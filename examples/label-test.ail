@@ -1,0 +1,20 @@
+// Test new label syntax
+group mygroup {
+    label { text "Test Label" [font_size: 18, fill: red] }
+    row content {
+        rect a
+        rect b
+    }
+}
+
+// Test inline label syntax
+group another {
+    label: text "Inline Label" mylbl [font_size: 14]
+    col items {
+        circle c1
+        circle c2
+    }
+}
+
+// Test old [label: "text"] modifier still works
+rect standalone [label: "Standalone Label"]

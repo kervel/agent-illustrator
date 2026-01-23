@@ -35,6 +35,8 @@ pub enum Token {
     Stack,
     #[token("group")]
     Group,
+    #[token("label")]
+    Label,
 
     // Constraint keywords
     #[token("place")]
@@ -256,11 +258,17 @@ mod tests {
                 Token::Arrow,
                 Token::Ident("db".to_string()),
                 Token::BracketOpen,
-                Token::Ident("label".to_string()),
+                Token::Label, // "label" is now a keyword token
                 Token::Colon,
                 Token::String("query".to_string()),
                 Token::BracketClose,
             ]
         );
+    }
+
+    #[test]
+    fn test_label_keyword() {
+        let tokens: Vec<_> = lex("label").map(|(t, _)| t).collect();
+        assert_eq!(tokens, vec![Token::Label]);
     }
 }

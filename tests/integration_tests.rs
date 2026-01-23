@@ -485,3 +485,198 @@ fn test_text_shape_in_layout() {
         _ => panic!("Expected layout statement"),
     }
 }
+
+// ============================================================================
+// Label Statement Tests
+// ============================================================================
+
+#[test]
+fn test_label_block_form_in_group() {
+    // Feature: Label statement with block form inside a group
+    let input = r#"
+        group mygroup {
+            label { text "Group Label" }
+            rect a
+            rect b
+        }
+    "#;
+
+    let doc = parse(input).expect("Should parse label block form");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Group(g) => {
+            assert_eq!(g.children.len(), 3);
+            // First child should be a Label statement
+            match &g.children[0].node {
+                agent_illustrator::parser::ast::Statement::Label(inner) => {
+                    match inner.as_ref() {
+                        agent_illustrator::parser::ast::Statement::Shape(s) => {
+                            assert!(matches!(
+                                s.shape_type.node,
+                                agent_illustrator::parser::ast::ShapeType::Text { .. }
+                            ));
+                        }
+                        _ => panic!("Expected shape inside label"),
+                    }
+                }
+                _ => panic!("Expected label statement"),
+            }
+        }
+        _ => panic!("Expected group statement"),
+    }
+}
+
+#[test]
+fn test_label_inline_form_in_group() {
+    // Feature: Label statement with inline form inside a group
+    let input = r#"
+        group mygroup {
+            label: text "Inline Label" lbl [font_size: 18]
+            rect a
+        }
+    "#;
+
+    let doc = parse(input).expect("Should parse label inline form");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Group(g) => {
+            assert_eq!(g.children.len(), 2);
+            // First child should be a Label statement
+            match &g.children[0].node {
+                agent_illustrator::parser::ast::Statement::Label(inner) => {
+                    match inner.as_ref() {
+                        agent_illustrator::parser::ast::Statement::Shape(s) => {
+                            match &s.shape_type.node {
+                                agent_illustrator::parser::ast::ShapeType::Text { content } => {
+                                    assert_eq!(content, "Inline Label");
+                                }
+                                _ => panic!("Expected text shape"),
+                            }
+                            assert_eq!(s.modifiers.len(), 1);
+                        }
+                        _ => panic!("Expected shape inside label"),
+                    }
+                }
+                _ => panic!("Expected label statement"),
+            }
+        }
+        _ => panic!("Expected group statement"),
+    }
+}
+
+#[test]
+fn test_label_with_any_shape() {
+    // Feature: Any shape can be used as a label
+    let input = r#"
+        group mygroup {
+            label { rect marker [fill: red, width: 10, height: 10] }
+            row {
+                circle c1
+                circle c2
+            }
+        }
+    "#;
+
+    let doc = parse(input).expect("Should parse label with rectangle shape");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Group(g) => {
+            assert_eq!(g.children.len(), 2);
+            // First child should be a Label with a rectangle inside
+            match &g.children[0].node {
+                agent_illustrator::parser::ast::Statement::Label(inner) => {
+                    match inner.as_ref() {
+                        agent_illustrator::parser::ast::Statement::Shape(s) => {
+                            assert!(matches!(
+                                s.shape_type.node,
+                                agent_illustrator::parser::ast::ShapeType::Rectangle
+                            ));
+                            assert_eq!(s.name.as_ref().unwrap().node.as_str(), "marker");
+                        }
+                        _ => panic!("Expected shape inside label"),
+                    }
+                }
+                _ => panic!("Expected label statement"),
+            }
+        }
+        _ => panic!("Expected group statement"),
+    }
+}
+
+#[test]
+fn test_label_modifier_backward_compatible() {
+    // Feature: Old [label: "text"] modifier should still work
+    let input = r#"
+        group mygroup [label: "Old Style"] {
+            rect a
+        }
+        rect standalone [label: "Standalone"]
+    "#;
+
+    let doc = parse(input).expect("Should parse label modifier");
+    assert_eq!(doc.statements.len(), 2);
+
+    // Check the group's modifier
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Group(g) => {
+            assert_eq!(g.modifiers.len(), 1);
+            assert!(matches!(
+                g.modifiers[0].node.key.node,
+                agent_illustrator::parser::ast::StyleKey::Label
+            ));
+        }
+        _ => panic!("Expected group statement"),
+    }
+
+    // Check the standalone rect's modifier
+    match &doc.statements[1].node {
+        agent_illustrator::parser::ast::Statement::Shape(s) => {
+            assert_eq!(s.modifiers.len(), 1);
+            assert!(matches!(
+                s.modifiers[0].node.key.node,
+                agent_illustrator::parser::ast::StyleKey::Label
+            ));
+        }
+        _ => panic!("Expected shape statement"),
+    }
+}
+
+#[test]
+fn test_label_in_layout_container() {
+    // Feature: Label statement inside layout containers
+    let input = r#"
+        row myrow {
+            label { text "Row Title" }
+            rect a
+            rect b
+        }
+    "#;
+
+    let doc = parse(input).expect("Should parse label in layout container");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Layout(l) => {
+            assert_eq!(l.children.len(), 3);
+            // First child should be a Label statement
+            match &l.children[0].node {
+                agent_illustrator::parser::ast::Statement::Label(inner) => {
+                    match inner.as_ref() {
+                        agent_illustrator::parser::ast::Statement::Shape(s) => {
+                            assert!(matches!(
+                                s.shape_type.node,
+                                agent_illustrator::parser::ast::ShapeType::Text { .. }
+                            ));
+                        }
+                        _ => panic!("Expected shape inside label"),
+                    }
+                }
+                _ => panic!("Expected label statement"),
+            }
+        }
+        _ => panic!("Expected layout statement"),
+    }
+}

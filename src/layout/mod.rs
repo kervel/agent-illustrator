@@ -60,6 +60,10 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
                 collect_ids_from_statement(&child.node, ids);
             }
         }
+        Statement::Label(inner) => {
+            // Labels can contain elements that define identifiers
+            collect_ids_from_statement(inner, ids);
+        }
         Statement::Connection(_) | Statement::Constraint(_) => {}
     }
 }
@@ -111,6 +115,10 @@ fn validate_refs_in_statement(
             for child in &g.children {
                 validate_refs_in_statement(&child.node, defined, &child.span)?;
             }
+        }
+        Statement::Label(inner) => {
+            // Validate references inside the label's inner element
+            validate_refs_in_statement(inner, defined, _span)?;
         }
         Statement::Shape(_) => {}
     }

@@ -18,8 +18,8 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
 
     for stmt in &doc.statements {
         match &stmt.node {
-            // Skip connections and constraints - handled later
-            Statement::Connection(_) | Statement::Constraint(_) => continue,
+            // Skip connections, constraints, and standalone labels at document root
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) => continue,
             _ => {
                 let element = layout_statement(&stmt.node, position, config);
                 position.y += element.bounds.height + config.element_spacing;
@@ -61,6 +61,10 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
         Statement::Shape(s) => layout_shape(s, position, config),
         Statement::Layout(l) => layout_container(l, position, config),
         Statement::Group(g) => layout_group(g, position, config),
+        Statement::Label(inner) => {
+            // Layout the inner element - Label positioning is handled by the parent container
+            layout_statement(inner, position, config)
+        }
         Statement::Connection(_) | Statement::Constraint(_) => {
             // These are handled separately
             unreachable!("Connections and constraints should be filtered out")
@@ -225,6 +229,18 @@ fn extract_label(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
     })
 }
 
+/// Extract the first Label statement from a list of children.
+/// Returns the inner statement of the Label if found.
+fn extract_label_statement(children: &[Spanned<Statement>]) -> Option<&Statement> {
+    children.iter().find_map(|child| {
+        if let Statement::Label(inner) = &child.node {
+            Some(inner.as_ref())
+        } else {
+            None
+        }
+    })
+}
+
 /// Extract the gap value from modifiers (can be negative for overlap)
 fn extract_gap(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
     modifiers.iter().find_map(|m| {
@@ -240,10 +256,13 @@ fn extract_gap(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
 }
 
 fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
+    // Check for a Label statement among children (takes precedence over modifier)
+    let label_stmt = extract_label_statement(&layout.children);
+
     // Extract gap modifier from layout modifiers (can be negative for overlap)
     let gap = extract_gap(&layout.modifiers);
 
-    let (children, bounds) = match layout.layout_type.node {
+    let (mut children, bounds) = match layout.layout_type.node {
         LayoutType::Row => layout_row(&layout.children, position, config, gap),
         LayoutType::Column => layout_column(&layout.children, position, config, gap),
         LayoutType::Grid => layout_grid(&layout.children, position, config),
@@ -251,11 +270,39 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
     };
 
     let styles = ResolvedStyles::from_modifiers(&layout.modifiers);
-    let label = extract_label(&layout.modifiers).map(|text| LabelLayout {
-        text,
-        position: Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
-        anchor: TextAnchor::Middle,
-    });
+
+    // Determine the label: Label statement takes precedence, otherwise use modifier
+    let label = if let Some(inner_stmt) = label_stmt {
+        // Layout the label element and position it above the container (centered)
+        let label_element = layout_statement(inner_stmt, Point::new(0.0, 0.0), config);
+
+        // Position the label centered above the container
+        let label_x = bounds.x + (bounds.width - label_element.bounds.width) / 2.0;
+        let label_y = bounds.y - label_element.bounds.height - 5.0;
+
+        // Create a positioned copy of the label element and add it to children
+        let mut positioned_label = label_element.clone();
+        positioned_label.bounds.x = label_x;
+        positioned_label.bounds.y = label_y;
+
+        // Update label position if it has one (e.g., text shapes)
+        if let Some(ref mut lbl) = positioned_label.label {
+            lbl.position.x = label_x + positioned_label.bounds.width / 2.0;
+            lbl.position.y = label_y + positioned_label.bounds.height / 2.0;
+        }
+
+        children.push(positioned_label);
+
+        // No simple text label since we're using an element label
+        None
+    } else {
+        // Fall back to the old modifier-based label
+        extract_label(&layout.modifiers).map(|text| LabelLayout {
+            text,
+            position: Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
+            anchor: TextAnchor::Middle,
+        })
+    };
 
     ElementLayout {
         id: layout.name.as_ref().map(|n| n.node.clone()),
@@ -268,16 +315,48 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
 }
 
 fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
+    // Check for a Label statement among children (takes precedence over modifier)
+    let label_stmt = extract_label_statement(&group.children);
+
     // Groups default to column layout (no gap override)
-    let (children, bounds) = layout_column(&group.children, position, config, None);
+    // Filter out Label statements from layout children
+    let (mut children, bounds) = layout_column(&group.children, position, config, None);
 
     let styles = ResolvedStyles::from_modifiers(&group.modifiers);
-    // Place label on the left side of the group, vertically centered
-    let label = extract_label(&group.modifiers).map(|text| LabelLayout {
-        text,
-        position: Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
-        anchor: TextAnchor::End,
-    });
+
+    // Determine the label: Label statement takes precedence, otherwise use modifier
+    let label = if let Some(inner_stmt) = label_stmt {
+        // Layout the label element and position it on the left side of the group
+        let label_element = layout_statement(inner_stmt, Point::new(0.0, 0.0), config);
+
+        // Position the label on the left side of the group, vertically centered
+        // The label is positioned to the left of the group bounds
+        let label_x = bounds.x - label_element.bounds.width - 10.0;
+        let label_y = bounds.y + (bounds.height - label_element.bounds.height) / 2.0;
+
+        // Create a positioned copy of the label element and add it to children
+        let mut positioned_label = label_element.clone();
+        positioned_label.bounds.x = label_x;
+        positioned_label.bounds.y = label_y;
+
+        // Update label position if it has one (e.g., text shapes)
+        if let Some(ref mut lbl) = positioned_label.label {
+            lbl.position.x = label_x + positioned_label.bounds.width / 2.0;
+            lbl.position.y = label_y + positioned_label.bounds.height / 2.0;
+        }
+
+        children.push(positioned_label);
+
+        // No simple text label since we're using an element label
+        None
+    } else {
+        // Fall back to the old modifier-based label
+        extract_label(&group.modifiers).map(|text| LabelLayout {
+            text,
+            position: Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
+            anchor: TextAnchor::End,
+        })
+    };
 
     ElementLayout {
         id: group.name.as_ref().map(|n| n.node.clone()),
@@ -303,10 +382,10 @@ fn layout_row(
     let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
-        // Skip connections and constraints
+        // Skip connections, constraints, and labels (labels are handled separately by parent)
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_)
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)
         ) {
             continue;
         }
@@ -348,10 +427,10 @@ fn layout_column(
     let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
-        // Skip connections and constraints
+        // Skip connections, constraints, and labels (labels are handled separately by parent)
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_)
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)
         ) {
             continue;
         }
@@ -384,10 +463,10 @@ fn layout_grid(
     position: Point,
     config: &LayoutConfig,
 ) -> (Vec<ElementLayout>, BoundingBox) {
-    // Filter out connections and constraints
+    // Filter out connections, constraints, and labels (labels are handled separately by parent)
     let filtered: Vec<_> = children
         .iter()
-        .filter(|c| !matches!(c.node, Statement::Connection(_) | Statement::Constraint(_)))
+        .filter(|c| !matches!(c.node, Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)))
         .collect();
 
     if filtered.is_empty() {
@@ -454,10 +533,10 @@ fn layout_stack(
     let mut max_height = 0.0f64;
 
     for child in children {
-        // Skip connections and constraints
+        // Skip connections, constraints, and labels (labels are handled separately by parent)
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_)
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)
         ) {
             continue;
         }

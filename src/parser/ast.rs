@@ -55,6 +55,9 @@ pub enum Statement {
     Group(GroupDecl),
     /// Position constraint: `place a right-of b`
     Constraint(ConstraintDecl),
+    /// Label element: `label { text "Foo" }` or `label: text "Foo"`
+    /// Contains any statement that acts as a label for its parent container
+    Label(Box<Statement>),
 }
 
 /// Shape declaration

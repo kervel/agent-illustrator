@@ -50,24 +50,29 @@ where
     .map_with(|n, e| Spanned::new(n, span_range(&e.span())));
 
     // Style key/value parsers
-    let style_key = identifier.map(|id| {
-        let key = match id.node.as_str() {
-            "fill" => StyleKey::Fill,
-            "stroke" => StyleKey::Stroke,
-            "stroke_width" => StyleKey::StrokeWidth,
-            "opacity" => StyleKey::Opacity,
-            "label" => StyleKey::Label,
-            "font_size" => StyleKey::FontSize,
-            "class" => StyleKey::Class,
-            "gap" => StyleKey::Gap,
-            "size" => StyleKey::Size,
-            "width" => StyleKey::Width,
-            "height" => StyleKey::Height,
-            "routing" => StyleKey::Routing,
-            other => StyleKey::Custom(other.to_string()),
-        };
-        Spanned::new(key, id.span)
-    });
+    // Note: We need to handle both identifiers AND the Label token (since "label" is now a keyword)
+    let style_key = choice((
+        // Handle the "label" keyword token explicitly
+        just(Token::Label).map_with(|_, e| Spanned::new(StyleKey::Label, span_range(&e.span()))),
+        // Handle all other style keys as identifiers
+        identifier.map(|id| {
+            let key = match id.node.as_str() {
+                "fill" => StyleKey::Fill,
+                "stroke" => StyleKey::Stroke,
+                "stroke_width" => StyleKey::StrokeWidth,
+                "opacity" => StyleKey::Opacity,
+                "font_size" => StyleKey::FontSize,
+                "class" => StyleKey::Class,
+                "gap" => StyleKey::Gap,
+                "size" => StyleKey::Size,
+                "width" => StyleKey::Width,
+                "height" => StyleKey::Height,
+                "routing" => StyleKey::Routing,
+                other => StyleKey::Custom(other.to_string()),
+            };
+            Spanned::new(key, id.span)
+        }),
+    ));
 
     let style_value = choice((
         select! { Token::HexColor(c) => StyleValue::Color(c) }
@@ -210,11 +215,27 @@ where
                 modifiers: modifiers.unwrap_or_default(),
             });
 
+        // Label declaration: `label { ... }` or `label: <element>`
+        // The inner element can be any statement (shape, group, layout, etc.)
+        let label_decl = just(Token::Label)
+            .ignore_then(
+                choice((
+                    // Block form: label { text "Foo" [styles] }
+                    stmt.clone()
+                        .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
+                        .map(|s: Spanned<Statement>| s.node),
+                    // Inline form: label: text "Foo" [styles]
+                    just(Token::Colon).ignore_then(stmt.clone()).map(|s: Spanned<Statement>| s.node),
+                )),
+            )
+            .map(|inner| Statement::Label(Box::new(inner)));
+
         // All statements
         choice((
             constraint_decl.clone().map(Statement::Constraint),
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
+            label_decl,
             connection_decl.clone().map(Statement::Connection),
             shape_decl.clone().map(Statement::Shape),
         ))
@@ -372,6 +393,104 @@ mod tests {
                     _ => panic!("Expected text shape"),
                 }
                 assert_eq!(s.modifiers.len(), 2);
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_label_block_form() {
+        // label { text "Foo" } - block form with braces
+        let doc = parse(r#"group g { label { text "Foo" } rect a }"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Group(g) => {
+                assert_eq!(g.children.len(), 2);
+                // First child should be a Label
+                match &g.children[0].node {
+                    Statement::Label(inner) => {
+                        match inner.as_ref() {
+                            Statement::Shape(s) => {
+                                assert!(matches!(s.shape_type.node, ShapeType::Text { .. }));
+                            }
+                            _ => panic!("Expected shape inside label"),
+                        }
+                    }
+                    _ => panic!("Expected label statement"),
+                }
+            }
+            _ => panic!("Expected group"),
+        }
+    }
+
+    #[test]
+    fn test_parse_label_inline_form() {
+        // label: text "Foo" - inline form with colon
+        let doc = parse(r#"group g { label: text "Bar" rect a }"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Group(g) => {
+                assert_eq!(g.children.len(), 2);
+                // First child should be a Label
+                match &g.children[0].node {
+                    Statement::Label(inner) => {
+                        match inner.as_ref() {
+                            Statement::Shape(s) => {
+                                match &s.shape_type.node {
+                                    ShapeType::Text { content } => assert_eq!(content, "Bar"),
+                                    _ => panic!("Expected text shape"),
+                                }
+                            }
+                            _ => panic!("Expected shape inside label"),
+                        }
+                    }
+                    _ => panic!("Expected label statement"),
+                }
+            }
+            _ => panic!("Expected group"),
+        }
+    }
+
+    #[test]
+    fn test_parse_label_with_shape() {
+        // label { rect foo [fill: red] } - any shape as label
+        let doc = parse(r#"group g { label { rect foo [fill: red] } rect a }"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Group(g) => {
+                assert_eq!(g.children.len(), 2);
+                // First child should be a Label with a rect inside
+                match &g.children[0].node {
+                    Statement::Label(inner) => {
+                        match inner.as_ref() {
+                            Statement::Shape(s) => {
+                                assert!(matches!(s.shape_type.node, ShapeType::Rectangle));
+                                assert_eq!(s.name.as_ref().unwrap().node.as_str(), "foo");
+                                assert_eq!(s.modifiers.len(), 1);
+                            }
+                            _ => panic!("Expected shape inside label"),
+                        }
+                    }
+                    _ => panic!("Expected label statement"),
+                }
+            }
+            _ => panic!("Expected group"),
+        }
+    }
+
+    #[test]
+    fn test_parse_label_modifier_still_works() {
+        // Old [label: "text"] modifier should still work
+        let doc = parse(r#"rect foo [label: "Hello"]"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                assert_eq!(s.modifiers.len(), 1);
+                assert!(matches!(s.modifiers[0].node.key.node, StyleKey::Label));
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::String(text) => assert_eq!(text, "Hello"),
+                    _ => panic!("Expected string value"),
+                }
             }
             _ => panic!("Expected shape"),
         }
