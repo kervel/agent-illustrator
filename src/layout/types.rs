@@ -232,7 +232,10 @@ impl ResolvedStyles {
             fill: other.fill.clone().or_else(|| self.fill.clone()),
             stroke: other.stroke.clone().or_else(|| self.stroke.clone()),
             stroke_width: other.stroke_width.or(self.stroke_width),
-            stroke_dasharray: other.stroke_dasharray.clone().or_else(|| self.stroke_dasharray.clone()),
+            stroke_dasharray: other
+                .stroke_dasharray
+                .clone()
+                .or_else(|| self.stroke_dasharray.clone()),
             opacity: other.opacity.or(self.opacity),
             font_size: other.font_size.or(self.font_size),
             css_classes: {
@@ -374,9 +377,8 @@ impl LayoutResult {
         self.elements.remove(name);
 
         // Remove from root_elements
-        self.root_elements.retain(|elem| {
-            elem.id.as_ref().map(|id| id.0.as_str()) != Some(name)
-        });
+        self.root_elements
+            .retain(|elem| elem.id.as_ref().map(|id| id.0.as_str()) != Some(name));
 
         // Also remove from children recursively
         for elem in &mut self.root_elements {
@@ -483,9 +485,7 @@ fn find_element_mut<'a>(
 }
 
 fn remove_from_children(children: &mut Vec<ElementLayout>, name: &str) {
-    children.retain(|elem| {
-        elem.id.as_ref().map(|id| id.0.as_str()) != Some(name)
-    });
+    children.retain(|elem| elem.id.as_ref().map(|id| id.0.as_str()) != Some(name));
     for child in children {
         remove_from_children(&mut child.children, name);
     }

@@ -18,10 +18,11 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
 
     for stmt in &doc.statements {
         match &stmt.node {
-            // Skip connections, constraints, alignments, and standalone labels at document root
+            // Skip connections, constraints, alignments, constrain, and standalone labels at document root
             Statement::Connection(_)
             | Statement::Constraint(_)
             | Statement::Alignment(_)
+            | Statement::Constrain(_)
             | Statement::Label(_) => continue,
             _ => {
                 let element = layout_statement(&stmt.node, position, config);
@@ -140,7 +141,10 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // Layout the inner element - Label positioning is handled by the parent container
             layout_statement(inner, position, config)
         }
-        Statement::Connection(_) | Statement::Constraint(_) | Statement::Alignment(_) => {
+        Statement::Connection(_)
+        | Statement::Constraint(_)
+        | Statement::Alignment(_)
+        | Statement::Constrain(_) => {
             // These are handled separately
             unreachable!("Connections, constraints, and alignments should be filtered out")
         }
@@ -490,7 +494,10 @@ fn layout_row(
         // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+            Statement::Connection(_)
+                | Statement::Constraint(_)
+                | Statement::Label(_)
+                | Statement::Alignment(_)
         ) || has_role_label(&child.node)
         {
             continue;
@@ -537,7 +544,10 @@ fn layout_column(
         // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+            Statement::Connection(_)
+                | Statement::Constraint(_)
+                | Statement::Label(_)
+                | Statement::Alignment(_)
         ) || has_role_label(&child.node)
         {
             continue;
@@ -578,7 +588,10 @@ fn layout_grid(
         .filter(|c| {
             !matches!(
                 c.node,
-                Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+                Statement::Connection(_)
+                    | Statement::Constraint(_)
+                    | Statement::Label(_)
+                    | Statement::Alignment(_)
             ) && !has_role_label(&c.node)
         })
         .collect();
@@ -651,7 +664,10 @@ fn layout_stack(
         // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+            Statement::Connection(_)
+                | Statement::Constraint(_)
+                | Statement::Label(_)
+                | Statement::Alignment(_)
         ) || has_role_label(&child.node)
         {
             continue;
@@ -957,7 +973,10 @@ fn collect_alignments(stmts: &[Spanned<Statement>]) -> Vec<&AlignmentDecl> {
 }
 
 /// Apply a single alignment constraint
-fn apply_alignment(result: &mut LayoutResult, alignment: &AlignmentDecl) -> Result<(), LayoutError> {
+fn apply_alignment(
+    result: &mut LayoutResult,
+    alignment: &AlignmentDecl,
+) -> Result<(), LayoutError> {
     // Validate that all anchors are on the same axis
     if !alignment.is_valid() {
         let edges: Vec<String> = alignment
@@ -1088,11 +1107,7 @@ fn shift_element_by_name(
 
 /// Recursively collect all element IDs starting from an element with the given name
 /// Returns true if the element was found
-fn collect_element_ids_recursive(
-    elem: &ElementLayout,
-    name: &str,
-    ids: &mut Vec<String>,
-) -> bool {
+fn collect_element_ids_recursive(elem: &ElementLayout, name: &str, ids: &mut Vec<String>) -> bool {
     if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
         // Found the element - collect its ID and all children's IDs
         collect_all_ids(elem, ids);
@@ -1121,12 +1136,7 @@ fn collect_all_ids(elem: &ElementLayout, ids: &mut Vec<String>) {
 
 /// Recursively search for and shift an element by name
 /// Returns true if the element was found and shifted
-fn shift_element_recursive(
-    elem: &mut ElementLayout,
-    name: &str,
-    delta: f64,
-    axis: Axis,
-) -> bool {
+fn shift_element_recursive(elem: &mut ElementLayout, name: &str, delta: f64, axis: Axis) -> bool {
     if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
         // Found the element - shift it and all its children
         shift_element_and_children(elem, delta, axis);
@@ -1166,6 +1176,147 @@ fn shift_element_and_children(elem: &mut ElementLayout, delta: f64, axis: Axis) 
     }
 }
 
+// ============================================================================
+// Constrain Statement Resolution (Feature 005)
+// ============================================================================
+
+/// Resolve `constrain` statements after initial layout
+///
+/// This function collects constraints from the document, uses the constraint solver
+/// to resolve them, and applies the resulting adjustments to the layout.
+pub fn resolve_constrain_statements(
+    result: &mut LayoutResult,
+    doc: &Document,
+    config: &LayoutConfig,
+) -> Result<(), LayoutError> {
+    use super::collector::ConstraintCollector;
+    use super::solver::{ConstraintSolver, LayoutProperty};
+
+    // Collect constraints from the document
+    let mut collector = ConstraintCollector::new(config.clone());
+
+    // Only collect user constraints (constrain statements), not intrinsics or layout
+    // since those are handled by the procedural layout engine
+    collect_constrain_statements(&doc.statements, &mut collector);
+
+    if collector.constraints.is_empty() {
+        return Ok(());
+    }
+
+    // Create solver and add constraints
+    let mut solver = ConstraintSolver::new();
+
+    // First, add current positions as suggested values to anchor the system
+    for elem in &result.root_elements {
+        add_element_positions_as_suggestions(&mut solver, elem, result)?;
+    }
+
+    // Then add the user constraints
+    for constraint in collector.constraints {
+        solver
+            .add_constraint(constraint)
+            .map_err(LayoutError::solver_error)?;
+    }
+
+    // Solve the constraint system
+    let solution = solver.solve().map_err(LayoutError::solver_error)?;
+
+    // Apply the solution to the layout
+    for (var, value) in &solution.values {
+        // Find the element and update its position
+        let current = get_element_property(result, &var.element_id, var.property);
+        if let Some(current_value) = current {
+            let delta = value - current_value;
+            if delta.abs() > 0.001 {
+                let axis = match var.property {
+                    LayoutProperty::X | LayoutProperty::Width => Axis::Horizontal,
+                    LayoutProperty::Y | LayoutProperty::Height => Axis::Vertical,
+                };
+                // Only shift for X/Y changes, not width/height
+                if matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
+                    shift_element_by_name(result, &var.element_id, delta, axis)?;
+                }
+            }
+        }
+    }
+
+    // Recompute bounds after applying constraints
+    result.compute_bounds();
+    Ok(())
+}
+
+/// Collect only constrain statements (not intrinsics or layout constraints)
+fn collect_constrain_statements(
+    stmts: &[Spanned<Statement>],
+    collector: &mut super::collector::ConstraintCollector,
+) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constrain(c) => {
+                collector.collect_constrain_expr(&c.expr, &stmt.span);
+            }
+            Statement::Layout(l) => {
+                collect_constrain_statements(&l.children, collector);
+            }
+            Statement::Group(g) => {
+                collect_constrain_statements(&g.children, collector);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Add current element positions as solver suggestions
+fn add_element_positions_as_suggestions(
+    solver: &mut super::solver::ConstraintSolver,
+    elem: &ElementLayout,
+    result: &LayoutResult,
+) -> Result<(), LayoutError> {
+    use super::solver::LayoutVariable;
+
+    if let Some(id) = &elem.id {
+        let name = id.0.as_str();
+
+        // Suggest current position values
+        solver
+            .suggest_value(&LayoutVariable::x(name), elem.bounds.x)
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .suggest_value(&LayoutVariable::y(name), elem.bounds.y)
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .suggest_value(&LayoutVariable::width(name), elem.bounds.width)
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .suggest_value(&LayoutVariable::height(name), elem.bounds.height)
+            .map_err(LayoutError::solver_error)?;
+    }
+
+    // Recurse into children
+    for child in &elem.children {
+        add_element_positions_as_suggestions(solver, child, result)?;
+    }
+
+    Ok(())
+}
+
+/// Get current property value for an element
+fn get_element_property(
+    result: &LayoutResult,
+    element_id: &str,
+    property: super::solver::LayoutProperty,
+) -> Option<f64> {
+    use super::solver::LayoutProperty;
+
+    let elem = result.get_element_by_name(element_id)?;
+    Some(match property {
+        LayoutProperty::X => elem.bounds.x,
+        LayoutProperty::Y => elem.bounds.y,
+        LayoutProperty::Width => elem.bounds.width,
+        LayoutProperty::Height => elem.bounds.height,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1174,11 +1325,13 @@ mod tests {
     #[test]
     fn test_alignment_horizontal_left() {
         // Test horizontal left edge alignment
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             rect a
             rect b
             align a.left = b.left
-        "#)
+        "#,
+        )
         .unwrap();
         let config = LayoutConfig::default();
         let mut result = compute(&doc, &config).unwrap();
@@ -1197,11 +1350,13 @@ mod tests {
     #[test]
     fn test_alignment_horizontal_center() {
         // Test horizontal center alignment
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             rect a [width: 100]
             rect b [width: 50]
             align a.horizontal_center = b.horizontal_center
-        "#)
+        "#,
+        )
         .unwrap();
         let config = LayoutConfig::default();
         let mut result = compute(&doc, &config).unwrap();
@@ -1225,13 +1380,15 @@ mod tests {
     #[test]
     fn test_alignment_vertical_top() {
         // Test vertical top edge alignment
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             row {
                 rect a
                 rect b
             }
             align a.top = b.top
-        "#)
+        "#,
+        )
         .unwrap();
         let config = LayoutConfig::default();
         let mut result = compute(&doc, &config).unwrap();
@@ -1248,12 +1405,14 @@ mod tests {
     #[test]
     fn test_alignment_chain() {
         // Test aligning multiple elements in a chain
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             rect a
             rect b
             rect c
             align a.left = b.left = c.left
-        "#)
+        "#,
+        )
         .unwrap();
         let config = LayoutConfig::default();
         let mut result = compute(&doc, &config).unwrap();
@@ -1265,18 +1424,26 @@ mod tests {
         let c = result.get_element_by_name("c").unwrap();
 
         // All left edges should be aligned
-        assert_eq!(a.bounds.x, b.bounds.x, "a and b left edges should be aligned");
-        assert_eq!(b.bounds.x, c.bounds.x, "b and c left edges should be aligned");
+        assert_eq!(
+            a.bounds.x, b.bounds.x,
+            "a and b left edges should be aligned"
+        );
+        assert_eq!(
+            b.bounds.x, c.bounds.x,
+            "b and c left edges should be aligned"
+        );
     }
 
     #[test]
     fn test_alignment_incompatible_edges_error() {
         // Test that mixing horizontal and vertical edges produces an error
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             rect a
             rect b
             align a.left = b.top
-        "#)
+        "#,
+        )
         .unwrap();
         let config = LayoutConfig::default();
         let mut result = compute(&doc, &config).unwrap();

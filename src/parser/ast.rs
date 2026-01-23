@@ -134,6 +134,8 @@ pub enum Statement {
     Label(Box<Statement>),
     /// Alignment constraint: `align a.left = b.left`
     Alignment(AlignmentDecl),
+    /// Constrain statement: `constrain a.left = b.left`
+    Constrain(ConstrainDecl),
 }
 
 /// Shape declaration
@@ -274,7 +276,10 @@ pub enum StyleKey {
 #[derive(Debug, Clone, PartialEq)]
 pub enum StyleValue {
     Color(ColorValue),
-    Number { value: f64, unit: Option<String> },
+    Number {
+        value: f64,
+        unit: Option<String>,
+    },
     String(String),
     Keyword(String),
     /// Identifier reference (for `[label: my_shape]` syntax)
@@ -344,7 +349,11 @@ impl ElementPath {
 
     /// Get the final segment (leaf element name)
     pub fn leaf(&self) -> &Identifier {
-        &self.segments.last().expect("ElementPath must have at least one segment").node
+        &self
+            .segments
+            .last()
+            .expect("ElementPath must have at least one segment")
+            .node
     }
 
     /// Check if this is a simple (single-segment) path
@@ -384,13 +393,106 @@ impl AlignmentDecl {
             return false;
         }
         let first_axis = self.anchors[0].edge.node.axis();
-        self.anchors.iter().all(|a| a.edge.node.axis() == first_axis)
+        self.anchors
+            .iter()
+            .all(|a| a.edge.node.axis() == first_axis)
     }
 
     /// Get the axis of this alignment
     pub fn axis(&self) -> Option<Axis> {
         self.anchors.first().map(|a| a.edge.node.axis())
     }
+}
+
+// ============================================
+// Constraint Types (Feature 005)
+// ============================================
+
+/// Properties that can be referenced in constraints
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConstraintProperty {
+    // Position
+    X,
+    Y,
+    // Size
+    Width,
+    Height,
+    // Edges
+    Left,
+    Right,
+    Top,
+    Bottom,
+    // Centers
+    CenterX,
+    CenterY,
+    Center, // Both center_x and center_y
+}
+
+impl ConstraintProperty {
+    /// Parse from string (for parser integration)
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "x" => Some(Self::X),
+            "y" => Some(Self::Y),
+            "width" => Some(Self::Width),
+            "height" => Some(Self::Height),
+            "left" => Some(Self::Left),
+            "right" => Some(Self::Right),
+            "top" => Some(Self::Top),
+            "bottom" => Some(Self::Bottom),
+            "center_x" | "horizontal_center" => Some(Self::CenterX),
+            "center_y" | "vertical_center" => Some(Self::CenterY),
+            "center" => Some(Self::Center),
+            _ => None,
+        }
+    }
+}
+
+/// Reference to an element's property
+#[derive(Debug, Clone, PartialEq)]
+pub struct PropertyRef {
+    pub element: Spanned<ElementPath>,
+    pub property: Spanned<ConstraintProperty>,
+}
+
+/// Expression in a constrain statement
+#[derive(Debug, Clone, PartialEq)]
+pub enum ConstraintExpr {
+    /// a.prop = b.prop
+    Equal {
+        left: PropertyRef,
+        right: PropertyRef,
+    },
+    /// a.prop = b.prop + offset
+    EqualWithOffset {
+        left: PropertyRef,
+        right: PropertyRef,
+        offset: f64,
+    },
+    /// a.prop = constant
+    Constant { left: PropertyRef, value: f64 },
+    /// a.prop >= value
+    GreaterOrEqual { left: PropertyRef, value: f64 },
+    /// a.prop <= value
+    LessOrEqual { left: PropertyRef, value: f64 },
+    /// a.center = midpoint(b, c)
+    Midpoint {
+        target: PropertyRef,
+        a: Spanned<Identifier>,
+        b: Spanned<Identifier>,
+    },
+    /// container contains a, b, c [padding: 20]
+    Contains {
+        container: Spanned<Identifier>,
+        elements: Vec<Spanned<Identifier>>,
+        padding: Option<f64>,
+    },
+}
+
+/// Constrain statement declaration
+#[derive(Debug, Clone, PartialEq)]
+pub struct ConstrainDecl {
+    pub expr: ConstraintExpr,
 }
 
 #[cfg(test)]

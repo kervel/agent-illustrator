@@ -410,7 +410,10 @@ fn test_text_shape_with_styles() {
             assert_eq!(shape.modifiers.len(), 2);
             // Verify fill modifier
             let has_fill = shape.modifiers.iter().any(|m| {
-                matches!(m.node.key.node, agent_illustrator::parser::ast::StyleKey::Fill)
+                matches!(
+                    m.node.key.node,
+                    agent_illustrator::parser::ast::StyleKey::Fill
+                )
             });
             assert!(has_fill, "Should have fill modifier");
             // Verify font_size modifier
@@ -516,17 +519,15 @@ fn test_label_block_form_in_group() {
             assert_eq!(g.children.len(), 3);
             // First child should be a Label statement
             match &g.children[0].node {
-                agent_illustrator::parser::ast::Statement::Label(inner) => {
-                    match inner.as_ref() {
-                        agent_illustrator::parser::ast::Statement::Shape(s) => {
-                            assert!(matches!(
-                                s.shape_type.node,
-                                agent_illustrator::parser::ast::ShapeType::Text { .. }
-                            ));
-                        }
-                        _ => panic!("Expected shape inside label"),
+                agent_illustrator::parser::ast::Statement::Label(inner) => match inner.as_ref() {
+                    agent_illustrator::parser::ast::Statement::Shape(s) => {
+                        assert!(matches!(
+                            s.shape_type.node,
+                            agent_illustrator::parser::ast::ShapeType::Text { .. }
+                        ));
                     }
-                }
+                    _ => panic!("Expected shape inside label"),
+                },
                 _ => panic!("Expected label statement"),
             }
         }
@@ -552,20 +553,18 @@ fn test_label_inline_form_in_group() {
             assert_eq!(g.children.len(), 2);
             // First child should be a Label statement
             match &g.children[0].node {
-                agent_illustrator::parser::ast::Statement::Label(inner) => {
-                    match inner.as_ref() {
-                        agent_illustrator::parser::ast::Statement::Shape(s) => {
-                            match &s.shape_type.node {
-                                agent_illustrator::parser::ast::ShapeType::Text { content } => {
-                                    assert_eq!(content, "Inline Label");
-                                }
-                                _ => panic!("Expected text shape"),
+                agent_illustrator::parser::ast::Statement::Label(inner) => match inner.as_ref() {
+                    agent_illustrator::parser::ast::Statement::Shape(s) => {
+                        match &s.shape_type.node {
+                            agent_illustrator::parser::ast::ShapeType::Text { content } => {
+                                assert_eq!(content, "Inline Label");
                             }
-                            assert_eq!(s.modifiers.len(), 1);
+                            _ => panic!("Expected text shape"),
                         }
-                        _ => panic!("Expected shape inside label"),
+                        assert_eq!(s.modifiers.len(), 1);
                     }
-                }
+                    _ => panic!("Expected shape inside label"),
+                },
                 _ => panic!("Expected label statement"),
             }
         }
@@ -594,18 +593,16 @@ fn test_label_with_any_shape() {
             assert_eq!(g.children.len(), 2);
             // First child should be a Label with a rectangle inside
             match &g.children[0].node {
-                agent_illustrator::parser::ast::Statement::Label(inner) => {
-                    match inner.as_ref() {
-                        agent_illustrator::parser::ast::Statement::Shape(s) => {
-                            assert!(matches!(
-                                s.shape_type.node,
-                                agent_illustrator::parser::ast::ShapeType::Rectangle
-                            ));
-                            assert_eq!(s.name.as_ref().unwrap().node.as_str(), "marker");
-                        }
-                        _ => panic!("Expected shape inside label"),
+                agent_illustrator::parser::ast::Statement::Label(inner) => match inner.as_ref() {
+                    agent_illustrator::parser::ast::Statement::Shape(s) => {
+                        assert!(matches!(
+                            s.shape_type.node,
+                            agent_illustrator::parser::ast::ShapeType::Rectangle
+                        ));
+                        assert_eq!(s.name.as_ref().unwrap().node.as_str(), "marker");
                     }
-                }
+                    _ => panic!("Expected shape inside label"),
+                },
                 _ => panic!("Expected label statement"),
             }
         }
@@ -670,17 +667,15 @@ fn test_label_in_layout_container() {
             assert_eq!(l.children.len(), 3);
             // First child should be a Label statement
             match &l.children[0].node {
-                agent_illustrator::parser::ast::Statement::Label(inner) => {
-                    match inner.as_ref() {
-                        agent_illustrator::parser::ast::Statement::Shape(s) => {
-                            assert!(matches!(
-                                s.shape_type.node,
-                                agent_illustrator::parser::ast::ShapeType::Text { .. }
-                            ));
-                        }
-                        _ => panic!("Expected shape inside label"),
+                agent_illustrator::parser::ast::Statement::Label(inner) => match inner.as_ref() {
+                    agent_illustrator::parser::ast::Statement::Shape(s) => {
+                        assert!(matches!(
+                            s.shape_type.node,
+                            agent_illustrator::parser::ast::ShapeType::Text { .. }
+                        ));
                     }
-                }
+                    _ => panic!("Expected shape inside label"),
+                },
                 _ => panic!("Expected label statement"),
             }
         }
@@ -999,7 +994,10 @@ fn test_connection_label_identifier_reference() {
     let svg = render(input).expect("Should render connection with label reference");
 
     // The text "HTTP Request" should appear on the connection
-    assert!(svg.contains("HTTP Request"), "Connection should use referenced text shape's content as label");
+    assert!(
+        svg.contains("HTTP Request"),
+        "Connection should use referenced text shape's content as label"
+    );
 }
 
 #[test]
@@ -1017,4 +1015,182 @@ fn test_connection_label_string_still_works() {
 
     // The text "Query" should appear on the connection
     assert!(svg.contains("Query"), "String labels should still work");
+}
+
+// ============================================================================
+// Constraint Solver Integration Tests (Feature 005)
+// ============================================================================
+
+#[test]
+fn test_constrain_statement_parses() {
+    // Test that constrain statements parse correctly
+    let input = r#"
+        rect a
+        rect b
+        constrain a.left = b.left
+    "#;
+
+    let doc = parse(input).expect("Should parse constrain statement");
+    assert_eq!(doc.statements.len(), 3);
+
+    // Verify the last statement is a Constrain
+    use agent_illustrator::parser::ast::Statement;
+    assert!(matches!(doc.statements[2].node, Statement::Constrain(_)));
+}
+
+#[test]
+fn test_constrain_with_offset_parses() {
+    let input = r#"
+        rect a
+        rect b
+        constrain a.x = b.x + 100
+    "#;
+
+    let doc = parse(input).expect("Should parse constrain with offset");
+    assert_eq!(doc.statements.len(), 3);
+}
+
+#[test]
+fn test_constrain_inequality_parses() {
+    let input = r#"
+        rect a [width: 50]
+        constrain a.width >= 100
+    "#;
+
+    let doc = parse(input).expect("Should parse constrain inequality");
+    assert_eq!(doc.statements.len(), 2);
+}
+
+#[test]
+fn test_constrain_midpoint_parses() {
+    let input = r#"
+        rect a
+        rect b
+        rect c
+        constrain c.x = midpoint(a, b)
+    "#;
+
+    let doc = parse(input).expect("Should parse constrain midpoint");
+    assert_eq!(doc.statements.len(), 4);
+}
+
+#[test]
+fn test_constrain_contains_parses() {
+    let input = r#"
+        rect container [width: 200, height: 200]
+        rect a [width: 50]
+        rect b [width: 50]
+        constrain container contains a, b [padding: 10]
+    "#;
+
+    let doc = parse(input).expect("Should parse constrain contains");
+    assert_eq!(doc.statements.len(), 4);
+}
+
+#[test]
+fn test_constrain_renders_without_error() {
+    use agent_illustrator::render;
+
+    // Test that a document with constrain statements renders without error
+    let input = r#"
+        rect a [width: 50, height: 50]
+        rect b [width: 50, height: 50]
+        constrain a.left = b.left
+    "#;
+
+    let svg = render(input).expect("Should render with constrain statement");
+    assert!(svg.contains("<svg"), "Output should be valid SVG");
+    assert!(svg.contains("<rect"), "Should contain rect elements");
+}
+
+#[test]
+fn test_constrain_with_nested_path_parses() {
+    let input = r#"
+        group g1 {
+            rect a
+        }
+        group g2 {
+            rect b
+        }
+        constrain g1.a.left = g2.b.left
+    "#;
+
+    let doc = parse(input).expect("Should parse constrain with nested paths");
+    assert_eq!(doc.statements.len(), 3);
+}
+
+#[test]
+fn test_constraint_collector_collects_constraints() {
+    use agent_illustrator::layout::{ConstraintCollector, LayoutConfig};
+
+    let input = r#"
+        rect a [width: 100]
+        rect b
+        constrain a.left = b.left
+        constrain b.width >= 50
+    "#;
+
+    let doc = parse(input).unwrap();
+    let mut collector = ConstraintCollector::new(LayoutConfig::default());
+    collector.collect(&doc);
+
+    // Should have:
+    // - 1 intrinsic constraint (a.width = 100)
+    // - 1 equality constraint (a.left = b.left)
+    // - 1 inequality constraint (b.width >= 50)
+    assert!(
+        collector.constraints.len() >= 3,
+        "Should collect at least 3 constraints, got {}",
+        collector.constraints.len()
+    );
+}
+
+#[test]
+fn test_existing_row_layout_still_works() {
+    use agent_illustrator::render;
+
+    // Verify that existing row layout functionality is preserved
+    let input = r#"
+        row {
+            rect a [width: 50]
+            rect b [width: 50]
+            rect c [width: 50]
+        }
+    "#;
+
+    let svg = render(input).expect("Row layout should still work");
+    assert!(svg.contains("<svg"), "Output should be valid SVG");
+    assert!(svg.contains("<rect"), "Should contain rect elements");
+}
+
+#[test]
+fn test_existing_align_statement_still_works() {
+    use agent_illustrator::render;
+
+    // Verify that existing align statements are preserved
+    let input = r#"
+        rect a
+        rect b
+        align a.left = b.left
+    "#;
+
+    let svg = render(input).expect("Align statement should still work");
+    assert!(svg.contains("<svg"), "Output should be valid SVG");
+}
+
+#[test]
+fn test_mixed_constrain_and_align_statements() {
+    use agent_illustrator::render;
+
+    // Test that both constrain and align statements can coexist
+    let input = r#"
+        rect a [width: 100]
+        rect b [width: 80]
+        rect c [width: 60]
+        align a.left = b.left
+        constrain c.left = a.left
+    "#;
+
+    let svg = render(input).expect("Mixed constrain and align should work");
+    assert!(svg.contains("<svg"), "Output should be valid SVG");
 }

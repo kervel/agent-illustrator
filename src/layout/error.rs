@@ -4,6 +4,8 @@ use thiserror::Error;
 
 use crate::parser::ast::Span;
 
+use super::solver::SolverError;
+
 /// Errors that can occur during layout computation
 #[derive(Debug, Error)]
 pub enum LayoutError {
@@ -45,6 +47,10 @@ pub enum LayoutError {
     /// Circular alignment dependency
     #[error("circular alignment dependency: {}", elements.join(" -> "))]
     CircularAlignment { elements: Vec<String> },
+
+    /// Constraint solver error
+    #[error("constraint solver error: {0}")]
+    SolverError(#[from] SolverError),
 }
 
 impl LayoutError {
@@ -114,6 +120,11 @@ impl LayoutError {
     /// Create a circular alignment error
     pub fn circular_alignment(elements: Vec<String>) -> Self {
         Self::CircularAlignment { elements }
+    }
+
+    /// Create a solver error from a SolverError
+    pub fn solver_error(e: SolverError) -> Self {
+        Self::SolverError(e)
     }
 }
 

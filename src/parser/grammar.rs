@@ -6,6 +6,14 @@ use chumsky::prelude::*;
 use crate::parser::ast::*;
 use crate::parser::lexer::Token;
 
+/// Helper enum for parsing constraint equality expressions
+#[derive(Debug, Clone)]
+enum ConstraintExprKind {
+    Property(PropertyRef),
+    PropertyWithOffset(PropertyRef, f64),
+    Constant(f64),
+}
+
 /// Check if an identifier is a symbolic color category
 fn is_color_category(ident: &str) -> Option<ColorCategory> {
     match ident {
@@ -103,7 +111,8 @@ where
     // Parse a color category - identifier or "text" keyword (since text is reserved)
     let color_category = choice((
         // "text" keyword token maps to Text category
-        just(Token::Text).map_with(|_, e| Spanned::new(Identifier::new("text"), span_range(&e.span()))),
+        just(Token::Text)
+            .map_with(|_, e| Spanned::new(Identifier::new("text"), span_range(&e.span()))),
         // Regular identifier
         identifier.clone(),
     ));
@@ -111,20 +120,14 @@ where
     // Parse a symbolic color: category(-variant)?(-lightness)?
     // e.g., foreground, foreground-1, text-dark, accent-2-light
     let symbolic_color = color_category
-        .then(
-            just(Token::Minus)
-                .ignore_then(number.clone())
-                .or_not(),
-        )
-        .then(
-            just(Token::Minus)
-                .ignore_then(identifier.clone())
-                .or_not(),
-        )
+        .then(just(Token::Minus).ignore_then(number.clone()).or_not())
+        .then(just(Token::Minus).ignore_then(identifier.clone()).or_not())
         .try_map(|((cat_id, variant_num), lightness_id), span| {
             // Check if this is a valid symbolic color category
             if let Some(category) = is_color_category(&cat_id.node.0) {
-                let variant = variant_num.map(|n| n.node as u8).filter(|&v| (1..=3).contains(&v));
+                let variant = variant_num
+                    .map(|n| n.node as u8)
+                    .filter(|&v| (1..=3).contains(&v));
                 let lightness = lightness_id.and_then(|id| is_lightness_modifier(&id.node.0));
 
                 Ok(StyleValue::Color(ColorValue::Symbolic {
@@ -150,10 +153,7 @@ where
             .map_with(|(neg, n), e| {
                 let value = if neg.is_some() { -n.node } else { n.node };
                 Spanned::new(
-                    StyleValue::Number {
-                        value,
-                        unit: None,
-                    },
+                    StyleValue::Number { value, unit: None },
                     span_range(&e.span()),
                 )
             }),
@@ -161,40 +161,81 @@ where
         string_literal.map(|s| Spanned::new(StyleValue::String(s.node), s.span)),
         // Handle "label" keyword as a keyword value (for [role: label])
         just(Token::Label).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("label".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("label".to_string()),
+                span_range(&e.span()),
+            )
         }),
         // Handle edge keywords as keyword values (for [label_position: left], etc.)
         just(Token::Left).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("left".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("left".to_string()),
+                span_range(&e.span()),
+            )
         }),
         just(Token::Right).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("right".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("right".to_string()),
+                span_range(&e.span()),
+            )
         }),
         just(Token::Top).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("top".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("top".to_string()),
+                span_range(&e.span()),
+            )
         }),
         just(Token::Bottom).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("bottom".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("bottom".to_string()),
+                span_range(&e.span()),
+            )
         }),
         just(Token::HorizontalCenter).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("horizontal_center".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("horizontal_center".to_string()),
+                span_range(&e.span()),
+            )
         }),
         just(Token::VerticalCenter).map_with(|_, e| {
-            Spanned::new(StyleValue::Keyword("vertical_center".to_string()), span_range(&e.span()))
+            Spanned::new(
+                StyleValue::Keyword("vertical_center".to_string()),
+                span_range(&e.span()),
+            )
+        }),
+        // Center token (can be used in style values like [label_position: center])
+        just(Token::Center).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("center".to_string()),
+                span_range(&e.span()),
+            )
+        }),
+        // center_x and center_y tokens
+        just(Token::CenterXProp).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("center_x".to_string()),
+                span_range(&e.span()),
+            )
+        }),
+        just(Token::CenterYProp).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("center_y".to_string()),
+                span_range(&e.span()),
+            )
         }),
         // Identifiers can be either keyword values OR identifier references
         // Certain common keywords are recognized and stored as Keywords for backward compatibility
         identifier.map(|id| {
             let value = match id.node.as_str() {
                 // Common style value keywords (not alignment edges)
-                "center" | "direct" | "orthogonal" | "none" | "auto" |
-                "solid" | "dashed" | "dotted" | "hidden" |
-                "bold" | "italic" | "normal" |
-                "start" | "middle" | "end" => StyleValue::Keyword(id.node.0.clone()),
+                "center" | "direct" | "orthogonal" | "none" | "auto" | "solid" | "dashed"
+                | "dotted" | "hidden" | "bold" | "italic" | "normal" | "start" | "middle"
+                | "end" => StyleValue::Keyword(id.node.0.clone()),
                 // Color keywords
-                "red" | "green" | "blue" | "black" | "white" | "gray" | "grey" |
-                "yellow" | "orange" | "purple" | "pink" | "cyan" | "magenta" |
-                "transparent" => StyleValue::Keyword(id.node.0.clone()),
+                "red" | "green" | "blue" | "black" | "white" | "gray" | "grey" | "yellow"
+                | "orange" | "purple" | "pink" | "cyan" | "magenta" | "transparent" => {
+                    StyleValue::Keyword(id.node.0.clone())
+                }
                 // Everything else is an identifier reference (for [label: my_shape] syntax)
                 _ => StyleValue::Identifier(id.node),
             };
@@ -286,11 +327,7 @@ where
     // - `place a right-of b [x: 10]` - relational with offset
     let constraint_decl = just(Token::Place)
         .ignore_then(identifier.clone())
-        .then(
-            position_relation
-                .then(identifier.clone())
-                .or_not()
-        )
+        .then(position_relation.then(identifier.clone()).or_not())
         .then(modifier_block.clone().or_not())
         .map(|((subject, rel_anchor), mods)| {
             let (relation, anchor) = match rel_anchor {
@@ -350,6 +387,187 @@ where
             AlignmentDecl { anchors }
         });
 
+    // ==================== Constraint Parser (Feature 005) ====================
+
+    // Property reference: element_path.property
+    // Parse all dot-separated tokens, then split into path and property
+    // The last segment must be a valid property, everything before is the element path
+
+    // Helper to parse either an identifier or a keyword that could be a property
+    let path_or_prop_segment = choice((
+        // Keyword tokens that could appear in property position
+        just(Token::CenterXProp)
+            .map_with(|_, e| Spanned::new(Identifier::new("center_x"), span_range(&e.span()))),
+        just(Token::CenterYProp)
+            .map_with(|_, e| Spanned::new(Identifier::new("center_y"), span_range(&e.span()))),
+        just(Token::Center)
+            .map_with(|_, e| Spanned::new(Identifier::new("center"), span_range(&e.span()))),
+        just(Token::Left)
+            .map_with(|_, e| Spanned::new(Identifier::new("left"), span_range(&e.span()))),
+        just(Token::Right)
+            .map_with(|_, e| Spanned::new(Identifier::new("right"), span_range(&e.span()))),
+        just(Token::Top)
+            .map_with(|_, e| Spanned::new(Identifier::new("top"), span_range(&e.span()))),
+        just(Token::Bottom)
+            .map_with(|_, e| Spanned::new(Identifier::new("bottom"), span_range(&e.span()))),
+        just(Token::HorizontalCenter).map_with(|_, e| {
+            Spanned::new(Identifier::new("horizontal_center"), span_range(&e.span()))
+        }),
+        just(Token::VerticalCenter).map_with(|_, e| {
+            Spanned::new(Identifier::new("vertical_center"), span_range(&e.span()))
+        }),
+        // Regular identifier
+        identifier.clone(),
+    ));
+
+    let property_ref = path_or_prop_segment
+        .clone()
+        .separated_by(just(Token::Dot))
+        .at_least(2)
+        .collect::<Vec<_>>()
+        .try_map(|segments, span: SimpleSpan| {
+            // Last segment must be a property
+            let last = segments.last().unwrap();
+            let prop_opt = ConstraintProperty::from_str(last.node.as_str());
+
+            match prop_opt {
+                Some(prop) => {
+                    let path_segments: Vec<_> = segments[..segments.len() - 1].to_vec();
+                    let prop_span = last.span.clone();
+                    Ok(PropertyRef {
+                        element: Spanned::new(ElementPath { segments: path_segments }, span_range(&span)),
+                        property: Spanned::new(prop, prop_span),
+                    })
+                }
+                None => Err(Rich::custom(span, format!("'{}' is not a valid constraint property. Expected one of: x, y, width, height, left, right, top, bottom, center, center_x, center_y", last.node.as_str()))),
+            }
+        });
+
+    // Parse offset: + number or - number
+    let offset = choice((
+        just(Token::Plus)
+            .ignore_then(number.clone())
+            .map(|n| n.node),
+        just(Token::Minus)
+            .ignore_then(number.clone())
+            .map(|n| -n.node),
+    ));
+
+    // Constraint expression parsers
+
+    // Midpoint: target.prop = midpoint(a, b)
+    let midpoint_expr = property_ref
+        .clone()
+        .then_ignore(just(Token::Equals))
+        .then_ignore(just(Token::Midpoint))
+        .then_ignore(just(Token::ParenOpen))
+        .then(identifier.clone())
+        .then_ignore(just(Token::Comma))
+        .then(identifier.clone())
+        .then_ignore(just(Token::ParenClose))
+        .map(|((target, a), b)| ConstraintExpr::Midpoint { target, a, b });
+
+    // Contains: container contains a, b, c [padding: N]
+    let contains_expr = identifier
+        .clone()
+        .then_ignore(just(Token::Contains))
+        .then(
+            identifier
+                .clone()
+                .separated_by(just(Token::Comma))
+                .at_least(1)
+                .collect::<Vec<_>>(),
+        )
+        .then(modifier_block.clone().or_not())
+        .map(|((container, elements), modifiers)| {
+            // Extract padding from modifiers if present
+            let padding = modifiers.as_ref().and_then(|mods| {
+                mods.iter().find_map(|m| {
+                    if let StyleKey::Custom(k) = &m.node.key.node {
+                        if k == "padding" {
+                            if let StyleValue::Number { value, .. } = &m.node.value.node {
+                                return Some(*value);
+                            }
+                        }
+                    }
+                    None
+                })
+            });
+            ConstraintExpr::Contains {
+                container,
+                elements,
+                padding,
+            }
+        });
+
+    // Inequality: a.prop >= value or a.prop <= value
+    let ge_expr = property_ref
+        .clone()
+        .then_ignore(just(Token::GreaterOrEqual))
+        .then(just(Token::Minus).or_not().then(number.clone()))
+        .map(|(left, (neg, n))| {
+            let value = if neg.is_some() { -n.node } else { n.node };
+            ConstraintExpr::GreaterOrEqual { left, value }
+        });
+
+    let le_expr = property_ref
+        .clone()
+        .then_ignore(just(Token::LessOrEqual))
+        .then(just(Token::Minus).or_not().then(number.clone()))
+        .map(|(left, (neg, n))| {
+            let value = if neg.is_some() { -n.node } else { n.node };
+            ConstraintExpr::LessOrEqual { left, value }
+        });
+
+    // Equality with property: a.prop = b.prop [+ offset]
+    // Or constant: a.prop = value
+    let equality_expr = property_ref.clone().then_ignore(just(Token::Equals)).then(
+        // Try property ref with optional offset first
+        property_ref
+            .clone()
+            .then(offset.clone().or_not())
+            .map(|(right, off)| {
+                if let Some(offset) = off {
+                    ConstraintExprKind::PropertyWithOffset(right, offset)
+                } else {
+                    ConstraintExprKind::Property(right)
+                }
+            })
+            // Or just a constant number
+            .or(just(Token::Minus)
+                .or_not()
+                .then(number.clone())
+                .map(|(neg, n)| {
+                    let value = if neg.is_some() { -n.node } else { n.node };
+                    ConstraintExprKind::Constant(value)
+                })),
+    );
+
+    // Build the final constraint expression from equality
+    let equality_constraint = equality_expr.map(|(left, kind)| match kind {
+        ConstraintExprKind::Property(right) => ConstraintExpr::Equal { left, right },
+        ConstraintExprKind::PropertyWithOffset(right, offset) => ConstraintExpr::EqualWithOffset {
+            left,
+            right,
+            offset,
+        },
+        ConstraintExprKind::Constant(value) => ConstraintExpr::Constant { left, value },
+    });
+
+    // All constraint expressions (order matters - try more specific first)
+    let constraint_expr = choice((
+        midpoint_expr,
+        contains_expr,
+        ge_expr,
+        le_expr,
+        equality_constraint,
+    ));
+
+    // Constrain declaration: constrain <expr>
+    let constrain_decl = just(Token::Constrain)
+        .ignore_then(constraint_expr)
+        .map(|expr| ConstrainDecl { expr });
+
     // Recursive statement parser
     let statement = recursive(|stmt| {
         // Layout declaration with children
@@ -389,21 +607,22 @@ where
         // Label declaration: `label { ... }` or `label: <element>`
         // The inner element can be any statement (shape, group, layout, etc.)
         let label_decl = just(Token::Label)
-            .ignore_then(
-                choice((
-                    // Block form: label { text "Foo" [styles] }
-                    stmt.clone()
-                        .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
-                        .map(|s: Spanned<Statement>| s.node),
-                    // Inline form: label: text "Foo" [styles]
-                    just(Token::Colon).ignore_then(stmt.clone()).map(|s: Spanned<Statement>| s.node),
-                )),
-            )
+            .ignore_then(choice((
+                // Block form: label { text "Foo" [styles] }
+                stmt.clone()
+                    .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
+                    .map(|s: Spanned<Statement>| s.node),
+                // Inline form: label: text "Foo" [styles]
+                just(Token::Colon)
+                    .ignore_then(stmt.clone())
+                    .map(|s: Spanned<Statement>| s.node),
+            )))
             .map(|inner| Statement::Label(Box::new(inner)));
 
         // All statements
         choice((
             alignment_decl.clone().map(Statement::Alignment),
+            constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
@@ -499,7 +718,10 @@ mod tests {
         match &doc.statements[0].node {
             Statement::Constraint(c) => {
                 assert_eq!(c.subject.node.as_str(), "client");
-                assert!(matches!(c.relation.as_ref().unwrap().node, PositionRelation::RightOf));
+                assert!(matches!(
+                    c.relation.as_ref().unwrap().node,
+                    PositionRelation::RightOf
+                ));
                 assert_eq!(c.anchor.as_ref().unwrap().node.as_str(), "server");
                 assert!(c.modifiers.is_empty());
             }
@@ -529,7 +751,10 @@ mod tests {
         match &doc.statements[0].node {
             Statement::Constraint(c) => {
                 assert_eq!(c.subject.node.as_str(), "a");
-                assert!(matches!(c.relation.as_ref().unwrap().node, PositionRelation::RightOf));
+                assert!(matches!(
+                    c.relation.as_ref().unwrap().node,
+                    PositionRelation::RightOf
+                ));
                 assert_eq!(c.anchor.as_ref().unwrap().node.as_str(), "b");
                 assert_eq!(c.modifiers.len(), 1);
             }
@@ -611,14 +836,12 @@ mod tests {
                 assert_eq!(g.children.len(), 2);
                 // First child should be a Label
                 match &g.children[0].node {
-                    Statement::Label(inner) => {
-                        match inner.as_ref() {
-                            Statement::Shape(s) => {
-                                assert!(matches!(s.shape_type.node, ShapeType::Text { .. }));
-                            }
-                            _ => panic!("Expected shape inside label"),
+                    Statement::Label(inner) => match inner.as_ref() {
+                        Statement::Shape(s) => {
+                            assert!(matches!(s.shape_type.node, ShapeType::Text { .. }));
                         }
-                    }
+                        _ => panic!("Expected shape inside label"),
+                    },
                     _ => panic!("Expected label statement"),
                 }
             }
@@ -636,17 +859,13 @@ mod tests {
                 assert_eq!(g.children.len(), 2);
                 // First child should be a Label
                 match &g.children[0].node {
-                    Statement::Label(inner) => {
-                        match inner.as_ref() {
-                            Statement::Shape(s) => {
-                                match &s.shape_type.node {
-                                    ShapeType::Text { content } => assert_eq!(content, "Bar"),
-                                    _ => panic!("Expected text shape"),
-                                }
-                            }
-                            _ => panic!("Expected shape inside label"),
-                        }
-                    }
+                    Statement::Label(inner) => match inner.as_ref() {
+                        Statement::Shape(s) => match &s.shape_type.node {
+                            ShapeType::Text { content } => assert_eq!(content, "Bar"),
+                            _ => panic!("Expected text shape"),
+                        },
+                        _ => panic!("Expected shape inside label"),
+                    },
                     _ => panic!("Expected label statement"),
                 }
             }
@@ -657,23 +876,22 @@ mod tests {
     #[test]
     fn test_parse_label_with_shape() {
         // label { rect foo [fill: red] } - any shape as label
-        let doc = parse(r#"group g { label { rect foo [fill: red] } rect a }"#).expect("Should parse");
+        let doc =
+            parse(r#"group g { label { rect foo [fill: red] } rect a }"#).expect("Should parse");
         assert_eq!(doc.statements.len(), 1);
         match &doc.statements[0].node {
             Statement::Group(g) => {
                 assert_eq!(g.children.len(), 2);
                 // First child should be a Label with a rect inside
                 match &g.children[0].node {
-                    Statement::Label(inner) => {
-                        match inner.as_ref() {
-                            Statement::Shape(s) => {
-                                assert!(matches!(s.shape_type.node, ShapeType::Rectangle));
-                                assert_eq!(s.name.as_ref().unwrap().node.as_str(), "foo");
-                                assert_eq!(s.modifiers.len(), 1);
-                            }
-                            _ => panic!("Expected shape inside label"),
+                    Statement::Label(inner) => match inner.as_ref() {
+                        Statement::Shape(s) => {
+                            assert!(matches!(s.shape_type.node, ShapeType::Rectangle));
+                            assert_eq!(s.name.as_ref().unwrap().node.as_str(), "foo");
+                            assert_eq!(s.modifiers.len(), 1);
                         }
-                    }
+                        _ => panic!("Expected shape inside label"),
+                    },
                     _ => panic!("Expected label statement"),
                 }
             }
@@ -728,20 +946,18 @@ mod tests {
     fn test_parse_symbolic_color_text_dark() {
         let doc = parse(r#"rect server [fill: text-dark]"#).expect("Should parse");
         match &doc.statements[0].node {
-            Statement::Shape(s) => {
-                match &s.modifiers[0].node.value.node {
-                    StyleValue::Color(ColorValue::Symbolic {
-                        category,
-                        variant,
-                        lightness,
-                    }) => {
-                        assert!(matches!(category, ColorCategory::Text));
-                        assert!(variant.is_none());
-                        assert!(matches!(lightness, Some(Lightness::Dark)));
-                    }
-                    other => panic!("Expected symbolic color, got {:?}", other),
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Color(ColorValue::Symbolic {
+                    category,
+                    variant,
+                    lightness,
+                }) => {
+                    assert!(matches!(category, ColorCategory::Text));
+                    assert!(variant.is_none());
+                    assert!(matches!(lightness, Some(Lightness::Dark)));
                 }
-            }
+                other => panic!("Expected symbolic color, got {:?}", other),
+            },
             _ => panic!("Expected shape"),
         }
     }
@@ -750,20 +966,18 @@ mod tests {
     fn test_parse_symbolic_color_accent_variant_light() {
         let doc = parse(r#"rect server [fill: accent-2-light]"#).expect("Should parse");
         match &doc.statements[0].node {
-            Statement::Shape(s) => {
-                match &s.modifiers[0].node.value.node {
-                    StyleValue::Color(ColorValue::Symbolic {
-                        category,
-                        variant,
-                        lightness,
-                    }) => {
-                        assert!(matches!(category, ColorCategory::Accent));
-                        assert_eq!(*variant, Some(2));
-                        assert!(matches!(lightness, Some(Lightness::Light)));
-                    }
-                    other => panic!("Expected symbolic color, got {:?}", other),
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Color(ColorValue::Symbolic {
+                    category,
+                    variant,
+                    lightness,
+                }) => {
+                    assert!(matches!(category, ColorCategory::Accent));
+                    assert_eq!(*variant, Some(2));
+                    assert!(matches!(lightness, Some(Lightness::Light)));
                 }
-            }
+                other => panic!("Expected symbolic color, got {:?}", other),
+            },
             _ => panic!("Expected shape"),
         }
     }
@@ -772,20 +986,18 @@ mod tests {
     fn test_parse_symbolic_color_background_base() {
         let doc = parse(r#"rect server [fill: background]"#).expect("Should parse");
         match &doc.statements[0].node {
-            Statement::Shape(s) => {
-                match &s.modifiers[0].node.value.node {
-                    StyleValue::Color(ColorValue::Symbolic {
-                        category,
-                        variant,
-                        lightness,
-                    }) => {
-                        assert!(matches!(category, ColorCategory::Background));
-                        assert!(variant.is_none());
-                        assert!(lightness.is_none());
-                    }
-                    other => panic!("Expected symbolic color, got {:?}", other),
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Color(ColorValue::Symbolic {
+                    category,
+                    variant,
+                    lightness,
+                }) => {
+                    assert!(matches!(category, ColorCategory::Background));
+                    assert!(variant.is_none());
+                    assert!(lightness.is_none());
                 }
-            }
+                other => panic!("Expected symbolic color, got {:?}", other),
+            },
             _ => panic!("Expected shape"),
         }
     }
@@ -795,14 +1007,12 @@ mod tests {
         // Named colors like 'red' should NOT be parsed as symbolic
         let doc = parse(r#"rect server [fill: red]"#).expect("Should parse");
         match &doc.statements[0].node {
-            Statement::Shape(s) => {
-                match &s.modifiers[0].node.value.node {
-                    StyleValue::Keyword(name) => {
-                        assert_eq!(name, "red");
-                    }
-                    other => panic!("Expected keyword for named color, got {:?}", other),
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Keyword(name) => {
+                    assert_eq!(name, "red");
                 }
-            }
+                other => panic!("Expected keyword for named color, got {:?}", other),
+            },
             _ => panic!("Expected shape"),
         }
     }
@@ -811,14 +1021,12 @@ mod tests {
     fn test_parse_hex_color_passthrough() {
         let doc = parse(r#"rect server [fill: #ff0000]"#).expect("Should parse");
         match &doc.statements[0].node {
-            Statement::Shape(s) => {
-                match &s.modifiers[0].node.value.node {
-                    StyleValue::Color(ColorValue::Hex(hex)) => {
-                        assert_eq!(hex, "#ff0000");
-                    }
-                    other => panic!("Expected hex color, got {:?}", other),
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Color(ColorValue::Hex(hex)) => {
+                    assert_eq!(hex, "#ff0000");
                 }
-            }
+                other => panic!("Expected hex color, got {:?}", other),
+            },
             _ => panic!("Expected shape"),
         }
     }
@@ -826,11 +1034,13 @@ mod tests {
     #[test]
     fn test_parse_mixed_colors() {
         // Mix of symbolic, named, and hex colors in one document
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             rect a [fill: foreground-1]
             rect b [fill: red]
             rect c [fill: #00ff00]
-        "#)
+        "#,
+        )
         .expect("Should parse");
         assert_eq!(doc.statements.len(), 3);
 
@@ -905,11 +1115,17 @@ mod tests {
                 assert_eq!(a.anchors.len(), 2);
                 // First anchor: group1.item
                 assert_eq!(a.anchors[0].element.node.segments.len(), 2);
-                assert_eq!(a.anchors[0].element.node.segments[0].node.as_str(), "group1");
+                assert_eq!(
+                    a.anchors[0].element.node.segments[0].node.as_str(),
+                    "group1"
+                );
                 assert_eq!(a.anchors[0].element.node.segments[1].node.as_str(), "item");
                 // Second anchor: group2.other
                 assert_eq!(a.anchors[1].element.node.segments.len(), 2);
-                assert_eq!(a.anchors[1].element.node.segments[0].node.as_str(), "group2");
+                assert_eq!(
+                    a.anchors[1].element.node.segments[0].node.as_str(),
+                    "group2"
+                );
                 assert_eq!(a.anchors[1].element.node.segments[1].node.as_str(), "other");
             }
             _ => panic!("Expected alignment"),
@@ -959,10 +1175,237 @@ mod tests {
                 assert!(matches!(c.modifiers[0].node.key.node, StyleKey::Label));
                 match &c.modifiers[0].node.value.node {
                     StyleValue::Identifier(id) => assert_eq!(id.as_str(), "my_label"),
-                    _ => panic!("Expected identifier value, got {:?}", c.modifiers[0].node.value.node),
+                    _ => panic!(
+                        "Expected identifier value, got {:?}",
+                        c.modifiers[0].node.value.node
+                    ),
                 }
             }
             _ => panic!("Expected connection"),
+        }
+    }
+
+    // ==================== Constrain Syntax Tests (Feature 005) ====================
+
+    #[test]
+    fn test_parse_constrain_equality() {
+        let doc = parse("constrain a.left = b.left").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Equal { left, right } => {
+                    assert_eq!(left.element.node.leaf().as_str(), "a");
+                    assert!(matches!(left.property.node, ConstraintProperty::Left));
+                    assert_eq!(right.element.node.leaf().as_str(), "b");
+                    assert!(matches!(right.property.node, ConstraintProperty::Left));
+                }
+                other => panic!("Expected Equal, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_with_offset() {
+        let doc = parse("constrain a.left = b.right + 20").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::EqualWithOffset {
+                    left,
+                    right,
+                    offset,
+                } => {
+                    assert_eq!(left.element.node.leaf().as_str(), "a");
+                    assert!(matches!(left.property.node, ConstraintProperty::Left));
+                    assert_eq!(right.element.node.leaf().as_str(), "b");
+                    assert!(matches!(right.property.node, ConstraintProperty::Right));
+                    assert!((offset - 20.0).abs() < 0.001);
+                }
+                other => panic!("Expected EqualWithOffset, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_negative_offset() {
+        let doc = parse("constrain a.x = b.x - 10").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::EqualWithOffset { offset, .. } => {
+                    assert!((offset - (-10.0)).abs() < 0.001);
+                }
+                other => panic!("Expected EqualWithOffset, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_constant() {
+        let doc = parse("constrain a.width = 100").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Constant { left, value } => {
+                    assert_eq!(left.element.node.leaf().as_str(), "a");
+                    assert!(matches!(left.property.node, ConstraintProperty::Width));
+                    assert!((value - 100.0).abs() < 0.001);
+                }
+                other => panic!("Expected Constant, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_greater_or_equal() {
+        let doc = parse("constrain a.width >= 50").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::GreaterOrEqual { left, value } => {
+                    assert_eq!(left.element.node.leaf().as_str(), "a");
+                    assert!(matches!(left.property.node, ConstraintProperty::Width));
+                    assert!((value - 50.0).abs() < 0.001);
+                }
+                other => panic!("Expected GreaterOrEqual, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_less_or_equal() {
+        let doc = parse("constrain a.height <= 200").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::LessOrEqual { left, value } => {
+                    assert_eq!(left.element.node.leaf().as_str(), "a");
+                    assert!(matches!(left.property.node, ConstraintProperty::Height));
+                    assert!((value - 200.0).abs() < 0.001);
+                }
+                other => panic!("Expected LessOrEqual, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_midpoint() {
+        let doc = parse("constrain a.center_x = midpoint(b, c)").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Midpoint { target, a, b } => {
+                    assert_eq!(target.element.node.leaf().as_str(), "a");
+                    assert!(matches!(target.property.node, ConstraintProperty::CenterX));
+                    assert_eq!(a.node.as_str(), "b");
+                    assert_eq!(b.node.as_str(), "c");
+                }
+                other => panic!("Expected Midpoint, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_contains() {
+        let doc = parse("constrain container contains a, b, c").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Contains {
+                    container,
+                    elements,
+                    padding,
+                } => {
+                    assert_eq!(container.node.as_str(), "container");
+                    assert_eq!(elements.len(), 3);
+                    assert_eq!(elements[0].node.as_str(), "a");
+                    assert_eq!(elements[1].node.as_str(), "b");
+                    assert_eq!(elements[2].node.as_str(), "c");
+                    assert!(padding.is_none());
+                }
+                other => panic!("Expected Contains, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_contains_with_padding() {
+        let doc = parse("constrain container contains a, b [padding: 20]").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Contains {
+                    container,
+                    elements,
+                    padding,
+                } => {
+                    assert_eq!(container.node.as_str(), "container");
+                    assert_eq!(elements.len(), 2);
+                    assert!(padding.is_some());
+                    assert!((padding.unwrap() - 20.0).abs() < 0.001);
+                }
+                other => panic!("Expected Contains, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_center_properties() {
+        // Test all center property keywords
+        let doc = parse("constrain a.center_x = b.center_y").expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Equal { left, right } => {
+                    assert!(matches!(left.property.node, ConstraintProperty::CenterX));
+                    assert!(matches!(right.property.node, ConstraintProperty::CenterY));
+                }
+                _ => panic!("Expected Equal"),
+            },
+            _ => panic!("Expected Constrain"),
+        }
+
+        // Test "center" property
+        let doc2 = parse("constrain a.center = b.center").expect("Should parse");
+        match &doc2.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Equal { left, right } => {
+                    assert!(matches!(left.property.node, ConstraintProperty::Center));
+                    assert!(matches!(right.property.node, ConstraintProperty::Center));
+                }
+                _ => panic!("Expected Equal"),
+            },
+            _ => panic!("Expected Constrain"),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_with_nested_path() {
+        let doc = parse("constrain group1.item.left = group2.other.left").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Equal { left, right } => {
+                    // First path: group1.item
+                    assert_eq!(left.element.node.segments.len(), 2);
+                    assert_eq!(left.element.node.segments[0].node.as_str(), "group1");
+                    assert_eq!(left.element.node.segments[1].node.as_str(), "item");
+                    // Second path: group2.other
+                    assert_eq!(right.element.node.segments.len(), 2);
+                    assert_eq!(right.element.node.segments[0].node.as_str(), "group2");
+                    assert_eq!(right.element.node.segments[1].node.as_str(), "other");
+                }
+                other => panic!("Expected Equal, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
         }
     }
 }

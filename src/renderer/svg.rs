@@ -130,7 +130,9 @@ impl SvgBuilder {
             self.elements.push(format!(
                 r##"{}<text x="{}" y="{}" font-size="6" fill="#ff00ff" opacity="0.8">{}</text>"##,
                 self.indent_str(),
-                x + 1.0, y + 6.0, label
+                x + 1.0,
+                y + 6.0,
+                label
             ));
         }
     }

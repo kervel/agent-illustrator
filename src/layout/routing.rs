@@ -171,8 +171,7 @@ pub fn route_connection(
 
         // For large shapes, consider snapping to axis-aligned lines
         let min_snap_size = 15.0;
-        let target_too_small =
-            to_bounds.width < min_snap_size || to_bounds.height < min_snap_size;
+        let target_too_small = to_bounds.width < min_snap_size || to_bounds.height < min_snap_size;
         let source_too_small =
             from_bounds.width < min_snap_size || from_bounds.height < min_snap_size;
 
@@ -182,19 +181,13 @@ pub fn route_connection(
                 // Primarily vertical - snap if alignment is close
                 if (from_center.x - to_center.x).abs() < to_bounds.width / 2.0 {
                     let mid_x = (from_center.x + to_center.x) / 2.0;
-                    return vec![
-                        Point::new(mid_x, start.y),
-                        Point::new(mid_x, end.y),
-                    ];
+                    return vec![Point::new(mid_x, start.y), Point::new(mid_x, end.y)];
                 }
             } else if dx.abs() > dy.abs() * 2.0 {
                 // Primarily horizontal - snap if alignment is close
                 if (from_center.y - to_center.y).abs() < to_bounds.height / 2.0 {
                     let mid_y = (from_center.y + to_center.y) / 2.0;
-                    return vec![
-                        Point::new(start.x, mid_y),
-                        Point::new(end.x, mid_y),
-                    ];
+                    return vec![Point::new(start.x, mid_y), Point::new(end.x, mid_y)];
                 }
             }
         }
@@ -316,7 +309,8 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                     let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
 
                     // Extract label and track if it references an element
-                    let (label, label_ref_id) = extract_connection_label_with_ref(&conn.modifiers, &path, result);
+                    let (label, label_ref_id) =
+                        extract_connection_label_with_ref(&conn.modifiers, &path, result);
 
                     // Mark the referenced element for removal from rendering
                     if let Some(id) = label_ref_id {
@@ -394,7 +388,9 @@ fn extract_connection_label_with_ref(
                         label_ref_id = Some(id.0.clone());
                         // Capture styles from the referenced element
                         label_styles = Some(element.styles.clone());
-                        if let ElementType::Shape(ShapeType::Text { content }) = &element.element_type {
+                        if let ElementType::Shape(ShapeType::Text { content }) =
+                            &element.element_type
+                        {
                             Some(content.clone())
                         } else {
                             // If it's not a text shape, use the identifier as the label text
@@ -696,7 +692,10 @@ mod tests {
         let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
 
         assert_eq!(path.len(), 2);
-        assert_eq!(path[0].x, path[1].x, "Perfectly vertical should stay vertical");
+        assert_eq!(
+            path[0].x, path[1].x,
+            "Perfectly vertical should stay vertical"
+        );
     }
 
     #[test]
@@ -708,7 +707,10 @@ mod tests {
         let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
 
         assert_eq!(path.len(), 2);
-        assert_eq!(path[0].y, path[1].y, "Perfectly horizontal should stay horizontal");
+        assert_eq!(
+            path[0].y, path[1].y,
+            "Perfectly horizontal should stay horizontal"
+        );
     }
 
     // Helper to create an empty LayoutResult for testing
@@ -749,7 +751,11 @@ mod tests {
         // Should be positioned to the right (x + 10)
         assert_eq!(label.position.x, 10.0, "Right position should add 10 to x");
         assert_eq!(label.position.y, 50.0, "Y should be at midpoint");
-        assert_eq!(label.anchor, TextAnchor::Start, "Right position should use Start anchor");
+        assert_eq!(
+            label.anchor,
+            TextAnchor::Start,
+            "Right position should use Start anchor"
+        );
     }
 
     #[test]
@@ -760,9 +766,16 @@ mod tests {
         let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Should be positioned to the left (x - 10)
-        assert_eq!(label.position.x, -10.0, "Left position should subtract 10 from x");
+        assert_eq!(
+            label.position.x, -10.0,
+            "Left position should subtract 10 from x"
+        );
         assert_eq!(label.position.y, 50.0, "Y should be at midpoint");
-        assert_eq!(label.anchor, TextAnchor::End, "Left position should use End anchor");
+        assert_eq!(
+            label.anchor,
+            TextAnchor::End,
+            "Left position should use End anchor"
+        );
     }
 
     #[test]
@@ -773,9 +786,16 @@ mod tests {
         let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Should be positioned at center (no offset)
-        assert_eq!(label.position.x, 0.0, "Center position should have no x offset");
+        assert_eq!(
+            label.position.x, 0.0,
+            "Center position should have no x offset"
+        );
         assert_eq!(label.position.y, 50.0, "Y should be at midpoint");
-        assert_eq!(label.anchor, TextAnchor::Middle, "Center position should use Middle anchor");
+        assert_eq!(
+            label.anchor,
+            TextAnchor::Middle,
+            "Center position should use Middle anchor"
+        );
     }
 
     #[test]
@@ -788,7 +808,11 @@ mod tests {
 
         // Auto-detect for vertical: right side
         assert_eq!(label.position.x, 60.0, "Vertical auto should add 10 to x");
-        assert_eq!(label.anchor, TextAnchor::Start, "Vertical auto should use Start anchor");
+        assert_eq!(
+            label.anchor,
+            TextAnchor::Start,
+            "Vertical auto should use Start anchor"
+        );
     }
 
     #[test]
@@ -800,8 +824,18 @@ mod tests {
         let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Auto-detect for horizontal: above
-        assert_eq!(label.position.x, 50.0, "Horizontal auto should have x at midpoint");
-        assert_eq!(label.position.y, 40.0, "Horizontal auto should subtract 10 from y");
-        assert_eq!(label.anchor, TextAnchor::Middle, "Horizontal auto should use Middle anchor");
+        assert_eq!(
+            label.position.x, 50.0,
+            "Horizontal auto should have x at midpoint"
+        );
+        assert_eq!(
+            label.position.y, 40.0,
+            "Horizontal auto should subtract 10 from y"
+        );
+        assert_eq!(
+            label.anchor,
+            TextAnchor::Middle,
+            "Horizontal auto should use Middle anchor"
+        );
     }
 }

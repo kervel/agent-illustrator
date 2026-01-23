@@ -49,6 +49,9 @@
 - `svg` - SVG document building
 - `resvg` - SVG rendering (for PNG export if needed later)
 
+### Layout & Constraint Solving
+- `kasuari` - Cassowary constraint solver (pure Rust, actively maintained) <!-- Feature 005 -->
+
 ### Error Handling
 - `thiserror` - Derive macros for error types
 - `ariadne` - Beautiful diagnostic messages (selected over miette) <!-- Feature 001 -->
@@ -124,4 +127,4 @@ agent-illustrator/
 ---
 
 *Created: 2026-01-23*
-*Last Updated: 2026-01-23*
+*Last Updated: 2026-01-23* <!-- Feature 005: Added kasuari -->

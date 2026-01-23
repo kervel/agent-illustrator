@@ -72,6 +72,22 @@ pub enum Token {
     #[token("role")]
     Role,
 
+    // Constraint keywords
+    #[token("constrain")]
+    Constrain,
+    #[token("midpoint")]
+    Midpoint,
+    #[token("contains")]
+    Contains,
+
+    // Constraint property keywords
+    #[token("center_x")]
+    CenterXProp,
+    #[token("center_y")]
+    CenterYProp,
+    #[token("center")]
+    Center,
+
     // Connection operators (order matters - longer patterns first)
     #[token("<->")]
     ArrowBoth,
@@ -86,6 +102,10 @@ pub enum Token {
     #[token("-")]
     Minus,
 
+    // Plus sign (for constraint offsets like a.left = b.right + 20)
+    #[token("+")]
+    Plus,
+
     // Delimiters
     #[token("{")]
     BraceOpen,
@@ -95,12 +115,21 @@ pub enum Token {
     BracketOpen,
     #[token("]")]
     BracketClose,
+    #[token("(")]
+    ParenOpen,
+    #[token(")")]
+    ParenClose,
     #[token(",")]
     Comma,
     #[token(":")]
     Colon,
     #[token(".")]
     Dot,
+    // Comparison operators (longer first)
+    #[token(">=")]
+    GreaterOrEqual,
+    #[token("<=")]
+    LessOrEqual,
     #[token("=")]
     Equals,
 
@@ -341,10 +370,7 @@ mod tests {
     #[test]
     fn test_role_keyword() {
         let tokens: Vec<_> = lex("role: label").map(|(t, _)| t).collect();
-        assert_eq!(
-            tokens,
-            vec![Token::Role, Token::Colon, Token::Label]
-        );
+        assert_eq!(tokens, vec![Token::Role, Token::Colon, Token::Label]);
     }
 
     #[test]
@@ -360,6 +386,65 @@ mod tests {
                 Token::Ident("c".to_string()),
                 Token::Dot,
                 Token::Ident("d".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_constrain_keywords() {
+        let tokens: Vec<_> = lex("constrain midpoint contains").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![Token::Constrain, Token::Midpoint, Token::Contains]
+        );
+    }
+
+    #[test]
+    fn test_comparison_operators() {
+        let tokens: Vec<_> = lex(">= <=").map(|(t, _)| t).collect();
+        assert_eq!(tokens, vec![Token::GreaterOrEqual, Token::LessOrEqual]);
+    }
+
+    #[test]
+    fn test_constraint_property_keywords() {
+        let tokens: Vec<_> = lex("center center_x center_y").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![Token::Center, Token::CenterXProp, Token::CenterYProp]
+        );
+    }
+
+    #[test]
+    fn test_parentheses() {
+        let tokens: Vec<_> = lex("midpoint(a, b)").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Midpoint,
+                Token::ParenOpen,
+                Token::Ident("a".to_string()),
+                Token::Comma,
+                Token::Ident("b".to_string()),
+                Token::ParenClose,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_plus_for_offset() {
+        let tokens: Vec<_> = lex("a.left = b.right + 20").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Ident("a".to_string()),
+                Token::Dot,
+                Token::Left,
+                Token::Equals,
+                Token::Ident("b".to_string()),
+                Token::Dot,
+                Token::Right,
+                Token::Plus,
+                Token::Number(20.0),
             ]
         );
     }

@@ -3,14 +3,24 @@
 //! This module takes a parsed AST and computes the spatial layout,
 //! producing a LayoutResult with positioned elements and routed connections.
 
+pub mod collector;
 pub mod config;
 pub mod engine;
 pub mod error;
 pub mod routing;
+pub mod solver;
 pub mod types;
 
+pub use collector::ConstraintCollector;
+pub use solver::{
+    ConstraintSolver, LayoutConstraint, LayoutProperty, LayoutVariable, Solution, SolverError,
+};
+
+#[cfg(test)]
+mod solver_spike;
+
 pub use config::LayoutConfig;
-pub use engine::{compute, resolve_alignments, resolve_constraints};
+pub use engine::{compute, resolve_alignments, resolve_constrain_statements, resolve_constraints};
 pub use error::LayoutError;
 pub use routing::{route_connections, RoutingMode};
 pub use types::*;
@@ -64,7 +74,10 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Labels can contain elements that define identifiers
             collect_ids_from_statement(inner, ids);
         }
-        Statement::Connection(_) | Statement::Constraint(_) | Statement::Alignment(_) => {
+        Statement::Connection(_)
+        | Statement::Constraint(_)
+        | Statement::Alignment(_)
+        | Statement::Constrain(_) => {
             // Connections, constraints, and alignments don't define new identifiers
         }
     }
@@ -139,7 +152,83 @@ fn validate_refs_in_statement(
                 }
             }
         }
+        Statement::Constrain(c) => {
+            // Validate element references in constrain expressions
+            validate_constraint_expr_refs(&c.expr, defined, _span)?;
+        }
         Statement::Shape(_) => {}
+    }
+    Ok(())
+}
+
+/// Validate element references within a constraint expression
+fn validate_constraint_expr_refs(
+    expr: &crate::parser::ast::ConstraintExpr,
+    defined: &HashSet<String>,
+    _span: &Span,
+) -> Result<(), LayoutError> {
+    use crate::parser::ast::ConstraintExpr;
+
+    // Helper to validate a property ref
+    let validate_prop_ref =
+        |prop_ref: &crate::parser::ast::PropertyRef| -> Result<(), LayoutError> {
+            let leaf_name = &prop_ref.element.node.leaf().0;
+            if !defined.contains(leaf_name) {
+                return Err(LayoutError::UndefinedIdentifier {
+                    name: leaf_name.clone(),
+                    span: prop_ref.element.span.clone(),
+                    suggestions: find_similar(defined, leaf_name, 2),
+                });
+            }
+            Ok(())
+        };
+
+    // Helper to validate an identifier
+    let validate_ident =
+        |id: &crate::parser::ast::Spanned<crate::parser::ast::Identifier>| -> Result<(), LayoutError> {
+            if !defined.contains(&id.node.0) {
+                return Err(LayoutError::UndefinedIdentifier {
+                    name: id.node.0.clone(),
+                    span: id.span.clone(),
+                    suggestions: find_similar(defined, &id.node.0, 2),
+                });
+            }
+            Ok(())
+        };
+
+    match expr {
+        ConstraintExpr::Equal { left, right } => {
+            validate_prop_ref(left)?;
+            validate_prop_ref(right)?;
+        }
+        ConstraintExpr::EqualWithOffset { left, right, .. } => {
+            validate_prop_ref(left)?;
+            validate_prop_ref(right)?;
+        }
+        ConstraintExpr::Constant { left, .. } => {
+            validate_prop_ref(left)?;
+        }
+        ConstraintExpr::GreaterOrEqual { left, .. } => {
+            validate_prop_ref(left)?;
+        }
+        ConstraintExpr::LessOrEqual { left, .. } => {
+            validate_prop_ref(left)?;
+        }
+        ConstraintExpr::Midpoint { target, a, b } => {
+            validate_prop_ref(target)?;
+            validate_ident(a)?;
+            validate_ident(b)?;
+        }
+        ConstraintExpr::Contains {
+            container,
+            elements,
+            ..
+        } => {
+            validate_ident(container)?;
+            for elem in elements {
+                validate_ident(elem)?;
+            }
+        }
     }
     Ok(())
 }
