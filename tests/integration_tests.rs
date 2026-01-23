@@ -230,3 +230,34 @@ fn test_numeric_modifiers() {
     let doc = parse(input).expect("Should parse");
     assert_eq!(doc.statements.len(), 1);
 }
+
+#[test]
+fn test_railway_topology_smoke_test() {
+    // Feature 002: Railway Topology Smoke Test
+    // This test verifies that the reference DSL document parses correctly
+    let input = include_str!("../examples/railway-topology.ail");
+
+    let doc = parse(input).expect("Railway topology document should parse");
+
+    // Document should have:
+    // - 1 col layout (diagram) containing everything
+    assert_eq!(
+        doc.statements.len(),
+        1,
+        "Should have 1 top-level statement (col layout)"
+    );
+
+    // Verify it's a layout
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Layout(layout) => {
+            // The col should contain: micro group, connection, meso group, connection, macro group
+            // = 5 children
+            assert_eq!(
+                layout.children.len(),
+                5,
+                "Col layout should have 5 children"
+            );
+        }
+        _ => panic!("Expected top-level layout"),
+    }
+}
