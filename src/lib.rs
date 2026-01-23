@@ -62,6 +62,8 @@ pub struct RenderConfig {
     pub svg: SvgConfig,
     /// Stylesheet for color resolution
     pub stylesheet: Stylesheet,
+    /// Debug mode: show container bounds and element IDs
+    pub debug: bool,
 }
 
 impl Default for RenderConfig {
@@ -70,6 +72,7 @@ impl Default for RenderConfig {
             layout: LayoutConfig::default(),
             svg: SvgConfig::default(),
             stylesheet: Stylesheet::default(),
+            debug: false,
         }
     }
 }
@@ -95,6 +98,12 @@ impl RenderConfig {
     /// Set the stylesheet for color resolution
     pub fn with_stylesheet(mut self, stylesheet: Stylesheet) -> Self {
         self.stylesheet = stylesheet;
+        self
+    }
+
+    /// Enable or disable debug mode
+    pub fn with_debug(mut self, debug: bool) -> Self {
+        self.debug = debug;
         self
     }
 }
@@ -155,8 +164,28 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
     // Route connections
     layout::route_connections(&mut result, &doc)?;
 
+    // Debug output
+    if config.debug {
+        fn print_tree(elem: &layout::ElementLayout, depth: usize) {
+            let indent = "  ".repeat(depth);
+            let id = elem.id.as_ref().map(|i| i.0.as_str()).unwrap_or("<anon>");
+            eprintln!(
+                "{}[{}] x={:.1} y={:.1} w={:.1} h={:.1}",
+                indent, id, elem.bounds.x, elem.bounds.y, elem.bounds.width, elem.bounds.height
+            );
+            for child in &elem.children {
+                print_tree(child, depth + 1);
+            }
+        }
+        eprintln!("=== Layout Debug ===");
+        for elem in &result.root_elements {
+            print_tree(elem, 0);
+        }
+        eprintln!("====================");
+    }
+
     // Generate SVG with stylesheet
-    let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet);
+    let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet, config.debug);
 
     Ok(svg)
 }

@@ -966,31 +966,79 @@ fn shift_element_by_name(
     delta: f64,
     axis: Axis,
 ) -> Result<(), LayoutError> {
-    // We need to find and shift the element in the root_elements tree
-    for elem in &mut result.root_elements {
-        if shift_element_recursive(elem, name, delta, axis) {
-            // Also update the elements HashMap
-            if let Some(indexed_elem) = result.elements.get_mut(name) {
-                match axis {
-                    Axis::Horizontal => {
-                        indexed_elem.bounds.x += delta;
-                        if let Some(label) = &mut indexed_elem.label {
-                            label.position.x += delta;
-                        }
-                    }
-                    Axis::Vertical => {
-                        indexed_elem.bounds.y += delta;
-                        if let Some(label) = &mut indexed_elem.label {
-                            label.position.y += delta;
-                        }
-                    }
-                }
-            }
-            return Ok(());
+    // First, collect all IDs that will be shifted (the element and all its children)
+    let mut ids_to_update = vec![];
+    for elem in &result.root_elements {
+        if collect_element_ids_recursive(elem, name, &mut ids_to_update) {
+            break;
         }
     }
 
-    Err(LayoutError::undefined(name, 0..0, vec![]))
+    if ids_to_update.is_empty() {
+        return Err(LayoutError::undefined(name, 0..0, vec![]));
+    }
+
+    // Shift the element in the tree
+    for elem in &mut result.root_elements {
+        if shift_element_recursive(elem, name, delta, axis) {
+            break;
+        }
+    }
+
+    // Update all affected elements in the HashMap
+    for id in ids_to_update {
+        if let Some(indexed_elem) = result.elements.get_mut(&id) {
+            match axis {
+                Axis::Horizontal => {
+                    indexed_elem.bounds.x += delta;
+                    if let Some(label) = &mut indexed_elem.label {
+                        label.position.x += delta;
+                    }
+                }
+                Axis::Vertical => {
+                    indexed_elem.bounds.y += delta;
+                    if let Some(label) = &mut indexed_elem.label {
+                        label.position.y += delta;
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Recursively collect all element IDs starting from an element with the given name
+/// Returns true if the element was found
+fn collect_element_ids_recursive(
+    elem: &ElementLayout,
+    name: &str,
+    ids: &mut Vec<String>,
+) -> bool {
+    if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
+        // Found the element - collect its ID and all children's IDs
+        collect_all_ids(elem, ids);
+        return true;
+    }
+
+    // Search in children
+    for child in &elem.children {
+        if collect_element_ids_recursive(child, name, ids) {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Collect all IDs from an element and its children
+fn collect_all_ids(elem: &ElementLayout, ids: &mut Vec<String>) {
+    if let Some(id) = &elem.id {
+        ids.push(id.0.clone());
+    }
+    for child in &elem.children {
+        collect_all_ids(child, ids);
+    }
 }
 
 /// Recursively search for and shift an element by name

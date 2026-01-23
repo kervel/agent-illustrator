@@ -25,6 +25,10 @@ struct Cli {
     /// Stylesheet file for color palette (TOML format)
     #[arg(short, long)]
     stylesheet: Option<PathBuf>,
+
+    /// Debug mode: show container bounds and element IDs
+    #[arg(short, long)]
+    debug: bool,
 }
 
 fn main() {
@@ -63,8 +67,10 @@ fn main() {
         }
     };
 
-    // Render with stylesheet
-    let config = RenderConfig::new().with_stylesheet(stylesheet);
+    // Render with stylesheet and debug mode
+    let config = RenderConfig::new()
+        .with_stylesheet(stylesheet)
+        .with_debug(cli.debug);
     match render_with_config(&source, config) {
         Ok(svg) => {
             println!("{}", svg);

@@ -104,5 +104,8 @@ col diagram {
     meso_label -> macro_label [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
 
     // Align the level labels on the same vertical axis
+    // Align containers for correct arrow routing
     align micro_label.horizontal_center = meso_label.horizontal_center = macro_label.horizontal_center
+    // Align text elements for visual alignment
+    align micro_lbl.horizontal_center = meso_lbl.horizontal_center = macro_lbl.horizontal_center
 }

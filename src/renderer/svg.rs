@@ -117,6 +117,24 @@ impl SvgBuilder {
         ));
     }
 
+    /// Add a debug rectangle with dashed border and tiny label
+    pub fn add_debug_rect(&mut self, x: f64, y: f64, w: f64, h: f64, label: &str) {
+        // Dashed magenta rectangle
+        self.elements.push(format!(
+            r##"{}<rect x="{}" y="{}" width="{}" height="{}" fill="none" stroke="#ff00ff" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.7"/>"##,
+            self.indent_str(),
+            x, y, w, h
+        ));
+        // Tiny label at top-left
+        if !label.is_empty() {
+            self.elements.push(format!(
+                r##"{}<text x="{}" y="{}" font-size="6" fill="#ff00ff" opacity="0.8">{}</text>"##,
+                self.indent_str(),
+                x + 1.0, y + 6.0, label
+            ));
+        }
+    }
+
     /// Add a circle element
     pub fn add_circle(
         &mut self,
@@ -423,7 +441,7 @@ impl SvgBuilder {
 
 /// Render a LayoutResult to an SVG string (with default stylesheet)
 pub fn render_svg(result: &LayoutResult, config: &SvgConfig) -> String {
-    render_svg_with_stylesheet(result, config, &Stylesheet::default())
+    render_svg_with_stylesheet(result, config, &Stylesheet::default(), false)
 }
 
 /// Render a LayoutResult to an SVG string with a custom stylesheet
@@ -431,6 +449,7 @@ pub fn render_svg_with_stylesheet(
     result: &LayoutResult,
     config: &SvgConfig,
     stylesheet: &Stylesheet,
+    debug: bool,
 ) -> String {
     let mut builder = SvgBuilder::new(config.clone());
 
@@ -458,7 +477,28 @@ pub fn render_svg_with_stylesheet(
         render_connection(conn, &mut builder);
     }
 
+    // Render debug overlays
+    if debug {
+        for element in &result.root_elements {
+            render_debug_bounds(element, &mut builder);
+        }
+    }
+
     builder.build(result.bounds)
+}
+
+/// Render debug bounds for an element and its children
+fn render_debug_bounds(element: &ElementLayout, builder: &mut SvgBuilder) {
+    let b = &element.bounds;
+    let id = element.id.as_ref().map(|i| i.0.as_str()).unwrap_or("");
+
+    // Draw dashed rectangle for bounds
+    builder.add_debug_rect(b.x, b.y, b.width, b.height, id);
+
+    // Recurse into children
+    for child in &element.children {
+        render_debug_bounds(child, builder);
+    }
 }
 
 /// Render a single element to the builder

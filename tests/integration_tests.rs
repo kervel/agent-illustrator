@@ -362,12 +362,12 @@ fn test_railway_topology_smoke_test() {
             // - agg_label text
             // - simp_label text
             // - 2 connections
-            // - 1 alignment statement
-            // = 8 children
+            // - 2 alignment statements (containers + text elements)
+            // = 9 children
             assert_eq!(
                 layout.children.len(),
-                8,
-                "Col layout should have 8 children"
+                9,
+                "Col layout should have 9 children"
             );
         }
         _ => panic!("Expected top-level layout"),
