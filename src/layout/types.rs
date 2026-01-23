@@ -138,6 +138,9 @@ impl ResolvedStyles {
                         styles.fill = Some(c.clone());
                     } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
                         styles.fill = Some(k.clone());
+                    } else if let StyleValue::Identifier(id) = &modifier.node.value.node {
+                        // Identifier can be a color keyword like "red", "blue", etc.
+                        styles.fill = Some(id.0.clone());
                     }
                 }
                 StyleKey::Stroke => {
@@ -145,6 +148,9 @@ impl ResolvedStyles {
                         styles.stroke = Some(c.clone());
                     } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
                         styles.stroke = Some(k.clone());
+                    } else if let StyleValue::Identifier(id) = &modifier.node.value.node {
+                        // Identifier can be a color keyword like "red", "blue", etc.
+                        styles.stroke = Some(id.0.clone());
                     }
                 }
                 StyleKey::StrokeWidth => {
@@ -167,6 +173,8 @@ impl ResolvedStyles {
                         styles.css_classes.push(c.clone());
                     } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
                         styles.css_classes.push(k.clone());
+                    } else if let StyleValue::Identifier(id) = &modifier.node.value.node {
+                        styles.css_classes.push(id.0.clone());
                     }
                 }
                 StyleKey::Label
@@ -176,8 +184,9 @@ impl ResolvedStyles {
                 | StyleKey::Width
                 | StyleKey::Height
                 | StyleKey::Routing
+                | StyleKey::Role
                 | StyleKey::Custom(_) => {
-                    // Labels, label position, gap, size, and routing modifiers handled separately in layout engine; custom keys ignored for now
+                    // Labels, label position, gap, size, routing, and role modifiers handled separately in layout engine; custom keys ignored for now
                 }
             }
         }

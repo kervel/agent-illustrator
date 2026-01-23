@@ -52,6 +52,26 @@ pub enum Token {
     #[token("inside")]
     Inside,
 
+    // Alignment keywords
+    #[token("align")]
+    Align,
+    #[token("left")]
+    Left,
+    #[token("right")]
+    Right,
+    #[token("top")]
+    Top,
+    #[token("bottom")]
+    Bottom,
+    #[token("horizontal_center")]
+    HorizontalCenter,
+    #[token("vertical_center")]
+    VerticalCenter,
+
+    // Role keyword
+    #[token("role")]
+    Role,
+
     // Connection operators (order matters - longer patterns first)
     #[token("<->")]
     ArrowBoth,
@@ -75,6 +95,10 @@ pub enum Token {
     Comma,
     #[token(":")]
     Colon,
+    #[token(".")]
+    Dot,
+    #[token("=")]
+    Equals,
 
     // Literals - identifiers must come after keywords
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_string(), priority = 1)]
@@ -270,5 +294,68 @@ mod tests {
     fn test_label_keyword() {
         let tokens: Vec<_> = lex("label").map(|(t, _)| t).collect();
         assert_eq!(tokens, vec![Token::Label]);
+    }
+
+    #[test]
+    fn test_alignment_keywords() {
+        let tokens: Vec<_> = lex("align left right top bottom horizontal_center vertical_center")
+            .map(|(t, _)| t)
+            .collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Align,
+                Token::Left,
+                Token::Right,
+                Token::Top,
+                Token::Bottom,
+                Token::HorizontalCenter,
+                Token::VerticalCenter,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_alignment_syntax() {
+        let tokens: Vec<_> = lex("align a.left = b.right").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Align,
+                Token::Ident("a".to_string()),
+                Token::Dot,
+                Token::Left,
+                Token::Equals,
+                Token::Ident("b".to_string()),
+                Token::Dot,
+                Token::Right,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_role_keyword() {
+        let tokens: Vec<_> = lex("role: label").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![Token::Role, Token::Colon, Token::Label]
+        );
+    }
+
+    #[test]
+    fn test_dot_and_equals() {
+        let tokens: Vec<_> = lex("a.b = c.d").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Ident("a".to_string()),
+                Token::Dot,
+                Token::Ident("b".to_string()),
+                Token::Equals,
+                Token::Ident("c".to_string()),
+                Token::Dot,
+                Token::Ident("d".to_string()),
+            ]
+        );
     }
 }

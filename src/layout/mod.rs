@@ -64,7 +64,9 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Labels can contain elements that define identifiers
             collect_ids_from_statement(inner, ids);
         }
-        Statement::Connection(_) | Statement::Constraint(_) => {}
+        Statement::Connection(_) | Statement::Constraint(_) | Statement::Alignment(_) => {
+            // Connections, constraints, and alignments don't define new identifiers
+        }
     }
 }
 
@@ -119,6 +121,21 @@ fn validate_refs_in_statement(
         Statement::Label(inner) => {
             // Validate references inside the label's inner element
             validate_refs_in_statement(inner, defined, _span)?;
+        }
+        Statement::Alignment(a) => {
+            // Validate that all element paths in the alignment reference defined elements
+            for anchor in &a.anchors {
+                // For now, only check simple (single-segment) paths against defined identifiers
+                // Full path resolution will be implemented in Phase 5
+                let leaf_name = &anchor.element.node.leaf().0;
+                if !defined.contains(leaf_name) {
+                    return Err(LayoutError::UndefinedIdentifier {
+                        name: leaf_name.clone(),
+                        span: anchor.element.span.clone(),
+                        suggestions: find_similar(defined, leaf_name, 2),
+                    });
+                }
+            }
         }
         Statement::Shape(_) => {}
     }

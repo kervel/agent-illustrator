@@ -57,7 +57,10 @@ pub enum Statement {
     Constraint(ConstraintDecl),
     /// Label element: `label { text "Foo" }` or `label: text "Foo"`
     /// Contains any statement that acts as a label for its parent container
+    /// DEPRECATED: Use `[role: label]` modifier instead
     Label(Box<Statement>),
+    /// Alignment constraint: `align a.left = b.left`
+    Alignment(AlignmentDecl),
 }
 
 /// Shape declaration
@@ -175,6 +178,8 @@ pub enum StyleKey {
     Height,
     /// Routing mode for connections (direct or orthogonal)
     Routing,
+    /// Role modifier for shape positioning (e.g., `role: label`)
+    Role,
     Custom(String),
 }
 
@@ -185,4 +190,205 @@ pub enum StyleValue {
     Number { value: f64, unit: Option<String> },
     String(String),
     Keyword(String),
+    /// Identifier reference (for `[label: my_shape]` syntax)
+    Identifier(Identifier),
+}
+
+// ============================================
+// Alignment Types (Feature 004)
+// ============================================
+
+/// Axis type for alignment compatibility
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Axis {
+    Horizontal,
+    Vertical,
+}
+
+/// Alignment edge on an element's bounding box
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Edge {
+    // Horizontal axis (affects x-coordinate)
+    Left,
+    HorizontalCenter,
+    Right,
+    // Vertical axis (affects y-coordinate)
+    Top,
+    VerticalCenter,
+    Bottom,
+}
+
+impl Edge {
+    /// Returns true if this edge is horizontal (affects x-position)
+    pub fn is_horizontal(&self) -> bool {
+        matches!(self, Edge::Left | Edge::HorizontalCenter | Edge::Right)
+    }
+
+    /// Returns true if this edge is vertical (affects y-position)
+    pub fn is_vertical(&self) -> bool {
+        matches!(self, Edge::Top | Edge::VerticalCenter | Edge::Bottom)
+    }
+
+    /// Get axis type for compatibility checking
+    pub fn axis(&self) -> Axis {
+        if self.is_horizontal() {
+            Axis::Horizontal
+        } else {
+            Axis::Vertical
+        }
+    }
+}
+
+/// Path to an element through the group hierarchy
+/// Examples: "my_element", "group1.item", "outer.inner.shape"
+#[derive(Debug, Clone, PartialEq)]
+pub struct ElementPath {
+    /// Path segments (identifiers separated by dots)
+    pub segments: Vec<Spanned<Identifier>>,
+}
+
+impl ElementPath {
+    /// Create a simple path (single segment)
+    pub fn simple(id: Identifier, span: Span) -> Self {
+        Self {
+            segments: vec![Spanned::new(id, span)],
+        }
+    }
+
+    /// Get the final segment (leaf element name)
+    pub fn leaf(&self) -> &Identifier {
+        &self.segments.last().expect("ElementPath must have at least one segment").node
+    }
+
+    /// Check if this is a simple (single-segment) path
+    pub fn is_simple(&self) -> bool {
+        self.segments.len() == 1
+    }
+}
+
+impl std::fmt::Display for ElementPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let path_str: Vec<&str> = self.segments.iter().map(|s| s.node.as_str()).collect();
+        write!(f, "{}", path_str.join("."))
+    }
+}
+
+/// A specific alignment anchor point
+#[derive(Debug, Clone, PartialEq)]
+pub struct AlignmentAnchor {
+    /// Path to the element
+    pub element: Spanned<ElementPath>,
+    /// Edge of the element to align
+    pub edge: Spanned<Edge>,
+}
+
+/// Alignment constraint: aligns edges of multiple elements
+/// Example: `align a.left = b.left = c.left`
+#[derive(Debug, Clone, PartialEq)]
+pub struct AlignmentDecl {
+    /// Anchors to align (at least 2)
+    pub anchors: Vec<AlignmentAnchor>,
+}
+
+impl AlignmentDecl {
+    /// Check that all anchors are on the same axis
+    pub fn is_valid(&self) -> bool {
+        if self.anchors.len() < 2 {
+            return false;
+        }
+        let first_axis = self.anchors[0].edge.node.axis();
+        self.anchors.iter().all(|a| a.edge.node.axis() == first_axis)
+    }
+
+    /// Get the axis of this alignment
+    pub fn axis(&self) -> Option<Axis> {
+        self.anchors.first().map(|a| a.edge.node.axis())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_edge_axis_classification() {
+        assert!(Edge::Left.is_horizontal());
+        assert!(Edge::HorizontalCenter.is_horizontal());
+        assert!(Edge::Right.is_horizontal());
+        assert!(!Edge::Left.is_vertical());
+
+        assert!(Edge::Top.is_vertical());
+        assert!(Edge::VerticalCenter.is_vertical());
+        assert!(Edge::Bottom.is_vertical());
+        assert!(!Edge::Top.is_horizontal());
+
+        assert_eq!(Edge::Left.axis(), Axis::Horizontal);
+        assert_eq!(Edge::Top.axis(), Axis::Vertical);
+    }
+
+    #[test]
+    fn test_element_path_simple() {
+        let path = ElementPath::simple(Identifier::new("foo"), 0..3);
+        assert!(path.is_simple());
+        assert_eq!(path.leaf().as_str(), "foo");
+        assert_eq!(path.to_string(), "foo");
+    }
+
+    #[test]
+    fn test_element_path_nested() {
+        let path = ElementPath {
+            segments: vec![
+                Spanned::new(Identifier::new("group1"), 0..6),
+                Spanned::new(Identifier::new("item"), 7..11),
+                Spanned::new(Identifier::new("child"), 12..17),
+            ],
+        };
+        assert!(!path.is_simple());
+        assert_eq!(path.leaf().as_str(), "child");
+        assert_eq!(path.to_string(), "group1.item.child");
+    }
+
+    #[test]
+    fn test_alignment_decl_validation() {
+        // Valid: two anchors on same axis
+        let valid = AlignmentDecl {
+            anchors: vec![
+                AlignmentAnchor {
+                    element: Spanned::new(ElementPath::simple(Identifier::new("a"), 0..1), 0..1),
+                    edge: Spanned::new(Edge::Left, 2..6),
+                },
+                AlignmentAnchor {
+                    element: Spanned::new(ElementPath::simple(Identifier::new("b"), 9..10), 9..10),
+                    edge: Spanned::new(Edge::Left, 11..15),
+                },
+            ],
+        };
+        assert!(valid.is_valid());
+        assert_eq!(valid.axis(), Some(Axis::Horizontal));
+
+        // Invalid: only one anchor
+        let invalid_single = AlignmentDecl {
+            anchors: vec![AlignmentAnchor {
+                element: Spanned::new(ElementPath::simple(Identifier::new("a"), 0..1), 0..1),
+                edge: Spanned::new(Edge::Left, 2..6),
+            }],
+        };
+        assert!(!invalid_single.is_valid());
+
+        // Mixed axes is still structurally valid (semantic validation happens later)
+        let mixed = AlignmentDecl {
+            anchors: vec![
+                AlignmentAnchor {
+                    element: Spanned::new(ElementPath::simple(Identifier::new("a"), 0..1), 0..1),
+                    edge: Spanned::new(Edge::Left, 2..6),
+                },
+                AlignmentAnchor {
+                    element: Spanned::new(ElementPath::simple(Identifier::new("b"), 9..10), 9..10),
+                    edge: Spanned::new(Edge::Top, 11..14),
+                },
+            ],
+        };
+        // is_valid checks axis consistency
+        assert!(!mixed.is_valid());
+    }
 }

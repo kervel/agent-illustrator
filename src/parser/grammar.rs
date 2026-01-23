@@ -50,10 +50,12 @@ where
     .map_with(|n, e| Spanned::new(n, span_range(&e.span())));
 
     // Style key/value parsers
-    // Note: We need to handle both identifiers AND the Label token (since "label" is now a keyword)
+    // Note: We need to handle keyword tokens explicitly since they're not identifiers
     let style_key = choice((
         // Handle the "label" keyword token explicitly
         just(Token::Label).map_with(|_, e| Spanned::new(StyleKey::Label, span_range(&e.span()))),
+        // Handle the "role" keyword token explicitly
+        just(Token::Role).map_with(|_, e| Spanned::new(StyleKey::Role, span_range(&e.span()))),
         // Handle all other style keys as identifiers
         identifier.map(|id| {
             let key = match id.node.as_str() {
@@ -88,7 +90,47 @@ where
             )
         }),
         string_literal.map(|s| Spanned::new(StyleValue::String(s.node), s.span)),
-        identifier.map(|id| Spanned::new(StyleValue::Keyword(id.node.0), id.span)),
+        // Handle "label" keyword as a keyword value (for [role: label])
+        just(Token::Label).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("label".to_string()), span_range(&e.span()))
+        }),
+        // Handle edge keywords as keyword values (for [label_position: left], etc.)
+        just(Token::Left).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("left".to_string()), span_range(&e.span()))
+        }),
+        just(Token::Right).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("right".to_string()), span_range(&e.span()))
+        }),
+        just(Token::Top).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("top".to_string()), span_range(&e.span()))
+        }),
+        just(Token::Bottom).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("bottom".to_string()), span_range(&e.span()))
+        }),
+        just(Token::HorizontalCenter).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("horizontal_center".to_string()), span_range(&e.span()))
+        }),
+        just(Token::VerticalCenter).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("vertical_center".to_string()), span_range(&e.span()))
+        }),
+        // Identifiers can be either keyword values OR identifier references
+        // Certain common keywords are recognized and stored as Keywords for backward compatibility
+        identifier.map(|id| {
+            let value = match id.node.as_str() {
+                // Common style value keywords (not alignment edges)
+                "center" | "direct" | "orthogonal" | "none" | "auto" |
+                "solid" | "dashed" | "dotted" | "hidden" |
+                "bold" | "italic" | "normal" |
+                "start" | "middle" | "end" => StyleValue::Keyword(id.node.0.clone()),
+                // Color keywords
+                "red" | "green" | "blue" | "black" | "white" | "gray" | "grey" |
+                "yellow" | "orange" | "purple" | "pink" | "cyan" | "magenta" |
+                "transparent" => StyleValue::Keyword(id.node.0.clone()),
+                // Everything else is an identifier reference (for [label: my_shape] syntax)
+                _ => StyleValue::Identifier(id.node),
+            };
+            Spanned::new(value, id.span)
+        }),
     ));
 
     let modifier = style_key
@@ -171,13 +213,58 @@ where
 
     // Constraint declaration
     let constraint_decl = just(Token::Place)
-        .ignore_then(identifier)
+        .ignore_then(identifier.clone())
         .then(position_relation)
-        .then(identifier)
+        .then(identifier.clone())
         .map(|((subject, relation), anchor)| ConstraintDecl {
             subject,
             relation,
             anchor,
+        });
+
+    // Element path parser: identifier { "." identifier }
+    // e.g., "a", "group1.item", "outer.inner.shape"
+    let element_path = identifier
+        .clone()
+        .separated_by(just(Token::Dot))
+        .at_least(1)
+        .collect::<Vec<_>>()
+        .map_with(|segments, e| Spanned::new(ElementPath { segments }, span_range(&e.span())));
+
+    // Edge parser for alignment anchors
+    let edge = choice((
+        just(Token::Left).to(Edge::Left),
+        just(Token::Right).to(Edge::Right),
+        just(Token::Top).to(Edge::Top),
+        just(Token::Bottom).to(Edge::Bottom),
+        just(Token::HorizontalCenter).to(Edge::HorizontalCenter),
+        just(Token::VerticalCenter).to(Edge::VerticalCenter),
+    ))
+    .map_with(|e, extra| Spanned::new(e, span_range(&extra.span())));
+
+    // Alignment anchor: element_path "." edge
+    // e.g., "a.left", "group1.item.horizontal_center"
+    let alignment_anchor = element_path
+        .clone()
+        .then_ignore(just(Token::Dot))
+        .then(edge)
+        .map(|(element, edge)| AlignmentAnchor { element, edge });
+
+    // Alignment declaration: "align" anchor { "=" anchor }
+    // e.g., "align a.left = b.left = c.left"
+    let alignment_decl = just(Token::Align)
+        .ignore_then(alignment_anchor.clone())
+        .then(
+            just(Token::Equals)
+                .ignore_then(alignment_anchor)
+                .repeated()
+                .at_least(1)
+                .collect::<Vec<_>>(),
+        )
+        .map(|(first, rest)| {
+            let mut anchors = vec![first];
+            anchors.extend(rest);
+            AlignmentDecl { anchors }
         });
 
     // Recursive statement parser
@@ -233,6 +320,7 @@ where
 
         // All statements
         choice((
+            alignment_decl.clone().map(Statement::Alignment),
             constraint_decl.clone().map(Statement::Constraint),
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
@@ -494,6 +582,110 @@ mod tests {
                 }
             }
             _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_alignment_simple() {
+        // Simple two-element alignment
+        let doc = parse("align a.left = b.left").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Alignment(a) => {
+                assert_eq!(a.anchors.len(), 2);
+                assert_eq!(a.anchors[0].element.node.leaf().as_str(), "a");
+                assert!(matches!(a.anchors[0].edge.node, Edge::Left));
+                assert_eq!(a.anchors[1].element.node.leaf().as_str(), "b");
+                assert!(matches!(a.anchors[1].edge.node, Edge::Left));
+            }
+            _ => panic!("Expected alignment"),
+        }
+    }
+
+    #[test]
+    fn test_parse_alignment_chain() {
+        // Multi-element alignment chain
+        let doc = parse("align a.top = b.top = c.top").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Alignment(a) => {
+                assert_eq!(a.anchors.len(), 3);
+                for anchor in &a.anchors {
+                    assert!(matches!(anchor.edge.node, Edge::Top));
+                }
+            }
+            _ => panic!("Expected alignment"),
+        }
+    }
+
+    #[test]
+    fn test_parse_alignment_nested_path() {
+        // Alignment with nested element paths
+        let doc = parse("align group1.item.left = group2.other.left").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Alignment(a) => {
+                assert_eq!(a.anchors.len(), 2);
+                // First anchor: group1.item
+                assert_eq!(a.anchors[0].element.node.segments.len(), 2);
+                assert_eq!(a.anchors[0].element.node.segments[0].node.as_str(), "group1");
+                assert_eq!(a.anchors[0].element.node.segments[1].node.as_str(), "item");
+                // Second anchor: group2.other
+                assert_eq!(a.anchors[1].element.node.segments.len(), 2);
+                assert_eq!(a.anchors[1].element.node.segments[0].node.as_str(), "group2");
+                assert_eq!(a.anchors[1].element.node.segments[1].node.as_str(), "other");
+            }
+            _ => panic!("Expected alignment"),
+        }
+    }
+
+    #[test]
+    fn test_parse_alignment_all_edges() {
+        // Test all edge types parse correctly
+        let doc = parse("align a.horizontal_center = b.vertical_center").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Alignment(a) => {
+                assert!(matches!(a.anchors[0].edge.node, Edge::HorizontalCenter));
+                assert!(matches!(a.anchors[1].edge.node, Edge::VerticalCenter));
+            }
+            _ => panic!("Expected alignment"),
+        }
+    }
+
+    #[test]
+    fn test_parse_role_modifier() {
+        // Parse [role: label] modifier
+        let doc = parse(r#"text "Title" [role: label]"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                assert_eq!(s.modifiers.len(), 1);
+                assert!(matches!(s.modifiers[0].node.key.node, StyleKey::Role));
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Keyword(k) => assert_eq!(k, "label"),
+                    _ => panic!("Expected keyword value"),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_label_identifier_reference() {
+        // Parse [label: my_label] where my_label is an identifier reference
+        let doc = parse("a -> b [label: my_label]").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Connection(c) => {
+                assert_eq!(c.modifiers.len(), 1);
+                assert!(matches!(c.modifiers[0].node.key.node, StyleKey::Label));
+                match &c.modifiers[0].node.value.node {
+                    StyleValue::Identifier(id) => assert_eq!(id.as_str(), "my_label"),
+                    _ => panic!("Expected identifier value, got {:?}", c.modifiers[0].node.value.node),
+                }
+            }
+            _ => panic!("Expected connection"),
         }
     }
 }

@@ -65,9 +65,9 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // Layout the inner element - Label positioning is handled by the parent container
             layout_statement(inner, position, config)
         }
-        Statement::Connection(_) | Statement::Constraint(_) => {
+        Statement::Connection(_) | Statement::Constraint(_) | Statement::Alignment(_) => {
             // These are handled separately
-            unreachable!("Connections and constraints should be filtered out")
+            unreachable!("Connections, constraints, and alignments should be filtered out")
         }
     }
 }
