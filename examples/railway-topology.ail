@@ -64,16 +64,9 @@ col diagram {
 
         // Stack: ellipses behind tracks
         stack meso_content {
-            // Ellipses positioned over junction areas
-            // Left junction area: mjA1 at ~66, mjB1 at ~106 -> center ~86
-            // Right junction area: mjA2 at ~232, mjB2 at ~192 -> center ~212
-            // Ellipse width 140 so x = center - 70
+            // Ellipses positioned over junction areas using constraints
             ellipse op1 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 1 (Station)"]
             ellipse op2 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 2 (Station)"]
-            // op1 center should be at ~91, so x=91-70=21
-            // op2 center should be at ~220, so x=220-70=150
-            place op1 [x: -66]
-            place op2 [x: 63]
 
             // Track structure (same as Micro but grayed)
             col meso_tracks [gap: 30] {
@@ -106,6 +99,14 @@ col diagram {
                 mjA1 -- mjB1 [stroke: foreground-3, stroke_width: 2, routing: direct]
                 mjB2 -- mjA2 [stroke: foreground-3, stroke_width: 2, routing: direct]
             }
+
+            // Position ellipses using constraint-based midpoints
+            // op1 centered horizontally between mjA1/mjB1 and vertically between tracks
+            constrain op1.center_x = midpoint(mjA1, mjB1)
+            constrain op1.center_y = midpoint(mtrackA, mtrackB)
+            // op2 centered horizontally between mjA2/mjB2 and vertically between tracks
+            constrain op2.center_x = midpoint(mjA2, mjB2)
+            constrain op2.center_y = midpoint(mtrackA, mtrackB)
         }
     }
 
