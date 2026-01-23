@@ -166,11 +166,12 @@ struct Variable {
 ### Phase 2: Constraint Solver
 
 Options:
-1. **Cassowary** (`cassowary-rs`): Efficient linear constraint solver, used in Apple's Auto Layout
+1. **Kasuari** (`kasuari`): Actively maintained Cassowary implementation, used by Ratatui
 2. **Custom solver**: Simple Gaussian elimination for linear systems
 3. **Z3** (overkill): Full SMT solver
 
-Cassowary is the pragmatic choice - proven, efficient, handles the constraint types we need.
+Kasuari is the pragmatic choice - it's the maintained fork of cassowary-rs (last updated 8 years ago),
+actively used in production by Ratatui for terminal UI layout.
 
 ### Phase 3: Layout Pipeline Refactor
 
@@ -232,5 +233,6 @@ ellipse op1 [contains: mjA1 mjB1, padding: 30]
 ## References
 
 - [Cassowary algorithm](https://constraints.cs.washington.edu/cassowary/)
-- [cassowary-rs](https://crates.io/crates/cassowary)
+- [kasuari](https://github.com/ratatui/kasuari) - Actively maintained Rust implementation
+- [Ratatui layout docs](https://docs.rs/ratatui/latest/ratatui/layout/index.html) - Example usage in production
 - [Apple Auto Layout Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/AutolayoutPG/)
