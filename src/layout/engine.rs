@@ -494,6 +494,7 @@ fn layout_row(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
+                | Statement::Constrain(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -543,6 +544,7 @@ fn layout_column(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
+                | Statement::Constrain(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -586,6 +588,7 @@ fn layout_grid(
                 c.node,
                 Statement::Connection(_)
                     | Statement::Constraint(_)
+                    | Statement::Constrain(_)
                     | Statement::Label(_)
             ) && !has_role_label(&c.node)
         })
@@ -661,6 +664,7 @@ fn layout_stack(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
+                | Statement::Constrain(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
