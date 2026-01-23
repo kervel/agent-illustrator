@@ -13,6 +13,13 @@ The Agent Illustrator project has a working parser that produces an AST from the
 
 The core philosophy is **semantic over geometric**: the DSL describes meaning and relationships, while the layout engine decides exact coordinates. This allows AI agents to describe illustrations declaratively without reasoning about pixel-level positioning.
 
+## Clarifications
+
+### Session 2026-01-23
+
+- Q: When position constraints conflict, how should the system behave? → A: Fail with error (report conflicting constraints and refuse to render)
+- Q: When a connection references an undefined element identifier, should this be caught at layout time or parse time? → A: Layout error (parser accepts it; layout engine validates references)
+
 ## User Scenarios
 
 ### Scenario 1: Render a Simple Illustration
@@ -81,7 +88,9 @@ The system handles nested layouts, computing positions hierarchically while resp
 - `grid`: Children placed in a grid pattern with auto-determined dimensions
 - `stack`: Children placed at the same position (for layering/overlapping)
 
-**FR1.3**: Position constraints (`place X right-of Y`, `place X below Y`, etc.) shall be resolved after initial layout, adjusting element positions to satisfy the constraints.
+**FR1.3**: Position constraints (`place X right-of Y`, `place X below Y`, etc.) shall be resolved after initial layout, adjusting element positions to satisfy the constraints. If constraints conflict (cannot all be satisfied simultaneously), the layout engine shall fail with an error identifying the conflicting constraints.
+
+**FR1.6**: The layout engine shall validate that all element identifiers referenced in connections exist in the document. Missing references shall be reported as layout errors with the undefined identifier and source location.
 
 **FR1.4**: The layout engine shall provide reasonable default sizes for elements that do not specify dimensions.
 
