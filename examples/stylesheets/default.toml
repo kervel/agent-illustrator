@@ -39,3 +39,6 @@ accent-dark = "#1565c0"        # Dark variant
 status-success = "#4caf50"     # Green
 status-warning = "#ff9800"     # Orange
 status-error = "#f44336"       # Red
+
+# Fonts
+font-family = "system-ui, -apple-system, sans-serif"

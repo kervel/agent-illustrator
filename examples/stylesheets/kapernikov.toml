@@ -39,3 +39,6 @@ accent-dark = "#a83a2c"        # Dark accent
 status-success = "#a5d6a7"     # Green
 status-warning = "#ffcc80"     # Orange
 status-error = "#ef9a9a"       # Red
+
+# Fonts
+font-family = "'Segoe UI', Roboto, Arial, sans-serif"
