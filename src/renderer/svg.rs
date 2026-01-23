@@ -77,8 +77,9 @@ impl SvgBuilder {
         // at the marker position. The arrow shape points right (+X), so it will
         // rotate to match the final segment direction (e.g., down for vertical paths).
         // Use fill="context-stroke" so the arrow inherits the line's stroke color.
+        // Use markerUnits="strokeWidth" so arrow size scales with line thickness.
         self.defs.push(format!(
-            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>"#
         ));

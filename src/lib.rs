@@ -149,6 +149,9 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
     // Resolve constraints
     layout::resolve_constraints(&mut result, &doc)?;
 
+    // Resolve alignments
+    layout::resolve_alignments(&mut result, &doc)?;
+
     // Route connections
     layout::route_connections(&mut result, &doc)?;
 

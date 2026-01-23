@@ -102,4 +102,7 @@ col diagram {
     text "Simplification" simp_label [font_size: 11, fill: foreground-3]
     micro_lbl -> meso_lbl [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
     meso_lbl -> macro_lbl [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
+
+    // Align the level labels on the same vertical axis
+    align micro_lbl.horizontal_center = meso_lbl.horizontal_center = macro_lbl.horizontal_center
 }
