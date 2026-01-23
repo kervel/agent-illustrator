@@ -265,6 +265,8 @@ pub enum StyleKey {
     X,
     /// Y position offset (used with place constraints)
     Y,
+    /// Stroke dash pattern (e.g., "4,2" for dashed lines)
+    StrokeDasharray,
     Custom(String),
 }
 

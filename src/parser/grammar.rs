@@ -93,6 +93,7 @@ where
                 "label_position" => StyleKey::LabelPosition,
                 "x" => StyleKey::X,
                 "y" => StyleKey::Y,
+                "stroke_dasharray" => StyleKey::StrokeDasharray,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)

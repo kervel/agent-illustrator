@@ -55,24 +55,56 @@ col diagram {
     }
 
     // === MESO LEVEL ===
+    // Same track structure as Micro, with dashed ellipses for operational points
     group meso {
-        // Label using new [role: label] modifier
         col meso_label [role: label] {
             text "Meso" meso_lbl [font_size: 20, fill: text-1]
             text "OPs + Tracks" [font_size: 12, fill: text-2]
         }
 
-        stack overlay {
-            col meso_tracks {
-                line m1 [stroke: accent-1]
-                line m2 [stroke: accent-1]
-                line m3 [stroke: accent-1]
-                line m4 [stroke: accent-1]
-                line m5 [stroke: accent-1]
-            }
-            row ops [gap: 10] {
-                ellipse op1 [fill: accent-light, opacity: 0.35, label: "OP1"]
-                ellipse op2 [fill: accent-light, opacity: 0.35, label: "OP2"]
+        // Stack: ellipses behind tracks
+        stack meso_content {
+            // Ellipses positioned over junction areas
+            // Left junction area: mjA1 at ~66, mjB1 at ~106 -> center ~86
+            // Right junction area: mjA2 at ~232, mjB2 at ~192 -> center ~212
+            // Ellipse width 140 so x = center - 70
+            ellipse op1 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 1 (Station)"]
+            ellipse op2 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 2 (Station)"]
+            // op1 center should be at ~91, so x=91-70=21
+            // op2 center should be at ~220, so x=220-70=150
+            place op1 [x: -66]
+            place op2 [x: 63]
+
+            // Track structure (same as Micro but grayed)
+            col meso_tracks [gap: 30] {
+                row mtrackA [gap: 80] {
+                    circle ma1 [fill: foreground-3, size: 6]
+                    circle mjA1 [fill: foreground-3, size: 6]
+                    circle mjA2 [fill: foreground-3, size: 6]
+                    circle ma2 [fill: foreground-3, size: 6]
+                }
+                row mtrackB [gap: 80] {
+                    circle mb1 [fill: foreground-3, size: 6]
+                    circle mjB1 [fill: foreground-3, size: 6]
+                    circle mjB2 [fill: foreground-3, size: 6]
+                    circle mb2 [fill: foreground-3, size: 6]
+                }
+
+                // Offset junctions (same as Micro)
+                align mjA1.horizontal_center = mjB1.horizontal_center
+                place mjA1 [x: -40]
+                align mjA2.horizontal_center = mjB2.horizontal_center
+                place mjA2 [x: 40]
+
+                // Track lines (grayed)
+                ma1 -- mjA1 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mjA1 -- mjA2 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mjA2 -- ma2 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mb1 -- mjB1 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mjB1 -- mjB2 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mjB2 -- mb2 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mjA1 -- mjB1 [stroke: foreground-3, stroke_width: 2, routing: direct]
+                mjB2 -- mjA2 [stroke: foreground-3, stroke_width: 2, routing: direct]
             }
         }
     }
@@ -85,10 +117,10 @@ col diagram {
             text "Nodes & Lines" [font_size: 12, fill: text-2]
         }
 
-        row graph [gap: 30] {
-            ellipse n1 [fill: foreground-1, label: "OP1", width: 70, height: 40]
-            ellipse n2 [fill: foreground-1, label: "OP2", width: 70, height: 40]
-            n1 -- n2 [stroke: accent-1, stroke_width: 3, label: "Line Section", routing: direct]
+        row graph [gap: 100] {
+            circle n1 [fill: accent-1, size: 50, label: "OP 1"]
+            circle n2 [fill: accent-1, size: 50, label: "OP 2"]
+            n1 -- n2 [stroke: accent-1, stroke_width: 3, label: "Section of Line (SoL)", routing: direct]
         }
     }
 

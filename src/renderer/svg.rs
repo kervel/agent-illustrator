@@ -717,6 +717,9 @@ fn format_styles(styles: &ResolvedStyles) -> String {
     if let Some(sw) = styles.stroke_width {
         parts.push(format!(r#" stroke-width="{}""#, sw));
     }
+    if let Some(dash) = &styles.stroke_dasharray {
+        parts.push(format!(r#" stroke-dasharray="{}""#, dash));
+    }
     if let Some(op) = styles.opacity {
         if op < 1.0 {
             parts.push(format!(r#" opacity="{}""#, op));
@@ -777,6 +780,7 @@ mod tests {
             fill: Some("#ff0000".to_string()),
             stroke: Some("#000000".to_string()),
             stroke_width: Some(2.0),
+            stroke_dasharray: Some("4,2".to_string()),
             opacity: Some(0.5),
             font_size: None,
             css_classes: vec![],
@@ -785,6 +789,7 @@ mod tests {
         assert!(result.contains(r##"fill="#ff0000""##));
         assert!(result.contains(r##"stroke="#000000""##));
         assert!(result.contains(r#"stroke-width="2""#));
+        assert!(result.contains(r#"stroke-dasharray="4,2""#));
         assert!(result.contains(r#"opacity="0.5""#));
     }
 

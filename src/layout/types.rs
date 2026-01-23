@@ -109,6 +109,7 @@ pub struct ResolvedStyles {
     pub fill: Option<String>,
     pub stroke: Option<String>,
     pub stroke_width: Option<f64>,
+    pub stroke_dasharray: Option<String>,
     pub opacity: Option<f64>,
     pub font_size: Option<f64>,
     pub css_classes: Vec<String>,
@@ -121,6 +122,7 @@ impl ResolvedStyles {
             fill: Some("#f0f0f0".to_string()),
             stroke: Some("#333333".to_string()),
             stroke_width: Some(2.0),
+            stroke_dasharray: None,
             opacity: Some(1.0),
             font_size: Some(14.0),
             css_classes: vec![],
@@ -145,6 +147,20 @@ impl ResolvedStyles {
                 StyleKey::StrokeWidth => {
                     if let StyleValue::Number { value, .. } = &modifier.node.value.node {
                         styles.stroke_width = Some(*value);
+                    }
+                }
+                StyleKey::StrokeDasharray => {
+                    // Accept string like "4,2" or keyword like "dashed"
+                    if let StyleValue::String(s) = &modifier.node.value.node {
+                        styles.stroke_dasharray = Some(s.clone());
+                    } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
+                        // Convert keywords to dash patterns
+                        let pattern = match k.as_str() {
+                            "dashed" => "8,4",
+                            "dotted" => "2,2",
+                            _ => k.as_str(),
+                        };
+                        styles.stroke_dasharray = Some(pattern.to_string());
                     }
                 }
                 StyleKey::Opacity => {
@@ -216,6 +232,7 @@ impl ResolvedStyles {
             fill: other.fill.clone().or_else(|| self.fill.clone()),
             stroke: other.stroke.clone().or_else(|| self.stroke.clone()),
             stroke_width: other.stroke_width.or(self.stroke_width),
+            stroke_dasharray: other.stroke_dasharray.clone().or_else(|| self.stroke_dasharray.clone()),
             opacity: other.opacity.or(self.opacity),
             font_size: other.font_size.or(self.font_size),
             css_classes: {
