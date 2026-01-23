@@ -3,7 +3,12 @@
 col diagram {
     // === MICRO LEVEL ===
     group micro {
-        label { text "Micro" micro_lbl [font_size: 18] }
+        label {
+            col micro_label {
+                text "Micro" micro_lbl [font_size: 20, fill: #333333]
+                text "Detailed tracks" [font_size: 12, fill: #888888]
+            }
+        }
 
         row tracks [gap: 50] {
             col entry [gap: 35] {
@@ -55,7 +60,12 @@ col diagram {
 
     // === MESO LEVEL ===
     group meso {
-        label { text "Meso" meso_lbl [font_size: 18] }
+        label {
+            col meso_label {
+                text "Meso" meso_lbl [font_size: 20, fill: #333333]
+                text "OPs + Tracks" [font_size: 12, fill: #888888]
+            }
+        }
 
         stack overlay {
             col meso_tracks {
@@ -74,7 +84,12 @@ col diagram {
 
     // === MACRO LEVEL ===
     group macro {
-        label { text "Macro" macro_lbl [font_size: 18] }
+        label {
+            col macro_label {
+                text "Macro" macro_lbl [font_size: 20, fill: #333333]
+                text "Nodes & Lines" [font_size: 12, fill: #888888]
+            }
+        }
 
         row graph [gap: 30] {
             ellipse n1 [fill: #2E8B57, label: "OP1", width: 70, height: 40]
@@ -83,7 +98,7 @@ col diagram {
         }
     }
 
-    // Aggregation arrows between the text labels
-    micro_lbl -> meso_lbl [label: "Aggregation", stroke: #555555]
-    meso_lbl -> macro_lbl [label: "Aggregation", stroke: #555555]
+    // Aggregation arrows - lighter gray color
+    micro_lbl -> meso_lbl [label: "Aggregation", stroke: #AAAAAA, routing: direct]
+    meso_lbl -> macro_lbl [label: "Simplification", stroke: #AAAAAA, routing: direct]
 }

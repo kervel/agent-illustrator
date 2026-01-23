@@ -115,9 +115,27 @@ pub fn route_connection(
     let start = attachment_point(from_bounds, from_edge);
     let end = attachment_point(to_bounds, to_edge);
 
-    // For direct routing, just return a straight line
+    // For direct routing, return a straight line with snap-to-axis logic
     if mode == RoutingMode::Direct {
-        return vec![start, end];
+        let dx = end.x - start.x;
+        let dy = end.y - start.y;
+
+        // Snap to vertical if almost vertical (dx is small relative to dy)
+        // Snap to horizontal if almost horizontal (dy is small relative to dx)
+        // Threshold of 0.1 corresponds to ~5.7 degrees from axis
+        let snap_threshold = 0.1;
+
+        let snapped_end = if dy.abs() > 0.0 && dx.abs() < dy.abs() * snap_threshold {
+            // Almost vertical - snap to vertical
+            Point::new(start.x, end.y)
+        } else if dx.abs() > 0.0 && dy.abs() < dx.abs() * snap_threshold {
+            // Almost horizontal - snap to horizontal
+            Point::new(end.x, start.y)
+        } else {
+            end
+        };
+
+        return vec![start, snapped_end];
     }
 
     // Orthogonal routing: create paths with horizontal/vertical segments only
@@ -266,22 +284,37 @@ fn extract_connection_label(
         }
     })?;
 
-    // Position at midpoint of path
+    // Calculate midpoint of path
     let mid_idx = path.len() / 2;
-    let position = if path.len() >= 2 {
+    let (mid_x, mid_y, anchor) = if path.len() >= 2 {
+        let start = path[0];
+        let end = path[path.len() - 1];
         let p1 = path[mid_idx.saturating_sub(1)];
         let p2 = path[mid_idx.min(path.len() - 1)];
-        Point::new((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0 - 10.0)
+        let mid_x = (p1.x + p2.x) / 2.0;
+        let mid_y = (p1.y + p2.y) / 2.0;
+
+        // Determine if path is primarily vertical or horizontal
+        let dx = (end.x - start.x).abs();
+        let dy = (end.y - start.y).abs();
+
+        if dy > dx {
+            // Vertical path: position label to the right
+            (mid_x + 10.0, mid_y, TextAnchor::Start)
+        } else {
+            // Horizontal path: position label above
+            (mid_x, mid_y - 10.0, TextAnchor::Middle)
+        }
     } else if !path.is_empty() {
-        path[0]
+        (path[0].x, path[0].y, TextAnchor::Middle)
     } else {
-        Point::new(0.0, 0.0)
+        (0.0, 0.0, TextAnchor::Middle)
     };
 
     Some(LabelLayout {
         text,
-        position,
-        anchor: TextAnchor::Middle,
+        position: Point::new(mid_x, mid_y),
+        anchor,
     })
 }
 
@@ -397,5 +430,85 @@ mod tests {
     #[test]
     fn test_routing_mode_default_is_orthogonal() {
         assert_eq!(RoutingMode::default(), RoutingMode::Orthogonal);
+    }
+
+    #[test]
+    fn test_direct_routing_snaps_to_vertical() {
+        // Two boxes that are almost vertically aligned (small x offset)
+        // Box centers: (25, 25) and (30, 225) - dx=5, dy=200
+        // Ratio: 5/200 = 0.025 < 0.1, should snap to vertical
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(5.0, 200.0, 50.0, 50.0);
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        // The end point should be snapped to have the same x as the start
+        assert_eq!(
+            path[0].x, path[1].x,
+            "Almost-vertical line should snap to perfectly vertical"
+        );
+    }
+
+    #[test]
+    fn test_direct_routing_snaps_to_horizontal() {
+        // Two boxes that are almost horizontally aligned (small y offset)
+        // Box centers at same height, slight vertical offset
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(200.0, 5.0, 50.0, 50.0);
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        // The end point should be snapped to have the same y as the start
+        assert_eq!(
+            path[0].y, path[1].y,
+            "Almost-horizontal line should snap to perfectly horizontal"
+        );
+    }
+
+    #[test]
+    fn test_direct_routing_preserves_diagonal() {
+        // Two boxes at a significant diagonal angle (more than ~5.7 degrees)
+        // dx=150, dy=100, ratio = 100/150 = 0.67 > 0.1, should NOT snap
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        // Both x and y should be different (diagonal line preserved)
+        assert_ne!(
+            path[0].x, path[1].x,
+            "Diagonal line should not snap horizontally"
+        );
+        assert_ne!(
+            path[0].y, path[1].y,
+            "Diagonal line should not snap vertically"
+        );
+    }
+
+    #[test]
+    fn test_direct_routing_perfect_vertical_unchanged() {
+        // Two boxes perfectly vertically aligned
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(0.0, 200.0, 50.0, 50.0);
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        assert_eq!(path[0].x, path[1].x, "Perfectly vertical should stay vertical");
+    }
+
+    #[test]
+    fn test_direct_routing_perfect_horizontal_unchanged() {
+        // Two boxes perfectly horizontally aligned
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(200.0, 0.0, 50.0, 50.0);
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        assert_eq!(path[0].y, path[1].y, "Perfectly horizontal should stay horizontal");
     }
 }

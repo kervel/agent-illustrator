@@ -280,16 +280,11 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         let label_x = bounds.x + (bounds.width - label_element.bounds.width) / 2.0;
         let label_y = bounds.y - label_element.bounds.height - 5.0;
 
-        // Create a positioned copy of the label element and add it to children
+        // Create a positioned copy of the label element and recursively offset all children
         let mut positioned_label = label_element.clone();
-        positioned_label.bounds.x = label_x;
-        positioned_label.bounds.y = label_y;
-
-        // Update label position if it has one (e.g., text shapes)
-        if let Some(ref mut lbl) = positioned_label.label {
-            lbl.position.x = label_x + positioned_label.bounds.width / 2.0;
-            lbl.position.y = label_y + positioned_label.bounds.height / 2.0;
-        }
+        let dx = label_x - positioned_label.bounds.x;
+        let dy = label_y - positioned_label.bounds.y;
+        offset_element(&mut positioned_label, dx, dy);
 
         children.push(positioned_label);
 
@@ -334,16 +329,11 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         let label_x = bounds.x - label_element.bounds.width - 10.0;
         let label_y = bounds.y + (bounds.height - label_element.bounds.height) / 2.0;
 
-        // Create a positioned copy of the label element and add it to children
+        // Create a positioned copy of the label element and recursively offset all children
         let mut positioned_label = label_element.clone();
-        positioned_label.bounds.x = label_x;
-        positioned_label.bounds.y = label_y;
-
-        // Update label position if it has one (e.g., text shapes)
-        if let Some(ref mut lbl) = positioned_label.label {
-            lbl.position.x = label_x + positioned_label.bounds.width / 2.0;
-            lbl.position.y = label_y + positioned_label.bounds.height / 2.0;
-        }
+        let dx = label_x - positioned_label.bounds.x;
+        let dy = label_y - positioned_label.bounds.y;
+        offset_element(&mut positioned_label, dx, dy);
 
         children.push(positioned_label);
 
