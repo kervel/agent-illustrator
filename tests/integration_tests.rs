@@ -362,12 +362,12 @@ fn test_railway_topology_smoke_test() {
             // - agg_label text
             // - simp_label text
             // - 2 connections
-            // - 2 alignment statements (containers + text elements)
-            // = 9 children
+            // - 4 constrain statements (2 for labels, 2 for text)
+            // = 11 children
             assert_eq!(
                 layout.children.len(),
-                9,
-                "Col layout should have 9 children"
+                11,
+                "Col layout should have 11 children"
             );
         }
         _ => panic!("Expected top-level layout"),
@@ -1163,34 +1163,4 @@ fn test_existing_row_layout_still_works() {
     assert!(svg.contains("<rect"), "Should contain rect elements");
 }
 
-#[test]
-fn test_existing_align_statement_still_works() {
-    use agent_illustrator::render;
-
-    // Verify that existing align statements are preserved
-    let input = r#"
-        rect a
-        rect b
-        align a.left = b.left
-    "#;
-
-    let svg = render(input).expect("Align statement should still work");
-    assert!(svg.contains("<svg"), "Output should be valid SVG");
-}
-
-#[test]
-fn test_mixed_constrain_and_align_statements() {
-    use agent_illustrator::render;
-
-    // Test that both constrain and align statements can coexist
-    let input = r#"
-        rect a [width: 100]
-        rect b [width: 80]
-        rect c [width: 60]
-        align a.left = b.left
-        constrain c.left = a.left
-    "#;
-
-    let svg = render(input).expect("Mixed constrain and align should work");
-    assert!(svg.contains("<svg"), "Output should be valid SVG");
-}
+// align keyword has been removed - use constrain instead

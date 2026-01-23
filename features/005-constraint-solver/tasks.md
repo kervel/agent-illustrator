@@ -1380,7 +1380,7 @@ fn test_alignment_via_constrain() {
 
 ---
 
-### T028: Implement unsatisfiable constraint error messages
+### T028: Implement unsatisfiable constraint error messages [X]
 
 **File**: `src/layout/solver.rs`
 **Priority**: P3
@@ -1410,38 +1410,15 @@ impl ConstraintSolver {
 
 ---
 
-### T029: Convert `align` statements to constraints internally [P]
+### T029: Convert `align` statements to constraints internally [SKIP]
+
+**Note**: Skipped - breaking change is acceptable. `align` keyword support can be removed.
 
 **File**: `src/layout/collector.rs`
 **Priority**: P3
 **Depends**: T028
 
-Ensure `align` statements are converted to equality constraints:
-
-```rust
-fn collect_alignment(&mut self, alignment: &AlignmentDecl, span: &Span) {
-    // Emit deprecation warning (if warnings enabled)
-    // eprintln!("Warning: 'align' is deprecated, use 'constrain' instead");
-
-    // Convert each anchor pair to an equality constraint
-    for i in 1..alignment.anchors.len() {
-        let prev = &alignment.anchors[i - 1];
-        let curr = &alignment.anchors[i];
-
-        let prev_var = self.edge_to_variable(&prev.element, &prev.edge);
-        let curr_var = self.edge_to_variable(&curr.element, &curr.edge);
-
-        self.constraints.push(LayoutConstraint::Equal {
-            left: prev_var,
-            right: curr_var,
-            offset: 0.0,
-            source: ConstraintSource::user(span.clone(), "align (deprecated, use constrain)"),
-        });
-    }
-}
-```
-
-**Acceptance**: `align` syntax still works via constraint conversion.
+**Acceptance**: N/A - breaking change accepted.
 
 ---
 

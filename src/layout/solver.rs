@@ -95,8 +95,6 @@ pub enum ConstraintOrigin {
     UserDefined,
     /// Generated from layout container (row, col, etc.)
     LayoutContainer,
-    /// Generated from align statement
-    Alignment,
     /// Generated from intrinsic properties (text size, etc.)
     Intrinsic,
 }
@@ -126,15 +124,6 @@ impl ConstraintSource {
             span,
             description: description.into(),
             origin: ConstraintOrigin::LayoutContainer,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn alignment(span: Span, description: impl Into<String>) -> Self {
-        Self {
-            span,
-            description: description.into(),
-            origin: ConstraintOrigin::Alignment,
         }
     }
 

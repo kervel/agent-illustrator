@@ -52,9 +52,7 @@ pub enum Token {
     #[token("inside")]
     Inside,
 
-    // Alignment keywords
-    #[token("align")]
-    Align,
+    // Edge keywords (used in constraints)
     #[token("left")]
     Left,
     #[token("right")]
@@ -331,38 +329,19 @@ mod tests {
     }
 
     #[test]
-    fn test_alignment_keywords() {
-        let tokens: Vec<_> = lex("align left right top bottom horizontal_center vertical_center")
+    fn test_edge_keywords() {
+        let tokens: Vec<_> = lex("left right top bottom horizontal_center vertical_center")
             .map(|(t, _)| t)
             .collect();
         assert_eq!(
             tokens,
             vec![
-                Token::Align,
                 Token::Left,
                 Token::Right,
                 Token::Top,
                 Token::Bottom,
                 Token::HorizontalCenter,
                 Token::VerticalCenter,
-            ]
-        );
-    }
-
-    #[test]
-    fn test_alignment_syntax() {
-        let tokens: Vec<_> = lex("align a.left = b.right").map(|(t, _)| t).collect();
-        assert_eq!(
-            tokens,
-            vec![
-                Token::Align,
-                Token::Ident("a".to_string()),
-                Token::Dot,
-                Token::Left,
-                Token::Equals,
-                Token::Ident("b".to_string()),
-                Token::Dot,
-                Token::Right,
             ]
         );
     }

@@ -32,21 +32,13 @@ pub enum LayoutError {
     #[error("invalid layout for element '{element}': {reason}")]
     InvalidLayout { element: String, reason: String },
 
-    /// Element path not found during alignment resolution
+    /// Element path not found during constraint resolution
     #[error("element path '{path}' not found")]
     PathNotFound {
         path: String,
         span: Span,
         suggestions: Vec<String>,
     },
-
-    /// Incompatible edge types in alignment (mixing horizontal and vertical)
-    #[error("incompatible edge types in alignment: cannot mix {}", edges.join(" and "))]
-    IncompatibleEdges { edges: Vec<String>, span: Span },
-
-    /// Circular alignment dependency
-    #[error("circular alignment dependency: {}", elements.join(" -> "))]
-    CircularAlignment { elements: Vec<String> },
 
     /// Constraint solver error
     #[error("constraint solver error: {0}")]
@@ -89,7 +81,6 @@ impl LayoutError {
         match self {
             Self::UndefinedIdentifier { span, .. } => Some(span),
             Self::PathNotFound { span, .. } => Some(span),
-            Self::IncompatibleEdges { span, .. } => Some(span),
             _ => None,
         }
     }
@@ -110,16 +101,6 @@ impl LayoutError {
             span,
             suggestions,
         }
-    }
-
-    /// Create an incompatible edges error
-    pub fn incompatible_edges(edges: Vec<String>, span: Span) -> Self {
-        Self::IncompatibleEdges { edges, span }
-    }
-
-    /// Create a circular alignment error
-    pub fn circular_alignment(elements: Vec<String>) -> Self {
-        Self::CircularAlignment { elements }
     }
 
     /// Create a solver error from a SolverError

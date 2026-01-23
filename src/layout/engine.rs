@@ -18,10 +18,9 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
 
     for stmt in &doc.statements {
         match &stmt.node {
-            // Skip connections, constraints, alignments, constrain, and standalone labels at document root
+            // Skip connections, constraints, constrain, and standalone labels at document root
             Statement::Connection(_)
             | Statement::Constraint(_)
-            | Statement::Alignment(_)
             | Statement::Constrain(_)
             | Statement::Label(_) => continue,
             _ => {
@@ -143,10 +142,9 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
         }
         Statement::Connection(_)
         | Statement::Constraint(_)
-        | Statement::Alignment(_)
         | Statement::Constrain(_) => {
             // These are handled separately
-            unreachable!("Connections, constraints, and alignments should be filtered out")
+            unreachable!("Connections and constraints should be filtered out")
         }
     }
 }
@@ -490,14 +488,13 @@ fn layout_row(
     let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
-        // Skip connections, constraints, alignments, and labels (labels are handled separately by parent)
+        // Skip connections, constraints, and labels (labels are handled separately by parent)
         // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
                 | Statement::Label(_)
-                | Statement::Alignment(_)
         ) || has_role_label(&child.node)
         {
             continue;
@@ -540,14 +537,13 @@ fn layout_column(
     let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
-        // Skip connections, constraints, alignments, and labels (labels are handled separately by parent)
+        // Skip connections, constraints, and labels (labels are handled separately by parent)
         // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
                 | Statement::Label(_)
-                | Statement::Alignment(_)
         ) || has_role_label(&child.node)
         {
             continue;
@@ -581,7 +577,7 @@ fn layout_grid(
     position: Point,
     config: &LayoutConfig,
 ) -> (Vec<ElementLayout>, BoundingBox) {
-    // Filter out connections, constraints, alignments, and labels (labels are handled separately by parent)
+    // Filter out connections, constraints, and labels (labels are handled separately by parent)
     // Labels include both Statement::Label and elements with [role: label] modifier
     let filtered: Vec<_> = children
         .iter()
@@ -591,7 +587,6 @@ fn layout_grid(
                 Statement::Connection(_)
                     | Statement::Constraint(_)
                     | Statement::Label(_)
-                    | Statement::Alignment(_)
             ) && !has_role_label(&c.node)
         })
         .collect();
@@ -660,14 +655,13 @@ fn layout_stack(
     let mut max_height = 0.0f64;
 
     for child in children {
-        // Skip connections, constraints, alignments, and labels (labels are handled separately by parent)
+        // Skip connections, constraints, and labels (labels are handled separately by parent)
         // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
                 | Statement::Label(_)
-                | Statement::Alignment(_)
         ) || has_role_label(&child.node)
         {
             continue;
@@ -935,126 +929,8 @@ fn are_conflicting(a: &PositionRelation, b: &PositionRelation) -> bool {
 }
 
 // ============================================================================
-// Alignment Resolution
+// Element Shifting Helpers
 // ============================================================================
-
-/// Resolve alignment constraints after initial layout
-pub fn resolve_alignments(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
-    // Collect all alignment declarations from the document
-    let alignments = collect_alignments(&doc.statements);
-
-    for alignment in alignments {
-        apply_alignment(result, &alignment)?;
-    }
-
-    // Recompute bounds after alignment resolution
-    result.compute_bounds();
-    Ok(())
-}
-
-/// Collect all alignment declarations from statements (including nested)
-fn collect_alignments(stmts: &[Spanned<Statement>]) -> Vec<&AlignmentDecl> {
-    let mut alignments = vec![];
-
-    for stmt in stmts {
-        match &stmt.node {
-            Statement::Alignment(a) => alignments.push(a),
-            Statement::Layout(l) => {
-                alignments.extend(collect_alignments(&l.children));
-            }
-            Statement::Group(g) => {
-                alignments.extend(collect_alignments(&g.children));
-            }
-            _ => {}
-        }
-    }
-
-    alignments
-}
-
-/// Apply a single alignment constraint
-fn apply_alignment(
-    result: &mut LayoutResult,
-    alignment: &AlignmentDecl,
-) -> Result<(), LayoutError> {
-    // Validate that all anchors are on the same axis
-    if !alignment.is_valid() {
-        let edges: Vec<String> = alignment
-            .anchors
-            .iter()
-            .map(|a| format!("{:?}", a.edge.node))
-            .collect();
-        return Err(LayoutError::IncompatibleEdges {
-            edges,
-            span: alignment.anchors[0].edge.span.clone(),
-        });
-    }
-
-    // Resolve the first anchor to get the reference coordinate
-    let first_anchor = &alignment.anchors[0];
-    let first_elem_name = resolve_element_path(&first_anchor.element.node, result)?;
-    let first_elem = result
-        .get_element_by_name(&first_elem_name)
-        .ok_or_else(|| {
-            LayoutError::undefined(&first_elem_name, first_anchor.element.span.clone(), vec![])
-        })?;
-    let reference_coord = get_edge_coordinate(&first_elem.bounds, &first_anchor.edge.node);
-
-    // Apply alignment to all other anchors
-    for anchor in &alignment.anchors[1..] {
-        let elem_name = resolve_element_path(&anchor.element.node, result)?;
-        let current_coord = {
-            let elem = result.get_element_by_name(&elem_name).ok_or_else(|| {
-                LayoutError::undefined(&elem_name, anchor.element.span.clone(), vec![])
-            })?;
-            get_edge_coordinate(&elem.bounds, &anchor.edge.node)
-        };
-
-        // Calculate the delta needed to align
-        let delta = reference_coord - current_coord;
-
-        // Shift the element (and its children recursively)
-        let axis = anchor.edge.node.axis();
-        shift_element_by_name(result, &elem_name, delta, axis)?;
-    }
-
-    Ok(())
-}
-
-/// Resolve an element path to an element name
-/// For now, only handles simple (single-segment) paths
-/// Full hierarchical path resolution will be implemented in Phase 7
-fn resolve_element_path(path: &ElementPath, result: &LayoutResult) -> Result<String, LayoutError> {
-    if path.is_simple() {
-        // Simple case: just return the leaf name
-        Ok(path.leaf().0.clone())
-    } else {
-        // For now, try the leaf name - full path resolution will be added later
-        // This works because elements are indexed by their ID in the LayoutResult
-        let leaf_name = path.leaf().0.clone();
-        if result.get_element_by_name(&leaf_name).is_some() {
-            Ok(leaf_name)
-        } else {
-            Err(LayoutError::PathNotFound {
-                path: path.to_string(),
-                span: path.segments.last().map(|s| s.span.clone()).unwrap_or(0..0),
-                suggestions: vec![],
-            })
-        }
-    }
-}
-
-/// Get the coordinate value for an edge of a bounding box
-fn get_edge_coordinate(bounds: &BoundingBox, edge: &Edge) -> f64 {
-    match edge {
-        Edge::Left => bounds.x,
-        Edge::Right => bounds.right(),
-        Edge::HorizontalCenter => bounds.x + bounds.width / 2.0,
-        Edge::Top => bounds.y,
-        Edge::Bottom => bounds.bottom(),
-        Edge::VerticalCenter => bounds.y + bounds.height / 2.0,
-    }
-}
 
 /// Shift an element by name in the layout result
 fn shift_element_by_name(
@@ -1321,136 +1197,6 @@ fn get_element_property(
 mod tests {
     use super::*;
     use crate::parser::parse;
-
-    #[test]
-    fn test_alignment_horizontal_left() {
-        // Test horizontal left edge alignment
-        let doc = parse(
-            r#"
-            rect a
-            rect b
-            align a.left = b.left
-        "#,
-        )
-        .unwrap();
-        let config = LayoutConfig::default();
-        let mut result = compute(&doc, &config).unwrap();
-
-        // Before alignment, elements are stacked vertically with different x positions
-        // After alignment, their left edges should be equal
-        resolve_alignments(&mut result, &doc).unwrap();
-
-        let a = result.get_element_by_name("a").unwrap();
-        let b = result.get_element_by_name("b").unwrap();
-
-        // Left edges should be aligned (same x coordinate)
-        assert_eq!(a.bounds.x, b.bounds.x, "Left edges should be aligned");
-    }
-
-    #[test]
-    fn test_alignment_horizontal_center() {
-        // Test horizontal center alignment
-        let doc = parse(
-            r#"
-            rect a [width: 100]
-            rect b [width: 50]
-            align a.horizontal_center = b.horizontal_center
-        "#,
-        )
-        .unwrap();
-        let config = LayoutConfig::default();
-        let mut result = compute(&doc, &config).unwrap();
-
-        resolve_alignments(&mut result, &doc).unwrap();
-
-        let a = result.get_element_by_name("a").unwrap();
-        let b = result.get_element_by_name("b").unwrap();
-
-        // Horizontal centers should be aligned
-        let a_center = a.bounds.x + a.bounds.width / 2.0;
-        let b_center = b.bounds.x + b.bounds.width / 2.0;
-        assert!(
-            (a_center - b_center).abs() < 0.001,
-            "Horizontal centers should be aligned: {} vs {}",
-            a_center,
-            b_center
-        );
-    }
-
-    #[test]
-    fn test_alignment_vertical_top() {
-        // Test vertical top edge alignment
-        let doc = parse(
-            r#"
-            row {
-                rect a
-                rect b
-            }
-            align a.top = b.top
-        "#,
-        )
-        .unwrap();
-        let config = LayoutConfig::default();
-        let mut result = compute(&doc, &config).unwrap();
-
-        resolve_alignments(&mut result, &doc).unwrap();
-
-        let a = result.get_element_by_name("a").unwrap();
-        let b = result.get_element_by_name("b").unwrap();
-
-        // Top edges should be aligned (same y coordinate)
-        assert_eq!(a.bounds.y, b.bounds.y, "Top edges should be aligned");
-    }
-
-    #[test]
-    fn test_alignment_chain() {
-        // Test aligning multiple elements in a chain
-        let doc = parse(
-            r#"
-            rect a
-            rect b
-            rect c
-            align a.left = b.left = c.left
-        "#,
-        )
-        .unwrap();
-        let config = LayoutConfig::default();
-        let mut result = compute(&doc, &config).unwrap();
-
-        resolve_alignments(&mut result, &doc).unwrap();
-
-        let a = result.get_element_by_name("a").unwrap();
-        let b = result.get_element_by_name("b").unwrap();
-        let c = result.get_element_by_name("c").unwrap();
-
-        // All left edges should be aligned
-        assert_eq!(
-            a.bounds.x, b.bounds.x,
-            "a and b left edges should be aligned"
-        );
-        assert_eq!(
-            b.bounds.x, c.bounds.x,
-            "b and c left edges should be aligned"
-        );
-    }
-
-    #[test]
-    fn test_alignment_incompatible_edges_error() {
-        // Test that mixing horizontal and vertical edges produces an error
-        let doc = parse(
-            r#"
-            rect a
-            rect b
-            align a.left = b.top
-        "#,
-        )
-        .unwrap();
-        let config = LayoutConfig::default();
-        let mut result = compute(&doc, &config).unwrap();
-
-        let err = resolve_alignments(&mut result, &doc);
-        assert!(err.is_err(), "Should error on incompatible edge types");
-    }
 
     #[test]
     fn test_layout_single_shape() {

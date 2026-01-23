@@ -278,14 +278,13 @@ impl ConstraintCollector {
     }
 
     // ========================================================================
-    // T023: User constraint collection (constrain and align statements)
+    // T023: User constraint collection (constrain statements)
     // ========================================================================
 
     fn collect_user_constraints(&mut self, stmts: &[Spanned<Statement>]) {
         for stmt in stmts {
             match &stmt.node {
                 Statement::Constrain(c) => self.collect_constrain(&c.expr, &stmt.span),
-                Statement::Alignment(a) => self.collect_alignment(a, &stmt.span),
                 Statement::Layout(l) => self.collect_user_constraints(&l.children),
                 Statement::Group(g) => self.collect_user_constraints(&g.children),
                 _ => {}
@@ -427,32 +426,6 @@ impl ConstraintCollector {
         }
     }
 
-    fn collect_alignment(&mut self, alignment: &AlignmentDecl, span: &Span) {
-        // Convert alignment anchors to equality constraints
-        // Each pair of consecutive anchors becomes an equality constraint
-        for i in 1..alignment.anchors.len() {
-            let prev = &alignment.anchors[i - 1];
-            let curr = &alignment.anchors[i];
-
-            let prev_var = self.edge_to_variable(&prev.element.node, prev.edge.node);
-            let curr_var = self.edge_to_variable(&curr.element.node, curr.edge.node);
-
-            self.constraints.push(LayoutConstraint::Equal {
-                left: curr_var,
-                right: prev_var,
-                offset: 0.0,
-                source: ConstraintSource {
-                    span: span.clone(),
-                    description: format!(
-                        "align {}.{:?} = {}.{:?}",
-                        curr.element.node, curr.edge.node, prev.element.node, prev.edge.node
-                    ),
-                    origin: ConstraintOrigin::Alignment,
-                },
-            });
-        }
-    }
-
     /// Convert a PropertyRef to a LayoutVariable
     fn property_to_variable(&self, prop_ref: &PropertyRef) -> LayoutVariable {
         let id = prop_ref.element.node.leaf().0.clone();
@@ -472,18 +445,6 @@ impl ConstraintCollector {
             ConstraintProperty::Bottom | ConstraintProperty::CenterY => {
                 super::solver::LayoutProperty::Y
             }
-        };
-
-        LayoutVariable::new(id, property)
-    }
-
-    /// Convert an alignment Edge to a LayoutVariable
-    fn edge_to_variable(&self, path: &ElementPath, edge: Edge) -> LayoutVariable {
-        let id = path.leaf().0.clone();
-
-        let property = match edge {
-            Edge::Left | Edge::HorizontalCenter | Edge::Right => super::solver::LayoutProperty::X,
-            Edge::Top | Edge::VerticalCenter | Edge::Bottom => super::solver::LayoutProperty::Y,
         };
 
         LayoutVariable::new(id, property)
@@ -643,23 +604,6 @@ mod tests {
             assert_eq!(a.element_id, "b");
             assert_eq!(b.element_id, "c");
         }
-    }
-
-    #[test]
-    fn test_collect_alignment() {
-        let doc = parse("rect a\nrect b\nalign a.left = b.left").unwrap();
-        let mut collector = ConstraintCollector::new(LayoutConfig::default());
-        collector.collect(&doc);
-
-        let align_constraint = collector.constraints.iter().find(|c| {
-            if let LayoutConstraint::Equal { source, .. } = c {
-                source.origin == ConstraintOrigin::Alignment
-            } else {
-                false
-            }
-        });
-
-        assert!(align_constraint.is_some());
     }
 
     #[test]

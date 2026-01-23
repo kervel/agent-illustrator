@@ -20,7 +20,7 @@ pub use solver::{
 mod solver_spike;
 
 pub use config::LayoutConfig;
-pub use engine::{compute, resolve_alignments, resolve_constrain_statements, resolve_constraints};
+pub use engine::{compute, resolve_constrain_statements, resolve_constraints};
 pub use error::LayoutError;
 pub use routing::{route_connections, RoutingMode};
 pub use types::*;
@@ -76,9 +76,8 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
         }
         Statement::Connection(_)
         | Statement::Constraint(_)
-        | Statement::Alignment(_)
         | Statement::Constrain(_) => {
-            // Connections, constraints, and alignments don't define new identifiers
+            // Connections and constraints don't define new identifiers
         }
     }
 }
@@ -136,21 +135,6 @@ fn validate_refs_in_statement(
         Statement::Label(inner) => {
             // Validate references inside the label's inner element
             validate_refs_in_statement(inner, defined, _span)?;
-        }
-        Statement::Alignment(a) => {
-            // Validate that all element paths in the alignment reference defined elements
-            for anchor in &a.anchors {
-                // For now, only check simple (single-segment) paths against defined identifiers
-                // Full path resolution will be implemented in Phase 5
-                let leaf_name = &anchor.element.node.leaf().0;
-                if !defined.contains(leaf_name) {
-                    return Err(LayoutError::UndefinedIdentifier {
-                        name: leaf_name.clone(),
-                        span: anchor.element.span.clone(),
-                        suggestions: find_similar(defined, leaf_name, 2),
-                    });
-                }
-            }
         }
         Statement::Constrain(c) => {
             // Validate element references in constrain expressions

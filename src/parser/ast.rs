@@ -132,8 +132,6 @@ pub enum Statement {
     /// Contains any statement that acts as a label for its parent container
     /// DEPRECATED: Use `[role: label]` modifier instead
     Label(Box<Statement>),
-    /// Alignment constraint: `align a.left = b.left`
-    Alignment(AlignmentDecl),
     /// Constrain statement: `constrain a.left = b.left`
     Constrain(ConstrainDecl),
 }
@@ -369,41 +367,6 @@ impl std::fmt::Display for ElementPath {
     }
 }
 
-/// A specific alignment anchor point
-#[derive(Debug, Clone, PartialEq)]
-pub struct AlignmentAnchor {
-    /// Path to the element
-    pub element: Spanned<ElementPath>,
-    /// Edge of the element to align
-    pub edge: Spanned<Edge>,
-}
-
-/// Alignment constraint: aligns edges of multiple elements
-/// Example: `align a.left = b.left = c.left`
-#[derive(Debug, Clone, PartialEq)]
-pub struct AlignmentDecl {
-    /// Anchors to align (at least 2)
-    pub anchors: Vec<AlignmentAnchor>,
-}
-
-impl AlignmentDecl {
-    /// Check that all anchors are on the same axis
-    pub fn is_valid(&self) -> bool {
-        if self.anchors.len() < 2 {
-            return false;
-        }
-        let first_axis = self.anchors[0].edge.node.axis();
-        self.anchors
-            .iter()
-            .all(|a| a.edge.node.axis() == first_axis)
-    }
-
-    /// Get the axis of this alignment
-    pub fn axis(&self) -> Option<Axis> {
-        self.anchors.first().map(|a| a.edge.node.axis())
-    }
-}
-
 // ============================================
 // Constraint Types (Feature 005)
 // ============================================
@@ -537,47 +500,4 @@ mod tests {
         assert_eq!(path.to_string(), "group1.item.child");
     }
 
-    #[test]
-    fn test_alignment_decl_validation() {
-        // Valid: two anchors on same axis
-        let valid = AlignmentDecl {
-            anchors: vec![
-                AlignmentAnchor {
-                    element: Spanned::new(ElementPath::simple(Identifier::new("a"), 0..1), 0..1),
-                    edge: Spanned::new(Edge::Left, 2..6),
-                },
-                AlignmentAnchor {
-                    element: Spanned::new(ElementPath::simple(Identifier::new("b"), 9..10), 9..10),
-                    edge: Spanned::new(Edge::Left, 11..15),
-                },
-            ],
-        };
-        assert!(valid.is_valid());
-        assert_eq!(valid.axis(), Some(Axis::Horizontal));
-
-        // Invalid: only one anchor
-        let invalid_single = AlignmentDecl {
-            anchors: vec![AlignmentAnchor {
-                element: Spanned::new(ElementPath::simple(Identifier::new("a"), 0..1), 0..1),
-                edge: Spanned::new(Edge::Left, 2..6),
-            }],
-        };
-        assert!(!invalid_single.is_valid());
-
-        // Mixed axes is still structurally valid (semantic validation happens later)
-        let mixed = AlignmentDecl {
-            anchors: vec![
-                AlignmentAnchor {
-                    element: Spanned::new(ElementPath::simple(Identifier::new("a"), 0..1), 0..1),
-                    edge: Spanned::new(Edge::Left, 2..6),
-                },
-                AlignmentAnchor {
-                    element: Spanned::new(ElementPath::simple(Identifier::new("b"), 9..10), 9..10),
-                    edge: Spanned::new(Edge::Top, 11..14),
-                },
-            ],
-        };
-        // is_valid checks axis consistency
-        assert!(!mixed.is_valid());
-    }
 }

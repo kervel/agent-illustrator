@@ -33,9 +33,9 @@ col diagram {
             // Offset top junctions for diagonal crossovers:
             // jA1 offset left → diagonal goes down-right to jB1
             // jA2 offset right → diagonal goes down-left from jB2
-            align jA1.horizontal_center = jB1.horizontal_center
+            constrain jA1.center_x = jB1.center_x
             place jA1 [x: -40]
-            align jA2.horizontal_center = jB2.horizontal_center
+            constrain jA2.center_x = jB2.center_x
             place jA2 [x: 40]
 
             // Track A main line
@@ -91,9 +91,9 @@ col diagram {
                 }
 
                 // Offset junctions (same as Micro)
-                align mjA1.horizontal_center = mjB1.horizontal_center
+                constrain mjA1.center_x = mjB1.center_x
                 place mjA1 [x: -40]
-                align mjA2.horizontal_center = mjB2.horizontal_center
+                constrain mjA2.center_x = mjB2.center_x
                 place mjA2 [x: 40]
 
                 // Track lines (grayed)
@@ -130,9 +130,11 @@ col diagram {
     micro_label -> meso_label [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
     meso_label -> macro_label [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
 
-    // Align the level labels on the same vertical axis
-    // Align containers for correct arrow routing
-    align micro_label.horizontal_center = meso_label.horizontal_center = macro_label.horizontal_center
-    // Align text elements for visual alignment
-    align micro_lbl.horizontal_center = meso_lbl.horizontal_center = macro_lbl.horizontal_center
+    // Constrain the level labels to same vertical axis
+    // Containers for correct arrow routing
+    constrain micro_label.center_x = meso_label.center_x
+    constrain meso_label.center_x = macro_label.center_x
+    // Text elements for visual alignment
+    constrain micro_lbl.center_x = meso_lbl.center_x
+    constrain meso_lbl.center_x = macro_lbl.center_x
 }

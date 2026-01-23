@@ -344,48 +344,12 @@ where
 
     // Element path parser: identifier { "." identifier }
     // e.g., "a", "group1.item", "outer.inner.shape"
-    let element_path = identifier
+    let _element_path = identifier
         .clone()
         .separated_by(just(Token::Dot))
         .at_least(1)
         .collect::<Vec<_>>()
         .map_with(|segments, e| Spanned::new(ElementPath { segments }, span_range(&e.span())));
-
-    // Edge parser for alignment anchors
-    let edge = choice((
-        just(Token::Left).to(Edge::Left),
-        just(Token::Right).to(Edge::Right),
-        just(Token::Top).to(Edge::Top),
-        just(Token::Bottom).to(Edge::Bottom),
-        just(Token::HorizontalCenter).to(Edge::HorizontalCenter),
-        just(Token::VerticalCenter).to(Edge::VerticalCenter),
-    ))
-    .map_with(|e, extra| Spanned::new(e, span_range(&extra.span())));
-
-    // Alignment anchor: element_path "." edge
-    // e.g., "a.left", "group1.item.horizontal_center"
-    let alignment_anchor = element_path
-        .clone()
-        .then_ignore(just(Token::Dot))
-        .then(edge)
-        .map(|(element, edge)| AlignmentAnchor { element, edge });
-
-    // Alignment declaration: "align" anchor { "=" anchor }
-    // e.g., "align a.left = b.left = c.left"
-    let alignment_decl = just(Token::Align)
-        .ignore_then(alignment_anchor.clone())
-        .then(
-            just(Token::Equals)
-                .ignore_then(alignment_anchor)
-                .repeated()
-                .at_least(1)
-                .collect::<Vec<_>>(),
-        )
-        .map(|(first, rest)| {
-            let mut anchors = vec![first];
-            anchors.extend(rest);
-            AlignmentDecl { anchors }
-        });
 
     // ==================== Constraint Parser (Feature 005) ====================
 
@@ -621,7 +585,6 @@ where
 
         // All statements
         choice((
-            alignment_decl.clone().map(Statement::Alignment),
             constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
             layout_decl.map(Statement::Layout),
@@ -1069,80 +1032,6 @@ mod tests {
                 other => panic!("Expected hex, got {:?}", other),
             },
             _ => panic!("Expected shape"),
-        }
-    }
-
-    #[test]
-    fn test_parse_alignment_simple() {
-        // Simple two-element alignment
-        let doc = parse("align a.left = b.left").expect("Should parse");
-        assert_eq!(doc.statements.len(), 1);
-        match &doc.statements[0].node {
-            Statement::Alignment(a) => {
-                assert_eq!(a.anchors.len(), 2);
-                assert_eq!(a.anchors[0].element.node.leaf().as_str(), "a");
-                assert!(matches!(a.anchors[0].edge.node, Edge::Left));
-                assert_eq!(a.anchors[1].element.node.leaf().as_str(), "b");
-                assert!(matches!(a.anchors[1].edge.node, Edge::Left));
-            }
-            _ => panic!("Expected alignment"),
-        }
-    }
-
-    #[test]
-    fn test_parse_alignment_chain() {
-        // Multi-element alignment chain
-        let doc = parse("align a.top = b.top = c.top").expect("Should parse");
-        assert_eq!(doc.statements.len(), 1);
-        match &doc.statements[0].node {
-            Statement::Alignment(a) => {
-                assert_eq!(a.anchors.len(), 3);
-                for anchor in &a.anchors {
-                    assert!(matches!(anchor.edge.node, Edge::Top));
-                }
-            }
-            _ => panic!("Expected alignment"),
-        }
-    }
-
-    #[test]
-    fn test_parse_alignment_nested_path() {
-        // Alignment with nested element paths
-        let doc = parse("align group1.item.left = group2.other.left").expect("Should parse");
-        assert_eq!(doc.statements.len(), 1);
-        match &doc.statements[0].node {
-            Statement::Alignment(a) => {
-                assert_eq!(a.anchors.len(), 2);
-                // First anchor: group1.item
-                assert_eq!(a.anchors[0].element.node.segments.len(), 2);
-                assert_eq!(
-                    a.anchors[0].element.node.segments[0].node.as_str(),
-                    "group1"
-                );
-                assert_eq!(a.anchors[0].element.node.segments[1].node.as_str(), "item");
-                // Second anchor: group2.other
-                assert_eq!(a.anchors[1].element.node.segments.len(), 2);
-                assert_eq!(
-                    a.anchors[1].element.node.segments[0].node.as_str(),
-                    "group2"
-                );
-                assert_eq!(a.anchors[1].element.node.segments[1].node.as_str(), "other");
-            }
-            _ => panic!("Expected alignment"),
-        }
-    }
-
-    #[test]
-    fn test_parse_alignment_all_edges() {
-        // Test all edge types parse correctly
-        let doc = parse("align a.horizontal_center = b.vertical_center").expect("Should parse");
-        assert_eq!(doc.statements.len(), 1);
-        match &doc.statements[0].node {
-            Statement::Alignment(a) => {
-                assert!(matches!(a.anchors[0].edge.node, Edge::HorizontalCenter));
-                assert!(matches!(a.anchors[1].edge.node, Edge::VerticalCenter));
-            }
-            _ => panic!("Expected alignment"),
         }
     }
 

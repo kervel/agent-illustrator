@@ -1,0 +1,154 @@
+(* Agent Illustrator DSL Grammar Extensions - Feature 005 *)
+(* Constraint-Based Layout System *)
+(* Version: 3.0.0 (proposed) *)
+(* Last Updated: 2026-01-23 *)
+
+(* ============================================ *)
+(* NEW: CONSTRAIN DECLARATIONS                  *)
+(* ============================================ *)
+
+(* Note: This extends the base grammar from Feature 001 *)
+(* The 'constrain' keyword replaces 'align' for all constraint types *)
+
+statement = (* existing *) | constrain_decl ;
+
+constrain_decl = "constrain" constraint_expr ;
+
+constraint_expr = equality_constraint
+                | inequality_constraint
+                | midpoint_constraint
+                | contains_constraint ;
+
+(* ============================================ *)
+(* EQUALITY CONSTRAINTS                         *)
+(* ============================================ *)
+
+(* Simple equality: constrain a.left = b.left *)
+equality_constraint = property_ref "=" ( property_ref | number_value )
+                    | property_ref "=" property_ref ( "+" | "-" ) number_value ;
+
+(* Examples:
+   constrain a.left = b.left
+   constrain a.left = b.right + 20
+   constrain a.width = 100
+*)
+
+(* ============================================ *)
+(* INEQUALITY CONSTRAINTS                       *)
+(* ============================================ *)
+
+inequality_constraint = property_ref ( ">=" | "<=" ) ( property_ref | number_value ) ;
+
+(* Examples:
+   constrain a.width >= 50
+   constrain a.height <= b.height
+   constrain a.right >= b.left + 10
+*)
+
+(* ============================================ *)
+(* MIDPOINT CONSTRAINTS                         *)
+(* ============================================ *)
+
+midpoint_constraint = property_ref "=" "midpoint" "(" identifier "," identifier ")" ;
+
+(* Examples:
+   constrain a.center_x = midpoint(b, c)
+   constrain label.center = midpoint(start_node, end_node)
+*)
+
+(* ============================================ *)
+(* CONTAINS CONSTRAINTS                         *)
+(* ============================================ *)
+
+contains_constraint = identifier "contains" identifier_list [ modifier_block ] ;
+
+identifier_list = identifier { "," identifier } ;
+
+(* Examples:
+   constrain container contains a, b, c
+   constrain container contains a, b, c [padding: 20]
+*)
+
+(* ============================================ *)
+(* PROPERTY REFERENCES                          *)
+(* ============================================ *)
+
+property_ref = element_path "." constraint_property ;
+
+constraint_property = "x" | "y" | "width" | "height"
+                    | "left" | "right" | "top" | "bottom"
+                    | "center_x" | "center_y" | "center" ;
+
+(* element_path is already defined in base grammar *)
+
+(* ============================================ *)
+(* COMPARISON OPERATORS (NEW TOKENS)            *)
+(* ============================================ *)
+
+comparison_op = ">=" | "<=" ;
+
+(* Note: "=" already exists for equality *)
+
+(* ============================================ *)
+(* DEPRECATION NOTE                             *)
+(* ============================================ *)
+
+(*
+  The 'align' keyword is DEPRECATED in favor of 'constrain':
+
+  OLD (deprecated):
+    align a.left = b.left
+
+  NEW:
+    constrain a.left = b.left
+
+  The 'align' syntax will continue to work but emit a deprecation warning.
+  Migration: Replace 'align' with 'constrain' in all files.
+*)
+
+(* ============================================ *)
+(* EXAMPLE VALID INPUTS                         *)
+(* ============================================ *)
+
+(*
+  // Basic alignment (replaces align)
+  constrain a.left = b.left
+  constrain x.center_x = y.center_x = z.center_x
+
+  // Offset positioning
+  constrain label.left = button.right + 10
+  constrain header.bottom = content.top - 20
+
+  // Size constraints
+  constrain sidebar.width = 200
+  constrain content.width >= 400
+  constrain popup.height <= 500
+
+  // Midpoint (center between two elements)
+  constrain title.center_x = midpoint(left_column, right_column)
+
+  // Containment
+  constrain frame contains widget_a, widget_b, widget_c [padding: 15]
+
+  // Complex layout
+  row main_content {
+    col sidebar {
+      rect nav
+      rect settings
+    }
+    col content {
+      rect header
+      rect body
+      rect footer
+    }
+  }
+
+  // Constrain sidebar width
+  constrain sidebar.width = 200
+
+  // Align headers across columns
+  constrain nav.top = header.top
+
+  // Footer at bottom with minimum gap
+  constrain footer.top >= body.bottom + 20
+*)
