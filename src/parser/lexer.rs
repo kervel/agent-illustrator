@@ -17,6 +17,8 @@ pub enum Token {
     Ellipse,
     #[token("polygon")]
     Polygon,
+    #[token("line")]
+    Line,
     #[token("icon")]
     Icon,
 

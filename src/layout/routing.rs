@@ -1,0 +1,303 @@
+//! Connection routing between elements
+
+use crate::parser::ast::*;
+
+use super::error::LayoutError;
+use super::types::*;
+
+/// Edge of a bounding box for connection attachment
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Edge {
+    Top,
+    Bottom,
+    Left,
+    Right,
+}
+
+/// Get the attachment point on a bounding box edge
+pub fn attachment_point(bounds: &BoundingBox, edge: Edge) -> Point {
+    match edge {
+        Edge::Top => Point::new(bounds.x + bounds.width / 2.0, bounds.y),
+        Edge::Bottom => Point::new(bounds.x + bounds.width / 2.0, bounds.bottom()),
+        Edge::Left => Point::new(bounds.x, bounds.y + bounds.height / 2.0),
+        Edge::Right => Point::new(bounds.right(), bounds.y + bounds.height / 2.0),
+    }
+}
+
+/// Determine the best edges to connect two bounding boxes
+pub fn best_edges(from: &BoundingBox, to: &BoundingBox) -> (Edge, Edge) {
+    let dx = to.center().x - from.center().x;
+    let dy = to.center().y - from.center().y;
+
+    // Check if boxes overlap horizontally (one is below the other)
+    let h_overlap = from.x < to.right() && from.right() > to.x;
+    // Check if boxes overlap vertically (one is beside the other)
+    let v_overlap = from.y < to.bottom() && from.bottom() > to.y;
+
+    // If primarily vertical movement (dy much larger than dx), prefer vertical connection
+    // This handles cases where elements are in a column but don't perfectly overlap
+    let primarily_vertical = dy.abs() > dx.abs() * 1.5;
+
+    if (h_overlap && !v_overlap) || primarily_vertical {
+        // Stacked vertically - prefer vertical connection
+        if dy > 0.0 {
+            (Edge::Bottom, Edge::Top)
+        } else {
+            (Edge::Top, Edge::Bottom)
+        }
+    } else if v_overlap && !h_overlap {
+        // Side by side - prefer horizontal connection
+        if dx > 0.0 {
+            (Edge::Right, Edge::Left)
+        } else {
+            (Edge::Left, Edge::Right)
+        }
+    } else if dx.abs() > dy.abs() {
+        // Primarily horizontal
+        if dx > 0.0 {
+            (Edge::Right, Edge::Left)
+        } else {
+            (Edge::Left, Edge::Right)
+        }
+    } else {
+        // Primarily vertical
+        if dy > 0.0 {
+            (Edge::Bottom, Edge::Top)
+        } else {
+            (Edge::Top, Edge::Bottom)
+        }
+    }
+}
+
+/// Create an orthogonal path between two points
+pub fn route_orthogonal(from: Point, to: Point) -> Vec<Point> {
+    let dx = (to.x - from.x).abs();
+    let dy = (to.y - from.y).abs();
+
+    // If nearly aligned on both axes, draw direct line
+    if dx < 15.0 && dy < 15.0 {
+        vec![from, to]
+    } else if dx < 15.0 {
+        // Vertically aligned - direct vertical line
+        vec![from, to]
+    } else if dy < 15.0 {
+        // Horizontally aligned - direct horizontal line
+        vec![from, to]
+    } else {
+        // Need to route around - create S-shaped path
+        // Go down first, then across, then down to target
+        let mid_y = (from.y + to.y) / 2.0;
+        vec![
+            from,
+            Point::new(from.x, mid_y),
+            Point::new(to.x, mid_y),
+            to,
+        ]
+    }
+}
+
+/// Route a connection between two bounding boxes
+pub fn route_connection(from_bounds: &BoundingBox, to_bounds: &BoundingBox) -> Vec<Point> {
+    let (from_edge, to_edge) = best_edges(from_bounds, to_bounds);
+    let start = attachment_point(from_bounds, from_edge);
+    let end = attachment_point(to_bounds, to_edge);
+
+    // For vertical connections (Bottom to Top), create a proper downward path
+    // even if the x coordinates are different
+    if from_edge == Edge::Bottom && to_edge == Edge::Top {
+        let dx = (end.x - start.x).abs();
+        if dx > 15.0 {
+            // Elements not aligned - create S-shaped path going down first
+            let mid_y = (start.y + end.y) / 2.0;
+            return vec![
+                start,
+                Point::new(start.x, mid_y),
+                Point::new(end.x, mid_y),
+                end,
+            ];
+        }
+    }
+
+    // For horizontal connections (Right to Left), similar treatment
+    if from_edge == Edge::Right && to_edge == Edge::Left {
+        let dy = (end.y - start.y).abs();
+        if dy > 15.0 {
+            let mid_x = (start.x + end.x) / 2.0;
+            return vec![
+                start,
+                Point::new(mid_x, start.y),
+                Point::new(mid_x, end.y),
+                end,
+            ];
+        }
+    }
+
+    route_orthogonal(start, end)
+}
+
+/// Route all connections in a document
+pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
+    fn process_statements(
+        stmts: &[Spanned<Statement>],
+        result: &mut LayoutResult,
+    ) -> Result<(), LayoutError> {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Connection(conn) => {
+                    let from_element = result
+                        .get_element_by_name(&conn.from.node.0)
+                        .ok_or_else(|| {
+                            LayoutError::undefined(
+                                conn.from.node.0.clone(),
+                                conn.from.span.clone(),
+                                vec![],
+                            )
+                        })?;
+                    let to_element =
+                        result
+                            .get_element_by_name(&conn.to.node.0)
+                            .ok_or_else(|| {
+                                LayoutError::undefined(
+                                    conn.to.node.0.clone(),
+                                    conn.to.span.clone(),
+                                    vec![],
+                                )
+                            })?;
+
+                    let path = route_connection(&from_element.bounds, &to_element.bounds);
+                    let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
+                    let label = extract_connection_label(&conn.modifiers, &path);
+
+                    result.connections.push(ConnectionLayout {
+                        from_id: conn.from.node.clone(),
+                        to_id: conn.to.node.clone(),
+                        direction: conn.direction,
+                        path,
+                        styles,
+                        label,
+                    });
+                }
+                Statement::Layout(l) => {
+                    process_statements(&l.children, result)?;
+                }
+                Statement::Group(g) => {
+                    process_statements(&g.children, result)?;
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    process_statements(&doc.statements, result)?;
+    result.compute_bounds();
+    Ok(())
+}
+
+fn extract_connection_label(modifiers: &[Spanned<StyleModifier>], path: &[Point]) -> Option<LabelLayout> {
+    let text = modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::Label) {
+            match &m.node.value.node {
+                StyleValue::String(s) => Some(s.clone()),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    })?;
+
+    // Position at midpoint of path
+    let mid_idx = path.len() / 2;
+    let position = if path.len() >= 2 {
+        let p1 = path[mid_idx.saturating_sub(1)];
+        let p2 = path[mid_idx.min(path.len() - 1)];
+        Point::new((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0 - 10.0)
+    } else if !path.is_empty() {
+        path[0]
+    } else {
+        Point::new(0.0, 0.0)
+    };
+
+    Some(LabelLayout {
+        text,
+        position,
+        anchor: TextAnchor::Middle,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_attachment_point_top() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let point = attachment_point(&bounds, Edge::Top);
+        assert_eq!(point.x, 50.0);
+        assert_eq!(point.y, 0.0);
+    }
+
+    #[test]
+    fn test_attachment_point_bottom() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let point = attachment_point(&bounds, Edge::Bottom);
+        assert_eq!(point.x, 50.0);
+        assert_eq!(point.y, 50.0);
+    }
+
+    #[test]
+    fn test_attachment_point_left() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let point = attachment_point(&bounds, Edge::Left);
+        assert_eq!(point.x, 0.0);
+        assert_eq!(point.y, 25.0);
+    }
+
+    #[test]
+    fn test_attachment_point_right() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let point = attachment_point(&bounds, Edge::Right);
+        assert_eq!(point.x, 100.0);
+        assert_eq!(point.y, 25.0);
+    }
+
+    #[test]
+    fn test_best_edges_horizontal() {
+        let a = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let b = BoundingBox::new(200.0, 0.0, 50.0, 50.0);
+        let (from, to) = best_edges(&a, &b);
+        assert_eq!(from, Edge::Right);
+        assert_eq!(to, Edge::Left);
+    }
+
+    #[test]
+    fn test_best_edges_vertical() {
+        let a = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let b = BoundingBox::new(0.0, 200.0, 50.0, 50.0);
+        let (from, to) = best_edges(&a, &b);
+        assert_eq!(from, Edge::Bottom);
+        assert_eq!(to, Edge::Top);
+    }
+
+    #[test]
+    fn test_route_orthogonal_direct_horizontal() {
+        let from = Point::new(0.0, 50.0);
+        let to = Point::new(100.0, 50.0);
+        let path = route_orthogonal(from, to);
+        assert_eq!(path.len(), 2);
+    }
+
+    #[test]
+    fn test_route_orthogonal_s_shaped() {
+        let from = Point::new(0.0, 0.0);
+        let to = Point::new(100.0, 100.0);
+        let path = route_orthogonal(from, to);
+        // S-shape with midpoints: start -> mid1 -> mid2 -> end
+        assert_eq!(path.len(), 4);
+        // Now goes down first, then across: mid_y = 50
+        assert_eq!(path[1].x, 0.0);
+        assert_eq!(path[1].y, 50.0);
+        assert_eq!(path[2].x, 100.0);
+        assert_eq!(path[2].y, 50.0);
+    }
+}

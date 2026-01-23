@@ -1,0 +1,458 @@
+//! Core types for the layout engine
+
+use std::collections::HashMap;
+
+use crate::parser::ast::{
+    ConnectionDirection, Identifier, LayoutType, ShapeType, Span, Spanned, StyleKey, StyleModifier,
+    StyleValue,
+};
+
+/// A 2D point in the coordinate system
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Point {
+    pub x: f64,
+    pub y: f64,
+}
+
+impl Point {
+    pub fn new(x: f64, y: f64) -> Self {
+        Self { x, y }
+    }
+}
+
+/// A bounding box representing the spatial extent of an element
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BoundingBox {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
+impl BoundingBox {
+    pub fn new(x: f64, y: f64, width: f64, height: f64) -> Self {
+        Self {
+            x,
+            y,
+            width,
+            height,
+        }
+    }
+
+    /// Create a zero-sized bounding box at the origin
+    pub fn zero() -> Self {
+        Self::new(0.0, 0.0, 0.0, 0.0)
+    }
+
+    /// Right edge x-coordinate
+    pub fn right(&self) -> f64 {
+        self.x + self.width
+    }
+
+    /// Bottom edge y-coordinate
+    pub fn bottom(&self) -> f64 {
+        self.y + self.height
+    }
+
+    /// Center point of the bounding box
+    pub fn center(&self) -> Point {
+        Point {
+            x: self.x + self.width / 2.0,
+            y: self.y + self.height / 2.0,
+        }
+    }
+
+    /// Check if this bounding box contains a point
+    pub fn contains(&self, point: Point) -> bool {
+        point.x >= self.x
+            && point.x <= self.right()
+            && point.y >= self.y
+            && point.y <= self.bottom()
+    }
+
+    /// Check if this bounding box intersects another
+    pub fn intersects(&self, other: &BoundingBox) -> bool {
+        self.x < other.right()
+            && self.right() > other.x
+            && self.y < other.bottom()
+            && self.bottom() > other.y
+    }
+
+    /// Compute the union of two bounding boxes (smallest box containing both)
+    pub fn union(&self, other: &BoundingBox) -> BoundingBox {
+        let x = self.x.min(other.x);
+        let y = self.y.min(other.y);
+        let right = self.right().max(other.right());
+        let bottom = self.bottom().max(other.bottom());
+        BoundingBox::new(x, y, right - x, bottom - y)
+    }
+
+    /// Expand this bounding box to include a point
+    pub fn expand_to_include(&self, point: Point) -> BoundingBox {
+        let x = self.x.min(point.x);
+        let y = self.y.min(point.y);
+        let right = self.right().max(point.x);
+        let bottom = self.bottom().max(point.y);
+        BoundingBox::new(x, y, right - x, bottom - y)
+    }
+}
+
+impl Default for BoundingBox {
+    fn default() -> Self {
+        Self::zero()
+    }
+}
+
+/// Resolved style properties ready for rendering
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ResolvedStyles {
+    pub fill: Option<String>,
+    pub stroke: Option<String>,
+    pub stroke_width: Option<f64>,
+    pub opacity: Option<f64>,
+    pub font_size: Option<f64>,
+    pub css_classes: Vec<String>,
+}
+
+impl ResolvedStyles {
+    /// Create styles with sensible defaults
+    pub fn with_defaults() -> Self {
+        Self {
+            fill: Some("#f0f0f0".to_string()),
+            stroke: Some("#333333".to_string()),
+            stroke_width: Some(2.0),
+            opacity: Some(1.0),
+            font_size: Some(14.0),
+            css_classes: vec![],
+        }
+    }
+
+    /// Create styles from AST style modifiers
+    pub fn from_modifiers(modifiers: &[Spanned<StyleModifier>]) -> Self {
+        let mut styles = Self::default();
+
+        for modifier in modifiers {
+            match &modifier.node.key.node {
+                StyleKey::Fill => {
+                    if let StyleValue::Color(c) = &modifier.node.value.node {
+                        styles.fill = Some(c.clone());
+                    } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
+                        styles.fill = Some(k.clone());
+                    }
+                }
+                StyleKey::Stroke => {
+                    if let StyleValue::Color(c) = &modifier.node.value.node {
+                        styles.stroke = Some(c.clone());
+                    } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
+                        styles.stroke = Some(k.clone());
+                    }
+                }
+                StyleKey::StrokeWidth => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.stroke_width = Some(*value);
+                    }
+                }
+                StyleKey::Opacity => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.opacity = Some(*value);
+                    }
+                }
+                StyleKey::FontSize => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.font_size = Some(*value);
+                    }
+                }
+                StyleKey::Class => {
+                    if let StyleValue::String(c) = &modifier.node.value.node {
+                        styles.css_classes.push(c.clone());
+                    } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
+                        styles.css_classes.push(k.clone());
+                    }
+                }
+                StyleKey::Label | StyleKey::Custom(_) => {
+                    // Labels handled separately, custom keys ignored for now
+                }
+            }
+        }
+
+        styles
+    }
+
+    /// Merge another style set, with other taking precedence
+    pub fn merge(&self, other: &ResolvedStyles) -> ResolvedStyles {
+        ResolvedStyles {
+            fill: other.fill.clone().or_else(|| self.fill.clone()),
+            stroke: other.stroke.clone().or_else(|| self.stroke.clone()),
+            stroke_width: other.stroke_width.or(self.stroke_width),
+            opacity: other.opacity.or(self.opacity),
+            font_size: other.font_size.or(self.font_size),
+            css_classes: {
+                let mut classes = self.css_classes.clone();
+                classes.extend(other.css_classes.clone());
+                classes
+            },
+        }
+    }
+}
+
+/// Type of element in the layout
+#[derive(Debug, Clone, PartialEq)]
+pub enum ElementType {
+    Shape(ShapeType),
+    Layout(LayoutType),
+    Group,
+}
+
+/// Text anchor position for labels
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TextAnchor {
+    Start,
+    Middle,
+    End,
+}
+
+/// Layout information for a label
+#[derive(Debug, Clone)]
+pub struct LabelLayout {
+    pub text: String,
+    pub position: Point,
+    pub anchor: TextAnchor,
+}
+
+/// Layout information for a single element
+#[derive(Debug, Clone)]
+pub struct ElementLayout {
+    pub id: Option<Identifier>,
+    pub element_type: ElementType,
+    pub bounds: BoundingBox,
+    pub styles: ResolvedStyles,
+    pub children: Vec<ElementLayout>,
+    pub label: Option<LabelLayout>,
+}
+
+impl ElementLayout {
+    /// Get the identifier as a string, if present
+    pub fn id_str(&self) -> Option<&str> {
+        self.id.as_ref().map(|id| id.0.as_str())
+    }
+}
+
+/// Layout information for a connection between elements
+#[derive(Debug, Clone)]
+pub struct ConnectionLayout {
+    pub from_id: Identifier,
+    pub to_id: Identifier,
+    pub direction: ConnectionDirection,
+    pub path: Vec<Point>,
+    pub styles: ResolvedStyles,
+    pub label: Option<LabelLayout>,
+}
+
+/// The complete result of layout computation
+#[derive(Debug, Clone)]
+pub struct LayoutResult {
+    /// All elements indexed by identifier
+    pub elements: HashMap<String, ElementLayout>,
+    /// Root-level elements in document order
+    pub root_elements: Vec<ElementLayout>,
+    /// All connections
+    pub connections: Vec<ConnectionLayout>,
+    /// Bounding box containing all elements
+    pub bounds: BoundingBox,
+}
+
+impl LayoutResult {
+    /// Create an empty layout result
+    pub fn new() -> Self {
+        Self {
+            elements: HashMap::new(),
+            root_elements: vec![],
+            connections: vec![],
+            bounds: BoundingBox::zero(),
+        }
+    }
+
+    /// Add an element to the layout
+    pub fn add_element(&mut self, element: ElementLayout) {
+        // Index by ID if present
+        if let Some(id) = &element.id {
+            self.elements.insert(id.0.clone(), element.clone());
+        }
+        // Also index children recursively
+        self.index_children(&element);
+        self.root_elements.push(element);
+    }
+
+    fn index_children(&mut self, element: &ElementLayout) {
+        for child in &element.children {
+            if let Some(id) = &child.id {
+                self.elements.insert(id.0.clone(), child.clone());
+            }
+            self.index_children(child);
+        }
+    }
+
+    /// Get an element by identifier
+    pub fn get_element(&self, id: &Identifier) -> Option<&ElementLayout> {
+        self.elements.get(&id.0)
+    }
+
+    /// Get an element by name string
+    pub fn get_element_by_name(&self, name: &str) -> Option<&ElementLayout> {
+        self.elements.get(name)
+    }
+
+    /// Get mutable reference to element by name (for constraint resolution)
+    pub fn get_element_mut_by_name(&mut self, name: &str) -> Option<&mut ElementLayout> {
+        // First check root elements
+        for elem in &mut self.root_elements {
+            if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
+                return Some(elem);
+            }
+            // Check children recursively
+            if let Some(child) = find_element_mut(&mut elem.children, name) {
+                return Some(child);
+            }
+        }
+        None
+    }
+
+    /// Compute the bounding box that contains all elements
+    pub fn compute_bounds(&mut self) {
+        if self.root_elements.is_empty() {
+            self.bounds = BoundingBox::zero();
+            return;
+        }
+
+        let mut bounds = self.root_elements[0].bounds;
+        for element in &self.root_elements[1..] {
+            bounds = bounds.union(&element.bounds);
+        }
+
+        // Also include connection paths
+        for conn in &self.connections {
+            for point in &conn.path {
+                bounds = bounds.expand_to_include(*point);
+            }
+        }
+
+        self.bounds = bounds;
+    }
+}
+
+fn find_element_mut<'a>(
+    children: &'a mut [ElementLayout],
+    name: &str,
+) -> Option<&'a mut ElementLayout> {
+    for child in children {
+        if child.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
+            return Some(child);
+        }
+        if let Some(found) = find_element_mut(&mut child.children, name) {
+            return Some(found);
+        }
+    }
+    None
+}
+
+impl Default for LayoutResult {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Information about a constraint for error reporting
+#[derive(Debug, Clone)]
+pub struct ConstraintInfo {
+    pub subject: String,
+    pub relation: String,
+    pub anchor: String,
+    pub span: Span,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_point_creation() {
+        let p = Point::new(10.0, 20.0);
+        assert_eq!(p.x, 10.0);
+        assert_eq!(p.y, 20.0);
+    }
+
+    #[test]
+    fn test_bounding_box_edges() {
+        let bb = BoundingBox::new(10.0, 20.0, 100.0, 50.0);
+        assert_eq!(bb.right(), 110.0);
+        assert_eq!(bb.bottom(), 70.0);
+    }
+
+    #[test]
+    fn test_bounding_box_center() {
+        let bb = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let center = bb.center();
+        assert_eq!(center.x, 50.0);
+        assert_eq!(center.y, 25.0);
+    }
+
+    #[test]
+    fn test_bounding_box_contains() {
+        let bb = BoundingBox::new(0.0, 0.0, 100.0, 100.0);
+        assert!(bb.contains(Point::new(50.0, 50.0)));
+        assert!(bb.contains(Point::new(0.0, 0.0)));
+        assert!(bb.contains(Point::new(100.0, 100.0)));
+        assert!(!bb.contains(Point::new(-1.0, 50.0)));
+        assert!(!bb.contains(Point::new(101.0, 50.0)));
+    }
+
+    #[test]
+    fn test_bounding_box_intersects() {
+        let a = BoundingBox::new(0.0, 0.0, 100.0, 100.0);
+        let b = BoundingBox::new(50.0, 50.0, 100.0, 100.0);
+        let c = BoundingBox::new(200.0, 200.0, 50.0, 50.0);
+
+        assert!(a.intersects(&b));
+        assert!(b.intersects(&a));
+        assert!(!a.intersects(&c));
+        assert!(!c.intersects(&a));
+    }
+
+    #[test]
+    fn test_bounding_box_union() {
+        let a = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let b = BoundingBox::new(100.0, 100.0, 50.0, 50.0);
+        let union = a.union(&b);
+
+        assert_eq!(union.x, 0.0);
+        assert_eq!(union.y, 0.0);
+        assert_eq!(union.width, 150.0);
+        assert_eq!(union.height, 150.0);
+    }
+
+    #[test]
+    fn test_resolved_styles_defaults() {
+        let styles = ResolvedStyles::with_defaults();
+        assert_eq!(styles.fill, Some("#f0f0f0".to_string()));
+        assert_eq!(styles.stroke, Some("#333333".to_string()));
+        assert_eq!(styles.stroke_width, Some(2.0));
+    }
+
+    #[test]
+    fn test_layout_result_add_element() {
+        let mut result = LayoutResult::new();
+        let element = ElementLayout {
+            id: Some(Identifier::new("test")),
+            element_type: ElementType::Shape(ShapeType::Rectangle),
+            bounds: BoundingBox::new(0.0, 0.0, 100.0, 50.0),
+            styles: ResolvedStyles::default(),
+            children: vec![],
+            label: None,
+        };
+
+        result.add_element(element);
+
+        assert_eq!(result.root_elements.len(), 1);
+        assert!(result.get_element_by_name("test").is_some());
+    }
+}

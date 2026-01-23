@@ -99,6 +99,7 @@ where
         just(Token::Circle).to(ShapeType::Circle),
         just(Token::Ellipse).to(ShapeType::Ellipse),
         just(Token::Polygon).to(ShapeType::Polygon),
+        just(Token::Line).to(ShapeType::Line),
         just(Token::Icon)
             .ignore_then(string_literal)
             .map(|s| ShapeType::Icon { icon_name: s.node }),

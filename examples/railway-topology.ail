@@ -1,72 +1,47 @@
 // Railway Topology - Three Level Abstraction
-// Smoke test for Agent Illustrator DSL
-// Feature 002: First reference document
-//
-// This illustration demonstrates railway network topology at three levels:
-// - Micro level: Track geometry (lines, switches, junctions)
-// - Meso level: Operational points (OP regions grouping tracks)
-// - Macro level: Network graph (abstract nodes and edges)
-//
-// Reference: features/002-railway-topology-smoke-test/reference-image.webp
 
 col diagram {
-    // ═══════════════════════════════════════════════════════════════
-    // MICRO LEVEL - Detailed track geometry
-    // ═══════════════════════════════════════════════════════════════
+    // === MICRO LEVEL ===
     group micro [label: "Micro"] {
-        // Main tracks (horizontal lines representing railway tracks)
-        row tracks {
-            rect track1 [fill: blue, class: "track"]
-            rect track2 [fill: blue, class: "track"]
-            rect track3 [fill: blue, class: "track"]
-            rect track4 [fill: blue, class: "track"]
+        col tracks {
+            line t1 [stroke: #4169E1, stroke_width: 2]
+            line t2 [stroke: #4169E1, stroke_width: 2]
+            line t3 [stroke: #4169E1, stroke_width: 2]
+            line t4 [stroke: #4169E1, stroke_width: 2]
+            line t5 [stroke: #4169E1, stroke_width: 2]
+            line t6 [stroke: #4169E1, stroke_width: 2]
         }
-
-        // Switches/junctions connecting tracks
-        track1 -- track2 [class: "switch"]
-        track2 -- track3 [class: "switch"]
-        track3 -- track4 [class: "switch"]
     }
 
-    // Aggregation arrow: Micro → Meso
-    micro -> meso [label: "Aggregation", fill: gray]
-
-    // ═══════════════════════════════════════════════════════════════
-    // MESO LEVEL - Operational Points
-    // ═══════════════════════════════════════════════════════════════
+    // === MESO LEVEL ===
     group meso [label: "Meso"] {
-        // Track geometry passes through (simplified representation)
-        row tracks {
-            rect meso_track1 [fill: blue, class: "track"]
-            rect meso_track2 [fill: blue, class: "track"]
-            rect meso_track3 [fill: blue, class: "track"]
+        stack overlay {
+            col meso_tracks {
+                line m1 [stroke: #4169E1, stroke_width: 2]
+                line m2 [stroke: #4169E1, stroke_width: 2]
+                line m3 [stroke: #4169E1, stroke_width: 2]
+                line m4 [stroke: #4169E1, stroke_width: 2]
+                line m5 [stroke: #4169E1, stroke_width: 2]
+            }
+            row ops {
+                ellipse op1 [fill: #90EE90, opacity: 0.35, label: "OP1"]
+                ellipse op2 [fill: #90EE90, opacity: 0.35, label: "OP2"]
+            }
         }
-
-        // Operational Point regions (semi-transparent overlays)
-        ellipse op1 [fill: green, opacity: 0.3, label: "OP1"]
-        ellipse op2 [fill: green, opacity: 0.3, label: "OP2"]
     }
 
-    // Aggregation arrow: Meso → Macro
-    meso -> macro [label: "Aggregation", fill: gray]
-
-    // ═══════════════════════════════════════════════════════════════
-    // MACRO LEVEL - Abstract network graph
-    // ═══════════════════════════════════════════════════════════════
+    // === MACRO LEVEL ===
     group macro [label: "Macro"] {
-        // Graph layout: nodes (OPs) connected by line sections
         row graph {
-            rect left_section [fill: blue, label: "Line Section"]
-            ellipse macro_op1 [fill: green, label: "OP1"]
-            rect center_section [fill: blue, label: "Line Section"]
-            ellipse macro_op2 [fill: green, label: "OP2"]
-            rect right_section [fill: blue, label: "Line Section"]
+            line ls1 [stroke: #4169E1, stroke_width: 2]
+            ellipse n1 [fill: #2E8B57, label: "OP1"]
+            line ls2 [stroke: #4169E1, stroke_width: 2]
+            ellipse n2 [fill: #2E8B57, label: "OP2"]
+            line ls3 [stroke: #4169E1, stroke_width: 2]
         }
-
-        // Graph edges
-        left_section -- macro_op1
-        macro_op1 -- center_section
-        center_section -- macro_op2
-        macro_op2 -- right_section
     }
+
+    // Aggregation arrows
+    micro -> meso [label: "Aggregation", stroke: #555555]
+    meso -> macro [label: "Aggregation", stroke: #555555]
 }
