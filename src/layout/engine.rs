@@ -105,6 +105,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
             text,
             position: Point::new(label_x, label_y),
             anchor,
+            styles: None,
         }
     });
 
@@ -333,6 +334,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
             text,
             position: Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
             anchor: TextAnchor::Middle,
+            styles: None,
         })
     };
 
@@ -384,6 +386,7 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
             text,
             position: Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
             anchor: TextAnchor::End,
+            styles: None,
         })
     };
 

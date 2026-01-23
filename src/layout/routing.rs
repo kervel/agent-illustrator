@@ -225,9 +225,13 @@ fn extract_routing_mode(modifiers: &[Spanned<StyleModifier>]) -> RoutingMode {
 
 /// Route all connections in a document
 pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
+    // Track element IDs that are used as connection labels (to remove them from rendering)
+    let mut label_element_ids: std::collections::HashSet<String> = std::collections::HashSet::new();
+
     fn process_statements(
         stmts: &[Spanned<Statement>],
         result: &mut LayoutResult,
+        label_element_ids: &mut std::collections::HashSet<String>,
     ) -> Result<(), LayoutError> {
         for stmt in stmts {
             match &stmt.node {
@@ -255,7 +259,14 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                     let path =
                         route_connection(&from_element.bounds, &to_element.bounds, routing_mode);
                     let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
-                    let label = extract_connection_label(&conn.modifiers, &path, result);
+
+                    // Extract label and track if it references an element
+                    let (label, label_ref_id) = extract_connection_label_with_ref(&conn.modifiers, &path, result);
+
+                    // Mark the referenced element for removal from rendering
+                    if let Some(id) = label_ref_id {
+                        label_element_ids.insert(id);
+                    }
 
                     result.connections.push(ConnectionLayout {
                         from_id: conn.from.node.clone(),
@@ -267,10 +278,10 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                     });
                 }
                 Statement::Layout(l) => {
-                    process_statements(&l.children, result)?;
+                    process_statements(&l.children, result, label_element_ids)?;
                 }
                 Statement::Group(g) => {
-                    process_statements(&g.children, result)?;
+                    process_statements(&g.children, result, label_element_ids)?;
                 }
                 _ => {}
             }
@@ -278,7 +289,13 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
         Ok(())
     }
 
-    process_statements(&doc.statements, result)?;
+    process_statements(&doc.statements, result, &mut label_element_ids)?;
+
+    // Remove elements that are used as connection labels from the layout
+    for id in &label_element_ids {
+        result.remove_element_by_name(id);
+    }
+
     result.compute_bounds();
     Ok(())
 }
@@ -291,11 +308,25 @@ pub enum LabelPosition {
     Center,
 }
 
+/// Extract connection label (wrapper for tests - returns just the label without tracking references)
+#[cfg(test)]
 fn extract_connection_label(
     modifiers: &[Spanned<StyleModifier>],
     path: &[Point],
     result: &LayoutResult,
 ) -> Option<LabelLayout> {
+    extract_connection_label_with_ref(modifiers, path, result).0
+}
+
+/// Extract connection label and return both the label and the referenced element ID (if any)
+fn extract_connection_label_with_ref(
+    modifiers: &[Spanned<StyleModifier>],
+    path: &[Point],
+    result: &LayoutResult,
+) -> (Option<LabelLayout>, Option<String>) {
+    let mut label_ref_id: Option<String> = None;
+    let mut label_styles: Option<ResolvedStyles> = None;
+
     let text = modifiers.iter().find_map(|m| {
         if matches!(m.node.key.node, StyleKey::Label) {
             match &m.node.value.node {
@@ -304,6 +335,10 @@ fn extract_connection_label(
                 StyleValue::Identifier(id) => {
                     // Look up the element by name and extract text content
                     result.get_element_by_name(&id.0).and_then(|element| {
+                        // Mark this element ID for removal from rendering
+                        label_ref_id = Some(id.0.clone());
+                        // Capture styles from the referenced element
+                        label_styles = Some(element.styles.clone());
                         if let ElementType::Shape(ShapeType::Text { content }) = &element.element_type {
                             Some(content.clone())
                         } else {
@@ -317,7 +352,12 @@ fn extract_connection_label(
         } else {
             None
         }
-    })?;
+    });
+
+    let text = match text {
+        Some(t) => t,
+        None => return (None, label_ref_id),
+    };
 
     // Extract label_position modifier if present
     let label_position = modifiers.iter().find_map(|m| {
@@ -371,11 +411,15 @@ fn extract_connection_label(
         (0.0, 0.0, TextAnchor::Middle)
     };
 
-    Some(LabelLayout {
-        text,
-        position: Point::new(mid_x, mid_y),
-        anchor,
-    })
+    (
+        Some(LabelLayout {
+            text,
+            position: Point::new(mid_x, mid_y),
+            anchor,
+            styles: label_styles,
+        }),
+        label_ref_id,
+    )
 }
 
 #[cfg(test)]

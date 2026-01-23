@@ -615,12 +615,18 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
 
     // Render connection label if present
     if let Some(label) = &conn.label {
+        // Use label's own styles if available (from referenced element), otherwise empty
+        let label_styles = label
+            .styles
+            .as_ref()
+            .map(format_text_styles)
+            .unwrap_or_default();
         builder.add_text(
             &label.text,
             label.position.x,
             label.position.y,
             &label.anchor,
-            "",
+            &label_styles,
         );
     }
 }
@@ -639,6 +645,22 @@ fn format_connection_styles(styles: &ResolvedStyles) -> String {
         parts.push(r#" stroke-width="2""#.to_string());
     }
     parts.join("")
+}
+
+/// Format text styles (fill and font_size for labels)
+fn format_text_styles(styles: &ResolvedStyles) -> String {
+    let mut parts = vec![];
+    if let Some(fill) = &styles.fill {
+        parts.push(format!(r#"fill="{}""#, fill));
+    }
+    if let Some(font_size) = styles.font_size {
+        parts.push(format!(r#"font-size="{}""#, font_size));
+    }
+    if !parts.is_empty() {
+        parts.join(" ")
+    } else {
+        String::new()
+    }
 }
 
 /// Format ResolvedStyles as SVG attribute string

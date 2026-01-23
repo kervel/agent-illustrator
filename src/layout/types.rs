@@ -246,6 +246,8 @@ pub struct LabelLayout {
     pub text: String,
     pub position: Point,
     pub anchor: TextAnchor,
+    /// Optional styles for the label (used when referencing a styled element)
+    pub styles: Option<ResolvedStyles>,
 }
 
 /// Layout information for a single element
@@ -346,6 +348,22 @@ impl LayoutResult {
         None
     }
 
+    /// Remove an element by name (used to hide elements that are used as connection labels)
+    pub fn remove_element_by_name(&mut self, name: &str) {
+        // Remove from the index
+        self.elements.remove(name);
+
+        // Remove from root_elements
+        self.root_elements.retain(|elem| {
+            elem.id.as_ref().map(|id| id.0.as_str()) != Some(name)
+        });
+
+        // Also remove from children recursively
+        for elem in &mut self.root_elements {
+            remove_from_children(&mut elem.children, name);
+        }
+    }
+
     /// Compute the bounding box that contains all elements
     pub fn compute_bounds(&mut self) {
         if self.root_elements.is_empty() {
@@ -442,6 +460,15 @@ fn find_element_mut<'a>(
         }
     }
     None
+}
+
+fn remove_from_children(children: &mut Vec<ElementLayout>, name: &str) {
+    children.retain(|elem| {
+        elem.id.as_ref().map(|id| id.0.as_str()) != Some(name)
+    });
+    for child in children {
+        remove_from_children(&mut child.children, name);
+    }
 }
 
 impl Default for LayoutResult {
