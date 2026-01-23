@@ -1,0 +1,238 @@
+---
+parent_branch: main
+feature_number: "005"
+status: In Progress
+created_at: 2026-01-23T00:00:00+00:00
+---
+
+# Feature: Reusable Components (SVG and AIL Imports)
+
+## Overview
+
+Enable users to create reusable visual components by importing external SVG files and other AIL files into their illustrations. This allows building a library of reusable elements—such as person icons, server symbols, or custom diagrams—that can be instantiated multiple times within a single illustration.
+
+The primary use case is defining a visual element once (e.g., a person icon as an SVG or a complex machine as an AIL file) and then using it multiple times in a composition. This promotes consistency, reduces duplication, and enables building complex illustrations from simpler building blocks.
+
+## Clarifications
+
+### Session 2026-01-23
+
+- Q: How should component instance sizing work when the SVG has intrinsic dimensions? → A: Scale to fit layout (preserving aspect ratio) by default; allow optional explicit size override parameters.
+- Q: Can connections target elements inside a component instance? → A: Yes, but only via explicitly exported connection points; components must declare which internal elements are targetable.
+- Q: What happens if a component/instance name conflicts with existing names? → A: Scoped namespaces; component internals have their own namespace, preventing conflicts with parent document names.
+
+## User Scenarios
+
+### Scenario 1: Import and Use an SVG Icon Multiple Times
+
+A user has an SVG file representing a person icon. They want to create a team diagram showing 5 people arranged in a row.
+
+**Acceptance Criteria:**
+- User can declare an SVG file as a component with a name
+- User can instantiate that component multiple times with different instance names
+- Each instance renders the same SVG at the appropriate position
+- Instances can be styled or modified independently (e.g., different colors)
+
+### Scenario 2: Import and Use an AIL File as a Subcomponent
+
+A user has an AIL file defining a "server rack" with multiple servers inside. They want to create a datacenter diagram with 3 server racks.
+
+**Acceptance Criteria:**
+- User can import an AIL file and give it a component name
+- User can instantiate that AIL component multiple times
+- The imported AIL's internal structure is preserved in each instance
+- Connections can be made to elements inside the imported component
+
+### Scenario 3: Component with Configurable Parameters
+
+A user has a "labeled box" component that takes a text label as a parameter. They want to create multiple boxes with different labels.
+
+**Acceptance Criteria:**
+- Components can declare parameters (at minimum, a text label)
+- When instantiating, users can provide parameter values
+- The component renders with the provided parameter values
+
+### Scenario 4: Nested Component Imports
+
+A user creates a "workstation" AIL component that imports a "monitor" SVG and a "keyboard" SVG. Another file imports the "workstation" component.
+
+**Acceptance Criteria:**
+- Components can import other components (transitive imports)
+- Import resolution handles nested dependencies correctly
+- Circular import dependencies are detected and reported as errors
+
+### Scenario 5: Connecting to Exported Component Ports
+
+A user has a "router" component with exported "wan" and "lan" ports. They want to connect cables to specific ports rather than the router's bounding box.
+
+**Acceptance Criteria:**
+- Component can declare exports for internal elements
+- External connections can target exports via dot notation (e.g., `router1.wan`)
+- Connections to non-exported internals produce clear error messages
+- Exported ports are visually indicated as valid connection targets
+
+### Scenario 6: Missing Import Error Handling
+
+A user references an import file that doesn't exist or has syntax errors.
+
+**Acceptance Criteria:**
+- Clear error message indicates which import file is missing
+- Error message includes the line where the import was declared
+- If the imported file has syntax errors, those errors are reported with context
+
+## Functional Requirements
+
+### FR-1: Component Declaration Syntax
+
+The grammar must support declaring external files as named components.
+
+**Requirement:** Users can import SVG and AIL files and assign them component names.
+
+**Testable Criteria:**
+- Parser accepts `component "person" from "icons/person.svg"` and produces an AST node with component_name="person", source_path="icons/person.svg", source_type=SVG
+- Parser accepts `component "rack" from "components/server-rack.ail"` and produces an AST node with source_type=AIL
+
+### FR-2: Component Instantiation Syntax
+
+The grammar must support creating instances of declared components.
+
+**Requirement:** Users can create named instances of components.
+
+**Testable Criteria:**
+- Parser accepts `person "alice"` (after component declaration) and produces an instance AST node
+- Parser accepts `rack "rack1"` and produces an instance AST node referencing the component
+
+### FR-3: Component Parameters
+
+Components can accept parameters for customization.
+
+**Requirement:** Users can pass parameters when instantiating components.
+
+**Testable Criteria:**
+- Parser accepts `person "alice" [label: "Alice Smith"]` and captures parameters in AST
+- Parameters are optional and have sensible defaults when omitted
+
+### FR-4: Import Resolution
+
+The system must resolve import paths and load external files.
+
+**Requirement:** Import paths are resolved relative to the importing file's directory.
+
+**Testable Criteria:**
+- `component "x" from "sub/file.svg"` resolves to `{current_file_dir}/sub/file.svg`
+- Missing files produce clear error messages with the resolved path
+- Circular imports are detected before infinite recursion occurs
+
+### FR-5: SVG Component Rendering
+
+SVG components must be embedded in the output.
+
+**Requirement:** SVG content is included in the rendered output, properly positioned and scaled to fit its layout allocation while preserving aspect ratio. Optional explicit size parameters override default scaling.
+
+**Testable Criteria:**
+- An SVG component instance appears at the layout-determined position
+- The SVG scales to fit its allocated layout space while preserving aspect ratio
+- Optional `width` and `height` parameters override automatic scaling: `person "alice" [width: 100, height: 150]`
+- Multiple instances of the same SVG component render independently
+
+### FR-6: AIL Component Rendering
+
+AIL components must be rendered as nested structures.
+
+**Requirement:** Imported AIL files are parsed and their elements become part of the parent document.
+
+**Testable Criteria:**
+- An AIL component's shapes appear in the rendered output
+- Layout of the AIL component's contents is preserved
+- The component acts as a group for layout purposes in the parent
+
+### FR-7: Style Propagation
+
+Styles can be applied to component instances.
+
+**Requirement:** Styles applied to an instance affect its visual appearance.
+
+**Testable Criteria:**
+- `person "alice" [fill: blue]` overrides or supplements the SVG's default colors
+- Style inheritance follows predictable rules (instance styles override component defaults)
+
+### FR-8: Connection to Component Instances
+
+Connections can target component instances and their exported connection points.
+
+**Requirement:** Components can participate in connections like regular shapes. Components may export named connection points from internal elements, allowing external connections to target specific sub-elements.
+
+**Testable Criteria:**
+- `connect server1 -> rack1` works when rack1 is a component instance (attaches to bounding box)
+- Components can declare exports: `export port1, port2` within the component definition
+- External connections can target exports: `connect cable -> rack1.port1`
+- Attempting to connect to a non-exported internal element produces a clear error
+
+### FR-9: Component Export Declaration
+
+Components can expose internal elements as connection targets.
+
+**Requirement:** AIL components can declare which internal elements are accessible from outside using an export statement.
+
+**Testable Criteria:**
+- Parser accepts `export element_name` within a component's AIL source
+- Multiple exports supported: `export input, output, status`
+- Exported names must reference existing elements in the component (error if not found)
+- Only exported elements are visible via dot notation from parent scope
+
+## Success Criteria
+
+1. **Reuse Efficiency**: A user can define a complex visual element once and instantiate it 10+ times without duplicating code
+2. **First-Attempt Correctness**: AI agents can correctly use component syntax 90% of the time by following documentation
+3. **Parse Speed**: Documents with 50 component imports and 100 instances parse in under 200 milliseconds
+4. **Error Clarity**: Missing import errors clearly indicate the file path and location in source
+5. **Composition Depth**: Supports at least 5 levels of nested component imports without performance degradation
+
+## Key Entities
+
+### Component
+
+A reusable template defined from an external SVG or AIL file. Has a name, source path, source type, and optional parameter definitions.
+
+### ComponentInstance
+
+A usage of a component with a specific instance name, optional parameter values, and optional style modifiers.
+
+### ImportSource
+
+Represents the external file being imported: path, type (SVG or AIL), and resolved content.
+
+### ComponentParameter
+
+A named parameter that can customize component behavior. Has a name, type (initially just string/text), and optional default value.
+
+### ComponentExport
+
+A declaration that makes an internal element accessible from outside the component. Enables dot-notation connections (e.g., `instance.exportedName`).
+
+## Assumptions
+
+1. **File System Access**: The renderer has read access to import paths relative to the source file
+2. **SVG Subset**: SVGs are assumed to be static (no JavaScript, no external references)
+3. **No Circular Dependencies**: Circular imports are an error, not a feature
+4. **UTF-8 Files**: All imported files are UTF-8 encoded
+5. **Flat Parameter Space**: Parameters are simple key-value pairs, not nested structures
+6. **Scoped Namespaces**: Each component has its own internal namespace; internal element names do not conflict with parent document names. Component and instance names in the parent scope must be unique within that scope.
+7. **Import Before Use**: Components must be declared before they can be instantiated
+8. **Aspect Ratio Preservation**: When scaling components to fit layout, aspect ratio is always preserved (no distortion)
+
+## Technical Boundaries
+
+This feature covers:
+- Grammar extensions for component declaration and instantiation
+- AST types for components and instances
+- Import resolution logic
+- Error handling for missing/invalid imports
+- Integration with existing layout system
+
+This feature does NOT cover:
+- Remote URL imports (only local files)
+- Dynamic/runtime component loading
+- Component versioning or package management
+- Binary file imports (only text-based SVG and AIL)
+- Animation within SVG components
