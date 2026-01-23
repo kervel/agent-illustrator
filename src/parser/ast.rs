@@ -161,6 +161,8 @@ pub enum StyleKey {
     StrokeWidth,
     Opacity,
     Label,
+    /// Position of a connection label (left, right, or center)
+    LabelPosition,
     FontSize,
     Class,
     /// Gap between elements in a layout (can be negative for overlap)

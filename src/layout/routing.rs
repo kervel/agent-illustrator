@@ -283,6 +283,14 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
     Ok(())
 }
 
+/// Label position for connection labels
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LabelPosition {
+    Left,
+    Right,
+    Center,
+}
+
 fn extract_connection_label(
     modifiers: &[Spanned<StyleModifier>],
     path: &[Point],
@@ -298,6 +306,23 @@ fn extract_connection_label(
         }
     })?;
 
+    // Extract label_position modifier if present
+    let label_position = modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::LabelPosition) {
+            match &m.node.value.node {
+                StyleValue::Keyword(k) => match k.as_str() {
+                    "left" => Some(LabelPosition::Left),
+                    "right" => Some(LabelPosition::Right),
+                    "center" => Some(LabelPosition::Center),
+                    _ => None,
+                },
+                _ => None,
+            }
+        } else {
+            None
+        }
+    });
+
     // Calculate midpoint of path
     let mid_idx = path.len() / 2;
     let (mid_x, mid_y, anchor) = if path.len() >= 2 {
@@ -305,19 +330,27 @@ fn extract_connection_label(
         let end = path[path.len() - 1];
         let p1 = path[mid_idx.saturating_sub(1)];
         let p2 = path[mid_idx.min(path.len() - 1)];
-        let mid_x = (p1.x + p2.x) / 2.0;
-        let mid_y = (p1.y + p2.y) / 2.0;
+        let base_mid_x = (p1.x + p2.x) / 2.0;
+        let base_mid_y = (p1.y + p2.y) / 2.0;
 
-        // Determine if path is primarily vertical or horizontal
-        let dx = (end.x - start.x).abs();
-        let dy = (end.y - start.y).abs();
+        // Position based on explicit label_position or auto-detect
+        match label_position {
+            Some(LabelPosition::Right) => (base_mid_x + 10.0, base_mid_y, TextAnchor::Start),
+            Some(LabelPosition::Left) => (base_mid_x - 10.0, base_mid_y, TextAnchor::End),
+            Some(LabelPosition::Center) => (base_mid_x, base_mid_y, TextAnchor::Middle),
+            None => {
+                // Auto-detect based on path direction
+                let dx = (end.x - start.x).abs();
+                let dy = (end.y - start.y).abs();
 
-        if dy > dx {
-            // Vertical path: position label to the right
-            (mid_x + 10.0, mid_y, TextAnchor::Start)
-        } else {
-            // Horizontal path: position label above
-            (mid_x, mid_y - 10.0, TextAnchor::Middle)
+                if dy > dx {
+                    // Vertical path: position label to the right
+                    (base_mid_x + 10.0, base_mid_y, TextAnchor::Start)
+                } else {
+                    // Horizontal path: position label above
+                    (base_mid_x, base_mid_y - 10.0, TextAnchor::Middle)
+                }
+            }
         }
     } else if !path.is_empty() {
         (path[0].x, path[0].y, TextAnchor::Middle)
@@ -564,5 +597,94 @@ mod tests {
 
         assert_eq!(path.len(), 2);
         assert_eq!(path[0].y, path[1].y, "Perfectly horizontal should stay horizontal");
+    }
+
+    // Helper function to create modifiers for testing
+    fn make_label_modifiers(label: &str, position: Option<&str>) -> Vec<Spanned<StyleModifier>> {
+        let mut modifiers = vec![Spanned::new(
+            StyleModifier {
+                key: Spanned::new(StyleKey::Label, 0..5),
+                value: Spanned::new(StyleValue::String(label.to_string()), 7..7 + label.len()),
+            },
+            0..7 + label.len(),
+        )];
+
+        if let Some(pos) = position {
+            modifiers.push(Spanned::new(
+                StyleModifier {
+                    key: Spanned::new(StyleKey::LabelPosition, 0..14),
+                    value: Spanned::new(StyleValue::Keyword(pos.to_string()), 16..16 + pos.len()),
+                },
+                0..16 + pos.len(),
+            ));
+        }
+
+        modifiers
+    }
+
+    #[test]
+    fn test_label_position_right() {
+        let path = vec![Point::new(0.0, 0.0), Point::new(0.0, 100.0)];
+        let modifiers = make_label_modifiers("Test", Some("right"));
+
+        let label = extract_connection_label(&modifiers, &path).unwrap();
+
+        // Should be positioned to the right (x + 10)
+        assert_eq!(label.position.x, 10.0, "Right position should add 10 to x");
+        assert_eq!(label.position.y, 50.0, "Y should be at midpoint");
+        assert_eq!(label.anchor, TextAnchor::Start, "Right position should use Start anchor");
+    }
+
+    #[test]
+    fn test_label_position_left() {
+        let path = vec![Point::new(0.0, 0.0), Point::new(0.0, 100.0)];
+        let modifiers = make_label_modifiers("Test", Some("left"));
+
+        let label = extract_connection_label(&modifiers, &path).unwrap();
+
+        // Should be positioned to the left (x - 10)
+        assert_eq!(label.position.x, -10.0, "Left position should subtract 10 from x");
+        assert_eq!(label.position.y, 50.0, "Y should be at midpoint");
+        assert_eq!(label.anchor, TextAnchor::End, "Left position should use End anchor");
+    }
+
+    #[test]
+    fn test_label_position_center() {
+        let path = vec![Point::new(0.0, 0.0), Point::new(0.0, 100.0)];
+        let modifiers = make_label_modifiers("Test", Some("center"));
+
+        let label = extract_connection_label(&modifiers, &path).unwrap();
+
+        // Should be positioned at center (no offset)
+        assert_eq!(label.position.x, 0.0, "Center position should have no x offset");
+        assert_eq!(label.position.y, 50.0, "Y should be at midpoint");
+        assert_eq!(label.anchor, TextAnchor::Middle, "Center position should use Middle anchor");
+    }
+
+    #[test]
+    fn test_label_position_auto_vertical_path() {
+        // Vertical path (dy > dx): auto should position to the right
+        let path = vec![Point::new(50.0, 0.0), Point::new(50.0, 100.0)];
+        let modifiers = make_label_modifiers("Test", None);
+
+        let label = extract_connection_label(&modifiers, &path).unwrap();
+
+        // Auto-detect for vertical: right side
+        assert_eq!(label.position.x, 60.0, "Vertical auto should add 10 to x");
+        assert_eq!(label.anchor, TextAnchor::Start, "Vertical auto should use Start anchor");
+    }
+
+    #[test]
+    fn test_label_position_auto_horizontal_path() {
+        // Horizontal path (dx > dy): auto should position above
+        let path = vec![Point::new(0.0, 50.0), Point::new(100.0, 50.0)];
+        let modifiers = make_label_modifiers("Test", None);
+
+        let label = extract_connection_label(&modifiers, &path).unwrap();
+
+        // Auto-detect for horizontal: above
+        assert_eq!(label.position.x, 50.0, "Horizontal auto should have x at midpoint");
+        assert_eq!(label.position.y, 40.0, "Horizontal auto should subtract 10 from y");
+        assert_eq!(label.anchor, TextAnchor::Middle, "Horizontal auto should use Middle anchor");
     }
 }

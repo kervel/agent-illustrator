@@ -680,3 +680,130 @@ fn test_label_in_layout_container() {
         _ => panic!("Expected layout statement"),
     }
 }
+
+// ============================================================================
+// Connection Label Position Tests
+// ============================================================================
+
+#[test]
+fn test_connection_label_position_right() {
+    // Feature: Connection label positioned to the right
+    let input = r#"
+        rect a
+        rect b
+        a -> b [label: "Right Label", label_position: right]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with label_position: right");
+    assert_eq!(doc.statements.len(), 3);
+
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+            assert_eq!(conn.modifiers.len(), 2);
+            // Verify label_position modifier exists
+            let has_label_position = conn.modifiers.iter().any(|m| {
+                matches!(
+                    m.node.key.node,
+                    agent_illustrator::parser::ast::StyleKey::LabelPosition
+                )
+            });
+            assert!(has_label_position, "Should have label_position modifier");
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}
+
+#[test]
+fn test_connection_label_position_left() {
+    // Feature: Connection label positioned to the left
+    let input = r#"
+        rect a
+        rect b
+        a -> b [label: "Left Label", label_position: left]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with label_position: left");
+    assert_eq!(doc.statements.len(), 3);
+
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+            let label_position_modifier = conn.modifiers.iter().find(|m| {
+                matches!(
+                    m.node.key.node,
+                    agent_illustrator::parser::ast::StyleKey::LabelPosition
+                )
+            });
+            assert!(
+                label_position_modifier.is_some(),
+                "Should have label_position modifier"
+            );
+            match &label_position_modifier.unwrap().node.value.node {
+                agent_illustrator::parser::ast::StyleValue::Keyword(k) => {
+                    assert_eq!(k, "left");
+                }
+                _ => panic!("Expected keyword value for label_position"),
+            }
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}
+
+#[test]
+fn test_connection_label_position_center() {
+    // Feature: Connection label positioned at center
+    let input = r#"
+        rect a
+        rect b
+        a -> b [label: "Center Label", label_position: center]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with label_position: center");
+    assert_eq!(doc.statements.len(), 3);
+
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+            let label_position_modifier = conn.modifiers.iter().find(|m| {
+                matches!(
+                    m.node.key.node,
+                    agent_illustrator::parser::ast::StyleKey::LabelPosition
+                )
+            });
+            assert!(
+                label_position_modifier.is_some(),
+                "Should have label_position modifier"
+            );
+            match &label_position_modifier.unwrap().node.value.node {
+                agent_illustrator::parser::ast::StyleValue::Keyword(k) => {
+                    assert_eq!(k, "center");
+                }
+                _ => panic!("Expected keyword value for label_position"),
+            }
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}
+
+#[test]
+fn test_connection_label_without_position() {
+    // Feature: Connection label without explicit position (auto-detect)
+    let input = r#"
+        rect a
+        rect b
+        a -> b [label: "Auto Position"]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection without label_position");
+    assert_eq!(doc.statements.len(), 3);
+
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+            // Should only have label modifier, no label_position
+            assert_eq!(conn.modifiers.len(), 1);
+            assert!(matches!(
+                conn.modifiers[0].node.key.node,
+                agent_illustrator::parser::ast::StyleKey::Label
+            ));
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}

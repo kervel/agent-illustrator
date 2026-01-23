@@ -68,6 +68,7 @@ where
                 "width" => StyleKey::Width,
                 "height" => StyleKey::Height,
                 "routing" => StyleKey::Routing,
+                "label_position" => StyleKey::LabelPosition,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)

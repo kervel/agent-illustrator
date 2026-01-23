@@ -98,7 +98,7 @@ col diagram {
         }
     }
 
-    // Aggregation arrows - lighter gray color
-    micro_lbl -> meso_lbl [label: "Aggregation", stroke: #AAAAAA, routing: direct]
-    meso_lbl -> macro_lbl [label: "Simplification", stroke: #AAAAAA, routing: direct]
+    // Aggregation arrows - lighter gray color, labels on right
+    micro_lbl -> meso_lbl [label: "Aggregation", label_position: right, stroke: #AAAAAA, routing: direct]
+    meso_lbl -> macro_lbl [label: "Simplification", label_position: right, stroke: #AAAAAA, routing: direct]
 }
