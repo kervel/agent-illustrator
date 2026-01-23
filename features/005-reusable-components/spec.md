@@ -1,7 +1,7 @@
 ---
 parent_branch: main
 feature_number: "005"
-status: In Progress
+status: Paused (blocked on constraint solver)
 created_at: 2026-01-23T00:00:00+00:00
 ---
 
