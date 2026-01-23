@@ -115,22 +115,36 @@ pub fn route_connection(
     let start = attachment_point(from_bounds, from_edge);
     let end = attachment_point(to_bounds, to_edge);
 
-    // For direct routing, return a straight line with snap-to-axis logic
+    // For direct routing, return a straight line with smart snap-to-axis logic
     if mode == RoutingMode::Direct {
         let dx = end.x - start.x;
         let dy = end.y - start.y;
 
-        // Snap to vertical if almost vertical (dx is small relative to dy)
-        // Snap to horizontal if almost horizontal (dy is small relative to dx)
-        // Threshold of 0.1 corresponds to ~5.7 degrees from axis
-        let snap_threshold = 0.1;
+        // Don't snap for small target shapes (e.g., track junction points)
+        // Small shapes need precise diagonal connections preserved
+        let min_snap_size = 15.0;
+        let target_too_small =
+            to_bounds.width < min_snap_size || to_bounds.height < min_snap_size;
 
-        let snapped_end = if dy.abs() > 0.0 && dx.abs() < dy.abs() * snap_threshold {
-            // Almost vertical - snap to vertical
-            Point::new(start.x, end.y)
-        } else if dx.abs() > 0.0 && dy.abs() < dx.abs() * snap_threshold {
-            // Almost horizontal - snap to horizontal
-            Point::new(end.x, start.y)
+        let snapped_end = if target_too_small {
+            // No snapping for small shapes - preserve diagonal lines
+            end
+        } else if dy.abs() > dx.abs() {
+            // Primarily vertical - consider snapping to vertical (keeping start.x)
+            // Only snap if start.x falls within target bounds horizontally
+            if start.x >= to_bounds.x && start.x <= to_bounds.right() {
+                Point::new(start.x, end.y)
+            } else {
+                end
+            }
+        } else if dx.abs() > dy.abs() {
+            // Primarily horizontal - consider snapping to horizontal (keeping start.y)
+            // Only snap if start.y falls within target bounds vertically
+            if start.y >= to_bounds.y && start.y <= to_bounds.bottom() {
+                Point::new(end.x, start.y)
+            } else {
+                end
+            }
         } else {
             end
         };
@@ -433,10 +447,10 @@ mod tests {
     }
 
     #[test]
-    fn test_direct_routing_snaps_to_vertical() {
-        // Two boxes that are almost vertically aligned (small x offset)
-        // Box centers: (25, 25) and (30, 225) - dx=5, dy=200
-        // Ratio: 5/200 = 0.025 < 0.1, should snap to vertical
+    fn test_direct_routing_snaps_to_vertical_when_within_bounds() {
+        // Two boxes where the from box's center x falls within target bounds
+        // From box center at x=25, target spans x=5 to x=55
+        // Since 25 is within [5, 55], snapping is safe
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(5.0, 200.0, 50.0, 50.0);
 
@@ -446,14 +460,15 @@ mod tests {
         // The end point should be snapped to have the same x as the start
         assert_eq!(
             path[0].x, path[1].x,
-            "Almost-vertical line should snap to perfectly vertical"
+            "Vertical line should snap when start.x is within target bounds"
         );
     }
 
     #[test]
-    fn test_direct_routing_snaps_to_horizontal() {
-        // Two boxes that are almost horizontally aligned (small y offset)
-        // Box centers at same height, slight vertical offset
+    fn test_direct_routing_snaps_to_horizontal_when_within_bounds() {
+        // Two boxes where the from box's center y falls within target bounds
+        // From box center at y=25, target spans y=5 to y=55
+        // Since 25 is within [5, 55], snapping is safe
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(200.0, 5.0, 50.0, 50.0);
 
@@ -463,14 +478,17 @@ mod tests {
         // The end point should be snapped to have the same y as the start
         assert_eq!(
             path[0].y, path[1].y,
-            "Almost-horizontal line should snap to perfectly horizontal"
+            "Horizontal line should snap when start.y is within target bounds"
         );
     }
 
     #[test]
-    fn test_direct_routing_preserves_diagonal() {
-        // Two boxes at a significant diagonal angle (more than ~5.7 degrees)
-        // dx=150, dy=100, ratio = 100/150 = 0.67 > 0.1, should NOT snap
+    fn test_direct_routing_preserves_diagonal_when_outside_bounds() {
+        // Two boxes where start point falls outside target bounds
+        // From box center at (25, 25), target at (200, 100) with size 50x50
+        // Target spans x=200 to x=250, y=100 to y=150
+        // start.x=25 is NOT within [200, 250], start.y=25 is NOT within [100, 150]
+        // Snapping would miss the target, so diagonal should be preserved
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
 
@@ -480,11 +498,47 @@ mod tests {
         // Both x and y should be different (diagonal line preserved)
         assert_ne!(
             path[0].x, path[1].x,
-            "Diagonal line should not snap horizontally"
+            "Diagonal line should not snap when outside target bounds"
         );
         assert_ne!(
             path[0].y, path[1].y,
-            "Diagonal line should not snap vertically"
+            "Diagonal line should not snap when outside target bounds"
+        );
+    }
+
+    #[test]
+    fn test_direct_routing_no_snap_for_small_shapes() {
+        // Small target shape (like a track junction point, size: 6)
+        // Should never snap, even if start is within bounds
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(20.0, 200.0, 6.0, 6.0); // Small 6x6 shape
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        // Start point at (25, 50), end should be at target center (23, 203)
+        // Diagonal should be preserved for small shapes
+        assert_ne!(
+            path[0].x, path[1].x,
+            "Small shapes should never snap - preserve diagonal"
+        );
+    }
+
+    #[test]
+    fn test_direct_routing_snaps_for_large_shapes_only() {
+        // Large target shape where snapping makes sense
+        // From center at x=25, target spans x=0 to x=100
+        // Since 25 is within [0, 100], vertical snap is safe
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(0.0, 200.0, 100.0, 50.0); // Large 100x50 shape
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+
+        assert_eq!(path.len(), 2);
+        // Should snap to vertical since start.x (25) is within target x bounds [0, 100]
+        assert_eq!(
+            path[0].x, path[1].x,
+            "Large shapes should snap when start is within bounds"
         );
     }
 
