@@ -1,8 +1,8 @@
 //! SVG generation from layout results
 
 use crate::layout::{
-    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point,
-    ResolvedStyles, TextAnchor,
+    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point, ResolvedStyles,
+    TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, ShapeType};
 
@@ -52,8 +52,11 @@ impl SvgBuilder {
     /// Add the arrow marker definition for directed connections
     pub fn add_arrow_marker(&mut self) {
         let prefix = self.prefix();
+        // Use orient="auto" to automatically rotate the marker to match path direction
+        // at the marker position. The arrow shape points right (+X), so it will
+        // rotate to match the final segment direction (e.g., down for vertical paths).
         self.defs.push(format!(
-            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" class="{prefix}arrow-head"/>
     </marker>"#
         ));
@@ -239,7 +242,13 @@ impl SvgBuilder {
     }
 
     /// Add a path for a connection
-    pub fn add_connection_path(&mut self, path: &[Point], classes: &[String], styles: &str, marker_end: bool) {
+    pub fn add_connection_path(
+        &mut self,
+        path: &[Point],
+        classes: &[String],
+        styles: &str,
+        marker_end: bool,
+    ) {
         let prefix = self.prefix();
         let class_list = std::iter::once(format!("{}connection", prefix))
             .chain(classes.iter().cloned())
@@ -272,12 +281,8 @@ impl SvgBuilder {
             format!(r#" class="{}""#, classes.join(" "))
         };
 
-        self.elements.push(format!(
-            "{}<g{}{}>",
-            self.indent_str(),
-            id_attr,
-            class_attr
-        ));
+        self.elements
+            .push(format!("{}<g{}{}>", self.indent_str(), id_attr, class_attr));
         self.indent += 1;
     }
 
@@ -501,7 +506,13 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
 
     // Render connection label if present
     if let Some(label) = &conn.label {
-        builder.add_text(&label.text, label.position.x, label.position.y, &label.anchor, "");
+        builder.add_text(
+            &label.text,
+            label.position.x,
+            label.position.y,
+            &label.anchor,
+            "",
+        );
     }
 }
 

@@ -195,4 +195,41 @@ mod tests {
         let err = result.unwrap_err();
         assert!(matches!(err, RenderError::Layout(_)));
     }
+
+    #[test]
+    fn test_render_connection_direct_routing() {
+        // Direct routing should produce a simple 2-point path (M x1,y1 L x2,y2)
+        let svg = render(
+            r#"
+            row {
+                rect a
+                rect b
+            }
+            a -> b [routing: direct]
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains("ai-connection"));
+        // The SVG path should be rendered - check it contains path element with d attribute
+        assert!(svg.contains("<path"));
+        // Direct routing between horizontally aligned elements creates a simple line
+        // The path should NOT have multiple L commands for intermediate points
+    }
+
+    #[test]
+    fn test_render_connection_orthogonal_routing_explicit() {
+        // Explicit orthogonal routing should work the same as default
+        let svg = render(
+            r#"
+            row {
+                rect a
+                rect b
+            }
+            a -> b [routing: orthogonal]
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains("ai-connection"));
+        assert!(svg.contains("<path"));
+    }
 }

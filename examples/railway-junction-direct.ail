@@ -1,0 +1,39 @@
+// Railway Junction with Direct Routing
+// Demonstrates diagonal connections for track switches
+
+row junction {
+    // Entry tracks (2 main lines)
+    col entry [gap: 30] {
+        circle entry_north [size: 10, fill: #4169E1]
+        circle entry_south [size: 10, fill: #4169E1]
+    }
+
+    // Junction switches - tracks split/merge here
+    col junction_center [gap: 20] {
+        circle j1 [size: 10, fill: #228B22, label: "Switch 1"]
+        circle j2 [size: 10, fill: #228B22, label: "Switch 2"]
+        circle j3 [size: 10, fill: #228B22, label: "Switch 3"]
+    }
+
+    // Exit tracks (3 yard tracks)
+    col exit [gap: 20] {
+        circle exit_t1 [size: 10, fill: #4169E1]
+        circle exit_t2 [size: 10, fill: #4169E1]
+        circle exit_t3 [size: 10, fill: #4169E1]
+    }
+}
+
+// Main track connections (orthogonal - default)
+entry_north -> j1 [stroke: #4169E1, stroke_width: 3]
+entry_south -> j3 [stroke: #4169E1, stroke_width: 3]
+
+// Direct diagonal connections for track switches
+// These create the characteristic Y-shape of railway junctions
+j1 -> exit_t1 [routing: direct, stroke: #228B22, stroke_width: 2]
+j1 -> exit_t2 [routing: direct, stroke: #228B22, stroke_width: 2]
+j2 -> exit_t2 [routing: direct, stroke: #228B22, stroke_width: 2]
+j3 -> exit_t2 [routing: direct, stroke: #228B22, stroke_width: 2]
+j3 -> exit_t3 [routing: direct, stroke: #228B22, stroke_width: 2]
+
+// Orthogonal connection for comparison
+j2 -> exit_t1 [routing: orthogonal, stroke: #555555, stroke_width: 1]

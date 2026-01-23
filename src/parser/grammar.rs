@@ -59,6 +59,11 @@ where
             "label" => StyleKey::Label,
             "font_size" => StyleKey::FontSize,
             "class" => StyleKey::Class,
+            "gap" => StyleKey::Gap,
+            "size" => StyleKey::Size,
+            "width" => StyleKey::Width,
+            "height" => StyleKey::Height,
+            "routing" => StyleKey::Routing,
             other => StyleKey::Custom(other.to_string()),
         };
         Spanned::new(key, id.span)

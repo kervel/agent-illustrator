@@ -169,8 +169,14 @@ impl ResolvedStyles {
                         styles.css_classes.push(k.clone());
                     }
                 }
-                StyleKey::Label | StyleKey::Custom(_) => {
-                    // Labels handled separately, custom keys ignored for now
+                StyleKey::Label
+                | StyleKey::Gap
+                | StyleKey::Size
+                | StyleKey::Width
+                | StyleKey::Height
+                | StyleKey::Routing
+                | StyleKey::Custom(_) => {
+                    // Labels, gap, size, and routing modifiers handled separately in layout engine; custom keys ignored for now
                 }
             }
         }
@@ -334,10 +340,70 @@ impl LayoutResult {
             for point in &conn.path {
                 bounds = bounds.expand_to_include(*point);
             }
+            // Include connection labels
+            if let Some(label) = &conn.label {
+                bounds = expand_bounds_for_label(bounds, label);
+            }
+        }
+
+        // Include element labels recursively
+        for element in &self.root_elements {
+            bounds = expand_bounds_for_element_labels(bounds, element);
         }
 
         self.bounds = bounds;
     }
+}
+
+/// Estimate the width of a text label (approximate: ~7px per character for default font)
+fn estimate_label_width(text: &str) -> f64 {
+    text.len() as f64 * 7.0
+}
+
+/// Expand bounds to include a label, accounting for text anchor
+fn expand_bounds_for_label(bounds: BoundingBox, label: &LabelLayout) -> BoundingBox {
+    let estimated_width = estimate_label_width(&label.text);
+    let estimated_height = 14.0; // approximate line height
+
+    // Calculate label bounds based on anchor
+    let (label_left, label_right) = match label.anchor {
+        TextAnchor::Start => (label.position.x, label.position.x + estimated_width),
+        TextAnchor::Middle => (
+            label.position.x - estimated_width / 2.0,
+            label.position.x + estimated_width / 2.0,
+        ),
+        TextAnchor::End => (label.position.x - estimated_width, label.position.x),
+    };
+
+    // Labels extend above their position point (text baseline)
+    let label_top = label.position.y - estimated_height;
+    let label_bottom = label.position.y;
+
+    let label_bounds = BoundingBox::new(
+        label_left,
+        label_top,
+        label_right - label_left,
+        label_bottom - label_top,
+    );
+
+    bounds.union(&label_bounds)
+}
+
+/// Recursively expand bounds to include all element labels
+fn expand_bounds_for_element_labels(bounds: BoundingBox, element: &ElementLayout) -> BoundingBox {
+    let mut bounds = bounds;
+
+    // Include this element's label
+    if let Some(label) = &element.label {
+        bounds = expand_bounds_for_label(bounds, label);
+    }
+
+    // Recursively include children's labels
+    for child in &element.children {
+        bounds = expand_bounds_for_element_labels(bounds, child);
+    }
+
+    bounds
 }
 
 fn find_element_mut<'a>(

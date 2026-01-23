@@ -232,6 +232,111 @@ fn test_numeric_modifiers() {
 }
 
 #[test]
+fn test_connection_routing_direct() {
+    // Feature: Direct (diagonal) routing for connections
+    let input = r#"
+        rect a
+        rect b
+        a -> b [routing: direct]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with direct routing");
+    assert_eq!(doc.statements.len(), 3);
+
+    // Verify the connection has the routing modifier
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+            assert_eq!(conn.modifiers.len(), 1);
+            assert!(matches!(
+                conn.modifiers[0].node.key.node,
+                agent_illustrator::parser::ast::StyleKey::Routing
+            ));
+            match &conn.modifiers[0].node.value.node {
+                agent_illustrator::parser::ast::StyleValue::Keyword(k) => {
+                    assert_eq!(k, "direct");
+                }
+                _ => panic!("Expected keyword value"),
+            }
+        }
+        _ => panic!("Expected connection"),
+    }
+}
+
+#[test]
+fn test_connection_routing_orthogonal() {
+    // Explicit orthogonal routing (same as default)
+    let input = r#"
+        rect a
+        rect b
+        a -> b [routing: orthogonal]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with orthogonal routing");
+    assert_eq!(doc.statements.len(), 3);
+}
+
+#[test]
+fn test_undirected_connection_with_routing() {
+    // Undirected connection with direct routing
+    let input = r#"
+        rect a
+        rect b
+        a -- b [routing: direct]
+    "#;
+
+    let doc = parse(input).expect("Should parse undirected connection with routing");
+    assert_eq!(doc.statements.len(), 3);
+}
+
+#[test]
+fn test_railway_junction_with_direct_routing() {
+    // Feature: Direct routing for railway junction diagrams
+    // This example demonstrates diagonal connections for track switches
+    let input = include_str!("../examples/railway-junction-direct.ail");
+
+    let doc = parse(input).expect("Railway junction with direct routing should parse");
+
+    // Count connections with direct routing
+    fn count_direct_routing(
+        stmts: &[agent_illustrator::parser::ast::Spanned<
+            agent_illustrator::parser::ast::Statement,
+        >],
+    ) -> usize {
+        let mut count = 0;
+        for stmt in stmts {
+            if let agent_illustrator::parser::ast::Statement::Connection(conn) = &stmt.node {
+                for modifier in &conn.modifiers {
+                    if matches!(
+                        modifier.node.key.node,
+                        agent_illustrator::parser::ast::StyleKey::Routing
+                    ) {
+                        if let agent_illustrator::parser::ast::StyleValue::Keyword(k) =
+                            &modifier.node.value.node
+                        {
+                            if k == "direct" {
+                                count += 1;
+                            }
+                        }
+                    }
+                }
+            } else if let agent_illustrator::parser::ast::Statement::Layout(l) = &stmt.node {
+                count += count_direct_routing(&l.children);
+            } else if let agent_illustrator::parser::ast::Statement::Group(g) = &stmt.node {
+                count += count_direct_routing(&g.children);
+            }
+        }
+        count
+    }
+
+    let direct_count = count_direct_routing(&doc.statements);
+    assert!(
+        direct_count >= 5,
+        "Expected at least 5 direct routing connections, found {}",
+        direct_count
+    );
+}
+
+#[test]
 fn test_railway_topology_smoke_test() {
     // Feature 002: Railway Topology Smoke Test
     // This test verifies that the reference DSL document parses correctly

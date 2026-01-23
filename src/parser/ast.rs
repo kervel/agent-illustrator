@@ -159,6 +159,16 @@ pub enum StyleKey {
     Label,
     FontSize,
     Class,
+    /// Gap between elements in a layout (can be negative for overlap)
+    Gap,
+    /// Size for shapes (creates square/circle with this dimension)
+    Size,
+    /// Explicit width for shapes
+    Width,
+    /// Explicit height for shapes
+    Height,
+    /// Routing mode for connections (direct or orthogonal)
+    Routing,
     Custom(String),
 }
 

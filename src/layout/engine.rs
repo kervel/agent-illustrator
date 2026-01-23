@@ -72,10 +72,33 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     let (width, height) = compute_shape_size(shape, config);
     let styles = ResolvedStyles::from_modifiers(&shape.modifiers);
 
-    let label = extract_label(&shape.modifiers).map(|text| LabelLayout {
-        text,
-        position: Point::new(position.x + width / 2.0, position.y + height / 2.0),
-        anchor: TextAnchor::Middle,
+    // For Line shapes, position label above the line with an offset
+    // For other shapes, center the label within the shape
+    let label = extract_label(&shape.modifiers).map(|text| {
+        let (label_x, label_y, anchor) = match &shape.shape_type.node {
+            ShapeType::Line => {
+                // Center horizontally on the line, position above with offset
+                let label_offset = 12.0; // pixels above the line
+                (
+                    position.x + width / 2.0,
+                    position.y + height / 2.0 - label_offset,
+                    TextAnchor::Middle,
+                )
+            }
+            _ => {
+                // Default: center within the shape bounds
+                (
+                    position.x + width / 2.0,
+                    position.y + height / 2.0,
+                    TextAnchor::Middle,
+                )
+            }
+        };
+        LabelLayout {
+            text,
+            position: Point::new(label_x, label_y),
+            anchor,
+        }
     });
 
     ElementLayout {
@@ -89,7 +112,24 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 }
 
 fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
-    match &shape.shape_type.node {
+    // Extract size modifiers from the shape
+    let size = extract_size_modifier(&shape.modifiers);
+    let width = extract_width_modifier(&shape.modifiers);
+    let height = extract_height_modifier(&shape.modifiers);
+
+    // If explicit width and height are provided, use them
+    if let (Some(w), Some(h)) = (width, height) {
+        return (w, h);
+    }
+
+    // If only size is provided, use it for both dimensions (square/circle)
+    if let Some(s) = size {
+        return (s, s);
+    }
+
+    // If only width is provided, use it for width and default for height
+    // If only height is provided, use default for width and it for height
+    let (default_width, default_height) = match &shape.shape_type.node {
         ShapeType::Rectangle => config.default_rect_size,
         ShapeType::Circle => {
             let d = config.default_circle_radius * 2.0;
@@ -99,7 +139,54 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         ShapeType::Polygon => config.default_rect_size,
         ShapeType::Icon { .. } => config.default_rect_size,
         ShapeType::Line => (config.default_line_width, 4.0),
-    }
+    };
+
+    let final_width = width.unwrap_or(default_width);
+    let final_height = height.unwrap_or(default_height);
+
+    (final_width, final_height)
+}
+
+/// Extract the size modifier value from modifiers
+fn extract_size_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
+    modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::Size) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(*value),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    })
+}
+
+/// Extract the width modifier value from modifiers
+fn extract_width_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
+    modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::Width) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(*value),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    })
+}
+
+/// Extract the height modifier value from modifiers
+fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
+    modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::Height) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(*value),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    })
 }
 
 fn extract_label(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
@@ -115,10 +202,27 @@ fn extract_label(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
     })
 }
 
+/// Extract the gap value from modifiers (can be negative for overlap)
+fn extract_gap(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
+    modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::Gap) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(*value),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    })
+}
+
 fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
+    // Extract gap modifier from layout modifiers (can be negative for overlap)
+    let gap = extract_gap(&layout.modifiers);
+
     let (children, bounds) = match layout.layout_type.node {
-        LayoutType::Row => layout_row(&layout.children, position, config),
-        LayoutType::Column => layout_column(&layout.children, position, config),
+        LayoutType::Row => layout_row(&layout.children, position, config, gap),
+        LayoutType::Column => layout_column(&layout.children, position, config, gap),
         LayoutType::Grid => layout_grid(&layout.children, position, config),
         LayoutType::Stack => layout_stack(&layout.children, position, config),
     };
@@ -141,8 +245,8 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
 }
 
 fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
-    // Groups default to column layout
-    let (children, bounds) = layout_column(&group.children, position, config);
+    // Groups default to column layout (no gap override)
+    let (children, bounds) = layout_column(&group.children, position, config, None);
 
     let styles = ResolvedStyles::from_modifiers(&group.modifiers);
     // Place label on the left side of the group, vertically centered
@@ -166,10 +270,14 @@ fn layout_row(
     children: &[Spanned<Statement>],
     position: Point,
     config: &LayoutConfig,
+    gap_override: Option<f64>,
 ) -> (Vec<ElementLayout>, BoundingBox) {
     let mut layouts = vec![];
     let mut x = position.x + config.container_padding;
     let mut max_height = 0.0f64;
+
+    // Use gap override if provided, otherwise use default element spacing
+    let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
         // Skip connections and constraints
@@ -185,7 +293,7 @@ fn layout_row(
             Point::new(x, position.y + config.container_padding),
             config,
         );
-        x += child_layout.bounds.width + config.element_spacing;
+        x += child_layout.bounds.width + spacing;
         max_height = max_height.max(child_layout.bounds.height);
         layouts.push(child_layout);
     }
@@ -193,7 +301,7 @@ fn layout_row(
     let total_width = if layouts.is_empty() {
         config.container_padding * 2.0
     } else {
-        x - position.x - config.element_spacing + config.container_padding
+        x - position.x - spacing + config.container_padding
     };
     let total_height = max_height + 2.0 * config.container_padding;
 
@@ -207,10 +315,14 @@ fn layout_column(
     children: &[Spanned<Statement>],
     position: Point,
     config: &LayoutConfig,
+    gap_override: Option<f64>,
 ) -> (Vec<ElementLayout>, BoundingBox) {
     let mut layouts = vec![];
     let mut y = position.y + config.container_padding;
     let mut max_width = 0.0f64;
+
+    // Use gap override if provided, otherwise use default element spacing
+    let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
         // Skip connections and constraints
@@ -226,7 +338,7 @@ fn layout_column(
             Point::new(position.x + config.container_padding, y),
             config,
         );
-        y += child_layout.bounds.height + config.element_spacing;
+        y += child_layout.bounds.height + spacing;
         max_width = max_width.max(child_layout.bounds.width);
         layouts.push(child_layout);
     }
@@ -235,7 +347,7 @@ fn layout_column(
     let total_height = if layouts.is_empty() {
         config.container_padding * 2.0
     } else {
-        y - position.y - config.element_spacing + config.container_padding
+        y - position.y - spacing + config.container_padding
     };
 
     (
@@ -434,7 +546,10 @@ impl ConstraintGraph {
         for (subject, relations) in &self.constraints {
             for (_, anchor) in relations {
                 *in_degree.entry(subject.clone()).or_insert(0) += 1;
-                dependents.entry(anchor.clone()).or_default().push(subject.clone());
+                dependents
+                    .entry(anchor.clone())
+                    .or_default()
+                    .push(subject.clone());
             }
         }
 
@@ -512,8 +627,7 @@ fn apply_constraint(
             subject.bounds.y = anchor_bounds.y - subject.bounds.height - spacing;
         }
         PositionRelation::Inside => {
-            subject.bounds.x =
-                anchor_bounds.x + (anchor_bounds.width - subject.bounds.width) / 2.0;
+            subject.bounds.x = anchor_bounds.x + (anchor_bounds.width - subject.bounds.width) / 2.0;
             subject.bounds.y =
                 anchor_bounds.y + (anchor_bounds.height - subject.bounds.height) / 2.0;
         }
@@ -649,5 +763,54 @@ mod tests {
         // Each row should have 2 children
         assert_eq!(outer.children[0].children.len(), 2);
         assert_eq!(outer.children[1].children.len(), 2);
+    }
+
+    #[test]
+    fn test_shape_size_modifier() {
+        // Test size modifier creates square/circle with given dimension
+        let doc = parse("circle p1 [size: 8]").unwrap();
+        let config = LayoutConfig::default();
+        let result = compute(&doc, &config).unwrap();
+
+        assert_eq!(result.root_elements.len(), 1);
+        assert_eq!(result.root_elements[0].bounds.width, 8.0);
+        assert_eq!(result.root_elements[0].bounds.height, 8.0);
+    }
+
+    #[test]
+    fn test_shape_width_height_modifiers() {
+        // Test explicit width and height modifiers
+        let doc = parse("rect r1 [width: 50, height: 30]").unwrap();
+        let config = LayoutConfig::default();
+        let result = compute(&doc, &config).unwrap();
+
+        assert_eq!(result.root_elements.len(), 1);
+        assert_eq!(result.root_elements[0].bounds.width, 50.0);
+        assert_eq!(result.root_elements[0].bounds.height, 30.0);
+    }
+
+    #[test]
+    fn test_shape_ellipse_with_dimensions() {
+        // Test ellipse with explicit width and height
+        let doc = parse("ellipse e1 [width: 100, height: 50]").unwrap();
+        let config = LayoutConfig::default();
+        let result = compute(&doc, &config).unwrap();
+
+        assert_eq!(result.root_elements.len(), 1);
+        assert_eq!(result.root_elements[0].bounds.width, 100.0);
+        assert_eq!(result.root_elements[0].bounds.height, 50.0);
+    }
+
+    #[test]
+    fn test_shape_only_width_uses_default_height() {
+        // Test that specifying only width keeps default height
+        let doc = parse("rect r1 [width: 100]").unwrap();
+        let config = LayoutConfig::default();
+        let result = compute(&doc, &config).unwrap();
+
+        assert_eq!(result.root_elements.len(), 1);
+        assert_eq!(result.root_elements[0].bounds.width, 100.0);
+        // Height should be the default rect height (30.0)
+        assert_eq!(result.root_elements[0].bounds.height, 30.0);
     }
 }

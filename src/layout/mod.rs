@@ -12,7 +12,7 @@ pub mod types;
 pub use config::LayoutConfig;
 pub use engine::{compute, resolve_constraints};
 pub use error::LayoutError;
-pub use routing::route_connections;
+pub use routing::{route_connections, RoutingMode};
 pub use types::*;
 
 use std::collections::HashSet;
@@ -171,7 +171,11 @@ fn find_similar(defined: &HashSet<String>, target: &str, max_distance: usize) ->
         .collect();
 
     candidates.sort_by_key(|(_, d)| *d);
-    candidates.into_iter().map(|(name, _)| name).take(3).collect()
+    candidates
+        .into_iter()
+        .map(|(name, _)| name)
+        .take(3)
+        .collect()
 }
 
 #[cfg(test)]

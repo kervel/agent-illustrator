@@ -5,6 +5,16 @@ use crate::parser::ast::*;
 use super::error::LayoutError;
 use super::types::*;
 
+/// Routing mode for connections
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum RoutingMode {
+    /// Direct straight line from source to target
+    Direct,
+    /// Orthogonal routing with horizontal/vertical segments (S-shaped paths)
+    #[default]
+    Orthogonal,
+}
+
 /// Edge of a bounding box for connection attachment
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Edge {
@@ -87,20 +97,30 @@ pub fn route_orthogonal(from: Point, to: Point) -> Vec<Point> {
         // Need to route around - create S-shaped path
         // Go down first, then across, then down to target
         let mid_y = (from.y + to.y) / 2.0;
-        vec![
-            from,
-            Point::new(from.x, mid_y),
-            Point::new(to.x, mid_y),
-            to,
-        ]
+        vec![from, Point::new(from.x, mid_y), Point::new(to.x, mid_y), to]
     }
 }
 
-/// Route a connection between two bounding boxes
-pub fn route_connection(from_bounds: &BoundingBox, to_bounds: &BoundingBox) -> Vec<Point> {
+/// Minimum length for the final segment to ensure proper marker orientation.
+/// Short segments can cause browsers to calculate incorrect tangent directions.
+const MIN_FINAL_SEGMENT_LENGTH: f64 = 15.0;
+
+/// Route a connection between two bounding boxes with the specified routing mode
+pub fn route_connection(
+    from_bounds: &BoundingBox,
+    to_bounds: &BoundingBox,
+    mode: RoutingMode,
+) -> Vec<Point> {
     let (from_edge, to_edge) = best_edges(from_bounds, to_bounds);
     let start = attachment_point(from_bounds, from_edge);
     let end = attachment_point(to_bounds, to_edge);
+
+    // For direct routing, just return a straight line
+    if mode == RoutingMode::Direct {
+        return vec![start, end];
+    }
+
+    // Orthogonal routing: create paths with horizontal/vertical segments only
 
     // For vertical connections (Bottom to Top), create a proper downward path
     // even if the x coordinates are different
@@ -108,7 +128,25 @@ pub fn route_connection(from_bounds: &BoundingBox, to_bounds: &BoundingBox) -> V
         let dx = (end.x - start.x).abs();
         if dx > 15.0 {
             // Elements not aligned - create S-shaped path going down first
-            let mid_y = (start.y + end.y) / 2.0;
+            // The horizontal segment should be BETWEEN source and destination:
+            // - Below the source (greater than start.y)
+            // - Above the destination (less than end.y)
+            // Also ensure the final segment is long enough for proper marker orientation
+            let vertical_distance = end.y - start.y;
+            let mid_y = if vertical_distance > MIN_FINAL_SEGMENT_LENGTH * 2.0 {
+                // Enough room: place horizontal segment at midpoint, but ensure
+                // at least MIN_FINAL_SEGMENT_LENGTH for the final segment
+                let midpoint = (start.y + end.y) / 2.0;
+                midpoint
+                    .max(start.y + MIN_FINAL_SEGMENT_LENGTH)
+                    .min(end.y - MIN_FINAL_SEGMENT_LENGTH)
+            } else if vertical_distance > MIN_FINAL_SEGMENT_LENGTH {
+                // Limited room: prioritize final segment length for arrow orientation
+                end.y - MIN_FINAL_SEGMENT_LENGTH
+            } else {
+                // Very close: just use midpoint
+                (start.y + end.y) / 2.0
+            };
             return vec![
                 start,
                 Point::new(start.x, mid_y),
@@ -122,7 +160,9 @@ pub fn route_connection(from_bounds: &BoundingBox, to_bounds: &BoundingBox) -> V
     if from_edge == Edge::Right && to_edge == Edge::Left {
         let dy = (end.y - start.y).abs();
         if dy > 15.0 {
-            let mid_x = (start.x + end.x) / 2.0;
+            // Ensure the final segment is long enough for proper marker orientation
+            // Position the vertical segment so the final horizontal segment is at least MIN_FINAL_SEGMENT_LENGTH
+            let mid_x = end.x - MIN_FINAL_SEGMENT_LENGTH;
             return vec![
                 start,
                 Point::new(mid_x, start.y),
@@ -135,6 +175,22 @@ pub fn route_connection(from_bounds: &BoundingBox, to_bounds: &BoundingBox) -> V
     route_orthogonal(start, end)
 }
 
+/// Extract the routing mode from connection modifiers
+fn extract_routing_mode(modifiers: &[Spanned<StyleModifier>]) -> RoutingMode {
+    for modifier in modifiers {
+        if matches!(modifier.node.key.node, StyleKey::Routing) {
+            if let StyleValue::Keyword(k) = &modifier.node.value.node {
+                match k.as_str() {
+                    "direct" => return RoutingMode::Direct,
+                    "orthogonal" => return RoutingMode::Orthogonal,
+                    _ => {} // Unknown value, use default
+                }
+            }
+        }
+    }
+    RoutingMode::default() // Orthogonal
+}
+
 /// Route all connections in a document
 pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
     fn process_statements(
@@ -144,27 +200,28 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
         for stmt in stmts {
             match &stmt.node {
                 Statement::Connection(conn) => {
-                    let from_element = result
-                        .get_element_by_name(&conn.from.node.0)
-                        .ok_or_else(|| {
-                            LayoutError::undefined(
-                                conn.from.node.0.clone(),
-                                conn.from.span.clone(),
-                                vec![],
-                            )
-                        })?;
-                    let to_element =
+                    let from_element =
                         result
-                            .get_element_by_name(&conn.to.node.0)
+                            .get_element_by_name(&conn.from.node.0)
                             .ok_or_else(|| {
                                 LayoutError::undefined(
-                                    conn.to.node.0.clone(),
-                                    conn.to.span.clone(),
+                                    conn.from.node.0.clone(),
+                                    conn.from.span.clone(),
                                     vec![],
                                 )
                             })?;
+                    let to_element =
+                        result.get_element_by_name(&conn.to.node.0).ok_or_else(|| {
+                            LayoutError::undefined(
+                                conn.to.node.0.clone(),
+                                conn.to.span.clone(),
+                                vec![],
+                            )
+                        })?;
 
-                    let path = route_connection(&from_element.bounds, &to_element.bounds);
+                    let routing_mode = extract_routing_mode(&conn.modifiers);
+                    let path =
+                        route_connection(&from_element.bounds, &to_element.bounds, routing_mode);
                     let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
                     let label = extract_connection_label(&conn.modifiers, &path);
 
@@ -194,7 +251,10 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
     Ok(())
 }
 
-fn extract_connection_label(modifiers: &[Spanned<StyleModifier>], path: &[Point]) -> Option<LabelLayout> {
+fn extract_connection_label(
+    modifiers: &[Spanned<StyleModifier>],
+    path: &[Point],
+) -> Option<LabelLayout> {
     let text = modifiers.iter().find_map(|m| {
         if matches!(m.node.key.node, StyleKey::Label) {
             match &m.node.value.node {
@@ -299,5 +359,43 @@ mod tests {
         assert_eq!(path[1].y, 50.0);
         assert_eq!(path[2].x, 100.0);
         assert_eq!(path[2].y, 50.0);
+    }
+
+    #[test]
+    fn test_route_connection_direct_mode() {
+        // Two non-aligned bounding boxes
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
+
+        // Direct routing should give exactly 2 points (straight line)
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        assert_eq!(
+            path.len(),
+            2,
+            "Direct routing should produce exactly 2 points"
+        );
+
+        // Verify start is on from_bounds edge and end is on to_bounds edge
+        assert!((path[0].x >= 0.0 && path[0].x <= 50.0) || path[0].x == 50.0);
+        assert!((path[1].x >= 200.0 && path[1].x <= 250.0) || path[1].x == 200.0);
+    }
+
+    #[test]
+    fn test_route_connection_orthogonal_mode() {
+        // Two non-aligned bounding boxes that should create S-shape
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
+
+        // Orthogonal routing may produce more than 2 points
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Orthogonal);
+        assert!(
+            path.len() >= 2,
+            "Orthogonal routing should produce at least 2 points"
+        );
+    }
+
+    #[test]
+    fn test_routing_mode_default_is_orthogonal() {
+        assert_eq!(RoutingMode::default(), RoutingMode::Orthogonal);
     }
 }
