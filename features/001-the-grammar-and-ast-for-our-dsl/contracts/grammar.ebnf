@@ -1,0 +1,170 @@
+(* Agent Illustrator DSL Grammar - EBNF Notation *)
+(* Version: 1.0.0 *)
+(* Design Goal: Minimal tokens for AI agent efficiency *)
+
+(* ============================================ *)
+(* DOCUMENT STRUCTURE                           *)
+(* ============================================ *)
+
+document = { statement } ;
+
+statement = shape_decl
+          | connection_decl
+          | layout_decl
+          | group_decl
+          | constraint_decl
+          | comment ;
+
+(* ============================================ *)
+(* SHAPE DECLARATIONS                           *)
+(* ============================================ *)
+
+shape_decl = shape_type [ identifier ] [ modifier_block ] ;
+
+shape_type = "rect" | "circle" | "ellipse" | "line" | "polygon"
+           | icon_type ;
+
+icon_type = "icon" string_literal ;
+
+(* ============================================ *)
+(* CONNECTIONS                                  *)
+(* ============================================ *)
+
+connection_decl = identifier connection_op identifier [ modifier_block ] ;
+
+connection_op = "->"    (* forward/directed *)
+              | "<-"    (* backward *)
+              | "<->"   (* bidirectional *)
+              | "--" ;  (* undirected *)
+
+(* ============================================ *)
+(* LAYOUT CONTAINERS                            *)
+(* ============================================ *)
+
+layout_decl = layout_type [ identifier ] [ modifier_block ] block ;
+
+layout_type = "row" | "col" | "grid" | "stack" ;
+
+block = "{" { statement } "}" ;
+
+(* ============================================ *)
+(* SEMANTIC GROUPS                              *)
+(* ============================================ *)
+
+group_decl = "group" [ identifier ] [ modifier_block ] block ;
+
+(* ============================================ *)
+(* POSITION CONSTRAINTS (Experimental)          *)
+(* ============================================ *)
+
+constraint_decl = "place" identifier position_relation identifier ;
+
+position_relation = "right-of" | "left-of" | "above" | "below" | "inside" ;
+
+(* ============================================ *)
+(* STYLE MODIFIERS                              *)
+(* ============================================ *)
+
+modifier_block = "[" modifier { "," modifier } [ "," ] "]" ;
+
+modifier = modifier_key ":" modifier_value ;
+
+modifier_key = identifier ;
+
+modifier_value = color_value
+               | number_value
+               | string_literal
+               | keyword ;
+
+color_value = "#" hex_digits          (* #fff or #ffffff *)
+            | "rgb" "(" number "," number "," number ")"
+            | color_name ;
+
+color_name = "red" | "blue" | "green" | "yellow" | "black" | "white"
+           | "gray" | "orange" | "purple" | "pink" | "cyan" | identifier ;
+
+number_value = number [ unit ] ;
+
+unit = "px" | "%" | "em" | "pt" ;
+
+keyword = "bold" | "italic" | "dashed" | "dotted" | "solid"
+        | "thin" | "thick" | identifier ;
+
+(* ============================================ *)
+(* COMMENTS                                     *)
+(* ============================================ *)
+
+comment = line_comment | block_comment ;
+
+line_comment = "//" { any_char - newline } newline ;
+
+block_comment = "/*" { any_char } "*/" ;
+
+(* ============================================ *)
+(* LEXICAL ELEMENTS                             *)
+(* ============================================ *)
+
+identifier = ( letter | "_" ) { letter | digit | "_" } ;
+
+string_literal = '"' { string_char } '"' ;
+
+string_char = any_char - '"' - "\"
+            | "\" escape_char ;
+
+escape_char = '"' | "\" | "n" | "t" | "r" ;
+
+number = [ "-" ] digits [ "." digits ] ;
+
+digits = digit { digit } ;
+
+hex_digits = hex_digit { hex_digit } ;
+
+letter = "a" | ... | "z" | "A" | ... | "Z" ;
+
+digit = "0" | ... | "9" ;
+
+hex_digit = digit | "a" | ... | "f" | "A" | ... | "F" ;
+
+(* ============================================ *)
+(* WHITESPACE (ignored except as separator)     *)
+(* ============================================ *)
+
+whitespace = " " | "\t" | "\n" | "\r" ;
+
+(* Whitespace is insignificant and consumed between tokens *)
+
+(* ============================================ *)
+(* EXAMPLE VALID INPUTS                         *)
+(* ============================================ *)
+
+(*
+  // Simple shapes
+  rect server
+  circle db [fill: blue]
+
+  // Connections
+  server -> db [label: "query"]
+  client <-> server
+
+  // Layout
+  row {
+    rect a
+    rect b
+    rect c [fill: red]
+  }
+
+  // Groups
+  group datacenter {
+    row {
+      rect rack1
+      rect rack2
+    }
+  }
+
+  // Constraints (experimental)
+  place client right-of server
+
+  // Icons
+  icon "server" myserver [fill: gray]
+  icon "database" db1
+*)

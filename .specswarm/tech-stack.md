@@ -32,6 +32,9 @@
   - Purpose: Vector-based illustration output
   - Library: Consider `svg` crate or direct XML generation
   - Notes: Optimize for readability (formatted XML, meaningful IDs)
+  - We want the SVG to make extensive use of (standardized) classes so it can be very easily styled with CSS.
+    for instance i want to make a stylesheet with color scheme and branding for my org that should style all
+    results
 
 ---
 
@@ -48,7 +51,7 @@
 
 ### Error Handling
 - `thiserror` - Derive macros for error types
-- `miette` or `ariadne` - Beautiful diagnostic messages
+- `ariadne` - Beautiful diagnostic messages (selected over miette) <!-- Feature 001 -->
 
 ### CLI (if applicable)
 - `clap` - Command-line argument parsing
