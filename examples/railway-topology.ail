@@ -100,9 +100,9 @@ col diagram {
     // Aggregation arrows with connection label references
     text "Aggregation" agg_label [font_size: 11, fill: foreground-3]
     text "Simplification" simp_label [font_size: 11, fill: foreground-3]
-    micro_lbl -> meso_lbl [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
-    meso_lbl -> macro_lbl [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
+    micro_label -> meso_label [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
+    meso_label -> macro_label [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
 
     // Align the level labels on the same vertical axis
-    align micro_lbl.horizontal_center = meso_lbl.horizontal_center = macro_lbl.horizontal_center
+    align micro_label.horizontal_center = meso_label.horizontal_center = macro_label.horizontal_center
 }
