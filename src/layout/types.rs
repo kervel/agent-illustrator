@@ -3,8 +3,8 @@
 use std::collections::HashMap;
 
 use crate::parser::ast::{
-    ConnectionDirection, Identifier, LayoutType, ShapeType, Span, Spanned, StyleKey, StyleModifier,
-    StyleValue,
+    ColorValue, ConnectionDirection, Identifier, LayoutType, ShapeType, Span, Spanned, StyleKey,
+    StyleModifier, StyleValue,
 };
 
 /// A 2D point in the coordinate system
@@ -128,24 +128,19 @@ impl ResolvedStyles {
     }
 
     /// Create styles from AST style modifiers
+    ///
+    /// Symbolic colors are converted to CSS variable references (e.g., `var(--foreground-1)`).
+    /// The actual color values are provided via a `<style>` block in the SVG output.
     pub fn from_modifiers(modifiers: &[Spanned<StyleModifier>]) -> Self {
         let mut styles = Self::default();
 
         for modifier in modifiers {
             match &modifier.node.key.node {
                 StyleKey::Fill => {
-                    if let StyleValue::Color(c) = &modifier.node.value.node {
-                        styles.fill = Some(c.clone());
-                    } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
-                        styles.fill = Some(k.clone());
-                    }
+                    styles.fill = Self::color_to_css(&modifier.node.value.node);
                 }
                 StyleKey::Stroke => {
-                    if let StyleValue::Color(c) = &modifier.node.value.node {
-                        styles.stroke = Some(c.clone());
-                    } else if let StyleValue::Keyword(k) = &modifier.node.value.node {
-                        styles.stroke = Some(k.clone());
-                    }
+                    styles.stroke = Self::color_to_css(&modifier.node.value.node);
                 }
                 StyleKey::StrokeWidth => {
                     if let StyleValue::Number { value, .. } = &modifier.node.value.node {
@@ -183,6 +178,28 @@ impl ResolvedStyles {
         }
 
         styles
+    }
+
+    /// Convert a StyleValue to a CSS color string
+    ///
+    /// - Hex colors: pass through (e.g., `#ff0000`)
+    /// - Named colors: pass through (e.g., `red`)
+    /// - Symbolic colors: convert to CSS variable reference (e.g., `var(--foreground-1)`)
+    fn color_to_css(value: &StyleValue) -> Option<String> {
+        match value {
+            StyleValue::Color(color_value) => match color_value {
+                // Hex and named colors pass through unchanged
+                ColorValue::Hex(s) | ColorValue::Named(s) => Some(s.clone()),
+                // Symbolic colors become CSS variable references
+                ColorValue::Symbolic { .. } => {
+                    let token = color_value.token_string()?;
+                    Some(format!("var(--{})", token))
+                }
+            },
+            // Keywords that aren't symbolic colors are treated as named colors
+            StyleValue::Keyword(k) => Some(k.clone()),
+            _ => None,
+        }
     }
 
     /// Merge another style set, with other taking precedence

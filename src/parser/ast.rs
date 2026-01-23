@@ -3,6 +3,79 @@
 /// Byte range in source text
 pub type Span = std::ops::Range<usize>;
 
+/// Semantic color categories for brand-agnostic illustrations
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ColorCategory {
+    Foreground,
+    Background,
+    Text,
+    Accent,
+}
+
+/// Light/dark modifier for colors
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Lightness {
+    Light,
+    Dark,
+}
+
+/// A color value - either concrete (hex/named) or symbolic (resolved at render time)
+#[derive(Debug, Clone, PartialEq)]
+pub enum ColorValue {
+    /// Hex color like #ff0000 or #f00
+    Hex(String),
+    /// Named SVG color like red, blue (passed to SVG as-is)
+    Named(String),
+    /// Symbolic token like foreground-1, text-dark (resolved via stylesheet)
+    Symbolic {
+        category: ColorCategory,
+        variant: Option<u8>,
+        lightness: Option<Lightness>,
+    },
+}
+
+impl ColorValue {
+    /// Convert to string representation for stylesheet lookup
+    ///
+    /// Returns Some for Symbolic colors, None for concrete colors.
+    pub fn token_string(&self) -> Option<String> {
+        match self {
+            ColorValue::Symbolic {
+                category,
+                variant,
+                lightness,
+            } => {
+                let cat = match category {
+                    ColorCategory::Foreground => "foreground",
+                    ColorCategory::Background => "background",
+                    ColorCategory::Text => "text",
+                    ColorCategory::Accent => "accent",
+                };
+                let mut s = cat.to_string();
+                if let Some(v) = variant {
+                    s.push_str(&format!("-{}", v));
+                }
+                if let Some(l) = lightness {
+                    s.push_str(match l {
+                        Lightness::Light => "-light",
+                        Lightness::Dark => "-dark",
+                    });
+                }
+                Some(s)
+            }
+            _ => None,
+        }
+    }
+
+    /// Get the concrete color string for hex or named colors
+    pub fn concrete_string(&self) -> Option<&str> {
+        match self {
+            ColorValue::Hex(s) | ColorValue::Named(s) => Some(s.as_str()),
+            ColorValue::Symbolic { .. } => None,
+        }
+    }
+}
+
 /// AST node with source location
 #[derive(Debug, Clone, PartialEq)]
 pub struct Spanned<T> {
@@ -181,7 +254,7 @@ pub enum StyleKey {
 /// Style values
 #[derive(Debug, Clone, PartialEq)]
 pub enum StyleValue {
-    Color(String),
+    Color(ColorValue),
     Number { value: f64, unit: Option<String> },
     String(String),
     Keyword(String),

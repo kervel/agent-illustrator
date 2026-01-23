@@ -1,0 +1,41 @@
+# Kapernikov Brand Stylesheet
+# Based on kapernikov-theme.css
+# For use with Agent Illustrator
+
+[metadata]
+name = "Kapernikov"
+description = "Kapernikov corporate branding colors"
+
+[colors]
+# Foreground colors (primary visual elements)
+foreground-1 = "#c94a3a"       # Primary brand red
+foreground-2 = "#5a5a5a"       # Secondary gray
+foreground-3 = "#aaaaaa"       # Muted gray
+foreground-light = "#fce8e8"   # Light rose
+foreground-dark = "#a83a2c"    # Darker red
+
+# Background colors
+background-1 = "#ffffff"       # White
+background-2 = "#f9f9f9"       # Off-white
+background-3 = "#f5f5f5"       # Light gray
+background-light = "#ffffff"   # White
+background-dark = "#333333"    # Dark charcoal
+
+# Text colors
+text-1 = "#333333"             # Primary text (dark)
+text-2 = "#5a5a5a"             # Secondary text (gray)
+text-3 = "#666666"             # Muted text
+text-light = "#ffffff"         # Light text (for dark backgrounds)
+text-dark = "#333333"          # Dark text
+
+# Accent colors (highlights, emphasis)
+accent-1 = "#c94a3a"           # Primary accent (brand red)
+accent-2 = "#fce8e8"           # Light accent (section bg)
+accent-3 = "#e0e0e0"           # Neutral accent (borders)
+accent-light = "#fce8e8"       # Light accent
+accent-dark = "#a83a2c"        # Dark accent
+
+# Status colors (for indicators)
+status-success = "#a5d6a7"     # Green
+status-warning = "#ffcc80"     # Orange
+status-error = "#ef9a9a"       # Red

@@ -7,4 +7,4 @@ pub mod config;
 pub mod svg;
 
 pub use config::SvgConfig;
-pub use svg::render_svg;
+pub use svg::{render_svg, render_svg_with_stylesheet};
