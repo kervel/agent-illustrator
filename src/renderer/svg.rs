@@ -56,7 +56,7 @@ impl SvgBuilder {
         // at the marker position. The arrow shape points right (+X), so it will
         // rotate to match the final segment direction (e.g., down for vertical paths).
         self.defs.push(format!(
-            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" class="{prefix}arrow-head"/>
     </marker>"#
         ));
