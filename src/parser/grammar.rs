@@ -419,7 +419,7 @@ where
 
     // Constraint expression parsers
 
-    // Midpoint: target.prop = midpoint(a, b)
+    // Midpoint: target.prop = midpoint(a, b) or target.prop = midpoint(a, b) + offset
     let midpoint_expr = property_ref
         .clone()
         .then_ignore(just(Token::Equals))
@@ -429,7 +429,13 @@ where
         .then_ignore(just(Token::Comma))
         .then(identifier.clone())
         .then_ignore(just(Token::ParenClose))
-        .map(|((target, a), b)| ConstraintExpr::Midpoint { target, a, b });
+        .then(offset.clone().or_not())
+        .map(|(((target, a), b), off)| ConstraintExpr::Midpoint {
+            target,
+            a,
+            b,
+            offset: off.unwrap_or(0.0),
+        });
 
     // Contains: container contains a, b, c [padding: N]
     let contains_expr = identifier
@@ -1189,11 +1195,44 @@ mod tests {
         assert_eq!(doc.statements.len(), 1);
         match &doc.statements[0].node {
             Statement::Constrain(c) => match &c.expr {
-                ConstraintExpr::Midpoint { target, a, b } => {
+                ConstraintExpr::Midpoint {
+                    target,
+                    a,
+                    b,
+                    offset,
+                } => {
                     assert_eq!(target.element.node.leaf().as_str(), "a");
                     assert!(matches!(target.property.node, ConstraintProperty::CenterX));
                     assert_eq!(a.node.as_str(), "b");
                     assert_eq!(b.node.as_str(), "c");
+                    assert_eq!(*offset, 0.0); // No offset specified
+                }
+                other => panic!("Expected Midpoint, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_midpoint_with_offset() {
+        // Test positive offset
+        let doc = parse("constrain a.center_x = midpoint(b, c) + 50").expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Midpoint { offset, .. } => {
+                    assert_eq!(*offset, 50.0);
+                }
+                other => panic!("Expected Midpoint, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+
+        // Test negative offset
+        let doc = parse("constrain a.center_x = midpoint(b, c) - 80").expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Midpoint { offset, .. } => {
+                    assert_eq!(*offset, -80.0);
                 }
                 other => panic!("Expected Midpoint, got {:?}", other),
             },

@@ -30,7 +30,14 @@ col diagram {
                 circle b2 [fill: accent-1, size: 6]
             }
 
-            // Offset top junctions for diagonal crossovers:
+            // Preserve B track spacing (jB2 is 160px right of jB1)
+            constrain jB2.center_x = jB1.center_x + 160
+            // Center the junction pair within the track
+            // midpoint of jB1,jB2 should equal midpoint of b1,b2
+            // jB1 + 80 = midpoint(b1,b2), so jB1 = midpoint(b1,b2) - 80
+            constrain jB1.center_x = midpoint(b1, b2) - 80
+
+            // Offset A junctions for diagonal crossovers:
             // jA1 offset left → diagonal goes down-right to jB1
             // jA2 offset right → diagonal goes down-left from jB2
             constrain jA1.center_x = jB1.center_x - 40
@@ -81,7 +88,11 @@ col diagram {
                     circle mb2 [fill: foreground-3, size: 6]
                 }
 
-                // Offset junctions (same as Micro)
+                // Align meso B junctions to micro B junctions (cross-level alignment)
+                constrain mjB1.center_x = jB1.center_x
+                constrain mjB2.center_x = jB2.center_x
+
+                // Offset A junctions for diagonal crossovers (same as micro)
                 constrain mjA1.center_x = mjB1.center_x - 40
                 constrain mjA2.center_x = mjB2.center_x + 40
 

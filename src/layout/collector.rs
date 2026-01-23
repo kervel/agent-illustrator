@@ -355,7 +355,12 @@ impl ConstraintCollector {
                 });
             }
 
-            ConstraintExpr::Midpoint { target, a, b } => {
+            ConstraintExpr::Midpoint {
+                target,
+                a,
+                b,
+                offset,
+            } => {
                 let target_var = self.property_to_variable(target);
 
                 // For midpoint of elements, we use the same property type as target
@@ -398,6 +403,7 @@ impl ConstraintCollector {
                     target: target_var,
                     a: a_var,
                     b: b_var,
+                    offset: *offset,
                     source: ConstraintSource::user(span.clone(), "constrain midpoint"),
                 });
             }

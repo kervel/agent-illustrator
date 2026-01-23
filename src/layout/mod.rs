@@ -198,7 +198,7 @@ fn validate_constraint_expr_refs(
         ConstraintExpr::LessOrEqual { left, .. } => {
             validate_prop_ref(left)?;
         }
-        ConstraintExpr::Midpoint { target, a, b } => {
+        ConstraintExpr::Midpoint { target, a, b, .. } => {
             validate_prop_ref(target)?;
             validate_ident(a)?;
             validate_ident(b)?;

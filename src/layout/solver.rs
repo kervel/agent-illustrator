@@ -176,11 +176,12 @@ pub enum LayoutConstraint {
         source: ConstraintSource,
     },
 
-    /// target = (a + b) / 2
+    /// target = (a + b) / 2 + offset
     Midpoint {
         target: LayoutVariable,
         a: LayoutVariable,
         b: LayoutVariable,
+        offset: f64,
         source: ConstraintSource,
     },
 }
@@ -414,21 +415,33 @@ impl ConstraintSolver {
                 target,
                 a,
                 b,
+                offset,
                 source,
             } => {
                 // Use expressions to handle derived properties like CenterX/CenterY
                 let target_expr = self.get_expression(target);
                 let a_expr = self.get_expression(a);
                 let b_expr = self.get_expression(b);
-                let desc = format!(
-                    "{}.{:?} = midpoint({}.{:?}, {}.{:?})",
-                    target.element_id, target.property,
-                    a.element_id, a.property,
-                    b.element_id, b.property
-                );
-                // Express midpoint as: 2*target = a + b
+                let desc = if *offset != 0.0 {
+                    format!(
+                        "{}.{:?} = midpoint({}.{:?}, {}.{:?}) + {}",
+                        target.element_id, target.property,
+                        a.element_id, a.property,
+                        b.element_id, b.property,
+                        offset
+                    )
+                } else {
+                    format!(
+                        "{}.{:?} = midpoint({}.{:?}, {}.{:?})",
+                        target.element_id, target.property,
+                        a.element_id, a.property,
+                        b.element_id, b.property
+                    )
+                };
+                // Express midpoint + offset as: 2*target = a + b + 2*offset
+                // Which is equivalent to: target = (a + b) / 2 + offset
                 self.solver
-                    .add_constraint(2.0 * target_expr | EQ(Strength::REQUIRED) | a_expr + b_expr)
+                    .add_constraint(2.0 * target_expr | EQ(Strength::REQUIRED) | a_expr + b_expr + 2.0 * offset)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -558,6 +571,7 @@ mod tests {
                 target: mid.clone(),
                 a: a.clone(),
                 b: b.clone(),
+                offset: 0.0,
                 source: ConstraintSource::intrinsic("test"),
             })
             .unwrap();

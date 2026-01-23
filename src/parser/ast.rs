@@ -438,11 +438,13 @@ pub enum ConstraintExpr {
     GreaterOrEqual { left: PropertyRef, value: f64 },
     /// a.prop <= value
     LessOrEqual { left: PropertyRef, value: f64 },
-    /// a.center = midpoint(b, c)
+    /// a.center = midpoint(b, c) or a.center = midpoint(b, c) + offset
     Midpoint {
         target: PropertyRef,
         a: Spanned<Identifier>,
         b: Spanned<Identifier>,
+        /// Offset to add to midpoint (0.0 for no offset)
+        offset: f64,
     },
     /// container contains a, b, c [padding: 20]
     Contains {
