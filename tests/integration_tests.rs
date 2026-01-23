@@ -355,12 +355,18 @@ fn test_railway_topology_smoke_test() {
     // Verify it's a layout
     match &doc.statements[0].node {
         agent_illustrator::parser::ast::Statement::Layout(layout) => {
-            // The col should contain: micro group, connection, meso group, connection, macro group
-            // = 5 children
+            // The col should contain:
+            // - micro group
+            // - meso group
+            // - macro group
+            // - agg_label text
+            // - simp_label text
+            // - 2 connections
+            // = 7 children
             assert_eq!(
                 layout.children.len(),
-                5,
-                "Col layout should have 5 children"
+                7,
+                "Col layout should have 7 children"
             );
         }
         _ => panic!("Expected top-level layout"),
@@ -897,4 +903,117 @@ fn test_mixed_colors() {
     assert!(svg.contains(r##"fill="#ff0000""##));
     // Named color should pass through directly
     assert!(svg.contains(r#"fill="blue""#));
+}
+
+#[test]
+fn test_role_label_in_group() {
+    // Feature: Using [role: label] modifier instead of label { } syntax
+    let input = r#"
+        group mygroup {
+            text "Group Label" [role: label]
+            rect a
+            rect b
+        }
+    "#;
+
+    let doc = parse(input).expect("Should parse role label");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Group(g) => {
+            // Should have 3 children: text with role:label, rect a, rect b
+            assert_eq!(g.children.len(), 3);
+
+            // First child should be a Shape with role: label modifier
+            match &g.children[0].node {
+                agent_illustrator::parser::ast::Statement::Shape(s) => {
+                    // Check it has the role: label modifier
+                    let has_role_label = s.modifiers.iter().any(|m| {
+                        matches!(
+                            &m.node.key.node,
+                            agent_illustrator::parser::ast::StyleKey::Role
+                        ) && matches!(
+                            &m.node.value.node,
+                            agent_illustrator::parser::ast::StyleValue::Keyword(k) if k == "label"
+                        )
+                    });
+                    assert!(has_role_label, "Should have role: label modifier");
+                }
+                _ => panic!("Expected shape statement"),
+            }
+        }
+        _ => panic!("Expected group statement"),
+    }
+}
+
+#[test]
+fn test_role_label_rendering_in_group() {
+    use agent_illustrator::render;
+
+    // Feature: Elements with [role: label] should be rendered as labels
+    let input = r#"
+        group mygroup {
+            text "My Label" [role: label]
+            rect a
+        }
+    "#;
+
+    let svg = render(input).expect("Should render role label");
+
+    // The text "My Label" should be in the output
+    assert!(svg.contains("My Label"), "Should contain the label text");
+}
+
+#[test]
+fn test_role_label_in_layout_container() {
+    use agent_illustrator::render;
+
+    // Feature: Elements with [role: label] in layout containers
+    let input = r#"
+        row myrow {
+            text "Row Label" [role: label]
+            rect a
+            rect b
+        }
+    "#;
+
+    let svg = render(input).expect("Should render role label in layout");
+
+    // The text "Row Label" should be in the output
+    assert!(svg.contains("Row Label"), "Should contain the label text");
+}
+
+#[test]
+fn test_connection_label_identifier_reference() {
+    use agent_illustrator::render;
+
+    // Feature: Connection labels can reference text shapes by identifier
+    let input = r#"
+        text "HTTP Request" http_label
+        rect server
+        rect client
+        server -> client [label: http_label]
+    "#;
+
+    let svg = render(input).expect("Should render connection with label reference");
+
+    // The text "HTTP Request" should appear on the connection
+    assert!(svg.contains("HTTP Request"), "Connection should use referenced text shape's content as label");
+}
+
+#[test]
+fn test_connection_label_string_still_works() {
+    use agent_illustrator::render;
+
+    // Feature: String labels should still work (backward compatibility)
+    let input = r#"
+        rect server
+        rect client
+        server -> client [label: "Query"]
+    "#;
+
+    let svg = render(input).expect("Should render connection with string label");
+
+    // The text "Query" should appear on the connection
+    assert!(svg.contains("Query"), "String labels should still work");
 }

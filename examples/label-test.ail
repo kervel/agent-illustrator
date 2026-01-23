@@ -1,20 +1,26 @@
-// Test new label syntax
+// Test new [role: label] modifier (preferred syntax)
 group mygroup {
-    label { text "Test Label" [font_size: 18, fill: red] }
+    text "Test Label" [role: label, font_size: 18, fill: red]
     row content {
         rect a
         rect b
     }
 }
 
-// Test inline label syntax
+// Test with named label element
 group another {
-    label: text "Inline Label" mylbl [font_size: 14]
+    text "Inline Label" mylbl [role: label, font_size: 14]
     col items {
         circle c1
         circle c2
     }
 }
 
-// Test old [label: "text"] modifier still works
+// Test old [label: "text"] modifier still works (backward compatible)
 rect standalone [label: "Standalone Label"]
+
+// Test connection label with shape reference
+text "Connection Label" conn_label [font_size: 12, fill: accent-1]
+rect source
+rect target
+source -> target [label: conn_label]

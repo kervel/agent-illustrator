@@ -1,14 +1,14 @@
 // Railway Topology - Three Level Abstraction
 // Uses symbolic colors for brand-agnostic theming
+// Uses [role: label] for element labels
 
 col diagram {
     // === MICRO LEVEL ===
     group micro {
-        label {
-            col micro_label {
-                text "Micro" micro_lbl [font_size: 20, fill: text-1]
-                text "Detailed tracks" [font_size: 12, fill: text-2]
-            }
+        // Label using new [role: label] modifier
+        col micro_label [role: label] {
+            text "Micro" micro_lbl [font_size: 20, fill: text-1]
+            text "Detailed tracks" [font_size: 12, fill: text-2]
         }
 
         row tracks [gap: 50] {
@@ -61,11 +61,10 @@ col diagram {
 
     // === MESO LEVEL ===
     group meso {
-        label {
-            col meso_label {
-                text "Meso" meso_lbl [font_size: 20, fill: text-1]
-                text "OPs + Tracks" [font_size: 12, fill: text-2]
-            }
+        // Label using new [role: label] modifier
+        col meso_label [role: label] {
+            text "Meso" meso_lbl [font_size: 20, fill: text-1]
+            text "OPs + Tracks" [font_size: 12, fill: text-2]
         }
 
         stack overlay {
@@ -85,11 +84,10 @@ col diagram {
 
     // === MACRO LEVEL ===
     group macro {
-        label {
-            col macro_label {
-                text "Macro" macro_lbl [font_size: 20, fill: text-1]
-                text "Nodes & Lines" [font_size: 12, fill: text-2]
-            }
+        // Label using new [role: label] modifier
+        col macro_label [role: label] {
+            text "Macro" macro_lbl [font_size: 20, fill: text-1]
+            text "Nodes & Lines" [font_size: 12, fill: text-2]
         }
 
         row graph [gap: 30] {
@@ -99,7 +97,9 @@ col diagram {
         }
     }
 
-    // Aggregation arrows
-    micro_lbl -> meso_lbl [label: "Aggregation", label_position: right, stroke: foreground-3, routing: direct]
-    meso_lbl -> macro_lbl [label: "Simplification", label_position: right, stroke: foreground-3, routing: direct]
+    // Aggregation arrows with connection label references
+    text "Aggregation" agg_label [font_size: 11, fill: foreground-3]
+    text "Simplification" simp_label [font_size: 11, fill: foreground-3]
+    micro_lbl -> meso_lbl [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
+    meso_lbl -> macro_lbl [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
 }

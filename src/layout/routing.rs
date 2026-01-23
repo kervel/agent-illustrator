@@ -255,7 +255,7 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                     let path =
                         route_connection(&from_element.bounds, &to_element.bounds, routing_mode);
                     let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
-                    let label = extract_connection_label(&conn.modifiers, &path);
+                    let label = extract_connection_label(&conn.modifiers, &path, result);
 
                     result.connections.push(ConnectionLayout {
                         from_id: conn.from.node.clone(),
@@ -294,11 +294,24 @@ pub enum LabelPosition {
 fn extract_connection_label(
     modifiers: &[Spanned<StyleModifier>],
     path: &[Point],
+    result: &LayoutResult,
 ) -> Option<LabelLayout> {
     let text = modifiers.iter().find_map(|m| {
         if matches!(m.node.key.node, StyleKey::Label) {
             match &m.node.value.node {
                 StyleValue::String(s) => Some(s.clone()),
+                // Support identifier references: [label: my_shape]
+                StyleValue::Identifier(id) => {
+                    // Look up the element by name and extract text content
+                    result.get_element_by_name(&id.0).and_then(|element| {
+                        if let ElementType::Shape(ShapeType::Text { content }) = &element.element_type {
+                            Some(content.clone())
+                        } else {
+                            // If it's not a text shape, use the identifier as the label text
+                            Some(id.0.clone())
+                        }
+                    })
+                }
                 _ => None,
             }
         } else {
@@ -599,6 +612,11 @@ mod tests {
         assert_eq!(path[0].y, path[1].y, "Perfectly horizontal should stay horizontal");
     }
 
+    // Helper to create an empty LayoutResult for testing
+    fn empty_result() -> LayoutResult {
+        LayoutResult::new()
+    }
+
     // Helper function to create modifiers for testing
     fn make_label_modifiers(label: &str, position: Option<&str>) -> Vec<Spanned<StyleModifier>> {
         let mut modifiers = vec![Spanned::new(
@@ -627,7 +645,7 @@ mod tests {
         let path = vec![Point::new(0.0, 0.0), Point::new(0.0, 100.0)];
         let modifiers = make_label_modifiers("Test", Some("right"));
 
-        let label = extract_connection_label(&modifiers, &path).unwrap();
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Should be positioned to the right (x + 10)
         assert_eq!(label.position.x, 10.0, "Right position should add 10 to x");
@@ -640,7 +658,7 @@ mod tests {
         let path = vec![Point::new(0.0, 0.0), Point::new(0.0, 100.0)];
         let modifiers = make_label_modifiers("Test", Some("left"));
 
-        let label = extract_connection_label(&modifiers, &path).unwrap();
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Should be positioned to the left (x - 10)
         assert_eq!(label.position.x, -10.0, "Left position should subtract 10 from x");
@@ -653,7 +671,7 @@ mod tests {
         let path = vec![Point::new(0.0, 0.0), Point::new(0.0, 100.0)];
         let modifiers = make_label_modifiers("Test", Some("center"));
 
-        let label = extract_connection_label(&modifiers, &path).unwrap();
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Should be positioned at center (no offset)
         assert_eq!(label.position.x, 0.0, "Center position should have no x offset");
@@ -667,7 +685,7 @@ mod tests {
         let path = vec![Point::new(50.0, 0.0), Point::new(50.0, 100.0)];
         let modifiers = make_label_modifiers("Test", None);
 
-        let label = extract_connection_label(&modifiers, &path).unwrap();
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Auto-detect for vertical: right side
         assert_eq!(label.position.x, 60.0, "Vertical auto should add 10 to x");
@@ -680,7 +698,7 @@ mod tests {
         let path = vec![Point::new(0.0, 50.0), Point::new(100.0, 50.0)];
         let modifiers = make_label_modifiers("Test", None);
 
-        let label = extract_connection_label(&modifiers, &path).unwrap();
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
 
         // Auto-detect for horizontal: above
         assert_eq!(label.position.x, 50.0, "Horizontal auto should have x at midpoint");

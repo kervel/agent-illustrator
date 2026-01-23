@@ -234,10 +234,42 @@ fn extract_label(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
 
 /// Extract the first Label statement from a list of children.
 /// Returns the inner statement of the Label if found.
+/// DEPRECATED: Use `[role: label]` modifier instead.
 fn extract_label_statement(children: &[Spanned<Statement>]) -> Option<&Statement> {
     children.iter().find_map(|child| {
         if let Statement::Label(inner) = &child.node {
+            // Note: Deprecation warning would be emitted during parsing
             Some(inner.as_ref())
+        } else {
+            None
+        }
+    })
+}
+
+/// Check if a statement has a `role: label` modifier
+fn has_role_label(stmt: &Statement) -> bool {
+    let modifiers = match stmt {
+        Statement::Shape(s) => &s.modifiers,
+        Statement::Layout(l) => &l.modifiers,
+        Statement::Group(g) => &g.modifiers,
+        _ => return false,
+    };
+
+    modifiers.iter().any(|m| {
+        matches!(m.node.key.node, StyleKey::Role)
+            && matches!(
+                &m.node.value.node,
+                StyleValue::Keyword(k) if k == "label"
+            )
+    })
+}
+
+/// Extract the first child with `role: label` modifier from a list of children.
+/// Returns the statement if found.
+fn extract_role_label_statement(children: &[Spanned<Statement>]) -> Option<&Statement> {
+    children.iter().find_map(|child| {
+        if has_role_label(&child.node) {
+            Some(&child.node)
         } else {
             None
         }
@@ -259,8 +291,10 @@ fn extract_gap(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
 }
 
 fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
-    // Check for a Label statement among children (takes precedence over modifier)
-    let label_stmt = extract_label_statement(&layout.children);
+    // Check for a child with [role: label] modifier (preferred)
+    // Falls back to Label statement (deprecated) if not found
+    let role_label_stmt = extract_role_label_statement(&layout.children);
+    let label_stmt = role_label_stmt.or_else(|| extract_label_statement(&layout.children));
 
     // Extract gap modifier from layout modifiers (can be negative for overlap)
     let gap = extract_gap(&layout.modifiers);
@@ -274,7 +308,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
 
     let styles = ResolvedStyles::from_modifiers(&layout.modifiers);
 
-    // Determine the label: Label statement takes precedence, otherwise use modifier
+    // Determine the label: role: label or Label statement takes precedence, otherwise use modifier
     let label = if let Some(inner_stmt) = label_stmt {
         // Layout the label element and position it above the container (centered)
         let label_element = layout_statement(inner_stmt, Point::new(0.0, 0.0), config);
@@ -313,8 +347,10 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
 }
 
 fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
-    // Check for a Label statement among children (takes precedence over modifier)
-    let label_stmt = extract_label_statement(&group.children);
+    // Check for a child with [role: label] modifier (preferred)
+    // Falls back to Label statement (deprecated) if not found
+    let role_label_stmt = extract_role_label_statement(&group.children);
+    let label_stmt = role_label_stmt.or_else(|| extract_label_statement(&group.children));
 
     // Groups default to column layout (no gap override)
     // Filter out Label statements from layout children
@@ -375,11 +411,13 @@ fn layout_row(
     let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
-        // Skip connections, constraints, and labels (labels are handled separately by parent)
+        // Skip connections, constraints, alignments, and labels (labels are handled separately by parent)
+        // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)
-        ) {
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+        ) || has_role_label(&child.node)
+        {
             continue;
         }
 
@@ -420,11 +458,13 @@ fn layout_column(
     let spacing = gap_override.unwrap_or(config.element_spacing);
 
     for child in children {
-        // Skip connections, constraints, and labels (labels are handled separately by parent)
+        // Skip connections, constraints, alignments, and labels (labels are handled separately by parent)
+        // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)
-        ) {
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+        ) || has_role_label(&child.node)
+        {
             continue;
         }
 
@@ -456,10 +496,16 @@ fn layout_grid(
     position: Point,
     config: &LayoutConfig,
 ) -> (Vec<ElementLayout>, BoundingBox) {
-    // Filter out connections, constraints, and labels (labels are handled separately by parent)
+    // Filter out connections, constraints, alignments, and labels (labels are handled separately by parent)
+    // Labels include both Statement::Label and elements with [role: label] modifier
     let filtered: Vec<_> = children
         .iter()
-        .filter(|c| !matches!(c.node, Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)))
+        .filter(|c| {
+            !matches!(
+                c.node,
+                Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+            ) && !has_role_label(&c.node)
+        })
         .collect();
 
     if filtered.is_empty() {
@@ -526,11 +572,13 @@ fn layout_stack(
     let mut max_height = 0.0f64;
 
     for child in children {
-        // Skip connections, constraints, and labels (labels are handled separately by parent)
+        // Skip connections, constraints, alignments, and labels (labels are handled separately by parent)
+        // Labels include both Statement::Label and elements with [role: label] modifier
         if matches!(
             child.node,
-            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_)
-        ) {
+            Statement::Connection(_) | Statement::Constraint(_) | Statement::Label(_) | Statement::Alignment(_)
+        ) || has_role_label(&child.node)
+        {
             continue;
         }
 
