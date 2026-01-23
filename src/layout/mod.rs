@@ -100,12 +100,14 @@ fn validate_refs_in_statement(
                     suggestions: find_similar(defined, &c.subject.node.0, 2),
                 });
             }
-            if !defined.contains(&c.anchor.node.0) {
-                return Err(LayoutError::UndefinedIdentifier {
-                    name: c.anchor.node.0.clone(),
-                    span: c.anchor.span.clone(),
-                    suggestions: find_similar(defined, &c.anchor.node.0, 2),
-                });
+            if let Some(anchor) = &c.anchor {
+                if !defined.contains(&anchor.node.0) {
+                    return Err(LayoutError::UndefinedIdentifier {
+                        name: anchor.node.0.clone(),
+                        span: anchor.span.clone(),
+                        suggestions: find_similar(defined, &anchor.node.0, 2),
+                    });
+                }
             }
         }
         Statement::Layout(l) => {

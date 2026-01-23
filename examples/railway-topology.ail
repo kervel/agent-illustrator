@@ -4,58 +4,53 @@
 
 col diagram {
     // === MICRO LEVEL ===
+    // 2 main tracks (A and B) with crossover connections
+    // Track A: a1 -- jA1 -- jA2 -- a2
+    // Track B: b1 -- jB1 -- jB2 -- b2
+    // Crossovers: jA1 -> jB1 (left), jB2 -> jA2 (right)
     group micro {
-        // Label using new [role: label] modifier
         col micro_label [role: label] {
             text "Micro" micro_lbl [font_size: 20, fill: text-1]
             text "Detailed tracks" [font_size: 12, fill: text-2]
         }
 
-        row tracks [gap: 50] {
-            col entry [gap: 35] {
-                circle e1 [fill: accent-1, size: 6]
-                circle e2 [fill: accent-1, size: 6]
+        col tracks [gap: 30] {
+            // Track A (top)
+            row trackA [gap: 80] {
+                circle a1 [fill: accent-1, size: 6]
+                circle jA1 [fill: accent-1, size: 6]
+                circle jA2 [fill: accent-1, size: 6]
+                circle a2 [fill: accent-1, size: 6]
             }
-            col sw1 [gap: 12] {
-                circle s1 [fill: accent-1, size: 6]
-                circle s2 [fill: accent-1, size: 6]
-                circle s3 [fill: accent-1, size: 6]
-                circle s4 [fill: accent-1, size: 6]
-            }
-            col yard [gap: 12] {
-                circle y1 [fill: accent-1, size: 6]
-                circle y2 [fill: accent-1, size: 6]
-                circle y3 [fill: accent-1, size: 6]
-                circle y4 [fill: accent-1, size: 6]
-            }
-            col sw2 [gap: 12] {
-                circle t1 [fill: accent-1, size: 6]
-                circle t2 [fill: accent-1, size: 6]
-                circle t3 [fill: accent-1, size: 6]
-                circle t4 [fill: accent-1, size: 6]
-            }
-            col exit [gap: 35] {
-                circle x1 [fill: accent-1, size: 6]
-                circle x2 [fill: accent-1, size: 6]
+            // Track B (bottom)
+            row trackB [gap: 80] {
+                circle b1 [fill: accent-1, size: 6]
+                circle jB1 [fill: accent-1, size: 6]
+                circle jB2 [fill: accent-1, size: 6]
+                circle b2 [fill: accent-1, size: 6]
             }
 
-            // Track connections
-            e1 -- s1 [stroke: accent-1, routing: direct]
-            e1 -- s2 [stroke: accent-1, routing: direct]
-            e2 -- s3 [stroke: accent-1, routing: direct]
-            e2 -- s4 [stroke: accent-1, routing: direct]
-            s1 -- y1 [stroke: accent-1, routing: direct]
-            s2 -- y2 [stroke: accent-1, routing: direct]
-            s3 -- y3 [stroke: accent-1, routing: direct]
-            s4 -- y4 [stroke: accent-1, routing: direct]
-            y1 -- t1 [stroke: accent-1, routing: direct]
-            y2 -- t2 [stroke: accent-1, routing: direct]
-            y3 -- t3 [stroke: accent-1, routing: direct]
-            y4 -- t4 [stroke: accent-1, routing: direct]
-            t1 -- x1 [stroke: accent-1, routing: direct]
-            t2 -- x1 [stroke: accent-1, routing: direct]
-            t3 -- x2 [stroke: accent-1, routing: direct]
-            t4 -- x2 [stroke: accent-1, routing: direct]
+            // Offset top junctions for diagonal crossovers:
+            // jA1 offset left → diagonal goes down-right to jB1
+            // jA2 offset right → diagonal goes down-left from jB2
+            align jA1.horizontal_center = jB1.horizontal_center
+            place jA1 [x: -40]
+            align jA2.horizontal_center = jB2.horizontal_center
+            place jA2 [x: 40]
+
+            // Track A main line
+            a1 -- jA1 [stroke: text-1, stroke_width: 2, routing: direct]
+            jA1 -- jA2 [stroke: text-1, stroke_width: 2, routing: direct]
+            jA2 -- a2 [stroke: text-1, stroke_width: 2, routing: direct]
+
+            // Track B main line
+            b1 -- jB1 [stroke: text-1, stroke_width: 2, routing: direct]
+            jB1 -- jB2 [stroke: text-1, stroke_width: 2, routing: direct]
+            jB2 -- b2 [stroke: text-1, stroke_width: 2, routing: direct]
+
+            // Crossover connections (switches)
+            jA1 -- jB1 [stroke: text-1, stroke_width: 2, routing: direct]
+            jB2 -- jA2 [stroke: text-1, stroke_width: 2, routing: direct]
         }
     }
 

@@ -174,8 +174,11 @@ impl ResolvedStyles {
                 | StyleKey::Height
                 | StyleKey::Routing
                 | StyleKey::Role
+                | StyleKey::X
+                | StyleKey::Y
                 | StyleKey::Custom(_) => {
-                    // Labels, label position, gap, size, routing, and role modifiers handled separately in layout engine; custom keys ignored for now
+                    // Labels, label position, gap, size, routing, role, and position modifiers
+                    // handled separately in layout engine; custom keys ignored for now
                 }
             }
         }

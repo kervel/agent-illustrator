@@ -204,12 +204,20 @@ pub struct GroupDecl {
     pub modifiers: Vec<Spanned<StyleModifier>>,
 }
 
-/// Position constraint (experimental)
+/// Position constraint
+/// Supports both relational positioning and direct offsets:
+/// - `place a right-of b` - relative positioning
+/// - `place a [x: 10, y: 20]` - absolute or offset positioning
+/// - `place a right-of b [x: 10]` - relative with additional offset
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConstraintDecl {
     pub subject: Spanned<Identifier>,
-    pub relation: Spanned<PositionRelation>,
-    pub anchor: Spanned<Identifier>,
+    /// Optional relation (right-of, left-of, etc.)
+    pub relation: Option<Spanned<PositionRelation>>,
+    /// Optional anchor element (required if relation is specified)
+    pub anchor: Option<Spanned<Identifier>>,
+    /// Optional position modifiers (x, y offsets)
+    pub modifiers: Vec<Spanned<StyleModifier>>,
 }
 
 /// Relative position relations
@@ -253,6 +261,10 @@ pub enum StyleKey {
     Routing,
     /// Role modifier for shape positioning (e.g., `role: label`)
     Role,
+    /// X position offset (used with place constraints)
+    X,
+    /// Y position offset (used with place constraints)
+    Y,
     Custom(String),
 }
 

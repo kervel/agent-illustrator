@@ -34,6 +34,51 @@ pub fn attachment_point(bounds: &BoundingBox, edge: Edge) -> Point {
     }
 }
 
+/// Calculate the point on a bounding box boundary in the direction of a target point.
+/// This finds where a ray from the center toward the target intersects the boundary.
+/// For circles (when width ≈ height and small), uses circular boundary.
+/// For rectangles, uses rectangular boundary intersection.
+pub fn boundary_point_toward(bounds: &BoundingBox, target: Point) -> Point {
+    let center = bounds.center();
+    let dx = target.x - center.x;
+    let dy = target.y - center.y;
+
+    // Handle degenerate case where target is at center
+    if dx.abs() < 0.001 && dy.abs() < 0.001 {
+        return center;
+    }
+
+    // Check if this is a circle (small, square bounding box)
+    let is_circle = (bounds.width - bounds.height).abs() < 1.0 && bounds.width < 20.0;
+
+    if is_circle {
+        // For circles, use radius-based calculation
+        let radius = bounds.width / 2.0;
+        let dist = (dx * dx + dy * dy).sqrt();
+        Point::new(center.x + dx / dist * radius, center.y + dy / dist * radius)
+    } else {
+        // For rectangles, find intersection with boundary
+        // Calculate t values for each edge intersection
+        let half_w = bounds.width / 2.0;
+        let half_h = bounds.height / 2.0;
+
+        // t value where ray intersects each edge (ray = center + t * direction)
+        let t_left = if dx < -0.001 { -half_w / dx } else { f64::MAX };
+        let t_right = if dx > 0.001 { half_w / dx } else { f64::MAX };
+        let t_top = if dy < -0.001 { -half_h / dy } else { f64::MAX };
+        let t_bottom = if dy > 0.001 { half_h / dy } else { f64::MAX };
+
+        // Take the smallest positive t (first intersection)
+        let t = t_left.min(t_right).min(t_top).min(t_bottom);
+
+        if t == f64::MAX {
+            center
+        } else {
+            Point::new(center.x + dx * t, center.y + dy * t)
+        }
+    }
+}
+
 /// Determine the best edges to connect two bounding boxes
 pub fn best_edges(from: &BoundingBox, to: &BoundingBox) -> (Edge, Edge) {
     let dx = to.center().x - from.center().x;
@@ -111,46 +156,56 @@ pub fn route_connection(
     to_bounds: &BoundingBox,
     mode: RoutingMode,
 ) -> Vec<Point> {
-    let (from_edge, to_edge) = best_edges(from_bounds, to_bounds);
-    let start = attachment_point(from_bounds, from_edge);
-    let end = attachment_point(to_bounds, to_edge);
-
-    // For direct routing, return a straight line with smart snap-to-axis logic
+    // For direct routing, use boundary points that point toward each other's centers
     if mode == RoutingMode::Direct {
-        let dx = end.x - start.x;
-        let dy = end.y - start.y;
+        let from_center = from_bounds.center();
+        let to_center = to_bounds.center();
 
-        // Don't snap for small target shapes (e.g., track junction points)
-        // Small shapes need precise diagonal connections preserved
+        // Calculate boundary points: direction is toward the other shape's center,
+        // but the point is on the boundary of this shape
+        let start = boundary_point_toward(from_bounds, to_center);
+        let end = boundary_point_toward(to_bounds, from_center);
+
+        let dx = to_center.x - from_center.x;
+        let dy = to_center.y - from_center.y;
+
+        // For large shapes, consider snapping to axis-aligned lines
         let min_snap_size = 15.0;
         let target_too_small =
             to_bounds.width < min_snap_size || to_bounds.height < min_snap_size;
+        let source_too_small =
+            from_bounds.width < min_snap_size || from_bounds.height < min_snap_size;
 
-        let snapped_end = if target_too_small {
-            // No snapping for small shapes - preserve diagonal lines
-            end
-        } else if dy.abs() > dx.abs() {
-            // Primarily vertical - consider snapping to vertical (keeping start.x)
-            // Only snap if start.x falls within target bounds horizontally
-            if start.x >= to_bounds.x && start.x <= to_bounds.right() {
-                Point::new(start.x, end.y)
-            } else {
-                end
+        // Only snap for large shapes on both ends
+        if !target_too_small && !source_too_small {
+            if dy.abs() > dx.abs() * 2.0 {
+                // Primarily vertical - snap if alignment is close
+                if (from_center.x - to_center.x).abs() < to_bounds.width / 2.0 {
+                    let mid_x = (from_center.x + to_center.x) / 2.0;
+                    return vec![
+                        Point::new(mid_x, start.y),
+                        Point::new(mid_x, end.y),
+                    ];
+                }
+            } else if dx.abs() > dy.abs() * 2.0 {
+                // Primarily horizontal - snap if alignment is close
+                if (from_center.y - to_center.y).abs() < to_bounds.height / 2.0 {
+                    let mid_y = (from_center.y + to_center.y) / 2.0;
+                    return vec![
+                        Point::new(start.x, mid_y),
+                        Point::new(end.x, mid_y),
+                    ];
+                }
             }
-        } else if dx.abs() > dy.abs() {
-            // Primarily horizontal - consider snapping to horizontal (keeping start.y)
-            // Only snap if start.y falls within target bounds vertically
-            if start.y >= to_bounds.y && start.y <= to_bounds.bottom() {
-                Point::new(end.x, start.y)
-            } else {
-                end
-            }
-        } else {
-            end
-        };
+        }
 
-        return vec![start, snapped_end];
+        return vec![start, end];
     }
+
+    // Orthogonal routing: use edge-based attachment points
+    let (from_edge, to_edge) = best_edges(from_bounds, to_bounds);
+    let start = attachment_point(from_bounds, from_edge);
+    let end = attachment_point(to_bounds, to_edge);
 
     // Orthogonal routing: create paths with horizontal/vertical segments only
 

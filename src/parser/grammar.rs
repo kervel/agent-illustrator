@@ -91,6 +91,8 @@ where
                 "height" => StyleKey::Height,
                 "routing" => StyleKey::Routing,
                 "label_position" => StyleKey::LabelPosition,
+                "x" => StyleKey::X,
+                "y" => StyleKey::Y,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)
@@ -277,15 +279,29 @@ where
     ))
     .map_with(|rel, e| Spanned::new(rel, span_range(&e.span())));
 
-    // Constraint declaration
+    // Constraint declaration - supports:
+    // - `place a right-of b` - relational positioning
+    // - `place a [x: 10]` - position offset only
+    // - `place a right-of b [x: 10]` - relational with offset
     let constraint_decl = just(Token::Place)
         .ignore_then(identifier.clone())
-        .then(position_relation)
-        .then(identifier.clone())
-        .map(|((subject, relation), anchor)| ConstraintDecl {
-            subject,
-            relation,
-            anchor,
+        .then(
+            position_relation
+                .then(identifier.clone())
+                .or_not()
+        )
+        .then(modifier_block.clone().or_not())
+        .map(|((subject, rel_anchor), mods)| {
+            let (relation, anchor) = match rel_anchor {
+                Some((rel, anch)) => (Some(rel), Some(anch)),
+                None => (None, None),
+            };
+            ConstraintDecl {
+                subject,
+                relation,
+                anchor,
+                modifiers: mods.unwrap_or_default(),
+            }
         });
 
     // Element path parser: identifier { "." identifier }
@@ -482,8 +498,39 @@ mod tests {
         match &doc.statements[0].node {
             Statement::Constraint(c) => {
                 assert_eq!(c.subject.node.as_str(), "client");
-                assert!(matches!(c.relation.node, PositionRelation::RightOf));
-                assert_eq!(c.anchor.node.as_str(), "server");
+                assert!(matches!(c.relation.as_ref().unwrap().node, PositionRelation::RightOf));
+                assert_eq!(c.anchor.as_ref().unwrap().node.as_str(), "server");
+                assert!(c.modifiers.is_empty());
+            }
+            _ => panic!("Expected constraint"),
+        }
+    }
+
+    #[test]
+    fn test_parse_constraint_with_offset() {
+        let doc = parse("place element [x: 10, y: 20]").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constraint(c) => {
+                assert_eq!(c.subject.node.as_str(), "element");
+                assert!(c.relation.is_none());
+                assert!(c.anchor.is_none());
+                assert_eq!(c.modifiers.len(), 2);
+            }
+            _ => panic!("Expected constraint"),
+        }
+    }
+
+    #[test]
+    fn test_parse_constraint_relational_with_offset() {
+        let doc = parse("place a right-of b [x: 10]").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Constraint(c) => {
+                assert_eq!(c.subject.node.as_str(), "a");
+                assert!(matches!(c.relation.as_ref().unwrap().node, PositionRelation::RightOf));
+                assert_eq!(c.anchor.as_ref().unwrap().node.as_str(), "b");
+                assert_eq!(c.modifiers.len(), 1);
             }
             _ => panic!("Expected constraint"),
         }

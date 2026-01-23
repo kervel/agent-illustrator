@@ -36,6 +36,9 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
 }
 
 /// Resolve position constraints after initial layout
+/// This includes:
+/// 1. Relational constraints (right-of, left-of, etc.)
+/// 2. Position offsets from x/y modifiers in place statements
 pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
     let graph = ConstraintGraph::from_document(doc);
 
@@ -45,7 +48,7 @@ pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<
     // Get topological order (or error on cycles)
     let order = graph.topological_order()?;
 
-    // Apply constraints in order
+    // Apply relational constraints in order
     for subject_id in order {
         if let Some(constraints) = graph.constraints.get(&subject_id) {
             for (relation, anchor_id) in constraints {
@@ -54,9 +57,78 @@ pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<
         }
     }
 
+    // Apply position offsets from place statements
+    apply_position_offsets(result, doc)?;
+
     // Recompute bounds after constraint resolution
     result.compute_bounds();
     Ok(())
+}
+
+/// Apply x/y position offsets from place statements
+fn apply_position_offsets(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
+    // Collect all place statements with position modifiers
+    let offsets = collect_position_offsets(&doc.statements);
+
+    for (subject_id, x_offset, y_offset) in offsets {
+        if x_offset.abs() > 0.0001 {
+            shift_element_by_name(result, &subject_id, x_offset, Axis::Horizontal)?;
+        }
+        if y_offset.abs() > 0.0001 {
+            shift_element_by_name(result, &subject_id, y_offset, Axis::Vertical)?;
+        }
+    }
+
+    Ok(())
+}
+
+/// Collect position offsets from place statements
+fn collect_position_offsets(stmts: &[Spanned<Statement>]) -> Vec<(String, f64, f64)> {
+    use crate::parser::ast::StyleKey;
+
+    let mut offsets = vec![];
+
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constraint(c) => {
+                let mut x_offset = 0.0;
+                let mut y_offset = 0.0;
+
+                for modifier in &c.modifiers {
+                    match &modifier.node.key.node {
+                        StyleKey::X => {
+                            if let crate::parser::ast::StyleValue::Number { value, .. } =
+                                &modifier.node.value.node
+                            {
+                                x_offset = *value;
+                            }
+                        }
+                        StyleKey::Y => {
+                            if let crate::parser::ast::StyleValue::Number { value, .. } =
+                                &modifier.node.value.node
+                            {
+                                y_offset = *value;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+
+                if x_offset.abs() > 0.0001 || y_offset.abs() > 0.0001 {
+                    offsets.push((c.subject.node.0.clone(), x_offset, y_offset));
+                }
+            }
+            Statement::Layout(l) => {
+                offsets.extend(collect_position_offsets(&l.children));
+            }
+            Statement::Group(g) => {
+                offsets.extend(collect_position_offsets(&g.children));
+            }
+            _ => {}
+        }
+    }
+
+    offsets
 }
 
 fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) -> ElementLayout {
@@ -651,10 +723,13 @@ impl ConstraintGraph {
             for stmt in stmts {
                 match &stmt.node {
                     Statement::Constraint(c) => {
-                        constraints
-                            .entry(c.subject.node.0.clone())
-                            .or_default()
-                            .push((c.relation.node, c.anchor.node.0.clone()));
+                        // Only add relational constraints (not pure offset constraints)
+                        if let (Some(relation), Some(anchor)) = (&c.relation, &c.anchor) {
+                            constraints
+                                .entry(c.subject.node.0.clone())
+                                .or_default()
+                                .push((relation.node, anchor.node.0.clone()));
+                        }
                     }
                     Statement::Layout(l) => {
                         collect_constraints(&l.children, constraints);
@@ -797,9 +872,12 @@ fn detect_conflicts(doc: &Document) -> Result<(), LayoutError> {
         for stmt in stmts {
             match &stmt.node {
                 Statement::Constraint(c) => {
-                    map.entry(c.subject.node.0.clone())
-                        .or_default()
-                        .push((c.relation.node, c.anchor.node.0.clone()));
+                    // Only collect relational constraints for conflict detection
+                    if let (Some(relation), Some(anchor)) = (&c.relation, &c.anchor) {
+                        map.entry(c.subject.node.0.clone())
+                            .or_default()
+                            .push((relation.node, anchor.node.0.clone()));
+                    }
                 }
                 Statement::Layout(l) => collect_all(&l.children, map),
                 Statement::Group(g) => collect_all(&g.children, map),

@@ -61,9 +61,19 @@ group_decl = "group" [ identifier ] [ modifier_block ] block ;
 (* POSITION CONSTRAINTS                         *)
 (* ============================================ *)
 
-constraint_decl = "place" identifier position_relation identifier ;
+constraint_decl = "place" identifier [ position_relation identifier ] [ modifier_block ] ;
 
 position_relation = "right-of" | "left-of" | "above" | "below" | "inside" ;
+
+(* Examples:
+   place a right-of b              (* relational positioning *)
+   place a [x: 10, y: 20]          (* offset positioning *)
+   place a right-of b [x: 10]      (* relational with offset *)
+
+   When combined with alignment:
+   align a.left = b.right
+   place a [x: 10]                 (* a is 10px right of b's right edge *)
+*)
 
 (* ============================================ *)
 (* ALIGNMENT DECLARATIONS                       *)
