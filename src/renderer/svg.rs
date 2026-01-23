@@ -35,10 +35,18 @@ impl SvgBuilder {
     /// Add CSS custom properties from a stylesheet
     pub fn add_stylesheet(&mut self, stylesheet: &Stylesheet) {
         let mut css = String::from(":root {\n");
-        for (token, color) in &stylesheet.colors {
-            css.push_str(&format!("    --{}: {};\n", token, color));
+        for (token, value) in &stylesheet.colors {
+            css.push_str(&format!("    --{}: {};\n", token, value));
         }
-        css.push_str("  }");
+        css.push_str("  }\n");
+        // Apply font-family to text elements if defined
+        if stylesheet.colors.contains_key("font-family") {
+            let prefix = self.prefix();
+            css.push_str(&format!(
+                "  .{}label, .{}text {{ font-family: var(--font-family); }}",
+                prefix, prefix
+            ));
+        }
         self.styles.push(css);
     }
 
