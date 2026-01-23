@@ -40,22 +40,22 @@ col diagram {
             }
 
             // Track connections
-            e1 -- s1 [stroke: accent-1, stroke_width: 2, routing: direct]
-            e1 -- s2 [stroke: accent-1, stroke_width: 2, routing: direct]
-            e2 -- s3 [stroke: accent-1, stroke_width: 2, routing: direct]
-            e2 -- s4 [stroke: accent-1, stroke_width: 2, routing: direct]
-            s1 -- y1 [stroke: accent-1, stroke_width: 2, routing: direct]
-            s2 -- y2 [stroke: accent-1, stroke_width: 2, routing: direct]
-            s3 -- y3 [stroke: accent-1, stroke_width: 2, routing: direct]
-            s4 -- y4 [stroke: accent-1, stroke_width: 2, routing: direct]
-            y1 -- t1 [stroke: accent-1, stroke_width: 2, routing: direct]
-            y2 -- t2 [stroke: accent-1, stroke_width: 2, routing: direct]
-            y3 -- t3 [stroke: accent-1, stroke_width: 2, routing: direct]
-            y4 -- t4 [stroke: accent-1, stroke_width: 2, routing: direct]
-            t1 -- x1 [stroke: accent-1, stroke_width: 2, routing: direct]
-            t2 -- x1 [stroke: accent-1, stroke_width: 2, routing: direct]
-            t3 -- x2 [stroke: accent-1, stroke_width: 2, routing: direct]
-            t4 -- x2 [stroke: accent-1, stroke_width: 2, routing: direct]
+            e1 -- s1 [stroke: accent-1, routing: direct]
+            e1 -- s2 [stroke: accent-1, routing: direct]
+            e2 -- s3 [stroke: accent-1, routing: direct]
+            e2 -- s4 [stroke: accent-1, routing: direct]
+            s1 -- y1 [stroke: accent-1, routing: direct]
+            s2 -- y2 [stroke: accent-1, routing: direct]
+            s3 -- y3 [stroke: accent-1, routing: direct]
+            s4 -- y4 [stroke: accent-1, routing: direct]
+            y1 -- t1 [stroke: accent-1, routing: direct]
+            y2 -- t2 [stroke: accent-1, routing: direct]
+            y3 -- t3 [stroke: accent-1, routing: direct]
+            y4 -- t4 [stroke: accent-1, routing: direct]
+            t1 -- x1 [stroke: accent-1, routing: direct]
+            t2 -- x1 [stroke: accent-1, routing: direct]
+            t3 -- x2 [stroke: accent-1, routing: direct]
+            t4 -- x2 [stroke: accent-1, routing: direct]
         }
     }
 
@@ -69,11 +69,11 @@ col diagram {
 
         stack overlay {
             col meso_tracks {
-                line m1 [stroke: accent-1, stroke_width: 2]
-                line m2 [stroke: accent-1, stroke_width: 2]
-                line m3 [stroke: accent-1, stroke_width: 2]
-                line m4 [stroke: accent-1, stroke_width: 2]
-                line m5 [stroke: accent-1, stroke_width: 2]
+                line m1 [stroke: accent-1]
+                line m2 [stroke: accent-1]
+                line m3 [stroke: accent-1]
+                line m4 [stroke: accent-1]
+                line m5 [stroke: accent-1]
             }
             row ops [gap: 10] {
                 ellipse op1 [fill: accent-light, opacity: 0.35, label: "OP1"]

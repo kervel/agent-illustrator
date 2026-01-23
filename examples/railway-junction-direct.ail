@@ -29,11 +29,11 @@ entry_south -> j3 [stroke: #4169E1, stroke_width: 3]
 
 // Direct diagonal connections for track switches
 // These create the characteristic Y-shape of railway junctions
-j1 -> exit_t1 [routing: direct, stroke: #228B22, stroke_width: 2]
-j1 -> exit_t2 [routing: direct, stroke: #228B22, stroke_width: 2]
-j2 -> exit_t2 [routing: direct, stroke: #228B22, stroke_width: 2]
-j3 -> exit_t2 [routing: direct, stroke: #228B22, stroke_width: 2]
-j3 -> exit_t3 [routing: direct, stroke: #228B22, stroke_width: 2]
+j1 -> exit_t1 [routing: direct, stroke: #228B22]
+j1 -> exit_t2 [routing: direct, stroke: #228B22]
+j2 -> exit_t2 [routing: direct, stroke: #228B22]
+j3 -> exit_t2 [routing: direct, stroke: #228B22]
+j3 -> exit_t3 [routing: direct, stroke: #228B22]
 
-// Orthogonal connection for comparison
-j2 -> exit_t1 [routing: orthogonal, stroke: #555555, stroke_width: 1]
+// Orthogonal connection for comparison (uses default routing)
+j2 -> exit_t1 [stroke: #555555, stroke_width: 1]
