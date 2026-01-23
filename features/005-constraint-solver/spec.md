@@ -1,5 +1,14 @@
 # Constraint-Based Layout System
 
+## Clarifications
+
+### Session 2026-01-23
+- Q: Which syntax approach for constraints? → A: New `constrain` keyword (replaces `align`, handles equality and inequality)
+- Q: How to handle unsatisfiable constraints? → A: Hard error with detailed conflict report
+- Q: Expected diagram scale? → A: Medium (50-500 elements), solve time <1 second acceptable
+- Q: Support inequality constraints? → A: Yes, full support for min/max width, height, gaps
+- Q: How do containers interact with constraints? → A: Containers generate constraints (syntactic sugar)
+
 ## Problem Statement
 
 The current procedural layout approach processes layout operations in a fixed order:
@@ -91,39 +100,29 @@ element.width >= 50
 element.height <= 200
 ```
 
-## Syntax Proposals
+## Syntax (Decision: `constrain` keyword)
 
-### Option A: Extended align syntax
-
-```
-// Current
-align a.left = b.left
-
-// Extended with offset
-align a.center_x = b.center_x + 40
-
-// Extended with midpoint
-align a.center = midpoint(b, c)
-
-// Contains constraint
-align container contains a, b, c [padding: 20]
-```
-
-### Option B: Separate constraint block
+Single `constrain` keyword replaces `align` and handles all constraint types:
 
 ```
-constraints {
-    a.center_x = (b.center_x + c.center_x) / 2
-    a.center_y = (b.center_y + c.center_y) / 2
-    op1 contains mjA1, mjB1 [padding: 20]
-}
+// Equality (replaces align)
+constrain a.left = b.left
+constrain a.center_x = b.center_x + 40
+
+// Midpoint
+constrain a.center = midpoint(b, c)
+
+// Inequalities
+constrain a.width >= 50
+constrain a.height <= b.height
+
+// Containment
+constrain container contains a, b, c [padding: 20]
 ```
 
-### Option C: Inline modifiers
+**Breaking change**: `align` keyword is removed, replaced entirely by `constrain`.
 
-```
-ellipse op1 [center_between: mjA1 mjB1, contains: mjA1 mjB1]
-```
+Layout containers (`row`, `col`, `stack`, `grid`) become syntactic sugar that generate constraints internally.
 
 ## Implementation Approach
 
@@ -165,13 +164,29 @@ struct Variable {
 
 ### Phase 2: Constraint Solver
 
-Options:
-1. **Kasuari** (`kasuari`): Actively maintained Cassowary implementation, used by Ratatui
-2. **Custom solver**: Simple Gaussian elimination for linear systems
-3. **Z3** (overkill): Full SMT solver
+**Initial choice**: Kasuari (`kasuari`) - actively maintained Cassowary implementation used by Ratatui.
 
-Kasuari is the pragmatic choice - it's the maintained fork of cassowary-rs (last updated 8 years ago),
-actively used in production by Ratatui for terminal UI layout.
+**Fallback options** (if Kasuari proves unsuitable):
+1. **Custom linear solver**: Gaussian elimination for simple equality systems
+2. **z3** via `z3-sys`: Full SMT solver (heavier dependency but very capable)
+
+#### Decision Gate: When to Abandon Kasuari
+
+Stop trying Kasuari and switch if ANY of these occur within first 2 days of implementation:
+- Cannot express midpoint constraints (a = (b + c) / 2) without manual variable substitution
+- Cannot handle our inequality constraints (>=, <=) for contains/min-max
+- API is too low-level, requiring >100 lines of boilerplate per constraint type
+- Performance is >1 second for 100 elements
+- Documentation/examples are insufficient to understand the model
+
+**Spike task**: Before full implementation, write a standalone test that:
+1. Creates 10 variables (x, y for 5 elements)
+2. Adds equality constraints (align)
+3. Adds midpoint constraint
+4. Adds inequality constraint (contains)
+5. Solves and extracts values
+
+If the spike fails or takes >4 hours, evaluate alternatives before proceeding.
 
 ### Phase 3: Layout Pipeline Refactor
 
@@ -214,21 +229,38 @@ place op1 [x: -66]  // Magic number from trial and error
 With constraints:
 ```
 ellipse op1 [...]
-align op1.center_x = midpoint(mjA1.center_x, mjB1.center_x)
-align op1.center_y = midpoint(mtrackA.center_y, mtrackB.center_y)
+constrain op1.center_x = midpoint(mjA1.center_x, mjB1.center_x)
+constrain op1.center_y = midpoint(mtrackA.center_y, mtrackB.center_y)
 ```
 
 Or with contains:
 ```
-ellipse op1 [contains: mjA1 mjB1, padding: 30]
+ellipse op1 [...]
+constrain op1 contains mjA1, mjB1 [padding: 30]
 ```
 
-## Open Questions
+## Error Handling
 
-1. **Syntax**: Which option (A, B, C) or combination?
-2. **Error reporting**: How to explain unsatisfiable constraints to users?
-3. **Performance**: Is Cassowary fast enough for large diagrams?
-4. **Nested AILs**: How do imported diagram constraints interact with parent constraints?
+When constraints are unsatisfiable or conflict, compilation fails with a detailed error report:
+
+```
+error: Unsatisfiable constraints
+  --> example.ail:15:1
+   |
+15 | align a.left = b.left
+   | ^^^^^^^^^^^^^^^^^^^^^ constraint 1
+...
+18 | align a.left = c.right + 100
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ constraint 2 conflicts
+   |
+   = note: a.left cannot simultaneously equal b.left (50) and c.right + 100 (200)
+   = help: remove one constraint or adjust offsets
+```
+
+## Open Questions (Remaining)
+
+1. **Nested AILs**: How do imported diagram constraints interact with parent constraints? (Deferred to nested AIL feature)
+2. **Kasuari fit**: Will Kasuari handle our constraint types? (Resolved by spike task)
 
 ## References
 
