@@ -74,6 +74,7 @@ pub enum ShapeType {
     Line,
     Polygon,
     Icon { icon_name: String },
+    Text { content: String },
 }
 
 /// Connection between shapes

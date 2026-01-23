@@ -241,6 +241,43 @@ impl SvgBuilder {
         ));
     }
 
+    /// Add a text shape element (with id, classes, and dominant-baseline for vertical centering)
+    pub fn add_text_element(
+        &mut self,
+        id: Option<&str>,
+        text: &str,
+        x: f64,
+        y: f64,
+        anchor: &TextAnchor,
+        classes: &[String],
+        styles: &str,
+    ) {
+        let prefix = self.prefix();
+        let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
+        let anchor_str = match anchor {
+            TextAnchor::Start => "start",
+            TextAnchor::Middle => "middle",
+            TextAnchor::End => "end",
+        };
+        let class_list = std::iter::once(format!("{}shape", prefix))
+            .chain(std::iter::once(format!("{}text", prefix)))
+            .chain(classes.iter().cloned())
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        self.elements.push(format!(
+            r#"{}<text{} class="{}" x="{}" y="{}" text-anchor="{}" dominant-baseline="middle"{}>{}</text>"#,
+            self.indent_str(),
+            id_attr,
+            class_list,
+            x,
+            y,
+            anchor_str,
+            styles,
+            escape_xml(text)
+        ));
+    }
+
     /// Add a path for a connection
     pub fn add_connection_path(
         &mut self,
@@ -456,6 +493,31 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
                 element.bounds.y + element.bounds.height / 2.0,
                 &TextAnchor::Middle,
                 "",
+            );
+        }
+        ElementType::Shape(ShapeType::Text { content }) => {
+            // Render text element as SVG text
+            // Position text at the center of bounds, vertically centered using dominant-baseline
+            let font_styles = element
+                .styles
+                .font_size
+                .map(|fs| format!(r#" font-size="{}""#, fs))
+                .unwrap_or_default();
+            let fill_style = element
+                .styles
+                .fill
+                .as_ref()
+                .map(|f| format!(r#" fill="{}""#, f))
+                .unwrap_or_default();
+            let combined_styles = format!("{}{}", font_styles, fill_style);
+            builder.add_text_element(
+                id,
+                content,
+                element.bounds.x,
+                element.bounds.y + element.bounds.height / 2.0,
+                &TextAnchor::Start,
+                &classes,
+                &combined_styles,
             );
         }
         ElementType::Layout(_) | ElementType::Group => {

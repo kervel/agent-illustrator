@@ -366,3 +366,122 @@ fn test_railway_topology_smoke_test() {
         _ => panic!("Expected top-level layout"),
     }
 }
+
+#[test]
+fn test_text_shape_basic() {
+    // Feature: Text shape primitive
+    // Basic text element parsing
+    let input = r#"text "Hello World" foo"#;
+
+    let doc = parse(input).expect("Should parse text shape");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Shape(shape) => {
+            match &shape.shape_type.node {
+                agent_illustrator::parser::ast::ShapeType::Text { content } => {
+                    assert_eq!(content, "Hello World");
+                }
+                _ => panic!("Expected text shape type"),
+            }
+            assert_eq!(shape.name.as_ref().unwrap().node.as_str(), "foo");
+        }
+        _ => panic!("Expected shape statement"),
+    }
+}
+
+#[test]
+fn test_text_shape_with_styles() {
+    // Text element with fill color and font size
+    let input = r#"text "Styled Text" styled_text [fill: red, font_size: 24]"#;
+
+    let doc = parse(input).expect("Should parse text shape with styles");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Shape(shape) => {
+            assert_eq!(shape.modifiers.len(), 2);
+            // Verify fill modifier
+            let has_fill = shape.modifiers.iter().any(|m| {
+                matches!(m.node.key.node, agent_illustrator::parser::ast::StyleKey::Fill)
+            });
+            assert!(has_fill, "Should have fill modifier");
+            // Verify font_size modifier
+            let has_font_size = shape.modifiers.iter().any(|m| {
+                matches!(
+                    m.node.key.node,
+                    agent_illustrator::parser::ast::StyleKey::FontSize
+                )
+            });
+            assert!(has_font_size, "Should have font_size modifier");
+        }
+        _ => panic!("Expected shape statement"),
+    }
+}
+
+#[test]
+fn test_text_shapes_with_connection() {
+    // Text elements can be connected like other shapes
+    let input = r#"
+        text "Label A" a
+        text "Label B" b
+        a -> b
+    "#;
+
+    let doc = parse(input).expect("Should parse text shapes with connection");
+    assert_eq!(doc.statements.len(), 3);
+
+    // Verify first text element
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Shape(shape) => {
+            assert!(matches!(
+                shape.shape_type.node,
+                agent_illustrator::parser::ast::ShapeType::Text { .. }
+            ));
+        }
+        _ => panic!("Expected shape statement"),
+    }
+
+    // Verify connection
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+            assert_eq!(conn.from.node.as_str(), "a");
+            assert_eq!(conn.to.node.as_str(), "b");
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}
+
+#[test]
+fn test_text_shape_in_layout() {
+    // Text elements can be used inside layouts
+    let input = r#"
+        row {
+            text "First" first
+            text "Second" second
+            text "Third" third
+        }
+    "#;
+
+    let doc = parse(input).expect("Should parse text shapes in layout");
+    assert_eq!(doc.statements.len(), 1);
+
+    match &doc.statements[0].node {
+        agent_illustrator::parser::ast::Statement::Layout(layout) => {
+            assert_eq!(layout.children.len(), 3);
+            // Verify all children are text shapes
+            for child in &layout.children {
+                match &child.node {
+                    agent_illustrator::parser::ast::Statement::Shape(shape) => {
+                        assert!(matches!(
+                            shape.shape_type.node,
+                            agent_illustrator::parser::ast::ShapeType::Text { .. }
+                        ));
+                    }
+                    _ => panic!("Expected shape statement"),
+                }
+            }
+        }
+        _ => panic!("Expected layout statement"),
+    }
+}

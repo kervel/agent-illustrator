@@ -232,4 +232,68 @@ mod tests {
         assert!(svg.contains("ai-connection"));
         assert!(svg.contains("<path"));
     }
+
+    #[test]
+    fn test_render_text_shape() {
+        // Text shape should render as SVG text element
+        let svg = render(r#"text "Hello World" greeting"#).unwrap();
+        assert!(svg.contains("<svg"));
+        assert!(svg.contains("<text"));
+        assert!(svg.contains("Hello World"));
+        assert!(svg.contains(r#"id="greeting""#));
+        assert!(svg.contains("ai-text")); // CSS class for text shapes
+    }
+
+    #[test]
+    fn test_render_text_with_fill() {
+        // Text shape with fill color
+        let svg = render(r#"text "Red Text" red_text [fill: red]"#).unwrap();
+        assert!(svg.contains("Red Text"));
+        assert!(svg.contains(r#"fill="red""#));
+    }
+
+    #[test]
+    fn test_render_text_with_font_size() {
+        // Text shape with custom font size
+        let svg = render(r#"text "Big Text" big [font_size: 24]"#).unwrap();
+        assert!(svg.contains("Big Text"));
+        assert!(svg.contains(r#"font-size="24""#));
+    }
+
+    #[test]
+    fn test_render_text_with_connection() {
+        // Two text elements connected by an arrow
+        let svg = render(
+            r#"
+            row {
+                text "Label A" a
+                text "Label B" b
+            }
+            a -> b
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains("Label A"));
+        assert!(svg.contains("Label B"));
+        assert!(svg.contains("ai-connection"));
+        assert!(svg.contains("<path"));
+    }
+
+    #[test]
+    fn test_render_text_in_layout() {
+        // Text elements in a row layout
+        let svg = render(
+            r#"
+            row {
+                text "First" first
+                text "Second" second
+                text "Third" third
+            }
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains("First"));
+        assert!(svg.contains("Second"));
+        assert!(svg.contains("Third"));
+    }
 }

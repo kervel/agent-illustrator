@@ -139,6 +139,15 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         ShapeType::Polygon => config.default_rect_size,
         ShapeType::Icon { .. } => config.default_rect_size,
         ShapeType::Line => (config.default_line_width, 4.0),
+        ShapeType::Text { content } => {
+            // Estimate text size based on content length
+            // Use font_size from modifiers if available, otherwise default to 14px
+            let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
+            // Approximate width: ~0.6 * font_size per character
+            let estimated_width = content.len() as f64 * font_size * 0.6;
+            // Height is approximately the font size
+            (estimated_width.max(20.0), font_size)
+        }
     };
 
     let final_width = width.unwrap_or(default_width);
@@ -179,6 +188,20 @@ fn extract_width_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
 fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
     modifiers.iter().find_map(|m| {
         if matches!(m.node.key.node, StyleKey::Height) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(*value),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    })
+}
+
+/// Extract the font_size modifier value from modifiers
+fn extract_font_size(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
+    modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::FontSize) {
             match &m.node.value.node {
                 StyleValue::Number { value, .. } => Some(*value),
                 _ => None,

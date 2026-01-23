@@ -21,6 +21,8 @@ pub enum Token {
     Line,
     #[token("icon")]
     Icon,
+    #[token("text")]
+    Text,
 
     // Layout keywords
     #[token("row")]
@@ -109,8 +111,11 @@ mod tests {
 
     #[test]
     fn test_shape_keywords() {
-        let tokens: Vec<_> = lex("rect circle ellipse").map(|(t, _)| t).collect();
-        assert_eq!(tokens, vec![Token::Rect, Token::Circle, Token::Ellipse]);
+        let tokens: Vec<_> = lex("rect circle ellipse text").map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![Token::Rect, Token::Circle, Token::Ellipse, Token::Text]
+        );
     }
 
     #[test]

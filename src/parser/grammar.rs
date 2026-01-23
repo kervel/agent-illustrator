@@ -106,8 +106,11 @@ where
         just(Token::Polygon).to(ShapeType::Polygon),
         just(Token::Line).to(ShapeType::Line),
         just(Token::Icon)
-            .ignore_then(string_literal)
+            .ignore_then(string_literal.clone())
             .map(|s| ShapeType::Icon { icon_name: s.node }),
+        just(Token::Text)
+            .ignore_then(string_literal)
+            .map(|s| ShapeType::Text { content: s.node }),
     ))
     .map_with(|st, e| Spanned::new(st, span_range(&e.span())));
 
@@ -339,5 +342,38 @@ mod tests {
         "#;
         let doc = parse(input).expect("Should parse");
         assert_eq!(doc.statements.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_text() {
+        let doc = parse(r#"text "Hello World" my_label"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.shape_type.node {
+                    ShapeType::Text { content } => assert_eq!(content, "Hello World"),
+                    _ => panic!("Expected text shape"),
+                }
+                assert_eq!(s.name.as_ref().unwrap().node.as_str(), "my_label");
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_text_with_modifiers() {
+        let doc =
+            parse(r#"text "Styled" styled_text [fill: red, font_size: 16]"#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.shape_type.node {
+                    ShapeType::Text { content } => assert_eq!(content, "Styled"),
+                    _ => panic!("Expected text shape"),
+                }
+                assert_eq!(s.modifiers.len(), 2);
+            }
+            _ => panic!("Expected shape"),
+        }
     }
 }

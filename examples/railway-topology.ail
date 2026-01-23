@@ -2,95 +2,94 @@
 
 col diagram {
     // === MICRO LEVEL ===
-    // Railway junction: 2 tracks -> 4 tracks -> 2 tracks
-    group micro [label: "Micro"] {
-        row tracks [gap: 50] {
-            // Entry - 2 tracks
-            col entry [gap: 35] {
-                circle e1 [fill: #4169E1, size: 6]
-                circle e2 [fill: #4169E1, size: 6]
+    group micro {
+        row micro_row {
+            text "Micro" micro_lbl [font_size: 18]
+
+            row tracks [gap: 50] {
+                col entry [gap: 35] {
+                    circle e1 [fill: #4169E1, size: 6]
+                    circle e2 [fill: #4169E1, size: 6]
+                }
+                col sw1 [gap: 12] {
+                    circle s1 [fill: #4169E1, size: 6]
+                    circle s2 [fill: #4169E1, size: 6]
+                    circle s3 [fill: #4169E1, size: 6]
+                    circle s4 [fill: #4169E1, size: 6]
+                }
+                col yard [gap: 12] {
+                    circle y1 [fill: #4169E1, size: 6]
+                    circle y2 [fill: #4169E1, size: 6]
+                    circle y3 [fill: #4169E1, size: 6]
+                    circle y4 [fill: #4169E1, size: 6]
+                }
+                col sw2 [gap: 12] {
+                    circle t1 [fill: #4169E1, size: 6]
+                    circle t2 [fill: #4169E1, size: 6]
+                    circle t3 [fill: #4169E1, size: 6]
+                    circle t4 [fill: #4169E1, size: 6]
+                }
+                col exit [gap: 35] {
+                    circle x1 [fill: #4169E1, size: 6]
+                    circle x2 [fill: #4169E1, size: 6]
+                }
+
+                // Track connections
+                e1 -- s1 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                e1 -- s2 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                e2 -- s3 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                e2 -- s4 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                s1 -- y1 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                s2 -- y2 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                s3 -- y3 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                s4 -- y4 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                y1 -- t1 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                y2 -- t2 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                y3 -- t3 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                y4 -- t4 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                t1 -- x1 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                t2 -- x1 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                t3 -- x2 [stroke: #4169E1, stroke_width: 2, routing: direct]
+                t4 -- x2 [stroke: #4169E1, stroke_width: 2, routing: direct]
             }
-
-            // Switch zone 1 - diverging to 4
-            col sw1 [gap: 12] {
-                circle s1 [fill: #4169E1, size: 6]
-                circle s2 [fill: #4169E1, size: 6]
-                circle s3 [fill: #4169E1, size: 6]
-                circle s4 [fill: #4169E1, size: 6]
-            }
-
-            // Yard - 4 parallel tracks
-            col yard [gap: 12] {
-                circle y1 [fill: #4169E1, size: 6]
-                circle y2 [fill: #4169E1, size: 6]
-                circle y3 [fill: #4169E1, size: 6]
-                circle y4 [fill: #4169E1, size: 6]
-            }
-
-            // Switch zone 2 - converging
-            col sw2 [gap: 12] {
-                circle t1 [fill: #4169E1, size: 6]
-                circle t2 [fill: #4169E1, size: 6]
-                circle t3 [fill: #4169E1, size: 6]
-                circle t4 [fill: #4169E1, size: 6]
-            }
-
-            // Exit - 2 tracks
-            col exit [gap: 35] {
-                circle x1 [fill: #4169E1, size: 6]
-                circle x2 [fill: #4169E1, size: 6]
-            }
-
-            // Track connections (direct routing for diagonal switches)
-            e1 -- s1 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            e1 -- s2 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            e2 -- s3 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            e2 -- s4 [stroke: #4169E1, stroke_width: 2, routing: direct]
-
-            s1 -- y1 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            s2 -- y2 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            s3 -- y3 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            s4 -- y4 [stroke: #4169E1, stroke_width: 2, routing: direct]
-
-            y1 -- t1 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            y2 -- t2 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            y3 -- t3 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            y4 -- t4 [stroke: #4169E1, stroke_width: 2, routing: direct]
-
-            t1 -- x1 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            t2 -- x1 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            t3 -- x2 [stroke: #4169E1, stroke_width: 2, routing: direct]
-            t4 -- x2 [stroke: #4169E1, stroke_width: 2, routing: direct]
         }
     }
 
     // === MESO LEVEL ===
-    group meso [label: "Meso"] {
-        stack overlay {
-            col meso_tracks {
-                line m1 [stroke: #4169E1, stroke_width: 2]
-                line m2 [stroke: #4169E1, stroke_width: 2]
-                line m3 [stroke: #4169E1, stroke_width: 2]
-                line m4 [stroke: #4169E1, stroke_width: 2]
-                line m5 [stroke: #4169E1, stroke_width: 2]
-            }
-            row ops [gap: 10] {
-                ellipse op1 [fill: #90EE90, opacity: 0.35, label: "OP1"]
-                ellipse op2 [fill: #90EE90, opacity: 0.35, label: "OP2"]
+    group meso {
+        row meso_row {
+            text "Meso" meso_lbl [font_size: 18]
+
+            stack overlay {
+                col meso_tracks {
+                    line m1 [stroke: #4169E1, stroke_width: 2]
+                    line m2 [stroke: #4169E1, stroke_width: 2]
+                    line m3 [stroke: #4169E1, stroke_width: 2]
+                    line m4 [stroke: #4169E1, stroke_width: 2]
+                    line m5 [stroke: #4169E1, stroke_width: 2]
+                }
+                row ops [gap: 10] {
+                    ellipse op1 [fill: #90EE90, opacity: 0.35, label: "OP1"]
+                    ellipse op2 [fill: #90EE90, opacity: 0.35, label: "OP2"]
+                }
             }
         }
     }
 
     // === MACRO LEVEL ===
-    group macro [label: "Macro"] {
-        row graph [gap: 30] {
-            ellipse n1 [fill: #2E8B57, label: "OP1", width: 70, height: 40]
-            ellipse n2 [fill: #2E8B57, label: "OP2", width: 70, height: 40]
-            n1 -- n2 [stroke: #4169E1, stroke_width: 3, label: "Line Section", routing: direct]
+    group macro {
+        row macro_row {
+            text "Macro" macro_lbl [font_size: 18]
+
+            row graph [gap: 30] {
+                ellipse n1 [fill: #2E8B57, label: "OP1", width: 70, height: 40]
+                ellipse n2 [fill: #2E8B57, label: "OP2", width: 70, height: 40]
+                n1 -- n2 [stroke: #4169E1, stroke_width: 3, label: "Line Section", routing: direct]
+            }
         }
     }
 
-    // Aggregation arrows - should route vertically since groups are stacked in a column
-    micro -> meso [label: "Aggregation", stroke: #555555]
-    meso -> macro [label: "Aggregation", stroke: #555555]
+    // Aggregation arrows between the text labels
+    micro_lbl -> meso_lbl [label: "Aggregation", stroke: #555555]
+    meso_lbl -> macro_lbl [label: "Aggregation", stroke: #555555]
 }
