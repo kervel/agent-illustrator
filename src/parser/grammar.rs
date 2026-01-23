@@ -6,6 +6,26 @@ use chumsky::prelude::*;
 use crate::parser::ast::*;
 use crate::parser::lexer::Token;
 
+/// Check if an identifier is a symbolic color category
+fn is_color_category(ident: &str) -> Option<ColorCategory> {
+    match ident {
+        "foreground" => Some(ColorCategory::Foreground),
+        "background" => Some(ColorCategory::Background),
+        "text" => Some(ColorCategory::Text),
+        "accent" => Some(ColorCategory::Accent),
+        _ => None,
+    }
+}
+
+/// Check if an identifier is a lightness modifier
+fn is_lightness_modifier(ident: &str) -> Option<Lightness> {
+    match ident {
+        "light" => Some(Lightness::Light),
+        "dark" => Some(Lightness::Dark),
+        _ => None,
+    }
+}
+
 /// Parse DSL source code into an AST
 pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     let len = input.len();
@@ -77,18 +97,64 @@ where
         }),
     ));
 
+    // Parse a color category - identifier or "text" keyword (since text is reserved)
+    let color_category = choice((
+        // "text" keyword token maps to Text category
+        just(Token::Text).map_with(|_, e| Spanned::new(Identifier::new("text"), span_range(&e.span()))),
+        // Regular identifier
+        identifier.clone(),
+    ));
+
+    // Parse a symbolic color: category(-variant)?(-lightness)?
+    // e.g., foreground, foreground-1, text-dark, accent-2-light
+    let symbolic_color = color_category
+        .then(
+            just(Token::Minus)
+                .ignore_then(number.clone())
+                .or_not(),
+        )
+        .then(
+            just(Token::Minus)
+                .ignore_then(identifier.clone())
+                .or_not(),
+        )
+        .try_map(|((cat_id, variant_num), lightness_id), span| {
+            // Check if this is a valid symbolic color category
+            if let Some(category) = is_color_category(&cat_id.node.0) {
+                let variant = variant_num.map(|n| n.node as u8).filter(|&v| (1..=3).contains(&v));
+                let lightness = lightness_id.and_then(|id| is_lightness_modifier(&id.node.0));
+
+                Ok(StyleValue::Color(ColorValue::Symbolic {
+                    category,
+                    variant,
+                    lightness,
+                }))
+            } else {
+                Err(Rich::custom(span, "not a symbolic color"))
+            }
+        });
+
     let style_value = choice((
-        select! { Token::HexColor(c) => StyleValue::Color(c) }
+        // Hex colors like #ff0000 or #f00
+        select! { Token::HexColor(c) => StyleValue::Color(ColorValue::Hex(c)) }
             .map_with(|v, e| Spanned::new(v, span_range(&e.span()))),
-        number.map(|n| {
-            Spanned::new(
-                StyleValue::Number {
-                    value: n.node,
-                    unit: None,
-                },
-                n.span,
-            )
-        }),
+        // Symbolic colors (must come before plain identifiers)
+        symbolic_color.map_with(|v, e| Spanned::new(v, span_range(&e.span()))),
+        // Numbers (including negative via Minus token)
+        just(Token::Minus)
+            .or_not()
+            .then(number)
+            .map_with(|(neg, n), e| {
+                let value = if neg.is_some() { -n.node } else { n.node };
+                Spanned::new(
+                    StyleValue::Number {
+                        value,
+                        unit: None,
+                    },
+                    span_range(&e.span()),
+                )
+            }),
+        // Quoted strings
         string_literal.map(|s| Spanned::new(StyleValue::String(s.node), s.span)),
         // Handle "label" keyword as a keyword value (for [role: label])
         just(Token::Label).map_with(|_, e| {
@@ -581,6 +647,169 @@ mod tests {
                     _ => panic!("Expected string value"),
                 }
             }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    // ==================== Symbolic Color Tests ====================
+
+    #[test]
+    fn test_parse_symbolic_color_foreground() {
+        let doc = parse(r#"rect server [fill: foreground-1]"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                assert_eq!(s.modifiers.len(), 1);
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Color(ColorValue::Symbolic {
+                        category,
+                        variant,
+                        lightness,
+                    }) => {
+                        assert!(matches!(category, ColorCategory::Foreground));
+                        assert_eq!(*variant, Some(1));
+                        assert!(lightness.is_none());
+                    }
+                    other => panic!("Expected symbolic color, got {:?}", other),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_symbolic_color_text_dark() {
+        let doc = parse(r#"rect server [fill: text-dark]"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Color(ColorValue::Symbolic {
+                        category,
+                        variant,
+                        lightness,
+                    }) => {
+                        assert!(matches!(category, ColorCategory::Text));
+                        assert!(variant.is_none());
+                        assert!(matches!(lightness, Some(Lightness::Dark)));
+                    }
+                    other => panic!("Expected symbolic color, got {:?}", other),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_symbolic_color_accent_variant_light() {
+        let doc = parse(r#"rect server [fill: accent-2-light]"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Color(ColorValue::Symbolic {
+                        category,
+                        variant,
+                        lightness,
+                    }) => {
+                        assert!(matches!(category, ColorCategory::Accent));
+                        assert_eq!(*variant, Some(2));
+                        assert!(matches!(lightness, Some(Lightness::Light)));
+                    }
+                    other => panic!("Expected symbolic color, got {:?}", other),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_symbolic_color_background_base() {
+        let doc = parse(r#"rect server [fill: background]"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Color(ColorValue::Symbolic {
+                        category,
+                        variant,
+                        lightness,
+                    }) => {
+                        assert!(matches!(category, ColorCategory::Background));
+                        assert!(variant.is_none());
+                        assert!(lightness.is_none());
+                    }
+                    other => panic!("Expected symbolic color, got {:?}", other),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_named_color_passthrough() {
+        // Named colors like 'red' should NOT be parsed as symbolic
+        let doc = parse(r#"rect server [fill: red]"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Keyword(name) => {
+                        assert_eq!(name, "red");
+                    }
+                    other => panic!("Expected keyword for named color, got {:?}", other),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_hex_color_passthrough() {
+        let doc = parse(r#"rect server [fill: #ff0000]"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.modifiers[0].node.value.node {
+                    StyleValue::Color(ColorValue::Hex(hex)) => {
+                        assert_eq!(hex, "#ff0000");
+                    }
+                    other => panic!("Expected hex color, got {:?}", other),
+                }
+            }
+            _ => panic!("Expected shape"),
+        }
+    }
+
+    #[test]
+    fn test_parse_mixed_colors() {
+        // Mix of symbolic, named, and hex colors in one document
+        let doc = parse(r#"
+            rect a [fill: foreground-1]
+            rect b [fill: red]
+            rect c [fill: #00ff00]
+        "#)
+        .expect("Should parse");
+        assert_eq!(doc.statements.len(), 3);
+
+        // First: symbolic
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Color(ColorValue::Symbolic { .. }) => {}
+                other => panic!("Expected symbolic, got {:?}", other),
+            },
+            _ => panic!("Expected shape"),
+        }
+
+        // Second: keyword (named color)
+        match &doc.statements[1].node {
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Keyword(_) => {}
+                other => panic!("Expected keyword, got {:?}", other),
+            },
+            _ => panic!("Expected shape"),
+        }
+
+        // Third: hex
+        match &doc.statements[2].node {
+            Statement::Shape(s) => match &s.modifiers[0].node.value.node {
+                StyleValue::Color(ColorValue::Hex(_)) => {}
+                other => panic!("Expected hex, got {:?}", other),
+            },
             _ => panic!("Expected shape"),
         }
     }

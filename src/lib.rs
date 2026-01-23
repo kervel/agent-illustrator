@@ -15,13 +15,17 @@ pub mod error;
 pub mod layout;
 pub mod parser;
 pub mod renderer;
+pub mod stylesheet;
 
 pub use error::ParseError;
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
-pub use renderer::{render_svg, SvgConfig};
+pub use renderer::{render_svg, render_svg_with_stylesheet, SvgConfig};
 
 use thiserror::Error;
+
+// Re-export Stylesheet for public API
+pub use stylesheet::Stylesheet;
 
 /// Errors that can occur during the render pipeline
 #[derive(Debug, Error)]
@@ -50,12 +54,24 @@ fn format_parse_errors(errors: &[ParseError]) -> String {
 }
 
 /// Configuration for the complete render pipeline
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct RenderConfig {
     /// Layout configuration
     pub layout: LayoutConfig,
     /// SVG output configuration
     pub svg: SvgConfig,
+    /// Stylesheet for color resolution
+    pub stylesheet: Stylesheet,
+}
+
+impl Default for RenderConfig {
+    fn default() -> Self {
+        Self {
+            layout: LayoutConfig::default(),
+            svg: SvgConfig::default(),
+            stylesheet: Stylesheet::default(),
+        }
+    }
 }
 
 impl RenderConfig {
@@ -73,6 +89,12 @@ impl RenderConfig {
     /// Set the SVG configuration
     pub fn with_svg(mut self, config: SvgConfig) -> Self {
         self.svg = config;
+        self
+    }
+
+    /// Set the stylesheet for color resolution
+    pub fn with_stylesheet(mut self, stylesheet: Stylesheet) -> Self {
+        self.stylesheet = stylesheet;
         self
     }
 }
@@ -130,8 +152,8 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
     // Route connections
     layout::route_connections(&mut result, &doc)?;
 
-    // Generate SVG
-    let svg = render_svg(&result, &config.svg);
+    // Generate SVG with stylesheet
+    let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet);
 
     Ok(svg)
 }

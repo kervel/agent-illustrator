@@ -82,6 +82,10 @@ pub enum Token {
     #[token("--")]
     Dash,
 
+    // Single minus sign (for symbolic colors like foreground-1)
+    #[token("-")]
+    Minus,
+
     // Delimiters
     #[token("{")]
     BraceOpen,
@@ -110,7 +114,7 @@ pub enum Token {
     })]
     String(String),
 
-    #[regex(r"-?[0-9]+(\.[0-9]+)?", |lex| lex.slice().parse::<f64>().ok())]
+    #[regex(r"[0-9]+(\.[0-9]+)?", |lex| lex.slice().parse::<f64>().ok())]
     Number(f64),
 
     #[regex(r"#[0-9a-fA-F]{3,6}", |lex| lex.slice().to_string())]
@@ -192,7 +196,8 @@ mod tests {
             vec![
                 Token::Number(42.0),
                 Token::Number(3.14),
-                Token::Number(-10.0)
+                Token::Minus,
+                Token::Number(10.0)
             ]
         );
     }

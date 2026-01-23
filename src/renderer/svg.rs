@@ -5,6 +5,7 @@ use crate::layout::{
     TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, ShapeType};
+use crate::stylesheet::Stylesheet;
 
 use super::SvgConfig;
 
@@ -12,6 +13,7 @@ use super::SvgConfig;
 pub struct SvgBuilder {
     config: SvgConfig,
     defs: Vec<String>,
+    styles: Vec<String>,
     elements: Vec<String>,
     connections: Vec<String>,
     indent: usize,
@@ -23,10 +25,29 @@ impl SvgBuilder {
         Self {
             config,
             defs: vec![],
+            styles: vec![],
             elements: vec![],
             connections: vec![],
             indent: 1,
         }
+    }
+
+    /// Add CSS custom properties from a stylesheet
+    pub fn add_stylesheet(&mut self, stylesheet: &Stylesheet) {
+        let mut css = String::from(":root {\n");
+        for (token, value) in &stylesheet.colors {
+            css.push_str(&format!("    --{}: {};\n", token, value));
+        }
+        css.push_str("  }\n");
+        // Apply font-family to text elements if defined
+        if stylesheet.colors.contains_key("font-family") {
+            let prefix = self.prefix();
+            css.push_str(&format!(
+                "  .{}label, .{}text {{ font-family: var(--font-family); }}",
+                prefix, prefix
+            ));
+        }
+        self.styles.push(css);
     }
 
     fn prefix(&self) -> String {
@@ -355,6 +376,19 @@ impl SvgBuilder {
         ));
         svg.push_str(nl);
 
+        // Style section for CSS custom properties
+        if !self.styles.is_empty() {
+            svg.push_str("  <style>");
+            svg.push_str(nl);
+            for style in &self.styles {
+                svg.push_str("    ");
+                svg.push_str(style);
+                svg.push_str(nl);
+            }
+            svg.push_str("  </style>");
+            svg.push_str(nl);
+        }
+
         // Defs section if needed
         if !self.defs.is_empty() {
             svg.push_str("  <defs>");
@@ -386,9 +420,21 @@ impl SvgBuilder {
     }
 }
 
-/// Render a LayoutResult to an SVG string
+/// Render a LayoutResult to an SVG string (with default stylesheet)
 pub fn render_svg(result: &LayoutResult, config: &SvgConfig) -> String {
+    render_svg_with_stylesheet(result, config, &Stylesheet::default())
+}
+
+/// Render a LayoutResult to an SVG string with a custom stylesheet
+pub fn render_svg_with_stylesheet(
+    result: &LayoutResult,
+    config: &SvgConfig,
+    stylesheet: &Stylesheet,
+) -> String {
     let mut builder = SvgBuilder::new(config.clone());
+
+    // Add CSS custom properties from the stylesheet
+    builder.add_stylesheet(stylesheet);
 
     // Add arrow marker if there are any directed connections
     let has_directed = result.connections.iter().any(|c| {

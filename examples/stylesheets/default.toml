@@ -1,0 +1,44 @@
+# Default Stylesheet
+# Neutral grays with blue accent
+# For use with Agent Illustrator
+
+[metadata]
+name = "Default"
+description = "Default neutral palette - works with any content"
+
+[colors]
+# Foreground colors (primary visual elements)
+foreground-1 = "#333333"       # Primary - dark gray
+foreground-2 = "#666666"       # Secondary
+foreground-3 = "#999999"       # Tertiary/subtle
+foreground-light = "#e0e0e0"   # Light variant
+foreground-dark = "#1a1a1a"    # Dark variant
+
+# Background colors
+background-1 = "#ffffff"       # Main background - white
+background-2 = "#f5f5f5"       # Subtle background
+background-3 = "#eeeeee"       # More contrast
+background-light = "#ffffff"   # Light variant
+background-dark = "#333333"    # Dark variant
+
+# Text colors
+text-1 = "#333333"             # Primary text
+text-2 = "#666666"             # Secondary text
+text-3 = "#999999"             # Muted text
+text-light = "#ffffff"         # For dark backgrounds
+text-dark = "#1a1a1a"          # Maximum contrast
+
+# Accent colors (Material Blue)
+accent-1 = "#2196f3"           # Primary accent
+accent-2 = "#e3f2fd"           # Light accent
+accent-3 = "#bbdefb"           # Medium accent
+accent-light = "#e3f2fd"       # Light variant
+accent-dark = "#1565c0"        # Dark variant
+
+# Status colors
+status-success = "#4caf50"     # Green
+status-warning = "#ff9800"     # Orange
+status-error = "#f44336"       # Red
+
+# Fonts
+font-family = "system-ui, -apple-system, sans-serif"

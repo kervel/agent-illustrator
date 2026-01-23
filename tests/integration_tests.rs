@@ -807,3 +807,94 @@ fn test_connection_label_without_position() {
         _ => panic!("Expected connection statement"),
     }
 }
+
+// ============================================================================
+// Symbolic Color Tests
+// ============================================================================
+
+#[test]
+fn test_symbolic_colors() {
+    use agent_illustrator::render;
+
+    // Test parsing and rendering of symbolic colors
+    let input = r#"
+        rect server [fill: foreground-1, stroke: accent-1]
+        rect client [fill: background-2, stroke: text-dark]
+    "#;
+
+    let svg = render(input).expect("Should render symbolic colors");
+
+    // Check that CSS custom properties are used in the output
+    assert!(
+        svg.contains("var(--foreground-1)"),
+        "Should use CSS variable for foreground-1"
+    );
+    assert!(
+        svg.contains("var(--accent-1)"),
+        "Should use CSS variable for accent-1"
+    );
+    assert!(
+        svg.contains("var(--background-2)"),
+        "Should use CSS variable for background-2"
+    );
+    assert!(
+        svg.contains("var(--text-dark)"),
+        "Should use CSS variable for text-dark"
+    );
+
+    // Check that the style block contains the CSS custom property definitions
+    assert!(svg.contains("<style>"), "Should have style block");
+    assert!(
+        svg.contains("--foreground-1:"),
+        "Should define foreground-1 in style"
+    );
+}
+
+#[test]
+fn test_symbolic_colors_with_stylesheet() {
+    use agent_illustrator::{render_with_config, RenderConfig, Stylesheet};
+
+    let input = r#"rect box [fill: foreground-1]"#;
+
+    // Create a custom stylesheet
+    let stylesheet_toml = r##"
+[colors]
+foreground-1 = "#ff0000"
+"##;
+    let stylesheet = Stylesheet::from_str(stylesheet_toml).expect("Should parse stylesheet");
+
+    let config = RenderConfig::new().with_stylesheet(stylesheet);
+    let svg = render_with_config(input, config).expect("Should render with custom stylesheet");
+
+    // Check that the custom color is in the style block
+    assert!(
+        svg.contains("--foreground-1: #ff0000"),
+        "Should use custom color from stylesheet"
+    );
+    // The fill attribute should use the CSS variable
+    assert!(
+        svg.contains("var(--foreground-1)"),
+        "Should reference CSS variable"
+    );
+}
+
+#[test]
+fn test_mixed_colors() {
+    use agent_illustrator::render;
+
+    // Test mixing symbolic, hex, and named colors
+    let input = r#"
+        rect a [fill: foreground-1]
+        rect b [fill: #ff0000]
+        rect c [fill: blue]
+    "#;
+
+    let svg = render(input).expect("Should render mixed colors");
+
+    // Symbolic color should use CSS variable
+    assert!(svg.contains("var(--foreground-1)"));
+    // Hex color should pass through directly
+    assert!(svg.contains(r##"fill="#ff0000""##));
+    // Named color should pass through directly
+    assert!(svg.contains(r#"fill="blue""#));
+}

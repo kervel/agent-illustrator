@@ -10,7 +10,7 @@ pub mod routing;
 pub mod types;
 
 pub use config::LayoutConfig;
-pub use engine::{compute, resolve_constraints};
+pub use engine::{compute, resolve_alignments, resolve_constraints};
 pub use error::LayoutError;
 pub use routing::{route_connections, RoutingMode};
 pub use types::*;

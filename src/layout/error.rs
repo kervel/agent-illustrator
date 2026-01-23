@@ -29,6 +29,22 @@ pub enum LayoutError {
     /// Invalid layout configuration
     #[error("invalid layout for element '{element}': {reason}")]
     InvalidLayout { element: String, reason: String },
+
+    /// Element path not found during alignment resolution
+    #[error("element path '{path}' not found")]
+    PathNotFound {
+        path: String,
+        span: Span,
+        suggestions: Vec<String>,
+    },
+
+    /// Incompatible edge types in alignment (mixing horizontal and vertical)
+    #[error("incompatible edge types in alignment: cannot mix {}", edges.join(" and "))]
+    IncompatibleEdges { edges: Vec<String>, span: Span },
+
+    /// Circular alignment dependency
+    #[error("circular alignment dependency: {}", elements.join(" -> "))]
+    CircularAlignment { elements: Vec<String> },
 }
 
 impl LayoutError {
@@ -66,6 +82,8 @@ impl LayoutError {
     pub fn span(&self) -> Option<&Span> {
         match self {
             Self::UndefinedIdentifier { span, .. } => Some(span),
+            Self::PathNotFound { span, .. } => Some(span),
+            Self::IncompatibleEdges { span, .. } => Some(span),
             _ => None,
         }
     }
@@ -74,8 +92,28 @@ impl LayoutError {
     pub fn suggestions(&self) -> Option<&[String]> {
         match self {
             Self::UndefinedIdentifier { suggestions, .. } => Some(suggestions),
+            Self::PathNotFound { suggestions, .. } => Some(suggestions),
             _ => None,
         }
+    }
+
+    /// Create a path not found error
+    pub fn path_not_found(path: impl Into<String>, span: Span, suggestions: Vec<String>) -> Self {
+        Self::PathNotFound {
+            path: path.into(),
+            span,
+            suggestions,
+        }
+    }
+
+    /// Create an incompatible edges error
+    pub fn incompatible_edges(edges: Vec<String>, span: Span) -> Self {
+        Self::IncompatibleEdges { edges, span }
+    }
+
+    /// Create a circular alignment error
+    pub fn circular_alignment(elements: Vec<String>) -> Self {
+        Self::CircularAlignment { elements }
     }
 }
 
