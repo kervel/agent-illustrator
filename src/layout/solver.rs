@@ -27,6 +27,10 @@ pub enum LayoutProperty {
     CenterX,
     /// Center Y = Y + Height/2 (derived property)
     CenterY,
+    /// Right = X + Width (derived property)
+    Right,
+    /// Bottom = Y + Height (derived property)
+    Bottom,
 }
 
 impl LayoutProperty {
@@ -292,6 +296,18 @@ impl ConstraintSolver {
                 let y = self.get_or_create_base_var(&var.element_id, LayoutProperty::Y);
                 let height = self.get_or_create_base_var(&var.element_id, LayoutProperty::Height);
                 y + height * 0.5
+            }
+            LayoutProperty::Right => {
+                // right = x + width
+                let x = self.get_or_create_base_var(&var.element_id, LayoutProperty::X);
+                let width = self.get_or_create_base_var(&var.element_id, LayoutProperty::Width);
+                x + width
+            }
+            LayoutProperty::Bottom => {
+                // bottom = y + height
+                let y = self.get_or_create_base_var(&var.element_id, LayoutProperty::Y);
+                let height = self.get_or_create_base_var(&var.element_id, LayoutProperty::Height);
+                y + height
             }
         }
     }

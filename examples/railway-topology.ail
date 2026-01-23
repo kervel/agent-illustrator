@@ -30,12 +30,16 @@ col diagram {
                 circle b2 [fill: accent-1, size: 6]
             }
 
-            // Preserve B track spacing (jB2 is 160px right of jB1)
-            constrain jB2.center_x = jB1.center_x + 160
+            // Align track A endpoints to track B endpoints (both tracks same length)
+            constrain a1.center_x = b1.center_x
+            constrain a2.center_x = b2.center_x
+
+            // Preserve B track spacing (jB2 is 140px right of jB1)
+            constrain jB2.center_x = jB1.center_x + 140
             // Center the junction pair within the track
             // midpoint of jB1,jB2 should equal midpoint of b1,b2
-            // jB1 + 80 = midpoint(b1,b2), so jB1 = midpoint(b1,b2) - 80
-            constrain jB1.center_x = midpoint(b1, b2) - 80
+            // jB1 + 70 = midpoint(b1,b2), so jB1 = midpoint(b1,b2) - 70
+            constrain jB1.center_x = midpoint(b1, b2) - 70
 
             // Offset A junctions for diagonal crossovers:
             // jA1 offset left → diagonal goes down-right to jB1
@@ -88,13 +92,19 @@ col diagram {
                     circle mb2 [fill: foreground-3, size: 6]
                 }
 
-                // Align meso B junctions to micro B junctions (cross-level alignment)
+                // Align meso junctions to micro junctions (cross-level alignment)
                 constrain mjB1.center_x = jB1.center_x
                 constrain mjB2.center_x = jB2.center_x
 
                 // Offset A junctions for diagonal crossovers (same as micro)
                 constrain mjA1.center_x = mjB1.center_x - 40
                 constrain mjA2.center_x = mjB2.center_x + 40
+
+                // Align meso track endpoints to micro track endpoints
+                constrain ma1.center_x = a1.center_x
+                constrain ma2.center_x = a2.center_x
+                constrain mb1.center_x = b1.center_x
+                constrain mb2.center_x = b2.center_x
 
                 // Track lines (grayed)
                 ma1 -- mjA1 [stroke: foreground-3, stroke_width: 2, routing: direct]
@@ -130,6 +140,10 @@ col diagram {
             circle n2 [fill: accent-1, size: 50, label: "OP 2"]
             n1 -- n2 [stroke: accent-1, stroke_width: 3, label: "Section of Line (SoL)", routing: direct]
         }
+
+        // Align macro nodes with track endpoints (left-to-left, right-to-right)
+        constrain n1.left = b1.left
+        constrain n2.right = b2.right
     }
 
     // Aggregation arrows with connection label references

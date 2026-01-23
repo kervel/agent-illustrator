@@ -1109,10 +1109,10 @@ pub fn resolve_constrain_statements(
             let delta = value - current_value;
             if delta.abs() > 0.001 {
                 let axis = match var.property {
-                    LayoutProperty::X | LayoutProperty::Width | LayoutProperty::CenterX => {
+                    LayoutProperty::X | LayoutProperty::Width | LayoutProperty::CenterX | LayoutProperty::Right => {
                         Axis::Horizontal
                     }
-                    LayoutProperty::Y | LayoutProperty::Height | LayoutProperty::CenterY => {
+                    LayoutProperty::Y | LayoutProperty::Height | LayoutProperty::CenterY | LayoutProperty::Bottom => {
                         Axis::Vertical
                     }
                 };
@@ -1203,6 +1203,8 @@ fn get_element_property(
         // Derived properties
         LayoutProperty::CenterX => elem.bounds.x + elem.bounds.width / 2.0,
         LayoutProperty::CenterY => elem.bounds.y + elem.bounds.height / 2.0,
+        LayoutProperty::Right => elem.bounds.x + elem.bounds.width,
+        LayoutProperty::Bottom => elem.bounds.y + elem.bounds.height,
     })
 }
 

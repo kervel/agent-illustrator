@@ -456,10 +456,9 @@ impl ConstraintCollector {
                 super::solver::LayoutProperty::CenterX
             }
             ConstraintProperty::CenterY => super::solver::LayoutProperty::CenterY,
-            // Right/Bottom need special handling too (right = x + width)
-            // For now, map to base properties - TODO: add Right/Bottom to LayoutProperty
-            ConstraintProperty::Right => super::solver::LayoutProperty::X,
-            ConstraintProperty::Bottom => super::solver::LayoutProperty::Y,
+            // Right and Bottom are derived properties (right = x + width, bottom = y + height)
+            ConstraintProperty::Right => super::solver::LayoutProperty::Right,
+            ConstraintProperty::Bottom => super::solver::LayoutProperty::Bottom,
         };
 
         LayoutVariable::new(id, property)
