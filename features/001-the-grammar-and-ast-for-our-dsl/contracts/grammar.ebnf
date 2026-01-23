@@ -1,6 +1,7 @@
 (* Agent Illustrator DSL Grammar - EBNF Notation *)
-(* Version: 1.0.0 *)
+(* Version: 2.0.0 *)
 (* Design Goal: Minimal tokens for AI agent efficiency *)
+(* Last Updated: 2026-01-23 *)
 
 (* ============================================ *)
 (* DOCUMENT STRUCTURE                           *)
@@ -13,18 +14,21 @@ statement = shape_decl
           | layout_decl
           | group_decl
           | constraint_decl
+          | alignment_decl
           | comment ;
 
 (* ============================================ *)
 (* SHAPE DECLARATIONS                           *)
 (* ============================================ *)
 
-shape_decl = shape_type [ identifier ] [ modifier_block ] ;
+shape_decl = shape_type [ string_literal ] [ identifier ] [ modifier_block ] ;
 
-shape_type = "rect" | "circle" | "ellipse" | "line" | "polygon"
+shape_type = "rect" | "circle" | "ellipse" | "line" | "polygon" | "text"
            | icon_type ;
 
 icon_type = "icon" string_literal ;
+
+(* Note: text shape requires a string literal: text "Hello" my_label *)
 
 (* ============================================ *)
 (* CONNECTIONS                                  *)
@@ -54,12 +58,30 @@ block = "{" { statement } "}" ;
 group_decl = "group" [ identifier ] [ modifier_block ] block ;
 
 (* ============================================ *)
-(* POSITION CONSTRAINTS (Experimental)          *)
+(* POSITION CONSTRAINTS                         *)
 (* ============================================ *)
 
 constraint_decl = "place" identifier position_relation identifier ;
 
 position_relation = "right-of" | "left-of" | "above" | "below" | "inside" ;
+
+(* ============================================ *)
+(* ALIGNMENT DECLARATIONS                       *)
+(* ============================================ *)
+
+alignment_decl = "align" anchor "=" anchor { "=" anchor } ;
+
+anchor = element_path "." edge ;
+
+element_path = identifier { "." identifier } ;
+
+edge = "left" | "right" | "top" | "bottom"
+     | "horizontal_center" | "vertical_center" ;
+
+(* Examples:
+   align a.left = b.left
+   align x.horizontal_center = y.horizontal_center = z.horizontal_center
+*)
 
 (* ============================================ *)
 (* STYLE MODIFIERS                              *)
@@ -69,26 +91,73 @@ modifier_block = "[" modifier { "," modifier } [ "," ] "]" ;
 
 modifier = modifier_key ":" modifier_value ;
 
-modifier_key = identifier ;
+modifier_key = "fill" | "stroke" | "stroke_width" | "opacity"
+             | "width" | "height" | "size" | "gap"
+             | "label" | "label_position" | "font_size"
+             | "routing" | "role"
+             | identifier ;  (* extensible *)
 
 modifier_value = color_value
                | number_value
                | string_literal
+               | identifier    (* for references and keywords *)
                | keyword ;
 
-color_value = "#" hex_digits          (* #fff or #ffffff *)
-            | "rgb" "(" number "," number "," number ")"
-            | color_name ;
+(* ============================================ *)
+(* COLORS                                       *)
+(* ============================================ *)
+
+color_value = hex_color | symbolic_color | color_name ;
+
+hex_color = "#" hex_digits ;  (* #fff or #ffffff *)
+
+(* Symbolic colors reference stylesheet palette *)
+symbolic_color = color_category "-" level ;
+
+color_category = "accent" | "foreground" | "background" | "text" | "status" ;
+
+level = "1" | "2" | "3" | "light" | "dark"
+      | "success" | "warning" | "error" ;
+
+(* Examples: accent-1, text-2, foreground-light, status-error *)
 
 color_name = "red" | "blue" | "green" | "yellow" | "black" | "white"
-           | "gray" | "orange" | "purple" | "pink" | "cyan" | identifier ;
+           | "gray" | "orange" | "purple" | "pink" | "cyan" ;
+
+(* ============================================ *)
+(* SPECIAL MODIFIER VALUES                      *)
+(* ============================================ *)
+
+(* Routing modes for connections *)
+routing_value = "orthogonal" | "direct" ;
+
+(* Label positions for connection labels *)
+label_position_value = "center" | "start" | "end" | "left" | "right" ;
+
+(* Role values for semantic element roles *)
+role_value = "label" ;
+
+(* ============================================ *)
+(* NUMERIC VALUES                               *)
+(* ============================================ *)
 
 number_value = number [ unit ] ;
 
 unit = "px" | "%" | "em" | "pt" ;
 
+number = [ "-" ] digits [ "." digits ] ;
+
+digits = digit { digit } ;
+
+(* ============================================ *)
+(* KEYWORDS                                     *)
+(* ============================================ *)
+
 keyword = "bold" | "italic" | "dashed" | "dotted" | "solid"
-        | "thin" | "thick" | identifier ;
+        | "thin" | "thick"
+        | routing_value
+        | label_position_value
+        | role_value ;
 
 (* ============================================ *)
 (* COMMENTS                                     *)
@@ -104,7 +173,7 @@ block_comment = "/*" { any_char } "*/" ;
 (* LEXICAL ELEMENTS                             *)
 (* ============================================ *)
 
-identifier = ( letter | "_" ) { letter | digit | "_" } ;
+identifier = ( letter | "_" ) { letter | digit | "_" | "-" } ;
 
 string_literal = '"' { string_char } '"' ;
 
@@ -112,10 +181,6 @@ string_char = any_char - '"' - "\"
             | "\" escape_char ;
 
 escape_char = '"' | "\" | "n" | "t" | "r" ;
-
-number = [ "-" ] digits [ "." digits ] ;
-
-digits = digit { digit } ;
 
 hex_digits = hex_digit { hex_digit } ;
 
@@ -134,17 +199,38 @@ whitespace = " " | "\t" | "\n" | "\r" ;
 (* Whitespace is insignificant and consumed between tokens *)
 
 (* ============================================ *)
+(* DEFAULTS                                     *)
+(* ============================================ *)
+
+(*
+  Connection defaults:
+  - routing: orthogonal
+  - stroke: #333
+  - stroke_width: 2
+
+  Shape defaults:
+  - No fill (transparent)
+  - No stroke
+*)
+
+(* ============================================ *)
 (* EXAMPLE VALID INPUTS                         *)
 (* ============================================ *)
 
 (*
   // Simple shapes
   rect server
-  circle db [fill: blue]
+  circle db [fill: accent-1]
+  text "Hello World" greeting [font_size: 16, fill: text-1]
 
   // Connections
   server -> db [label: "query"]
   client <-> server
+  a -- b [routing: direct, stroke: accent-1]
+
+  // Connection with label reference
+  text "My Label" lbl [font_size: 12]
+  a -> b [label: lbl]
 
   // Layout
   row {
@@ -153,18 +239,22 @@ whitespace = " " | "\t" | "\n" | "\r" ;
     rect c [fill: red]
   }
 
-  // Groups
+  // Groups with role-based labels
   group datacenter {
+    text "Datacenter" [role: label, font_size: 18]
     row {
       rect rack1
       rect rack2
     }
   }
 
-  // Constraints (experimental)
+  // Alignment
+  align a.left = b.left = c.left
+  align x.horizontal_center = y.horizontal_center
+
+  // Constraints
   place client right-of server
 
   // Icons
   icon "server" myserver [fill: gray]
-  icon "database" db1
 *)

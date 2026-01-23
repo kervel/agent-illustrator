@@ -46,6 +46,11 @@ If there is already something we can use as a component, bring it in. For instan
 - Renderer tests should use snapshot testing for visual output
 - Integration tests verify end-to-end language-to-SVG pipeline
 
+### Documentation Requirements
+- The formal grammar in `features/001-the-grammar-and-ast-for-our-dsl/contracts/grammar.ebnf` MUST be kept in sync with the parser implementation
+- When adding new syntax (keywords, operators, modifiers), update grammar.ebnf in the same commit
+- The EBNF serves as the canonical language specification and source for tooling (syntax highlighting, etc.)
+
 ## Decision Framework
 
 When making architectural decisions:
