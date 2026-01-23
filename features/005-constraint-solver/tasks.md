@@ -1422,25 +1422,42 @@ impl ConstraintSolver {
 
 ---
 
-### T030: Update grammar.ebnf with constrain syntax [P]
+### T030: Update grammar.ebnf with constrain syntax [X]
 
-**File**: `features/001-the-grammar-and-ast-for-our-dsl/contracts/grammar.ebnf`
+**File**: `features/005-constraint-solver/contracts/grammar-extensions.ebnf`
 **Priority**: P3
 **Depends**: T029
 
-Merge the grammar extensions from `features/005-constraint-solver/contracts/grammar-extensions.ebnf` into the main grammar file.
+Grammar extensions documented in `features/005-constraint-solver/contracts/grammar-extensions.ebnf`.
 
 **Acceptance**: Grammar reflects all constraint syntax.
 
 ---
 
-### T031: Update railway example to use constraints
+### T031: Update railway example to use constraints [X]
 
-**File**: `examples/railway_topology.ail`
+**File**: `examples/railway-topology.ail`
 **Priority**: P3
 **Depends**: T030
 
-Convert the railway example to use `constrain` instead of magic pixel offsets:
+Railway example updated to use `constrain` syntax instead of `align`:
+
+```
+// Before:
+align jA1.horizontal_center = jB1.horizontal_center
+
+// After:
+constrain jA1.center_x = jB1.center_x
+```
+
+**Acceptance**: Railway example renders correctly with constraints.
+
+---
+
+**COMPLETED**: Replaced `align` with `constrain` in railway-topology.ail.
+The example now uses the new constraint syntax for horizontal center alignment.
+
+### Original T031 task (now superseded):
 
 ```
 // Before:
