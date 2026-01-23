@@ -657,7 +657,8 @@ fn format_text_styles(styles: &ResolvedStyles) -> String {
         parts.push(format!(r#"font-size="{}""#, font_size));
     }
     if !parts.is_empty() {
-        parts.join(" ")
+        // Add leading space so it can be appended to existing attributes
+        format!(" {}", parts.join(" "))
     } else {
         String::new()
     }
