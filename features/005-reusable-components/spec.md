@@ -20,6 +20,7 @@ The primary use case is defining a visual element once (e.g., a person icon as a
 - Q: How should component instance sizing work when the SVG has intrinsic dimensions? → A: Scale to fit layout (preserving aspect ratio) by default; allow optional explicit size override parameters.
 - Q: Can connections target elements inside a component instance? → A: Yes, but only via explicitly exported connection points; components must declare which internal elements are targetable.
 - Q: What happens if a component/instance name conflicts with existing names? → A: Scoped namespaces; component internals have their own namespace, preventing conflicts with parent document names.
+- Q: Can parent constraints override component internal constraints? → A: No, encapsulation preserved. Parent can only constrain exported elements, not modify internal layout.
 
 ## User Scenarios
 
@@ -180,6 +181,21 @@ Components can expose internal elements as connection targets.
 - Exported names must reference existing elements in the component (error if not found)
 - Only exported elements are visible via dot notation from parent scope
 
+### FR-10: Constraint Scoping for Imported AIL
+
+**Dependency:** Requires constraint solver (Feature 005-constraint-solver)
+
+Constraints in imported AIL files must integrate with the parent document's constraint system while maintaining encapsulation.
+
+**Requirement:** Internal component constraints are solved within their namespace. Parent documents can reference exported elements in constraints but cannot override internal constraints.
+
+**Testable Criteria:**
+- Internal constraints (e.g., `constrain a.left = b.left` inside component) are solved as part of the global constraint system
+- Parent can reference exported elements: `constrain cable.right = router1.wan.left`
+- Parent constraints cannot reference non-exported internals (produces clear error: "element 'router1.internal_node' is not exported")
+- Constraint conflicts between parent and component produce scoped error messages indicating which file contains each conflicting constraint
+- Component internal layout is stable regardless of how parent positions the component instance
+
 ## Success Criteria
 
 1. **Reuse Efficiency**: A user can define a complex visual element once and instantiate it 10+ times without duplicating code
@@ -220,6 +236,7 @@ A declaration that makes an internal element accessible from outside the compone
 6. **Scoped Namespaces**: Each component has its own internal namespace; internal element names do not conflict with parent document names. Component and instance names in the parent scope must be unique within that scope.
 7. **Import Before Use**: Components must be declared before they can be instantiated
 8. **Aspect Ratio Preservation**: When scaling components to fit layout, aspect ratio is always preserved (no distortion)
+9. **Constraint Solver Available**: This feature depends on the constraint-based layout system (Feature 005-constraint-solver). Imported AIL constraints merge into the global constraint system.
 
 ## Technical Boundaries
 
