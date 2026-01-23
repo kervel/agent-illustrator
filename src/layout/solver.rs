@@ -23,6 +23,10 @@ pub enum LayoutProperty {
     Y,
     Width,
     Height,
+    /// Center X = X + Width/2 (derived property)
+    CenterX,
+    /// Center Y = Y + Height/2 (derived property)
+    CenterY,
 }
 
 impl LayoutProperty {
@@ -245,7 +249,19 @@ impl ConstraintSolver {
         }
     }
 
-    /// Get or create a kasuari variable for our layout variable
+    /// Get or create a kasuari variable for a base property (X, Y, Width, Height)
+    fn get_or_create_base_var(&mut self, element_id: &str, property: LayoutProperty) -> KasuariVariable {
+        let var = LayoutVariable::new(element_id, property);
+        if let Some(&kvar) = self.variables.get(&var) {
+            kvar
+        } else {
+            let kvar = KasuariVariable::new();
+            self.variables.insert(var, kvar);
+            kvar
+        }
+    }
+
+    /// Get or create a kasuari variable for our layout variable (for base properties only)
     fn get_or_create_var(&mut self, var: &LayoutVariable) -> KasuariVariable {
         if let Some(&kvar) = self.variables.get(var) {
             kvar
@@ -253,6 +269,29 @@ impl ConstraintSolver {
             let kvar = KasuariVariable::new();
             self.variables.insert(var.clone(), kvar);
             kvar
+        }
+    }
+
+    /// Create a kasuari expression for a layout variable
+    /// For base properties (X, Y, Width, Height), returns the variable as an expression
+    /// For derived properties (CenterX, CenterY), returns the appropriate expression
+    fn get_expression(&mut self, var: &LayoutVariable) -> kasuari::Expression {
+        match var.property {
+            LayoutProperty::X | LayoutProperty::Y | LayoutProperty::Width | LayoutProperty::Height => {
+                self.get_or_create_var(var).into()
+            }
+            LayoutProperty::CenterX => {
+                // center_x = x + width / 2
+                let x = self.get_or_create_base_var(&var.element_id, LayoutProperty::X);
+                let width = self.get_or_create_base_var(&var.element_id, LayoutProperty::Width);
+                x + width * 0.5
+            }
+            LayoutProperty::CenterY => {
+                // center_y = y + height / 2
+                let y = self.get_or_create_base_var(&var.element_id, LayoutProperty::Y);
+                let height = self.get_or_create_base_var(&var.element_id, LayoutProperty::Height);
+                y + height * 0.5
+            }
         }
     }
 }
@@ -308,10 +347,11 @@ impl ConstraintSolver {
                 value,
                 source,
             } => {
-                let var = self.get_or_create_var(variable);
+                // Use expression to handle derived properties like CenterX/CenterY
+                let expr = self.get_expression(variable);
                 let desc = format!("{}.{:?} = {}", variable.element_id, variable.property, value);
                 self.solver
-                    .add_constraint(var | EQ(Strength::REQUIRED) | *value)
+                    .add_constraint(expr | EQ(Strength::REQUIRED) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -322,8 +362,9 @@ impl ConstraintSolver {
                 offset,
                 source,
             } => {
-                let left_var = self.get_or_create_var(left);
-                let right_var = self.get_or_create_var(right);
+                // Use expressions to handle derived properties like CenterX/CenterY
+                let left_expr = self.get_expression(left);
+                let right_expr = self.get_expression(right);
                 let desc = if *offset == 0.0 {
                     format!(
                         "{}.{:?} = {}.{:?}",
@@ -336,7 +377,7 @@ impl ConstraintSolver {
                     )
                 };
                 self.solver
-                    .add_constraint(left_var | EQ(Strength::REQUIRED) | right_var + *offset)
+                    .add_constraint(left_expr | EQ(Strength::REQUIRED) | right_expr + *offset)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -346,10 +387,11 @@ impl ConstraintSolver {
                 value,
                 source,
             } => {
-                let var = self.get_or_create_var(variable);
+                // Use expression to handle derived properties like CenterX/CenterY
+                let expr = self.get_expression(variable);
                 let desc = format!("{}.{:?} >= {}", variable.element_id, variable.property, value);
                 self.solver
-                    .add_constraint(var | GE(Strength::REQUIRED) | *value)
+                    .add_constraint(expr | GE(Strength::REQUIRED) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -359,10 +401,11 @@ impl ConstraintSolver {
                 value,
                 source,
             } => {
-                let var = self.get_or_create_var(variable);
+                // Use expression to handle derived properties like CenterX/CenterY
+                let expr = self.get_expression(variable);
                 let desc = format!("{}.{:?} <= {}", variable.element_id, variable.property, value);
                 self.solver
-                    .add_constraint(var | LE(Strength::REQUIRED) | *value)
+                    .add_constraint(expr | LE(Strength::REQUIRED) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -373,9 +416,10 @@ impl ConstraintSolver {
                 b,
                 source,
             } => {
-                let target_var = self.get_or_create_var(target);
-                let a_var = self.get_or_create_var(a);
-                let b_var = self.get_or_create_var(b);
+                // Use expressions to handle derived properties like CenterX/CenterY
+                let target_expr = self.get_expression(target);
+                let a_expr = self.get_expression(a);
+                let b_expr = self.get_expression(b);
                 let desc = format!(
                     "{}.{:?} = midpoint({}.{:?}, {}.{:?})",
                     target.element_id, target.property,
@@ -384,7 +428,7 @@ impl ConstraintSolver {
                 );
                 // Express midpoint as: 2*target = a + b
                 self.solver
-                    .add_constraint(2.0 * target_var | EQ(Strength::REQUIRED) | a_var + b_var)
+                    .add_constraint(2.0 * target_expr | EQ(Strength::REQUIRED) | a_expr + b_expr)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }

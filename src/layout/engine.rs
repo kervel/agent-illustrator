@@ -1109,10 +1109,16 @@ pub fn resolve_constrain_statements(
             let delta = value - current_value;
             if delta.abs() > 0.001 {
                 let axis = match var.property {
-                    LayoutProperty::X | LayoutProperty::Width => Axis::Horizontal,
-                    LayoutProperty::Y | LayoutProperty::Height => Axis::Vertical,
+                    LayoutProperty::X | LayoutProperty::Width | LayoutProperty::CenterX => {
+                        Axis::Horizontal
+                    }
+                    LayoutProperty::Y | LayoutProperty::Height | LayoutProperty::CenterY => {
+                        Axis::Vertical
+                    }
                 };
-                // Only shift for X/Y changes, not width/height
+                // Only shift for X/Y position changes (not width/height or derived properties)
+                // Note: CenterX/CenterY constraints are expressed as X+Width/2 or Y+Height/2,
+                // so the solver returns X/Y values, not CenterX/CenterY directly
                 if matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
                     shift_element_by_name(result, &var.element_id, delta, axis)?;
                 }
@@ -1194,6 +1200,9 @@ fn get_element_property(
         LayoutProperty::Y => elem.bounds.y,
         LayoutProperty::Width => elem.bounds.width,
         LayoutProperty::Height => elem.bounds.height,
+        // Derived properties
+        LayoutProperty::CenterX => elem.bounds.x + elem.bounds.width / 2.0,
+        LayoutProperty::CenterY => elem.bounds.y + elem.bounds.height / 2.0,
     })
 }
 

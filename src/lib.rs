@@ -155,7 +155,11 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
     // Compute layout
     let mut result = layout::compute(&doc, &config.layout)?;
 
-    // Resolve constraints (relational positioning)
+    // Resolve constrain statements first (constraint-solver based positioning)
+    // This must run before place statements so that offsets are applied after alignment
+    layout::resolve_constrain_statements(&mut result, &doc, &config.layout)?;
+
+    // Resolve constraints (relational positioning and offsets from `place` statements)
     layout::resolve_constraints(&mut result, &doc)?;
 
     // Route connections

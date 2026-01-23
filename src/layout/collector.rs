@@ -358,15 +358,20 @@ impl ConstraintCollector {
             ConstraintExpr::Midpoint { target, a, b } => {
                 let target_var = self.property_to_variable(target);
 
-                // For midpoint of elements, we use the same property as target
-                // e.g., if target is a.center_x, we use b.center_x and c.center_x
+                // For midpoint of elements, we use the same property type as target
+                // e.g., if target is a.center_y, we use b.center_y and c.center_y
+                // This ensures centers are compared with centers for proper alignment
                 let a_var = LayoutVariable::new(
                     &a.node.0,
                     match target.property.node {
-                        ConstraintProperty::CenterX | ConstraintProperty::X | ConstraintProperty::Left => {
+                        ConstraintProperty::CenterX | ConstraintProperty::Center => {
+                            super::solver::LayoutProperty::CenterX
+                        }
+                        ConstraintProperty::CenterY => super::solver::LayoutProperty::CenterY,
+                        ConstraintProperty::X | ConstraintProperty::Left => {
                             super::solver::LayoutProperty::X
                         }
-                        ConstraintProperty::CenterY | ConstraintProperty::Y | ConstraintProperty::Top => {
+                        ConstraintProperty::Y | ConstraintProperty::Top => {
                             super::solver::LayoutProperty::Y
                         }
                         _ => super::solver::LayoutProperty::X,
@@ -375,10 +380,14 @@ impl ConstraintCollector {
                 let b_var = LayoutVariable::new(
                     &b.node.0,
                     match target.property.node {
-                        ConstraintProperty::CenterX | ConstraintProperty::X | ConstraintProperty::Left => {
+                        ConstraintProperty::CenterX | ConstraintProperty::Center => {
+                            super::solver::LayoutProperty::CenterX
+                        }
+                        ConstraintProperty::CenterY => super::solver::LayoutProperty::CenterY,
+                        ConstraintProperty::X | ConstraintProperty::Left => {
                             super::solver::LayoutProperty::X
                         }
-                        ConstraintProperty::CenterY | ConstraintProperty::Y | ConstraintProperty::Top => {
+                        ConstraintProperty::Y | ConstraintProperty::Top => {
                             super::solver::LayoutProperty::Y
                         }
                         _ => super::solver::LayoutProperty::X,
@@ -431,20 +440,20 @@ impl ConstraintCollector {
         let id = prop_ref.element.node.leaf().0.clone();
 
         // Map constraint properties to layout properties
-        // Note: Derived properties (right, bottom, center) need special handling
-        // that involves the width/height. For now, we map to base properties.
         let property = match prop_ref.property.node {
             ConstraintProperty::X | ConstraintProperty::Left => super::solver::LayoutProperty::X,
             ConstraintProperty::Y | ConstraintProperty::Top => super::solver::LayoutProperty::Y,
             ConstraintProperty::Width => super::solver::LayoutProperty::Width,
             ConstraintProperty::Height => super::solver::LayoutProperty::Height,
-            // Derived properties map to base properties for now
-            ConstraintProperty::Right | ConstraintProperty::CenterX | ConstraintProperty::Center => {
-                super::solver::LayoutProperty::X
+            // Center properties are derived (center_x = x + width/2)
+            ConstraintProperty::CenterX | ConstraintProperty::Center => {
+                super::solver::LayoutProperty::CenterX
             }
-            ConstraintProperty::Bottom | ConstraintProperty::CenterY => {
-                super::solver::LayoutProperty::Y
-            }
+            ConstraintProperty::CenterY => super::solver::LayoutProperty::CenterY,
+            // Right/Bottom need special handling too (right = x + width)
+            // For now, map to base properties - TODO: add Right/Bottom to LayoutProperty
+            ConstraintProperty::Right => super::solver::LayoutProperty::X,
+            ConstraintProperty::Bottom => super::solver::LayoutProperty::Y,
         };
 
         LayoutVariable::new(id, property)

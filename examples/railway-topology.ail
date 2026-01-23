@@ -33,10 +33,8 @@ col diagram {
             // Offset top junctions for diagonal crossovers:
             // jA1 offset left → diagonal goes down-right to jB1
             // jA2 offset right → diagonal goes down-left from jB2
-            constrain jA1.center_x = jB1.center_x
-            place jA1 [x: -40]
-            constrain jA2.center_x = jB2.center_x
-            place jA2 [x: 40]
+            constrain jA1.center_x = jB1.center_x - 40
+            constrain jA2.center_x = jB2.center_x + 40
 
             // Track A main line
             a1 -- jA1 [stroke: text-1, stroke_width: 2, routing: direct]
@@ -84,10 +82,8 @@ col diagram {
                 }
 
                 // Offset junctions (same as Micro)
-                constrain mjA1.center_x = mjB1.center_x
-                place mjA1 [x: -40]
-                constrain mjA2.center_x = mjB2.center_x
-                place mjA2 [x: 40]
+                constrain mjA1.center_x = mjB1.center_x - 40
+                constrain mjA2.center_x = mjB2.center_x + 40
 
                 // Track lines (grayed)
                 ma1 -- mjA1 [stroke: foreground-3, stroke_width: 2, routing: direct]
@@ -100,13 +96,13 @@ col diagram {
                 mjB2 -- mjA2 [stroke: foreground-3, stroke_width: 2, routing: direct]
             }
 
-            // Position ellipses using constraint-based midpoints
-            // op1 centered horizontally between mjA1/mjB1 and vertically between tracks
+            // Position ellipses over junction areas using constraints
+            // op1 centered over the left junction area (midpoint of mjA1 and mjB1)
             constrain op1.center_x = midpoint(mjA1, mjB1)
-            constrain op1.center_y = midpoint(mtrackA, mtrackB)
-            // op2 centered horizontally between mjA2/mjB2 and vertically between tracks
+            constrain op1.center_y = midpoint(mjA1, mjB1)
+            // op2 centered over the right junction area (midpoint of mjA2 and mjB2)
             constrain op2.center_x = midpoint(mjA2, mjB2)
-            constrain op2.center_y = midpoint(mtrackA, mtrackB)
+            constrain op2.center_y = midpoint(mjA2, mjB2)
         }
     }
 
