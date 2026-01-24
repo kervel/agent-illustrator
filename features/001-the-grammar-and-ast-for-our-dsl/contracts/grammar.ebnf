@@ -1,7 +1,7 @@
 (* Agent Illustrator DSL Grammar - EBNF Notation *)
-(* Version: 2.0.0 *)
+(* Version: 3.0.0 *)
 (* Design Goal: Minimal tokens for AI agent efficiency *)
-(* Last Updated: 2026-01-23 *)
+(* Last Updated: 2026-01-24 *)
 
 (* ============================================ *)
 (* DOCUMENT STRUCTURE                           *)
@@ -15,7 +15,66 @@ statement = shape_decl
           | group_decl
           | constraint_decl
           | alignment_decl
+          | template_decl
+          | template_instance
+          | export_decl
           | comment ;
+
+(* ============================================ *)
+(* TEMPLATES (Feature 005)                      *)
+(* ============================================ *)
+
+(* Templates define reusable components from three sources:
+   1. Inline AIL blocks with optional parameters
+   2. External AIL files
+   3. External SVG files
+
+   Order-independent: templates can be declared and used in any order.
+   Forward references are allowed (declarative, not procedural).
+*)
+
+template_decl = inline_template | file_template ;
+
+(* Inline template: template "name" (params) { body } *)
+inline_template = "template" string_literal [ param_list ] block ;
+
+(* File template: template "name" from "path" *)
+file_template = "template" string_literal "from" string_literal ;
+
+(* Parameter list for AIL templates (SVG templates have no parameters) *)
+param_list = "(" param_def { "," param_def } [ "," ] ")" ;
+
+param_def = identifier ":" modifier_value ;
+
+(* Template instantiation: template_name "instance_name" [arguments] *)
+(* Note: Looks like shape_decl; resolved by checking known template names *)
+template_instance = identifier string_literal [ modifier_block ] ;
+
+(* Export declaration: makes internal elements accessible *)
+export_decl = "export" identifier { "," identifier } ;
+
+(* Examples:
+   // Inline template with parameters
+   template "button" (label: "Click", color: blue) {
+       rect bg [fill: color]
+       text txt [content: label]
+       row { bg txt }
+       export bg
+   }
+
+   // File templates
+   template "server" from "components/server.ail"
+   template "person" from "icons/person.svg"
+
+   // Instantiation
+   button "submit" [label: "Submit", color: green]
+   server "s1"
+   person "alice"
+
+   // Connections to exported elements
+   connect cable -> router1.wan    // OK: wan exported
+   // connect cable -> router1.internal  // ERROR: not exported
+*)
 
 (* ============================================ *)
 (* SHAPE DECLARATIONS                           *)
@@ -267,4 +326,23 @@ whitespace = " " | "\t" | "\n" | "\r" ;
 
   // Icons
   icon "server" myserver [fill: gray]
+
+  // Templates (Feature 005)
+  template "labeled_box" (label: "Default", bg_color: white) {
+      rect box [fill: bg_color]
+      text lbl [content: label]
+      row { box lbl }
+      export box
+  }
+
+  template "server_icon" from "icons/server.svg"
+  template "rack" from "components/rack.ail"
+
+  labeled_box "input" [label: "Input"]
+  labeled_box "output" [label: "Output", bg_color: accent-1]
+  server_icon "s1"
+  rack "r1"
+
+  connect input -> output
+  connect cable -> r1.port1   // port1 exported by rack template
 *)

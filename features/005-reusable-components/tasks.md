@@ -1,68 +1,152 @@
-# Tasks: Reusable Components (SVG and AIL Imports)
+# Tasks: Reusable Components (Templates)
 
 **Feature**: 005-reusable-components
-**Generated**: 2026-01-23
-**Total Tasks**: 32
-**Parallel Opportunities**: 14 task groups
+**Generated**: 2026-01-24
+**Status**: Ready for Implementation
+
+<!-- Tech Stack Validation: PASSED -->
+<!-- Validated against: .specswarm/tech-stack.md -->
+<!-- No prohibited technologies found -->
 
 ---
 
-## Phase 1: Setup & Foundation
+## Summary
 
-*These tasks establish the infrastructure needed by all user scenarios.*
+| Metric | Value |
+|--------|-------|
+| Total Tasks | 35 |
+| Parallelizable | 18 |
+| User Scenarios | 6 |
+| Phases | 7 |
 
-### T001: Add new lexer tokens for component syntax
+### User Scenario Coverage
+
+| Scenario | Tasks | Priority |
+|----------|-------|----------|
+| US1: Inline Templates | T001-T025 | P1 (MVP) |
+| US2: SVG Import | T026-T030 | P1 |
+| US3: AIL Import | T031 | P2 |
+| US4: Parameters | T020-T022 | P2 |
+| US5: Exports & Connections | T032-T034 | P2 |
+| US6: Error Handling | T035 | P3 |
+
+---
+
+## Phase 1: Foundation (Lexer & AST)
+
+**Goal**: Add new tokens and AST types required by all scenarios.
+
+**Checkpoint**: Parser compiles with new types, existing tests pass.
+
+### T001: Add Template-Related Tokens to Lexer [P]
+
 **File**: `src/parser/lexer.rs`
-**Story**: Foundation
-**Parallel**: No (prerequisite for all parsing)
 
-Add three new tokens to the `Token` enum:
+**Task**: Add three new tokens for template syntax.
+
 ```rust
-#[token("component")]
-Component,
+#[token("template")]
+Template,
 #[token("from")]
 From,
 #[token("export")]
 Export,
 ```
 
-Add corresponding test cases in the `mod tests` section.
-
-**Acceptance**: `cargo test lexer` passes with new token tests.
+**Acceptance**:
+- Lexer tokenizes `template`, `from`, `export` keywords
+- Existing token tests still pass
 
 ---
 
-### T002: Add AST types for components [P]
-**File**: `src/parser/ast.rs`
-**Story**: Foundation
-**Parallel**: Yes (with T003)
+### T002: Add TemplateSourceType Enum [P]
 
-Add the following types after the existing `AlignmentDecl`:
+**File**: `src/parser/ast.rs`
+
+**Task**: Add enum for template source types.
 
 ```rust
-/// Source type for component imports
+/// Source type for templates
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ComponentSourceType {
-    Svg,
-    Ail,
+pub enum TemplateSourceType {
+    Inline,  // template "name" { ... }
+    Svg,     // template "name" from "file.svg"
+    Ail,     // template "name" from "file.ail"
 }
+```
 
-/// Component declaration: component "name" from "path.svg"
+**Acceptance**: Type compiles and is exported from ast module.
+
+---
+
+### T003: Add ParameterDef Struct [P]
+
+**File**: `src/parser/ast.rs`
+
+**Task**: Add struct for template parameter definitions.
+
+```rust
+/// Parameter definition with default value
 #[derive(Debug, Clone, PartialEq)]
-pub struct ComponentDecl {
+pub struct ParameterDef {
     pub name: Spanned<Identifier>,
-    pub source_path: Spanned<String>,
-    pub source_type: ComponentSourceType,
+    pub default_value: Spanned<StyleValue>,
 }
+```
 
-/// Component instance: person "alice" [styles]
+**Acceptance**: Type compiles and is exported.
+
+---
+
+### T004: Add TemplateDecl Struct [P]
+
+**File**: `src/parser/ast.rs`
+
+**Task**: Add struct for template declarations.
+
+```rust
+/// Template declaration
 #[derive(Debug, Clone, PartialEq)]
-pub struct ComponentInstance {
-    pub component_name: Spanned<Identifier>,
-    pub instance_name: Spanned<Identifier>,
-    pub parameters: Vec<Spanned<StyleModifier>>,
+pub struct TemplateDecl {
+    pub name: Spanned<Identifier>,
+    pub source_type: TemplateSourceType,
+    pub source_path: Option<Spanned<String>>,
+    pub parameters: Vec<ParameterDef>,
+    pub body: Option<Vec<Spanned<Statement>>>,
 }
+```
 
+**Acceptance**: Type compiles.
+
+---
+
+### T005: Add TemplateInstance Struct [P]
+
+**File**: `src/parser/ast.rs`
+
+**Task**: Add struct for template instantiation.
+
+```rust
+/// Template instance: template_name "instance_name" [params]
+#[derive(Debug, Clone, PartialEq)]
+pub struct TemplateInstance {
+    pub template_name: Spanned<Identifier>,
+    pub instance_name: Spanned<Identifier>,
+    pub arguments: Vec<(Spanned<Identifier>, Spanned<StyleValue>)>,
+}
+```
+
+**Acceptance**: Type compiles.
+
+---
+
+### T006: Add ExportDecl Struct [P]
+
+**File**: `src/parser/ast.rs`
+
+**Task**: Add struct for export declarations.
+
+```rust
 /// Export declaration: export port1, port2
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExportDecl {
@@ -70,8 +154,37 @@ pub struct ExportDecl {
 }
 ```
 
-Add `SvgEmbed` variant to `ShapeType`:
+**Acceptance**: Type compiles.
+
+---
+
+### T007: Add Statement Variants
+
+**File**: `src/parser/ast.rs`
+
+**Task**: Extend Statement enum with template-related variants.
+
+Add to `Statement` enum:
 ```rust
+TemplateDecl(TemplateDecl),
+TemplateInstance(TemplateInstance),
+Export(ExportDecl),
+```
+
+**Dependencies**: T004, T005, T006
+
+**Acceptance**: Statement enum includes new variants, compiles.
+
+---
+
+### T008: Add SvgEmbed ShapeType Variant
+
+**File**: `src/parser/ast.rs`
+
+**Task**: Add SvgEmbed variant to ShapeType for embedded SVG content.
+
+```rust
+// Add to ShapeType enum
 SvgEmbed {
     content: String,
     intrinsic_width: Option<f64>,
@@ -79,89 +192,292 @@ SvgEmbed {
 },
 ```
 
-Add variants to `Statement` enum:
-```rust
-ComponentDecl(ComponentDecl),
-ComponentInstance(ComponentInstance),
-Export(ExportDecl),
-```
-
-**Acceptance**: `cargo check` passes.
+**Acceptance**: ShapeType compiles with new variant.
 
 ---
 
-### T003: Create import module structure [P]
-**File**: `src/import/mod.rs` (new)
-**Story**: Foundation
-**Parallel**: Yes (with T002)
+**CHECKPOINT**: Run `cargo build` and `cargo test`. All existing tests must pass.
 
-Create new module at `src/import/mod.rs`:
+---
+
+## Phase 2: Grammar Extensions (Parsing)
+
+**Goal**: Parse all three template declaration forms and instantiation.
+
+**Checkpoint**: Parser accepts template syntax, produces correct AST nodes.
+
+### T009: Parse Export Declaration
+
+**File**: `src/parser/grammar.rs`
+
+**Task**: Add parser rule for export statements.
+
 ```rust
-//! Import resolution for component files
+let export_decl = just(Token::Export)
+    .ignore_then(
+        identifier.clone()
+            .separated_by(just(Token::Comma))
+            .at_least(1)
+    )
+    .map(|exports| Statement::Export(ExportDecl { exports }));
+```
+
+**Test Cases**:
+- `export foo` → `ExportDecl { exports: [foo] }`
+- `export foo, bar, baz` → `ExportDecl { exports: [foo, bar, baz] }`
+
+**Acceptance**: Export statements parse correctly.
+
+---
+
+### T010: Parse File Template Declaration
+
+**File**: `src/parser/grammar.rs`
+
+**Task**: Add parser rule for file-based templates (SVG and AIL).
+
+```rust
+let file_template = just(Token::Template)
+    .ignore_then(string_literal.clone())
+    .then_ignore(just(Token::From))
+    .then(string_literal.clone())
+    .map(|(name, path)| {
+        let source_type = if path.node.ends_with(".svg") {
+            TemplateSourceType::Svg
+        } else {
+            TemplateSourceType::Ail
+        };
+        Statement::TemplateDecl(TemplateDecl {
+            name: name.map(|s| Identifier::new(s)),
+            source_type,
+            source_path: Some(path),
+            parameters: vec![],
+            body: None,
+        })
+    });
+```
+
+**Test Cases**:
+- `template "icon" from "icons/person.svg"` → TemplateDecl with source_type=Svg
+- `template "rack" from "components/rack.ail"` → TemplateDecl with source_type=Ail
+
+**Acceptance**: File templates parse correctly.
+
+---
+
+### T011: Parse Parameter Definition List
+
+**File**: `src/parser/grammar.rs`
+
+**Task**: Add parser rule for parameter definitions.
+
+```rust
+let param_def = identifier.clone()
+    .then_ignore(just(Token::Colon))
+    .then(style_value.clone())
+    .map(|(name, default)| ParameterDef {
+        name,
+        default_value: default
+    });
+
+let param_list = param_def
+    .separated_by(just(Token::Comma))
+    .allow_trailing()
+    .delimited_by(just(Token::LParen), just(Token::RParen))
+    .or_not()
+    .map(|opt| opt.unwrap_or_default());
+```
+
+**Test Cases**:
+- `(label: "Default")` → `[ParameterDef { name: label, default_value: "Default" }]`
+- `(a: 1, b: blue)` → two ParameterDefs
+
+**Acceptance**: Parameter lists parse correctly.
+
+---
+
+### T012: Parse Inline Template Declaration
+
+**File**: `src/parser/grammar.rs`
+
+**Task**: Add parser rule for inline template blocks.
+
+```rust
+let inline_template = just(Token::Template)
+    .ignore_then(string_literal.clone())
+    .then(param_list.clone())
+    .then(
+        statement.clone()
+            .repeated()
+            .delimited_by(just(Token::LBrace), just(Token::RBrace))
+    )
+    .map(|((name, params), body)| Statement::TemplateDecl(TemplateDecl {
+        name: name.map(|s| Identifier::new(s)),
+        source_type: TemplateSourceType::Inline,
+        source_path: None,
+        parameters: params,
+        body: Some(body),
+    }));
+```
+
+**Dependencies**: T011
+
+**Test Case**:
+```
+template "box" {
+    rect r
+}
+```
+→ TemplateDecl with source_type=Inline, body containing rect
+
+**Acceptance**: Inline templates with and without parameters parse correctly.
+
+---
+
+### T013: Combine Template Declaration Parsers
+
+**File**: `src/parser/grammar.rs`
+
+**Task**: Combine inline and file template parsers, add to statement parser.
+
+```rust
+let template_decl = inline_template.or(file_template);
+
+// Add to statement parser alternatives
+let statement = choice((
+    // ... existing parsers
+    template_decl,
+    export_decl,
+    // ...
+));
+```
+
+**Dependencies**: T010, T012
+
+**Acceptance**: Both template forms parse as statements.
+
+---
+
+### T014: Handle Template Instance Parsing
+
+**File**: `src/parser/grammar.rs`
+
+**Task**: Parse potential template instances (identifier followed by string literal).
+
+**Note**: At parse time, we can't distinguish `rect "foo"` from `mytemplate "foo"`.
+Strategy: Parse uniformly, resolve during template resolution phase based on known template names.
+
+The existing shape parsing should handle this - template instances look like shapes.
+During resolution, reclassify shapes whose type_name matches a template as TemplateInstance.
+
+**Acceptance**: Syntax `identifier "name" [mods]` parses correctly.
+
+---
+
+**CHECKPOINT**: Parser tests for template syntax pass.
+
+---
+
+## Phase 3: Template Module Infrastructure
+
+**Goal**: Create template resolution module with types and file loading.
+
+**Checkpoint**: Template module compiles, can load files.
+
+### T015: Create Template Module Structure [P]
+
+**File**: `src/template/mod.rs` (new)
+
+**Task**: Create the template module with submodule declarations.
+
+```rust
+//! Template resolution and expansion for reusable components
 
 mod resolver;
 mod svg;
+mod expansion;
+mod error;
 
-pub use resolver::{ImportResolver, ResolvedComponent, ComponentContent, ImportError};
-pub use svg::{SvgInfo, SvgParseError};
+pub use resolver::{TemplateResolver, TemplateRegistry, ResolvedTemplate, TemplateContent};
+pub use svg::SvgInfo;
+pub use expansion::expand_document;
+pub use error::{TemplateError, ExpansionError};
 ```
 
-Update `src/lib.rs` to include the module:
-```rust
-pub mod import;
-```
+Also add `mod template;` to `src/lib.rs`.
 
-**Acceptance**: `cargo check` passes (module exists but implementations are stubs).
+**Acceptance**: Module structure created, compiles.
 
 ---
 
-### T004: Create error types for imports [P]
-**File**: `src/import/resolver.rs` (new), `src/error.rs`
-**Story**: Foundation
-**Parallel**: Yes (with T005)
+### T016: Create Template Error Types [P]
 
-Create `src/import/resolver.rs` with error types:
+**File**: `src/template/error.rs` (new)
+
+**Task**: Define error types for template operations.
+
 ```rust
 use std::path::PathBuf;
-use crate::parser::ast::Span;
+use crate::parser::Span;
 
-#[derive(Debug, Clone)]
-pub enum ImportError {
+#[derive(Debug, thiserror::Error)]
+pub enum TemplateError {
+    #[error("file not found: {path:?}")]
     FileNotFound { path: PathBuf, declared_at: Span },
-    CircularImport { path: PathBuf, cycle: Vec<PathBuf> },
+
+    #[error("circular dependency detected: {path:?}")]
+    CircularDependency { path: PathBuf, cycle: Vec<PathBuf> },
+
+    #[error("invalid SVG: {reason}")]
     InvalidSvg { path: PathBuf, reason: String },
-    ParseError { path: PathBuf, errors: Vec<crate::ParseError> },
-    IoError { path: PathBuf, message: String },
+
+    #[error("parse error in {path:?}")]
+    ParseError { path: PathBuf, message: String },
+
+    #[error("unknown template: {name}")]
+    UnknownTemplate { name: String, used_at: Span },
+
+    #[error("duplicate template: {name}")]
+    DuplicateTemplate { name: String, first: Span, second: Span },
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
-impl std::fmt::Display for ImportError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::FileNotFound { path, .. } => write!(f, "File not found: {}", path.display()),
-            Self::CircularImport { path, .. } => write!(f, "Circular import detected: {}", path.display()),
-            Self::InvalidSvg { path, reason } => write!(f, "Invalid SVG {}: {}", path.display(), reason),
-            Self::ParseError { path, .. } => write!(f, "Parse error in {}", path.display()),
-            Self::IoError { path, message } => write!(f, "IO error reading {}: {}", path.display(), message),
-        }
-    }
-}
+#[derive(Debug, thiserror::Error)]
+pub enum ExpansionError {
+    #[error("cannot access non-exported element '{element}' in '{instance}'")]
+    NonExportedElement {
+        instance: String,
+        element: String,
+        available_exports: Vec<String>,
+        used_at: Span,
+    },
 
-impl std::error::Error for ImportError {}
+    #[error("unknown parameter '{parameter}' for template '{template}'")]
+    UnknownParameter {
+        template: String,
+        parameter: String,
+        available: Vec<String>,
+        used_at: Span,
+    },
+
+    #[error("SVG templates do not support parameters")]
+    SvgNoParameters { template: String, used_at: Span },
+}
 ```
 
-**Acceptance**: `cargo check` passes.
+**Acceptance**: Error types compile with thiserror.
 
 ---
 
-### T005: Create SvgInfo type and parser [P]
-**File**: `src/import/svg.rs` (new)
-**Story**: Foundation
-**Parallel**: Yes (with T004)
+### T017: Create SvgInfo Parser [P]
 
-Create `src/import/svg.rs`:
+**File**: `src/template/svg.rs` (new)
+
+**Task**: Parse SVG files to extract dimensions.
+
 ```rust
-//! SVG metadata extraction
-
 #[derive(Debug, Clone)]
 pub struct SvgInfo {
     pub content: String,
@@ -170,17 +486,13 @@ pub struct SvgInfo {
     pub view_box: Option<(f64, f64, f64, f64)>,
 }
 
-#[derive(Debug, Clone)]
-pub struct SvgParseError(pub String);
-
 impl SvgInfo {
-    /// Parse SVG content and extract dimensions
-    pub fn parse(content: &str) -> Result<Self, SvgParseError> {
-        let view_box = Self::extract_viewbox(content);
-        let width = Self::extract_dimension(content, "width");
-        let height = Self::extract_dimension(content, "height");
+    pub fn parse(content: &str) -> Result<Self, String> {
+        let width = extract_attr(content, "width");
+        let height = extract_attr(content, "height");
+        let view_box = extract_viewbox(content);
 
-        Ok(SvgInfo {
+        Ok(Self {
             content: content.to_string(),
             width,
             height,
@@ -188,293 +500,635 @@ impl SvgInfo {
         })
     }
 
-    pub fn aspect_ratio(&self) -> Option<f64> {
+    pub fn aspect_ratio(&self) -> f64 {
         if let Some((_, _, w, h)) = self.view_box {
-            if h > 0.0 { return Some(w / h); }
-        }
-        self.width.zip(self.height).map(|(w, h)| if h > 0.0 { w / h } else { 1.0 })
-    }
-
-    pub fn intrinsic_size(&self) -> (f64, f64) {
-        if let Some((_, _, w, h)) = self.view_box {
-            return (w, h);
-        }
-        (self.width.unwrap_or(100.0), self.height.unwrap_or(100.0))
-    }
-
-    fn extract_viewbox(content: &str) -> Option<(f64, f64, f64, f64)> {
-        // Regex: viewBox\s*=\s*["']([^"']+)["']
-        let re = regex::Regex::new(r#"viewBox\s*=\s*["']([^"']+)["']"#).ok()?;
-        let caps = re.captures(content)?;
-        let parts: Vec<f64> = caps[1].split_whitespace()
-            .filter_map(|s| s.parse().ok())
-            .collect();
-        if parts.len() == 4 {
-            Some((parts[0], parts[1], parts[2], parts[3]))
+            if h > 0.0 { w / h } else { 1.0 }
+        } else if let (Some(w), Some(h)) = (self.width, self.height) {
+            if h > 0.0 { w / h } else { 1.0 }
         } else {
-            None
+            1.0
         }
     }
-
-    fn extract_dimension(content: &str, attr: &str) -> Option<f64> {
-        let pattern = format!(r#"<svg[^>]*\s{}="([^"]+)""#, attr);
-        let re = regex::Regex::new(&pattern).ok()?;
-        let caps = re.captures(content)?;
-        // Strip units (px, em, etc.) and parse number
-        let val = &caps[1];
-        val.trim_end_matches(|c: char| c.is_alphabetic() || c == '%')
-            .parse().ok()
-    }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+fn extract_attr(svg: &str, attr: &str) -> Option<f64> {
+    // Simple regex to extract numeric attribute value
+    let pattern = format!(r#"{}="([0-9.]+)"#, attr);
+    regex::Regex::new(&pattern).ok()
+        .and_then(|re| re.captures(svg))
+        .and_then(|caps| caps.get(1))
+        .and_then(|m| m.as_str().parse().ok())
+}
 
-    #[test]
-    fn test_parse_viewbox() {
-        let svg = r#"<svg viewBox="0 0 100 50"></svg>"#;
-        let info = SvgInfo::parse(svg).unwrap();
-        assert_eq!(info.view_box, Some((0.0, 0.0, 100.0, 50.0)));
-        assert_eq!(info.aspect_ratio(), Some(2.0));
-    }
-
-    #[test]
-    fn test_parse_dimensions() {
-        let svg = r#"<svg width="200" height="100"></svg>"#;
-        let info = SvgInfo::parse(svg).unwrap();
-        assert_eq!(info.width, Some(200.0));
-        assert_eq!(info.height, Some(100.0));
-    }
+fn extract_viewbox(svg: &str) -> Option<(f64, f64, f64, f64)> {
+    let re = regex::Regex::new(r#"viewBox="([0-9.-]+)\s+([0-9.-]+)\s+([0-9.-]+)\s+([0-9.-]+)""#).ok()?;
+    let caps = re.captures(svg)?;
+    Some((
+        caps.get(1)?.as_str().parse().ok()?,
+        caps.get(2)?.as_str().parse().ok()?,
+        caps.get(3)?.as_str().parse().ok()?,
+        caps.get(4)?.as_str().parse().ok()?,
+    ))
 }
 ```
 
-Note: Add `regex = "1"` to Cargo.toml dependencies.
+**Note**: Uses regex crate (lightweight, already available in Rust ecosystem).
 
-**Acceptance**: `cargo test svg` passes.
-
----
-
-### T006: Add regex dependency
-**File**: `Cargo.toml`
-**Story**: Foundation
-**Parallel**: No (needed for T005)
-
-Add regex crate for SVG parsing:
-```toml
-[dependencies]
-regex = "1"
-```
-
-**Acceptance**: `cargo build` succeeds.
+**Acceptance**: Can parse SVG strings and extract dimensions.
 
 ---
 
-**CHECKPOINT: Foundation Complete**
-- All new types defined
-- Module structure in place
-- Error types ready
-- SVG parsing implemented
+### T018: Create TemplateRegistry and ResolvedTemplate
 
----
+**File**: `src/template/resolver.rs` (new)
 
-## Phase 2: Scenario 1 - SVG Component Import
-
-*Goal: User can import SVG files as components and instantiate them multiple times.*
-
-### T007: Add component declaration parser rule
-**File**: `src/parser/grammar.rs`
-**Story**: S1 (SVG Import)
-**Parallel**: No (requires T001, T002)
-
-Add parser for component declarations after the existing `alignment_decl`:
-
-```rust
-// Component declaration: component "name" from "path"
-let component_decl = just(Token::Component)
-    .ignore_then(string_literal.clone())
-    .then_ignore(just(Token::From))
-    .then(string_literal.clone())
-    .map_with(|(name, path), e| {
-        let source_type = if path.node.ends_with(".svg") {
-            ComponentSourceType::Svg
-        } else {
-            ComponentSourceType::Ail
-        };
-        Spanned::new(
-            Statement::ComponentDecl(ComponentDecl {
-                name: Spanned::new(Identifier::new(name.node), name.span.clone()),
-                source_path: path,
-                source_type,
-            }),
-            span_range(&e.span())
-        )
-    });
-```
-
-Add `component_decl` to the `choice()` in `statement` parser.
-
-Add test:
-```rust
-#[test]
-fn test_parse_component_decl() {
-    let doc = parse(r#"component "person" from "icons/person.svg""#).expect("Should parse");
-    match &doc.statements[0].node {
-        Statement::ComponentDecl(c) => {
-            assert_eq!(c.name.node.as_str(), "person");
-            assert_eq!(c.source_path.node, "icons/person.svg");
-            assert!(matches!(c.source_type, ComponentSourceType::Svg));
-        }
-        _ => panic!("Expected component decl"),
-    }
-}
-```
-
-**Acceptance**: Test passes, component declarations parse correctly.
-
----
-
-### T008: Implement ImportResolver core [P]
-**File**: `src/import/resolver.rs`
-**Story**: S1 (SVG Import)
-**Parallel**: Yes (with T009)
-
-Complete the ImportResolver implementation:
+**Task**: Define template registry types.
 
 ```rust
 use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
-use crate::parser::ast::{Document, ComponentSourceType};
+use crate::parser::ast::{ParameterDef, Statement, Spanned, TemplateSourceType};
 use super::svg::SvgInfo;
+use super::error::TemplateError;
 
-pub struct ResolvedComponent {
-    pub source_path: PathBuf,
-    pub source_type: ComponentSourceType,
-    pub content: ComponentContent,
+#[derive(Debug, Clone)]
+pub struct ResolvedTemplate {
+    pub name: String,
+    pub source_type: TemplateSourceType,
+    pub parameters: Vec<ParameterDef>,
     pub exports: HashSet<String>,
+    pub content: TemplateContent,
 }
 
-pub enum ComponentContent {
+#[derive(Debug, Clone)]
+pub enum TemplateContent {
+    Inline(Vec<Spanned<Statement>>),
     Svg(SvgInfo),
-    Ail(Document),
+    Ail(Vec<Spanned<Statement>>),
 }
 
-pub struct ImportResolver {
+#[derive(Debug, Default)]
+pub struct TemplateRegistry {
+    templates: HashMap<String, ResolvedTemplate>,
+}
+
+impl TemplateRegistry {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn insert(&mut self, template: ResolvedTemplate) -> Result<(), TemplateError> {
+        if self.templates.contains_key(&template.name) {
+            return Err(TemplateError::DuplicateTemplate {
+                name: template.name.clone(),
+                first: Default::default(),  // Would need span tracking
+                second: Default::default(),
+            });
+        }
+        self.templates.insert(template.name.clone(), template);
+        Ok(())
+    }
+
+    pub fn get(&self, name: &str) -> Option<&ResolvedTemplate> {
+        self.templates.get(name)
+    }
+
+    pub fn contains(&self, name: &str) -> bool {
+        self.templates.contains_key(name)
+    }
+}
+```
+
+**Acceptance**: Types compile and basic operations work.
+
+---
+
+### T019: Create TemplateResolver
+
+**File**: `src/template/resolver.rs`
+
+**Task**: Implement template resolution with file loading and cycle detection.
+
+```rust
+use std::path::PathBuf;
+
+pub struct TemplateResolver {
     base_path: PathBuf,
-    resolved: HashMap<PathBuf, ResolvedComponent>,
     in_progress: HashSet<PathBuf>,
 }
 
-impl ImportResolver {
+impl TemplateResolver {
     pub fn new(base_path: PathBuf) -> Self {
         Self {
             base_path,
-            resolved: HashMap::new(),
             in_progress: HashSet::new(),
         }
     }
 
-    pub fn resolve(&mut self, path: &str, declared_at: Span) -> Result<&ResolvedComponent, ImportError> {
-        let full_path = self.base_path.join(path);
-        let canonical = full_path.canonicalize()
-            .map_err(|_| ImportError::FileNotFound {
-                path: full_path.clone(),
-                declared_at: declared_at.clone()
+    pub fn resolve_all(&mut self, doc: &Document) -> Result<TemplateRegistry, TemplateError> {
+        let mut registry = TemplateRegistry::new();
+
+        // First pass: collect all template declarations
+        for stmt in &doc.statements {
+            if let Statement::TemplateDecl(decl) = &stmt.node {
+                let resolved = self.resolve_template(decl)?;
+                registry.insert(resolved)?;
+            }
+        }
+
+        Ok(registry)
+    }
+
+    fn resolve_template(&mut self, decl: &TemplateDecl) -> Result<ResolvedTemplate, TemplateError> {
+        match decl.source_type {
+            TemplateSourceType::Inline => self.resolve_inline(decl),
+            TemplateSourceType::Svg => self.resolve_svg(decl),
+            TemplateSourceType::Ail => self.resolve_ail(decl),
+        }
+    }
+
+    fn resolve_inline(&self, decl: &TemplateDecl) -> Result<ResolvedTemplate, TemplateError> {
+        let exports = extract_exports_from_body(decl.body.as_ref().unwrap_or(&vec![]));
+        Ok(ResolvedTemplate {
+            name: decl.name.node.0.clone(),
+            source_type: TemplateSourceType::Inline,
+            parameters: decl.parameters.clone(),
+            exports,
+            content: TemplateContent::Inline(decl.body.clone().unwrap_or_default()),
+        })
+    }
+
+    fn resolve_svg(&self, decl: &TemplateDecl) -> Result<ResolvedTemplate, TemplateError> {
+        let path = decl.source_path.as_ref().unwrap();
+        let full_path = self.base_path.join(&path.node);
+        let content = std::fs::read_to_string(&full_path)?;
+        let svg_info = SvgInfo::parse(&content)
+            .map_err(|reason| TemplateError::InvalidSvg {
+                path: full_path,
+                reason
             })?;
 
-        if self.in_progress.contains(&canonical) {
-            return Err(ImportError::CircularImport {
-                path: canonical,
+        Ok(ResolvedTemplate {
+            name: decl.name.node.0.clone(),
+            source_type: TemplateSourceType::Svg,
+            parameters: vec![],
+            exports: HashSet::new(),
+            content: TemplateContent::Svg(svg_info),
+        })
+    }
+
+    fn resolve_ail(&mut self, decl: &TemplateDecl) -> Result<ResolvedTemplate, TemplateError> {
+        let path = decl.source_path.as_ref().unwrap();
+        let full_path = self.base_path.join(&path.node).canonicalize()?;
+
+        // Circular dependency check
+        if self.in_progress.contains(&full_path) {
+            return Err(TemplateError::CircularDependency {
+                path: full_path.clone(),
                 cycle: self.in_progress.iter().cloned().collect(),
             });
         }
+        self.in_progress.insert(full_path.clone());
 
-        if self.resolved.contains_key(&canonical) {
-            return Ok(self.resolved.get(&canonical).unwrap());
-        }
-
-        self.in_progress.insert(canonical.clone());
-
-        let content = std::fs::read_to_string(&canonical)
-            .map_err(|e| ImportError::IoError {
-                path: canonical.clone(),
-                message: e.to_string()
+        // Load and parse
+        let content = std::fs::read_to_string(&full_path)?;
+        let parsed = crate::parser::parse(&content)
+            .map_err(|e| TemplateError::ParseError {
+                path: full_path.clone(),
+                message: format!("{:?}", e)
             })?;
 
-        let resolved = self.parse_content(&canonical, &content, path)?;
+        let exports = extract_exports_from_body(&parsed.statements);
 
-        self.in_progress.remove(&canonical);
-        self.resolved.insert(canonical.clone(), resolved);
+        self.in_progress.remove(&full_path);
 
-        Ok(self.resolved.get(&canonical).unwrap())
+        Ok(ResolvedTemplate {
+            name: decl.name.node.0.clone(),
+            source_type: TemplateSourceType::Ail,
+            parameters: vec![],
+            exports,
+            content: TemplateContent::Ail(parsed.statements),
+        })
+    }
+}
+
+fn extract_exports_from_body(stmts: &[Spanned<Statement>]) -> HashSet<String> {
+    let mut exports = HashSet::new();
+    for stmt in stmts {
+        if let Statement::Export(export_decl) = &stmt.node {
+            for id in &export_decl.exports {
+                exports.insert(id.node.0.clone());
+            }
+        }
+    }
+    exports
+}
+```
+
+**Dependencies**: T017, T018
+
+**Acceptance**: Can resolve inline, SVG, and AIL templates. Detects circular dependencies.
+
+---
+
+**CHECKPOINT**: Template module compiles. Unit tests for SVG parsing and registry.
+
+---
+
+## Phase 4: Template Expansion (US1: Inline Templates - MVP)
+
+**Goal**: Expand inline template instances into concrete AST elements.
+
+**User Scenario**: US1 - Define and Use an Inline Template
+
+**Checkpoint**: Inline templates work end-to-end.
+
+### T020: Create Expansion Context with Parameter Binding
+
+**File**: `src/template/expansion.rs` (new)
+
+**Task**: Create expansion context with parameter binding.
+
+```rust
+use std::collections::HashMap;
+use crate::parser::ast::*;
+use super::{TemplateRegistry, ResolvedTemplate, TemplateContent};
+use super::error::ExpansionError;
+
+pub struct ExpansionContext<'a> {
+    registry: &'a TemplateRegistry,
+}
+
+impl<'a> ExpansionContext<'a> {
+    pub fn new(registry: &'a TemplateRegistry) -> Self {
+        Self { registry }
     }
 
-    fn parse_content(&mut self, path: &Path, content: &str, rel_path: &str) -> Result<ResolvedComponent, ImportError> {
-        let source_type = if rel_path.ends_with(".svg") {
-            ComponentSourceType::Svg
-        } else {
-            ComponentSourceType::Ail
-        };
+    fn bind_parameters(
+        &self,
+        template: &ResolvedTemplate,
+        arguments: &[(Spanned<Identifier>, Spanned<StyleValue>)],
+    ) -> Result<HashMap<String, StyleValue>, ExpansionError> {
+        let mut bindings = HashMap::new();
 
-        match source_type {
-            ComponentSourceType::Svg => {
-                let svg_info = SvgInfo::parse(content)
-                    .map_err(|e| ImportError::InvalidSvg {
-                        path: path.to_path_buf(),
-                        reason: e.0
-                    })?;
-                Ok(ResolvedComponent {
-                    source_path: path.to_path_buf(),
-                    source_type,
-                    content: ComponentContent::Svg(svg_info),
-                    exports: HashSet::new(),
-                })
+        // Start with defaults
+        for param in &template.parameters {
+            bindings.insert(
+                param.name.node.0.clone(),
+                param.default_value.node.clone(),
+            );
+        }
+
+        // Override with provided arguments
+        for (name, value) in arguments {
+            if !bindings.contains_key(&name.node.0) {
+                return Err(ExpansionError::UnknownParameter {
+                    template: template.name.clone(),
+                    parameter: name.node.0.clone(),
+                    available: template.parameters.iter()
+                        .map(|p| p.name.node.0.clone())
+                        .collect(),
+                    used_at: name.span.clone(),
+                });
             }
-            ComponentSourceType::Ail => {
-                // AIL parsing handled in Phase 3
-                todo!("AIL import not yet implemented")
+            bindings.insert(name.node.0.clone(), value.node.clone());
+        }
+
+        Ok(bindings)
+    }
+}
+```
+
+**Acceptance**: Parameter binding works with defaults and overrides.
+
+---
+
+### T021: Implement Identifier Prefixing
+
+**File**: `src/template/expansion.rs`
+
+**Task**: Implement recursive identifier prefixing for namespace scoping.
+
+```rust
+impl<'a> ExpansionContext<'a> {
+    fn prefix_identifier(&self, id: &Identifier, prefix: &str) -> Identifier {
+        Identifier::new(format!("{}.{}", prefix, id.0))
+    }
+
+    fn prefix_statement(
+        &self,
+        stmt: &Spanned<Statement>,
+        prefix: &str,
+        bindings: &HashMap<String, StyleValue>,
+    ) -> Result<Spanned<Statement>, ExpansionError> {
+        match &stmt.node {
+            Statement::Shape(shape) => {
+                let mut new_shape = shape.clone();
+                if let Some(ref name) = new_shape.name {
+                    new_shape.name = Some(name.clone().map(|id| self.prefix_identifier(&id, prefix)));
+                }
+                // Substitute parameter values in modifiers
+                new_shape.modifiers = self.substitute_modifiers(&new_shape.modifiers, bindings);
+                Ok(Spanned::new(Statement::Shape(new_shape), stmt.span.clone()))
+            }
+            Statement::Connection(conn) => {
+                let mut new_conn = conn.clone();
+                // Prefix from and to paths
+                // ... implementation
+                Ok(Spanned::new(Statement::Connection(new_conn), stmt.span.clone()))
+            }
+            Statement::Export(_) => {
+                // Exports are not emitted in expanded output - return empty/skip
+                Ok(stmt.clone())  // Will be filtered out
+            }
+            _ => Ok(stmt.clone()),
+        }
+    }
+
+    fn substitute_modifiers(
+        &self,
+        modifiers: &[Spanned<StyleModifier>],
+        bindings: &HashMap<String, StyleValue>,
+    ) -> Vec<Spanned<StyleModifier>> {
+        modifiers.iter().map(|m| {
+            let mut new_mod = m.clone();
+            if let StyleValue::Identifier(ref id) = new_mod.node.value.node {
+                if let Some(bound_value) = bindings.get(&id.0) {
+                    new_mod.node.value = Spanned::new(bound_value.clone(), new_mod.node.value.span.clone());
+                }
+            }
+            new_mod
+        }).collect()
+    }
+}
+```
+
+**Acceptance**: Identifiers in expanded templates have instance prefix.
+
+---
+
+### T022: Implement expand_instance for AIL Templates
+
+**File**: `src/template/expansion.rs`
+
+**Task**: Expand AIL template instances (inline and file).
+
+```rust
+impl<'a> ExpansionContext<'a> {
+    fn expand_instance(
+        &self,
+        inst: &TemplateInstance,
+    ) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
+        let template = self.registry.get(&inst.template_name.node.0)
+            .ok_or_else(|| ExpansionError::UnknownTemplate {
+                name: inst.template_name.node.0.clone(),
+            })?;
+
+        let prefix = &inst.instance_name.node.0;
+
+        match &template.content {
+            TemplateContent::Svg(svg_info) => {
+                self.create_svg_shape(inst, svg_info)
+            }
+            TemplateContent::Inline(stmts) | TemplateContent::Ail(stmts) => {
+                let bindings = self.bind_parameters(template, &inst.arguments)?;
+
+                let mut expanded = Vec::new();
+                for stmt in stmts {
+                    if matches!(&stmt.node, Statement::Export(_)) {
+                        continue;
+                    }
+                    let prefixed = self.prefix_statement(stmt, prefix, &bindings)?;
+                    expanded.push(prefixed);
+                }
+                Ok(expanded)
             }
         }
     }
 }
 ```
 
-**Acceptance**: SVG imports resolve correctly.
+**Dependencies**: T020, T021
+
+**Acceptance**: AIL template instances expand with prefixed identifiers and bound parameters.
 
 ---
 
-### T009: Add SvgEmbed layout handling [P]
-**File**: `src/layout/engine.rs`
-**Story**: S1 (SVG Import)
-**Parallel**: Yes (with T008)
+### T023: Implement expand_document
 
-Add layout handling for `SvgEmbed` shape type. In the match on `element_type`:
+**File**: `src/template/expansion.rs`
+
+**Task**: Implement main document expansion function.
 
 ```rust
-ElementType::Shape(ShapeType::SvgEmbed { intrinsic_width, intrinsic_height, .. }) => {
-    // Get explicit size from modifiers if provided
-    let explicit_width = styles.get_number("width");
-    let explicit_height = styles.get_number("height");
+pub fn expand_document(
+    doc: Document,
+    registry: &TemplateRegistry,
+) -> Result<Document, ExpansionError> {
+    let ctx = ExpansionContext::new(registry);
+
+    let mut expanded_statements = Vec::new();
+
+    for stmt in doc.statements {
+        match &stmt.node {
+            Statement::TemplateDecl(_) => {
+                // Template declarations are consumed; don't emit
+                continue;
+            }
+            Statement::TemplateInstance(inst) => {
+                let expanded = ctx.expand_instance(inst)?;
+                expanded_statements.extend(expanded);
+            }
+            Statement::Export(_) => {
+                // Top-level exports are metadata; don't emit
+                continue;
+            }
+            _ => {
+                expanded_statements.push(stmt);
+            }
+        }
+    }
+
+    Ok(Document { statements: expanded_statements })
+}
+```
+
+**Dependencies**: T022
+
+**Acceptance**: Full documents expand correctly.
+
+---
+
+### T024: Integrate Template Expansion into Pipeline
+
+**File**: `src/lib.rs` (or main processing function)
+
+**Task**: Add template resolution and expansion to the processing pipeline.
+
+```rust
+pub fn process_document(source: &str, base_path: PathBuf) -> Result<Document, Error> {
+    // 1. Parse
+    let doc = parser::parse(source)?;
+
+    // 2. Resolve templates
+    let mut resolver = template::TemplateResolver::new(base_path);
+    let registry = resolver.resolve_all(&doc)?;
+
+    // 3. Expand templates
+    let expanded = template::expand_document(doc, &registry)?;
+
+    // 4. Continue with layout, etc.
+    Ok(expanded)
+}
+```
+
+**Dependencies**: T019, T023
+
+**Acceptance**: End-to-end pipeline works with templates.
+
+---
+
+### T025: Integration Test - Inline Template End-to-End
+
+**File**: `tests/integration/templates.rs` (new)
+
+**Task**: Create integration test for inline templates.
+
+```rust
+#[test]
+fn test_inline_template_basic() {
+    let source = r#"
+        template "box" {
+            rect r
+        }
+
+        box "b1"
+        box "b2"
+    "#;
+
+    let result = process_and_render(source);
+
+    // Should have two rects with prefixed IDs
+    assert!(result.contains("b1"));
+    assert!(result.contains("b2"));
+}
+
+#[test]
+fn test_inline_template_with_params() {
+    let source = r#"
+        template "labeled" (text: "Default") {
+            rect r
+            text t [content: text]
+        }
+
+        labeled "l1" [text: "Hello"]
+        labeled "l2"
+    "#;
+
+    let result = process_and_render(source);
+
+    assert!(result.contains("Hello"));
+    assert!(result.contains("Default"));
+}
+
+#[test]
+fn test_forward_reference() {
+    let source = r#"
+        // Instance before declaration (forward reference)
+        box "b1"
+
+        template "box" {
+            rect r
+        }
+    "#;
+
+    let result = process(source);
+    assert!(result.is_ok());
+}
+```
+
+**Dependencies**: T024
+
+**Acceptance**: Integration tests pass.
+
+---
+
+**CHECKPOINT - US1 COMPLETE**: Inline templates work end-to-end.
+
+---
+
+## Phase 5: SVG Import (US2)
+
+**Goal**: Import and render SVG files as templates.
+
+**User Scenario**: US2 - Import and Use an SVG Icon Multiple Times
+
+### T026: Implement create_svg_shape
+
+**File**: `src/template/expansion.rs`
+
+**Task**: Create SvgEmbed shape from SVG template instance.
+
+```rust
+impl<'a> ExpansionContext<'a> {
+    fn create_svg_shape(
+        &self,
+        inst: &TemplateInstance,
+        svg_info: &SvgInfo,
+    ) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
+        // Check SVG templates don't have parameters
+        if !inst.arguments.is_empty() {
+            return Err(ExpansionError::SvgNoParameters {
+                template: inst.template_name.node.0.clone(),
+                used_at: inst.template_name.span.clone(),
+            });
+        }
+
+        let shape = Shape {
+            shape_type: ShapeType::SvgEmbed {
+                content: svg_info.content.clone(),
+                intrinsic_width: svg_info.width,
+                intrinsic_height: svg_info.height,
+            },
+            name: Some(inst.instance_name.clone()),
+            modifiers: vec![],
+        };
+
+        Ok(vec![Spanned::new(
+            Statement::Shape(shape),
+            inst.template_name.span.clone(),
+        )])
+    }
+}
+```
+
+**Acceptance**: SVG templates create SvgEmbed shapes. Parameters rejected.
+
+---
+
+### T027: Add SvgEmbed Layout Handling
+
+**File**: `src/layout/engine.rs`
+
+**Task**: Handle SvgEmbed in layout calculations.
+
+```rust
+ShapeType::SvgEmbed { intrinsic_width, intrinsic_height, .. } => {
+    let aspect = match (intrinsic_width, intrinsic_height) {
+        (Some(w), Some(h)) if *h > 0.0 => *w / *h,
+        _ => 1.0,
+    };
+
+    // Check for explicit size modifiers
+    let explicit_width = get_modifier_value(element, "width");
+    let explicit_height = get_modifier_value(element, "height");
 
     let (width, height) = match (explicit_width, explicit_height) {
         (Some(w), Some(h)) => (w, h),
-        (Some(w), None) => {
-            // Width specified, calculate height from aspect ratio
-            let aspect = intrinsic_width.zip(*intrinsic_height)
-                .map(|(iw, ih)| iw / ih)
-                .unwrap_or(1.0);
-            (w, w / aspect)
-        }
-        (None, Some(h)) => {
-            // Height specified, calculate width from aspect ratio
-            let aspect = intrinsic_width.zip(*intrinsic_height)
-                .map(|(iw, ih)| iw / ih)
-                .unwrap_or(1.0);
-            (h * aspect, h)
-        }
+        (Some(w), None) => (w, w / aspect),
+        (None, Some(h)) => (h * aspect, h),
         (None, None) => {
-            // Use intrinsic size or default
-            (intrinsic_width.unwrap_or(100.0), intrinsic_height.unwrap_or(100.0))
+            let default_size = 100.0;
+            (default_size, default_size / aspect)
         }
     };
 
@@ -482,746 +1136,179 @@ ElementType::Shape(ShapeType::SvgEmbed { intrinsic_width, intrinsic_height, .. }
 }
 ```
 
-**Acceptance**: SVG embeds have correct bounds.
+**Acceptance**: SvgEmbed shapes have correct dimensions with aspect ratio preservation.
 
 ---
 
-### T010: Add SvgEmbed rendering
+### T028: Add SvgEmbed Rendering
+
 **File**: `src/renderer/svg.rs`
-**Story**: S1 (SVG Import)
-**Parallel**: No (requires T009)
 
-Add rendering for `SvgEmbed` in `render_element` function:
+**Task**: Render SvgEmbed shapes in SVG output.
 
 ```rust
-ElementType::Shape(ShapeType::SvgEmbed { content, intrinsic_width, intrinsic_height }) => {
-    // Calculate scale factors
-    let iw = intrinsic_width.unwrap_or(100.0);
-    let ih = intrinsic_height.unwrap_or(100.0);
-    let scale_x = element.bounds.width / iw;
-    let scale_y = element.bounds.height / ih;
+ShapeType::SvgEmbed { content, intrinsic_width, intrinsic_height } => {
+    let bounds = &element.bounds;
 
-    // Create group with transform
-    let transform = format!(
-        "translate({}, {}) scale({}, {})",
-        element.bounds.x, element.bounds.y,
-        scale_x, scale_y
-    );
+    // Calculate scale
+    let scale_x = intrinsic_width.map(|w| bounds.width / w).unwrap_or(1.0);
+    let scale_y = intrinsic_height.map(|h| bounds.height / h).unwrap_or(1.0);
 
-    builder.start_group_with_transform(id, &classes, &transform);
-    builder.add_raw_svg(&strip_svg_wrapper(content));
-    builder.end_group();
-}
-```
-
-Add helper functions:
-```rust
-impl SvgBuilder {
-    pub fn start_group_with_transform(&mut self, id: Option<&str>, classes: &[String], transform: &str) {
-        let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
-        let class_attr = if classes.is_empty() {
-            String::new()
-        } else {
-            format!(r#" class="{}""#, classes.join(" "))
-        };
-
-        self.elements.push(format!(
-            r#"{}<g{}{} transform="{}">"#,
-            self.indent_str(), id_attr, class_attr, transform
+    builder.open_element("g")
+        .attr("id", element.id.as_deref().unwrap_or("svg-embed"))
+        .attr("class", "svg-embed")
+        .attr("transform", &format!(
+            "translate({}, {}) scale({}, {})",
+            bounds.x, bounds.y, scale_x, scale_y
         ));
-        self.indent += 1;
-    }
 
-    pub fn add_raw_svg(&mut self, content: &str) {
-        for line in content.lines() {
-            self.elements.push(format!("{}{}", self.indent_str(), line));
-        }
-    }
+    let inner_content = strip_svg_wrapper(content);
+    builder.raw(&inner_content);
+
+    builder.close_element("g");
 }
 
 fn strip_svg_wrapper(svg: &str) -> String {
-    let mut result = svg.to_string();
-
-    // Remove XML declaration
-    if let Some(idx) = result.find("?>") {
-        result = result[idx + 2..].to_string();
-    }
-
-    // Remove opening <svg...> tag
-    if let Some(start) = result.find("<svg") {
-        if let Some(end) = result[start..].find('>') {
-            result = result[start + end + 1..].to_string();
-        }
-    }
-
-    // Remove closing </svg> tag
-    if let Some(idx) = result.rfind("</svg>") {
-        result = result[..idx].to_string();
-    }
-
-    result.trim().to_string()
+    let s = svg.trim();
+    // Remove <?xml ... ?>
+    let s = if let Some(end) = s.find("?>") {
+        &s[end + 2..]
+    } else { s };
+    let s = s.trim();
+    // Remove <svg ...>
+    let s = if s.starts_with("<svg") {
+        if let Some(end) = s.find('>') {
+            &s[end + 1..]
+        } else { s }
+    } else { s };
+    // Remove </svg>
+    let s = s.trim();
+    if s.ends_with("</svg>") {
+        &s[..s.len() - 6]
+    } else { s }.trim().to_string()
 }
 ```
 
-**Acceptance**: SVG content renders at correct position and scale.
+**Acceptance**: SVG content renders correctly with positioning and scaling.
 
 ---
 
-### T011: Create example SVG component file
-**File**: `examples/components/person.svg` (new)
-**Story**: S1 (SVG Import)
-**Parallel**: Yes
+### T029: Integration Test - SVG Import
 
-Create a simple test SVG:
-```xml
-<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Head -->
-  <circle cx="20" cy="12" r="10" fill="currentColor"/>
-  <!-- Body -->
-  <rect x="10" y="24" width="20" height="30" rx="3" fill="currentColor"/>
-</svg>
-```
+**File**: `tests/integration/templates.rs`
 
-**Acceptance**: File exists and is valid SVG.
+**Task**: Test SVG template import.
 
----
-
-### T012: Create integration test for SVG import
-**File**: `tests/integration_tests.rs`
-**Story**: S1 (SVG Import)
-**Parallel**: No (requires T007-T010)
-
-Add integration test:
 ```rust
 #[test]
-fn test_svg_component_import() {
-    let input = r#"
-        component "person" from "components/person.svg"
-        row {
-            person "alice"
-            person "bob"
-            person "charlie"
-        }
+fn test_svg_template_import() {
+    let svg_content = r#"<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/></svg>"#;
+    let test_dir = tempfile::tempdir().unwrap();
+    std::fs::write(test_dir.path().join("icon.svg"), svg_content).unwrap();
+
+    let source = r#"
+        template "icon" from "icon.svg"
+
+        icon "i1"
+        icon "i2" [width: 50]
     "#;
 
-    // Parse, expand, layout, render
-    let doc = parse(input).expect("Should parse");
-    // ... expand components
-    // ... run layout
-    // ... render to SVG
+    let result = process_and_render_with_base(source, test_dir.path());
 
-    // Verify three person instances rendered
-    assert!(svg_output.contains("alice"));
-    assert!(svg_output.contains("bob"));
-    assert!(svg_output.contains("charlie"));
+    assert!(result.matches("<circle").count() >= 2);
+    assert!(result.contains("svg-embed"));
 }
-```
 
-**Acceptance**: Integration test passes.
-
----
-
-**CHECKPOINT: Scenario 1 Complete**
-- SVG files can be imported as components
-- Multiple instances render correctly
-- Layout respects aspect ratios
-
----
-
-## Phase 3: Scenario 2 - AIL Component Import
-
-*Goal: User can import AIL files as components and instantiate them with preserved structure.*
-
-### T013: Add export declaration parser
-**File**: `src/parser/grammar.rs`
-**Story**: S2 (AIL Import)
-**Parallel**: No
-
-Add parser for export declarations:
-```rust
-// Export declaration: export id1, id2, ...
-let export_decl = just(Token::Export)
-    .ignore_then(
-        identifier.clone()
-            .separated_by(just(Token::Comma))
-            .at_least(1)
-            .collect::<Vec<_>>()
-    )
-    .map_with(|exports, e| {
-        Spanned::new(
-            Statement::Export(ExportDecl { exports }),
-            span_range(&e.span())
-        )
-    });
-```
-
-Add `export_decl` to statement `choice()`.
-
-Add test:
-```rust
 #[test]
-fn test_parse_export_decl() {
-    let doc = parse("export port1, port2, port3").expect("Should parse");
-    match &doc.statements[0].node {
-        Statement::Export(e) => {
-            assert_eq!(e.exports.len(), 3);
-            assert_eq!(e.exports[0].node.as_str(), "port1");
-        }
-        _ => panic!("Expected export"),
-    }
-}
-```
+fn test_svg_template_rejects_params() {
+    let svg_content = r#"<svg viewBox="0 0 100 100"></svg>"#;
+    let test_dir = tempfile::tempdir().unwrap();
+    std::fs::write(test_dir.path().join("icon.svg"), svg_content).unwrap();
 
-**Acceptance**: Export declarations parse correctly.
-
----
-
-### T014: Extend ImportResolver for AIL files [P]
-**File**: `src/import/resolver.rs`
-**Story**: S2 (AIL Import)
-**Parallel**: Yes (with T015)
-
-Complete the AIL branch in `parse_content`:
-```rust
-ComponentSourceType::Ail => {
-    // Parse the AIL document
-    let doc = crate::parser::parse(content)
-        .map_err(|errs| ImportError::ParseError {
-            path: path.to_path_buf(),
-            errors: errs
-        })?;
-
-    // Extract exports
-    let mut exports = HashSet::new();
-    for stmt in &doc.statements {
-        if let Statement::Export(e) = &stmt.node {
-            for export in &e.exports {
-                exports.insert(export.node.as_str().to_string());
-            }
-        }
-    }
-
-    // Recursively resolve any nested imports
-    let old_base = std::mem::replace(&mut self.base_path, path.parent().unwrap().to_path_buf());
-    for stmt in &doc.statements {
-        if let Statement::ComponentDecl(c) = &stmt.node {
-            self.resolve(&c.source_path.node, c.source_path.span.clone())?;
-        }
-    }
-    self.base_path = old_base;
-
-    Ok(ResolvedComponent {
-        source_path: path.to_path_buf(),
-        source_type,
-        content: ComponentContent::Ail(doc),
-        exports,
-    })
-}
-```
-
-**Acceptance**: AIL files parse and exports are extracted.
-
----
-
-### T015: Create component expansion module [P]
-**File**: `src/import/expansion.rs` (new)
-**Story**: S2 (AIL Import)
-**Parallel**: Yes (with T014)
-
-Create expansion logic:
-```rust
-//! Component instance expansion
-
-use std::collections::{HashMap, HashSet};
-use crate::parser::ast::*;
-use super::resolver::{ResolvedComponent, ComponentContent};
-use super::svg::SvgInfo;
-
-pub struct ExpansionContext {
-    components: HashMap<String, ResolvedComponent>,
-}
-
-#[derive(Debug)]
-pub enum ExpansionError {
-    UnknownComponent { name: String, span: Span },
-    NonExportedElement { component: String, element: String, span: Span },
-}
-
-impl ExpansionContext {
-    pub fn new(components: HashMap<String, ResolvedComponent>) -> Self {
-        Self { components }
-    }
-
-    pub fn expand(&self, doc: Document) -> Result<Document, ExpansionError> {
-        let mut expanded = vec![];
-
-        for stmt in doc.statements {
-            match &stmt.node {
-                Statement::ComponentDecl(_) | Statement::Export(_) => {
-                    // Skip declarations and exports in expanded output
-                }
-                Statement::ComponentInstance(inst) => {
-                    let expanded_stmts = self.expand_instance(inst, "")?;
-                    expanded.extend(expanded_stmts);
-                }
-                _ => {
-                    expanded.push(stmt);
-                }
-            }
-        }
-
-        Ok(Document { statements: expanded })
-    }
-
-    fn expand_instance(&self, inst: &ComponentInstance, prefix: &str) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
-        let component = self.components.get(inst.component_name.node.as_str())
-            .ok_or_else(|| ExpansionError::UnknownComponent {
-                name: inst.component_name.node.as_str().to_string(),
-                span: inst.component_name.span.clone(),
-            })?;
-
-        let instance_prefix = if prefix.is_empty() {
-            inst.instance_name.node.as_str().to_string()
-        } else {
-            format!("{}.{}", prefix, inst.instance_name.node.as_str())
-        };
-
-        match &component.content {
-            ComponentContent::Svg(svg_info) => {
-                self.expand_svg_instance(inst, svg_info, &instance_prefix)
-            }
-            ComponentContent::Ail(doc) => {
-                self.expand_ail_instance(inst, doc, &instance_prefix)
-            }
-        }
-    }
-
-    fn expand_svg_instance(&self, inst: &ComponentInstance, svg: &SvgInfo, prefix: &str) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
-        let (iw, ih) = svg.intrinsic_size();
-        let shape = ShapeDecl {
-            shape_type: Spanned::new(
-                ShapeType::SvgEmbed {
-                    content: svg.content.clone(),
-                    intrinsic_width: Some(iw),
-                    intrinsic_height: Some(ih),
-                },
-                inst.component_name.span.clone(),
-            ),
-            name: Some(Spanned::new(
-                Identifier::new(prefix),
-                inst.instance_name.span.clone(),
-            )),
-            modifiers: inst.parameters.clone(),
-        };
-
-        Ok(vec![Spanned::new(Statement::Shape(shape), inst.instance_name.span.clone())])
-    }
-
-    fn expand_ail_instance(&self, inst: &ComponentInstance, doc: &Document, prefix: &str) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
-        let mut expanded = vec![];
-
-        for stmt in &doc.statements {
-            match &stmt.node {
-                Statement::ComponentDecl(_) | Statement::Export(_) => continue,
-                Statement::ComponentInstance(nested) => {
-                    expanded.extend(self.expand_instance(nested, prefix)?);
-                }
-                _ => {
-                    let prefixed = self.prefix_statement(stmt, prefix);
-                    expanded.push(prefixed);
-                }
-            }
-        }
-
-        // Wrap in a group with the instance name
-        let group = GroupDecl {
-            name: Some(Spanned::new(
-                Identifier::new(prefix),
-                inst.instance_name.span.clone(),
-            )),
-            children: expanded,
-            modifiers: inst.parameters.clone(),
-        };
-
-        Ok(vec![Spanned::new(Statement::Group(group), inst.instance_name.span.clone())])
-    }
-
-    fn prefix_statement(&self, stmt: &Spanned<Statement>, prefix: &str) -> Spanned<Statement> {
-        // Prefix all identifiers in the statement
-        // This is a deep clone with name transformation
-        // Implementation details: recursively update all Identifier nodes
-        todo!("Implement identifier prefixing")
-    }
-}
-```
-
-Update `src/import/mod.rs`:
-```rust
-mod expansion;
-pub use expansion::{ExpansionContext, ExpansionError};
-```
-
-**Acceptance**: Expansion context compiles.
-
----
-
-### T016: Implement identifier prefixing
-**File**: `src/import/expansion.rs`
-**Story**: S2 (AIL Import)
-**Parallel**: No (requires T015)
-
-Complete the `prefix_statement` function and add helpers:
-```rust
-fn prefix_statement(&self, stmt: &Spanned<Statement>, prefix: &str) -> Spanned<Statement> {
-    let new_node = match &stmt.node {
-        Statement::Shape(s) => Statement::Shape(self.prefix_shape(s, prefix)),
-        Statement::Connection(c) => Statement::Connection(self.prefix_connection(c, prefix)),
-        Statement::Layout(l) => Statement::Layout(self.prefix_layout(l, prefix)),
-        Statement::Group(g) => Statement::Group(self.prefix_group(g, prefix)),
-        Statement::Constraint(c) => Statement::Constraint(self.prefix_constraint(c, prefix)),
-        Statement::Alignment(a) => Statement::Alignment(self.prefix_alignment(a, prefix)),
-        Statement::Label(inner) => {
-            let prefixed_inner = self.prefix_statement(
-                &Spanned::new(*inner.clone(), stmt.span.clone()),
-                prefix,
-            );
-            Statement::Label(Box::new(prefixed_inner.node))
-        }
-        // Skip these in prefixing
-        Statement::ComponentDecl(_) | Statement::ComponentInstance(_) | Statement::Export(_) => {
-            stmt.node.clone()
-        }
-    };
-
-    Spanned::new(new_node, stmt.span.clone())
-}
-
-fn prefix_identifier(&self, id: &Spanned<Identifier>, prefix: &str) -> Spanned<Identifier> {
-    Spanned::new(
-        Identifier::new(format!("{}.{}", prefix, id.node.as_str())),
-        id.span.clone(),
-    )
-}
-
-fn prefix_shape(&self, shape: &ShapeDecl, prefix: &str) -> ShapeDecl {
-    ShapeDecl {
-        shape_type: shape.shape_type.clone(),
-        name: shape.name.as_ref().map(|n| self.prefix_identifier(n, prefix)),
-        modifiers: shape.modifiers.clone(),
-    }
-}
-
-// Add similar methods for Connection, Layout, Group, Constraint, Alignment...
-```
-
-**Acceptance**: All identifiers in expanded content are prefixed.
-
----
-
-### T017: Create example AIL component file
-**File**: `examples/components/server-rack.ail` (new)
-**Story**: S2 (AIL Import)
-**Parallel**: Yes
-
-```
-// A server rack component with exported connection points
-col {
-    rect server1 [size: 40, fill: foreground-1]
-    rect server2 [size: 40, fill: foreground-1]
-    rect server3 [size: 40, fill: foreground-1]
-}
-
-// Connection points
-circle input_port [size: 8, fill: accent-1]
-circle output_port [size: 8, fill: accent-2]
-
-// Expose connection points for external wiring
-export input_port, output_port
-```
-
-**Acceptance**: File parses without errors.
-
----
-
-### T018: Integration test for AIL import
-**File**: `tests/integration_tests.rs`
-**Story**: S2 (AIL Import)
-**Parallel**: No (requires T013-T016)
-
-```rust
-#[test]
-fn test_ail_component_import() {
-    let input = r#"
-        component "rack" from "components/server-rack.ail"
-        row {
-            rack "rack1"
-            rack "rack2"
-            rack "rack3"
-        }
+    let source = r#"
+        template "icon" from "icon.svg"
+        icon "i1" [color: red]
     "#;
 
-    let doc = parse(input).expect("Should parse");
-    // Expand, layout, render...
-
-    // Verify three rack instances with prefixed elements
-    assert!(svg_output.contains("rack1.server1"));
-    assert!(svg_output.contains("rack2.server1"));
+    let result = process_with_base(source, test_dir.path());
+    assert!(result.is_err());
 }
 ```
 
-**Acceptance**: AIL imports render with correct namespacing.
+**Dependencies**: T026, T027, T028
+
+**Acceptance**: SVG import tests pass.
 
 ---
 
-**CHECKPOINT: Scenario 2 Complete**
-- AIL files can be imported
-- Export declarations work
-- Elements are properly namespaced
+**CHECKPOINT - US2 COMPLETE**: SVG imports work with proper scaling.
 
 ---
 
-## Phase 4: Scenario 4 & 6 - Nested Imports & Error Handling
+## Phase 6: AIL Import & Exports (US3, US5)
 
-*Goal: Handle transitive imports and provide clear error messages.*
+**Goal**: Import external AIL files and support exports for connections.
 
-### T019: Add circular import detection test
-**File**: `tests/integration_tests.rs`
-**Story**: S4 (Nested) / S6 (Errors)
-**Parallel**: No
+### T031: Integration Test - AIL Import
+
+**File**: `tests/integration/templates.rs`
+
+**Task**: Test AIL file import.
 
 ```rust
 #[test]
-fn test_circular_import_detected() {
-    // Create temp files: a.ail imports b.ail, b.ail imports a.ail
-    let temp_dir = tempdir().unwrap();
+fn test_ail_template_import() {
+    let ail_content = r#"
+        rect box
+        text label [content: "Server"]
+        export box
+    "#;
+    let test_dir = tempfile::tempdir().unwrap();
+    std::fs::write(test_dir.path().join("server.ail"), ail_content).unwrap();
 
-    let a_path = temp_dir.path().join("a.ail");
-    let b_path = temp_dir.path().join("b.ail");
+    let source = r#"
+        template "server" from "server.ail"
 
-    std::fs::write(&a_path, r#"component "b" from "b.ail""#).unwrap();
-    std::fs::write(&b_path, r#"component "a" from "a.ail""#).unwrap();
-
-    let mut resolver = ImportResolver::new(temp_dir.path().to_path_buf());
-    let result = resolver.resolve("a.ail", 0..0);
-
-    assert!(matches!(result, Err(ImportError::CircularImport { .. })));
-}
-
-#[test]
-fn test_missing_import_error() {
-    let input = r#"component "missing" from "nonexistent.svg""#;
-    let doc = parse(input).expect("Should parse");
-
-    let mut resolver = ImportResolver::new(PathBuf::from("."));
-    let result = resolver.resolve("nonexistent.svg", 0..0);
-
-    assert!(matches!(result, Err(ImportError::FileNotFound { .. })));
-}
-```
-
-**Acceptance**: Circular imports and missing files produce clear errors.
-
----
-
-### T020: Add ariadne error formatting for imports
-**File**: `src/error.rs`
-**Story**: S6 (Errors)
-**Parallel**: Yes
-
-Extend error reporting to handle import errors with source locations:
-```rust
-use ariadne::{Report, ReportKind, Source, Label};
-use crate::import::ImportError;
-
-pub fn report_import_error(error: &ImportError, source: &str, filename: &str) -> String {
-    let mut output = Vec::new();
-
-    match error {
-        ImportError::FileNotFound { path, declared_at } => {
-            Report::build(ReportKind::Error, filename, declared_at.start)
-                .with_message(format!("Cannot find file '{}'", path.display()))
-                .with_label(
-                    Label::new((filename, declared_at.clone()))
-                        .with_message("import declared here")
-                )
-                .with_help(format!("Check that '{}' exists relative to '{}'", path.display(), filename))
-                .finish()
-                .write((filename, Source::from(source)), &mut output)
-                .unwrap();
-        }
-        ImportError::CircularImport { path, cycle } => {
-            // Format cycle path for clarity
-            let cycle_str = cycle.iter()
-                .map(|p| p.display().to_string())
-                .collect::<Vec<_>>()
-                .join(" -> ");
-
-            Report::build(ReportKind::Error, filename, 0)
-                .with_message("Circular import detected")
-                .with_note(format!("Import cycle: {} -> {}", cycle_str, path.display()))
-                .finish()
-                .write((filename, Source::from(source)), &mut output)
-                .unwrap();
-        }
-        // Add other cases...
-    }
-
-    String::from_utf8(output).unwrap()
-}
-```
-
-**Acceptance**: Import errors show helpful context.
-
----
-
-### T021: Test nested imports (3 levels deep)
-**File**: `tests/integration_tests.rs`
-**Story**: S4 (Nested)
-**Parallel**: No
-
-```rust
-#[test]
-fn test_nested_component_imports() {
-    // Create: workstation.ail -> monitor.svg, keyboard.svg
-    let temp_dir = tempdir().unwrap();
-
-    // Level 1: SVG components
-    std::fs::write(
-        temp_dir.path().join("monitor.svg"),
-        r#"<svg viewBox="0 0 80 60"><rect width="80" height="60"/></svg>"#
-    ).unwrap();
-
-    std::fs::write(
-        temp_dir.path().join("keyboard.svg"),
-        r#"<svg viewBox="0 0 100 30"><rect width="100" height="30"/></svg>"#
-    ).unwrap();
-
-    // Level 2: AIL component using SVGs
-    std::fs::write(
-        temp_dir.path().join("workstation.ail"),
-        r#"
-            component "monitor" from "monitor.svg"
-            component "keyboard" from "keyboard.svg"
-            col {
-                monitor "screen"
-                keyboard "keys"
-            }
-        "#
-    ).unwrap();
-
-    // Level 3: Main file using AIL component
-    let main_input = r#"
-        component "ws" from "workstation.ail"
-        row {
-            ws "desk1"
-            ws "desk2"
-        }
+        server "s1"
+        server "s2"
     "#;
 
-    // Parse and expand
-    // Verify desk1.screen and desk2.keys exist in output
+    let result = process_and_render_with_base(source, test_dir.path());
+
+    assert!(result.contains("s1"));
+    assert!(result.contains("s2"));
 }
 ```
 
-**Acceptance**: Three levels of nesting work correctly.
+**Dependencies**: T019 (AIL resolver)
+
+**Acceptance**: AIL import works.
 
 ---
 
-**CHECKPOINT: Scenarios 4 & 6 Complete**
-- Nested imports resolve correctly
-- Circular imports detected
-- Missing files produce clear errors
+### T032: Validate Export References in Connections
 
----
+**File**: `src/template/expansion.rs` or `src/layout/engine.rs`
 
-## Phase 5: Scenario 5 - Export & Connection Targeting
+**Task**: Validate that dot-notation connections only target exported elements.
 
-*Goal: Connections can target exported elements within component instances.*
-
-### T022: Extend connection resolution for dot notation
-**File**: `src/layout/engine.rs` (or appropriate file)
-**Story**: S5 (Exports)
-**Parallel**: No
-
-When resolving connection targets, handle dot notation:
 ```rust
-fn resolve_connection_target(&self, target: &ElementPath, exports: &HashMap<String, HashSet<String>>) -> Result<String, ConnectionError> {
-    if target.is_simple() {
-        // Simple reference: just the element name
-        return Ok(target.leaf().as_str().to_string());
-    }
+pub fn validate_connection_target(
+    path: &ElementPath,
+    instance_exports: &HashMap<String, HashSet<String>>,
+) -> Result<(), ExpansionError> {
+    if path.components.len() > 1 {
+        let instance_name = &path.components[0].node.0;
+        let target_name = &path.components[1].node.0;
 
-    // Dot notation: instance.export
-    let segments: Vec<&str> = target.segments.iter().map(|s| s.node.as_str()).collect();
-
-    if segments.len() == 2 {
-        let instance = segments[0];
-        let export = segments[1];
-
-        // Check if this is a component instance
-        if let Some(component_exports) = exports.get(instance) {
-            // Verify the export is declared
-            if !component_exports.contains(export) {
-                return Err(ConnectionError::NonExportedElement {
-                    component: instance.to_string(),
-                    element: export.to_string(),
+        if let Some(exports) = instance_exports.get(instance_name) {
+            if !exports.contains(target_name) {
+                return Err(ExpansionError::NonExportedElement {
+                    instance: instance_name.clone(),
+                    element: target_name.clone(),
+                    available_exports: exports.iter().cloned().collect(),
+                    used_at: path.components[1].span.clone(),
                 });
-            }
-            // Return the prefixed path
-            return Ok(format!("{}.{}", instance, export));
-        }
-    }
-
-    // Fallback to regular path resolution
-    Ok(target.to_string())
-}
-```
-
-**Acceptance**: Dot notation connections resolve to correct elements.
-
----
-
-### T023: Add validation for non-exported access [P]
-**File**: `src/import/expansion.rs`
-**Story**: S5 (Exports)
-**Parallel**: Yes (with T024)
-
-Add validation during expansion:
-```rust
-pub fn validate_connections(&self, doc: &Document) -> Vec<ExpansionError> {
-    let mut errors = vec![];
-
-    for stmt in &doc.statements {
-        if let Statement::Connection(conn) = &stmt.node {
-            // Check 'from' and 'to' targets
-            if let Err(e) = self.validate_target(&conn.from) {
-                errors.push(e);
-            }
-            if let Err(e) = self.validate_target(&conn.to) {
-                errors.push(e);
-            }
-        }
-    }
-
-    errors
-}
-
-fn validate_target(&self, target: &Spanned<Identifier>) -> Result<(), ExpansionError> {
-    let path = target.node.as_str();
-    if path.contains('.') {
-        let parts: Vec<&str> = path.split('.').collect();
-        if parts.len() == 2 {
-            let instance = parts[0];
-            let element = parts[1];
-
-            if let Some(component) = self.get_component_for_instance(instance) {
-                if !component.exports.contains(element) {
-                    return Err(ExpansionError::NonExportedElement {
-                        component: instance.to_string(),
-                        element: element.to_string(),
-                        span: target.span.clone(),
-                    });
-                }
             }
         }
     }
@@ -1229,405 +1316,229 @@ fn validate_target(&self, target: &Spanned<Identifier>) -> Result<(), ExpansionE
 }
 ```
 
-**Acceptance**: Non-exported access produces clear error.
+**Acceptance**: Clear error when connecting to non-exported element.
 
 ---
 
-### T024: Create component instance parser rule [P]
-**File**: `src/parser/grammar.rs`
-**Story**: S3 (Parameters) / S5 (Exports)
-**Parallel**: Yes (with T023)
+### T033: Integration Test - Export Connections
 
-This is tricky because component instances look like shapes. Use a two-phase approach:
+**File**: `tests/integration/templates.rs`
 
-Phase 1: Parse as potential instance (when identifier is not a shape keyword)
-```rust
-// In the statement parser, add a catch-all for unknown identifiers that might be component instances
-// This will be validated later during expansion
-let potential_instance = identifier.clone()
-    .then(string_literal.clone())
-    .then(modifier_block.clone().or_not())
-    .map_with(|((name, instance), mods), e| {
-        Spanned::new(
-            Statement::ComponentInstance(ComponentInstance {
-                component_name: name,
-                instance_name: Spanned::new(Identifier::new(instance.node), instance.span),
-                parameters: mods.unwrap_or_default(),
-            }),
-            span_range(&e.span())
-        )
-    });
-```
+**Task**: Test connecting to exported elements.
 
-Note: The shape parser has priority, so known shapes (rect, circle, etc.) parse as shapes. Unknown identifiers fall through to potential_instance.
-
-Add test:
 ```rust
 #[test]
-fn test_parse_component_instance() {
-    let doc = parse(r#"person "alice" [fill: blue]"#).expect("Should parse");
-    match &doc.statements[0].node {
-        Statement::ComponentInstance(inst) => {
-            assert_eq!(inst.component_name.node.as_str(), "person");
-            assert_eq!(inst.instance_name.node.as_str(), "alice");
-            assert_eq!(inst.parameters.len(), 1);
+fn test_export_connection() {
+    let source = r#"
+        template "router" {
+            rect body
+            rect wan
+            rect lan
+            export wan, lan
         }
-        _ => panic!("Expected component instance"),
-    }
-}
-```
 
-**Acceptance**: Component instances parse with parameters.
-
----
-
-### T025: Integration test for export connections
-**File**: `tests/integration_tests.rs`
-**Story**: S5 (Exports)
-**Parallel**: No
-
-```rust
-#[test]
-fn test_connection_to_export() {
-    let input = r#"
-        component "router" from "components/router.ail"
-
-        rect server [fill: blue]
+        rect cable
         router "r1"
 
-        server -> r1.wan
+        connect cable -> r1.wan
     "#;
 
-    // Router AIL has: export wan, lan
-    // Connection should resolve to r1.wan element
+    let result = process_and_render(source);
+    assert!(result.is_ok());
 }
 
 #[test]
-fn test_connection_to_non_export_fails() {
-    let input = r#"
-        component "router" from "components/router.ail"
+fn test_non_export_connection_error() {
+    let source = r#"
+        template "router" {
+            rect body
+            rect internal
+            export body
+        }
 
-        rect server
+        rect cable
         router "r1"
 
-        server -> r1.internal_element
+        connect cable -> r1.internal
     "#;
 
-    // Should produce clear error about non-exported element
+    let result = process(source);
+    assert!(result.is_err());
+    assert!(result.unwrap_err().to_string().contains("not exported"));
 }
 ```
 
-**Acceptance**: Export connections work, non-export access errors.
+**Dependencies**: T032
+
+**Acceptance**: Export validation works correctly.
 
 ---
 
-**CHECKPOINT: Scenario 5 Complete**
-- Connections target exported elements
-- Dot notation resolved correctly
-- Non-exported access produces errors
+### T034: Test Circular Dependency Detection
 
----
+**File**: `tests/integration/templates.rs`
 
-## Phase 6: Scenario 3 - Component Parameters
-
-*Goal: Components can accept style parameters that customize rendering.*
-
-### T026: Style propagation for SVG components
-**File**: `src/import/expansion.rs`
-**Story**: S3 (Parameters)
-**Parallel**: No
-
-When expanding SVG instances, apply style modifiers:
-```rust
-fn expand_svg_instance(&self, inst: &ComponentInstance, svg: &SvgInfo, prefix: &str) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
-    let (iw, ih) = svg.intrinsic_size();
-
-    // Merge instance parameters with defaults
-    let mut modifiers = inst.parameters.clone();
-
-    // Add CSS variable support for fill/stroke
-    // SVGs using currentColor will inherit these
-
-    let shape = ShapeDecl {
-        shape_type: Spanned::new(
-            ShapeType::SvgEmbed {
-                content: svg.content.clone(),
-                intrinsic_width: Some(iw),
-                intrinsic_height: Some(ih),
-            },
-            inst.component_name.span.clone(),
-        ),
-        name: Some(Spanned::new(
-            Identifier::new(prefix),
-            inst.instance_name.span.clone(),
-        )),
-        modifiers,
-    };
-
-    Ok(vec![Spanned::new(Statement::Shape(shape), inst.instance_name.span.clone())])
-}
-```
-
-**Acceptance**: Style parameters apply to SVG instances.
-
----
-
-### T027: Style propagation for AIL components
-**File**: `src/import/expansion.rs`
-**Story**: S3 (Parameters)
-**Parallel**: No (requires T026)
-
-Apply instance styles to AIL component group:
-```rust
-fn expand_ail_instance(&self, inst: &ComponentInstance, doc: &Document, prefix: &str) -> Result<Vec<Spanned<Statement>>, ExpansionError> {
-    let mut expanded = vec![];
-
-    for stmt in &doc.statements {
-        // ... expand statements
-    }
-
-    // Wrap in a group with instance name AND style modifiers
-    let group = GroupDecl {
-        name: Some(Spanned::new(
-            Identifier::new(prefix),
-            inst.instance_name.span.clone(),
-        )),
-        children: expanded,
-        modifiers: inst.parameters.clone(),  // Apply instance styles to group
-    };
-
-    Ok(vec![Spanned::new(Statement::Group(group), inst.instance_name.span.clone())])
-}
-```
-
-**Acceptance**: AIL instances inherit styles from instance modifiers.
-
----
-
-### T028: Integration test for parameters
-**File**: `tests/integration_tests.rs`
-**Story**: S3 (Parameters)
-**Parallel**: No
+**Task**: Test that circular dependencies are caught.
 
 ```rust
 #[test]
-fn test_component_with_parameters() {
-    let input = r#"
-        component "person" from "components/person.svg"
-        row {
-            person "alice" [fill: blue]
-            person "bob" [fill: red]
-            person "charlie" [fill: green]
+fn test_circular_dependency_error() {
+    let test_dir = tempfile::tempdir().unwrap();
+
+    std::fs::write(
+        test_dir.path().join("a.ail"),
+        r#"template "b" from "b.ail""#
+    ).unwrap();
+
+    std::fs::write(
+        test_dir.path().join("b.ail"),
+        r#"template "a" from "a.ail""#
+    ).unwrap();
+
+    let source = r#"template "a" from "a.ail""#;
+
+    let result = process_with_base(source, test_dir.path());
+    assert!(result.is_err());
+    assert!(result.unwrap_err().to_string().contains("circular"));
+}
+```
+
+**Dependencies**: T019
+
+**Acceptance**: Circular dependencies produce clear error.
+
+---
+
+**CHECKPOINT - US3, US5 COMPLETE**: AIL imports and exports work.
+
+---
+
+## Phase 7: Error Messages (US6)
+
+**Goal**: Comprehensive, helpful error messages using ariadne.
+
+### T035: Add ariadne Error Formatting
+
+**File**: `src/template/error.rs`
+
+**Task**: Implement ariadne-based error formatting for template errors.
+
+```rust
+use ariadne::{Report, ReportKind, Label, Source};
+
+impl TemplateError {
+    pub fn to_report(&self, filename: &str, source: &str) -> Report<(&str, std::ops::Range<usize>)> {
+        match self {
+            TemplateError::UnknownTemplate { name, used_at } => {
+                Report::build(ReportKind::Error, filename, used_at.start)
+                    .with_message(format!("Unknown template '{}'", name))
+                    .with_label(
+                        Label::new((filename, used_at.start..used_at.end))
+                            .with_message("template not declared")
+                    )
+                    .with_help("Declare template with:\n  template \"name\" from \"path.ail\"\n  -- or --\n  template \"name\" { ... }")
+                    .finish()
+            }
+            TemplateError::FileNotFound { path, declared_at } => {
+                Report::build(ReportKind::Error, filename, declared_at.start)
+                    .with_message(format!("File not found: {:?}", path))
+                    .with_label(
+                        Label::new((filename, declared_at.start..declared_at.end))
+                            .with_message("file does not exist")
+                    )
+                    .finish()
+            }
+            // ... other variants
+            _ => {
+                Report::build(ReportKind::Error, filename, 0)
+                    .with_message(self.to_string())
+                    .finish()
+            }
         }
-    "#;
-
-    // Render and verify each person has different fill color
-}
-```
-
-**Acceptance**: Parameters customize each instance.
-
----
-
-**CHECKPOINT: Scenario 3 Complete**
-- Parameters passed to instances
-- Styles applied correctly
-
----
-
-## Phase 7: Polish & Documentation
-
-### T029: Update grammar.ebnf documentation [P]
-**File**: `features/001-the-grammar-and-ast-for-our-dsl/contracts/grammar.ebnf`
-**Story**: Documentation
-**Parallel**: Yes (with T030, T031)
-
-Add new syntax rules:
-```ebnf
-(* Component declarations *)
-component_decl = "component", string_literal, "from", string_literal ;
-
-(* Component instances *)
-component_instance = identifier, string_literal, [ modifier_block ] ;
-
-(* Export declarations *)
-export_decl = "export", identifier, { ",", identifier } ;
-
-(* Updated statement rule *)
-statement = shape_decl | connection | layout | group | constraint | alignment
-          | component_decl | component_instance | export_decl ;
-```
-
-**Acceptance**: Grammar documentation is complete.
-
----
-
-### T030: Create example: team-diagram.ail [P]
-**File**: `examples/team-diagram.ail` (new)
-**Story**: Documentation
-**Parallel**: Yes (with T029, T031)
-
-```
-// Team diagram using person components
-component "person" from "components/person.svg"
-
-row [gap: 20] {
-    person "alice" [fill: blue, label: "Alice (Lead)"]
-    person "bob" [fill: green]
-    person "charlie" [fill: green]
-    person "diana" [fill: green]
-}
-
-// Org chart connections
-alice -> bob
-alice -> charlie
-alice -> diana
-```
-
-**Acceptance**: Example renders correctly.
-
----
-
-### T031: Create example: datacenter.ail [P]
-**File**: `examples/datacenter.ail` (new)
-**Story**: Documentation
-**Parallel**: Yes (with T029, T030)
-
-```
-// Datacenter diagram with server rack components
-component "rack" from "components/server-rack.ail"
-component "router" from "components/router.ail"
-
-row [gap: 40] {
-    col {
-        rack "rack1"
-        rack "rack2"
-    }
-
-    router "main_router"
-
-    col {
-        rack "rack3"
-        rack "rack4"
     }
 }
-
-// Network connections via exported ports
-rack1.output -> main_router.lan
-rack2.output -> main_router.lan
-main_router.wan -> rack3.input
-main_router.wan -> rack4.input
 ```
 
-**Acceptance**: Complex example with exports works.
+**Acceptance**: Errors render with helpful ariadne formatting.
 
 ---
 
-### T032: Snapshot tests for SVG output
-**File**: `tests/integration_tests.rs`
-**Story**: Quality
-**Parallel**: No (requires all previous tasks)
-
-Add insta snapshot tests:
-```rust
-#[test]
-fn test_svg_output_simple_component() {
-    let input = r#"
-        component "person" from "components/person.svg"
-        person "alice"
-    "#;
-
-    let svg = render_to_svg(input);
-    insta::assert_snapshot!(svg);
-}
-
-#[test]
-fn test_svg_output_ail_component() {
-    let input = r#"
-        component "rack" from "components/server-rack.ail"
-        rack "r1"
-    "#;
-
-    let svg = render_to_svg(input);
-    insta::assert_snapshot!(svg);
-}
-
-#[test]
-fn test_svg_output_nested_components() {
-    // Test with workstation containing monitor + keyboard
-    let svg = render_to_svg(nested_input);
-    insta::assert_snapshot!(svg);
-}
-```
-
-**Acceptance**: All snapshot tests pass.
+**CHECKPOINT - FEATURE COMPLETE**: All user scenarios implemented with good error messages.
 
 ---
 
-## Summary
-
-### Task Count by Story
-
-| Story | Tasks | Description |
-|-------|-------|-------------|
-| Foundation | 6 | Setup, types, module structure |
-| S1: SVG Import | 6 | Import and render SVG components |
-| S2: AIL Import | 6 | Import and render AIL components |
-| S4+S6: Nested & Errors | 3 | Transitive imports, error handling |
-| S5: Exports | 4 | Connection targeting via exports |
-| S3: Parameters | 3 | Style customization |
-| Documentation | 4 | Examples, grammar docs, snapshots |
-| **Total** | **32** | |
-
-### Parallel Execution Opportunities
-
-**Foundation Phase** (parallel group):
-- T002 (AST types) + T003 (module structure)
-- T004 (error types) + T005 (SVG parser)
-
-**Scenario 1** (parallel group):
-- T008 (resolver) + T009 (layout)
-
-**Scenario 2** (parallel group):
-- T014 (AIL resolver) + T015 (expansion module)
-
-**Scenario 5** (parallel group):
-- T023 (validation) + T024 (parser rule)
-
-**Documentation** (parallel group):
-- T029 (grammar) + T030 (team example) + T031 (datacenter example)
-
-### Dependency Graph
+## Dependency Graph
 
 ```
-T001 (tokens)
-  │
-  ├─► T002 (AST) ─┬─► T007 (parser) ─► T012 (test S1)
-  │               │
-  └─► T003 (mod) ─┴─► T004 (errors) ─► T020 (error fmt)
-                  │
-                  └─► T005 (SVG) ─► T006 (regex dep)
-                          │
-                          └─► T008 (resolver) ─► T014 (AIL) ─► T015 (expand)
-                                    │                              │
-                                    └─► T009 (layout) ─────────────┴─► T016 (prefix)
-                                            │                              │
-                                            └─► T010 (render) ─────────────┴─► T018 (test S2)
-                                                                               │
-                                                    T013 (export parser) ◄─────┘
-                                                            │
-                                                            └─► T22-25 (S5 tasks)
-                                                                    │
-                                                                    └─► T26-28 (S3 tasks)
-                                                                            │
-                                                                            └─► T29-32 (polish)
+T001 ─┬─► T007 ─► T013 ─► T014 ─► T024 ─► T025
+T002 ─┤
+T003 ─┤
+T004 ─┤
+T005 ─┤
+T006 ─┘
+
+T008 ─────────────────────────────► T026 ─► T027 ─► T028 ─► T029
+
+T009 ─► T013
+T010 ─► T013
+T011 ─► T012 ─► T013
+
+T015 ─┬─► T019 ─► T024
+T016 ─┤
+T017 ─┤
+T018 ─┘
+
+T020 ─► T021 ─► T022 ─► T023 ─► T024
+
+T031 (depends on T019)
+T032 ─► T033
+T034 (depends on T019)
+T035 (final polish)
 ```
 
-### Suggested MVP Scope
+## Parallel Execution Groups
 
-**MVP (Scenario 1 only)**: Tasks T001-T012
-- Import SVG files as components
-- Multiple instances in layouts
-- Basic styling
+**Group 1** (Foundation - all parallel):
+- T001, T002, T003, T004, T005, T006, T008
 
-This provides immediate value and validates the core architecture before adding AIL imports and exports.
+**Group 2** (After Group 1):
+- T007 (needs T004-T006)
+
+**Group 3** (Parsing - after T007):
+- T009, T010, T011 (parallel)
+- T012 (needs T011)
+- T013 (needs T010, T012)
+- T014 (needs T013)
+
+**Group 4** (Template Module - parallel with Group 3):
+- T015, T016, T017, T018 (all parallel)
+- T019 (needs T017, T018)
+
+**Group 5** (Expansion - needs T019):
+- T020, T021 (parallel)
+- T022 (needs T020, T021)
+- T023 (needs T022)
+- T024 (needs T014, T019, T023)
+
+**Group 6** (Integration tests - needs T024):
+- T025, T026-T029 (parallel SVG path)
+- T031-T035 (AIL and polish)
+
+## Implementation Strategy
+
+**MVP (Minimum Viable Product)**: Phases 1-4 (T001-T025)
+- Inline templates only
+- Demonstrates core value proposition
+- Can be delivered independently
+
+**Iteration 2**: Phase 5 (T026-T029)
+- Add SVG import support
+
+**Iteration 3**: Phases 6-7 (T031-T035)
+- Add AIL import support
+- Export validation
+- Error message polish
+
+---
+
+*Generated by SpecSwarm tasks workflow*
