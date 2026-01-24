@@ -113,6 +113,8 @@ pub struct ResolvedStyles {
     pub opacity: Option<f64>,
     pub font_size: Option<f64>,
     pub css_classes: Vec<String>,
+    /// Rotation angle in degrees (clockwise positive, 0 = no rotation)
+    pub rotation: Option<f64>,
 }
 
 impl ResolvedStyles {
@@ -126,6 +128,7 @@ impl ResolvedStyles {
             opacity: Some(1.0),
             font_size: Some(14.0),
             css_classes: vec![],
+            rotation: None,
         }
     }
 
@@ -180,6 +183,11 @@ impl ResolvedStyles {
                         styles.css_classes.push(k.clone());
                     } else if let StyleValue::Identifier(id) = &modifier.node.value.node {
                         styles.css_classes.push(id.0.clone());
+                    }
+                }
+                StyleKey::Rotation => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.rotation = Some(*value);
                     }
                 }
                 StyleKey::Label
@@ -243,6 +251,7 @@ impl ResolvedStyles {
                 classes.extend(other.css_classes.clone());
                 classes
             },
+            rotation: other.rotation.or(self.rotation),
         }
     }
 }
@@ -590,5 +599,27 @@ mod tests {
 
         assert_eq!(result.root_elements.len(), 1);
         assert!(result.get_element_by_name("test").is_some());
+    }
+
+    #[test]
+    fn test_resolved_styles_rotation() {
+        use crate::parser::ast::{StyleKey, StyleModifier, StyleValue, Spanned};
+
+        let modifiers = vec![Spanned::new(
+            StyleModifier {
+                key: Spanned::new(StyleKey::Rotation, 0..8),
+                value: Spanned::new(
+                    StyleValue::Number {
+                        value: 45.0,
+                        unit: None,
+                    },
+                    10..12,
+                ),
+            },
+            0..12,
+        )];
+
+        let styles = ResolvedStyles::from_modifiers(&modifiers);
+        assert_eq!(styles.rotation, Some(45.0));
     }
 }

@@ -544,6 +544,26 @@ fn render_debug_bounds(element: &ElementLayout, builder: &mut SvgBuilder) {
     }
 }
 
+/// Wrap shape rendering with rotation transform if needed
+fn render_shape_with_rotation<F>(element: &ElementLayout, builder: &mut SvgBuilder, render_fn: F)
+where
+    F: FnOnce(&mut SvgBuilder),
+{
+    if let Some(rotation) = element.styles.rotation {
+        if rotation.abs() > f64::EPSILON {
+            let center = element.bounds.center();
+            let transform = format!("rotate({} {} {})", rotation, center.x, center.y);
+            builder.start_group_with_transform(None, &[], &transform);
+            render_fn(builder);
+            builder.end_group();
+        } else {
+            render_fn(builder);
+        }
+    } else {
+        render_fn(builder);
+    }
+}
+
 /// Render a single element to the builder
 fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
     let id = element.id.as_ref().map(|i| i.0.as_str());
@@ -552,37 +572,43 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
 
     match &element.element_type {
         ElementType::Shape(ShapeType::Rectangle) => {
-            builder.add_rect(
-                id,
-                element.bounds.x,
-                element.bounds.y,
-                element.bounds.width,
-                element.bounds.height,
-                &classes,
-                &styles,
-            );
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_rect(
+                    id,
+                    element.bounds.x,
+                    element.bounds.y,
+                    element.bounds.width,
+                    element.bounds.height,
+                    &classes,
+                    &styles,
+                );
+            });
         }
         ElementType::Shape(ShapeType::Circle) => {
             let r = element.bounds.width.min(element.bounds.height) / 2.0;
-            builder.add_circle(
-                id,
-                element.bounds.x + r,
-                element.bounds.y + r,
-                r,
-                &classes,
-                &styles,
-            );
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_circle(
+                    id,
+                    element.bounds.x + r,
+                    element.bounds.y + r,
+                    r,
+                    &classes,
+                    &styles,
+                );
+            });
         }
         ElementType::Shape(ShapeType::Ellipse) => {
-            builder.add_ellipse(
-                id,
-                element.bounds.x + element.bounds.width / 2.0,
-                element.bounds.y + element.bounds.height / 2.0,
-                element.bounds.width / 2.0,
-                element.bounds.height / 2.0,
-                &classes,
-                &styles,
-            );
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_ellipse(
+                    id,
+                    element.bounds.x + element.bounds.width / 2.0,
+                    element.bounds.y + element.bounds.height / 2.0,
+                    element.bounds.width / 2.0,
+                    element.bounds.height / 2.0,
+                    &classes,
+                    &styles,
+                );
+            });
         }
         ElementType::Shape(ShapeType::Polygon) => {
             // Default to a diamond shape for polygon
@@ -593,38 +619,44 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
                 Point::new(b.x + b.width / 2.0, b.bottom()),
                 Point::new(b.x, b.y + b.height / 2.0),
             ];
-            builder.add_polygon(id, &points, &classes, &styles);
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_polygon(id, &points, &classes, &styles);
+            });
         }
         ElementType::Shape(ShapeType::Line) => {
-            builder.add_line(
-                id,
-                element.bounds.x,
-                element.bounds.y + element.bounds.height / 2.0,
-                element.bounds.right(),
-                element.bounds.y + element.bounds.height / 2.0,
-                &classes,
-                &styles,
-            );
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_line(
+                    id,
+                    element.bounds.x,
+                    element.bounds.y + element.bounds.height / 2.0,
+                    element.bounds.right(),
+                    element.bounds.y + element.bounds.height / 2.0,
+                    &classes,
+                    &styles,
+                );
+            });
         }
         ElementType::Shape(ShapeType::Icon { icon_name }) => {
             // For icons, render a placeholder rect with the icon name as text
-            builder.add_rect(
-                id,
-                element.bounds.x,
-                element.bounds.y,
-                element.bounds.width,
-                element.bounds.height,
-                &classes,
-                &styles,
-            );
-            // Add icon name as a label
-            builder.add_text(
-                icon_name,
-                element.bounds.x + element.bounds.width / 2.0,
-                element.bounds.y + element.bounds.height / 2.0,
-                &TextAnchor::Middle,
-                "",
-            );
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_rect(
+                    id,
+                    element.bounds.x,
+                    element.bounds.y,
+                    element.bounds.width,
+                    element.bounds.height,
+                    &classes,
+                    &styles,
+                );
+                // Add icon name as a label
+                b.add_text(
+                    icon_name,
+                    element.bounds.x + element.bounds.width / 2.0,
+                    element.bounds.y + element.bounds.height / 2.0,
+                    &TextAnchor::Middle,
+                    "",
+                );
+            });
         }
         ElementType::Shape(ShapeType::Text { content }) => {
             // Render text element as SVG text
@@ -641,15 +673,17 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
                 .map(|f| format!(r#" fill="{}""#, f))
                 .unwrap_or_default();
             let combined_styles = format!("{}{}", font_styles, fill_style);
-            builder.add_text_element(
-                id,
-                content,
-                element.bounds.x,
-                element.bounds.y + element.bounds.height / 2.0,
-                &TextAnchor::Start,
-                &classes,
-                &combined_styles,
-            );
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_text_element(
+                    id,
+                    content,
+                    element.bounds.x,
+                    element.bounds.y + element.bounds.height / 2.0,
+                    &TextAnchor::Start,
+                    &classes,
+                    &combined_styles,
+                );
+            });
         }
         ElementType::Shape(ShapeType::SvgEmbed {
             content,
@@ -670,11 +704,28 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
                 .map(|h| element.bounds.height / h)
                 .unwrap_or(1.0);
 
-            // Create group with transform for positioning and scaling
-            let transform = format!(
-                "translate({}, {}) scale({}, {})",
-                element.bounds.x, element.bounds.y, scale_x, scale_y
-            );
+            // Create group with transform for positioning, scaling, and optional rotation
+            // SVG transforms apply right-to-left, so: rotate around center, then scale, then translate
+            let transform = if let Some(rotation) = element.styles.rotation {
+                if rotation.abs() > f64::EPSILON {
+                    let cx = intrinsic_width.unwrap_or(element.bounds.width) / 2.0;
+                    let cy = intrinsic_height.unwrap_or(element.bounds.height) / 2.0;
+                    format!(
+                        "translate({}, {}) scale({}, {}) rotate({} {} {})",
+                        element.bounds.x, element.bounds.y, scale_x, scale_y, rotation, cx, cy
+                    )
+                } else {
+                    format!(
+                        "translate({}, {}) scale({}, {})",
+                        element.bounds.x, element.bounds.y, scale_x, scale_y
+                    )
+                }
+            } else {
+                format!(
+                    "translate({}, {}) scale({}, {})",
+                    element.bounds.x, element.bounds.y, scale_x, scale_y
+                )
+            };
 
             builder.start_group_with_transform(id, &embed_classes, &transform);
 
@@ -896,6 +947,7 @@ mod tests {
             opacity: Some(0.5),
             font_size: None,
             css_classes: vec![],
+            rotation: None,
         };
         let result = format_styles(&styles);
         assert!(result.contains(r##"fill="#ff0000""##));
