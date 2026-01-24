@@ -146,6 +146,16 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // These are handled separately
             unreachable!("Connections and constraints should be filtered out")
         }
+        Statement::TemplateDecl(_) | Statement::Export(_) => {
+            // Template declarations and exports are metadata, not layout elements
+            // They are handled during template resolution, not layout
+            unreachable!("Template declarations and exports should be filtered out before layout")
+        }
+        Statement::TemplateInstance(_) => {
+            // Template instances should be expanded before layout
+            // After template resolution, instances are replaced with their expanded content
+            unreachable!("Template instances should be expanded before layout")
+        }
     }
 }
 
@@ -229,6 +239,16 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
             let estimated_width = content.len() as f64 * font_size * 0.6;
             // Height is approximately the font size
             (estimated_width.max(20.0), font_size)
+        }
+        ShapeType::SvgEmbed {
+            intrinsic_width,
+            intrinsic_height,
+            ..
+        } => {
+            // For embedded SVG, use intrinsic dimensions or fall back to default rect size
+            let w = intrinsic_width.unwrap_or(config.default_rect_size.0);
+            let h = intrinsic_height.unwrap_or(config.default_rect_size.1);
+            (w, h)
         }
     };
 

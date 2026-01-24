@@ -1,0 +1,139 @@
+(* Grammar Extensions for Reusable Components *)
+(* Feature: 005-reusable-components *)
+(* These rules extend the base AIL grammar *)
+
+(* ============================================================ *)
+(* NEW TOKENS *)
+(* ============================================================ *)
+
+COMPONENT = "component" ;
+FROM      = "from" ;
+EXPORT    = "export" ;
+
+(* ============================================================ *)
+(* COMPONENT DECLARATION *)
+(* ============================================================ *)
+
+(* Declares an external file as a named component *)
+(* Example: component "person" from "icons/person.svg" *)
+(* Example: component "rack" from "components/server-rack.ail" *)
+
+component_decl = COMPONENT, string_literal, FROM, string_literal ;
+
+(* The first string is the component name (used for instantiation) *)
+(* The second string is the file path (relative to importing file) *)
+(* File extension determines source type: .svg or .ail *)
+
+(* ============================================================ *)
+(* COMPONENT INSTANCE *)
+(* ============================================================ *)
+
+(* Creates an instance of a declared component *)
+(* Syntax mirrors shape declaration for consistency *)
+(* Example: person "alice" *)
+(* Example: rack "r1" [fill: blue] *)
+(* Example: server "s1" [width: 100, height: 50] *)
+
+component_instance = identifier, string_literal, [ modifier_block ] ;
+
+(* Note: Parser context is required to distinguish component_instance *)
+(* from unknown shape types. Component names are collected in first pass. *)
+
+(* ============================================================ *)
+(* EXPORT DECLARATION *)
+(* ============================================================ *)
+
+(* Declares which internal elements are accessible from outside *)
+(* Only valid in component AIL files (top-level) *)
+(* Example: export port1 *)
+(* Example: export input, output, status *)
+
+export_decl = EXPORT, identifier, { ",", identifier } ;
+
+(* Exported names must reference existing elements in the document *)
+(* Only exported elements can be targeted via dot notation *)
+
+(* ============================================================ *)
+(* CONNECTION TARGET EXTENSION *)
+(* ============================================================ *)
+
+(* Connections can now target exported elements within component instances *)
+(* Uses existing dot notation from ElementPath *)
+
+connection_target = identifier                    (* simple element *)
+                  | identifier, ".", identifier   (* instance.export *)
+                  | element_path                  (* nested path *)
+                  ;
+
+(* Example: server1 -> rack1          (connect to component bounding box) *)
+(* Example: server1 -> rack1.port1    (connect to exported element) *)
+(* Example: a.b -> c.d.e              (nested group paths still work) *)
+
+(* ============================================================ *)
+(* STATEMENT EXTENSION *)
+(* ============================================================ *)
+
+(* Updated statement rule including new declarations *)
+
+statement = shape_decl
+          | connection
+          | layout
+          | group
+          | constraint
+          | alignment
+          | component_decl      (* NEW *)
+          | component_instance  (* NEW - context-dependent *)
+          | export_decl         (* NEW *)
+          ;
+
+(* ============================================================ *)
+(* SIZE PARAMETERS *)
+(* ============================================================ *)
+
+(* Component instances support explicit size override *)
+(* These use existing modifier syntax with width/height keys *)
+
+(* Example: person "alice" [width: 100, height: 150] *)
+
+(* Without explicit size: *)
+(*   SVG components scale to fit layout while preserving aspect ratio *)
+(*   AIL components use their natural layout size *)
+
+(* ============================================================ *)
+(* EXAMPLE DOCUMENTS *)
+(* ============================================================ *)
+
+(*
+-- main.ail --
+// Import components
+component "person" from "icons/person.svg"
+component "server" from "components/server.ail"
+
+// Use components in layout
+row {
+    person "alice" [fill: blue]
+    person "bob"
+    person "charlie" [width: 80]
+}
+
+// Create server instances
+server "s1"
+server "s2"
+
+// Connect to exported ports
+s1.output -> s2.input
+*)
+
+(*
+-- components/server.ail --
+// Server component with exported ports
+rect body [label: "Server"]
+
+row {
+    circle input [size: 10]
+    circle output [size: 10]
+}
+
+// Export connection points
+export input, output
+*)

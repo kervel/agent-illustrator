@@ -16,11 +16,13 @@ pub mod layout;
 pub mod parser;
 pub mod renderer;
 pub mod stylesheet;
+pub mod template;
 
 pub use error::ParseError;
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
 pub use renderer::{render_svg, render_svg_with_stylesheet, SvgConfig};
+pub use template::{TemplateRegistry, TemplateError, resolve_templates};
 
 use thiserror::Error;
 
@@ -37,6 +39,10 @@ pub enum RenderError {
     /// Error during layout
     #[error("layout error: {0}")]
     Layout(#[from] LayoutError),
+
+    /// Error during template resolution
+    #[error("template error: {0}")]
+    Template(#[from] TemplateError),
 }
 
 impl From<Vec<ParseError>> for RenderError {
@@ -64,6 +70,10 @@ pub struct RenderConfig {
     pub stylesheet: Stylesheet,
     /// Debug mode: show container bounds and element IDs
     pub debug: bool,
+    /// Whether to resolve templates (default: true)
+    pub resolve_templates: bool,
+    /// Base path for resolving template file references
+    pub template_base_path: Option<std::path::PathBuf>,
 }
 
 impl Default for RenderConfig {
@@ -73,6 +83,8 @@ impl Default for RenderConfig {
             svg: SvgConfig::default(),
             stylesheet: Stylesheet::default(),
             debug: false,
+            resolve_templates: true, // Templates are resolved by default
+            template_base_path: None,
         }
     }
 }
@@ -104,6 +116,18 @@ impl RenderConfig {
     /// Enable or disable debug mode
     pub fn with_debug(mut self, debug: bool) -> Self {
         self.debug = debug;
+        self
+    }
+
+    /// Enable or disable template resolution
+    pub fn with_resolve_templates(mut self, resolve: bool) -> Self {
+        self.resolve_templates = resolve;
+        self
+    }
+
+    /// Set the base path for template file resolution
+    pub fn with_template_base_path(mut self, path: std::path::PathBuf) -> Self {
+        self.template_base_path = Some(path);
         self
     }
 }
@@ -151,6 +175,18 @@ pub fn render(source: &str) -> Result<String, RenderError> {
 pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, RenderError> {
     // Parse the source
     let doc = parse(source)?;
+
+    // Resolve templates if enabled
+    let doc = if config.resolve_templates {
+        let mut registry = if let Some(base) = &config.template_base_path {
+            TemplateRegistry::with_base_path(base.clone())
+        } else {
+            TemplateRegistry::new()
+        };
+        resolve_templates(doc, &mut registry)?
+    } else {
+        doc
+    };
 
     // Compute layout
     let mut result = layout::compute(&doc, &config.layout)?;

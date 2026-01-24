@@ -372,6 +372,47 @@ impl SvgBuilder {
         self.elements.push(format!("{}</g>", self.indent_str()));
     }
 
+    /// Add a group element with optional ID, classes, and transform
+    pub fn start_group_with_transform(
+        &mut self,
+        id: Option<&str>,
+        classes: &[String],
+        transform: &str,
+    ) {
+        let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
+        let class_attr = if classes.is_empty() {
+            String::new()
+        } else {
+            format!(r#" class="{}""#, classes.join(" "))
+        };
+        let transform_attr = if transform.is_empty() {
+            String::new()
+        } else {
+            format!(r#" transform="{}""#, transform)
+        };
+
+        self.elements.push(format!(
+            "{}<g{}{}{}>",
+            self.indent_str(),
+            id_attr,
+            class_attr,
+            transform_attr
+        ));
+        self.indent += 1;
+    }
+
+    /// Add raw SVG content (for embedded SVG templates)
+    pub fn add_raw(&mut self, content: &str) {
+        // Split content into lines and add with proper indentation
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if !trimmed.is_empty() {
+                self.elements
+                    .push(format!("{}{}", self.indent_str(), trimmed));
+            }
+        }
+    }
+
     /// Build the final SVG string
     pub fn build(self, viewbox: BoundingBox) -> String {
         let padding = self.config.viewbox_padding;
@@ -610,6 +651,39 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
                 &combined_styles,
             );
         }
+        ElementType::Shape(ShapeType::SvgEmbed {
+            content,
+            intrinsic_width,
+            intrinsic_height,
+        }) => {
+            // Render embedded SVG content from a template
+            let prefix = builder.prefix();
+            let embed_classes = std::iter::once(format!("{}svg-embed", prefix))
+                .chain(classes.iter().cloned())
+                .collect::<Vec<_>>();
+
+            // Calculate scale factors
+            let scale_x = intrinsic_width
+                .map(|w| element.bounds.width / w)
+                .unwrap_or(1.0);
+            let scale_y = intrinsic_height
+                .map(|h| element.bounds.height / h)
+                .unwrap_or(1.0);
+
+            // Create group with transform for positioning and scaling
+            let transform = format!(
+                "translate({}, {}) scale({}, {})",
+                element.bounds.x, element.bounds.y, scale_x, scale_y
+            );
+
+            builder.start_group_with_transform(id, &embed_classes, &transform);
+
+            // Strip SVG wrapper and embed inner content
+            let inner = strip_svg_wrapper(content);
+            builder.add_raw(&inner);
+
+            builder.end_group();
+        }
         ElementType::Layout(_) | ElementType::Group => {
             // Start a group for containers
             let prefix = builder.prefix();
@@ -750,6 +824,42 @@ fn escape_xml(s: &str) -> String {
         .replace('>', "&gt;")
         .replace('"', "&quot;")
         .replace('\'', "&apos;")
+}
+
+/// Strip the outer SVG wrapper from embedded SVG content
+///
+/// Removes the XML declaration, DOCTYPE, and outer <svg> tags,
+/// returning only the inner content (paths, shapes, etc.)
+fn strip_svg_wrapper(svg: &str) -> String {
+    let mut result = svg.trim().to_string();
+
+    // Remove XML declaration: <?xml ... ?>
+    if let Some(start) = result.find("<?xml") {
+        if let Some(end) = result[start..].find("?>") {
+            result = result[start + end + 2..].trim().to_string();
+        }
+    }
+
+    // Remove DOCTYPE
+    if let Some(start) = result.find("<!DOCTYPE") {
+        if let Some(end) = result[start..].find('>') {
+            result = result[start + end + 1..].trim().to_string();
+        }
+    }
+
+    // Remove outer <svg ...> tag
+    if let Some(start) = result.find("<svg") {
+        if let Some(end) = result[start..].find('>') {
+            result = result[start + end + 1..].to_string();
+        }
+    }
+
+    // Remove closing </svg> tag
+    if let Some(pos) = result.rfind("</svg>") {
+        result = result[..pos].trim().to_string();
+    }
+
+    result
 }
 
 #[cfg(test)]
