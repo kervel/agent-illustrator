@@ -134,6 +134,12 @@ pub enum Statement {
     Label(Box<Statement>),
     /// Constrain statement: `constrain a.left = b.left`
     Constrain(ConstrainDecl),
+    /// Template declaration: `template "name" { ... }` or `template "name" from "path"`
+    TemplateDecl(TemplateDecl),
+    /// Template instance: `template_name "instance_name" [params]`
+    TemplateInstance(TemplateInstance),
+    /// Export declaration: `export port1, port2`
+    Export(ExportDecl),
 }
 
 /// Shape declaration
@@ -154,6 +160,12 @@ pub enum ShapeType {
     Polygon,
     Icon { icon_name: String },
     Text { content: String },
+    /// Embedded SVG content from template instantiation
+    SvgEmbed {
+        content: String,
+        intrinsic_width: Option<f64>,
+        intrinsic_height: Option<f64>,
+    },
 }
 
 /// Connection between shapes
@@ -282,6 +294,52 @@ pub enum StyleValue {
     Keyword(String),
     /// Identifier reference (for `[label: my_shape]` syntax)
     Identifier(Identifier),
+}
+
+// ============================================
+// Template Types (Feature 005)
+// ============================================
+
+/// Source type for templates
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TemplateSourceType {
+    /// Inline template: `template "name" { ... }`
+    Inline,
+    /// SVG file import: `template "name" from "file.svg"`
+    Svg,
+    /// AIL file import: `template "name" from "file.ail"`
+    Ail,
+}
+
+/// Parameter definition with default value
+#[derive(Debug, Clone, PartialEq)]
+pub struct ParameterDef {
+    pub name: Spanned<Identifier>,
+    pub default_value: Spanned<StyleValue>,
+}
+
+/// Template declaration
+#[derive(Debug, Clone, PartialEq)]
+pub struct TemplateDecl {
+    pub name: Spanned<Identifier>,
+    pub source_type: TemplateSourceType,
+    pub source_path: Option<Spanned<String>>,
+    pub parameters: Vec<ParameterDef>,
+    pub body: Option<Vec<Spanned<Statement>>>,
+}
+
+/// Template instance: template_name "instance_name" [params]
+#[derive(Debug, Clone, PartialEq)]
+pub struct TemplateInstance {
+    pub template_name: Spanned<Identifier>,
+    pub instance_name: Spanned<Identifier>,
+    pub arguments: Vec<(Spanned<Identifier>, Spanned<StyleValue>)>,
+}
+
+/// Export declaration: export port1, port2
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExportDecl {
+    pub exports: Vec<Spanned<Identifier>>,
 }
 
 // ============================================

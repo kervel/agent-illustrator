@@ -1,0 +1,124 @@
+// Railway Topology - Templated Version
+// Uses a reusable template for the track structure
+
+// === TEMPLATE: Two parallel tracks with crossover ===
+template "tracks" (fill: accent-1) {
+    col content [gap: 30] {
+        // Track A (top)
+        row trackA [gap: 80] {
+            circle a1 [fill: fill, size: 6]
+            circle jA1 [fill: fill, size: 6]
+            circle jA2 [fill: fill, size: 6]
+            circle a2 [fill: fill, size: 6]
+        }
+        // Track B (bottom)
+        row trackB [gap: 80] {
+            circle b1 [fill: fill, size: 6]
+            circle jB1 [fill: fill, size: 6]
+            circle jB2 [fill: fill, size: 6]
+            circle b2 [fill: fill, size: 6]
+        }
+
+        // Align track endpoints
+        constrain a1.center_x = b1.center_x
+        constrain a2.center_x = b2.center_x
+
+        // Center junction pair within track
+        constrain jB2.center_x = jB1.center_x + 140
+        constrain jB1.center_x = midpoint(b1, b2) - 70
+
+        // Offset A junctions for diagonal crossovers
+        constrain jA1.center_x = jB1.center_x - 40
+        constrain jA2.center_x = jB2.center_x + 40
+
+        // Track A main line
+        a1 -- jA1 [stroke: fill, stroke_width: 2, routing: direct]
+        jA1 -- jA2 [stroke: fill, stroke_width: 2, routing: direct]
+        jA2 -- a2 [stroke: fill, stroke_width: 2, routing: direct]
+
+        // Track B main line
+        b1 -- jB1 [stroke: fill, stroke_width: 2, routing: direct]
+        jB1 -- jB2 [stroke: fill, stroke_width: 2, routing: direct]
+        jB2 -- b2 [stroke: fill, stroke_width: 2, routing: direct]
+
+        // Crossovers
+        jA1 -- jB1 [stroke: fill, stroke_width: 2, routing: direct]
+        jB2 -- jA2 [stroke: fill, stroke_width: 2, routing: direct]
+    }
+
+    export a1, a2, b1, b2, jA1, jA2, jB1, jB2
+}
+
+
+// === DIAGRAM ===
+col diagram {
+
+    // === MICRO LEVEL ===
+    group micro {
+        col micro_label [role: label] {
+            text "Micro" micro_title [font_size: 20, fill: text-1]
+            text "Detailed tracks" [font_size: 12, fill: text-2]
+        }
+        tracks micro_tracks [fill: accent-1]
+    }
+
+    // === MESO LEVEL ===
+    group meso {
+        col meso_label [role: label] {
+            text "Meso" meso_title [font_size: 20, fill: text-1]
+            text "OPs + Tracks" [font_size: 12, fill: text-2]
+        }
+
+        stack meso_content {
+            // Operational point ellipses
+            ellipse op1 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 1 (Station)"]
+            ellipse op2 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 2 (Station)"]
+
+            // Grayed track structure (reusing the template)
+            tracks meso_tracks [fill: foreground-3]
+
+            // Position ellipses over junctions
+            constrain op1.center_x = midpoint(meso_tracks_jA1, meso_tracks_jB1)
+            constrain op1.center_y = midpoint(meso_tracks_jA1, meso_tracks_jB1)
+            constrain op2.center_x = midpoint(meso_tracks_jA2, meso_tracks_jB2)
+            constrain op2.center_y = midpoint(meso_tracks_jA2, meso_tracks_jB2)
+        }
+
+        // Align meso tracks to micro tracks
+        constrain meso_tracks_a1.center_x = micro_tracks_a1.center_x
+        constrain meso_tracks_a2.center_x = micro_tracks_a2.center_x
+        constrain meso_tracks_b1.center_x = micro_tracks_b1.center_x
+        constrain meso_tracks_b2.center_x = micro_tracks_b2.center_x
+        constrain meso_tracks_jB1.center_x = micro_tracks_jB1.center_x
+        constrain meso_tracks_jB2.center_x = micro_tracks_jB2.center_x
+    }
+
+    // === MACRO LEVEL ===
+    group macro {
+        col macro_label [role: label] {
+            text "Macro" macro_title [font_size: 20, fill: text-1]
+            text "Nodes & Lines" [font_size: 12, fill: text-2]
+        }
+
+        row graph [gap: 100] {
+            circle n1 [fill: accent-1, size: 50, label: "OP 1"]
+            circle n2 [fill: accent-1, size: 50, label: "OP 2"]
+            n1 -- n2 [stroke: accent-1, stroke_width: 3, label: "Section of Line", routing: direct]
+        }
+
+        // Align macro nodes with track endpoints
+        constrain n1.left = micro_tracks_b1.left
+        constrain n2.right = micro_tracks_b2.right
+    }
+
+    // === AGGREGATION ARROWS ===
+    text "Aggregation" agg_label [font_size: 11, fill: foreground-3]
+    text "Simplification" simp_label [font_size: 11, fill: foreground-3]
+
+    micro_label -> meso_label [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
+    meso_label -> macro_label [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
+
+    // Align level labels
+    constrain micro_title.center_x = meso_title.center_x
+    constrain meso_title.center_x = macro_title.center_x
+}

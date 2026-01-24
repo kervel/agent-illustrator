@@ -245,7 +245,7 @@ where
 
     let modifier = style_key
         .then_ignore(just(Token::Colon))
-        .then(style_value)
+        .then(style_value.clone())
         .map_with(|(key, value), e| {
             Spanned::new(StyleModifier { key, value }, span_range(&e.span()))
         });
@@ -538,6 +538,58 @@ where
         .ignore_then(constraint_expr)
         .map(|expr| ConstrainDecl { expr });
 
+    // ==================== Template Parsing (Feature 005) ====================
+
+    // Export declaration: export name1, name2
+    let export_decl = just(Token::Export)
+        .ignore_then(
+            identifier
+                .clone()
+                .separated_by(just(Token::Comma))
+                .at_least(1)
+                .collect::<Vec<_>>(),
+        )
+        .map(|exports| ExportDecl { exports });
+
+    // Parameter definition: name: default_value
+    let param_def = identifier
+        .clone()
+        .then_ignore(just(Token::Colon))
+        .then(style_value.clone())
+        .map(|(name, default_value)| ParameterDef {
+            name,
+            default_value,
+        });
+
+    // Parameter list: (param1: val1, param2: val2)
+    let param_list = param_def
+        .separated_by(just(Token::Comma))
+        .allow_trailing()
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::ParenOpen), just(Token::ParenClose))
+        .or_not()
+        .map(|opt| opt.unwrap_or_default());
+
+    // File template: template "name" from "path"
+    let file_template = just(Token::Template)
+        .ignore_then(string_literal.clone())
+        .then_ignore(just(Token::From))
+        .then(string_literal.clone())
+        .map(|(name, path)| {
+            let source_type = if path.node.ends_with(".svg") {
+                TemplateSourceType::Svg
+            } else {
+                TemplateSourceType::Ail
+            };
+            Statement::TemplateDecl(TemplateDecl {
+                name: Spanned::new(Identifier::new(name.node), name.span),
+                source_type,
+                source_path: Some(path),
+                parameters: vec![],
+                body: None,
+            })
+        });
+
     // Recursive statement parser
     let statement = recursive(|stmt| {
         // Layout declaration with children
@@ -589,15 +641,94 @@ where
             )))
             .map(|inner| Statement::Label(Box::new(inner)));
 
+        // Inline template: template "name" (params) { body }
+        let inline_template = just(Token::Template)
+            .ignore_then(string_literal.clone())
+            .then(param_list.clone())
+            .then(
+                stmt.clone()
+                    .repeated()
+                    .collect::<Vec<_>>()
+                    .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
+            )
+            .map(|((name, parameters), body)| {
+                Statement::TemplateDecl(TemplateDecl {
+                    name: Spanned::new(Identifier::new(name.node), name.span),
+                    source_type: TemplateSourceType::Inline,
+                    source_path: None,
+                    parameters,
+                    body: Some(body),
+                })
+            });
+
+        // Template instance: template_name instance_name [args]
+        // Note: This needs to be parsed carefully to not conflict with shape_decl
+        // We use a special approach where template instances use plain identifiers for
+        // both template name and instance name, without a keyword prefix.
+        // For now, we support the syntax: identifier identifier [params]
+        // where the first identifier is the template name and second is instance name.
+        // Template instances will be distinguished from connections by not having ->/<- operators.
+        let template_instance = identifier
+            .clone()
+            .then(identifier.clone())
+            .then(modifier_block.clone().or_not())
+            .try_map(|((template_name, instance_name), mods), _span| {
+                // Convert modifiers to argument list
+                let arguments: Vec<(Spanned<Identifier>, Spanned<StyleValue>)> = mods
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter_map(|m| {
+                        // Convert StyleKey to Identifier
+                        let key_str = match &m.node.key.node {
+                            StyleKey::Fill => "fill".to_string(),
+                            StyleKey::Stroke => "stroke".to_string(),
+                            StyleKey::StrokeWidth => "stroke_width".to_string(),
+                            StyleKey::Size => "size".to_string(),
+                            StyleKey::Width => "width".to_string(),
+                            StyleKey::Height => "height".to_string(),
+                            StyleKey::Label => "label".to_string(),
+                            StyleKey::Custom(s) => s.clone(),
+                            _ => return None,
+                        };
+                        Some((
+                            Spanned::new(Identifier::new(key_str), m.node.key.span),
+                            m.node.value,
+                        ))
+                    })
+                    .collect();
+
+                Ok(Statement::TemplateInstance(TemplateInstance {
+                    template_name,
+                    instance_name,
+                    arguments,
+                }))
+            });
+
         // All statements
+        // Note: Order matters! More specific patterns should come first.
+        // - constrain_decl before others (starts with 'constrain')
+        // - constraint_decl (place) before others
+        // - file_template before inline_template (both start with 'template')
+        // - inline_template after file_template
+        // - export_decl after templates
+        // - layout_decl, group_decl, label_decl
+        // - connection_decl before template_instance (both start with identifier)
+        // - shape_decl before template_instance (rect, circle, etc. are keywords)
+        // - template_instance last (identifier identifier pattern is very general)
         choice((
             constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
+            file_template.clone(),
+            inline_template,
+            export_decl.clone().map(Statement::Export),
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
             label_decl,
             connection_decl.clone().map(Statement::Connection),
             shape_decl.clone().map(Statement::Shape),
+            // Template instance must be last since it matches "identifier identifier"
+            // which could conflict with other patterns
+            template_instance,
         ))
         .map_with(|s, e| Spanned::new(s, span_range(&e.span())))
         .boxed()
@@ -1334,6 +1465,137 @@ mod tests {
                 other => panic!("Expected Equal, got {:?}", other),
             },
             other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    // ==================== Template Parsing Tests ====================
+
+    #[test]
+    fn test_parse_file_template_svg() {
+        let doc = parse(r#"template "box" from "icons/box.svg""#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.name.node.as_str(), "box");
+                assert_eq!(t.source_type, TemplateSourceType::Svg);
+                assert_eq!(t.source_path.as_ref().unwrap().node, "icons/box.svg");
+                assert!(t.body.is_none());
+                assert!(t.parameters.is_empty());
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_file_template_ail() {
+        let doc = parse(r#"template "component" from "lib/component.ail""#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.name.node.as_str(), "component");
+                assert_eq!(t.source_type, TemplateSourceType::Ail);
+                assert_eq!(
+                    t.source_path.as_ref().unwrap().node,
+                    "lib/component.ail"
+                );
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_inline_template() {
+        let doc = parse(
+            r#"template "server" {
+                rect box [fill: blue]
+                text "Server" title
+            }"#,
+        )
+        .expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.name.node.as_str(), "server");
+                assert_eq!(t.source_type, TemplateSourceType::Inline);
+                assert!(t.source_path.is_none());
+                assert_eq!(t.body.as_ref().unwrap().len(), 2);
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_inline_template_with_params() {
+        let doc = parse(
+            r#"template "box" (fill: blue, size: 50) {
+                rect shape [fill: fill, size: size]
+            }"#,
+        )
+        .expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.name.node.as_str(), "box");
+                assert_eq!(t.parameters.len(), 2);
+                assert_eq!(t.parameters[0].name.node.as_str(), "fill");
+                assert_eq!(t.parameters[1].name.node.as_str(), "size");
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_export_declaration() {
+        let doc = parse("export port1, port2, port3").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Export(e) => {
+                assert_eq!(e.exports.len(), 3);
+                assert_eq!(e.exports[0].node.as_str(), "port1");
+                assert_eq!(e.exports[1].node.as_str(), "port2");
+                assert_eq!(e.exports[2].node.as_str(), "port3");
+            }
+            other => panic!("Expected Export, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_template_instance() {
+        let doc = parse("server myserver [fill: red, size: 100]").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateInstance(inst) => {
+                assert_eq!(inst.template_name.node.as_str(), "server");
+                assert_eq!(inst.instance_name.node.as_str(), "myserver");
+                assert_eq!(inst.arguments.len(), 2);
+            }
+            other => panic!("Expected TemplateInstance, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_template_with_export() {
+        let doc = parse(
+            r#"template "connector" {
+                circle port_in
+                circle port_out
+                export port_in, port_out
+            }"#,
+        )
+        .expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.body.as_ref().unwrap().len(), 3);
+                // Check last statement is export
+                match &t.body.as_ref().unwrap()[2].node {
+                    Statement::Export(e) => {
+                        assert_eq!(e.exports.len(), 2);
+                    }
+                    _ => panic!("Expected Export as last statement"),
+                }
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
         }
     }
 }

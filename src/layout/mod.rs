@@ -79,6 +79,18 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
         | Statement::Constrain(_) => {
             // Connections and constraints don't define new identifiers
         }
+        Statement::TemplateDecl(t) => {
+            // Template declarations define new template names (not element identifiers)
+            // The template name becomes available for instantiation
+            ids.insert(t.name.node.0.clone());
+        }
+        Statement::TemplateInstance(inst) => {
+            // Template instances define new element identifiers
+            ids.insert(inst.instance_name.node.0.clone());
+        }
+        Statement::Export(_) => {
+            // Exports don't define new identifiers
+        }
     }
 }
 
@@ -141,6 +153,22 @@ fn validate_refs_in_statement(
             validate_constraint_expr_refs(&c.expr, defined, _span)?;
         }
         Statement::Shape(_) => {}
+        Statement::TemplateDecl(_) => {
+            // Template declarations are validated separately during template resolution
+        }
+        Statement::TemplateInstance(inst) => {
+            // Validate that the template name is defined
+            if !defined.contains(&inst.template_name.node.0) {
+                return Err(LayoutError::UndefinedIdentifier {
+                    name: inst.template_name.node.0.clone(),
+                    span: inst.template_name.span.clone(),
+                    suggestions: find_similar(defined, &inst.template_name.node.0, 2),
+                });
+            }
+        }
+        Statement::Export(_) => {
+            // Exports are validated during template resolution
+        }
     }
     Ok(())
 }

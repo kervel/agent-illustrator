@@ -38,6 +38,14 @@ pub enum Token {
     #[token("label")]
     Label,
 
+    // Template keywords
+    #[token("template")]
+    Template,
+    #[token("from")]
+    From,
+    #[token("export")]
+    Export,
+
     // Constraint keywords
     #[token("place")]
     Place,
@@ -424,6 +432,42 @@ mod tests {
                 Token::Right,
                 Token::Plus,
                 Token::Number(20.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_template_keywords() {
+        let tokens: Vec<_> = lex("template from export").map(|(t, _)| t).collect();
+        assert_eq!(tokens, vec![Token::Template, Token::From, Token::Export]);
+    }
+
+    #[test]
+    fn test_template_declaration() {
+        let input = r#"template "box" from "icons/box.svg""#;
+        let tokens: Vec<_> = lex(input).map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Template,
+                Token::String("box".to_string()),
+                Token::From,
+                Token::String("icons/box.svg".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_export_declaration() {
+        let input = "export port1, port2";
+        let tokens: Vec<_> = lex(input).map(|(t, _)| t).collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Export,
+                Token::Ident("port1".to_string()),
+                Token::Comma,
+                Token::Ident("port2".to_string()),
             ]
         );
     }
