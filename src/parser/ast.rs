@@ -279,6 +279,8 @@ pub enum StyleKey {
     Y,
     /// Stroke dash pattern (e.g., "4,2" for dashed lines)
     StrokeDasharray,
+    /// Rotation angle in degrees (clockwise positive)
+    Rotation,
     Custom(String),
 }
 

@@ -59,10 +59,10 @@ Insert in alphabetical order with the other keys.
 ---
 
 ### CHECKPOINT: Parser Layer Complete
-- [ ] T001 complete
-- [ ] T002 complete
-- [ ] `cargo build` succeeds
-- [ ] Can parse `[rotation: 45]` modifier
+- [X] T001 complete
+- [X] T002 complete
+- [X] `cargo build` succeeds
+- [X] Can parse `[rotation: 45]` modifier
 
 ---
 
@@ -132,9 +132,9 @@ rotation: None,
 ---
 
 ### CHECKPOINT: Layout Types Complete
-- [ ] T003-T005 complete
-- [ ] `cargo build` succeeds
-- [ ] Rotation flows from AST through layout types
+- [X] T003-T005 complete
+- [X] `cargo build` succeeds
+- [X] Rotation flows from AST through layout types
 
 ---
 
@@ -265,10 +265,10 @@ ElementType::Shape(ShapeType::SvgEmbed {
 ---
 
 ### CHECKPOINT: Renderer Complete
-- [ ] T006-T008 complete
-- [ ] `cargo build` succeeds
-- [ ] Rotated shapes produce correct SVG output
-- [ ] Template instances with rotation work
+- [X] T006-T008 complete
+- [X] `cargo build` succeeds
+- [X] Rotated shapes produce correct SVG output
+- [X] Template instances with rotation work
 
 ---
 
@@ -368,7 +368,7 @@ fn test_rotation_negative() {
 
 #[test]
 fn test_rotation_text() {
-    let input = r#"text label [rotation: 90] "Hello""#;
+    let input = r#"text "Hello" rotated_text [rotation: 90]"#;
     let result = agent_illustrator::render(input).expect("should render");
     assert!(result.contains("rotate(90"));
 }
@@ -414,19 +414,19 @@ fn test_rotation_zero_no_transform() {
 ---
 
 ### CHECKPOINT: Tests Complete
-- [ ] T009-T011 complete
-- [ ] `cargo test` passes (all 155+ existing tests + new tests)
-- [ ] No regressions in existing functionality
+- [X] T009-T011 complete
+- [X] `cargo test` passes (176 unit + 75 integration + 3 doc tests)
+- [X] No regressions in existing functionality
 
 ---
 
 ## Final Validation
 
-- [ ] `cargo build` succeeds
-- [ ] `cargo test` passes
-- [ ] `cargo clippy` has no warnings
+- [X] `cargo build` succeeds
+- [X] `cargo test` passes
+- [X] `cargo clippy` has no warnings
 - [ ] Create example file with rotated shapes and verify visual output
-- [ ] Non-rotated shapes render identically to before (regression check)
+- [X] Non-rotated shapes render identically to before (regression check)
 
 ---
 

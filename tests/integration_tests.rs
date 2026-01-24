@@ -1704,3 +1704,64 @@ fn test_ail_template_file_not_found_error() {
         err_msg
     );
 }
+
+// ============================================
+// Rotation Tests (Feature 006)
+// ============================================
+
+#[test]
+fn test_rotation_rect() {
+    let input = r#"rect box [rotation: 45]"#;
+    let result = agent_illustrator::render(input).expect("should render");
+    assert!(result.contains("transform="));
+    assert!(result.contains("rotate(45"));
+}
+
+#[test]
+fn test_rotation_negative() {
+    let input = r#"rect box [rotation: -30]"#;
+    let result = agent_illustrator::render(input).expect("should render");
+    assert!(result.contains("rotate(-30"));
+}
+
+#[test]
+fn test_rotation_text() {
+    let input = r#"text "Hello" rotated_text [rotation: 90]"#;
+    let result = agent_illustrator::render(input).expect("should render");
+    assert!(result.contains("rotate(90"));
+}
+
+#[test]
+fn test_rotation_in_layout() {
+    let input = r#"
+        row container {
+            rect a [rotation: 15]
+            rect b
+        }
+    "#;
+    let result = agent_illustrator::render(input).expect("should render");
+    assert!(result.contains("rotate(15"));
+    // Verify non-rotated shape has no transform wrapper
+    assert_eq!(result.matches("rotate(").count(), 1);
+}
+
+#[test]
+fn test_rotation_with_connection() {
+    let input = r#"
+        rect a [rotation: 45]
+        rect b [x: 100]
+        a -> b
+    "#;
+    let result = agent_illustrator::render(input).expect("should render");
+    assert!(result.contains("rotate(45"));
+    // Connection should still render
+    assert!(result.contains("ai-connection"));
+}
+
+#[test]
+fn test_rotation_zero_no_transform() {
+    let input = r#"rect box [rotation: 0]"#;
+    let result = agent_illustrator::render(input).expect("should render");
+    // Zero rotation should not add a transform wrapper
+    assert!(!result.contains("rotate(0"));
+}

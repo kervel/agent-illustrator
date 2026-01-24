@@ -102,6 +102,7 @@ where
                 "x" => StyleKey::X,
                 "y" => StyleKey::Y,
                 "stroke_dasharray" => StyleKey::StrokeDasharray,
+                "rotation" => StyleKey::Rotation,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)
@@ -1596,6 +1597,28 @@ mod tests {
                 }
             }
             other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_rotation_modifier() {
+        let input = r#"rect box [rotation: 45]"#;
+        let doc = parse(input).expect("should parse");
+        assert_eq!(doc.statements.len(), 1);
+
+        if let Statement::Shape(shape) = &doc.statements[0].node {
+            assert_eq!(shape.modifiers.len(), 1);
+            assert!(matches!(
+                shape.modifiers[0].node.key.node,
+                StyleKey::Rotation
+            ));
+            if let StyleValue::Number { value, .. } = &shape.modifiers[0].node.value.node {
+                assert!((value - 45.0).abs() < f64::EPSILON);
+            } else {
+                panic!("Expected number value");
+            }
+        } else {
+            panic!("Expected shape statement");
         }
     }
 }
