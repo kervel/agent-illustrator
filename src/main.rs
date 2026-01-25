@@ -154,6 +154,7 @@ rect [name] [modifiers]      Rectangle (default 60x40)
 circle [name] [modifiers]    Circle
 ellipse [name] [modifiers]   Ellipse
 text "content" [name] [mod]  Text element
+path [name] [mod] {{ ... }}   Custom shape with vertices/arcs
 
 LAYOUTS
 -------
@@ -206,7 +207,19 @@ Properties: left, right, top, bottom, center_x, center_y, width, height
 TEMPLATES
 ---------
 template mytemplate {{ ... }}          Define reusable group
-mytemplate instance_name [params]      Instantiate template"#
+mytemplate instance_name [params]      Instantiate template
+
+PATHS (Custom Shapes)
+---------------------
+path "name" [modifiers] {{
+    vertex a                           Start point (origin)
+    line_to b [x: 50, y: 0]            Straight line to point
+    arc_to c [x: 50, y: 30, radius: 10] Curved segment
+    close                              Close path to start
+}}
+
+Position syntax: [x: N, y: N]
+Arc options: radius: N, bulge: N (-1 to 1), sweep: cw/ccw"#
     );
 }
 
@@ -283,7 +296,24 @@ group server {{
     }}
 }}
 
-A labeled group containing two stacked components."#
+A labeled group containing two stacked components.
+
+EXAMPLE 6: Custom shapes with paths
+-----------------------------------
+path "arrow" [fill: steelblue] {{
+    vertex a
+    line_to b [x: 60, y: 15]
+    line_to c [x: 30, y: 0]
+    line_to d [x: 30, y: 10]
+    line_to e [x: 0, y: 10]
+    line_to f [x: 0, y: 20]
+    line_to g [x: 30, y: 20]
+    line_to h [x: 30, y: 30]
+    close
+}}
+
+A custom arrow shape. Paths let you define any polygon with
+straight lines (line_to) or curves (arc_to with radius/bulge)."#
     );
 }
 
@@ -295,7 +325,7 @@ You can create diagrams using the Agent Illustrator DSL. Pipe code to `agent-ill
 
 ## Quick Reference
 
-SHAPES: rect, circle, ellipse, text "content"
+SHAPES: rect, circle, ellipse, text "content", path {{ }}
 LAYOUTS: row {{ }}, col {{ }}, group {{ }}
 CONNECTIONS: a -> b, a <- b, a <-> b, a -- b
 MODIFIERS: [key: value, ...] after element name
@@ -331,6 +361,17 @@ col {{
 a -> b [stroke: green, stroke_width: 2]
 a -> b [routing: direct]  // diagonal instead of orthogonal
 a -> b [label: "flow"]
+```
+
+```
+# Custom shape (path)
+path "diamond" [fill: blue] {{
+    vertex a
+    line_to b [x: 20, y: -20]
+    line_to c [x: 40, y: 0]
+    line_to d [x: 20, y: 20]
+    close
+}}
 ```
 
 ## Common Modifiers
