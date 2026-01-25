@@ -325,6 +325,29 @@ mod tests {
     }
 
     #[test]
+    fn test_render_connection_curved_routing() {
+        // Feature 008: Curved routing should produce a quadratic Bezier (M ... Q ...)
+        let svg = render(
+            r#"
+            row {
+                rect a
+                rect b
+            }
+            a -> b [routing: curved]
+        "#,
+        )
+        .unwrap();
+
+        assert!(svg.contains("ai-connection"));
+        assert!(svg.contains("<path"));
+        // Curved routing uses SVG Q command for quadratic Bezier
+        assert!(
+            svg.contains(" Q") || svg.contains("Q "),
+            "Curved routing should use quadratic Bezier (Q command)"
+        );
+    }
+
+    #[test]
     fn test_render_text_shape() {
         // Text shape should render as SVG text element
         let svg = render(r#"text "Hello World" greeting"#).unwrap();

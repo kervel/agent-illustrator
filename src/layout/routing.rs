@@ -13,6 +13,8 @@ pub enum RoutingMode {
     /// Orthogonal routing with horizontal/vertical segments (S-shaped paths)
     #[default]
     Orthogonal,
+    /// Curved routing using quadratic Bezier (Feature 008)
+    Curved,
 }
 
 /// Edge of a bounding box for connection attachment
@@ -150,12 +152,56 @@ pub fn route_orthogonal(from: Point, to: Point) -> Vec<Point> {
 /// Short segments can cause browsers to calculate incorrect tangent directions.
 const MIN_FINAL_SEGMENT_LENGTH: f64 = 15.0;
 
+/// Compute control point for quadratic Bezier curve between two points (Feature 008)
+///
+/// Creates a control point perpendicular to the chord at 25% of the chord length.
+/// This produces gentle, visually pleasing curves by default.
+fn compute_curve_control_point(start: Point, end: Point) -> Point {
+    let chord_x = end.x - start.x;
+    let chord_y = end.y - start.y;
+    let chord_length = (chord_x * chord_x + chord_y * chord_y).sqrt();
+
+    // Degenerate case: start and end are the same point
+    if chord_length < 0.001 {
+        return start;
+    }
+
+    // Perpendicular vector (counterclockwise rotation)
+    let perp_x = -chord_y / chord_length;
+    let perp_y = chord_x / chord_length;
+
+    // Midpoint of chord
+    let mid_x = (start.x + end.x) / 2.0;
+    let mid_y = (start.y + end.y) / 2.0;
+
+    // Offset perpendicular at 25% of chord length
+    let offset = chord_length * 0.25;
+
+    Point::new(mid_x + perp_x * offset, mid_y + perp_y * offset)
+}
+
 /// Route a connection between two bounding boxes with the specified routing mode
 pub fn route_connection(
     from_bounds: &BoundingBox,
     to_bounds: &BoundingBox,
     mode: RoutingMode,
 ) -> Vec<Point> {
+    // For curved routing, use quadratic Bezier with auto-generated control point (Feature 008)
+    if mode == RoutingMode::Curved {
+        let from_center = from_bounds.center();
+        let to_center = to_bounds.center();
+
+        // Calculate boundary points
+        let start = boundary_point_toward(from_bounds, to_center);
+        let end = boundary_point_toward(to_bounds, from_center);
+
+        // Generate control point at perpendicular offset (25% of chord length)
+        let control = compute_curve_control_point(start, end);
+
+        // Return 3 points: start, control, end (renderer will interpret as quadratic Bezier)
+        return vec![start, control, end];
+    }
+
     // For direct routing, use boundary points that point toward each other's centers
     if mode == RoutingMode::Direct {
         let from_center = from_bounds.center();
@@ -263,6 +309,7 @@ fn extract_routing_mode(modifiers: &[Spanned<StyleModifier>]) -> RoutingMode {
                 match k.as_str() {
                     "direct" => return RoutingMode::Direct,
                     "orthogonal" => return RoutingMode::Orthogonal,
+                    "curved" => return RoutingMode::Curved,  // Feature 008
                     _ => {} // Unknown value, use default
                 }
             }
@@ -324,6 +371,7 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                         path,
                         styles,
                         label,
+                        routing_mode,
                     });
                 }
                 Statement::Layout(l) => {
@@ -837,5 +885,67 @@ mod tests {
             TextAnchor::Middle,
             "Horizontal auto should use Middle anchor"
         );
+    }
+
+    // Feature 008: Curved routing tests
+    #[test]
+    fn test_route_connection_curved_mode() {
+        // Two horizontally separated boxes
+        let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
+        let to_bounds = BoundingBox::new(150.0, 0.0, 50.0, 50.0);
+
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Curved);
+
+        // Curved routing returns exactly 3 points: start, control, end
+        assert_eq!(path.len(), 3, "Curved routing should return 3 points");
+
+        // Start point should be on right edge of from_bounds
+        assert!(
+            (path[0].x - 50.0).abs() < 1.0,
+            "Start x should be at right edge of from_bounds"
+        );
+
+        // End point should be on left edge of to_bounds
+        assert!(
+            (path[2].x - 150.0).abs() < 1.0,
+            "End x should be at left edge of to_bounds"
+        );
+
+        // Control point should be between start and end, offset perpendicular
+        assert!(
+            path[1].x > path[0].x && path[1].x < path[2].x,
+            "Control x should be between start and end"
+        );
+        // For horizontal connection, control y should be offset (perpendicular)
+        assert!(
+            (path[1].y - 25.0).abs() > 1.0,
+            "Control y should be offset from the line"
+        );
+    }
+
+    #[test]
+    fn test_compute_curve_control_point() {
+        // Horizontal line
+        let start = Point::new(0.0, 0.0);
+        let end = Point::new(100.0, 0.0);
+        let control = compute_curve_control_point(start, end);
+
+        // Control should be at midpoint x
+        assert!(
+            (control.x - 50.0).abs() < 0.01,
+            "Control x should be at midpoint"
+        );
+        // Control should be offset perpendicular (25% of chord = 25 pixels)
+        assert!(
+            (control.y - 25.0).abs() < 0.01,
+            "Control y should be offset by 25% of chord length"
+        );
+    }
+
+    #[test]
+    fn test_routing_mode_curved_exists() {
+        // Verify the Curved variant exists and is distinct
+        assert_ne!(RoutingMode::Curved, RoutingMode::Direct);
+        assert_ne!(RoutingMode::Curved, RoutingMode::Orthogonal);
     }
 }

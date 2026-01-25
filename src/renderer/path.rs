@@ -20,6 +20,14 @@ pub enum PathSegment {
         large_arc: bool,
         sweep: bool, // true = clockwise in SVG coordinates (y-down)
     },
+    /// Quadratic Bezier curve (Feature 008)
+    QuadraticTo {
+        control: Point,
+        end: Point,
+    },
+    /// Smooth quadratic continuation (Feature 008)
+    /// Uses SVG T command - control point is auto-reflected
+    SmoothQuadraticTo(Point),
     /// Close path back to start
     Close,
 }
@@ -61,6 +69,17 @@ impl ResolvedPath {
                         " A{:.2} {:.2} 0 {} {} {:.2} {:.2}",
                         radius, radius, large, sw, end.x, end.y
                     ));
+                }
+                PathSegment::QuadraticTo { control, end } => {
+                    // SVG Q command: Q cx cy ex ey (quadratic Bezier)
+                    d.push_str(&format!(
+                        " Q{:.2} {:.2} {:.2} {:.2}",
+                        control.x, control.y, end.x, end.y
+                    ));
+                }
+                PathSegment::SmoothQuadraticTo(end) => {
+                    // SVG T command: T ex ey (smooth quadratic - auto-reflected control point)
+                    d.push_str(&format!(" T{:.2} {:.2}", end.x, end.y));
                 }
                 PathSegment::Close => {
                     d.push_str(" Z");
@@ -136,6 +155,43 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
                 let arc_seg = compute_arc_segment(from, pos, &arc.params);
                 segments.push(arc_seg);
                 current_pos = Some(pos);
+            }
+            PathCommand::CurveTo(ct) => {
+                let end_pos = get_or_create_vertex(
+                    ct.target.node.as_str(),
+                    &ct.position,
+                    origin,
+                    &mut vertices,
+                );
+
+                // If we haven't started the path yet, move to current position first
+                if current_pos.is_none() {
+                    segments.push(PathSegment::MoveTo(origin));
+                    start_pos = Some(origin);
+                    current_pos = Some(origin);
+                }
+
+                let from = current_pos.unwrap_or(origin);
+
+                // Note: Via reference resolution happens in the layout phase (T015-T018)
+                // For now, if via is provided but not resolved, we fall back to auto-generated control point
+                // The layout phase will inject resolved via positions before rendering
+                let control = if let Some(via_ref) = &ct.via {
+                    // Try to look up via as a vertex (may have been defined earlier in path)
+                    vertices
+                        .get(via_ref.node.as_str())
+                        .copied()
+                        .unwrap_or_else(|| compute_default_control_point(from, end_pos))
+                } else {
+                    // Auto-generate control point
+                    compute_default_control_point(from, end_pos)
+                };
+
+                segments.push(PathSegment::QuadraticTo {
+                    control,
+                    end: end_pos,
+                });
+                current_pos = Some(end_pos);
             }
             PathCommand::Close => {
                 segments.push(PathSegment::Close);
@@ -262,10 +318,41 @@ fn compute_radius_arc(from: Point, to: Point, radius: f64, sweep: SweepDirection
     }
 }
 
+/// Compute default control point for quadratic Bezier curve (Feature 008)
+///
+/// Creates a control point perpendicular to the chord at 25% of the chord length.
+/// This produces gentle, visually pleasing curves by default.
+///
+/// The offset is in the positive perpendicular direction (counterclockwise from
+/// the chord vector), creating consistent "outward" curves.
+fn compute_default_control_point(start: Point, end: Point) -> Point {
+    let chord = Point::new(end.x - start.x, end.y - start.y);
+    let chord_length = (chord.x * chord.x + chord.y * chord.y).sqrt();
+
+    // Degenerate case: start and end are the same point
+    if chord_length < 0.001 {
+        return start;
+    }
+
+    // Perpendicular vector (counterclockwise rotation)
+    let perpendicular = Point::new(-chord.y / chord_length, chord.x / chord_length);
+
+    // Midpoint of chord
+    let midpoint = Point::new((start.x + end.x) / 2.0, (start.y + end.y) / 2.0);
+
+    // Offset perpendicular at 25% of chord length
+    let offset = chord_length * 0.25;
+
+    Point::new(
+        midpoint.x + perpendicular.x * offset,
+        midpoint.y + perpendicular.y * offset,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::ast::{ArcToDecl, Identifier, LineToDecl, PathBody, Spanned, VertexDecl};
+    use crate::parser::ast::{ArcToDecl, CurveToDecl, Identifier, LineToDecl, PathBody, Spanned, VertexDecl};
 
     fn make_vertex(name: &str, x: Option<f64>, y: Option<f64>) -> Spanned<PathCommand> {
         Spanned::new(
@@ -317,6 +404,26 @@ mod tests {
 
     fn make_close() -> Spanned<PathCommand> {
         Spanned::new(PathCommand::Close, 0..1)
+    }
+
+    fn make_curve_to(
+        target: &str,
+        x: Option<f64>,
+        y: Option<f64>,
+        via: Option<&str>,
+    ) -> Spanned<PathCommand> {
+        Spanned::new(
+            PathCommand::CurveTo(CurveToDecl {
+                target: Spanned::new(Identifier::new(target), 0..1),
+                via: via.map(|v| Spanned::new(Identifier::new(v), 0..1)),
+                position: if x.is_some() || y.is_some() {
+                    Some(VertexPosition { x, y })
+                } else {
+                    None
+                },
+            }),
+            0..1,
+        )
     }
 
     #[test]
@@ -441,5 +548,117 @@ mod tests {
 
         let d = path.to_svg_d();
         assert_eq!(d, "M0.00 0.00 L100.00 0.00 L100.00 100.00 Z");
+    }
+
+    // Feature 008: Curve tests
+    #[test]
+    fn test_curve_to_auto_control() {
+        // Test curve_to without via - should auto-generate control point
+        let decl = PathDecl {
+            name: None,
+            body: PathBody {
+                commands: vec![
+                    make_vertex("a", None, None),
+                    make_curve_to("b", Some(100.0), Some(0.0), None),
+                ],
+            },
+            modifiers: vec![],
+        };
+
+        let origin = Point::new(0.0, 0.0);
+        let resolved = resolve_path(&decl, origin);
+        let d = resolved.to_svg_d();
+
+        // Should start at origin
+        assert!(d.starts_with("M0.00 0.00"), "Should start at origin");
+        // Should contain Q command (quadratic Bezier)
+        assert!(d.contains(" Q"), "Should contain quadratic curve command");
+        // Should end at (100, 0)
+        assert!(d.contains("100.00 0.00"), "Should end at (100, 0)");
+    }
+
+    #[test]
+    fn test_curve_to_with_via_vertex() {
+        // Test curve_to with via referencing an earlier vertex
+        let decl = PathDecl {
+            name: None,
+            body: PathBody {
+                commands: vec![
+                    make_vertex("a", None, None),
+                    make_vertex("ctrl", Some(50.0), Some(-30.0)), // control point above the chord
+                    make_curve_to("b", Some(100.0), Some(0.0), Some("ctrl")),
+                ],
+            },
+            modifiers: vec![],
+        };
+
+        let origin = Point::new(0.0, 0.0);
+        let resolved = resolve_path(&decl, origin);
+        let d = resolved.to_svg_d();
+
+        // Should contain Q command with control point at (50, -30) and end at (100, 0)
+        assert!(d.contains(" Q50.00 -30.00 100.00 0.00"), "Should use ctrl vertex as control point");
+    }
+
+    #[test]
+    fn test_quadratic_svg_output() {
+        // Test that QuadraticTo generates correct SVG Q command
+        let path = ResolvedPath {
+            segments: vec![
+                PathSegment::MoveTo(Point::new(0.0, 0.0)),
+                PathSegment::QuadraticTo {
+                    control: Point::new(50.0, -30.0),
+                    end: Point::new(100.0, 0.0),
+                },
+            ],
+        };
+
+        let d = path.to_svg_d();
+        assert_eq!(d, "M0.00 0.00 Q50.00 -30.00 100.00 0.00");
+    }
+
+    #[test]
+    fn test_smooth_quadratic_svg_output() {
+        // Test that SmoothQuadraticTo generates correct SVG T command
+        let path = ResolvedPath {
+            segments: vec![
+                PathSegment::MoveTo(Point::new(0.0, 0.0)),
+                PathSegment::QuadraticTo {
+                    control: Point::new(25.0, -20.0),
+                    end: Point::new(50.0, 0.0),
+                },
+                PathSegment::SmoothQuadraticTo(Point::new(100.0, 0.0)),
+            ],
+        };
+
+        let d = path.to_svg_d();
+        assert_eq!(d, "M0.00 0.00 Q25.00 -20.00 50.00 0.00 T100.00 0.00");
+    }
+
+    #[test]
+    fn test_default_control_point_calculation() {
+        // Test the default control point calculation
+        let start = Point::new(0.0, 0.0);
+        let end = Point::new(100.0, 0.0);
+        let control = compute_default_control_point(start, end);
+
+        // Control point should be at midpoint (50, 0) plus perpendicular offset
+        // Chord = (100, 0), perpendicular = (-0, 100) normalized = (0, 1)
+        // Offset is 25% of 100 = 25 in perpendicular direction
+        // So control should be at (50, 25) - below the chord (positive Y in SVG)
+        assert!((control.x - 50.0).abs() < 0.01, "Control x should be 50");
+        assert!((control.y - 25.0).abs() < 0.01, "Control y should be 25 (perpendicular offset)");
+    }
+
+    #[test]
+    fn test_default_control_point_degenerate() {
+        // Test degenerate case where start == end
+        let start = Point::new(50.0, 50.0);
+        let end = Point::new(50.0, 50.0);
+        let control = compute_default_control_point(start, end);
+
+        // Should return start point for degenerate case
+        assert!((control.x - 50.0).abs() < 0.01);
+        assert!((control.y - 50.0).abs() < 0.01);
     }
 }

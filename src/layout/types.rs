@@ -7,6 +7,8 @@ use crate::parser::ast::{
     StyleModifier, StyleValue,
 };
 
+use super::routing::RoutingMode;
+
 /// A 2D point in the coordinate system
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point {
@@ -309,6 +311,7 @@ pub struct ConnectionLayout {
     pub path: Vec<Point>,
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,
+    pub routing_mode: RoutingMode,  // Feature 008: track routing mode for rendering
 }
 
 /// The complete result of layout computation

@@ -66,6 +66,14 @@ fn span_range(e: &impl chumsky::span::Span<Offset = usize>) -> std::ops::Range<u
 
 // ==================== Path Shape Parsers (Feature 007) ====================
 
+/// Parsed modifier value - can be a number, sweep direction, or identifier (Feature 008)
+#[derive(Debug, Clone)]
+enum ParsedModifierValue {
+    Number(f64),
+    Sweep(SweepDirection),
+    Identifier(Spanned<Identifier>),  // Feature 008: for via references
+}
+
 /// Helper struct for parsing arc modifiers within brackets
 #[derive(Debug, Clone, Default)]
 struct ParsedArcModifiers {
@@ -74,6 +82,7 @@ struct ParsedArcModifiers {
     radius: Option<f64>,
     bulge: Option<f64>,
     sweep: Option<SweepDirection>,
+    via: Option<Spanned<Identifier>>,  // Feature 008: steering vertex reference
 }
 
 impl ParsedArcModifiers {
@@ -274,7 +283,8 @@ where
         identifier.map(|id| {
             let value = match id.node.as_str() {
                 // Common style value keywords (not alignment edges)
-                "center" | "direct" | "orthogonal" | "none" | "auto" | "solid" | "dashed"
+                // Feature 008: added "curved" for curved routing
+                "center" | "direct" | "orthogonal" | "curved" | "none" | "auto" | "solid" | "dashed"
                 | "dotted" | "hidden" | "bold" | "italic" | "normal" | "start" | "middle"
                 | "end" => StyleValue::Keyword(id.node.0.clone()),
                 // Color keywords
@@ -646,7 +656,7 @@ where
         just(Token::Ccw).to(SweepDirection::Counterclockwise),
     ));
 
-    // Parse a single position or arc modifier: x: 10, radius: 5, sweep: clockwise, etc.
+    // Parse a single position or arc modifier: x: 10, radius: 5, sweep: clockwise, via: ctrl, etc.
     let path_modifier_spec = choice((
         // Position specs
         just(Token::Ident("x".into()))
@@ -654,50 +664,55 @@ where
             .ignore_then(just(Token::Minus).or_not().then(number.clone()))
             .map(|(neg, n)| {
                 let val = if neg.is_some() { -n.node } else { n.node };
-                ("x", val, None::<SweepDirection>)
+                ("x", ParsedModifierValue::Number(val))
             }),
         just(Token::Ident("y".into()))
             .ignore_then(just(Token::Colon))
             .ignore_then(just(Token::Minus).or_not().then(number.clone()))
             .map(|(neg, n)| {
                 let val = if neg.is_some() { -n.node } else { n.node };
-                ("y", val, None)
+                ("y", ParsedModifierValue::Number(val))
             }),
         just(Token::Right)
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
-            .map(|n| ("right", n.node, None)),
+            .map(|n| ("right", ParsedModifierValue::Number(n.node))),
         just(Token::Left)
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
-            .map(|n| ("left", n.node, None)),
+            .map(|n| ("left", ParsedModifierValue::Number(n.node))),
         just(Token::Ident("up".into()))
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
-            .map(|n| ("up", n.node, None)),
+            .map(|n| ("up", ParsedModifierValue::Number(n.node))),
         just(Token::Ident("down".into()))
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
-            .map(|n| ("down", n.node, None)),
+            .map(|n| ("down", ParsedModifierValue::Number(n.node))),
         // Arc specs
         just(Token::Ident("radius".into()))
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
-            .map(|n| ("radius", n.node, None)),
+            .map(|n| ("radius", ParsedModifierValue::Number(n.node))),
         just(Token::Ident("bulge".into()))
             .ignore_then(just(Token::Colon))
             .ignore_then(just(Token::Minus).or_not().then(number.clone()))
             .map(|(neg, n)| {
                 let val = if neg.is_some() { -n.node } else { n.node };
-                ("bulge", val, None)
+                ("bulge", ParsedModifierValue::Number(val))
             }),
         just(Token::Ident("sweep".into()))
             .ignore_then(just(Token::Colon))
             .ignore_then(sweep_direction.clone())
-            .map(|s| ("sweep", 0.0, Some(s))),
+            .map(|s| ("sweep", ParsedModifierValue::Sweep(s))),
+        // Feature 008: via reference for curve steering vertex
+        just(Token::Ident("via".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(identifier.clone())
+            .map(|id| ("via", ParsedModifierValue::Identifier(id))),
     ));
 
-    // Parse a modifier block for path commands: [x: 10, y: 20] or [radius: 5, sweep: cw]
+    // Parse a modifier block for path commands: [x: 10, y: 20] or [radius: 5, sweep: cw, via: ctrl]
     let path_modifier_block = path_modifier_spec
         .separated_by(just(Token::Comma))
         .allow_trailing()
@@ -705,17 +720,18 @@ where
         .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
         .map(|specs| {
             let mut mods = ParsedArcModifiers::default();
-            for (key, val, sweep_opt) in specs {
-                match key {
-                    "x" => mods.x = Some(val),
-                    "y" => mods.y = Some(val),
-                    "right" => mods.x = Some(val),
-                    "left" => mods.x = Some(-val),
-                    "down" => mods.y = Some(val),
-                    "up" => mods.y = Some(-val),
-                    "radius" => mods.radius = Some(val),
-                    "bulge" => mods.bulge = Some(val),
-                    "sweep" => mods.sweep = sweep_opt,
+            for (key, val) in specs {
+                match (key, val) {
+                    ("x", ParsedModifierValue::Number(n)) => mods.x = Some(n),
+                    ("y", ParsedModifierValue::Number(n)) => mods.y = Some(n),
+                    ("right", ParsedModifierValue::Number(n)) => mods.x = Some(n),
+                    ("left", ParsedModifierValue::Number(n)) => mods.x = Some(-n),
+                    ("down", ParsedModifierValue::Number(n)) => mods.y = Some(n),
+                    ("up", ParsedModifierValue::Number(n)) => mods.y = Some(-n),
+                    ("radius", ParsedModifierValue::Number(n)) => mods.radius = Some(n),
+                    ("bulge", ParsedModifierValue::Number(n)) => mods.bulge = Some(n),
+                    ("sweep", ParsedModifierValue::Sweep(s)) => mods.sweep = Some(s),
+                    ("via", ParsedModifierValue::Identifier(id)) => mods.via = Some(id),
                     _ => {}
                 }
             }
@@ -776,12 +792,37 @@ where
             )
         });
 
+    // Parse: curve_to target [via: control, x: 100, y: 50]? (Feature 008)
+    let curve_to_decl = just(Token::CurveTo)
+        .ignore_then(identifier.clone())
+        .then(path_modifier_block.clone().or_not())
+        .map_with(|(target, mods), e| {
+            let (position, via) = mods
+                .map(|m| {
+                    let pos = if m.x.is_some() || m.y.is_some() {
+                        Some(VertexPosition { x: m.x, y: m.y })
+                    } else {
+                        None
+                    };
+                    (pos, m.via)
+                })
+                .unwrap_or((None, None));
+            Spanned::new(
+                PathCommand::CurveTo(CurveToDecl {
+                    target,
+                    via,
+                    position,
+                }),
+                span_range(&e.span()),
+            )
+        });
+
     // Parse: close
     let close_decl =
         just(Token::Close).map_with(|_, e| Spanned::new(PathCommand::Close, span_range(&e.span())));
 
-    // Parse path command (vertex | line_to | arc_to | close)
-    let path_command = choice((vertex_decl, line_to_decl, arc_to_decl, close_decl));
+    // Parse path command (vertex | line_to | arc_to | curve_to | close)
+    let path_command = choice((vertex_decl, line_to_decl, arc_to_decl, curve_to_decl, close_decl));
 
     // Parse path body: { commands* }
     let path_body = path_command

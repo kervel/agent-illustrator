@@ -2,7 +2,7 @@
 
 use crate::layout::{
     BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point, ResolvedStyles,
-    TextAnchor,
+    RoutingMode, TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, ShapeType};
 use crate::stylesheet::Stylesheet;
@@ -349,6 +349,7 @@ impl SvgBuilder {
     pub fn add_connection_path(
         &mut self,
         path: &[Point],
+        routing_mode: RoutingMode,
         classes: &[String],
         styles: &str,
         marker_end: bool,
@@ -359,7 +360,18 @@ impl SvgBuilder {
             .collect::<Vec<_>>()
             .join(" ");
 
-        let d = path_to_d(path);
+        // Generate path data based on routing mode (Feature 008)
+        let d = match routing_mode {
+            RoutingMode::Curved if path.len() == 3 => {
+                // Quadratic Bezier: M start Q control end
+                format!(
+                    "M{} {} Q{} {} {} {}",
+                    path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y
+                )
+            }
+            _ => path_to_d(path), // Default polyline for orthogonal/direct
+        };
+
         let marker = if marker_end {
             format!(r#" marker-end="url(#{prefix}arrow)""#)
         } else {
@@ -818,7 +830,7 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
         ConnectionDirection::Forward | ConnectionDirection::Bidirectional
     );
 
-    builder.add_connection_path(&conn.path, &classes, &styles, marker_end);
+    builder.add_connection_path(&conn.path, conn.routing_mode, &classes, &styles, marker_end);
 
     // Render connection label if present
     if let Some(label) = &conn.label {
@@ -1044,6 +1056,7 @@ mod tests {
             path: vec![Point::new(50.0, 25.0), Point::new(100.0, 25.0)],
             styles: ResolvedStyles::default(),
             label: None,
+            routing_mode: RoutingMode::default(),
         });
         result.compute_bounds();
 
