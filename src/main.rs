@@ -389,12 +389,12 @@ Write "LAYOUT: [intent] → [pattern]" then code.
 ```
 row {{
   col {{
-    row {{ rect a [fill: blue]  rect b [fill: blue] }}
-    row {{ rect d [fill: blue]  rect c [fill: blue] }}
+    row {{ rect a [fill: blue, label: "A"]  rect b [fill: blue, label: "B"] }}
+    row {{ rect d [fill: blue, label: "D"]  rect c [fill: blue, label: "C"] }}
   }}
   col {{
-    row {{ rect e [fill: green]  rect f [fill: green] }}
-    row {{ rect h [fill: green]  rect g [fill: green] }}
+    row {{ rect e [fill: green, label: "E"]  rect f [fill: green, label: "F"] }}
+    row {{ rect h [fill: green, label: "H"]  rect g [fill: green, label: "G"] }}
   }}
 }}
 a -> b
