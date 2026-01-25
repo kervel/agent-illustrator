@@ -372,42 +372,21 @@ path "rounded" [fill: blue] {{
 
 ## Layout Planning
 
-Match **visual intent** to layout pattern:
+Follow this process for complex diagrams:
 
-| Intent | Pattern |
-|--------|---------|
-| Cycle/loop | 2x2 grid with circular arrows |
-| Infinity/8 | Two 2x2 grids side-by-side, cross-connections |
-| Flow | Single row or col with arrows |
-| Hub-spoke | Central shape, surrounding row/col |
+**1. Visualize** — What shape should viewers see?
+   - A loop? An infinity/8? A tree? Hub-and-spoke?
 
-**Key insight**: Use arrow paths to suggest curves, not actual curved shapes.
+**2. Map to rows/cols** — AIL positions with row {{ }} and col {{ }}
+   - How can nested rows/cols approximate your shape?
+   - Circles can be approximated by grids with circular arrows
+   - Use arrow direction and routing to suggest curves
 
-Write "LAYOUT: [intent] → [pattern]" then code.
+**3. Add details** — Shapes, colors, labels, connections
 
-### Example: Infinity Loop
-```
-row {{
-  col {{
-    row {{ rect a [fill: blue, label: "A"]  rect b [fill: blue, label: "B"] }}
-    row {{ rect d [fill: blue, label: "D"]  rect c [fill: blue, label: "C"] }}
-  }}
-  col {{
-    row {{ rect e [fill: green, label: "E"]  rect f [fill: green, label: "F"] }}
-    row {{ rect h [fill: green, label: "H"]  rect g [fill: green, label: "G"] }}
-  }}
-}}
-a -> b
-b -> c
-c -> d
-d -> a
-e -> f
-f -> g
-g -> h
-h -> e
-d -> e [routing: direct]
-h -> a [routing: direct]
-```
+**4. Write AIL and iterate** — Render to SVG, check the output, refine
+
+Write your thinking: "VISUAL: [shape] → LAYOUT: [how rows/cols approximate it]"
 
 ## Modifiers
 
