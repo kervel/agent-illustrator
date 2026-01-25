@@ -414,6 +414,11 @@ Examples:
 
 ```bash
 echo 'row {{ rect a  rect b }}  a -> b' | agent-illustrator > out.svg
-```"#
+```
+
+## More Help
+
+Run `agent-illustrator --examples` for annotated examples.
+Run `agent-illustrator --grammar` for full syntax reference."#
     );
 }

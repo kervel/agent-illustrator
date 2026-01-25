@@ -1,0 +1,23 @@
+row {
+    col {
+        rect plan [label: "Plan", fill: steelblue, width: 80, height: 50]
+        rect code [label: "Code", fill: steelblue, width: 80, height: 50]
+        rect build [label: "Build", fill: steelblue, width: 80, height: 50]
+        rect test [label: "Test", fill: steelblue, width: 80, height: 50]
+    }
+    col {
+        rect release [label: "Release", fill: orange, width: 80, height: 50]
+        rect deploy [label: "Deploy", fill: orange, width: 80, height: 50]
+        rect operate [label: "Operate", fill: orange, width: 80, height: 50]
+        rect monitor [label: "Monitor", fill: orange, width: 80, height: 50]
+    }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan

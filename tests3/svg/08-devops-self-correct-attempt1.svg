@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 314 352">
+  <style>
+    :root {
+    --foreground-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --foreground-2: #666666;
+    --text-1: #333333;
+    --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --text-light: #ffffff;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --status-error: #f44336;
+    --accent-dark: #1565c0;
+    --status-success: #4caf50;
+    --accent-1: #2196f3;
+    --background-1: #ffffff;
+    --foreground-3: #999999;
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --background-3: #eeeeee;
+    --foreground-1: #333333;
+    --text-dark: #1a1a1a;
+    --status-warning: #ff9800;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <g class="ai-container">
+      <rect id="plan" class="ai-shape ai-rect" x="10" y="10" width="80" height="50" fill="steelblue"/>
+      <text class="ai-label" x="50" y="35" text-anchor="middle">Plan</text>
+      <rect id="code" class="ai-shape ai-rect" x="10" y="64" width="80" height="50" fill="steelblue"/>
+      <text class="ai-label" x="50" y="89" text-anchor="middle">Code</text>
+      <rect id="build" class="ai-shape ai-rect" x="10" y="118" width="80" height="50" fill="steelblue"/>
+      <text class="ai-label" x="50" y="143" text-anchor="middle">Build</text>
+      <rect id="test" class="ai-shape ai-rect" x="10" y="172" width="80" height="50" fill="steelblue"/>
+      <text class="ai-label" x="50" y="197" text-anchor="middle">Test</text>
+    </g>
+    <g class="ai-container">
+      <rect id="release" class="ai-shape ai-rect" x="104" y="10" width="80" height="50" fill="orange"/>
+      <text class="ai-label" x="144" y="35" text-anchor="middle">Release</text>
+      <rect id="deploy" class="ai-shape ai-rect" x="104" y="64" width="80" height="50" fill="orange"/>
+      <text class="ai-label" x="144" y="89" text-anchor="middle">Deploy</text>
+      <rect id="operate" class="ai-shape ai-rect" x="104" y="118" width="80" height="50" fill="orange"/>
+      <text class="ai-label" x="144" y="143" text-anchor="middle">Operate</text>
+      <rect id="monitor" class="ai-shape ai-rect" x="104" y="172" width="80" height="50" fill="orange"/>
+      <text class="ai-label" x="144" y="197" text-anchor="middle">Monitor</text>
+    </g>
+  </g>
+  <path class="ai-connection" d="M50 60 L50 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M50 114 L50 118" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M50 168 L50 172" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M50 172 L50 116 L144 116 L144 60" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M144 60 L144 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M144 114 L144 118" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M144 168 L144 172" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M144 172 L144 116 L50 116 L50 60" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

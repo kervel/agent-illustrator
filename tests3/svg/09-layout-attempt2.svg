@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 1164 1250">
+  <style>
+    :root {
+    --text-2: #666666;
+    --status-success: #4caf50;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --text-1: #333333;
+    --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --foreground-3: #999999;
+    --text-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --foreground-2: #666666;
+    --accent-3: #bbdefb;
+    --background-3: #eeeeee;
+    --accent-2: #e3f2fd;
+    --accent-light: #e3f2fd;
+    --status-error: #f44336;
+    --text-light: #ffffff;
+    --text-3: #999999;
+    --foreground-1: #333333;
+    --background-light: #ffffff;
+    --accent-1: #2196f3;
+  }
+
+  </style>
+  <g class="ai-container">
+    <rect id="header" class="ai-shape ai-rect" x="5" y="5" width="1000" height="80" fill="#333333"/>
+    <text class="ai-shape ai-text" x="5" y="129" text-anchor="start" dominant-baseline="middle">Header</text>
+    <g class="ai-container">
+      <g id="nav" class="ai-container">
+        <rect id="nav_item_1" class="ai-shape ai-rect" x="15" y="183" width="200" height="50" fill="#e0e0e0"/>
+        <text class="ai-shape ai-text" x="15" y="262" text-anchor="start" dominant-baseline="middle">Home</text>
+        <rect id="nav_item_2" class="ai-shape ai-rect" x="15" y="291" width="200" height="50" fill="#e0e0e0"/>
+        <text class="ai-shape ai-text" x="15" y="370" text-anchor="start" dominant-baseline="middle">About</text>
+        <rect id="nav_item_3" class="ai-shape ai-rect" x="15" y="399" width="200" height="50" fill="#e0e0e0"/>
+        <text class="ai-shape ai-text" x="15" y="478" text-anchor="start" dominant-baseline="middle">Services</text>
+        <rect id="nav_item_4" class="ai-shape ai-rect" x="15" y="507" width="200" height="50" fill="#e0e0e0"/>
+        <text class="ai-shape ai-text" x="15" y="586" text-anchor="start" dominant-baseline="middle">Contact</text>
+      </g>
+      <g id="content" class="ai-container">
+        <rect id="content_area" class="ai-shape ai-rect" x="229" y="183" width="800" height="400" fill="#ffffff" stroke="#cccccc"/>
+        <text class="ai-shape ai-text" x="229" y="787" text-anchor="start" dominant-baseline="middle">Content Area</text>
+      </g>
+    </g>
+    <rect id="footer" class="ai-shape ai-rect" x="5" y="1001" width="1000" height="60" fill="#333333"/>
+    <text class="ai-shape ai-text" x="5" y="1095" text-anchor="start" dominant-baseline="middle">Footer</text>
+  </g>
+</svg>

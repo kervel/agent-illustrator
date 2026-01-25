@@ -1,0 +1,28 @@
+col {
+  rect header [width: 1000, height: 80, fill: #333333]
+  text "Header" [width: 1000, height: 80]
+
+  row {
+    col nav [width: 200, fill: #f0f0f0] {
+      rect nav_item_1 [width: 200, height: 50, fill: #e0e0e0]
+      text "Home" [width: 200, height: 50]
+
+      rect nav_item_2 [width: 200, height: 50, fill: #e0e0e0]
+      text "About" [width: 200, height: 50]
+
+      rect nav_item_3 [width: 200, height: 50, fill: #e0e0e0]
+      text "Services" [width: 200, height: 50]
+
+      rect nav_item_4 [width: 200, height: 50, fill: #e0e0e0]
+      text "Contact" [width: 200, height: 50]
+    }
+
+    col content [width: 800] {
+      rect content_area [width: 800, height: 400, fill: #ffffff, stroke: #cccccc]
+      text "Content Area" [width: 800, height: 400]
+    }
+  }
+
+  rect footer [width: 1000, height: 60, fill: #333333]
+  text "Footer" [width: 1000, height: 60]
+}

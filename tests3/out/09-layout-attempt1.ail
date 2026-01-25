@@ -1,0 +1,24 @@
+col {
+  header [width: 100%, height: 60]
+
+  row {
+    left_panel [width: 20%, height: 100%]
+    content_area [width: 80%, height: 100%]
+  }
+
+  footer [width: 100%, height: 40]
+}
+
+text "Navigation" [parent: left_panel, x: 10, y: 10]
+rect nav_item_1 [parent: left_panel, width: 90%, height: 30, x: 5, y: 30]
+text "Item 1" [parent: nav_item_1]
+rect nav_item_2 [parent: left_panel, width: 90%, height: 30, x: 5, y: 65]
+text "Item 2" [parent: nav_item_2]
+rect nav_item_3 [parent: left_panel, width: 90%, height: 30, x: 5, y: 100]
+text "Item 3" [parent: nav_item_3]
+
+text "Main Content Area" [parent: content_area, x: 20, y: 30]
+rect content_box [parent: content_area, width: 90%, height: 80%, x: 20, y: 60]
+
+text "Header" [parent: header, x: 15, y: 15]
+text "Footer" [parent: footer, x: 15, y: 10]
