@@ -603,7 +603,7 @@ mod tests {
 
     #[test]
     fn test_resolved_styles_rotation() {
-        use crate::parser::ast::{StyleKey, StyleModifier, StyleValue, Spanned};
+        use crate::parser::ast::{Spanned, StyleKey, StyleModifier, StyleValue};
 
         let modifiers = vec![Spanned::new(
             StyleModifier {

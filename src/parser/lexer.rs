@@ -24,6 +24,28 @@ pub enum Token {
     #[token("text")]
     Text,
 
+    // Path shape keywords (Feature 007)
+    #[token("path")]
+    Path,
+    #[token("vertex")]
+    Vertex,
+    #[token("line_to")]
+    LineTo,
+    #[token("arc_to")]
+    ArcTo,
+    #[token("close")]
+    Close,
+
+    // Sweep direction keywords (Feature 007)
+    #[token("clockwise")]
+    Clockwise,
+    #[token("cw")]
+    Cw,
+    #[token("counterclockwise")]
+    Counterclockwise,
+    #[token("ccw")]
+    Ccw,
+
     // Layout keywords
     #[token("row")]
     Row,
@@ -470,5 +492,49 @@ mod tests {
                 Token::Ident("port2".to_string()),
             ]
         );
+    }
+
+    // Path shape tests (Feature 007)
+    #[test]
+    fn test_path_keywords() {
+        let tokens: Vec<_> = lex("path vertex line_to arc_to close")
+            .map(|(t, _)| t)
+            .collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Path,
+                Token::Vertex,
+                Token::LineTo,
+                Token::ArcTo,
+                Token::Close
+            ]
+        );
+    }
+
+    #[test]
+    fn test_sweep_direction_keywords() {
+        let tokens: Vec<_> = lex("clockwise cw counterclockwise ccw")
+            .map(|(t, _)| t)
+            .collect();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Clockwise,
+                Token::Cw,
+                Token::Counterclockwise,
+                Token::Ccw
+            ]
+        );
+    }
+
+    #[test]
+    fn test_path_example() {
+        let input = r#"path "arrow" { vertex start line_to tip close }"#;
+        let tokens: Vec<_> = lex(input).map(|(t, _)| t).collect();
+        assert!(tokens.contains(&Token::Path));
+        assert!(tokens.contains(&Token::Vertex));
+        assert!(tokens.contains(&Token::LineTo));
+        assert!(tokens.contains(&Token::Close));
     }
 }

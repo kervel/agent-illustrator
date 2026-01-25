@@ -6,6 +6,13 @@ use chumsky::prelude::*;
 use crate::parser::ast::*;
 use crate::parser::lexer::Token;
 
+// Path parsing helper types imported from AST (Feature 007):
+// - PathDecl, PathBody, PathCommand
+// - VertexDecl, VertexPosition
+// - LineToDecl, ArcToDecl
+// - ArcParams, SweepDirection
+// All are available via the ast::* glob import above
+
 /// Helper enum for parsing constraint equality expressions
 #[derive(Debug, Clone)]
 enum ConstraintExprKind {
@@ -55,6 +62,44 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
 /// Helper to extract span range from chumsky's MapExtra
 fn span_range(e: &impl chumsky::span::Span<Offset = usize>) -> std::ops::Range<usize> {
     e.start()..e.end()
+}
+
+// ==================== Path Shape Parsers (Feature 007) ====================
+
+/// Helper struct for parsing arc modifiers within brackets
+#[derive(Debug, Clone, Default)]
+struct ParsedArcModifiers {
+    x: Option<f64>,
+    y: Option<f64>,
+    radius: Option<f64>,
+    bulge: Option<f64>,
+    sweep: Option<SweepDirection>,
+}
+
+impl ParsedArcModifiers {
+    fn into_position_and_params(self) -> (Option<VertexPosition>, ArcParams) {
+        let position = if self.x.is_some() || self.y.is_some() {
+            Some(VertexPosition {
+                x: self.x,
+                y: self.y,
+            })
+        } else {
+            None
+        };
+
+        let params = if let Some(radius) = self.radius {
+            ArcParams::Radius {
+                radius,
+                sweep: self.sweep.unwrap_or_default(),
+            }
+        } else if let Some(bulge) = self.bulge {
+            ArcParams::Bulge(bulge)
+        } else {
+            ArcParams::default()
+        };
+
+        (position, params)
+    }
 }
 
 fn document_parser<'a, I>() -> impl Parser<'a, I, Document, extra::Err<Rich<'a, Token>>> + Clone
@@ -591,6 +636,185 @@ where
             })
         });
 
+    // ==================== Path Shape Parsers (Feature 007) ====================
+
+    // Parse sweep direction for arcs
+    let sweep_direction = choice((
+        just(Token::Clockwise).to(SweepDirection::Clockwise),
+        just(Token::Cw).to(SweepDirection::Clockwise),
+        just(Token::Counterclockwise).to(SweepDirection::Counterclockwise),
+        just(Token::Ccw).to(SweepDirection::Counterclockwise),
+    ));
+
+    // Parse a single position or arc modifier: x: 10, radius: 5, sweep: clockwise, etc.
+    let path_modifier_spec = choice((
+        // Position specs
+        just(Token::Ident("x".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(just(Token::Minus).or_not().then(number.clone()))
+            .map(|(neg, n)| {
+                let val = if neg.is_some() { -n.node } else { n.node };
+                ("x", val, None::<SweepDirection>)
+            }),
+        just(Token::Ident("y".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(just(Token::Minus).or_not().then(number.clone()))
+            .map(|(neg, n)| {
+                let val = if neg.is_some() { -n.node } else { n.node };
+                ("y", val, None)
+            }),
+        just(Token::Right)
+            .ignore_then(just(Token::Colon))
+            .ignore_then(number.clone())
+            .map(|n| ("right", n.node, None)),
+        just(Token::Left)
+            .ignore_then(just(Token::Colon))
+            .ignore_then(number.clone())
+            .map(|n| ("left", n.node, None)),
+        just(Token::Ident("up".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(number.clone())
+            .map(|n| ("up", n.node, None)),
+        just(Token::Ident("down".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(number.clone())
+            .map(|n| ("down", n.node, None)),
+        // Arc specs
+        just(Token::Ident("radius".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(number.clone())
+            .map(|n| ("radius", n.node, None)),
+        just(Token::Ident("bulge".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(just(Token::Minus).or_not().then(number.clone()))
+            .map(|(neg, n)| {
+                let val = if neg.is_some() { -n.node } else { n.node };
+                ("bulge", val, None)
+            }),
+        just(Token::Ident("sweep".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(sweep_direction.clone())
+            .map(|s| ("sweep", 0.0, Some(s))),
+    ));
+
+    // Parse a modifier block for path commands: [x: 10, y: 20] or [radius: 5, sweep: cw]
+    let path_modifier_block = path_modifier_spec
+        .separated_by(just(Token::Comma))
+        .allow_trailing()
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
+        .map(|specs| {
+            let mut mods = ParsedArcModifiers::default();
+            for (key, val, sweep_opt) in specs {
+                match key {
+                    "x" => mods.x = Some(val),
+                    "y" => mods.y = Some(val),
+                    "right" => mods.x = Some(val),
+                    "left" => mods.x = Some(-val),
+                    "down" => mods.y = Some(val),
+                    "up" => mods.y = Some(-val),
+                    "radius" => mods.radius = Some(val),
+                    "bulge" => mods.bulge = Some(val),
+                    "sweep" => mods.sweep = sweep_opt,
+                    _ => {}
+                }
+            }
+            mods
+        });
+
+    // Parse: vertex name [position]?
+    let vertex_decl = just(Token::Vertex)
+        .ignore_then(identifier.clone())
+        .then(path_modifier_block.clone().or_not())
+        .map_with(|(name, mods), e| {
+            let position = mods.and_then(|m| {
+                if m.x.is_some() || m.y.is_some() {
+                    Some(VertexPosition { x: m.x, y: m.y })
+                } else {
+                    None
+                }
+            });
+            Spanned::new(
+                PathCommand::Vertex(VertexDecl { name, position }),
+                span_range(&e.span()),
+            )
+        });
+
+    // Parse: line_to target [position]?
+    let line_to_decl = just(Token::LineTo)
+        .ignore_then(identifier.clone())
+        .then(path_modifier_block.clone().or_not())
+        .map_with(|(target, mods), e| {
+            let position = mods.and_then(|m| {
+                if m.x.is_some() || m.y.is_some() {
+                    Some(VertexPosition { x: m.x, y: m.y })
+                } else {
+                    None
+                }
+            });
+            Spanned::new(
+                PathCommand::LineTo(LineToDecl { target, position }),
+                span_range(&e.span()),
+            )
+        });
+
+    // Parse: arc_to target [position, radius/bulge, sweep]?
+    let arc_to_decl = just(Token::ArcTo)
+        .ignore_then(identifier.clone())
+        .then(path_modifier_block.clone().or_not())
+        .map_with(|(target, mods), e| {
+            let (position, params) = mods
+                .map(|m| m.into_position_and_params())
+                .unwrap_or_else(|| (None, ArcParams::default()));
+            Spanned::new(
+                PathCommand::ArcTo(ArcToDecl {
+                    target,
+                    position,
+                    params,
+                }),
+                span_range(&e.span()),
+            )
+        });
+
+    // Parse: close
+    let close_decl =
+        just(Token::Close).map_with(|_, e| Spanned::new(PathCommand::Close, span_range(&e.span())));
+
+    // Parse path command (vertex | line_to | arc_to | close)
+    let path_command = choice((vertex_decl, line_to_decl, arc_to_decl, close_decl));
+
+    // Parse path body: { commands* }
+    let path_body = path_command
+        .repeated()
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
+        .map(|commands| PathBody { commands });
+
+    // Parse: path "name"? identifier? [modifiers]? { body }
+    let path_decl = just(Token::Path)
+        .ignore_then(
+            select! { Token::String(s) => s }
+                .map_with(|s, e| Spanned::new(Identifier::new(s), span_range(&e.span())))
+                .or_not(),
+        )
+        .then(identifier.clone().or_not())
+        .then(modifier_block.clone().or_not())
+        .then(path_body)
+        .map(|(((label, name), mods), body)| {
+            // Use label as name if present, otherwise use identifier
+            let path_name = label.or(name);
+            let path = PathDecl {
+                name: path_name,
+                body,
+                modifiers: mods.clone().unwrap_or_default(),
+            };
+            ShapeDecl {
+                shape_type: Spanned::new(ShapeType::Path(path), 0..0), // Span will be updated
+                name: None,                                            // Name is inside PathDecl
+                modifiers: mods.unwrap_or_default(),
+            }
+        });
+
     // Recursive statement parser
     let statement = recursive(|stmt| {
         // Layout declaration with children
@@ -726,6 +950,8 @@ where
             group_decl.map(Statement::Group),
             label_decl,
             connection_decl.clone().map(Statement::Connection),
+            // path_decl before shape_decl since 'path' is a keyword (Feature 007)
+            path_decl.clone().map(Statement::Shape),
             shape_decl.clone().map(Statement::Shape),
             // Template instance must be last since it matches "identifier identifier"
             // which could conflict with other patterns
@@ -1495,10 +1721,7 @@ mod tests {
             Statement::TemplateDecl(t) => {
                 assert_eq!(t.name.node.as_str(), "component");
                 assert_eq!(t.source_type, TemplateSourceType::Ail);
-                assert_eq!(
-                    t.source_path.as_ref().unwrap().node,
-                    "lib/component.ail"
-                );
+                assert_eq!(t.source_path.as_ref().unwrap().node, "lib/component.ail");
             }
             other => panic!("Expected TemplateDecl, got {:?}", other),
         }
@@ -1619,6 +1842,263 @@ mod tests {
             }
         } else {
             panic!("Expected shape statement");
+        }
+    }
+
+    // ==================== Path Shape Parsing Tests (Feature 007) ====================
+
+    #[test]
+    fn test_parse_simple_path() {
+        let input = r#"
+            path "triangle" {
+                vertex a
+                line_to b [x: 50, y: 0]
+                line_to c [x: 25, y: 40]
+                close
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                match &s.shape_type.node {
+                    ShapeType::Path(path) => {
+                        assert_eq!(path.name.as_ref().unwrap().node.as_str(), "triangle");
+                        assert_eq!(path.body.commands.len(), 4);
+                        // First command should be vertex
+                        match &path.body.commands[0].node {
+                            PathCommand::Vertex(v) => {
+                                assert_eq!(v.name.node.as_str(), "a");
+                                assert!(v.position.is_none());
+                            }
+                            other => panic!("Expected Vertex, got {:?}", other),
+                        }
+                        // Second should be line_to with position
+                        match &path.body.commands[1].node {
+                            PathCommand::LineTo(lt) => {
+                                assert_eq!(lt.target.node.as_str(), "b");
+                                let pos = lt.position.as_ref().expect("Should have position");
+                                assert_eq!(pos.x, Some(50.0));
+                                assert_eq!(pos.y, Some(0.0));
+                            }
+                            other => panic!("Expected LineTo, got {:?}", other),
+                        }
+                        // Last should be close
+                        assert!(matches!(path.body.commands[3].node, PathCommand::Close));
+                    }
+                    other => panic!("Expected Path, got {:?}", other),
+                }
+            }
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_with_arc() {
+        let input = r#"
+            path "rounded" {
+                vertex a
+                arc_to b [x: 50, y: 0, radius: 10]
+                line_to c [x: 50, y: 50]
+                close
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.shape_type.node {
+                ShapeType::Path(path) => {
+                    assert_eq!(path.body.commands.len(), 4);
+                    // Check arc_to command
+                    match &path.body.commands[1].node {
+                        PathCommand::ArcTo(arc) => {
+                            assert_eq!(arc.target.node.as_str(), "b");
+                            let pos = arc.position.as_ref().expect("Should have position");
+                            assert_eq!(pos.x, Some(50.0));
+                            assert_eq!(pos.y, Some(0.0));
+                            match &arc.params {
+                                ArcParams::Radius { radius, sweep } => {
+                                    assert!((radius - 10.0).abs() < 0.001);
+                                    assert!(matches!(sweep, SweepDirection::Clockwise));
+                                }
+                                other => panic!("Expected Radius params, got {:?}", other),
+                            }
+                        }
+                        other => panic!("Expected ArcTo, got {:?}", other),
+                    }
+                }
+                other => panic!("Expected Path, got {:?}", other),
+            },
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_with_bulge() {
+        let input = r#"
+            path "curved" {
+                vertex a
+                arc_to b [x: 50, bulge: 0.3]
+                close
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.shape_type.node {
+                ShapeType::Path(path) => match &path.body.commands[1].node {
+                    PathCommand::ArcTo(arc) => match &arc.params {
+                        ArcParams::Bulge(b) => assert!((b - 0.3).abs() < 0.001),
+                        other => panic!("Expected Bulge params, got {:?}", other),
+                    },
+                    other => panic!("Expected ArcTo, got {:?}", other),
+                },
+                other => panic!("Expected Path, got {:?}", other),
+            },
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_with_sweep_direction() {
+        let input = r#"
+            path "arc" {
+                vertex a
+                arc_to b [x: 50, radius: 20, sweep: counterclockwise]
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.shape_type.node {
+                ShapeType::Path(path) => match &path.body.commands[1].node {
+                    PathCommand::ArcTo(arc) => match &arc.params {
+                        ArcParams::Radius { sweep, .. } => {
+                            assert!(matches!(sweep, SweepDirection::Counterclockwise));
+                        }
+                        other => panic!("Expected Radius params, got {:?}", other),
+                    },
+                    other => panic!("Expected ArcTo, got {:?}", other),
+                },
+                other => panic!("Expected Path, got {:?}", other),
+            },
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_in_layout() {
+        let input = r#"
+            row {
+                path "shape1" { vertex a }
+                rect spacer
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Layout(l) => {
+                assert_eq!(l.children.len(), 2);
+                match &l.children[0].node {
+                    Statement::Shape(s) => {
+                        assert!(matches!(s.shape_type.node, ShapeType::Path(_)));
+                    }
+                    other => panic!("Expected Shape, got {:?}", other),
+                }
+            }
+            other => panic!("Expected Layout, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_with_modifiers() {
+        let input = r#"
+            path "styled" [fill: blue, stroke: black] {
+                vertex a
+                vertex b [x: 100, y: 0]
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => {
+                assert_eq!(s.modifiers.len(), 2);
+                match &s.shape_type.node {
+                    ShapeType::Path(path) => {
+                        assert_eq!(path.body.commands.len(), 2);
+                    }
+                    other => panic!("Expected Path, got {:?}", other),
+                }
+            }
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_degenerate_path() {
+        // Single vertex path (renders as point)
+        // Note: Using "origin" instead of "center" since "center" is a keyword
+        let input = r#"path "dot" { vertex origin }"#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.shape_type.node {
+                ShapeType::Path(path) => {
+                    assert_eq!(path.name.as_ref().unwrap().node.as_str(), "dot");
+                    assert_eq!(path.body.commands.len(), 1);
+                }
+                other => panic!("Expected Path, got {:?}", other),
+            },
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_with_directional_positions() {
+        let input = r#"
+            path "arrow" {
+                vertex tip [right: 100, down: 25]
+                line_to left_edge [left: 60, up: 25]
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.shape_type.node {
+                ShapeType::Path(path) => {
+                    // Check tip vertex with right/down (positive x, positive y)
+                    match &path.body.commands[0].node {
+                        PathCommand::Vertex(v) => {
+                            let pos = v.position.as_ref().expect("Should have position");
+                            assert_eq!(pos.x, Some(100.0));
+                            assert_eq!(pos.y, Some(25.0));
+                        }
+                        other => panic!("Expected Vertex, got {:?}", other),
+                    }
+                    // Check left_edge with left/up (negative x, negative y)
+                    match &path.body.commands[1].node {
+                        PathCommand::LineTo(lt) => {
+                            let pos = lt.position.as_ref().expect("Should have position");
+                            assert_eq!(pos.x, Some(-60.0));
+                            assert_eq!(pos.y, Some(-25.0));
+                        }
+                        other => panic!("Expected LineTo, got {:?}", other),
+                    }
+                }
+                other => panic!("Expected Path, got {:?}", other),
+            },
+            other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_path_with_identifier_name() {
+        // Path with identifier instead of string name
+        let input = r#"path my_shape { vertex a close }"#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => match &s.shape_type.node {
+                ShapeType::Path(path) => {
+                    assert_eq!(path.name.as_ref().unwrap().node.as_str(), "my_shape");
+                }
+                other => panic!("Expected Path, got {:?}", other),
+            },
+            other => panic!("Expected Shape, got {:?}", other),
         }
     }
 }

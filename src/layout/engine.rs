@@ -140,9 +140,7 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // Layout the inner element - Label positioning is handled by the parent container
             layout_statement(inner, position, config)
         }
-        Statement::Connection(_)
-        | Statement::Constraint(_)
-        | Statement::Constrain(_) => {
+        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) => {
             // These are handled separately
             unreachable!("Connections and constraints should be filtered out")
         }
@@ -249,6 +247,11 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
             let w = intrinsic_width.unwrap_or(config.default_rect_size.0);
             let h = intrinsic_height.unwrap_or(config.default_rect_size.1);
             (w, h)
+        }
+        ShapeType::Path(_) => {
+            // Path shapes use default rect size; actual size from vertex positions
+            // will be computed when rendering is implemented
+            config.default_rect_size
         }
     };
 
@@ -1129,12 +1132,14 @@ pub fn resolve_constrain_statements(
             let delta = value - current_value;
             if delta.abs() > 0.001 {
                 let axis = match var.property {
-                    LayoutProperty::X | LayoutProperty::Width | LayoutProperty::CenterX | LayoutProperty::Right => {
-                        Axis::Horizontal
-                    }
-                    LayoutProperty::Y | LayoutProperty::Height | LayoutProperty::CenterY | LayoutProperty::Bottom => {
-                        Axis::Vertical
-                    }
+                    LayoutProperty::X
+                    | LayoutProperty::Width
+                    | LayoutProperty::CenterX
+                    | LayoutProperty::Right => Axis::Horizontal,
+                    LayoutProperty::Y
+                    | LayoutProperty::Height
+                    | LayoutProperty::CenterY
+                    | LayoutProperty::Bottom => Axis::Vertical,
                 };
                 // Only shift for X/Y position changes (not width/height or derived properties)
                 // Note: CenterX/CenterY constraints are expressed as X+Width/2 or Y+Height/2,

@@ -74,9 +74,7 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Labels can contain elements that define identifiers
             collect_ids_from_statement(inner, ids);
         }
-        Statement::Connection(_)
-        | Statement::Constraint(_)
-        | Statement::Constrain(_) => {
+        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) => {
             // Connections and constraints don't define new identifiers
         }
         Statement::TemplateDecl(t) => {

@@ -3,8 +3,8 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
-    ConstrainDecl, ConstraintExpr, Document, ElementPath, Identifier, PropertyRef,
-    ShapeDecl, ShapeType, Spanned, Statement, StyleModifier, StyleValue, TemplateInstance,
+    ConstrainDecl, ConstraintExpr, Document, ElementPath, Identifier, PropertyRef, ShapeDecl,
+    ShapeType, Spanned, Statement, StyleModifier, StyleValue, TemplateInstance,
 };
 
 use super::registry::{TemplateError, TemplateRegistry};
@@ -96,7 +96,10 @@ impl ResolutionContext {
 /// 1. Collects all template declarations into a registry
 /// 2. Expands template instances into their concrete shapes
 /// 3. Returns a new document with all templates resolved
-pub fn resolve_templates(doc: Document, registry: &mut TemplateRegistry) -> Result<Document, TemplateError> {
+pub fn resolve_templates(
+    doc: Document,
+    registry: &mut TemplateRegistry,
+) -> Result<Document, TemplateError> {
     // First pass: collect template declarations
     registry.collect_from_statements(&doc.statements)?;
 
@@ -141,24 +144,32 @@ fn resolve_instance(
     // Check for circular references
     if ctx.is_resolving(template_name) {
         return Err(TemplateError::CircularReference {
-            chain: format!("{} -> {}", ctx.resolving.iter().cloned().collect::<Vec<_>>().join(" -> "), template_name),
+            chain: format!(
+                "{} -> {}",
+                ctx.resolving
+                    .iter()
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join(" -> "),
+                template_name
+            ),
         });
     }
 
     // Get the template definition
-    let def = registry.get(template_name).ok_or_else(|| TemplateError::NotFound {
-        name: template_name.to_string(),
-    })?.clone(); // Clone to avoid borrow issues
+    let def = registry
+        .get(template_name)
+        .ok_or_else(|| TemplateError::NotFound {
+            name: template_name.to_string(),
+        })?
+        .clone(); // Clone to avoid borrow issues
 
     // Build parameter values from arguments and defaults
     let mut param_values: HashMap<String, StyleValue> = HashMap::new();
 
     // Start with defaults
     for param in &def.parameters {
-        param_values.insert(
-            param.name.node.0.clone(),
-            param.default_value.node.clone(),
-        );
+        param_values.insert(param.name.node.0.clone(), param.default_value.node.clone());
     }
 
     // Override with provided arguments
@@ -205,9 +216,11 @@ fn resolve_svg_template(
     }
 
     // Get the loaded definition
-    let def = registry.get(&def.name).ok_or_else(|| TemplateError::NotFound {
-        name: def.name.clone(),
-    })?;
+    let def = registry
+        .get(&def.name)
+        .ok_or_else(|| TemplateError::NotFound {
+            name: def.name.clone(),
+        })?;
 
     let content = def.svg_content.clone().unwrap_or_default();
     let (width, height) = def.svg_dimensions.unwrap_or((100.0, 100.0));
@@ -238,26 +251,29 @@ fn resolve_ail_template(
     param_values: &HashMap<String, StyleValue>,
 ) -> Result<Vec<Spanned<Statement>>, TemplateError> {
     // Get the source path
-    let source_path = def.source_path.as_ref().ok_or_else(|| TemplateError::FileNotFound {
-        path: std::path::PathBuf::from(&def.name),
-    })?;
+    let source_path = def
+        .source_path
+        .as_ref()
+        .ok_or_else(|| TemplateError::FileNotFound {
+            path: std::path::PathBuf::from(&def.name),
+        })?;
 
     // Resolve relative to base path
     let full_path = registry.resolve_path(source_path.to_str().unwrap_or(""));
 
     // Load the AIL file content
-    let content = std::fs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
-        path: full_path.clone(),
-        message: e.to_string(),
-    })?;
+    let content =
+        std::fs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
+            path: full_path.clone(),
+            message: e.to_string(),
+        })?;
 
     // Parse the AIL content
-    let parsed_doc = crate::parser::parse(&content).map_err(|errors| {
-        TemplateError::FileReadError {
+    let parsed_doc =
+        crate::parser::parse(&content).map_err(|errors| TemplateError::FileReadError {
             path: full_path.clone(),
             message: format!("Parse errors: {:?}", errors),
-        }
-    })?;
+        })?;
 
     // Collect any nested template declarations from the AIL file
     registry.collect_from_statements(&parsed_doc.statements)?;
@@ -279,7 +295,8 @@ fn resolve_ail_template(
             }
             Statement::TemplateInstance(nested_inst) => {
                 // Recursively expand nested template instances
-                let nested_expanded = resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
+                let nested_expanded =
+                    resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
                 expanded.extend(nested_expanded);
             }
             _ => {
@@ -329,7 +346,8 @@ fn resolve_inline_template(
             }
             Statement::TemplateInstance(nested_inst) => {
                 // Recursively expand nested template instances
-                let nested_expanded = resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
+                let nested_expanded =
+                    resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
                 expanded.extend(nested_expanded);
             }
             _ => {
@@ -398,8 +416,12 @@ fn resolve_statement(
             Ok(Spanned::new(Statement::Group(group), stmt.span))
         }
         Statement::Label(inner) => {
-            let resolved_inner = resolve_statement(Spanned::new(*inner, stmt.span.clone()), registry, ctx)?;
-            Ok(Spanned::new(Statement::Label(Box::new(resolved_inner.node)), stmt.span))
+            let resolved_inner =
+                resolve_statement(Spanned::new(*inner, stmt.span.clone()), registry, ctx)?;
+            Ok(Spanned::new(
+                Statement::Label(Box::new(resolved_inner.node)),
+                stmt.span,
+            ))
         }
         // Other statements pass through unchanged
         _ => Ok(stmt),
@@ -428,7 +450,8 @@ fn substitute_parameters(
                 name.node = Identifier::new(format!("{}_{}", prefix, name.node.0));
             }
             // Substitute in children
-            layout.children = layout.children
+            layout.children = layout
+                .children
                 .into_iter()
                 .map(|c| substitute_parameters(c, params, prefix))
                 .collect();
@@ -441,7 +464,8 @@ fn substitute_parameters(
                 name.node = Identifier::new(format!("{}_{}", prefix, name.node.0));
             }
             // Substitute in children
-            group.children = group.children
+            group.children = group
+                .children
                 .into_iter()
                 .map(|c| substitute_parameters(c, params, prefix))
                 .collect();
@@ -590,8 +614,8 @@ fn substitute_modifiers(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::parse;
     use crate::parser::ast::StyleKey;
+    use crate::parser::parse;
 
     #[test]
     fn test_resolve_inline_template() {
@@ -635,7 +659,10 @@ mod tests {
         match &resolved.statements[0].node {
             Statement::Shape(s) => {
                 // Check that fill was substituted
-                let fill_mod = s.modifiers.iter().find(|m| matches!(m.node.key.node, StyleKey::Fill));
+                let fill_mod = s
+                    .modifiers
+                    .iter()
+                    .find(|m| matches!(m.node.key.node, StyleKey::Fill));
                 assert!(fill_mod.is_some());
                 // The value should be the keyword "red" (from the instance)
                 match &fill_mod.unwrap().node.value.node {

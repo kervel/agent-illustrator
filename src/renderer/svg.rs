@@ -231,6 +231,30 @@ impl SvgBuilder {
         ));
     }
 
+    /// Add a path element with custom d attribute (Feature 007)
+    pub fn add_path(&mut self, id: Option<&str>, d: &str, classes: &[String], styles: &str) {
+        let prefix = self.prefix();
+        let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
+        let class_list = std::iter::once(format!("{}shape", prefix))
+            .chain(std::iter::once(format!("{}path", prefix)))
+            .chain(classes.iter().cloned())
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        self.elements.push(format!(
+            r#"{}<path{} class="{}" d="{}"{}/>"#,
+            self.indent_str(),
+            id_attr,
+            class_list,
+            d,
+            if styles.is_empty() {
+                String::new()
+            } else {
+                format!(" {}", styles)
+            }
+        ));
+    }
+
     /// Add a line element
     pub fn add_line(
         &mut self,
@@ -734,6 +758,21 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
             builder.add_raw(&inner);
 
             builder.end_group();
+        }
+        ElementType::Shape(ShapeType::Path(path_decl)) => {
+            // Path shape rendering (Feature 007)
+            let origin = Point::new(element.bounds.x, element.bounds.y);
+            let resolved = super::path::resolve_path(path_decl, origin);
+            let d = resolved.to_svg_d();
+
+            if d.is_empty() {
+                // Empty path - render nothing
+                return;
+            }
+
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_path(id, &d, &classes, &styles);
+            });
         }
         ElementType::Layout(_) | ElementType::Group => {
             // Start a group for containers
