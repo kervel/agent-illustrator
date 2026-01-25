@@ -302,6 +302,8 @@ pub enum StyleValue {
     Keyword(String),
     /// Identifier reference (for `[label: my_shape]` syntax)
     Identifier(Identifier),
+    /// List of identifiers (for `[via: c1, c2, c3]` syntax - Feature 008)
+    IdentifierList(Vec<Identifier>),
 }
 
 // ============================================
@@ -591,6 +593,18 @@ pub struct ArcToDecl {
     pub params: ArcParams,
 }
 
+/// Quadratic Bezier curve segment declaration (Feature 008)
+#[derive(Debug, Clone, PartialEq)]
+pub struct CurveToDecl {
+    /// Target vertex (existing or implicit)
+    pub target: Spanned<Identifier>,
+    /// Optional steering vertex reference (control point)
+    /// When None, system auto-generates control point
+    pub via: Option<Spanned<Identifier>>,
+    /// Optional position for implicit vertex creation
+    pub position: Option<VertexPosition>,
+}
+
 /// Commands that can appear inside a path block
 #[derive(Debug, Clone, PartialEq)]
 pub enum PathCommand {
@@ -600,6 +614,8 @@ pub enum PathCommand {
     LineTo(LineToDecl),
     /// Arc segment: `arc_to target [arc_params]`
     ArcTo(ArcToDecl),
+    /// Quadratic Bezier curve segment: `curve_to target [via: control, position]` (Feature 008)
+    CurveTo(CurveToDecl),
     /// Close path with straight line: `close`
     Close,
     /// Close path with arc: `close_arc [arc_params]`

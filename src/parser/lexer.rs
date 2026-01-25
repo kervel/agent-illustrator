@@ -33,6 +33,8 @@ pub enum Token {
     LineTo,
     #[token("arc_to")]
     ArcTo,
+    #[token("curve_to")]
+    CurveTo,
     #[token("close")]
     Close,
 
