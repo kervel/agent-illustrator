@@ -372,24 +372,42 @@ path "rounded" [fill: blue] {{
 
 ## Layout Planning
 
-For complex diagrams, plan the structure before coding:
+Match **visual intent** to layout pattern:
 
-1. **Identify logical groups** - what belongs together?
-   - Architecture: tiers (frontend, backend, database)
-   - Network: zones (internal, DMZ, external)
-   - Flowchart: paths (success, failure, retry)
+| Intent | Pattern |
+|--------|---------|
+| Cycle/loop | 2x2 grid with circular arrows |
+| Infinity/8 | Two 2x2 grids side-by-side, cross-connections |
+| Flow | Single row or col with arrows |
+| Hub-spoke | Central shape, surrounding row/col |
 
-2. **Choose arrangement** - side-by-side or stacked?
-   - `row {{ }}` places groups horizontally
-   - `col {{ }}` places groups vertically
-   - Nest them for complex layouts
+**Key insight**: Use arrow paths to suggest curves, not actual curved shapes.
 
-3. **Write LAYOUT plan first, then code**
+Write "LAYOUT: [intent] → [pattern]" then code.
 
-Examples:
-- "LAYOUT: 3 tiers stacked (clients, services, databases)"
-- "LAYOUT: gateway left, 3 service columns right with own DBs"
-- "LAYOUT: shared top, then row with success/failure lanes"
+### Example: Infinity Loop
+```
+row {{
+  col {{
+    row {{ rect a [fill: blue]  rect b [fill: blue] }}
+    row {{ rect d [fill: blue]  rect c [fill: blue] }}
+  }}
+  col {{
+    row {{ rect e [fill: green]  rect f [fill: green] }}
+    row {{ rect h [fill: green]  rect g [fill: green] }}
+  }}
+}}
+a -> b
+b -> c
+c -> d
+d -> a
+e -> f
+f -> g
+g -> h
+h -> e
+d -> e [routing: direct]
+h -> a [routing: direct]
+```
 
 ## Modifiers
 

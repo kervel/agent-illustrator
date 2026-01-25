@@ -1,0 +1,20 @@
+row {
+  col {
+    row { rect plan [fill: #4A90E2] rect code [fill: #4A90E2] }
+    row { rect test [fill: #4A90E2] rect build [fill: #4A90E2] }
+  }
+  col {
+    row { rect release [fill: #7ED321] rect deploy [fill: #7ED321] }
+    row { rect monitor [fill: #7ED321] rect operate [fill: #7ED321] }
+  }
+}
+plan -> code
+code -> build
+build -> test
+test -> plan
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release
+test -> release [routing: direct]
+monitor -> plan [routing: direct]

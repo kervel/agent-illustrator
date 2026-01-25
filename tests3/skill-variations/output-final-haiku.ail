@@ -1,0 +1,23 @@
+row {
+  col {
+    row { plan code }
+    row { test build }
+  }
+  col {
+    row { release deploy }
+    row { monitor operate }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> plan
+
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release
+
+test -> release [routing: direct]
+monitor -> plan [routing: direct]

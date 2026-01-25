@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 220.8 400">
+  <style>
+    :root {
+    --status-warning: #ff9800;
+    --background-2: #f5f5f5;
+    --accent-light: #e3f2fd;
+    --text-dark: #1a1a1a;
+    --accent-3: #bbdefb;
+    --status-success: #4caf50;
+    --background-light: #ffffff;
+    --foreground-2: #666666;
+    --background-3: #eeeeee;
+    --accent-1: #2196f3;
+    --text-light: #ffffff;
+    --foreground-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --accent-dark: #1565c0;
+    --foreground-1: #333333;
+    --background-1: #ffffff;
+    --background-dark: #333333;
+    --text-3: #999999;
+    --text-1: #333333;
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --status-error: #f44336;
+    --foreground-3: #999999;
+  }
+
+  </style>
+  <path class="ai-shape ai-path" d="M0.00 50.00 A50.00 50.00 0 0 1 50.00 0.00 A50.00 50.00 0 0 1 100.00 50.00"  fill="none" stroke="blue" stroke-width="3"/>
+  <path class="ai-shape ai-path" d="M100.00 84.00 A50.00 50.00 0 0 1 150.00 134.00 A50.00 50.00 0 0 1 200.00 84.00"  fill="none" stroke="green" stroke-width="3"/>
+  <path class="ai-shape ai-path" d="M200.00 118.00 L0.00 118.00"  fill="none" stroke="purple" stroke-width="3"/>
+  <g id="dev_labels" class="ai-container">
+    <text id="plan" class="ai-shape ai-text" x="5" y="114" text-anchor="start" dominant-baseline="middle">Plan</text>
+    <text id="code" class="ai-shape ai-text" x="5" y="132" text-anchor="start" dominant-baseline="middle">Code</text>
+    <text id="build" class="ai-shape ai-text" x="5" y="150" text-anchor="start" dominant-baseline="middle">Build</text>
+    <text id="test" class="ai-shape ai-text" x="5" y="168" text-anchor="start" dominant-baseline="middle">Test</text>
+  </g>
+  <g id="ops_labels" class="ai-container">
+    <text id="release" class="ai-shape ai-text" x="5" y="196" text-anchor="start" dominant-baseline="middle">Release</text>
+    <text id="deploy" class="ai-shape ai-text" x="5" y="214" text-anchor="start" dominant-baseline="middle">Deploy</text>
+    <text id="operate" class="ai-shape ai-text" x="5" y="232" text-anchor="start" dominant-baseline="middle">Operate</text>
+    <text id="monitor" class="ai-shape ai-text" x="5" y="250" text-anchor="start" dominant-baseline="middle">Monitor</text>
+  </g>
+  <text id="title" class="ai-shape ai-text" x="0" y="273" text-anchor="start" dominant-baseline="middle">DevOps Cycle</text>
+</svg>

@@ -1,0 +1,35 @@
+col [gap: 40] {
+  row [gap: 20, align: center] {
+    circle [r: 120] {
+      col [gap: 15] {
+        text "Plan" [size: 12, weight: bold]
+        text "Code" [size: 12, weight: bold]
+        text "Build" [size: 12, weight: bold]
+        text "Test" [size: 12, weight: bold]
+      }
+    }
+    circle [r: 120] {
+      col [gap: 15] {
+        text "Release" [size: 12, weight: bold]
+        text "Deploy" [size: 12, weight: bold]
+        text "Operate" [size: 12, weight: bold]
+        text "Monitor" [size: 12, weight: bold]
+      }
+    }
+  }
+  row [gap: 20, align: center] {
+    text "DEV" [size: 14, weight: bold, color: #0066cc]
+    text "OPS" [size: 14, weight: bold, color: #cc0000]
+  }
+}
+
+path "cycle" {
+  Plan -> Code
+  Code -> Build
+  Build -> Test
+  Test -> Release
+  Release -> Deploy
+  Deploy -> Operate
+  Operate -> Monitor
+  Monitor -> Plan
+}

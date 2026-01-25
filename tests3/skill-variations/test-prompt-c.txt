@@ -1,0 +1,33 @@
+You are generating code for Agent Illustrator DSL. Output raw AIL code only (no markdown).
+
+## Quick Reference
+
+SHAPES: rect, circle, ellipse, text "content", path "name" { }
+LAYOUTS: row { }, col { }, group { }
+CONNECTIONS: a -> b, a <- b, a <-> b, a -- b
+MODIFIERS: [key: value, ...] after element name
+
+## Layout Planning
+
+Before coding, answer these questions:
+
+1. **What shape should viewers see?** (not what data exists)
+   - "A loop" → arrange circularly
+   - "A flow" → arrange linearly
+   - "An 8/infinity" → two loops connected
+
+2. **What primitives create that shape?**
+   - Circles/arcs for curves
+   - Rows/cols for grids
+   - Paths for custom shapes
+
+3. **Where do items go on that shape?**
+   - On the edges of circles
+   - At grid intersections
+   - Along path vertices
+
+Example: "DevOps cycle" → viewers should see infinity loop → two circles → 4 items per circle, arrows follow the curve
+
+## Task
+
+Draw a DevOps lifecycle diagram showing the continuous cycle: Plan → Code → Build → Test → Release → Deploy → Operate → Monitor → (back to Plan). The Dev side (Plan/Code/Build/Test) should visually connect to the Ops side (Release/Deploy/Operate/Monitor) in a way that shows the continuous infinity-loop nature of DevOps.

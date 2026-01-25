@@ -1,0 +1,56 @@
+row [spacing: 120] {
+  group dev_loop {
+    path "dev_circle" [stroke: blue, stroke_width: 3, fill: none] {
+      vertex center_left [x: 0, y: 60]
+      move_to top [x: 0, y: 0]
+      arc_to right [x: 60, y: 60, radius: 60]
+      arc_to bottom [x: 0, y: 120, radius: 60]
+      arc_to left [x: -60, y: 60, radius: 60]
+      arc_to top [x: 0, y: 0, radius: 60]
+    }
+
+    circle plan [fill: lightblue, x: 0, y: 0]
+    text "Plan" [x: 0, y: -20]
+
+    circle code [fill: lightblue, x: 60, y: 30]
+    text "Code" [x: 80, y: 30]
+
+    circle build [fill: lightblue, x: 60, y: 90]
+    text "Build" [x: 80, y: 90]
+
+    circle test [fill: lightblue, x: 0, y: 120]
+    text "Test" [x: 0, y: 140]
+  }
+
+  group ops_loop {
+    path "ops_circle" [stroke: green, stroke_width: 3, fill: none] {
+      vertex center_right [x: 0, y: 60]
+      move_to top [x: 0, y: 0]
+      arc_to left [x: -60, y: 60, radius: 60]
+      arc_to bottom [x: 0, y: 120, radius: 60]
+      arc_to right [x: 60, y: 60, radius: 60]
+      arc_to top [x: 0, y: 0, radius: 60]
+    }
+
+    circle release [fill: lightgreen, x: 0, y: 0]
+    text "Release" [x: 0, y: -20]
+
+    circle deploy [fill: lightgreen, x: -60, y: 30]
+    text "Deploy" [x: -85, y: 30]
+
+    circle operate [fill: lightgreen, x: -60, y: 90]
+    text "Operate" [x: -90, y: 90]
+
+    circle monitor [fill: lightgreen, x: 0, y: 120]
+    text "Monitor" [x: 0, y: 140]
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan

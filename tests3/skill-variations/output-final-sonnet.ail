@@ -1,0 +1,35 @@
+row {
+  col {
+    row {
+      rect plan [fill: #4A90E2, size: 60]
+      rect code [fill: #5CA3E8, size: 60]
+    }
+    row {
+      rect test [fill: #6FB5EE, size: 60]
+      rect build [fill: #82C7F4, size: 60]
+    }
+  }
+  col {
+    row {
+      rect release [fill: #E27D4A, size: 60]
+      rect deploy [fill: #E8905C, size: 60]
+    }
+    row {
+      rect monitor [fill: #EEA36F, size: 60]
+      rect operate [fill: #F4B682, size: 60]
+    }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> plan
+
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release
+
+test -> release [routing: direct]
+monitor -> plan [routing: direct]

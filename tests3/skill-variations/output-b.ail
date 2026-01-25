@@ -1,0 +1,44 @@
+group "DevOps Lifecycle" {
+  circle [x: 200, y: 200, r: 120, fill: "none", stroke: "blue", stroke_width: 2]
+  text "Plan" [x: 200, y: 80]
+  text "Code" [x: 320, y: 140]
+  text "Build" [x: 320, y: 260]
+  text "Test" [x: 200, y: 320]
+
+  circle [x: 600, y: 200, r: 120, fill: "none", stroke: "green", stroke_width: 2]
+  text "Release" [x: 600, y: 80]
+  text "Deploy" [x: 720, y: 140]
+  text "Operate" [x: 720, y: 260]
+  text "Monitor" [x: 600, y: 320]
+
+  path "dev_cycle" {
+    move_to 200, 80
+    arc_to 320, 140, 100, 100, 0, 0, 1
+    arc_to 320, 260, 100, 100, 0, 0, 1
+    arc_to 200, 320, 100, 100, 0, 0, 1
+  }
+
+  path "ops_cycle" {
+    move_to 600, 80
+    arc_to 720, 140, 100, 100, 0, 0, 1
+    arc_to 720, 260, 100, 100, 0, 0, 1
+    arc_to 600, 320, 100, 100, 0, 0, 1
+  }
+
+  path "dev_to_ops" {
+    move_to 320, 200
+    line_to 480, 200
+    arrow_end ">"
+  }
+
+  path "ops_to_dev" {
+    move_to 480, 240
+    line_to 320, 240
+    arrow_end ">"
+  }
+
+  path "loop_back" {
+    move_to 600, 320
+    arc_to 200, 320, 200, 150, 0, 1, 1
+  }
+}

@@ -1,0 +1,32 @@
+path "dev_loop" [stroke: blue, stroke_width: 3, fill: none] {
+    vertex start [x: 0, y: 50]
+    arc_to apex [x: 50, y: 0, radius: 50]
+    arc_to middle [x: 100, y: 50, radius: 50]
+}
+
+path "ops_loop" [stroke: green, stroke_width: 3, fill: none] {
+    vertex middle_start [x: 100, y: 50]
+    arc_to nadir [x: 150, y: 100, radius: 50]
+    arc_to end [x: 200, y: 50, radius: 50]
+}
+
+path "return_path" [stroke: purple, stroke_width: 3, fill: none] {
+    vertex ret_start [x: 200, y: 50]
+    line_to ret_end [x: 0, y: 50]
+}
+
+group dev_labels {
+    text "Plan" plan
+    text "Code" code
+    text "Build" build
+    text "Test" test
+}
+
+group ops_labels {
+    text "Release" release
+    text "Deploy" deploy
+    text "Operate" operate
+    text "Monitor" monitor
+}
+
+text "DevOps Cycle" title

@@ -1,0 +1,42 @@
+col {
+  group [label: "DevOps Lifecycle"] {
+    row {
+      circle [label: "1"] [color: "#FF6B6B"]
+      circle [label: "2"] [color: "#FF6B6B"]
+      circle [label: "3"] [color: "#FF6B6B"]
+      circle [label: "4"] [color: "#FF6B6B"]
+    }
+
+    row {
+      text "Plan" [size: "sm"]
+      text "Code" [size: "sm"]
+      text "Build" [size: "sm"]
+      text "Test" [size: "sm"]
+    }
+
+    row {
+      circle [label: "5"] [color: "#4ECDC4"]
+      circle [label: "6"] [color: "#4ECDC4"]
+      circle [label: "7"] [color: "#4ECDC4"]
+      circle [label: "8"] [color: "#4ECDC4"]
+    }
+
+    row {
+      text "Release" [size: "sm"]
+      text "Deploy" [size: "sm"]
+      text "Operate" [size: "sm"]
+      text "Monitor" [size: "sm"]
+    }
+
+    path "devops_cycle" {
+      1 -> 2
+      2 -> 3
+      3 -> 4
+      4 -> 5
+      5 -> 6
+      6 -> 7
+      7 -> 8
+      8 -> 1 [arc_to: "top"]
+    }
+  }
+}
