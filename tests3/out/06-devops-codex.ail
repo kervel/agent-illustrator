@@ -1,0 +1,45 @@
+row [gap: 80] {
+  col [gap: 20] {
+    text "Dev" [font_size: 18]
+    group dev_loop {
+      col [gap: 20] {
+        row [gap: 30] {
+          rect plan [label: "Plan", fill: #7FB3D5, width: 90, height: 50]
+          rect code [label: "Code", fill: #7FB3D5, width: 90, height: 50]
+        }
+        row [gap: 30] {
+          rect test [label: "Test", fill: #7FB3D5, width: 90, height: 50]
+          rect build [label: "Build", fill: #7FB3D5, width: 90, height: 50]
+        }
+      }
+    }
+  }
+  col [gap: 20] {
+    text "Ops" [font_size: 18]
+    group ops_loop {
+      col [gap: 20] {
+        row [gap: 30] {
+          rect release [label: "Release", fill: #82E0AA, width: 90, height: 50]
+          rect deploy [label: "Deploy", fill: #82E0AA, width: 90, height: 50]
+        }
+        row [gap: 30] {
+          rect monitor [label: "Monitor", fill: #82E0AA, width: 90, height: 50]
+          rect operate [label: "Operate", fill: #82E0AA, width: 90, height: 50]
+        }
+      }
+    }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> plan
+
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release
+
+test -> release [routing: direct, stroke: #555]
+monitor -> plan [routing: direct, stroke: #555]

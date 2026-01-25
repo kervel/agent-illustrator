@@ -1,0 +1,21 @@
+col {
+    rect start [label: "Start", fill: green]
+    rect enter_credentials [label: "Enter Credentials"]
+    rect validate [label: "Validate"]
+    rect load_profile [label: "Load Profile"]
+    rect dashboard [label: "Dashboard", fill: green]
+    rect show_error [label: "Show Error", fill: red]
+    rect increment_attempts [label: "Increment Attempts"]
+    rect check_attempts [label: "Check Attempts"]
+    rect lock_account [label: "Lock Account", fill: red]
+}
+
+start -> enter_credentials
+enter_credentials -> validate
+validate -> load_profile [label: "Valid"]
+load_profile -> dashboard [label: "Success"]
+validate -> show_error [label: "Invalid"]
+show_error -> increment_attempts
+increment_attempts -> check_attempts
+check_attempts -> enter_credentials [label: "< 3"]
+check_attempts -> lock_account [label: ">= 3"]

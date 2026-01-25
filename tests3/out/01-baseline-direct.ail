@@ -1,0 +1,37 @@
+col [gap: 30] {
+    circle start [label: "Start", fill: lightgreen, size: 60]
+
+    rect enter_creds [label: "Enter Credentials", width: 140, height: 60, fill: lightblue]
+
+    rect validate [label: "Validate", width: 120, height: 60, fill: lightyellow]
+
+    row [gap: 100] {
+        col [gap: 30] {
+            rect load_profile [label: "Load Profile", width: 120, height: 60, fill: lightblue]
+            rect dashboard [label: "Dashboard", width: 120, height: 60, fill: lightgreen]
+        }
+
+        col [gap: 30] {
+            rect show_error [label: "Show Error", width: 120, height: 60, fill: lightcoral]
+            rect increment [label: "Increment Attempts", width: 140, height: 60, fill: lightyellow]
+            rect check_attempts [label: "Check Attempts", width: 130, height: 60, fill: lightyellow]
+        }
+    }
+
+    rect lock_account [label: "Lock Account", width: 120, height: 60, fill: red]
+}
+
+start -> enter_creds
+
+enter_creds -> validate
+
+validate -> load_profile [label: "valid", stroke: green]
+validate -> show_error [label: "invalid", stroke: red]
+
+load_profile -> dashboard
+
+show_error -> increment
+increment -> check_attempts
+
+check_attempts -> enter_creds [label: "attempts < 3", stroke: orange]
+check_attempts -> lock_account [label: "attempts >= 3", stroke: red]

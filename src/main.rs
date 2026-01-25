@@ -333,22 +333,23 @@ MODIFIERS: [key: value, ...] after element name
 ## Core Patterns
 
 ```
-row {{ rect a  rect b }}
-a -> b
+row {{ circle start  rect process  circle end }}
+start -> process
+process -> end
 ```
 
 ```
 rect box [fill: steelblue, size: 50]
-circle dot [fill: red, size: 20]
-text "Label" [font_size: 16]
+circle node [fill: red, size: 30]
+ellipse db [fill: orange, width: 60, height: 40]
 ```
 
 ```
 col {{
     text "Title" [font_size: 18]
     row {{
-        rect item1 [label: "A"]
-        rect item2 [label: "B"]
+        rect svc [label: "Service"]
+        ellipse db [label: "DB"]
     }}
 }}
 ```
@@ -359,13 +360,36 @@ a -> b [routing: direct]  // diagonal line
 ```
 
 ```
-path "triangle" [fill: blue] {{
+path "rounded" [fill: blue] {{
     vertex a
-    line_to b [x: 30, y: -15]
-    line_to c [x: 30, y: 15]
+    line_to b [x: 40, y: 0]
+    arc_to c [x: 50, y: 10, radius: 10]
+    line_to d [x: 50, y: 30]
+    arc_to e [x: 40, y: 40, radius: 10]
     close
 }}
 ```
+
+## Layout Planning
+
+For complex diagrams, plan the structure before coding:
+
+1. **Identify logical groups** - what belongs together?
+   - Architecture: tiers (frontend, backend, database)
+   - Network: zones (internal, DMZ, external)
+   - Flowchart: paths (success, failure, retry)
+
+2. **Choose arrangement** - side-by-side or stacked?
+   - `row {{ }}` places groups horizontally
+   - `col {{ }}` places groups vertically
+   - Nest them for complex layouts
+
+3. **Write LAYOUT plan first, then code**
+
+Examples:
+- "LAYOUT: 3 tiers stacked (clients, services, databases)"
+- "LAYOUT: gateway left, 3 service columns right with own DBs"
+- "LAYOUT: shared top, then row with success/failure lanes"
 
 ## Modifiers
 

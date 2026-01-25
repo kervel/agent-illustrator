@@ -1,0 +1,36 @@
+group left_loop {
+    text plan [label: "Plan", fill: blue]
+    text code [label: "Code", fill: blue]
+    text build [label: "Build", fill: blue]
+    text test [label: "Test", fill: blue]
+
+    path "dev_curve" [stroke: blue, stroke_width: 3, fill: none] {
+        vertex start
+        curve_to top [x: -40, y: -30, cx1: -50, cy1: 0, cx2: -50, cy2: -30]
+        curve_to left [x: -40, y: -60, cx1: -30, cy1: -30, cx2: -20, cy2: -60]
+        curve_to bottom [x: 0, y: -30, cx1: -20, cy1: -60, cx2: 0, cy2: -50]
+    }
+}
+
+group right_loop {
+    text release [label: "Release", fill: green]
+    text deploy [label: "Deploy", fill: green]
+    text operate [label: "Operate", fill: green]
+    text monitor [label: "Monitor", fill: green]
+
+    path "ops_curve" [stroke: green, stroke_width: 3, fill: none] {
+        vertex start
+        curve_to top [x: 40, y: -30, cx1: 50, cy1: 0, cx2: 50, cy2: -30]
+        curve_to right [x: 40, y: -60, cx1: 30, cy1: -30, cx2: 20, cy2: -60]
+        curve_to bottom [x: 0, y: -30, cx1: 20, cy1: -60, cx2: 0, cy2: -50]
+    }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan

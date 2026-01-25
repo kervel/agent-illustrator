@@ -1,0 +1,14 @@
+Create a flowchart for a user login process:
+
+1. Start
+2. "Enter Credentials" - user inputs username/password
+3. "Validate" - check if credentials are correct
+4. If valid: go to "Load Profile" then "Dashboard" (success end)
+5. If invalid: go to "Show Error", then "Increment Attempts"
+6. "Check Attempts" - if attempts < 3, go back to "Enter Credentials"
+7. If attempts >= 3, go to "Lock Account" (failure end)
+
+The flowchart should clearly show:
+- The happy path (successful login)
+- The retry loop (failed but can retry)
+- The lockout path (too many failures)

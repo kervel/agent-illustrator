@@ -1,0 +1,36 @@
+col {
+    text "DevOps Infinity Loop" [font_size: 20]
+
+    row [gap: 30] {
+        col [gap: 15] {
+            text "DEV" [font_size: 16, fill: #3498db]
+            rect plan_box [label: "Plan", fill: #3498db, width: 80, height: 50]
+            rect code_box [label: "Code", fill: #3498db, width: 80, height: 50]
+            rect build_box [label: "Build", fill: #3498db, width: 80, height: 50]
+            rect test_box [label: "Test", fill: #3498db, width: 80, height: 50]
+        }
+
+        circle center_point [size: 20, fill: #95a5a6]
+
+        col [gap: 15] {
+            text "OPS" [font_size: 16, fill: #e74c3c]
+            rect monitor_box [label: "Monitor", fill: #e74c3c, width: 80, height: 50]
+            rect operate_box [label: "Operate", fill: #e74c3c, width: 80, height: 50]
+            rect deploy_box [label: "Deploy", fill: #e74c3c, width: 80, height: 50]
+            rect release_box [label: "Release", fill: #e74c3c, width: 80, height: 50]
+        }
+    }
+}
+
+plan_box -> code_box
+code_box -> build_box
+build_box -> test_box
+test_box -> center_point
+
+center_point -> release_box
+release_box -> deploy_box
+deploy_box -> operate_box
+operate_box -> monitor_box
+
+monitor_box -> center_point
+center_point -> plan_box

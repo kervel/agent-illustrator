@@ -1,0 +1,34 @@
+col {
+    rect start [label: "Start"]
+    rect enter_credentials [label: "Enter Credentials"]
+    rect validate [label: "Validate"]
+    row {
+        col {
+            rect load_profile [label: "Load Profile"]
+            rect dashboard [label: "Dashboard"]
+        }
+        col {
+            rect show_error [label: "Show Error"]
+            rect increment_attempts [label: "Increment Attempts"]
+            rect check_attempts [label: "Check Attempts"]
+            row {
+                col {
+                    rect retry [label: "Attempts < 3"]
+                }
+                col {
+                    rect lock_account [label: "Lock Account"]
+                }
+            }
+        }
+    }
+}
+start -> enter_credentials
+enter_credentials -> validate
+validate -> load_profile
+load_profile -> dashboard
+validate -> show_error
+show_error -> increment_attempts
+increment_attempts -> check_attempts
+check_attempts -> retry
+retry -> enter_credentials
+check_attempts -> lock_account

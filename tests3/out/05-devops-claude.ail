@@ -1,0 +1,35 @@
+// Claude's attempt - will likely fail due to invented syntax (curve_to)
+// Keeping for analysis
+
+col {
+    text "DevOps Cycle" [font_size: 20]
+    row [gap: 40] {
+        col [gap: 10] {
+            text "Dev" [font_size: 16]
+            col [gap: 10] {
+                rect plan [label: "Plan", fill: steelblue, width: 80, height: 40]
+                rect code [label: "Code", fill: steelblue, width: 80, height: 40]
+                rect build [label: "Build", fill: steelblue, width: 80, height: 40]
+                rect test [label: "Test", fill: steelblue, width: 80, height: 40]
+            }
+        }
+        col [gap: 10] {
+            text "Ops" [font_size: 16]
+            col [gap: 10] {
+                rect release [label: "Release", fill: green, width: 80, height: 40]
+                rect deploy [label: "Deploy", fill: green, width: 80, height: 40]
+                rect operate [label: "Operate", fill: green, width: 80, height: 40]
+                rect monitor [label: "Monitor", fill: green, width: 80, height: 40]
+            }
+        }
+    }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release [routing: direct]
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan [routing: direct]

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 380 400">
+  <style>
+    :root {
+    --foreground-dark: #1a1a1a;
+    --foreground-2: #666666;
+    --foreground-1: #333333;
+    --text-3: #999999;
+    --status-success: #4caf50;
+    --text-1: #333333;
+    --background-light: #ffffff;
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --text-dark: #1a1a1a;
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-light: #e3f2fd;
+    --status-warning: #ff9800;
+    --background-2: #f5f5f5;
+    --text-light: #ffffff;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --accent-3: #bbdefb;
+    --foreground-3: #999999;
+    --background-1: #ffffff;
+    --status-error: #f44336;
+    --accent-dark: #1565c0;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <text class="ai-shape ai-text" x="5" y="15" text-anchor="start" dominant-baseline="middle" font-size="20">DevOps Cycle</text>
+    <g class="ai-container">
+      <g class="ai-container">
+        <text class="ai-shape ai-text" x="15" y="47" text-anchor="start" dominant-baseline="middle" font-size="16">Dev</text>
+        <g class="ai-container">
+          <rect id="plan" class="ai-shape ai-rect" x="20" y="70" width="80" height="40" fill="steelblue"/>
+          <text class="ai-label" x="60" y="90" text-anchor="middle">Plan</text>
+          <rect id="code" class="ai-shape ai-rect" x="20" y="120" width="80" height="40" fill="steelblue"/>
+          <text class="ai-label" x="60" y="140" text-anchor="middle">Code</text>
+          <rect id="build" class="ai-shape ai-rect" x="20" y="170" width="80" height="40" fill="steelblue"/>
+          <text class="ai-label" x="60" y="190" text-anchor="middle">Build</text>
+          <rect id="test" class="ai-shape ai-rect" x="20" y="220" width="80" height="40" fill="steelblue"/>
+          <text class="ai-label" x="60" y="240" text-anchor="middle">Test</text>
+        </g>
+      </g>
+      <g class="ai-container">
+        <text class="ai-shape ai-text" x="155" y="47" text-anchor="start" dominant-baseline="middle" font-size="16">Ops</text>
+        <g class="ai-container">
+          <rect id="release" class="ai-shape ai-rect" x="160" y="70" width="80" height="40" fill="green"/>
+          <text class="ai-label" x="200" y="90" text-anchor="middle">Release</text>
+          <rect id="deploy" class="ai-shape ai-rect" x="160" y="120" width="80" height="40" fill="green"/>
+          <text class="ai-label" x="200" y="140" text-anchor="middle">Deploy</text>
+          <rect id="operate" class="ai-shape ai-rect" x="160" y="170" width="80" height="40" fill="green"/>
+          <text class="ai-label" x="200" y="190" text-anchor="middle">Operate</text>
+          <rect id="monitor" class="ai-shape ai-rect" x="160" y="220" width="80" height="40" fill="green"/>
+          <text class="ai-label" x="200" y="240" text-anchor="middle">Monitor</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M60 110 L60 120" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M60 160 L60 170" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M60 210 L60 220" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M78.66666666666667 220 L181.33333333333334 110" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M200 110 L200 120" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M200 160 L200 170" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M200 210 L200 220" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M181.33333333333334 220 L78.66666666666667 110" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

@@ -1,0 +1,10 @@
+Create a DevOps infinity loop diagram showing the continuous cycle:
+
+Left side (Dev): Plan → Code → Build → Test
+Right side (Ops): Release → Deploy → Operate → Monitor
+
+The diagram should visually convey:
+- Two interconnected loops forming an infinity symbol (∞)
+- Dev activities on the left, Ops activities on the right
+- The continuous, cyclical nature of DevOps
+- Clear flow direction between stages

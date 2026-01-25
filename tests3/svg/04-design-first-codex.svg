@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-74.5 -60 452.5 404">
+  <style>
+    :root {
+    --background-2: #f5f5f5;
+    --foreground-dark: #1a1a1a;
+    --text-3: #999999;
+    --accent-3: #bbdefb;
+    --background-dark: #333333;
+    --text-1: #333333;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --background-light: #ffffff;
+    --accent-dark: #1565c0;
+    --foreground-3: #999999;
+    --foreground-1: #333333;
+    --background-3: #eeeeee;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --text-light: #ffffff;
+    --text-2: #666666;
+    --status-error: #f44336;
+    --accent-light: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --foreground-2: #666666;
+    --background-1: #ffffff;
+    --accent-1: #2196f3;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <rect id="start" class="ai-shape ai-rect" x="5" y="5" width="80" height="30"/>
+    <text class="ai-label" x="45" y="20" text-anchor="middle">Start</text>
+    <rect id="enter_credentials" class="ai-shape ai-rect" x="5" y="39" width="80" height="30"/>
+    <text class="ai-label" x="45" y="54" text-anchor="middle">Enter Credentials</text>
+    <rect id="validate" class="ai-shape ai-rect" x="5" y="73" width="80" height="30"/>
+    <text class="ai-label" x="45" y="88" text-anchor="middle">Validate</text>
+    <g class="ai-container">
+      <g class="ai-container">
+        <rect id="load_profile" class="ai-shape ai-rect" x="15" y="117" width="80" height="30"/>
+        <text class="ai-label" x="55" y="132" text-anchor="middle">Load Profile</text>
+        <rect id="dashboard" class="ai-shape ai-rect" x="15" y="151" width="80" height="30"/>
+        <text class="ai-label" x="55" y="166" text-anchor="middle">Dashboard</text>
+      </g>
+      <g class="ai-container">
+        <rect id="show_error" class="ai-shape ai-rect" x="109" y="117" width="80" height="30"/>
+        <text class="ai-label" x="149" y="132" text-anchor="middle">Show Error</text>
+        <rect id="increment_attempts" class="ai-shape ai-rect" x="109" y="151" width="80" height="30"/>
+        <text class="ai-label" x="149" y="166" text-anchor="middle">Increment Attempts</text>
+        <rect id="check_attempts" class="ai-shape ai-rect" x="109" y="185" width="80" height="30"/>
+        <text class="ai-label" x="149" y="200" text-anchor="middle">Check Attempts</text>
+        <g class="ai-container">
+          <g class="ai-container">
+            <rect id="retry" class="ai-shape ai-rect" x="119" y="229" width="80" height="30"/>
+            <text class="ai-label" x="159" y="244" text-anchor="middle">Attempts &lt; 3</text>
+          </g>
+          <g class="ai-container">
+            <rect id="lock_account" class="ai-shape ai-rect" x="213" y="229" width="80" height="30"/>
+            <text class="ai-label" x="253" y="244" text-anchor="middle">Lock Account</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M45 35 L45 39" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 69 L45 73" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 103 L55 117" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M55 147 L55 151" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M85 88 L94 88 L94 132 L109 132" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M149 147 L149 151" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M149 181 L149 185" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M149 215 L159 229" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M159 229 L159 149 L45 149 L45 69" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M189 200 L198 200 L198 244 L213 244" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>
