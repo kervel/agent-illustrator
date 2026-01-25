@@ -1,0 +1,23 @@
+col {
+    rect gateway [label: "API Gateway"]
+    row {
+        col {
+            rect user_service [label: "User Service"]
+            rect user_db [label: "User DB"]
+        }
+        col {
+            rect order_service [label: "Order Service"]
+            rect order_db [label: "Order DB"]
+        }
+        col {
+            rect payment_service [label: "Payment Service"]
+            rect payment_db [label: "Payment DB"]
+        }
+    }
+}
+gateway -> user_service
+gateway -> order_service
+gateway -> payment_service
+user_service -> user_db
+order_service -> order_db
+payment_service -> payment_db

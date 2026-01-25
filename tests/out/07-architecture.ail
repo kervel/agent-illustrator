@@ -1,0 +1,7 @@
+row {
+  rect browser [label: "Browser"]
+  rect api [label: "API Server"]
+  rect database [label: "Database"]
+}
+browser -> api [label: "request"]
+api -> database [label: "query"]

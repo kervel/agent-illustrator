@@ -1,0 +1,1 @@
+Create a simple decision flow: Start -> Decision (diamond or rectangle) -> two paths: "Yes" leads to Action A, "No" leads to Action B. Both end at End.

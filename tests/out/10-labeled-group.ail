@@ -1,0 +1,8 @@
+group backend {
+    text "Backend Services" [role: label]
+    row {
+        rect auth [label: "Auth", size: 30]
+        rect users [label: "Users", size: 30]
+        rect orders [label: "Orders", size: 30]
+    }
+}

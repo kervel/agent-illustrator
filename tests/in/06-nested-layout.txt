@@ -1,0 +1,1 @@
+Create a diagram with a title "My System" at the top, and below it two columns: left column has "Input" and "Process", right column has "Output" and "Log".

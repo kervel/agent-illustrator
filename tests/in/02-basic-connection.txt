@@ -1,0 +1,1 @@
+Draw a client computer connecting to a server with an arrow labeled "request".

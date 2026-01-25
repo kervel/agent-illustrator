@@ -1,0 +1,2 @@
+row { rect server1  rect server2 }
+server1 <-> server2

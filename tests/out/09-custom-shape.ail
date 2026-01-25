@@ -1,0 +1,6 @@
+path "triangle" [fill: blue] {
+    vertex a
+    line_to b [x: 30, y: -20]
+    line_to c [x: 30, y: 20]
+    close
+}

@@ -1,0 +1,1 @@
+Show a load balancer distributing traffic to three web servers. The load balancer should connect to all three servers.

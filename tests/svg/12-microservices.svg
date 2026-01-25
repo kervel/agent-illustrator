@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 418 248">
+  <style>
+    :root {
+    --background-3: #eeeeee;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --foreground-2: #666666;
+    --background-1: #ffffff;
+    --accent-2: #e3f2fd;
+    --accent-light: #e3f2fd;
+    --accent-dark: #1565c0;
+    --text-dark: #1a1a1a;
+    --accent-1: #2196f3;
+    --status-error: #f44336;
+    --foreground-light: #e0e0e0;
+    --text-1: #333333;
+    --text-light: #ffffff;
+    --foreground-dark: #1a1a1a;
+    --foreground-3: #999999;
+    --background-2: #f5f5f5;
+    --foreground-1: #333333;
+    --text-3: #999999;
+    --accent-3: #bbdefb;
+    --background-light: #ffffff;
+    --text-2: #666666;
+    --background-dark: #333333;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <rect id="gateway" class="ai-shape ai-rect" x="5" y="5" width="80" height="30"/>
+    <text class="ai-label" x="45" y="20" text-anchor="middle">API Gateway</text>
+    <g class="ai-container">
+      <g class="ai-container">
+        <rect id="user_service" class="ai-shape ai-rect" x="15" y="49" width="80" height="30"/>
+        <text class="ai-label" x="55" y="64" text-anchor="middle">User Service</text>
+        <rect id="user_db" class="ai-shape ai-rect" x="15" y="83" width="80" height="30"/>
+        <text class="ai-label" x="55" y="98" text-anchor="middle">User DB</text>
+      </g>
+      <g class="ai-container">
+        <rect id="order_service" class="ai-shape ai-rect" x="109" y="49" width="80" height="30"/>
+        <text class="ai-label" x="149" y="64" text-anchor="middle">Order Service</text>
+        <rect id="order_db" class="ai-shape ai-rect" x="109" y="83" width="80" height="30"/>
+        <text class="ai-label" x="149" y="98" text-anchor="middle">Order DB</text>
+      </g>
+      <g class="ai-container">
+        <rect id="payment_service" class="ai-shape ai-rect" x="203" y="49" width="80" height="30"/>
+        <text class="ai-label" x="243" y="64" text-anchor="middle">Payment Service</text>
+        <rect id="payment_db" class="ai-shape ai-rect" x="203" y="83" width="80" height="30"/>
+        <text class="ai-label" x="243" y="98" text-anchor="middle">Payment DB</text>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M45 35 L55 49" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M85 20 L94 20 L94 64 L109 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M85 20 L188 20 L188 64 L203 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M55 79 L55 83" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M149 79 L149 83" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M243 79 L243 83" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

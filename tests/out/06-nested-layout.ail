@@ -1,0 +1,13 @@
+col {
+    text "My System" [font_size: 18]
+    row {
+        col leftcol {
+            text "Input"
+            text "Process"
+        }
+        col rightcol {
+            text "Output"
+            text "Log"
+        }
+    }
+}

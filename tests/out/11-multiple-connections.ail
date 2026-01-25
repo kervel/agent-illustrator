@@ -1,0 +1,4 @@
+row { rect lb [label: "Load Balancer"]  col { rect s1 [label: "Server 1"]  rect s2 [label: "Server 2"]  rect s3 [label: "Server 3"] } }
+lb -> s1
+lb -> s2
+lb -> s3

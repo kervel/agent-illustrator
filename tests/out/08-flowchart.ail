@@ -1,0 +1,15 @@
+col {
+    rect start [label: "Start"]
+    rect decision [label: "Decision"]
+    row {
+        rect actionA [label: "Action A"]
+        rect actionB [label: "Action B"]
+    }
+    rect end [label: "End"]
+}
+
+start -> decision
+decision -> actionA [label: "Yes"]
+decision -> actionB [label: "No"]
+actionA -> end
+actionB -> end

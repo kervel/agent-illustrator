@@ -1,0 +1,1 @@
+Create a vertical stack of three boxes: Header, Content, and Footer. Each should be labeled.

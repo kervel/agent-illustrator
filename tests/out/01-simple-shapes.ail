@@ -1,0 +1,4 @@
+row {
+  rect blue [fill: blue, size: 50]
+  rect green [fill: green, size: 50]
+}
