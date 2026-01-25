@@ -302,6 +302,8 @@ pub enum StyleValue {
     Keyword(String),
     /// Identifier reference (for `[label: my_shape]` syntax)
     Identifier(Identifier),
+    /// List of identifiers (for `[via: c1, c2, c3]` syntax - Feature 008)
+    IdentifierList(Vec<Identifier>),
 }
 
 // ============================================

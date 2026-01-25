@@ -181,12 +181,14 @@ fn compute_curve_control_point(start: Point, end: Point) -> Point {
 }
 
 /// Route a connection between two bounding boxes with the specified routing mode
+/// Optional via_points are control points for curved routing (Feature 008)
 pub fn route_connection(
     from_bounds: &BoundingBox,
     to_bounds: &BoundingBox,
     mode: RoutingMode,
+    via_points: &[Point],
 ) -> Vec<Point> {
-    // For curved routing, use quadratic Bezier with auto-generated control point (Feature 008)
+    // For curved routing, use quadratic Bezier (Feature 008)
     if mode == RoutingMode::Curved {
         let from_center = from_bounds.center();
         let to_center = to_bounds.center();
@@ -195,11 +197,35 @@ pub fn route_connection(
         let start = boundary_point_toward(from_bounds, to_center);
         let end = boundary_point_toward(to_bounds, from_center);
 
-        // Generate control point at perpendicular offset (25% of chord length)
-        let control = compute_curve_control_point(start, end);
+        if via_points.is_empty() {
+            // No via points - auto-generate control point
+            let control = compute_curve_control_point(start, end);
+            return vec![start, control, end];
+        } else if via_points.len() == 1 {
+            // Single via point - use as control point
+            return vec![start, via_points[0], end];
+        } else {
+            // Multiple via points - create chained curve segments
+            // For n via points, we create path: start, via1, junction1, via2, junction2, ..., end
+            // The renderer will interpret this as: Q via1 junction1, T junction2, T junction3, ..., T end
+            let mut path = vec![start];
 
-        // Return 3 points: start, control, end (renderer will interpret as quadratic Bezier)
-        return vec![start, control, end];
+            // Calculate junction points between via points
+            // For smooth chaining, junctions are at midpoints between consecutive via points
+            for i in 0..via_points.len() {
+                path.push(via_points[i]);
+                if i < via_points.len() - 1 {
+                    // Add junction point (midpoint to next via)
+                    let junction = Point::new(
+                        (via_points[i].x + via_points[i + 1].x) / 2.0,
+                        (via_points[i].y + via_points[i + 1].y) / 2.0,
+                    );
+                    path.push(junction);
+                }
+            }
+            path.push(end);
+            return path;
+        }
     }
 
     // For direct routing, use boundary points that point toward each other's centers
@@ -318,6 +344,53 @@ fn extract_routing_mode(modifiers: &[Spanned<StyleModifier>]) -> RoutingMode {
     RoutingMode::default() // Orthogonal
 }
 
+/// Extract via references from connection modifiers (Feature 008)
+/// Returns a list of identifier names for steering vertices
+fn extract_via_references(modifiers: &[Spanned<StyleModifier>]) -> Vec<String> {
+    let mut via_refs = Vec::new();
+    for modifier in modifiers {
+        if matches!(modifier.node.key.node, StyleKey::Custom(ref k) if k == "via") {
+            match &modifier.node.value.node {
+                StyleValue::Identifier(id) => {
+                    via_refs.push(id.0.clone());
+                }
+                StyleValue::Keyword(k) => {
+                    // Sometimes identifiers are parsed as keywords
+                    via_refs.push(k.clone());
+                }
+                StyleValue::IdentifierList(ids) => {
+                    // Multiple via points: [via: c1, c2, c3]
+                    for id in ids {
+                        via_refs.push(id.0.clone());
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    via_refs
+}
+
+/// Resolve via references to element center points (Feature 008)
+fn resolve_via_points(
+    via_refs: &[String],
+    result: &LayoutResult,
+) -> Result<Vec<Point>, LayoutError> {
+    let mut points = Vec::new();
+    for name in via_refs {
+        if let Some(element) = result.get_element_by_name(name) {
+            points.push(element.bounds.center());
+        } else {
+            return Err(LayoutError::UndefinedIdentifier {
+                name: name.clone(),
+                span: 0..0, // We don't have span info here
+                suggestions: vec![],
+            });
+        }
+    }
+    Ok(points)
+}
+
 /// Route all connections in a document
 pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
     // Track element IDs that are used as connection labels (to remove them from rendering)
@@ -351,8 +424,17 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                         })?;
 
                     let routing_mode = extract_routing_mode(&conn.modifiers);
+
+                    // Feature 008: Copy bounds before resolving via points to avoid borrow conflict
+                    let from_bounds = from_element.bounds;
+                    let to_bounds = to_element.bounds;
+
+                    // Feature 008: Resolve via references to control points
+                    let via_refs = extract_via_references(&conn.modifiers);
+                    let via_points = resolve_via_points(&via_refs, result)?;
+
                     let path =
-                        route_connection(&from_element.bounds, &to_element.bounds, routing_mode);
+                        route_connection(&from_bounds, &to_bounds, routing_mode, &via_points);
                     let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
 
                     // Extract label and track if it references an element
@@ -604,7 +686,7 @@ mod tests {
         let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
 
         // Direct routing should give exactly 2 points (straight line)
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
         assert_eq!(
             path.len(),
             2,
@@ -623,7 +705,7 @@ mod tests {
         let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
 
         // Orthogonal routing may produce more than 2 points
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Orthogonal);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Orthogonal, &[]);
         assert!(
             path.len() >= 2,
             "Orthogonal routing should produce at least 2 points"
@@ -643,7 +725,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(5.0, 200.0, 50.0, 50.0);
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         // The end point should be snapped to have the same x as the start
@@ -661,7 +743,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(200.0, 5.0, 50.0, 50.0);
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         // The end point should be snapped to have the same y as the start
@@ -681,7 +763,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(200.0, 100.0, 50.0, 50.0);
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         // Both x and y should be different (diagonal line preserved)
@@ -702,7 +784,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(20.0, 200.0, 6.0, 6.0); // Small 6x6 shape
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         // Start point at (25, 50), end should be at target center (23, 203)
@@ -721,7 +803,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(0.0, 200.0, 100.0, 50.0); // Large 100x50 shape
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         // Should snap to vertical since start.x (25) is within target x bounds [0, 100]
@@ -737,7 +819,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(0.0, 200.0, 50.0, 50.0);
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         assert_eq!(
@@ -752,7 +834,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(200.0, 0.0, 50.0, 50.0);
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Direct, &[]);
 
         assert_eq!(path.len(), 2);
         assert_eq!(
@@ -894,7 +976,7 @@ mod tests {
         let from_bounds = BoundingBox::new(0.0, 0.0, 50.0, 50.0);
         let to_bounds = BoundingBox::new(150.0, 0.0, 50.0, 50.0);
 
-        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Curved);
+        let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Curved, &[]);
 
         // Curved routing returns exactly 3 points: start, control, end
         assert_eq!(path.len(), 3, "Curved routing should return 3 points");

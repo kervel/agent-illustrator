@@ -363,11 +363,26 @@ impl SvgBuilder {
         // Generate path data based on routing mode (Feature 008)
         let d = match routing_mode {
             RoutingMode::Curved if path.len() == 3 => {
-                // Quadratic Bezier: M start Q control end
+                // Single via point: M start Q control end
                 format!(
                     "M{} {} Q{} {} {} {}",
                     path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y
                 )
+            }
+            RoutingMode::Curved if path.len() > 3 => {
+                // Multi-via chained curves: M start Q via1 junction1 T junction2 T ... T end
+                // Path format: [start, via1, junction1, via2, junction2, ..., end]
+                let mut d = format!("M{} {}", path[0].x, path[0].y);
+                // First segment is Q (quadratic Bezier)
+                d.push_str(&format!(
+                    " Q{} {} {} {}",
+                    path[1].x, path[1].y, path[2].x, path[2].y
+                ));
+                // Subsequent points use T (smooth quadratic continuation)
+                for point in &path[3..] {
+                    d.push_str(&format!(" T{} {}", point.x, point.y));
+                }
+                d
             }
             _ => path_to_d(path), // Default polyline for orthogonal/direct
         };

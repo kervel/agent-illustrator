@@ -410,4 +410,51 @@ mod tests {
         assert!(svg.contains("Second"));
         assert!(svg.contains("Third"));
     }
+
+    #[test]
+    fn test_render_curved_connection_with_via() {
+        // Feature 008: Curved connection with external via point
+        let svg = render(
+            r#"
+            rect a [x: 0, y: 0]
+            rect b [x: 200, y: 0]
+            circle ctrl [x: 100, y: 100, size: 6]
+            a -> b [routing: curved, via: ctrl]
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains("ai-connection"));
+        assert!(svg.contains("<path"));
+        // Should use Q command with ctrl's position as control point
+        assert!(
+            svg.contains(" Q") || svg.contains("Q "),
+            "Via-routed curve should use quadratic Bezier (Q command)"
+        );
+    }
+
+    #[test]
+    fn test_render_curved_connection_multi_via() {
+        // Feature 008: Multi-via for S-curves
+        let svg = render(
+            r#"
+            rect a [x: 0, y: 0]
+            rect b [x: 200, y: 0]
+            circle c1 [x: 50, y: 50, size: 6]
+            circle c2 [x: 150, y: -50, size: 6]
+            a -> b [routing: curved, via: c1, via: c2]
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains("ai-connection"));
+        assert!(svg.contains("<path"));
+        // Multi-via should produce Q followed by T commands
+        assert!(
+            svg.contains(" Q") || svg.contains("Q "),
+            "Multi-via should start with Q command"
+        );
+        assert!(
+            svg.contains(" T") || svg.contains("T "),
+            "Multi-via should chain with T commands"
+        );
+    }
 }

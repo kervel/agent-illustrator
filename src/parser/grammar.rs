@@ -297,7 +297,8 @@ where
             };
             Spanned::new(value, id.span)
         }),
-    ));
+    ))
+    .boxed(); // Feature 008: boxed() for faster compilation (chumsky trait solving)
 
     let modifier = style_key
         .then_ignore(just(Token::Colon))
@@ -587,7 +588,8 @@ where
         ge_expr,
         le_expr,
         equality_constraint,
-    ));
+    ))
+    .boxed(); // boxed() for faster compilation (chumsky trait solving)
 
     // Constrain declaration: constrain <expr>
     let constrain_decl = just(Token::Constrain)
@@ -710,7 +712,8 @@ where
             .ignore_then(just(Token::Colon))
             .ignore_then(identifier.clone())
             .map(|id| ("via", ParsedModifierValue::Identifier(id))),
-    ));
+    ))
+    .boxed(); // boxed() for faster compilation (chumsky trait solving)
 
     // Parse a modifier block for path commands: [x: 10, y: 20] or [radius: 5, sweep: cw, via: ctrl]
     let path_modifier_block = path_modifier_spec
