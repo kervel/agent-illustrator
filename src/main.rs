@@ -321,11 +321,11 @@ fn print_skill() {
     println!(
         r#"# Agent Illustrator Skill
 
-You can create diagrams using the Agent Illustrator DSL. Pipe code to `agent-illustrator` to get SVG output.
+Create diagrams with Agent Illustrator DSL. Output raw AIL code only (no markdown).
 
 ## Quick Reference
 
-SHAPES: rect, circle, ellipse, text "content", path {{ }}
+SHAPES: rect, circle, ellipse, text "content", path "name" {{ }}
 LAYOUTS: row {{ }}, col {{ }}, group {{ }}
 CONNECTIONS: a -> b, a <- b, a <-> b, a -- b
 MODIFIERS: [key: value, ...] after element name
@@ -333,71 +333,63 @@ MODIFIERS: [key: value, ...] after element name
 ## Core Patterns
 
 ```
-# Basic layout with connection
 row {{ rect a  rect b }}
 a -> b
 ```
 
 ```
-# Styled shapes
-rect box [fill: steelblue, stroke: #333, size: 50]
+rect box [fill: steelblue, size: 50]
 circle dot [fill: red, size: 20]
 text "Label" [font_size: 16]
 ```
 
 ```
-# Nested structure
 col {{
     text "Title" [font_size: 18]
     row {{
-        rect left [label: "A"]
-        rect right [label: "B"]
+        rect item1 [label: "A"]
+        rect item2 [label: "B"]
     }}
 }}
 ```
 
 ```
-# Connection styles
-a -> b [stroke: green, stroke_width: 2]
-a -> b [routing: direct]  // diagonal instead of orthogonal
-a -> b [label: "flow"]
+a -> b [label: "flow", stroke: green]
+a -> b [routing: direct]  // diagonal line
 ```
 
 ```
-# Custom shape (path)
-path "diamond" [fill: blue] {{
+path "triangle" [fill: blue] {{
     vertex a
-    line_to b [x: 20, y: -20]
-    line_to c [x: 40, y: 0]
-    line_to d [x: 20, y: 20]
+    line_to b [x: 30, y: -15]
+    line_to c [x: 30, y: 15]
     close
 }}
 ```
 
-## Common Modifiers
+## Modifiers
 
 | Modifier | Example | Purpose |
 |----------|---------|---------|
-| fill | fill: blue | Shape fill color |
+| fill | fill: blue | Fill color |
 | stroke | stroke: #333 | Border color |
-| size | size: 40 | Width=height (square) |
-| width/height | width: 100 | Explicit dimension |
-| gap | gap: 20 | Space in layouts |
-| label | label: "x" | Text label on shape |
-| rotation | rotation: 45 | Rotate degrees |
-| routing | routing: direct | Diagonal connections |
+| size | size: 40 | Width=height |
+| width/height | width: 100 | Explicit size |
+| gap | gap: 20 | Layout spacing |
+| label | label: "x" | Shape label |
+| routing | routing: direct | Diagonal lines |
 
 ## Rules
 
-1. Every shape in a layout gets auto-positioned
-2. Connections reference shapes by name
-3. Names are optional: `rect` works, `rect myname` names it
-4. Shapes outside layouts need constraints or connections to position them
+1. Names are identifiers: letters, numbers, underscore (e.g., `myShape`, `item_1`)
+2. Reserved words cannot be names: left, right, top, bottom, x, y, width, height
+3. Shapes in layouts auto-position; connections reference shapes by name
+4. Path names must be quoted: `path "name" {{ }}`
 
 ## Usage
 
 ```bash
-echo 'row {{ rect a  rect b }}  a -> b' | agent-illustrator > diagram.svg
+echo 'row {{ rect a  rect b }}  a -> b' | agent-illustrator > out.svg
 ```"#
     );
 }
