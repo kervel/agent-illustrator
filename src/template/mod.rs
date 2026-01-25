@@ -20,5 +20,5 @@
 mod registry;
 mod resolver;
 
-pub use registry::{TemplateDefinition, TemplateRegistry, TemplateError};
+pub use registry::{TemplateDefinition, TemplateError, TemplateRegistry};
 pub use resolver::{resolve_templates, ResolutionContext};

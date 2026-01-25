@@ -1,5 +1,5 @@
 (* Agent Illustrator DSL Grammar - EBNF Notation *)
-(* Version: 3.0.0 *)
+(* Version: 3.1.0 *)
 (* Design Goal: Minimal tokens for AI agent efficiency *)
 (* Last Updated: 2026-01-24 *)
 
@@ -83,11 +83,67 @@ export_decl = "export" identifier { "," identifier } ;
 shape_decl = shape_type [ string_literal ] [ identifier ] [ modifier_block ] ;
 
 shape_type = "rect" | "circle" | "ellipse" | "line" | "polygon" | "text"
-           | icon_type ;
+           | icon_type
+           | path_decl ;
 
 icon_type = "icon" string_literal ;
 
 (* Note: text shape requires a string literal: text "Hello" my_label *)
+
+(* ============================================ *)
+(* PATH SHAPE DECLARATIONS (Feature 007)       *)
+(* ============================================ *)
+
+(* Path shapes allow defining custom polygons with straight and curved segments.
+   Vertices can be explicitly declared or implicitly created via line_to/arc_to.
+   Positions are relative to the shape's origin (top-left corner).
+
+   Syntax: path "name"? identifier? [modifiers]? { body }
+*)
+
+path_decl = "path" [ string_literal ] [ identifier ] [ modifier_block ] path_block ;
+
+path_block = "{" { path_command } "}" ;
+
+path_command = vertex_decl
+             | line_to_decl
+             | arc_to_decl
+             | close_decl ;
+
+(* Vertex declaration: declares a named vertex, optionally with position *)
+vertex_decl = "vertex" identifier [ position_block ] ;
+
+(* Position block for vertices *)
+position_block = "[" position_spec { "," position_spec } [ "," ] "]" ;
+
+(* Position specification: supports both x/y and directional syntax *)
+position_spec = ( "x" | "y" | "right" | "left" | "up" | "down" ) ":" number_value ;
+
+(* Line segment: straight line to a target vertex *)
+line_to_decl = "line_to" identifier [ position_block ] ;
+
+(* Arc segment: curved line to a target vertex with arc parameters *)
+arc_to_decl = "arc_to" identifier [ arc_modifier_block ] ;
+
+(* Arc modifier block supports position specs plus arc-specific params *)
+arc_modifier_block = "[" arc_modifier { "," arc_modifier } [ "," ] "]" ;
+
+arc_modifier = position_spec
+             | "radius" ":" number_value
+             | "bulge" ":" number_value
+             | "sweep" ":" sweep_direction ;
+
+(* Sweep direction for arcs *)
+sweep_direction = "clockwise" | "counterclockwise" | "cw" | "ccw" ;
+
+(* Close the path back to the starting vertex *)
+close_decl = "close" ;
+
+(* Arc parameter modes:
+   - radius: arc radius in pixels, with sweep direction
+   - bulge: tangent of (arc_angle/4), negative = opposite direction
+     bulge = 0.414 gives a quarter-circle arc
+*)
 
 (* ============================================ *)
 (* CONNECTIONS                                  *)
@@ -345,4 +401,55 @@ whitespace = " " | "\t" | "\n" | "\r" ;
 
   connect input -> output
   connect cable -> r1.port1   // port1 exported by rack template
+
+  // Path shapes (Feature 007)
+
+  // Simple triangle
+  path "triangle" {
+    vertex a
+    line_to b [x: 50, y: 0]
+    line_to c [x: 25, y: 40]
+    close
+  }
+
+  // Arrow with curved back
+  path "arrow" [fill: accent-1] {
+    vertex tip [x: 100, y: 25]
+    line_to top [x: 60, y: 0]
+    arc_to back [x: 0, y: 25, bulge: 0.3]
+    line_to bottom [x: 60, y: 50]
+    close
+  }
+
+  // Rounded rectangle using arcs
+  path "rounded_rect" [fill: background-1, stroke: foreground-1] {
+    vertex top_left [x: 10, y: 0]
+    arc_to top_right [x: 90, y: 0, radius: 10, sweep: clockwise]
+    line_to bottom_right_arc [x: 100, y: 40]
+    arc_to bottom_right [x: 90, y: 50, radius: 10, sweep: cw]
+    line_to bottom_left_arc [x: 10, y: 50]
+    arc_to bottom_left [x: 0, y: 40, radius: 10, sweep: cw]
+    line_to top_left_arc [x: 0, y: 10]
+    arc_to top_left [radius: 10, sweep: cw]
+    close
+  }
+
+  // Path with directional positions
+  path "shape" {
+    vertex start
+    line_to a [right: 50, down: 0]
+    line_to b [right: 25, down: 40]
+    close
+  }
+
+  // Path inside layout
+  row {
+    path "badge" [fill: green] {
+      vertex a
+      vertex b [x: 60, y: 0]
+      vertex c [x: 60, y: 20]
+      vertex d [x: 0, y: 20]
+    }
+    rect spacer [width: 10]
+  }
 *)

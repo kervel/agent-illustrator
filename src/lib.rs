@@ -22,7 +22,7 @@ pub use error::ParseError;
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
 pub use renderer::{render_svg, render_svg_with_stylesheet, SvgConfig};
-pub use template::{TemplateRegistry, TemplateError, resolve_templates};
+pub use template::{resolve_templates, TemplateError, TemplateRegistry};
 
 use thiserror::Error;
 

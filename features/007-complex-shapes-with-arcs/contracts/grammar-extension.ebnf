@@ -1,0 +1,175 @@
+(* Path Shape Grammar Extension - Feature 007 *)
+(* To be integrated into grammar.ebnf after implementation *)
+(* Version: 1.0.0 *)
+
+(* ============================================ *)
+(* PATH SHAPE DECLARATIONS                      *)
+(* ============================================ *)
+
+(* Path shape: a custom closed shape with vertices and segments *)
+path_decl = "path" [ string_literal ] [ identifier ] [ modifier_block ] path_block ;
+
+path_block = "{" { path_command } "}" ;
+
+path_command = vertex_decl
+             | line_to_decl
+             | arc_to_decl
+             | close_decl ;
+
+(* ============================================ *)
+(* VERTEX DECLARATIONS                          *)
+(* ============================================ *)
+
+(* Explicit vertex: vertex name [position] *)
+vertex_decl = "vertex" identifier [ position_block ] ;
+
+(* Position can use x/y or directional syntax *)
+position_block = "[" position_spec { "," position_spec } [ "," ] "]" ;
+
+position_spec = axis_position | directional_position ;
+
+axis_position = ( "x" | "y" ) ":" number_value ;
+
+directional_position = ( "right" | "left" | "up" | "down" ) ":" number_value ;
+
+(* ============================================ *)
+(* SEGMENT DECLARATIONS                         *)
+(* ============================================ *)
+
+(* Straight line to a vertex *)
+line_to_decl = "line_to" identifier [ position_block ] ;
+
+(* Arc to a vertex *)
+arc_to_decl = "arc_to" identifier [ arc_modifier_block ] ;
+
+(* Arc modifier block: position + arc params *)
+arc_modifier_block = "[" arc_modifier { "," arc_modifier } [ "," ] "]" ;
+
+arc_modifier = position_spec
+             | radius_spec
+             | bulge_spec
+             | sweep_spec ;
+
+radius_spec = "radius" ":" number_value ;
+
+bulge_spec = "bulge" ":" number_value ;
+
+sweep_spec = "sweep" ":" sweep_direction ;
+
+sweep_direction = "clockwise" | "counterclockwise" | "cw" | "ccw" ;
+
+(* ============================================ *)
+(* CLOSE PATH                                   *)
+(* ============================================ *)
+
+close_decl = "close" [ close_arc_modifier ] ;
+
+close_arc_modifier = "_arc" "[" arc_params "]" ;
+
+arc_params = radius_spec | bulge_spec | ( radius_spec "," sweep_spec ) ;
+
+(* Note: close_arc is parsed as "close" "_arc" [...]
+   This is a shorthand for close with arc back to first vertex *)
+
+(* ============================================ *)
+(* PATH MODIFIERS (on path shape itself)        *)
+(* ============================================ *)
+
+(* Added to modifier_key production *)
+path_modifier_key = "rounded" ;  (* corner rounding shorthand *)
+
+(* Examples:
+   path "box" [rounded: 10] { ... }
+   Applies arc_to with radius:10 at each corner
+*)
+
+(* ============================================ *)
+(* INTEGRATION WITH SHAPE_TYPE                  *)
+(* ============================================ *)
+
+(* Updated shape_type production (existing shapes unchanged):
+   shape_type = "rect" | "circle" | "ellipse" | "line" | "polygon" | "text"
+              | icon_type
+              | "path" ;    (* NEW: path triggers path_decl parsing *)
+*)
+
+(* ============================================ *)
+(* EXAMPLE VALID INPUTS                         *)
+(* ============================================ *)
+
+(*
+  // Simple triangle
+  path "triangle" {
+    vertex a
+    line_to b [x: 50, y: 0]
+    line_to c [x: 25, y: 40]
+    close
+  }
+
+  // Rounded rectangle (explicit)
+  path "button" {
+    vertex tl
+    line_to tr [right: 100]
+    arc_to corner1 [down: 10, right: 10, radius: 10]
+    line_to br [down: 30]
+    arc_to corner2 [down: 10, left: 10, radius: 10]
+    line_to bl [left: 100]
+    arc_to corner3 [up: 10, left: 10, radius: 10]
+    line_to tl_return [up: 30]
+    close_arc [radius: 10]
+  }
+
+  // Rounded rectangle (shorthand)
+  path "button" [rounded: 10] {
+    vertex tl
+    vertex tr [right: 100]
+    vertex br [right: 100, down: 50]
+    vertex bl [down: 50]
+  }
+
+  // Arrow with curved back
+  path "arrow" [fill: accent-1] {
+    vertex tip [x: 100, y: 25]
+    line_to top [x: 60, y: 0]
+    line_to notch_top [x: 60, y: 15]
+    line_to back_top [x: 0, y: 15]
+    arc_to back_bottom [x: 0, y: 35, bulge: 0.3]
+    line_to notch_bottom [x: 60, y: 35]
+    line_to bottom [x: 60, y: 50]
+    close
+  }
+
+  // Pie slice
+  path "slice" [fill: red] {
+    vertex center
+    line_to edge1 [x: 50, y: 0]
+    arc_to edge2 [x: 35, y: 35, radius: 50, sweep: clockwise]
+    close
+  }
+
+  // Path in layout
+  row {
+    path "badge" [fill: green, rounded: 5] {
+      vertex a
+      vertex b [x: 60, y: 0]
+      vertex c [x: 60, y: 20]
+      vertex d [x: 0, y: 20]
+    }
+    rect "spacer" [width: 10]
+    path "chevron" [stroke: black] {
+      vertex a
+      line_to b [x: 15, y: 10]
+      line_to c [x: 0, y: 20]
+    }
+  }
+
+  // Degenerate paths (valid)
+  path "dot" {
+    vertex center
+  }
+
+  path "custom_line" {
+    vertex start
+    arc_to end [x: 100, y: 0, bulge: 0.5]
+  }
+*)

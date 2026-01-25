@@ -5,8 +5,7 @@ use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::parser::ast::{
-    ExportDecl, ParameterDef, Spanned, Statement, StyleValue, TemplateDecl,
-    TemplateSourceType,
+    ExportDecl, ParameterDef, Spanned, Statement, StyleValue, TemplateDecl, TemplateSourceType,
 };
 
 /// Errors that can occur during template operations
@@ -113,7 +112,10 @@ impl TemplateDefinition {
 
     /// Get all parameter names
     pub fn parameter_names(&self) -> Vec<&str> {
-        self.parameters.iter().map(|p| p.name.node.as_str()).collect()
+        self.parameters
+            .iter()
+            .map(|p| p.name.node.as_str())
+            .collect()
     }
 
     /// Check if this is a file-based template
@@ -211,9 +213,12 @@ impl TemplateRegistry {
 
     /// Load SVG content for a file-based template
     pub fn load_svg_template(&mut self, name: &str) -> Result<(), TemplateError> {
-        let def = self.templates.get(name).ok_or_else(|| TemplateError::NotFound {
-            name: name.to_string(),
-        })?;
+        let def = self
+            .templates
+            .get(name)
+            .ok_or_else(|| TemplateError::NotFound {
+                name: name.to_string(),
+            })?;
 
         if def.source_type != TemplateSourceType::Svg {
             return Ok(()); // Not an SVG template
@@ -223,16 +228,20 @@ impl TemplateRegistry {
             return Ok(()); // Already loaded
         }
 
-        let path = def.source_path.as_ref().ok_or_else(|| TemplateError::FileNotFound {
-            path: PathBuf::from(name),
-        })?;
+        let path = def
+            .source_path
+            .as_ref()
+            .ok_or_else(|| TemplateError::FileNotFound {
+                path: PathBuf::from(name),
+            })?;
 
         let full_path = self.resolve_path(path.to_str().unwrap_or(""));
 
-        let content = std::fs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
-            path: full_path.clone(),
-            message: e.to_string(),
-        })?;
+        let content =
+            std::fs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
+                path: full_path.clone(),
+                message: e.to_string(),
+            })?;
 
         // Parse SVG dimensions from viewBox or width/height attributes
         let dimensions = parse_svg_dimensions(&content);
@@ -246,7 +255,10 @@ impl TemplateRegistry {
     }
 
     /// Collect all template declarations from a document
-    pub fn collect_from_statements(&mut self, statements: &[Spanned<Statement>]) -> Result<(), TemplateError> {
+    pub fn collect_from_statements(
+        &mut self,
+        statements: &[Spanned<Statement>],
+    ) -> Result<(), TemplateError> {
         for stmt in statements {
             if let Statement::TemplateDecl(decl) = &stmt.node {
                 self.register(decl)?;
@@ -291,7 +303,10 @@ fn parse_svg_attribute(svg: &str, attr: &str) -> Option<f64> {
         if let Some(end) = svg[start..].find('"') {
             let value_str = &svg[start..start + end];
             // Strip unit suffixes like px, pt, etc.
-            let numeric: String = value_str.chars().take_while(|c| c.is_numeric() || *c == '.').collect();
+            let numeric: String = value_str
+                .chars()
+                .take_while(|c| c.is_numeric() || *c == '.')
+                .collect();
             return numeric.parse().ok();
         }
     }
@@ -340,7 +355,9 @@ mod tests {
             body: Some(vec![]),
         };
 
-        registry.register(&decl).expect("First register should succeed");
+        registry
+            .register(&decl)
+            .expect("First register should succeed");
         let result = registry.register(&decl);
         assert!(matches!(result, Err(TemplateError::Duplicate { .. })));
     }

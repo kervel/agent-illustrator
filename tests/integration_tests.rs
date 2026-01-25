@@ -1181,8 +1181,14 @@ fn test_template_inline_basic() {
 
     let svg = render(input).expect("Template should render");
     assert!(svg.contains("<svg"), "Output should be valid SVG");
-    assert!(svg.contains("<rect"), "Should contain rect element from template");
-    assert!(svg.contains(r#"id="mybox""#), "Should have instance name as ID");
+    assert!(
+        svg.contains("<rect"),
+        "Should contain rect element from template"
+    );
+    assert!(
+        svg.contains(r#"id="mybox""#),
+        "Should have instance name as ID"
+    );
 }
 
 #[test]
@@ -1200,7 +1206,10 @@ fn test_template_with_parameters() {
     let svg = render(input).expect("Parameterized template should render");
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     // The fill should be red, overriding the default blue
-    assert!(svg.contains(r#"fill="red""#), "Should have overridden fill color");
+    assert!(
+        svg.contains(r#"fill="red""#),
+        "Should have overridden fill color"
+    );
 }
 
 #[test]
@@ -1242,7 +1251,10 @@ fn test_template_in_layout() {
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     // Should have multiple rect elements
     let rect_count = svg.matches("<rect").count();
-    assert!(rect_count >= 3, "Should have at least 3 rect elements from template instances");
+    assert!(
+        rect_count >= 3,
+        "Should have at least 3 rect elements from template instances"
+    );
 }
 
 #[test]
@@ -1299,7 +1311,10 @@ fn test_template_file_svg_declaration() {
     match &doc.statements[0].node {
         agent_illustrator::parser::ast::Statement::TemplateDecl(decl) => {
             assert_eq!(decl.name.node.as_str(), "icon");
-            assert_eq!(decl.source_type, agent_illustrator::parser::ast::TemplateSourceType::Svg);
+            assert_eq!(
+                decl.source_type,
+                agent_illustrator::parser::ast::TemplateSourceType::Svg
+            );
         }
         _ => panic!("Expected TemplateDecl"),
     }
@@ -1341,7 +1356,8 @@ fn test_svg_template_import_end_to_end() {
 
     let svg_path = temp_dir.join("test_icon.svg");
     let mut file = std::fs::File::create(&svg_path).expect("Should create SVG file");
-    file.write_all(svg_content.as_bytes()).expect("Should write SVG content");
+    file.write_all(svg_content.as_bytes())
+        .expect("Should write SVG content");
 
     // Use "myicon" as template name (not "icon" which is a keyword)
     let input = r#"
@@ -1349,8 +1365,7 @@ fn test_svg_template_import_end_to_end() {
         myicon inst1
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1361,7 +1376,10 @@ fn test_svg_template_import_end_to_end() {
     let svg = result.expect("SVG template import should render");
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     // The embedded content should be present (circle element)
-    assert!(svg.contains("circle"), "Should contain the embedded SVG circle");
+    assert!(
+        svg.contains("circle"),
+        "Should contain the embedded SVG circle"
+    );
     // Should have the embed group
     assert!(svg.contains("ai-svg-embed"), "Should have svg-embed class");
 }
@@ -1380,7 +1398,8 @@ fn test_svg_template_multiple_instances() {
 
     let svg_path = temp_dir.join("box.svg");
     let mut file = std::fs::File::create(&svg_path).expect("Should create SVG file");
-    file.write_all(svg_content.as_bytes()).expect("Should write SVG content");
+    file.write_all(svg_content.as_bytes())
+        .expect("Should write SVG content");
 
     let input = r#"
         template "box" from "box.svg"
@@ -1391,8 +1410,7 @@ fn test_svg_template_multiple_instances() {
         }
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1403,7 +1421,11 @@ fn test_svg_template_multiple_instances() {
     let svg = result.expect("Multiple SVG instances should render");
     // Count occurrences of rect elements (should be 3)
     let rect_count = svg.matches("<rect").count();
-    assert!(rect_count >= 3, "Should have at least 3 rect elements (found {})", rect_count);
+    assert!(
+        rect_count >= 3,
+        "Should have at least 3 rect elements (found {})",
+        rect_count
+    );
 }
 
 #[test]
@@ -1420,7 +1442,8 @@ fn test_svg_template_with_size_modifiers() {
 
     let svg_path = temp_dir.join("circleicon.svg");
     let mut file = std::fs::File::create(&svg_path).expect("Should create SVG file");
-    file.write_all(svg_content.as_bytes()).expect("Should write SVG content");
+    file.write_all(svg_content.as_bytes())
+        .expect("Should write SVG content");
 
     // Use "circleicon" as template name (not "circle" which is a keyword)
     let input = r#"
@@ -1428,8 +1451,7 @@ fn test_svg_template_with_size_modifiers() {
         circleicon c1 [width: 200, height: 200]
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1438,7 +1460,10 @@ fn test_svg_template_with_size_modifiers() {
     let _ = std::fs::remove_dir(&temp_dir);
 
     let svg = result.expect("SVG template with size modifiers should render");
-    assert!(svg.contains("scale"), "Should contain scale transform for sizing");
+    assert!(
+        svg.contains("scale"),
+        "Should contain scale transform for sizing"
+    );
 }
 
 #[test]
@@ -1456,15 +1481,15 @@ fn test_svg_template_aspect_ratio_preserved() {
 
     let svg_path = temp_dir.join("wide.svg");
     let mut file = std::fs::File::create(&svg_path).expect("Should create SVG file");
-    file.write_all(svg_content.as_bytes()).expect("Should write SVG content");
+    file.write_all(svg_content.as_bytes())
+        .expect("Should write SVG content");
 
     let input = r#"
         template "wide" from "wide.svg"
         wide w1
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1490,8 +1515,7 @@ fn test_svg_template_file_not_found_error() {
         missing m1
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1501,7 +1525,9 @@ fn test_svg_template_file_not_found_error() {
     assert!(result.is_err(), "Missing SVG file should cause an error");
     let err_msg = result.unwrap_err().to_string();
     assert!(
-        err_msg.contains("not found") || err_msg.contains("read") || err_msg.contains("nonexistent"),
+        err_msg.contains("not found")
+            || err_msg.contains("read")
+            || err_msg.contains("nonexistent"),
         "Error should indicate file issue: {}",
         err_msg
     );
@@ -1528,7 +1554,8 @@ fn test_ail_template_import_basic() {
 
     let ail_path = temp_dir.join("server.ail");
     let mut file = std::fs::File::create(&ail_path).expect("Should create AIL file");
-    file.write_all(ail_content.as_bytes()).expect("Should write AIL content");
+    file.write_all(ail_content.as_bytes())
+        .expect("Should write AIL content");
 
     let input = r#"
         template "server" from "server.ail"
@@ -1536,8 +1563,7 @@ fn test_ail_template_import_basic() {
         server s2
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1548,7 +1574,10 @@ fn test_ail_template_import_basic() {
     let svg = result.expect("AIL template import should render");
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     // Should have elements from both instances
-    assert!(svg.contains("rect"), "Should contain rect elements from template");
+    assert!(
+        svg.contains("rect"),
+        "Should contain rect elements from template"
+    );
 }
 
 #[test]
@@ -1568,15 +1597,15 @@ fn test_ail_template_with_exports() {
 
     let ail_path = temp_dir.join("connector.ail");
     let mut file = std::fs::File::create(&ail_path).expect("Should create AIL file");
-    file.write_all(ail_content.as_bytes()).expect("Should write AIL content");
+    file.write_all(ail_content.as_bytes())
+        .expect("Should write AIL content");
 
     let input = r#"
         template "connector" from "connector.ail"
         connector c1
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1587,7 +1616,10 @@ fn test_ail_template_with_exports() {
     let svg = result.expect("AIL template with exports should render");
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     assert!(svg.contains("rect"), "Should contain rect element");
-    assert!(svg.contains("ellipse") || svg.contains("circle"), "Should contain circle elements");
+    assert!(
+        svg.contains("ellipse") || svg.contains("circle"),
+        "Should contain circle elements"
+    );
 }
 
 #[test]
@@ -1614,19 +1646,20 @@ fn test_ail_template_nested_import() {
 
     let component_path = temp_dir.join("component.ail");
     let mut file = std::fs::File::create(&component_path).expect("Should create component AIL");
-    file.write_all(component_ail.as_bytes()).expect("Should write component content");
+    file.write_all(component_ail.as_bytes())
+        .expect("Should write component content");
 
     let container_path = temp_dir.join("container.ail");
     let mut file = std::fs::File::create(&container_path).expect("Should create container AIL");
-    file.write_all(container_ail.as_bytes()).expect("Should write container content");
+    file.write_all(container_ail.as_bytes())
+        .expect("Should write container content");
 
     let input = r#"
         template "container" from "container.ail"
         container c1
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1639,7 +1672,11 @@ fn test_ail_template_nested_import() {
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     // Should have two rect elements from the nested components
     let rect_count = svg.matches("<rect").count();
-    assert!(rect_count >= 2, "Should have at least 2 rects from nested components (found {})", rect_count);
+    assert!(
+        rect_count >= 2,
+        "Should have at least 2 rects from nested components (found {})",
+        rect_count
+    );
 }
 
 #[test]
@@ -1659,8 +1696,7 @@ fn test_ail_template_circular_dependency_error() {
         recursive inst
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1688,8 +1724,7 @@ fn test_ail_template_file_not_found_error() {
         missing m1
     "#;
 
-    let config = RenderConfig::new()
-        .with_template_base_path(temp_dir.clone());
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
 
     let result = render_with_config(input, config);
 
@@ -1699,7 +1734,9 @@ fn test_ail_template_file_not_found_error() {
     assert!(result.is_err(), "Missing AIL file should cause an error");
     let err_msg = result.unwrap_err().to_string();
     assert!(
-        err_msg.contains("not found") || err_msg.contains("read") || err_msg.contains("nonexistent"),
+        err_msg.contains("not found")
+            || err_msg.contains("read")
+            || err_msg.contains("nonexistent"),
         "Error should indicate file issue: {}",
         err_msg
     );
@@ -1764,4 +1801,139 @@ fn test_rotation_zero_no_transform() {
     let result = agent_illustrator::render(input).expect("should render");
     // Zero rotation should not add a transform wrapper
     assert!(!result.contains("rotate(0"));
+}
+
+// ==================== Path Rendering Tests (Feature 007) ====================
+
+#[test]
+fn test_path_triangle_renders() {
+    let input = r#"
+        path "triangle" [fill: blue, stroke: black] {
+            vertex a
+            line_to b [x: 50, y: 0]
+            line_to c [x: 25, y: 40]
+            close
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    assert!(svg.contains("<path"), "Should contain path element");
+    assert!(
+        svg.contains("d=\"M"),
+        "Should have d attribute with M command"
+    );
+    assert!(svg.contains(" L"), "Should have L commands for lines");
+    assert!(svg.contains(" Z"), "Should have Z command for close");
+    assert!(svg.contains("ai-path"), "Should have path class");
+}
+
+#[test]
+fn test_path_with_arc_renders() {
+    let input = r#"
+        path "curved" {
+            vertex a
+            arc_to b [x: 50, y: 0, bulge: 0.5]
+            close
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    assert!(svg.contains(" A"), "Should have A command for arc");
+    assert!(svg.contains(" Z"), "Should close the path");
+}
+
+#[test]
+fn test_path_with_radius_arc_renders() {
+    let input = r#"
+        path "rounded" {
+            vertex a
+            arc_to b [x: 50, y: 0, radius: 30, sweep: clockwise]
+            line_to c [x: 50, y: 50]
+            close
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    assert!(svg.contains("<path"), "Should render as path");
+    assert!(svg.contains(" A30"), "Should have arc with radius 30");
+}
+
+#[test]
+fn test_path_in_layout_renders() {
+    let input = r#"
+        row {
+            path "badge" [fill: green] {
+                vertex a
+                line_to b [x: 40, y: 0]
+                line_to c [x: 40, y: 20]
+                line_to d [x: 0, y: 20]
+                close
+            }
+            rect spacer [width: 20]
+            circle dot
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    assert!(svg.contains("<path"), "Path in layout should render");
+    assert!(svg.contains("<rect"), "Rect should also render");
+}
+
+#[test]
+fn test_path_with_styles_renders() {
+    let input = r#"
+        path "styled" [fill: red, stroke: black, stroke_width: 2] {
+            vertex a
+            line_to b [x: 60, y: 0]
+            line_to c [x: 30, y: 50]
+            close
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    assert!(svg.contains("<path"), "Should render as path element");
+    // Note: styles are rendered as attributes or classes depending on config
+}
+
+#[test]
+fn test_path_single_vertex_renders() {
+    // Degenerate case: single vertex path
+    let input = r#"path "point" { vertex origin }"#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    // Should produce a MoveTo command at minimum
+    assert!(
+        svg.contains("d=\"M"),
+        "Should have d attribute with M command"
+    );
+}
+
+#[test]
+fn test_path_multiple_arcs() {
+    let input = r#"
+        path "wavy" {
+            vertex a
+            arc_to b [x: 30, y: 0, bulge: 0.3]
+            arc_to c [x: 60, y: 0, bulge: -0.3]
+            arc_to d [x: 90, y: 0, bulge: 0.3]
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    // Should have multiple arc commands
+    let arc_count = svg.matches(" A").count();
+    assert!(
+        arc_count >= 3,
+        "Should have at least 3 arc commands (found {})",
+        arc_count
+    );
+}
+
+#[test]
+fn test_path_counterclockwise_sweep() {
+    let input = r#"
+        path "arc" {
+            vertex a
+            arc_to b [x: 50, y: 0, radius: 25, sweep: counterclockwise]
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    // sweep-flag should be 0 for counterclockwise
+    assert!(
+        svg.contains(" 0 0 0 ") || svg.contains("0 0 0"),
+        "Counterclockwise arc should have sweep-flag 0"
+    );
 }

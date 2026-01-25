@@ -158,14 +158,20 @@ pub enum ShapeType {
     Ellipse,
     Line,
     Polygon,
-    Icon { icon_name: String },
-    Text { content: String },
+    Icon {
+        icon_name: String,
+    },
+    Text {
+        content: String,
+    },
     /// Embedded SVG content from template instantiation
     SvgEmbed {
         content: String,
         intrinsic_width: Option<f64>,
         intrinsic_height: Option<f64>,
     },
+    /// Custom path shape (Feature 007)
+    Path(PathDecl),
 }
 
 /// Connection between shapes
@@ -520,6 +526,104 @@ pub struct ConstrainDecl {
     pub expr: ConstraintExpr,
 }
 
+// ============================================
+// Path Shape Types (Feature 007)
+// ============================================
+
+/// Arc sweep direction
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SweepDirection {
+    #[default]
+    Clockwise,
+    Counterclockwise,
+}
+
+/// Arc curve parameters
+#[derive(Debug, Clone, PartialEq)]
+pub enum ArcParams {
+    /// Radius-based arc: `[radius: 20, sweep: clockwise]`
+    Radius { radius: f64, sweep: SweepDirection },
+    /// Bulge-based arc: `[bulge: 0.3]`
+    Bulge(f64),
+}
+
+impl Default for ArcParams {
+    fn default() -> Self {
+        ArcParams::Bulge(0.414) // tan(π/8) - gentle quarter-circle
+    }
+}
+
+/// Vertex position specification
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct VertexPosition {
+    /// X offset from origin
+    pub x: Option<f64>,
+    /// Y offset from origin
+    pub y: Option<f64>,
+}
+
+/// Vertex declaration
+#[derive(Debug, Clone, PartialEq)]
+pub struct VertexDecl {
+    /// Vertex name (required for referencing)
+    pub name: Spanned<Identifier>,
+    /// Optional position (relative to shape origin)
+    pub position: Option<VertexPosition>,
+}
+
+/// Line segment declaration
+#[derive(Debug, Clone, PartialEq)]
+pub struct LineToDecl {
+    /// Target vertex (existing or implicit)
+    pub target: Spanned<Identifier>,
+    /// Optional position for implicit vertex creation
+    pub position: Option<VertexPosition>,
+}
+
+/// Arc segment declaration
+#[derive(Debug, Clone, PartialEq)]
+pub struct ArcToDecl {
+    /// Target vertex (existing or implicit)
+    pub target: Spanned<Identifier>,
+    /// Optional position for implicit vertex creation
+    pub position: Option<VertexPosition>,
+    /// Arc parameters (radius, bulge, sweep)
+    pub params: ArcParams,
+}
+
+/// Commands that can appear inside a path block
+#[derive(Debug, Clone, PartialEq)]
+pub enum PathCommand {
+    /// Explicit vertex declaration: `vertex name [position]`
+    Vertex(VertexDecl),
+    /// Straight line segment: `line_to target [position]`
+    LineTo(LineToDecl),
+    /// Arc segment: `arc_to target [arc_params]`
+    ArcTo(ArcToDecl),
+    /// Close path with straight line: `close`
+    Close,
+    /// Close path with arc: `close_arc [arc_params]`
+    CloseArc(ArcParams),
+}
+
+/// The body of a path shape
+#[derive(Debug, Clone, PartialEq)]
+pub struct PathBody {
+    /// Sequence of path commands (vertices, segments, close)
+    pub commands: Vec<Spanned<PathCommand>>,
+}
+
+/// Path shape declaration
+#[derive(Debug, Clone, PartialEq)]
+pub struct PathDecl {
+    /// Shape name (optional)
+    pub name: Option<Spanned<Identifier>>,
+    /// Path body: vertices and segments
+    pub body: PathBody,
+    /// Style modifiers (fill, stroke, etc.)
+    pub modifiers: Vec<Spanned<StyleModifier>>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -561,5 +665,4 @@ mod tests {
         assert_eq!(path.leaf().as_str(), "child");
         assert_eq!(path.to_string(), "group1.item.child");
     }
-
 }

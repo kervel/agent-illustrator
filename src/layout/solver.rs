@@ -255,7 +255,11 @@ impl ConstraintSolver {
     }
 
     /// Get or create a kasuari variable for a base property (X, Y, Width, Height)
-    fn get_or_create_base_var(&mut self, element_id: &str, property: LayoutProperty) -> KasuariVariable {
+    fn get_or_create_base_var(
+        &mut self,
+        element_id: &str,
+        property: LayoutProperty,
+    ) -> KasuariVariable {
         let var = LayoutVariable::new(element_id, property);
         if let Some(&kvar) = self.variables.get(&var) {
             kvar
@@ -282,9 +286,10 @@ impl ConstraintSolver {
     /// For derived properties (CenterX, CenterY), returns the appropriate expression
     fn get_expression(&mut self, var: &LayoutVariable) -> kasuari::Expression {
         match var.property {
-            LayoutProperty::X | LayoutProperty::Y | LayoutProperty::Width | LayoutProperty::Height => {
-                self.get_or_create_var(var).into()
-            }
+            LayoutProperty::X
+            | LayoutProperty::Y
+            | LayoutProperty::Width
+            | LayoutProperty::Height => self.get_or_create_var(var).into(),
             LayoutProperty::CenterX => {
                 // center_x = x + width / 2
                 let x = self.get_or_create_base_var(&var.element_id, LayoutProperty::X);
@@ -350,9 +355,9 @@ impl ConstraintSolver {
                 // Duplicate constraints are warnings, not errors - but we treat them as errors for now
                 SolverError::Internal(format!("Duplicate constraint: {}", constraint_desc))
             }
-            kasuari::AddConstraintError::InternalSolverError(msg) => {
-                SolverError::Internal(format!("Internal solver error for {}: {}", constraint_desc, msg))
-            }
+            kasuari::AddConstraintError::InternalSolverError(msg) => SolverError::Internal(
+                format!("Internal solver error for {}: {}", constraint_desc, msg),
+            ),
         }
     }
 
@@ -366,7 +371,10 @@ impl ConstraintSolver {
             } => {
                 // Use expression to handle derived properties like CenterX/CenterY
                 let expr = self.get_expression(variable);
-                let desc = format!("{}.{:?} = {}", variable.element_id, variable.property, value);
+                let desc = format!(
+                    "{}.{:?} = {}",
+                    variable.element_id, variable.property, value
+                );
                 self.solver
                     .add_constraint(expr | EQ(Strength::REQUIRED) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
@@ -406,7 +414,10 @@ impl ConstraintSolver {
             } => {
                 // Use expression to handle derived properties like CenterX/CenterY
                 let expr = self.get_expression(variable);
-                let desc = format!("{}.{:?} >= {}", variable.element_id, variable.property, value);
+                let desc = format!(
+                    "{}.{:?} >= {}",
+                    variable.element_id, variable.property, value
+                );
                 self.solver
                     .add_constraint(expr | GE(Strength::REQUIRED) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
@@ -420,7 +431,10 @@ impl ConstraintSolver {
             } => {
                 // Use expression to handle derived properties like CenterX/CenterY
                 let expr = self.get_expression(variable);
-                let desc = format!("{}.{:?} <= {}", variable.element_id, variable.property, value);
+                let desc = format!(
+                    "{}.{:?} <= {}",
+                    variable.element_id, variable.property, value
+                );
                 self.solver
                     .add_constraint(expr | LE(Strength::REQUIRED) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
@@ -441,23 +455,31 @@ impl ConstraintSolver {
                 let desc = if *offset != 0.0 {
                     format!(
                         "{}.{:?} = midpoint({}.{:?}, {}.{:?}) + {}",
-                        target.element_id, target.property,
-                        a.element_id, a.property,
-                        b.element_id, b.property,
+                        target.element_id,
+                        target.property,
+                        a.element_id,
+                        a.property,
+                        b.element_id,
+                        b.property,
                         offset
                     )
                 } else {
                     format!(
                         "{}.{:?} = midpoint({}.{:?}, {}.{:?})",
-                        target.element_id, target.property,
-                        a.element_id, a.property,
-                        b.element_id, b.property
+                        target.element_id,
+                        target.property,
+                        a.element_id,
+                        a.property,
+                        b.element_id,
+                        b.property
                     )
                 };
                 // Express midpoint + offset as: 2*target = a + b + 2*offset
                 // Which is equivalent to: target = (a + b) / 2 + offset
                 self.solver
-                    .add_constraint(2.0 * target_expr | EQ(Strength::REQUIRED) | a_expr + b_expr + 2.0 * offset)
+                    .add_constraint(
+                        2.0 * target_expr | EQ(Strength::REQUIRED) | a_expr + b_expr + 2.0 * offset,
+                    )
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -730,7 +752,10 @@ mod tests {
         // Should fail with Unsatisfiable error
         assert!(result.is_err());
         match result.unwrap_err() {
-            SolverError::Unsatisfiable { reason, conflicting } => {
+            SolverError::Unsatisfiable {
+                reason,
+                conflicting,
+            } => {
                 assert!(reason.contains("conflicts"));
                 assert!(!conflicting.is_empty());
             }

@@ -100,9 +100,7 @@ impl ConstraintCollector {
                     }
 
                     match l.layout_type.node {
-                        LayoutType::Row => {
-                            self.collect_row_constraints(&child_ids, l, &stmt.span)
-                        }
+                        LayoutType::Row => self.collect_row_constraints(&child_ids, l, &stmt.span),
                         LayoutType::Column => {
                             self.collect_column_constraints(&child_ids, l, &stmt.span)
                         }
@@ -125,12 +123,7 @@ impl ConstraintCollector {
         }
     }
 
-    fn collect_row_constraints(
-        &mut self,
-        child_ids: &[String],
-        layout: &LayoutDecl,
-        span: &Span,
-    ) {
+    fn collect_row_constraints(&mut self, child_ids: &[String], layout: &LayoutDecl, span: &Span) {
         let gap = extract_number_modifier(&layout.modifiers, "gap")
             .unwrap_or(self.config.element_spacing);
 
@@ -142,7 +135,10 @@ impl ConstraintCollector {
                 offset: 0.0,
                 source: ConstraintSource {
                     span: span.clone(),
-                    description: format!("row vertical alignment: {} = {}", child_ids[i], child_ids[0]),
+                    description: format!(
+                        "row vertical alignment: {} = {}",
+                        child_ids[i], child_ids[0]
+                    ),
                     origin: ConstraintOrigin::LayoutContainer,
                 },
             });
@@ -187,7 +183,10 @@ impl ConstraintCollector {
                 offset: 0.0,
                 source: ConstraintSource {
                     span: span.clone(),
-                    description: format!("col horizontal alignment: {} = {}", child_ids[i], child_ids[0]),
+                    description: format!(
+                        "col horizontal alignment: {} = {}",
+                        child_ids[i], child_ids[0]
+                    ),
                     origin: ConstraintOrigin::LayoutContainer,
                 },
             });
@@ -504,9 +503,14 @@ mod tests {
         // Should have one fixed constraint for width
         assert_eq!(collector.constraints.len(), 1);
         match &collector.constraints[0] {
-            LayoutConstraint::Fixed { variable, value, .. } => {
+            LayoutConstraint::Fixed {
+                variable, value, ..
+            } => {
                 assert_eq!(variable.element_id, "a");
-                assert_eq!(variable.property, super::super::solver::LayoutProperty::Width);
+                assert_eq!(
+                    variable.property,
+                    super::super::solver::LayoutProperty::Width
+                );
                 assert!((value - 100.0).abs() < 0.001);
             }
             _ => panic!("Expected Fixed constraint"),
@@ -536,7 +540,13 @@ mod tests {
             .find(|c| matches!(c, LayoutConstraint::Equal { .. }));
 
         assert!(eq_constraint.is_some());
-        if let Some(LayoutConstraint::Equal { left, right, offset, .. }) = eq_constraint {
+        if let Some(LayoutConstraint::Equal {
+            left,
+            right,
+            offset,
+            ..
+        }) = eq_constraint
+        {
             assert_eq!(left.element_id, "a");
             assert_eq!(right.element_id, "b");
             assert!((offset - 0.0).abs() < 0.001);
