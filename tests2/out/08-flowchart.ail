@@ -1,0 +1,15 @@
+col {
+    rect start [label: "Start", fill: lightblue]
+    rect decision [label: "Decision?", fill: lightyellow]
+    row {
+        rect action_a [label: "Action A", fill: lightgreen]
+        rect action_b [label: "Action B", fill: lightcoral]
+    }
+    rect end [label: "End", fill: lightgray]
+}
+
+start -> decision
+decision -> action_a [label: "Yes"]
+decision -> action_b [label: "No"]
+action_a -> end
+action_b -> end

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 210 228">
+  <style>
+    :root {
+    --text-1: #333333;
+    --accent-1: #2196f3;
+    --background-1: #ffffff;
+    --foreground-dark: #1a1a1a;
+    --text-light: #ffffff;
+    --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --text-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --accent-2: #e3f2fd;
+    --status-warning: #ff9800;
+    --accent-3: #bbdefb;
+    --text-3: #999999;
+    --foreground-2: #666666;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --foreground-1: #333333;
+    --foreground-3: #999999;
+    --background-3: #eeeeee;
+    --foreground-light: #e0e0e0;
+    --text-2: #666666;
+    --background-light: #ffffff;
+  }
+
+  </style>
+  <g class="ai-container">
+    <rect id="header" class="ai-shape ai-rect" x="5" y="5" width="80" height="30"/>
+    <text class="ai-label" x="45" y="20" text-anchor="middle">Header</text>
+    <rect id="content" class="ai-shape ai-rect" x="5" y="39" width="80" height="30"/>
+    <text class="ai-label" x="45" y="54" text-anchor="middle">Content</text>
+    <rect id="footer" class="ai-shape ai-rect" x="5" y="73" width="80" height="30"/>
+    <text class="ai-label" x="45" y="88" text-anchor="middle">Footer</text>
+  </g>
+</svg>

@@ -1,0 +1,1 @@
+Draw a large red circle (size 60) next to a small blue square (size 30).

@@ -1,0 +1,1 @@
+Draw a 3-tier web architecture: Browser on the left, API Server in the middle, Database on the right. Show request flow from browser to API, and query flow from API to database.

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-75.5 -60 211 352">
+  <style>
+    :root {
+    --text-light: #ffffff;
+    --accent-2: #e3f2fd;
+    --background-2: #f5f5f5;
+    --accent-3: #bbdefb;
+    --foreground-1: #333333;
+    --foreground-3: #999999;
+    --foreground-2: #666666;
+    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
+    --background-3: #eeeeee;
+    --text-1: #333333;
+    --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --accent-1: #2196f3;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --text-2: #666666;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --background-1: #ffffff;
+    --text-dark: #1a1a1a;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <rect id="lb" class="ai-shape ai-rect" x="0" y="0" width="60" height="60" fill="steelblue"/>
+  <text class="ai-label" x="30" y="30" text-anchor="middle">Load Balancer</text>
+  <g class="ai-container">
+    <rect id="server1" class="ai-shape ai-rect" x="5" y="69" width="50" height="50" fill="green"/>
+    <text class="ai-label" x="30" y="94" text-anchor="middle">Server 1</text>
+    <rect id="server2" class="ai-shape ai-rect" x="5" y="123" width="50" height="50" fill="green"/>
+    <text class="ai-label" x="30" y="148" text-anchor="middle">Server 2</text>
+    <rect id="server3" class="ai-shape ai-rect" x="5" y="177" width="50" height="50" fill="green"/>
+    <text class="ai-label" x="30" y="202" text-anchor="middle">Server 3</text>
+  </g>
+  <path class="ai-connection" d="M30 60 L30 69" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M30 60 L30 123" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M30 60 L30 177" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

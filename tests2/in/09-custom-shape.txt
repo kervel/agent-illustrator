@@ -1,0 +1,1 @@
+Draw a triangle shape pointing to the right (like an arrow head or play button).

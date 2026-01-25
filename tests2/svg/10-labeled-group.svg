@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 328 220">
+  <style>
+    :root {
+    --background-3: #eeeeee;
+    --foreground-light: #e0e0e0;
+    --status-success: #4caf50;
+    --foreground-3: #999999;
+    --foreground-2: #666666;
+    --accent-3: #bbdefb;
+    --text-3: #999999;
+    --background-dark: #333333;
+    --text-light: #ffffff;
+    --background-light: #ffffff;
+    --text-1: #333333;
+    --text-2: #666666;
+    --foreground-dark: #1a1a1a;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --background-2: #f5f5f5;
+    --foreground-1: #333333;
+    --accent-light: #e3f2fd;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --accent-1: #2196f3;
+    --background-1: #ffffff;
+    --accent-dark: #1565c0;
+  }
+
+  </style>
+  <g class="ai-container">
+    <text class="ai-shape ai-text" x="5" y="13" text-anchor="start" dominant-baseline="middle" font-size="16">Backend Services</text>
+    <g class="ai-container">
+      <rect id="auth" class="ai-shape ai-rect" x="10" y="30" width="60" height="60"/>
+      <text class="ai-label" x="40" y="60" text-anchor="middle">Auth</text>
+      <rect id="users" class="ai-shape ai-rect" x="74" y="30" width="60" height="60"/>
+      <text class="ai-label" x="104" y="60" text-anchor="middle">Users</text>
+      <rect id="orders" class="ai-shape ai-rect" x="138" y="30" width="60" height="60"/>
+      <text class="ai-label" x="168" y="60" text-anchor="middle">Orders</text>
+    </g>
+  </g>
+</svg>

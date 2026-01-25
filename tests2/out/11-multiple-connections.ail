@@ -1,0 +1,9 @@
+rect lb [label: "Load Balancer", fill: steelblue, size: 60]
+col {
+    rect server1 [label: "Server 1", fill: green, size: 50]
+    rect server2 [label: "Server 2", fill: green, size: 50]
+    rect server3 [label: "Server 3", fill: green, size: 50]
+}
+lb -> server1
+lb -> server2
+lb -> server3

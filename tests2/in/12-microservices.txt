@@ -1,0 +1,1 @@
+Draw a microservices diagram with an API Gateway connecting to User Service, Order Service, and Payment Service. Each service connects to its own database.

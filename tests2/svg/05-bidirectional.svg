@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 349 244">
+  <style>
+    :root {
+    --status-error: #f44336;
+    --foreground-dark: #1a1a1a;
+    --foreground-2: #666666;
+    --text-1: #333333;
+    --text-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --text-light: #ffffff;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-3: #999999;
+    --background-1: #ffffff;
+    --background-light: #ffffff;
+    --foreground-1: #333333;
+    --foreground-light: #e0e0e0;
+    --foreground-3: #999999;
+    --background-dark: #333333;
+    --accent-2: #e3f2fd;
+    --accent-light: #e3f2fd;
+    --accent-1: #2196f3;
+    --accent-3: #bbdefb;
+    --text-2: #666666;
+    --accent-dark: #1565c0;
+    --background-3: #eeeeee;
+  }
+
+  </style>
+  <rect id="server1" class="ai-shape ai-rect" x="0" y="0" width="60" height="60" fill="lightblue"/>
+  <text class="ai-label" x="30" y="30" text-anchor="middle">Server 1</text>
+  <rect id="server2" class="ai-shape ai-rect" x="0" y="64" width="60" height="60" fill="lightblue"/>
+  <text class="ai-label" x="30" y="94" text-anchor="middle">Server 2</text>
+  <text class="ai-label" x="40" y="62" text-anchor="start">Bidirectional Communication</text>
+  <path class="ai-connection" d="M30 60 L30 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

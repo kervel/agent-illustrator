@@ -1,0 +1,4 @@
+row {
+    circle big_circle [fill: red, size: 60]
+    rect small_square [fill: blue, size: 30]
+}

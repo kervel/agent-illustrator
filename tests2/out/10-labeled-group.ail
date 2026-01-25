@@ -1,0 +1,8 @@
+col {
+    text "Backend Services" [font_size: 16]
+    row {
+        rect auth [label: "Auth", size: 60]
+        rect users [label: "Users", size: 60]
+        rect orders [label: "Orders", size: 60]
+    }
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 294 160">
+  <style>
+    :root {
+    --foreground-2: #666666;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --foreground-dark: #1a1a1a;
+    --text-2: #666666;
+    --accent-light: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --background-2: #f5f5f5;
+    --text-dark: #1a1a1a;
+    --accent-3: #bbdefb;
+    --background-dark: #333333;
+    --accent-1: #2196f3;
+    --background-3: #eeeeee;
+    --accent-2: #e3f2fd;
+    --background-1: #ffffff;
+    --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-light: #ffffff;
+    --foreground-3: #999999;
+    --text-3: #999999;
+    --foreground-1: #333333;
+    --background-light: #ffffff;
+  }
+
+  </style>
+  <g class="ai-container">
+    <rect id="blue_box" class="ai-shape ai-rect" x="5" y="5" width="80" height="30" fill="blue"/>
+    <rect id="green_box" class="ai-shape ai-rect" x="89" y="5" width="80" height="30" fill="green"/>
+  </g>
+</svg>

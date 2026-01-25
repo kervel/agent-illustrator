@@ -1,0 +1,6 @@
+rect browser [label: "Browser", fill: lightblue, size: 80]
+rect api [label: "API Server", fill: lightgreen, size: 80]
+rect database [label: "Database", fill: lightyellow, size: 80]
+
+browser -> api [label: "Request"]
+api -> database [label: "Query"]

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 219 368">
+  <style>
+    :root {
+    --foreground-light: #e0e0e0;
+    --foreground-1: #333333;
+    --background-3: #eeeeee;
+    --text-1: #333333;
+    --text-3: #999999;
+    --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --background-light: #ffffff;
+    --background-dark: #333333;
+    --text-light: #ffffff;
+    --foreground-3: #999999;
+    --foreground-2: #666666;
+    --text-2: #666666;
+    --accent-3: #bbdefb;
+    --background-2: #f5f5f5;
+    --accent-1: #2196f3;
+    --foreground-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --status-success: #4caf50;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <rect id="browser" class="ai-shape ai-rect" x="0" y="0" width="80" height="80" fill="lightblue"/>
+  <text class="ai-label" x="40" y="40" text-anchor="middle">Browser</text>
+  <rect id="api" class="ai-shape ai-rect" x="0" y="84" width="80" height="80" fill="lightgreen"/>
+  <text class="ai-label" x="40" y="124" text-anchor="middle">API Server</text>
+  <rect id="database" class="ai-shape ai-rect" x="0" y="168" width="80" height="80" fill="lightyellow"/>
+  <text class="ai-label" x="40" y="208" text-anchor="middle">Database</text>
+  <text class="ai-label" x="50" y="82" text-anchor="start">Request</text>
+  <text class="ai-label" x="50" y="166" text-anchor="start">Query</text>
+  <path class="ai-connection" d="M40 80 L40 84" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M40 164 L40 168" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

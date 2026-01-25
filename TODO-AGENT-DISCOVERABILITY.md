@@ -1,17 +1,20 @@
 # Agent Discoverability Improvements
 
-Prioritized list based on evidence from 12 subagent tests (92% first-attempt success rate).
+## Test Results Summary
+
+| Iteration | Pass Rate | Key Fix |
+|-----------|-----------|---------|
+| 1 | 92% (11/12) | N/A (baseline) |
+| 2 | 100% (12/12) | Added reserved keywords warning |
+
+Prioritized list based on evidence from 24 subagent tests across 2 iterations.
 
 ## P0: Critical (Blocking Issues)
 
-### 1. Document Reserved Keywords in Skill
+### 1. ✅ Document Reserved Keywords in Skill (DONE)
 **Evidence**: Test 06 failed because subagent used `col left { }` - "left" is a reserved keyword.
-**Fix**: Add to `--skill` output:
-```
-## Reserved Words
-These cannot be used as names: left, right, top, bottom, x, y, width, height, center_x, center_y
-```
-**Effort**: Small (documentation only)
+**Fix**: Added to `--skill` output: "Reserved words cannot be names: left, right, top, bottom, x, y, width, height"
+**Result**: Iteration 2 achieved 100% pass rate (Test 06 used `left_col` instead of `left`)
 
 ### 2. Improve Parse Error Messages
 **Evidence**: Error was "ExpectedFound { expected: [something else...], found: Some(Left) }" - not helpful.
@@ -79,9 +82,17 @@ These cannot be used as names: left, right, top, bottom, x, y, width, height, ce
 
 ## Quick Wins (Can Do Now)
 
-1. Add reserved keywords note to `--skill` (5 min)
-2. Add identifier naming rules to `--skill` (5 min)
+1. ✅ Add reserved keywords note to `--skill` (DONE)
+2. ✅ Add identifier naming rules to `--skill` (DONE)
 3. Add label_position to modifiers table (2 min)
+4. Strengthen "no markdown" instruction (haiku still wraps in ```)
+
+## New Issue from Iteration 2
+
+### Markdown Code Block Wrapping
+**Evidence**: Tests 05, 07 (haiku model) wrapped output in ``` blocks despite "Output raw AIL code only (no markdown)" instruction
+**Impact**: Low (easily stripped in post-processing)
+**Fix**: Make instruction more emphatic or accept as model-dependent behavior
 
 ## Summary
 

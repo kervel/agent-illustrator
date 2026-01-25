@@ -1,0 +1,3 @@
+rect server1 [label: "Server 1", fill: lightblue, size: 60]
+rect server2 [label: "Server 2", fill: lightblue, size: 60]
+server1 <-> server2 [label: "Bidirectional Communication"]

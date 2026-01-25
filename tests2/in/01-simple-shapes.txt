@@ -1,0 +1,1 @@
+Draw two rectangles side by side, one blue and one green.

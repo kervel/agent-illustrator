@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -64 294 164">
+  <style>
+    :root {
+    --background-3: #eeeeee;
+    --foreground-3: #999999;
+    --foreground-2: #666666;
+    --background-1: #ffffff;
+    --text-1: #333333;
+    --status-warning: #ff9800;
+    --accent-2: #e3f2fd;
+    --accent-dark: #1565c0;
+    --foreground-dark: #1a1a1a;
+    --accent-3: #bbdefb;
+    --text-light: #ffffff;
+    --background-light: #ffffff;
+    --status-error: #f44336;
+    --background-dark: #333333;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --text-2: #666666;
+    --accent-1: #2196f3;
+    --accent-light: #e3f2fd;
+    --status-success: #4caf50;
+    --foreground-1: #333333;
+    --background-2: #f5f5f5;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <rect id="client" class="ai-shape ai-rect" x="5" y="5" width="80" height="30"/>
+    <text class="ai-label" x="45" y="20" text-anchor="middle">Client</text>
+    <rect id="server" class="ai-shape ai-rect" x="89" y="5" width="80" height="30"/>
+    <text class="ai-label" x="129" y="20" text-anchor="middle">Server</text>
+  </g>
+  <text class="ai-label" x="87" y="10" text-anchor="middle">request</text>
+  <path class="ai-connection" d="M85 20 L89 20" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

@@ -1,0 +1,5 @@
+col {
+  rect header [label: "Header"]
+  rect content [label: "Content"]
+  rect footer [label: "Footer"]
+}

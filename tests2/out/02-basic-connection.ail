@@ -1,0 +1,6 @@
+row {
+    rect client [label: "Client"]
+    rect server [label: "Server"]
+}
+
+client -> server [label: "request"]

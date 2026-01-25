@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 324 242">
+  <style>
+    :root {
+    --background-dark: #333333;
+    --accent-2: #e3f2fd;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --background-2: #f5f5f5;
+    --text-light: #ffffff;
+    --foreground-1: #333333;
+    --background-1: #ffffff;
+    --text-1: #333333;
+    --foreground-light: #e0e0e0;
+    --accent-light: #e3f2fd;
+    --text-2: #666666;
+    --text-dark: #1a1a1a;
+    --text-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-2: #666666;
+    --background-light: #ffffff;
+    --accent-3: #bbdefb;
+    --status-success: #4caf50;
+    --accent-dark: #1565c0;
+    --background-3: #eeeeee;
+    --foreground-3: #999999;
+    --accent-1: #2196f3;
+  }
+
+  </style>
+  <g class="ai-container">
+    <text class="ai-shape ai-text" x="5" y="17" text-anchor="start" dominant-baseline="middle" font-size="24">My System</text>
+    <g class="ai-container">
+      <g id="left_col" class="ai-container">
+        <rect id="input" class="ai-shape ai-rect" x="15" y="43" width="80" height="30"/>
+        <text class="ai-label" x="55" y="58" text-anchor="middle">Input</text>
+        <rect id="process" class="ai-shape ai-rect" x="15" y="77" width="80" height="30"/>
+        <text class="ai-label" x="55" y="92" text-anchor="middle">Process</text>
+      </g>
+      <g id="right_col" class="ai-container">
+        <rect id="output" class="ai-shape ai-rect" x="109" y="43" width="80" height="30"/>
+        <text class="ai-label" x="149" y="58" text-anchor="middle">Output</text>
+        <rect id="log" class="ai-shape ai-rect" x="109" y="77" width="80" height="30"/>
+        <text class="ai-label" x="149" y="92" text-anchor="middle">Log</text>
+      </g>
+    </g>
+  </g>
+</svg>
