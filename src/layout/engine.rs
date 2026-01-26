@@ -287,6 +287,10 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
 }
 
 /// Compute bounding box dimensions from path vertices
+///
+/// Computes the actual content dimensions based on the path's vertices,
+/// not assuming the path starts at (0, 0). The renderer will normalize
+/// the path coordinates to match these bounds.
 fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
     use crate::parser::ast::PathCommand;
 
@@ -304,9 +308,6 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
         has_points = true;
     };
 
-    // Origin is at (0, 0)
-    update_bounds(0.0, 0.0);
-
     for cmd in &path.body.commands {
         match &cmd.node {
             PathCommand::Vertex(v) => {
@@ -314,6 +315,9 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
                     let x = pos.x.unwrap_or(0.0);
                     let y = pos.y.unwrap_or(0.0);
                     update_bounds(x, y);
+                } else {
+                    // Vertex with no position defaults to (0, 0)
+                    update_bounds(0.0, 0.0);
                 }
             }
             PathCommand::LineTo(lt) => {
@@ -1267,29 +1271,43 @@ fn collect_constrain_statements(
     }
 }
 
-/// Add current element positions as solver suggestions
+/// Add current element positions as solver suggestions and fix sizes
+///
+/// Position (X, Y) values are suggestions that can be adjusted by constraints.
+/// Size (Width, Height) values are fixed - user constraints should not resize elements.
 fn add_element_positions_as_suggestions(
     solver: &mut super::solver::ConstraintSolver,
     elem: &ElementLayout,
     result: &LayoutResult,
 ) -> Result<(), LayoutError> {
-    use super::solver::LayoutVariable;
+    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
 
     if let Some(id) = &elem.id {
         let name = id.0.as_str();
 
-        // Suggest current position values
+        // Suggest current position values (can be adjusted by constraints)
         solver
             .suggest_value(&LayoutVariable::x(name), elem.bounds.x)
             .map_err(LayoutError::solver_error)?;
         solver
             .suggest_value(&LayoutVariable::y(name), elem.bounds.y)
             .map_err(LayoutError::solver_error)?;
+
+        // Fix size values (should NOT be changed by user constraints)
+        // This ensures constraints like `a.bottom = b.top - 2` move elements, not resize them
         solver
-            .suggest_value(&LayoutVariable::width(name), elem.bounds.width)
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: LayoutVariable::width(name),
+                value: elem.bounds.width,
+                source: ConstraintSource::intrinsic("fixed width"),
+            })
             .map_err(LayoutError::solver_error)?;
         solver
-            .suggest_value(&LayoutVariable::height(name), elem.bounds.height)
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: LayoutVariable::height(name),
+                value: elem.bounds.height,
+                source: ConstraintSource::intrinsic("fixed height"),
+            })
             .map_err(LayoutError::solver_error)?;
     }
 

@@ -94,17 +94,27 @@ impl ResolvedPath {
 /// Resolve a PathDecl into concrete coordinates
 ///
 /// The origin point is the top-left corner of the element's bounding box.
-/// All vertex positions are relative to this origin.
+/// All vertex positions are normalized so the path content starts at the origin.
+/// This means if a path has vertices starting at (0, 6), they are shifted to start at (0, 0)
+/// relative to the element's bounds, ensuring constraints like `element.top` refer to the
+/// actual visual top of the content.
 pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
+    // First pass: compute the min x and y from all path coordinates
+    // This allows us to normalize the path so content starts at (0, 0)
+    let (min_x, min_y) = compute_path_min_coords(decl);
+
     let mut vertices: HashMap<String, Point> = HashMap::new();
     let mut segments: Vec<PathSegment> = Vec::new();
     let mut current_pos: Option<Point> = None;
     let mut start_pos: Option<Point> = None;
 
+    // Adjusted origin accounts for path content not starting at (0, 0)
+    let adjusted_origin = Point::new(origin.x - min_x, origin.y - min_y);
+
     for cmd in &decl.body.commands {
         match &cmd.node {
             PathCommand::Vertex(v) => {
-                let pos = resolve_vertex_position(&v.position, origin);
+                let pos = resolve_vertex_position(&v.position, adjusted_origin);
                 vertices.insert(v.name.node.as_str().to_string(), pos);
 
                 if start_pos.is_none() {
@@ -121,7 +131,7 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
                 let pos = get_or_create_vertex(
                     lt.target.node.as_str(),
                     &lt.position,
-                    origin,
+                    adjusted_origin,
                     &mut vertices,
                 );
 
@@ -139,7 +149,7 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
                 let pos = get_or_create_vertex(
                     arc.target.node.as_str(),
                     &arc.position,
-                    origin,
+                    adjusted_origin,
                     &mut vertices,
                 );
 
@@ -159,7 +169,7 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
                 let end_pos = get_or_create_vertex(
                     ct.target.node.as_str(),
                     &ct.position,
-                    origin,
+                    adjusted_origin,
                     &mut vertices,
                 );
 
@@ -208,6 +218,70 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
     }
 
     ResolvedPath { segments }
+}
+
+/// Compute the minimum x and y coordinates from all path vertices
+/// Returns (min_x, min_y) which can be used to normalize the path
+///
+/// Only returns positive offsets - if the path uses negative coordinates intentionally,
+/// those are preserved (returns 0.0 for that axis). This ensures that paths with a gap
+/// at the origin (like starting at y: 6) are normalized, but paths with intentional
+/// negative positioning (like a control point at y: -30) are not shifted.
+fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
+    let mut min_x = f64::INFINITY;
+    let mut min_y = f64::INFINITY;
+    let mut has_coords = false;
+
+    for cmd in &decl.body.commands {
+        match &cmd.node {
+            PathCommand::Vertex(v) => {
+                if let Some(pos) = &v.position {
+                    min_x = min_x.min(pos.x.unwrap_or(0.0));
+                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    has_coords = true;
+                } else {
+                    // Vertex with no position defaults to (0, 0)
+                    min_x = min_x.min(0.0);
+                    min_y = min_y.min(0.0);
+                    has_coords = true;
+                }
+            }
+            PathCommand::LineTo(lt) => {
+                if let Some(pos) = &lt.position {
+                    min_x = min_x.min(pos.x.unwrap_or(0.0));
+                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    has_coords = true;
+                }
+            }
+            PathCommand::ArcTo(at) => {
+                if let Some(pos) = &at.position {
+                    min_x = min_x.min(pos.x.unwrap_or(0.0));
+                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    has_coords = true;
+                }
+            }
+            PathCommand::CurveTo(ct) => {
+                if let Some(pos) = &ct.position {
+                    min_x = min_x.min(pos.x.unwrap_or(0.0));
+                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    has_coords = true;
+                }
+            }
+            PathCommand::Close | PathCommand::CloseArc(_) => {}
+        }
+    }
+
+    if !has_coords {
+        return (0.0, 0.0);
+    }
+
+    // Only normalize positive offsets - preserve negative coordinates
+    // This ensures paths starting at y: 6 are shifted to start at y: 0,
+    // but paths with intentional negative coords (like y: -30) are unchanged
+    let offset_x = if min_x > 0.0 { min_x } else { 0.0 };
+    let offset_y = if min_y > 0.0 { min_y } else { 0.0 };
+
+    (offset_x, offset_y)
 }
 
 /// Resolve a vertex position relative to the origin
@@ -525,12 +599,35 @@ mod tests {
             modifiers: vec![],
         };
 
+        // With path normalization, a single vertex at (25, 25) is normalized to (0, 0)
+        // relative to the origin, so the path content starts at the element's position
         let resolved = resolve_path(&decl, Point::new(0.0, 0.0));
         let d = resolved.to_svg_d();
 
         assert!(
-            d.starts_with("M25.00 25.00"),
-            "Should move to vertex position"
+            d.starts_with("M0.00 0.00"),
+            "Single vertex should be normalized to origin"
+        );
+    }
+
+    #[test]
+    fn test_single_vertex_with_offset_origin() {
+        // Test that normalization works with non-zero origin
+        let decl = PathDecl {
+            name: None,
+            body: PathBody {
+                commands: vec![make_vertex("a", Some(25.0), Some(25.0))],
+            },
+            modifiers: vec![],
+        };
+
+        // With origin at (10, 20), normalized vertex should be at (10, 20)
+        let resolved = resolve_path(&decl, Point::new(10.0, 20.0));
+        let d = resolved.to_svg_d();
+
+        assert!(
+            d.starts_with("M10.00 20.00"),
+            "Vertex should be normalized to origin position"
         );
     }
 
