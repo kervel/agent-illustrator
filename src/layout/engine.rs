@@ -1437,69 +1437,419 @@ pub fn resolve_constrain_statements(
     let mut collector = ConstraintCollector::new(config.clone());
 
     // Collect row/col alignment constraints (siblings stay aligned)
-    // These use STRONG priority to keep siblings at the same y (rows) or x (cols)
     collect_layout_alignment_constraints(&doc.statements, &mut collector);
 
     // Collect user constraints (constrain statements)
-    // These also use STRONG priority, so they work WITH layout alignment
     collect_constrain_statements(&doc.statements, &mut collector);
 
     // Also collect x/y modifiers from shapes as position constraints
-    // These use REQUIRED priority, so they override everything
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
 
     if collector.constraints.is_empty() {
         return Ok(());
     }
 
-    // Create solver and add constraints
-    let mut solver = ConstraintSolver::new();
+    // Separate constraints into internal (within a group) and external (between groups)
+    // Internal constraints: both elements share a common prefix (e.g., p1_head and p1_body)
+    // External constraints: elements have different prefixes or are root elements
+    let (internal_constraints, external_constraints): (Vec<_>, Vec<_>) =
+        collector.constraints.into_iter().partition(|c| is_internal_constraint(c));
 
-    // First, add current positions as suggested values to anchor the system
-    for elem in &result.root_elements {
-        add_element_positions_as_suggestions(&mut solver, elem, result)?;
+
+    // PASS 1: Solve internal constraints first
+    // These position children relative to each other within their groups
+    if !internal_constraints.is_empty() {
+        let mut internal_solver = ConstraintSolver::new();
+
+        // Add child sizes and positions as variables
+        for elem in &result.root_elements {
+            add_all_element_suggestions(&mut internal_solver, elem)?;
+        }
+
+        for constraint in internal_constraints {
+            internal_solver
+                .add_constraint(constraint)
+                .map_err(LayoutError::solver_error)?;
+        }
+
+        let internal_solution = internal_solver.solve().map_err(LayoutError::solver_error)?;
+
+        // Apply internal solution - shift children within their groups
+        for (var, value) in &internal_solution.values {
+            let current = get_element_property(result, &var.element_id, var.property);
+            if let Some(current_value) = current {
+                let delta = value - current_value;
+                if delta.abs() > 0.001 && matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
+                    let axis = if var.property == LayoutProperty::X {
+                        Axis::Horizontal
+                    } else {
+                        Axis::Vertical
+                    };
+                    // For internal constraints, shift just the element (not children)
+                    // because we're positioning siblings relative to each other
+                    shift_single_element_by_name(result, &var.element_id, delta, axis)?;
+                }
+            }
+        }
+
+        // Recompute group bounds after internal constraints
+        recompute_group_bounds(result);
     }
 
-    // Then add the user constraints
-    for constraint in collector.constraints {
-        solver
-            .add_constraint(constraint)
-            .map_err(LayoutError::solver_error)?;
-    }
+    // PASS 2: Solve external constraints
+    // These position groups relative to each other
+    if !external_constraints.is_empty() {
+        let mut external_solver = ConstraintSolver::new();
 
-    // Solve the constraint system
-    let solution = solver.solve().map_err(LayoutError::solver_error)?;
+        // Add only root element positions (groups move as units)
+        for elem in &result.root_elements {
+            add_element_positions_as_suggestions(&mut external_solver, elem, result)?;
+        }
 
-    // Apply the solution to the layout
-    for (var, value) in &solution.values {
-        // Find the element and update its position
-        let current = get_element_property(result, &var.element_id, var.property);
-        if let Some(current_value) = current {
-            let delta = value - current_value;
-            if delta.abs() > 0.001 {
-                let axis = match var.property {
-                    LayoutProperty::X
-                    | LayoutProperty::Width
-                    | LayoutProperty::CenterX
-                    | LayoutProperty::Right => Axis::Horizontal,
-                    LayoutProperty::Y
-                    | LayoutProperty::Height
-                    | LayoutProperty::CenterY
-                    | LayoutProperty::Bottom => Axis::Vertical,
-                };
-                // Only shift for X/Y position changes (not width/height or derived properties)
-                // Note: CenterX/CenterY constraints are expressed as X+Width/2 or Y+Height/2,
-                // so the solver returns X/Y values, not CenterX/CenterY directly
-                if matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
+        for constraint in external_constraints {
+            external_solver
+                .add_constraint(constraint)
+                .map_err(LayoutError::solver_error)?;
+        }
+
+        let external_solution = external_solver.solve().map_err(LayoutError::solver_error)?;
+
+        // Apply external solution - shift entire groups (children follow)
+        for (var, value) in &external_solution.values {
+            let current = get_element_property(result, &var.element_id, var.property);
+            if let Some(current_value) = current {
+                let delta = value - current_value;
+                if delta.abs() > 0.001 && matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
+                    let axis = if var.property == LayoutProperty::X {
+                        Axis::Horizontal
+                    } else {
+                        Axis::Vertical
+                    };
                     shift_element_by_name(result, &var.element_id, delta, axis)?;
                 }
             }
         }
     }
 
-    // Recompute bounds after applying constraints
+    // Recompute bounds and custom anchors after applying constraints
     result.compute_bounds();
+    recompute_custom_anchors(result, doc);
     Ok(())
+}
+
+/// Recompute custom anchors for all groups after constraint resolution
+/// This is needed because anchor positions are computed during initial layout,
+/// but internal constraints may move children afterward.
+fn recompute_custom_anchors(result: &mut LayoutResult, doc: &Document) {
+    recompute_anchors_in_statements(&doc.statements, result);
+}
+
+fn recompute_anchors_in_statements(stmts: &[Spanned<Statement>], result: &mut LayoutResult) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Group(g) => {
+                if !g.anchors.is_empty() {
+                    if let Some(group_name) = g.name.as_ref().map(|n| n.node.as_str()) {
+                        recompute_group_anchors(result, group_name, &g.anchors);
+                    }
+                }
+                recompute_anchors_in_statements(&g.children, result);
+            }
+            Statement::Layout(l) => {
+                recompute_anchors_in_statements(&l.children, result);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn recompute_group_anchors(
+    result: &mut LayoutResult,
+    group_name: &str,
+    anchor_decls: &[AnchorDecl],
+) {
+    // First, collect the children bounds
+    let children_bounds: HashMap<String, BoundingBox> = result
+        .elements
+        .iter()
+        .filter(|(id, _)| id.starts_with(&format!("{}_", group_name)))
+        .map(|(id, elem)| (id.clone(), elem.bounds))
+        .collect();
+
+    // Resolve each anchor declaration
+    let mut new_anchors = AnchorSet::default();
+
+    // Keep the built-in anchors
+    if let Some(group_elem) = result.elements.get(group_name) {
+        new_anchors = AnchorSet::simple_shape(&group_elem.bounds);
+    }
+
+    for decl in anchor_decls {
+        let (prop_ref, offset) = match &decl.position {
+            AnchorPosition::PropertyRef(pr) => (pr, 0.0),
+            AnchorPosition::PropertyRefWithOffset { prop_ref, offset } => (prop_ref, *offset),
+        };
+
+        // Get the element name (first segment of the path)
+        let element_name = prop_ref
+            .element
+            .node
+            .segments
+            .first()
+            .map(|s| s.node.0.clone())
+            .unwrap_or_default();
+
+        if let Some(child_bounds) = children_bounds.get(&element_name) {
+            let base_position = match prop_ref.property.node {
+                ConstraintProperty::Left => child_bounds.left_center(),
+                ConstraintProperty::Right => child_bounds.right_center(),
+                ConstraintProperty::Top => child_bounds.top_center(),
+                ConstraintProperty::Bottom => child_bounds.bottom_center(),
+                ConstraintProperty::CenterX | ConstraintProperty::CenterY | ConstraintProperty::Center => {
+                    child_bounds.center()
+                }
+                _ => child_bounds.center(),
+            };
+
+            let position = match prop_ref.property.node {
+                ConstraintProperty::Left | ConstraintProperty::Right | ConstraintProperty::CenterX => {
+                    Point::new(base_position.x + offset, base_position.y)
+                }
+                ConstraintProperty::Top | ConstraintProperty::Bottom | ConstraintProperty::CenterY => {
+                    Point::new(base_position.x, base_position.y + offset)
+                }
+                _ => base_position,
+            };
+
+            let direction = if let Some(dir_spec) = &decl.direction {
+                match dir_spec {
+                    AnchorDirectionSpec::Cardinal(c) => match c {
+                        CardinalDirection::Up => AnchorDirection::Up,
+                        CardinalDirection::Down => AnchorDirection::Down,
+                        CardinalDirection::Left => AnchorDirection::Left,
+                        CardinalDirection::Right => AnchorDirection::Right,
+                    },
+                    AnchorDirectionSpec::Angle(a) => AnchorDirection::Angle(*a),
+                }
+            } else {
+                match prop_ref.property.node {
+                    ConstraintProperty::Left => AnchorDirection::Left,
+                    ConstraintProperty::Right => AnchorDirection::Right,
+                    ConstraintProperty::Top => AnchorDirection::Up,
+                    ConstraintProperty::Bottom => AnchorDirection::Down,
+                    _ => AnchorDirection::Right,
+                }
+            };
+
+            new_anchors.insert(Anchor::new(decl.name.node.as_str(), position, direction));
+        }
+    }
+
+    // Update the group's anchors in both the tree and the HashMap
+    for elem in &mut result.root_elements {
+        update_element_anchors_recursive(elem, group_name, &new_anchors);
+    }
+    if let Some(elem) = result.elements.get_mut(group_name) {
+        elem.anchors = new_anchors;
+    }
+}
+
+fn update_element_anchors_recursive(elem: &mut ElementLayout, name: &str, anchors: &AnchorSet) {
+    if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
+        elem.anchors = anchors.clone();
+        return;
+    }
+    for child in &mut elem.children {
+        update_element_anchors_recursive(child, name, anchors);
+    }
+}
+
+/// Check if a constraint is internal (both elements are children of the same group)
+/// Internal constraints have element IDs that share a common prefix (e.g., p1_head and p1_body)
+fn is_internal_constraint(constraint: &super::solver::LayoutConstraint) -> bool {
+    use super::solver::LayoutConstraint;
+
+    match constraint {
+        LayoutConstraint::Equal { left, right, .. } => {
+            get_group_prefix(&left.element_id) == get_group_prefix(&right.element_id)
+                && get_group_prefix(&left.element_id).is_some()
+        }
+        _ => false,
+    }
+}
+
+/// Extract the group prefix from an element ID (e.g., "p1_head" -> Some("p1"))
+fn get_group_prefix(element_id: &str) -> Option<&str> {
+    if let Some(pos) = element_id.rfind('_') {
+        Some(&element_id[..pos])
+    } else {
+        None
+    }
+}
+
+/// Add position and size suggestions for ALL elements (including children)
+/// Used for internal constraint solving
+fn add_all_element_suggestions(
+    solver: &mut super::solver::ConstraintSolver,
+    elem: &ElementLayout,
+) -> Result<(), LayoutError> {
+    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+    if let Some(id) = &elem.id {
+        let name = id.0.as_str();
+
+        solver
+            .add_constraint(LayoutConstraint::Suggested {
+                variable: LayoutVariable::x(name),
+                value: elem.bounds.x,
+                source: ConstraintSource::layout(0..0, "element x position"),
+            })
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .add_constraint(LayoutConstraint::Suggested {
+                variable: LayoutVariable::y(name),
+                value: elem.bounds.y,
+                source: ConstraintSource::layout(0..0, "element y position"),
+            })
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: LayoutVariable::width(name),
+                value: elem.bounds.width,
+                source: ConstraintSource::intrinsic("fixed width"),
+            })
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: LayoutVariable::height(name),
+                value: elem.bounds.height,
+                source: ConstraintSource::intrinsic("fixed height"),
+            })
+            .map_err(LayoutError::solver_error)?;
+    }
+
+    for child in &elem.children {
+        add_all_element_suggestions(solver, child)?;
+    }
+
+    Ok(())
+}
+
+/// Shift only a single element (not its children)
+/// Used for internal constraints where siblings are positioned relative to each other
+fn shift_single_element_by_name(
+    result: &mut LayoutResult,
+    name: &str,
+    delta: f64,
+    axis: Axis,
+) -> Result<(), LayoutError> {
+    // Shift in the tree structure
+    for elem in &mut result.root_elements {
+        if shift_single_element_recursive(elem, name, delta, axis) {
+            break;
+        }
+    }
+
+    // Update in the HashMap
+    if let Some(indexed_elem) = result.elements.get_mut(name) {
+        match axis {
+            Axis::Horizontal => {
+                indexed_elem.bounds.x += delta;
+                if let Some(label) = &mut indexed_elem.label {
+                    label.position.x += delta;
+                }
+            }
+            Axis::Vertical => {
+                indexed_elem.bounds.y += delta;
+                if let Some(label) = &mut indexed_elem.label {
+                    label.position.y += delta;
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Recursively find and shift a single element (without shifting its children)
+fn shift_single_element_recursive(
+    elem: &mut ElementLayout,
+    name: &str,
+    delta: f64,
+    axis: Axis,
+) -> bool {
+    if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
+        // Shift only this element's bounds, not children
+        match axis {
+            Axis::Horizontal => {
+                elem.bounds.x += delta;
+                if let Some(label) = &mut elem.label {
+                    label.position.x += delta;
+                }
+            }
+            Axis::Vertical => {
+                elem.bounds.y += delta;
+                if let Some(label) = &mut elem.label {
+                    label.position.y += delta;
+                }
+            }
+        }
+        return true;
+    }
+
+    for child in &mut elem.children {
+        if shift_single_element_recursive(child, name, delta, axis) {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Recompute bounding boxes for all groups based on their children
+fn recompute_group_bounds(result: &mut LayoutResult) {
+    // First pass: recompute bounds in the tree
+    for elem in &mut result.root_elements {
+        recompute_element_bounds_recursive(elem);
+    }
+
+    // Second pass: collect all updated bounds
+    let mut updates: Vec<(String, BoundingBox)> = Vec::new();
+    for elem in &result.root_elements {
+        collect_bounds_updates(elem, &mut updates);
+    }
+
+    // Third pass: apply updates to HashMap
+    for (id, bounds) in updates {
+        if let Some(indexed) = result.elements.get_mut(&id) {
+            indexed.bounds = bounds;
+        }
+    }
+}
+
+fn recompute_element_bounds_recursive(elem: &mut ElementLayout) {
+    // First, recurse into children
+    for child in &mut elem.children {
+        recompute_element_bounds_recursive(child);
+    }
+
+    // If this element has children, recompute its bounds from children
+    if !elem.children.is_empty() {
+        let mut bounds = elem.children[0].bounds;
+        for child in &elem.children[1..] {
+            bounds = bounds.union(&child.bounds);
+        }
+        elem.bounds = bounds;
+    }
+}
+
+fn collect_bounds_updates(elem: &ElementLayout, updates: &mut Vec<(String, BoundingBox)>) {
+    if let Some(id) = &elem.id {
+        updates.push((id.0.clone(), elem.bounds));
+    }
+    for child in &elem.children {
+        collect_bounds_updates(child, updates);
+    }
 }
 
 /// Collect only constrain statements (not intrinsics or layout constraints)
@@ -1800,9 +2150,48 @@ fn add_element_positions_as_suggestions(
             .map_err(LayoutError::solver_error)?;
     }
 
-    // Recurse into children
+    // For children, we need to add SIZE constraints (so the solver knows dimensions)
+    // but NOT position suggestions (so children move with their parent group).
+    // Internal template constraints between children will create their own position variables.
     for child in &elem.children {
-        add_element_positions_as_suggestions(solver, child, _result)?;
+        add_child_sizes_only(solver, child)?;
+    }
+
+    Ok(())
+}
+
+/// Add only size constraints for children (not position suggestions)
+/// This allows internal template constraints to position children relative to each other,
+/// while external constraints move entire groups (children follow via shift_element_and_children).
+fn add_child_sizes_only(
+    solver: &mut super::solver::ConstraintSolver,
+    elem: &ElementLayout,
+) -> Result<(), LayoutError> {
+    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+    if let Some(id) = &elem.id {
+        let name = id.0.as_str();
+
+        // Fix size values only - NOT position
+        solver
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: LayoutVariable::width(name),
+                value: elem.bounds.width,
+                source: ConstraintSource::intrinsic("fixed width"),
+            })
+            .map_err(LayoutError::solver_error)?;
+        solver
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: LayoutVariable::height(name),
+                value: elem.bounds.height,
+                source: ConstraintSource::intrinsic("fixed height"),
+            })
+            .map_err(LayoutError::solver_error)?;
+    }
+
+    // Recurse into nested children
+    for child in &elem.children {
+        add_child_sizes_only(solver, child)?;
     }
 
     Ok(())
