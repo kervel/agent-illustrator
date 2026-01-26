@@ -23,6 +23,9 @@ pub struct LayoutConfig {
 
     /// Minimum spacing for connection routes around elements
     pub connection_spacing: f64,
+
+    /// Trace mode: emit debug output for constraint solving and routing
+    pub trace: bool,
 }
 
 impl Default for LayoutConfig {
@@ -35,6 +38,7 @@ impl Default for LayoutConfig {
             element_spacing: 4.0,
             container_padding: 5.0,
             connection_spacing: 10.0,
+            trace: false,
         }
     }
 }

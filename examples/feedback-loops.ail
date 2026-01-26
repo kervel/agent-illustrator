@@ -1,68 +1,69 @@
-// Human-Agent Feedback Loop Diagram v7
-// Via points are outside containers to avoid col/row alignment conflicts
+// Human-Agent Feedback Loop Diagram v9
+// Styleable version using palette colors
+// Usage: ai-illustrator feedback-loops-v9.ail --stylesheet mytheme.toml
 
-// Control points (defined outside containers)
+// Control points for curves (invisible)
 circle human_via [size: 1, fill: none, stroke: none]
 circle agent_via [size: 1, fill: none, stroke: none]
 
-col diagram [gap: 50] {
+col diagram [gap: 40] {
   // === HUMAN LOOP (top) ===
-  col human_section [gap: 6] {
+  col human_section [gap: 8] {
     row human_header [gap: 8] {
-      text "HUMAN" human_title [font_size: 14, fill: #1565c0]
-      text "— slow · persistent" human_sub [font_size: 11, fill: #888]
+      text "HUMAN" human_title [font_size: 14, fill: accent-dark]
+      text "— slow · persistent" human_sub [font_size: 11, fill: text-3]
     }
 
     row human_loop [gap: 20] {
-      rect assign [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Assign Task"]
-      rect tune [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Tune Feedback"]
-      rect spot [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Spot Patterns"]
-      rect evaluate [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Evaluate"]
+      rect assign [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Assign Task"]
+      rect tune [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Tune Feedback"]
+      rect spot [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Spot Patterns"]
+      rect evaluate [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Evaluate"]
     }
   }
 
   // === AGENT LOOP (bottom) ===
-  col agent_section [gap: 6] {
+  col agent_section [gap: 8] {
     row agent_header [gap: 8] {
-      text "AGENT" agent_title [font_size: 14, fill: #e65100]
-      text "— fast · ephemeral" agent_sub [font_size: 11, fill: #888]
+      text "AGENT" agent_title [font_size: 14, fill: secondary-dark]
+      text "— fast · ephemeral" agent_sub [font_size: 11, fill: text-3]
     }
     row agent_loop [gap: 20] {
-      rect task [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Task"]
-      rect execute [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Execute"]
-      rect check [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Feedback"]
-      rect result [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Result"]
+      rect task [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Task"]
+      rect execute [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Execute"]
+      rect check [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Feedback"]
+      rect result [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Result"]
     }
   }
 }
 
-// Position via points (outside containers, so they can move freely)
+// Position via points for curve control
 constrain human_via.center_x = midpoint(assign, evaluate)
-constrain human_via.center_y = assign.top - 40
+constrain human_via.center_y = assign.top - 50
 
 constrain agent_via.center_x = midpoint(task, result)
-constrain agent_via.center_y = result.bottom + 40
+constrain agent_via.center_y = result.bottom + 50
 
-// Align loops
+// Align loops horizontally
 constrain assign.left = task.left
 
-// Human internal flow
-evaluate -> spot [stroke: #1565c0, stroke_width: 3]
-spot -> tune [stroke: #1565c0, stroke_width: 3]
-tune -> assign [stroke: #1565c0, stroke_width: 3]
+// Human internal flow (right to left: evaluate -> spot -> tune -> assign)
+evaluate -> spot [stroke: accent-dark, stroke_width: 3]
+spot -> tune [stroke: accent-dark, stroke_width: 3]
+tune -> assign [stroke: accent-dark, stroke_width: 3]
 
-// Human loop-back
-assign -> evaluate [stroke: #1565c0, stroke_width: 3, routing: curved, via: human_via]
+// Human loop-back: assign.top -> evaluate.top (curves ABOVE)
+assign.top -> evaluate.top [stroke: accent-dark, stroke_width: 3, routing: curved, via: human_via]
 
-// Agent internal flow
-task -> execute [stroke: #e65100, stroke_width: 3]
-execute -> check [stroke: #e65100, stroke_width: 3]
-check -> result [stroke: #e65100, stroke_width: 3]
+// Agent internal flow (left to right: task -> execute -> check -> result)
+task -> execute [stroke: secondary-dark, stroke_width: 3]
+execute -> check [stroke: secondary-dark, stroke_width: 3]
+check -> result [stroke: secondary-dark, stroke_width: 3]
 
-// Agent loop-back
-result -> task [stroke: #e65100, stroke_width: 3, routing: curved, via: agent_via]
+// Agent loop-back: result.bottom -> task.bottom (curves BELOW)
+result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, routing: curved, via: agent_via]
 
-// Cross connections
-assign -> task [stroke: #999, stroke_width: 1]
-result -> evaluate [stroke: #999, stroke_width: 1]
-tune -> check [stroke: #2196f3, stroke_width: 2, label: "tunes"]
+// Cross connections (vertical)
+assign.bottom -> task.top [stroke: foreground-3, stroke_width: 1]
+result.top -> evaluate.bottom [stroke: foreground-3, stroke_width: 1]
+tune.bottom -> check.top [stroke: accent-1, stroke_width: 2, routing: curved, label: "tunes"]

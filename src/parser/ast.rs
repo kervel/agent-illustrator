@@ -10,6 +10,7 @@ pub enum ColorCategory {
     Background,
     Text,
     Accent,
+    Secondary,
 }
 
 /// Light/dark modifier for colors
@@ -50,6 +51,7 @@ impl ColorValue {
                     ColorCategory::Background => "background",
                     ColorCategory::Text => "text",
                     ColorCategory::Accent => "accent",
+                    ColorCategory::Secondary => "secondary",
                 };
                 let mut s = cat.to_string();
                 if let Some(v) = variant {

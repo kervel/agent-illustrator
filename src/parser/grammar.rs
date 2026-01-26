@@ -28,6 +28,7 @@ fn is_color_category(ident: &str) -> Option<ColorCategory> {
         "background" => Some(ColorCategory::Background),
         "text" => Some(ColorCategory::Text),
         "accent" => Some(ColorCategory::Accent),
+        "secondary" => Some(ColorCategory::Secondary),
         _ => None,
     }
 }
@@ -311,7 +312,8 @@ where
         .separated_by(just(Token::Comma))
         .allow_trailing()
         .collect::<Vec<_>>()
-        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose));
+        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
+        .boxed(); // boxed() for faster compilation
 
     // Shape type parser
     let shape_type = choice((
@@ -337,7 +339,8 @@ where
             shape_type,
             name,
             modifiers: modifiers.unwrap_or_default(),
-        });
+        })
+        .boxed(); // boxed() for faster compilation
 
     // Connection operators
     let connection_op = choice((
@@ -403,7 +406,8 @@ where
                 from = to;
             }
             result
-        });
+        })
+        .boxed(); // boxed() for faster compilation
 
     // Layout type
     let layout_type = choice((
@@ -443,7 +447,8 @@ where
                 anchor,
                 modifiers: mods.unwrap_or_default(),
             }
-        });
+        })
+        .boxed(); // boxed() for faster compilation
 
     // Element path parser: identifier { "." identifier }
     // e.g., "a", "group1.item", "outer.inner.shape"

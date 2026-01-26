@@ -353,6 +353,7 @@ impl SvgBuilder {
         classes: &[String],
         styles: &str,
         marker_end: bool,
+        stroke_width: f64,
     ) {
         let prefix = self.prefix();
         let class_list = std::iter::once(format!("{}connection", prefix))
@@ -362,7 +363,8 @@ impl SvgBuilder {
 
         // Shorten endpoint when marker is present to place arrow tip at anchor position
         // The arrow marker has refX=1, so the arrow extends ~9 marker units past the endpoint.
-        // With markerWidth=4 and strokeWidth=2, that's about 7 pixels.
+        // With markerWidth=4 and markerUnits="strokeWidth", each marker unit = (4 * strokeWidth) / 10.
+        // So pullback = 9 * (4/10) * strokeWidth = 3.6 * strokeWidth.
         let path = if marker_end && path.len() >= 2 {
             let mut shortened = path.to_vec();
             let last_idx = shortened.len() - 1;
@@ -374,8 +376,8 @@ impl SvgBuilder {
             let len = (dx * dx + dy * dy).sqrt();
 
             if len > 0.001 {
-                // Pull back to compensate for arrow length
-                let pullback = 7.0;
+                // Pull back to compensate for arrow length (scales with stroke width)
+                let pullback = 3.6 * stroke_width;
                 shortened[last_idx].x -= dx / len * pullback;
                 shortened[last_idx].y -= dy / len * pullback;
             }
@@ -864,12 +866,15 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
     let classes = conn.styles.css_classes.clone();
     let styles = format_connection_styles(&conn.styles);
 
+    // Get stroke width for arrow pullback calculation (default: 2.0)
+    let stroke_width = conn.styles.stroke_width.unwrap_or(2.0);
+
     let marker_end = matches!(
         conn.direction,
         ConnectionDirection::Forward | ConnectionDirection::Bidirectional
     );
 
-    builder.add_connection_path(&conn.path, conn.routing_mode, &classes, &styles, marker_end);
+    builder.add_connection_path(&conn.path, conn.routing_mode, &classes, &styles, marker_end, stroke_width);
 
     // Render connection label if present
     if let Some(label) = &conn.label {

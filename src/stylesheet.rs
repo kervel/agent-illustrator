@@ -43,7 +43,7 @@ struct TomlMetadata {
     description: Option<String>,
 }
 
-/// Default color palette - neutral grays with blue accent
+/// Default color palette - neutral grays with blue accent and orange secondary
 const DEFAULT_PALETTE: &str = r##"
 [colors]
 # Foreground colors (primary visual elements)
@@ -67,12 +67,19 @@ text-3 = "#999999"
 text-light = "#ffffff"
 text-dark = "#1a1a1a"
 
-# Accent colors (Material Blue)
+# Accent colors (Material Blue - primary)
 accent-1 = "#2196f3"
 accent-2 = "#e3f2fd"
 accent-3 = "#bbdefb"
 accent-light = "#e3f2fd"
 accent-dark = "#1565c0"
+
+# Secondary colors (Material Orange - for contrast/agent)
+secondary-1 = "#ff9800"
+secondary-2 = "#fff3e0"
+secondary-3 = "#ffe0b2"
+secondary-light = "#fff3e0"
+secondary-dark = "#e65100"
 
 # Status colors
 status-success = "#4caf50"
@@ -135,6 +142,9 @@ impl Stylesheet {
         }
         if token.starts_with("accent") {
             return "#2196f3".to_string();
+        }
+        if token.starts_with("secondary") {
+            return "#ff9800".to_string();
         }
         if token.starts_with("status") {
             return "#666666".to_string();

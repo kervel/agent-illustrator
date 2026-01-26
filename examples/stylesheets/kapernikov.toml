@@ -35,6 +35,13 @@ accent-3 = "#e0e0e0"           # Neutral accent (borders)
 accent-light = "#fce8e8"       # Light accent
 accent-dark = "#a83a2c"        # Dark accent
 
+# Secondary colors (complementary teal/gray for contrast)
+secondary-1 = "#5a5a5a"        # Secondary main (charcoal gray)
+secondary-2 = "#f0f0f0"        # Secondary light bg
+secondary-3 = "#d0d0d0"        # Secondary mid
+secondary-light = "#f0f0f0"    # Secondary light
+secondary-dark = "#333333"     # Secondary dark
+
 # Status colors (for indicators)
 status-success = "#a5d6a7"     # Green
 status-warning = "#ffcc80"     # Orange

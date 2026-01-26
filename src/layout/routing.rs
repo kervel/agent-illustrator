@@ -284,43 +284,89 @@ pub fn route_connection_with_anchors(
             end.y + to_dir.y * control_distance,
         );
 
-        // For multiple via points, create chained segments
-        if via_points.len() > 1 {
-            // Build path: start, ctrl1, ctrl2, via1, ctrl, via2, ..., ctrl, end
-            let mut path = vec![start, control1];
+        // Handle via points to create multi-segment curves with smooth S-curve
+        if !via_points.is_empty() {
+            // For a single via point, create two cubic Bezier segments that:
+            // 1. Leave start perpendicular (using from_dir)
+            // 2. Pass smoothly through the via point
+            // 3. Enter end perpendicular (using to_dir)
+            //
+            // Path structure: M start C ctrl1 ctrl2 via S ctrl3 end
+            // (S command mirrors the previous control point for G1 continuity)
 
-            // Add via points with control points for smooth continuation
-            for i in 0..via_points.len() {
-                let via = via_points[i];
-                if i == 0 {
-                    // First via point - control2 leads into it
-                    path.push(control2);
-                    path.push(via);
-                } else {
-                    // Subsequent via points - compute smooth control point
-                    let prev = via_points[i - 1];
-                    let ctrl = Point::new(
-                        via.x - (via.x - prev.x) * 0.3,
-                        via.y - (via.y - prev.y) * 0.3,
-                    );
-                    path.push(ctrl);
-                    path.push(via);
-                }
+            let via = via_points[0];
+
+            // Segment 1: start -> via
+            // ctrl1: extend from start in from_direction (perpendicular exit)
+            let ctrl1 = Point::new(
+                start.x + from_dir.x * control_distance,
+                start.y + from_dir.y * control_distance,
+            );
+
+            // ctrl2: positioned on the START side of via along the overall connection direction
+            // For G1 continuity, ctrl2 and ctrl3 should be collinear through via
+            // The tangent at via should point from start toward end (the overall flow direction)
+            let dir_x = end.x - start.x;
+            let dir_y = end.y - start.y;
+            let dir_len = (dir_x * dir_x + dir_y * dir_y).sqrt();
+            let (norm_x, norm_y) = if dir_len > 0.001 {
+                (dir_x / dir_len, dir_y / dir_len)
+            } else {
+                (1.0, 0.0)
+            };
+            // Position ctrl2 on the start side of via, along the tangent direction
+            let tangent_dist = control_distance * 0.5;
+            let ctrl2 = Point::new(
+                via.x - norm_x * tangent_dist,
+                via.y - norm_y * tangent_dist,
+            );
+
+            // Segment 2: via -> end (using S command for smooth continuation)
+            // ctrl3: mirror of ctrl2 relative to via (for G1 continuity)
+            // The S command auto-computes ctrl3 as reflection of ctrl2, so we just need final_ctrl
+            // final_ctrl: extend from end in to_direction (perpendicular entry)
+            let final_ctrl = Point::new(
+                end.x + to_dir.x * control_distance,
+                end.y + to_dir.y * control_distance,
+            );
+
+            // For multiple via points, chain them
+            if via_points.len() == 1 {
+                return vec![start, ctrl1, ctrl2, via, final_ctrl, end];
             }
 
-            // Add final segment to end
-            let _last_via = via_points[via_points.len() - 1];
-            let final_ctrl = Point::new(
-                end.x + to_dir.x * control_distance * 0.5,
-                end.y + to_dir.y * control_distance * 0.5,
-            );
+            // Multiple via points: chain cubic segments with smooth continuity
+            let mut path = vec![start, ctrl1, ctrl2, via_points[0]];
+
+            for i in 1..via_points.len() {
+                let prev_via = via_points[i - 1];
+                let curr_via = via_points[i];
+                // Control point along the tangent from prev_via toward curr_via
+                let seg_dx = curr_via.x - prev_via.x;
+                let seg_dy = curr_via.y - prev_via.y;
+                let seg_len = (seg_dx * seg_dx + seg_dy * seg_dy).sqrt();
+                let ctrl = if seg_len > 0.001 {
+                    Point::new(
+                        curr_via.x - seg_dx / seg_len * tangent_dist,
+                        curr_via.y - seg_dy / seg_len * tangent_dist,
+                    )
+                } else {
+                    Point::new(
+                        (prev_via.x + curr_via.x) / 2.0,
+                        (prev_via.y + curr_via.y) / 2.0,
+                    )
+                };
+                path.push(ctrl);
+                path.push(curr_via);
+            }
+
             path.push(final_ctrl);
             path.push(end);
 
             return path;
         }
 
-        // Single or no via point: simple cubic Bezier
+        // No via points: simple cubic Bezier
         return vec![start, control1, control2, end];
     }
 
@@ -514,7 +560,10 @@ fn resolve_via_points(
     let mut points = Vec::new();
     for name in via_refs {
         if let Some(element) = result.get_element_by_name(name) {
-            points.push(element.bounds.center());
+            let center = element.bounds.center();
+            // Note: trace output is controlled at a higher level
+            // We could add trace parameter here if needed in the future
+            points.push(center);
         } else {
             return Err(LayoutError::UndefinedIdentifier {
                 name: name.clone(),

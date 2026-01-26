@@ -70,6 +70,8 @@ pub struct RenderConfig {
     pub stylesheet: Stylesheet,
     /// Debug mode: show container bounds and element IDs
     pub debug: bool,
+    /// Trace mode: show internal constraint solver and routing debug output
+    pub trace: bool,
     /// Whether to resolve templates (default: true)
     pub resolve_templates: bool,
     /// Base path for resolving template file references
@@ -83,6 +85,7 @@ impl Default for RenderConfig {
             svg: SvgConfig::default(),
             stylesheet: Stylesheet::default(),
             debug: false,
+            trace: false,
             resolve_templates: true, // Templates are resolved by default
             template_base_path: None,
         }
@@ -116,6 +119,12 @@ impl RenderConfig {
     /// Enable or disable debug mode
     pub fn with_debug(mut self, debug: bool) -> Self {
         self.debug = debug;
+        self
+    }
+
+    /// Enable or disable trace mode (internal debug output)
+    pub fn with_trace(mut self, trace: bool) -> Self {
+        self.trace = trace;
         self
     }
 
@@ -188,12 +197,16 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
         doc
     };
 
+    // Create layout config with trace flag propagated
+    let mut layout_config = config.layout.clone();
+    layout_config.trace = config.trace;
+
     // Compute layout
-    let mut result = layout::compute(&doc, &config.layout)?;
+    let mut result = layout::compute(&doc, &layout_config)?;
 
     // Resolve constrain statements first (constraint-solver based positioning)
     // This must run before place statements so that offsets are applied after alignment
-    layout::resolve_constrain_statements(&mut result, &doc, &config.layout)?;
+    layout::resolve_constrain_statements(&mut result, &doc, &layout_config)?;
 
     // Resolve constraints (relational positioning and offsets from `place` statements)
     layout::resolve_constraints(&mut result, &doc)?;

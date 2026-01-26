@@ -1311,7 +1311,6 @@ fn shift_element_by_name(
             break;
         }
     }
-
     if ids_to_update.is_empty() {
         return Err(LayoutError::undefined(name, 0..0, vec![]));
     }
@@ -1499,11 +1498,28 @@ pub fn resolve_constrain_statements(
     // PASS 2: Solve external constraints
     // These position groups relative to each other
     if !external_constraints.is_empty() {
+        // Collect the target (element_id, property) pairs from external constraints
+        // We only want to move the specific property that is targeted
+        let target_vars: std::collections::HashSet<(String, LayoutProperty)> = external_constraints
+            .iter()
+            .filter_map(|c| get_constraint_target_var(c))
+            .collect();
+
+        // Collect all elements referenced in external constraints
+        // We need position variables for ALL of them, not just root elements
+        let referenced_elements: std::collections::HashSet<String> = external_constraints
+            .iter()
+            .flat_map(|c| get_constraint_referenced_elements(c))
+            .collect();
+
         let mut external_solver = ConstraintSolver::new();
 
-        // Add only root element positions (groups move as units)
-        for elem in &result.root_elements {
-            add_element_positions_as_suggestions(&mut external_solver, elem, result)?;
+        // Add positions for all elements referenced in external constraints
+        // For TARGET elements: add Suggested positions (solver can move them)
+        // For non-target elements: add Fixed positions (solver uses them but can't change them)
+        for element_name in &referenced_elements {
+            let is_target = target_vars.iter().any(|(id, _)| id == element_name);
+            add_element_by_name_with_strength(&mut external_solver, result, element_name, is_target, config.trace)?;
         }
 
         for constraint in external_constraints {
@@ -1514,8 +1530,40 @@ pub fn resolve_constrain_statements(
 
         let external_solution = external_solver.solve().map_err(LayoutError::solver_error)?;
 
-        // Apply external solution - shift entire groups (children follow)
+        // Trace: print all solution values
+        if config.trace {
+            for (var, value) in &external_solution.values {
+                eprintln!("TRACE: solution {} {:?} = {}", var.element_id, var.property, value);
+            }
+        }
+
+        // Apply external solution - but only to explicitly targeted (element, property) pairs
+        // This prevents constraints from affecting properties they don't target
         for (var, value) in &external_solution.values {
+            // Only apply to (element, property) pairs that are explicit targets
+            // For derived properties (CenterX -> X, CenterY -> Y, Right -> X, Bottom -> Y),
+            // check if either the base property OR the derived property is targeted
+            let is_targeted = target_vars.contains(&(var.element_id.clone(), var.property))
+                || match var.property {
+                    LayoutProperty::X => {
+                        target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterX))
+                            || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Right))
+                    }
+                    LayoutProperty::Y => {
+                        target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterY))
+                            || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Bottom))
+                    }
+                    _ => false,
+                };
+
+            if config.trace {
+                eprintln!("TRACE: {} {:?} is_targeted={}", var.element_id, var.property, is_targeted);
+            }
+
+            if !is_targeted {
+                continue;
+            }
+
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
                 let delta = value - current_value;
@@ -1525,6 +1573,9 @@ pub fn resolve_constrain_statements(
                     } else {
                         Axis::Vertical
                     };
+                    if config.trace {
+                        eprintln!("TRACE: shifting {} by {} on {:?}", var.element_id, delta, axis);
+                    }
                     shift_element_by_name(result, &var.element_id, delta, axis)?;
                 }
             }
@@ -1667,23 +1718,74 @@ fn update_element_anchors_recursive(elem: &mut ElementLayout, name: &str, anchor
 /// Check if a constraint is internal (both elements are children of the same group)
 /// Internal constraints have element IDs that share a common prefix (e.g., p1_head and p1_body)
 fn is_internal_constraint(constraint: &super::solver::LayoutConstraint) -> bool {
-    use super::solver::LayoutConstraint;
+    use super::solver::{ConstraintOrigin, LayoutConstraint};
 
     match constraint {
-        LayoutConstraint::Equal { left, right, .. } => {
-            get_group_prefix(&left.element_id) == get_group_prefix(&right.element_id)
-                && get_group_prefix(&left.element_id).is_some()
+        LayoutConstraint::Equal { source, .. } => {
+            // Layout container constraints are internal (alignment within row/col)
+            // User-defined and intrinsic constraints are external (cross-container)
+            matches!(source.origin, ConstraintOrigin::LayoutContainer)
         }
         _ => false,
     }
 }
 
-/// Extract the group prefix from an element ID (e.g., "p1_head" -> Some("p1"))
-fn get_group_prefix(element_id: &str) -> Option<&str> {
-    if let Some(pos) = element_id.rfind('_') {
-        Some(&element_id[..pos])
-    } else {
-        None
+/// Extract the target (element_id, property) from a constraint
+/// For Equal constraints, we extract the left-hand side variable
+/// For Midpoint constraints, we extract the target variable
+fn get_constraint_target_var(
+    constraint: &super::solver::LayoutConstraint,
+) -> Option<(String, super::solver::LayoutProperty)> {
+    use super::solver::LayoutConstraint;
+
+    match constraint {
+        LayoutConstraint::Equal { left, .. } => {
+            Some((left.element_id.clone(), left.property))
+        }
+        LayoutConstraint::Midpoint { target, .. } => {
+            Some((target.element_id.clone(), target.property))
+        }
+        LayoutConstraint::GreaterOrEqual { variable, .. } => {
+            Some((variable.element_id.clone(), variable.property))
+        }
+        LayoutConstraint::LessOrEqual { variable, .. } => {
+            Some((variable.element_id.clone(), variable.property))
+        }
+        LayoutConstraint::Fixed { variable, .. } => {
+            Some((variable.element_id.clone(), variable.property))
+        }
+        LayoutConstraint::Suggested { variable, .. } => {
+            Some((variable.element_id.clone(), variable.property))
+        }
+    }
+}
+
+/// Collect all element IDs referenced in a constraint
+/// This includes both left/right sides of Equal constraints, both endpoints of Midpoint, etc.
+fn get_constraint_referenced_elements(
+    constraint: &super::solver::LayoutConstraint,
+) -> Vec<String> {
+    use super::solver::LayoutConstraint;
+
+    match constraint {
+        LayoutConstraint::Equal { left, right, .. } => {
+            vec![left.element_id.clone(), right.element_id.clone()]
+        }
+        LayoutConstraint::Midpoint { target, a, b, .. } => {
+            vec![target.element_id.clone(), a.element_id.clone(), b.element_id.clone()]
+        }
+        LayoutConstraint::GreaterOrEqual { variable, .. } => {
+            vec![variable.element_id.clone()]
+        }
+        LayoutConstraint::LessOrEqual { variable, .. } => {
+            vec![variable.element_id.clone()]
+        }
+        LayoutConstraint::Fixed { variable, .. } => {
+            vec![variable.element_id.clone()]
+        }
+        LayoutConstraint::Suggested { variable, .. } => {
+            vec![variable.element_id.clone()]
+        }
     }
 }
 
@@ -2101,97 +2203,71 @@ fn collect_position_constraints_from_shapes(
     }
 }
 
-/// Add current element positions as solver suggestions and fix sizes
-///
-/// Position (X, Y) values use MEDIUM strength (Suggested) so they can be overridden
-/// by user constraints (STRONG strength).
-/// Size (Width, Height) values are fixed (REQUIRED) - constraints should not resize elements.
-fn add_element_positions_as_suggestions(
+/// Add position and size for a specific element by name
+/// If is_target is true, adds Suggested positions (can be moved by solver)
+/// If is_target is false, adds Fixed positions (can't be moved - used as reference values)
+fn add_element_by_name_with_strength(
     solver: &mut super::solver::ConstraintSolver,
-    elem: &ElementLayout,
-    _result: &LayoutResult,
+    result: &LayoutResult,
+    element_name: &str,
+    is_target: bool,
+    trace: bool,
 ) -> Result<(), LayoutError> {
     use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
 
-    if let Some(id) = &elem.id {
-        let name = id.0.as_str();
+    if let Some(elem) = result.get_element_by_name(element_name) {
+        if trace {
+            eprintln!("TRACE: adding {} is_target={} at ({}, {})", element_name, is_target, elem.bounds.x, elem.bounds.y);
+        }
+        if is_target {
+            // Target elements: add position as SUGGESTED (solver can move them)
+            solver
+                .add_constraint(LayoutConstraint::Suggested {
+                    variable: LayoutVariable::x(element_name),
+                    value: elem.bounds.x,
+                    source: ConstraintSource::layout(0..0, "target element x"),
+                })
+                .map_err(LayoutError::solver_error)?;
+            solver
+                .add_constraint(LayoutConstraint::Suggested {
+                    variable: LayoutVariable::y(element_name),
+                    value: elem.bounds.y,
+                    source: ConstraintSource::layout(0..0, "target element y"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        } else {
+            // Non-target elements: add position as FIXED (can't be moved, used as reference)
+            solver
+                .add_constraint(LayoutConstraint::Fixed {
+                    variable: LayoutVariable::x(element_name),
+                    value: elem.bounds.x,
+                    source: ConstraintSource::intrinsic("reference element x"),
+                })
+                .map_err(LayoutError::solver_error)?;
+            solver
+                .add_constraint(LayoutConstraint::Fixed {
+                    variable: LayoutVariable::y(element_name),
+                    value: elem.bounds.y,
+                    source: ConstraintSource::intrinsic("reference element y"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        }
 
-        // Suggest current position values (MEDIUM strength - can be overridden by STRONG user constraints)
-        solver
-            .add_constraint(LayoutConstraint::Suggested {
-                variable: LayoutVariable::x(name),
-                value: elem.bounds.x,
-                source: ConstraintSource::layout(0..0, "layout-computed x position"),
-            })
-            .map_err(LayoutError::solver_error)?;
-        solver
-            .add_constraint(LayoutConstraint::Suggested {
-                variable: LayoutVariable::y(name),
-                value: elem.bounds.y,
-                source: ConstraintSource::layout(0..0, "layout-computed y position"),
-            })
-            .map_err(LayoutError::solver_error)?;
-
-        // Fix size values (REQUIRED - should NOT be changed by user constraints)
-        // This ensures constraints like `a.bottom = b.top - 2` move elements, not resize them
+        // Size is always FIXED
         solver
             .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::width(name),
+                variable: LayoutVariable::width(element_name),
                 value: elem.bounds.width,
                 source: ConstraintSource::intrinsic("fixed width"),
             })
             .map_err(LayoutError::solver_error)?;
         solver
             .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::height(name),
+                variable: LayoutVariable::height(element_name),
                 value: elem.bounds.height,
                 source: ConstraintSource::intrinsic("fixed height"),
             })
             .map_err(LayoutError::solver_error)?;
-    }
-
-    // For children, we need to add SIZE constraints (so the solver knows dimensions)
-    // but NOT position suggestions (so children move with their parent group).
-    // Internal template constraints between children will create their own position variables.
-    for child in &elem.children {
-        add_child_sizes_only(solver, child)?;
-    }
-
-    Ok(())
-}
-
-/// Add only size constraints for children (not position suggestions)
-/// This allows internal template constraints to position children relative to each other,
-/// while external constraints move entire groups (children follow via shift_element_and_children).
-fn add_child_sizes_only(
-    solver: &mut super::solver::ConstraintSolver,
-    elem: &ElementLayout,
-) -> Result<(), LayoutError> {
-    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
-
-    if let Some(id) = &elem.id {
-        let name = id.0.as_str();
-
-        // Fix size values only - NOT position
-        solver
-            .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::width(name),
-                value: elem.bounds.width,
-                source: ConstraintSource::intrinsic("fixed width"),
-            })
-            .map_err(LayoutError::solver_error)?;
-        solver
-            .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::height(name),
-                value: elem.bounds.height,
-                source: ConstraintSource::intrinsic("fixed height"),
-            })
-            .map_err(LayoutError::solver_error)?;
-    }
-
-    // Recurse into nested children
-    for child in &elem.children {
-        add_child_sizes_only(solver, child)?;
     }
 
     Ok(())

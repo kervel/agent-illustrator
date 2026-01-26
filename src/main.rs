@@ -33,6 +33,10 @@ struct Cli {
     #[arg(short, long)]
     debug: bool,
 
+    /// Trace mode: show internal constraint solver and routing debug output
+    #[arg(short, long)]
+    trace: bool,
+
     /// Show language grammar reference
     #[arg(short, long)]
     grammar: bool,
@@ -104,10 +108,11 @@ fn main() {
         }
     };
 
-    // Render with stylesheet and debug mode
+    // Render with stylesheet, debug mode, and trace mode
     let config = RenderConfig::new()
         .with_stylesheet(stylesheet)
-        .with_debug(cli.debug);
+        .with_debug(cli.debug)
+        .with_trace(cli.trace);
     match render_with_config(&source, config) {
         Ok(svg) => {
             println!("{}", svg);
