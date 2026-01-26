@@ -986,7 +986,7 @@ fn strip_svg_wrapper(svg: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::layout::{ElementType, LayoutResult, ResolvedStyles};
+    use crate::layout::{AnchorSet, ElementType, LayoutResult, ResolvedStyles};
     use crate::parser::ast::{Identifier, LayoutType};
 
     #[test]
