@@ -54,8 +54,8 @@ improve -> feedback [label: "tunes"]
 Two side-by-side iteration cycles with connections between them.
 Use curved routing for loop-back arrows.
 
-EXAMPLE 3: Reusable templates with paths
-----------------------------------------
+EXAMPLE 3: Templates with anchors and curved connections
+--------------------------------------------------------
 template "person" {
   col [gap: 6] {
     stack head_stack {
@@ -80,15 +80,34 @@ template "person" {
   constrain head.center_x = torso.center_x
   constrain hair.center_x = head.center_x
   constrain head.bottom = torso.top
+
+  // Custom anchors with direction for perpendicular curve entry
+  anchor crown [position: head.top - 4, direction: up]
+  anchor feet [position: torso.bottom + 4, direction: down]
 }
 
-row [gap: 24] {
-  person alice
-  person bob
-}
+person alice
+person bob
 
-Templates define reusable components. Use paths for custom shapes,
-stack for overlapping elements, and constraints for alignment.
+constrain bob.left = alice.right + 80
+constrain bob.vertical_center = alice.vertical_center
+
+// Invisible via points control curve shape
+circle bottom_via [size: 1, fill: none, stroke: none]
+circle top_via [size: 1, fill: none, stroke: none]
+
+constrain bottom_via.center_x = midpoint(alice, bob)
+constrain bottom_via.center_y = alice.bottom + 30
+constrain top_via.center_x = midpoint(alice, bob)
+constrain top_via.center_y = alice.top - 30
+
+// S-curved connections using custom anchors
+alice.feet -> bob.feet [routing: curved, via: bottom_via, label: "request"]
+bob.crown -> alice.crown [routing: curved, via: top_via, label: "response"]
+
+Templates with custom anchors for semantic connection points.
+Via points control curve shape, anchor directions ensure
+perpendicular entry. Labels auto-position at curve apex.
 
 EXAMPLE 4: Explicit positioning with x/y
 ----------------------------------------

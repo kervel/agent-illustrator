@@ -1,4 +1,5 @@
 // Template-based person icon with hair and U-shaped torso.
+// Added anchors for connections.
 template "person" {
   col [gap: 6] {
     stack head_stack {
@@ -34,9 +35,30 @@ template "person" {
   constrain head.bottom = torso.top
   constrain collar.center_x = torso.center_x
   constrain collar.top = torso.top
+
+  // Custom anchors (with small offset for spacing)
+  anchor crown [position: head.top - 4, direction: up]
+  anchor feet [position: torso.bottom + 4, direction: down]
+  anchor hand_left [position: torso.left, direction: left]
+  anchor hand_right [position: torso.right, direction: right]
 }
 
-row [gap: 24] {
-  person alice
-  person bob
-}
+person alice
+person bob
+
+constrain bob.left = alice.right + 80
+constrain bob.vertical_center = alice.vertical_center
+
+// Via points for S-curves
+circle bottom_via [size: 1, fill: none, stroke: none]
+circle top_via [size: 1, fill: none, stroke: none]
+
+constrain bottom_via.center_x = midpoint(alice, bob)
+constrain bottom_via.center_y = alice.bottom + 30
+
+constrain top_via.center_x = midpoint(alice, bob)
+constrain top_via.center_y = alice.top - 30
+
+// S-curved connections between people
+alice.feet -> bob.feet [stroke: #e65100, stroke_width: 2, routing: curved, via: bottom_via, label: "request"]
+bob.crown -> alice.crown [stroke: #1565c0, stroke_width: 2, routing: curved, via: top_via, label: "response"]
