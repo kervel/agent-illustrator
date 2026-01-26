@@ -1035,14 +1035,19 @@ where
             number.clone().map(|n| AnchorDirectionSpec::Angle(n.node)),
         ));
 
-        // Parse anchor position: element.property or element.property + offset
+        // Parse anchor position: element.property or element.property +/- offset
         let anchor_position = property_ref
             .clone()
             .then(
-                just(Token::Plus)
-                    .ignore_then(number.clone())
-                    .map(|n| n.node)
-                    .or_not(),
+                choice((
+                    just(Token::Plus)
+                        .ignore_then(number.clone())
+                        .map(|n| n.node),
+                    just(Token::Minus)
+                        .ignore_then(number.clone())
+                        .map(|n| -n.node),
+                ))
+                .or_not(),
             )
             .map(|(prop_ref, offset)| {
                 if let Some(off) = offset {
