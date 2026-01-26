@@ -464,6 +464,9 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
     process_statements(&doc.statements, result, &mut label_element_ids)?;
 
+    // Resolve overlapping connection labels
+    resolve_label_overlaps(&mut result.connections);
+
     // Remove elements that are used as connection labels from the layout
     for id in &label_element_ids {
         result.remove_element_by_name(id);
@@ -471,6 +474,88 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
     result.compute_bounds();
     Ok(())
+}
+
+/// Resolve overlapping connection labels by nudging them apart
+fn resolve_label_overlaps(connections: &mut [ConnectionLayout]) {
+    // Approximate character width and line height for label bounds estimation
+    const CHAR_WIDTH: f64 = 7.0;
+    const LINE_HEIGHT: f64 = 14.0;
+    const PADDING: f64 = 4.0;
+    const MIN_SEPARATION: f64 = 2.0;
+
+    // Collect labels with their estimated bounds
+    struct LabelBounds {
+        conn_idx: usize,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+    }
+
+    let mut labels: Vec<LabelBounds> = connections
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, conn)| {
+            conn.label.as_ref().map(|label| {
+                let width = label.text.len() as f64 * CHAR_WIDTH + PADDING * 2.0;
+                let height = LINE_HEIGHT + PADDING;
+                // Adjust x based on anchor
+                let x = match label.anchor {
+                    super::types::TextAnchor::Start => label.position.x,
+                    super::types::TextAnchor::Middle => label.position.x - width / 2.0,
+                    super::types::TextAnchor::End => label.position.x - width,
+                };
+                let y = label.position.y - height / 2.0;
+                LabelBounds {
+                    conn_idx: idx,
+                    x,
+                    y,
+                    width,
+                    height,
+                }
+            })
+        })
+        .collect();
+
+    // Check for overlaps and nudge labels apart
+    // Simple approach: for each pair, if they overlap, move them apart vertically
+    let n = labels.len();
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let a = &labels[i];
+            let b = &labels[j];
+
+            // Check if bounding boxes overlap
+            let overlap_x = a.x < b.x + b.width && a.x + a.width > b.x;
+            let overlap_y = a.y < b.y + b.height && a.y + a.height > b.y;
+
+            if overlap_x && overlap_y {
+                // Calculate how much to separate them vertically
+                let overlap_amount = (a.y + a.height - b.y).min(b.y + b.height - a.y);
+                let nudge = (overlap_amount / 2.0) + MIN_SEPARATION;
+
+                // Determine which one is above (smaller y = higher up)
+                let (upper_idx, lower_idx) = if a.y <= b.y {
+                    (i, j)
+                } else {
+                    (j, i)
+                };
+
+                // Apply nudges to the actual connection labels
+                if let Some(ref mut label) = connections[labels[upper_idx].conn_idx].label {
+                    label.position.y -= nudge;
+                }
+                if let Some(ref mut label) = connections[labels[lower_idx].conn_idx].label {
+                    label.position.y += nudge;
+                }
+
+                // Update our tracking bounds too
+                labels[upper_idx].y -= nudge;
+                labels[lower_idx].y += nudge;
+            }
+        }
+    }
 }
 
 /// Label position for connection labels
