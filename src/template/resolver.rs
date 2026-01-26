@@ -3,8 +3,8 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
-    ConstrainDecl, ConstraintExpr, Document, ElementPath, Identifier, PropertyRef, ShapeDecl,
-    ShapeType, Spanned, Statement, StyleModifier, StyleValue, TemplateInstance,
+    ConstrainDecl, ConstraintExpr, Document, ElementPath, GroupDecl, Identifier, PropertyRef,
+    ShapeDecl, ShapeType, Spanned, Statement, StyleModifier, StyleValue, TemplateInstance,
 };
 
 use super::registry::{TemplateError, TemplateRegistry};
@@ -360,7 +360,7 @@ fn resolve_inline_template(
     }
 
     // If there's only one shape, rename it to the instance name
-    // If there are multiple, wrap them in a group
+    // If there are multiple, wrap them in a group with the instance name
     if expanded.len() == 1 {
         // Rename the single element to the instance name
         if let Statement::Shape(mut shape) = expanded[0].node.clone() {
@@ -369,9 +369,14 @@ fn resolve_inline_template(
         }
     }
 
-    // Multiple elements: wrap in a group (or return as-is for now)
-    // TODO: Consider wrapping in a group with the instance name
-    Ok(expanded)
+    // Multiple elements: wrap them in a group with the instance name
+    // This allows the instance name to be used in connections and constraints
+    let group = GroupDecl {
+        name: Some(Spanned::new(Identifier::new(instance_name), span.clone())),
+        children: expanded,
+        modifiers: vec![],
+    };
+    Ok(vec![Spanned::new(Statement::Group(group), span.clone())])
 }
 
 /// Resolve a statement recursively
@@ -439,6 +444,12 @@ fn substitute_parameters(
             // Prefix the shape name
             if let Some(ref mut name) = shape.name {
                 name.node = Identifier::new(format!("{}_{}", prefix, name.node.0));
+            }
+            // Also prefix path names (they're inside PathDecl, not ShapeDecl.name)
+            if let ShapeType::Path(ref mut path_decl) = shape.shape_type.node {
+                if let Some(ref mut name) = path_decl.name {
+                    name.node = Identifier::new(format!("{}_{}", prefix, name.node.0));
+                }
             }
             // Substitute parameters in modifiers
             shape.modifiers = substitute_modifiers(&shape.modifiers, params);

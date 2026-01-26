@@ -1,0 +1,23 @@
+/* ANALYSIS
+   Required elements: Plan, Code, Build, Test, Release, Deploy, Operate, Monitor
+   Element types: all processes=rect
+   Connections: Test→Release (center link), Monitor→Plan (feedback), loop backs use curved
+*/
+row [gap: 60] {
+  col [gap: 18] {
+    rect plan [fill: #4A90E2, label: "Plan"]
+    rect code [fill: #4A90E2, label: "Code"]
+    rect build [fill: #4A90E2, label: "Build"]
+    rect test [fill: #4A90E2, label: "Test"]
+  }
+  col [gap: 18] {
+    rect release [fill: #50C878, label: "Release"]
+    rect deploy [fill: #50C878, label: "Deploy"]
+    rect operate [fill: #50C878, label: "Operate"]
+    rect monitor [fill: #50C878, label: "Monitor"]
+  }
+}
+plan -> code -> build -> test
+release -> deploy -> operate -> monitor
+test -> release [routing: curved]
+monitor -> plan [routing: curved]

@@ -1,0 +1,85 @@
+/* INTENT
+   What is being communicated? The continuous DevOps cycle split into Dev (left) and Ops (right).
+   Who is the audience? Engineers/stakeholders needing a clear DevOps loop overview.
+   What should they understand after seeing this? Dev and Ops are two interconnected loops forming an infinity symbol with a clear directional flow.
+*/
+/* GLOBAL DESIGN
+   What visual metaphor captures the essence? Infinity loop (∞) representing continuous improvement.
+   What shape should the whole diagram evoke? Two linked loops side by side.
+   What are the major visual groupings? Left loop: Dev stages; right loop: Ops stages.
+*/
+/* LAYOUT PLAN
+   What goes where spatially? Left loop nodes arranged top-to-bottom then back; right loop similarly.
+   How are elements grouped? Two groups: dev_loop and ops_loop.
+   What is the reading flow (left-right, top-bottom, circular)? Circular within each loop, overall left-to-right.
+   Sketch the structure: row { group dev_loop { col } , group ops_loop { col } }
+*/
+/* AIL FEATURES
+   Elements:
+     plan → rect because process step
+     code → rect because process step
+     build → rect because process step
+     test → rect because process step
+     release → rect because process step
+     deploy → rect because process step
+     operate → rect because process step
+     monitor → rect because process step
+     dev_label → text because group label
+     ops_label → text because group label
+
+   Connections:
+     plan → code: default because sequential flow
+     code → build: default because sequential flow
+     build → test: default because sequential flow
+     test → plan: curved because loop-back
+     release → deploy: default because sequential flow
+     deploy → operate: default because sequential flow
+     operate → monitor: default because sequential flow
+     monitor → release: curved because loop-back
+     test → release: curved because inter-loop transition
+     monitor → plan: curved because inter-loop transition
+
+   Visual encoding:
+     Dev steps → light blue fills because left-loop identity
+     Ops steps → light green fills because right-loop identity
+     Inter-loop links → curved routing because cross-loop flow
+*/
+/* DETAILS
+   Edge cases or special considerations: Ensure no forbidden names used; avoid left/right/top/bottom.
+   Labels that need attention: Dev and Ops labels should sit above their loops.
+   Any constraints or assumptions: Simple layout with clear flow; no arrow chaining.
+*/
+/* IMPLEMENTATION */
+row [gap: 60] {
+  group dev_loop {
+    col [gap: 16] {
+      text "Dev" [font_size: 16]
+      rect plan [fill: lightblue, label: "Plan"]
+      rect code [fill: lightblue, label: "Code"]
+      rect build [fill: lightblue, label: "Build"]
+      rect test [fill: lightblue, label: "Test"]
+    }
+  }
+  group ops_loop {
+    col [gap: 16] {
+      text "Ops" [font_size: 16]
+      rect release [fill: lightgreen, label: "Release"]
+      rect deploy [fill: lightgreen, label: "Deploy"]
+      rect operate [fill: lightgreen, label: "Operate"]
+      rect monitor [fill: lightgreen, label: "Monitor"]
+    }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> plan [routing: curved]
+
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release [routing: curved]
+
+test -> release [routing: curved]
+monitor -> plan [routing: curved]

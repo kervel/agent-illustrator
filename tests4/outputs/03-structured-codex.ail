@@ -1,0 +1,34 @@
+/* SPECIFICATION
+   What: Hub-and-spoke architecture with API Gateway at center connected bidirectionally to five services
+   Elements: API Gateway, User Service, Order Service, Payment Service, Inventory Service, Notification Service
+   Relationships: API Gateway has bidirectional connections to each service
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Hub in center with spokes around
+   Strategy: Use group with central hub and surrounding row/col to suggest radiating spokes
+   Structure: group { col { row { user order payment } row { gateway } row { inventory notification } } }
+*/
+
+/* ELEMENT MAPPING
+   API Gateway → rect gateway [label: "API Gateway"]
+   User Service → rect user [label: "User Service"]
+   Order Service → rect order [label: "Order Service"]
+   Payment Service → rect payment [label: "Payment Service"]
+   Inventory Service → rect inventory [label: "Inventory Service"]
+   Notification Service → rect notification [label: "Notification Service"]
+*/
+
+group {
+  col {
+    row { rect user [label: "User Service"] rect order [label: "Order Service"] rect payment [label: "Payment Service"] }
+    row { rect gateway [label: "API Gateway"] }
+    row { rect inventory [label: "Inventory Service"] rect notification [label: "Notification Service"] }
+  }
+}
+
+gateway <-> user
+gateway <-> order
+gateway <-> payment
+gateway <-> inventory
+gateway <-> notification

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 640 570">
+  <style>
+    :root {
+    --background-2: #f5f5f5;
+    --text-2: #666666;
+    --background-light: #ffffff;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --accent-dark: #1565c0;
+    --accent-3: #bbdefb;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --background-dark: #333333;
+    --background-3: #eeeeee;
+    --accent-1: #2196f3;
+    --text-1: #333333;
+    --accent-light: #e3f2fd;
+    --foreground-dark: #1a1a1a;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-light: #e0e0e0;
+    --text-light: #ffffff;
+    --foreground-3: #999999;
+    --background-1: #ffffff;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <g id="main_flow" class="ai-container">
+      <g class="ai-container">
+        <rect id="pending" class="ai-shape ai-rect" x="15" y="15" width="100" height="100"/>
+        <text class="ai-label" x="65" y="65" text-anchor="middle">Pending</text>
+        <rect id="processing" class="ai-shape ai-rect" x="145" y="15" width="100" height="100"/>
+        <text class="ai-label" x="195" y="65" text-anchor="middle">Processing</text>
+        <rect id="shipped" class="ai-shape ai-rect" x="275" y="15" width="100" height="100"/>
+        <text class="ai-label" x="325" y="65" text-anchor="middle">Shipped</text>
+        <rect id="delivered" class="ai-shape ai-rect" x="405" y="15" width="100" height="100"/>
+        <text class="ai-label" x="455" y="65" text-anchor="middle">Delivered</text>
+      </g>
+    </g>
+    <g id="error_states" class="ai-container">
+      <g class="ai-container">
+        <circle id="init_marker" class="ai-shape ai-circle" cx="20" cy="180" r="5"/>
+        <rect id="failed" class="ai-shape ai-rect" x="125" y="175" width="100" height="100"/>
+        <text class="ai-label" x="175" y="225" text-anchor="middle">Failed</text>
+      </g>
+    </g>
+    <g id="cancellation" class="ai-container">
+      <g class="ai-container">
+        <rect id="cancelled" class="ai-shape ai-rect" x="15" y="335" width="100" height="100"/>
+        <text class="ai-label" x="65" y="385" text-anchor="middle">Cancelled</text>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M115 65 L145 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M245 65 L275 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M375 65 L405 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M20 175 L20 145 L65 145 L65 115" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M65 115 L65 335" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M185 115 L185 175" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

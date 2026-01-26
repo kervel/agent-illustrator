@@ -1,0 +1,44 @@
+```
+/* VISUAL DESIGN
+   Overall shape: Linear pipeline with a lower monitoring loop returning to data collection
+   Color scheme: Data stages → #FFE4B5, Model stages → steelblue
+   Key visual features: Two curved feedback loops (evaluation → feature engineering, deployment → data collection)
+*/
+
+/* SHAPE CHOICES
+   Raw Data → ellipse because it is data storage
+   Data Collection → circle because it is a node/hub in the monitoring loop
+   Preprocessing, Feature Engineering, Model Training, Evaluation, Deployment → rect because they are processes
+*/
+
+/* CONNECTION TYPES
+   Main pipeline flow: orthogonal because it is a clean, linear progression
+   Evaluation → Feature Engineering: curved because it is a feedback loop
+   Deployment → Data Collection: curved because it is a monitoring loop
+*/
+
+col [gap: 40] {
+  row [gap: 28] {
+    ellipse raw_data [fill: #FFE4B5, label: "Raw Data"]
+    rect preprocessing [fill: #FFE4B5, label: "Preprocessing"]
+    rect feature_eng [fill: #FFE4B5, label: "Feature Engineering"]
+    rect training [fill: steelblue, label: "Model Training"]
+    rect evaluation [fill: steelblue, label: "Evaluation"]
+    rect deployment [fill: steelblue, label: "Deployment"]
+  }
+  row [gap: 60] {
+    circle data_collection [fill: gold, size: 46]
+    text "Data Collection" [font_size: 12, fill: #333333]
+  }
+}
+
+raw_data -> preprocessing
+preprocessing -> feature_eng
+feature_eng -> training
+training -> evaluation
+evaluation -> deployment
+
+evaluation -> feature_eng [routing: curved, label: "iterate"]
+deployment -> data_collection [routing: curved, label: "monitoring"]
+data_collection -> raw_data [routing: curved]
+```

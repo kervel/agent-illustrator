@@ -1,0 +1,47 @@
+/* SPECIFICATION
+   What: Machine learning pipeline with data flow stages and feedback loops
+   Elements: Raw Data, Preprocessing, Feature Engineering, Model Training, Evaluation, Deployment, Data Collection feedback
+   Relationships: Linear pipeline left-to-right; feedback from Evaluation to Feature Engineering; monitoring from Deployment to Data Collection
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Horizontal main flow with two curved feedback paths underneath
+   Strategy: Main row for pipeline stages (data stages in one color group, model stages in another); return paths drawn as curved connectors
+   Structure: row { col {data_stages} col {model_stages} col {deployment} } with return arrows
+*/
+
+/* ELEMENT MAPPING
+   Raw Data → rect [fill: lightblue, label: "Raw Data"]
+   Preprocessing → rect [fill: lightblue, label: "Preprocessing"]
+   Feature Engineering → rect [fill: lightblue, label: "Feature Eng"]
+   Model Training → rect [fill: orange, label: "Model Training"]
+   Evaluation → rect [fill: orange, label: "Evaluation"]
+   Deployment → rect [fill: orange, label: "Deployment"]
+   Data Collection → rect [fill: lightblue, label: "Data Collection"]
+   Pipeline flow → row of rects with arrows
+   Feedback loop (Eval → Feature) → curved arrow
+   Monitoring loop (Deploy → Data) → curved arrow
+*/
+
+row {
+  group pipeline {
+    row [gap: 20] {
+      rect raw_data [fill: "#ADD8E6", label: "Raw Data", size: 100]
+      rect preproc [fill: "#ADD8E6", label: "Preprocessing", size: 100]
+      rect feat_eng [fill: "#ADD8E6", label: "Feature Eng", size: 100]
+      rect model_train [fill: "#FFB347", label: "Model Training", size: 100]
+      rect eval [fill: "#FFB347", label: "Evaluation", size: 100]
+      rect deploy [fill: "#FFB347", label: "Deployment", size: 100]
+    }
+  }
+}
+
+raw_data -> preproc
+preproc -> feat_eng
+feat_eng -> model_train
+model_train -> eval
+eval -> deploy
+
+/* Feedback loops */
+eval -> feat_eng [routing: direct]
+deploy -> raw_data [routing: direct]

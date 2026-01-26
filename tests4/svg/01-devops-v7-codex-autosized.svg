@@ -1,0 +1,13 @@
+warning: value assigned to `current_pos` is never read
+   --> src/renderer/path.rs:133:21
+    |
+133 |                     current_pos = Some(origin);
+    |                     ^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: `agent-illustrator` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running `target/debug/agent-illustrator`
+Error: parse errors: Parse error at 595..597: Unexpected '->'

@@ -1,0 +1,61 @@
+/* SPECIFICATION
+   What: State machine diagram for order processing with 6 states and transitions
+   Elements: Pending (initial), Processing, Shipped, Delivered (final), Cancelled (final), Failed
+   Relationships: Pending→Processing→Shipped→Delivered; Pending→Cancelled; Processing→Failed; all directed transitions
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Main forward flow with branching paths; happy path top, cancellation and failure branches below
+   Strategy: Top row for main states (Pending → Processing → Shipped → Delivered); middle for Failed state; bottom for Cancelled state
+   Structure: col { row {forward_states} row {failed} row {cancelled} } with diagonal connectors for branch paths
+*/
+
+/* ELEMENT MAPPING
+   Pending → rect [fill: lightgray, label: "Pending", style: initial marker]
+   Processing → rect [fill: lightblue, label: "Processing"]
+   Shipped → rect [fill: lightblue, label: "Shipped"]
+   Delivered → rect [fill: lightgreen, label: "Delivered", style: final marker]
+   Failed → rect [fill: lightyellow, label: "Failed", style: error]
+   Cancelled → rect [fill: lightcoral, label: "Cancelled", style: final marker]
+   Transitions → arrows with labels (cancel, fail, etc.)
+   Initial state → marker at Pending
+   Final states → markers at Delivered, Cancelled
+*/
+
+col [gap: 40] {
+  group main_flow {
+    row [gap: 30] {
+      rect pending [fill: "#D3D3D3", label: "Pending", size: 100]
+      rect processing [fill: "#ADD8E6", label: "Processing", size: 100]
+      rect shipped [fill: "#ADD8E6", label: "Shipped", size: 100]
+      rect delivered [fill: "#90EE90", label: "Delivered", size: 100]
+    }
+  }
+
+  group error_states {
+    row [gap: 100] {
+      circle init_marker [fill: "black", size: 10]
+      rect failed [fill: "#FFFFE0", label: "Failed", size: 100]
+    }
+  }
+
+  group cancellation {
+    row [gap: 100] {
+      rect cancelled [fill: "#FFB6C6", label: "Cancelled", size: 100]
+    }
+  }
+}
+
+/* Main happy path */
+pending -> processing
+processing -> shipped
+shipped -> delivered
+
+/* Initial state indicator */
+init_marker -> pending
+
+/* Cancellation path: from Pending to Cancelled */
+pending -> cancelled [routing: direct]
+
+/* Failed path: from Processing to Failed */
+processing -> failed [routing: direct]

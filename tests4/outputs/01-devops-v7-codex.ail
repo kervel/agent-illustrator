@@ -1,0 +1,20 @@
+/* PLAN
+   Visual: Infinity
+   Layout: Two 2x2 grids side-by-side (infinity template)
+   Elements: rect plan, rect code, rect build, rect test, rect release, rect deploy, rect operate, rect monitor
+   Curves needed: test->release (curved), monitor->plan (curved)
+*/
+row {
+  col {
+    row { rect plan [label: "Plan"]  rect code [label: "Code"] }
+    row { rect test [label: "Test"]  rect build [label: "Build"] }
+  }
+  col {
+    row { rect release [label: "Release"]  rect deploy [label: "Deploy"] }
+    row { rect monitor [label: "Monitor"]  rect operate [label: "Operate"] }
+  }
+}
+plan -> code -> build -> test -> plan [routing: curved]
+release -> deploy -> operate -> monitor -> release [routing: curved]
+test -> release [routing: curved]
+monitor -> plan [routing: curved]

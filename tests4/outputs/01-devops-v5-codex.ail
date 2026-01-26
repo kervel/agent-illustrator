@@ -1,0 +1,57 @@
+/******** VISUAL DESIGN
+   Overall shape: Infinity symbol (∞) with two loops side-by-side
+   Color scheme: Dev processes → steelblue, Ops processes → lightgreen, hubs → gold
+   Key visual features: Two loops, curved cross-connections, clear directional flow
+*/
+
+/******** SHAPE CHOICES
+   Plan, Code, Build, Test, Release, Deploy, Operate, Monitor → rect because they are process steps
+   Dev hub, Ops hub → circle because they are loop anchors
+*/
+
+/******** CONNECTION TYPES
+   Within each loop: orthogonal because it reads cleanly left-to-right and top-to-bottom
+   Cross-loop links: curved because they form the infinity crossover
+   Feedback to start: curved because it emphasizes continuous cycle
+*/
+
+row [gap: 80] {
+  col [gap: 24] {
+    circle devhub [fill: gold, size: 22]
+    row [gap: 18] {
+      rect plan [fill: steelblue, label: "Plan"]
+      rect code [fill: steelblue, label: "Code"]
+    }
+    row [gap: 18] {
+      rect build [fill: steelblue, label: "Build"]
+      rect test [fill: steelblue, label: "Test"]
+    }
+  }
+  col [gap: 24] {
+    circle opshub [fill: gold, size: 22]
+    row [gap: 18] {
+      rect release [fill: lightgreen, label: "Release"]
+      rect deploy [fill: lightgreen, label: "Deploy"]
+    }
+    row [gap: 18] {
+      rect operate [fill: lightgreen, label: "Operate"]
+      rect monitor [fill: lightgreen, label: "Monitor"]
+    }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> plan [routing: curved]
+
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release [routing: curved]
+
+test -> release [routing: curved]
+monitor -> plan [routing: curved]
+
+devhub -> plan [routing: direct]
+opshub -> release [routing: direct]

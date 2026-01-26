@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-64.5 -60 402.5 268">
+  <style>
+    :root {
+    --text-light: #ffffff;
+    --text-3: #999999;
+    --background-2: #f5f5f5;
+    --background-1: #ffffff;
+    --status-success: #4caf50;
+    --text-1: #333333;
+    --background-dark: #333333;
+    --foreground-1: #333333;
+    --accent-light: #e3f2fd;
+    --status-warning: #ff9800;
+    --background-3: #eeeeee;
+    --status-error: #f44336;
+    --accent-2: #e3f2fd;
+    --foreground-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --text-dark: #1a1a1a;
+    --foreground-3: #999999;
+    --text-2: #666666;
+    --accent-1: #2196f3;
+    --accent-3: #bbdefb;
+    --foreground-2: #666666;
+    --background-light: #ffffff;
+    --foreground-light: #e0e0e0;
+  }
+
+  </style>
+  <g class="ai-container">
+    <g class="ai-container">
+      <g class="ai-container">
+        <rect id="user" class="ai-shape ai-rect" x="15" y="15" width="80" height="30"/>
+        <text class="ai-label" x="55" y="30" text-anchor="middle">User Service</text>
+        <rect id="order" class="ai-shape ai-rect" x="99" y="15" width="80" height="30"/>
+        <text class="ai-label" x="139" y="30" text-anchor="middle">Order Service</text>
+        <rect id="payment" class="ai-shape ai-rect" x="183" y="15" width="80" height="30"/>
+        <text class="ai-label" x="223" y="30" text-anchor="middle">Payment Service</text>
+      </g>
+      <g class="ai-container">
+        <rect id="gateway" class="ai-shape ai-rect" x="15" y="59" width="80" height="30"/>
+        <text class="ai-label" x="55" y="74" text-anchor="middle">API Gateway</text>
+      </g>
+      <g class="ai-container">
+        <rect id="inventory" class="ai-shape ai-rect" x="15" y="103" width="80" height="30"/>
+        <text class="ai-label" x="55" y="118" text-anchor="middle">Inventory Service</text>
+        <rect id="notification" class="ai-shape ai-rect" x="99" y="103" width="80" height="30"/>
+        <text class="ai-label" x="139" y="118" text-anchor="middle">Notification Service</text>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M55 59 L55 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M95 74 L84 74 L84 30 L99 30" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M95 74 L168 74 L168 30 L183 30" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M55 89 L55 103" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M95 74 L84 74 L84 118 L99 118" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

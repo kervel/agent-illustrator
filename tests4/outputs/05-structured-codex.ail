@@ -1,0 +1,42 @@
+/* SPECIFICATION
+   What: State machine for order lifecycle with cancel and failure paths
+   Elements: initial, Pending, Processing, Shipped, Delivered, Cancelled, Failed
+   Relationships: initial -> Pending -> Processing -> Shipped -> Delivered; Pending -> Cancelled; Processing -> Failed
+*/
+
+/* LAYOUT PLAN
+   Visual shape: vertical flow with a side branch down from Pending and a side branch from Processing
+   Strategy: main column for primary flow; side column for branch states
+   Structure: row { col { initial Pending Processing Shipped Delivered } col { Cancelled Failed } }
+*/
+
+/* ELEMENT MAPPING
+   initial → circle [label: ""]
+   Pending → rect [label: "Pending"]
+   Processing → rect [label: "Processing"]
+   Shipped → rect [label: "Shipped"]
+   Delivered → rect [label: "Delivered"]
+   Cancelled → rect [label: "Cancelled"]
+   Failed → rect [label: "Failed"]
+*/
+
+row {
+  col {
+    circle initial [size: 20]
+    rect Pending [label: "Pending"]
+    rect Processing [label: "Processing"]
+    rect Shipped [label: "Shipped"]
+    rect Delivered [label: "Delivered"]
+  }
+  col {
+    rect Cancelled [label: "Cancelled"]
+    rect Failed [label: "Failed"]
+  }
+}
+
+initial -> Pending
+Pending -> Processing
+Processing -> Shipped
+Shipped -> Delivered
+Pending -> Cancelled [routing: direct]
+Processing -> Failed [routing: direct]

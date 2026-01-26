@@ -1,0 +1,59 @@
+/* SPECIFICATION
+   What: Git branching diagram with main, feature, and hotfix branches, showing commits and merges
+   Elements: main_start, main_after_feature_split, main_after_hotfix_split, main_merge_feature, main_merge_hotfix, feature_c1, feature_c2, feature_c3, hotfix_c1
+   Relationships: main flows left-to-right; feature branches off main then merges back; hotfix branches off main after feature split then merges back
+*/
+
+/* LAYOUT PLAN
+   Visual shape: horizontal main line on top, feature branch below with 3 commits, hotfix branch midline with 1 commit
+   Strategy: main row on top; feature row below spanning commits; hotfix row in between; use direct routing for diagonal split/merge
+   Structure: col { row { main nodes } row { hotfix nodes } row { feature nodes } }
+*/
+
+/* ELEMENT MAPPING
+   main_start → rect [label: "main"]
+   main_after_feature_split → rect [label: "main"]
+   main_after_hotfix_split → rect [label: "main"]
+   main_merge_feature → rect [label: "main"]
+   main_merge_hotfix → rect [label: "main"]
+   feature_c1 → circle [label: "f1"]
+   feature_c2 → circle [label: "f2"]
+   feature_c3 → circle [label: "f3"]
+   hotfix_c1 → circle [label: "h1"]
+*/
+
+// Now write the AIL code:
+col {
+  row {
+    rect main_start [label: "main"]
+    rect main_after_feature_split [label: "main"]
+    rect main_after_hotfix_split [label: "main"]
+    rect main_merge_feature [label: "main"]
+    rect main_merge_hotfix [label: "main"]
+  }
+  row {
+    text spacer_hotfix [label: ""]
+    circle hotfix_c1 [label: "h1"]
+    text spacer_hotfix2 [label: ""]
+  }
+  row {
+    text spacer_feature [label: ""]
+    circle feature_c1 [label: "f1"]
+    circle feature_c2 [label: "f2"]
+    circle feature_c3 [label: "f3"]
+    text spacer_feature2 [label: ""]
+  }
+}
+
+main_start -> main_after_feature_split
+main_after_feature_split -> main_after_hotfix_split
+main_after_hotfix_split -> main_merge_feature
+main_merge_feature -> main_merge_hotfix
+
+main_after_feature_split -> feature_c1 [routing: direct]
+feature_c1 -> feature_c2
+feature_c2 -> feature_c3
+feature_c3 -> main_merge_feature [routing: direct]
+
+main_after_hotfix_split -> hotfix_c1 [routing: direct]
+hotfix_c1 -> main_merge_hotfix [routing: direct]

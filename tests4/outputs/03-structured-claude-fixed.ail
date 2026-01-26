@@ -1,0 +1,42 @@
+/* SPECIFICATION
+   What: Hub-and-spoke architecture with API Gateway at center and five services as spokes
+   Elements: API Gateway (hub), User Service, Order Service, Payment Service, Inventory Service, Notification Service (spokes)
+   Relationships: Bidirectional connections from hub to each spoke
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Central circle surrounded by 5 rectangles in a radial pattern
+   Strategy: Central hub in middle; services arranged in circular pattern around it (top, bottom, left, right, diagonal)
+   Structure: group with central hub; surrounding row/col layout with services positioned radially
+*/
+
+/* ELEMENT MAPPING
+   API Gateway → circle [fill: gold, label: "API Gateway"]
+   User Service → rect [fill: lightblue, label: "User Service"]
+   Order Service → rect [fill: lightblue, label: "Order Service"]
+   Payment Service → rect [fill: lightblue, label: "Payment Service"]
+   Inventory Service → rect [fill: lightblue, label: "Inventory Service"]
+   Notification Service → rect [fill: lightblue, label: "Notification Service"]
+   Bidirectional connections → <-> arrows between hub and each spoke
+*/
+
+group hub_spoke {
+  col {
+    row [gap: 60] {
+      circle hub [fill: "#FFD700", label: "API\nGateway", size: 60]
+    }
+  }
+}
+
+rect user_svc [fill: "#ADD8E6", label: "User Service", size: 90]
+rect order_svc [fill: "#ADD8E6", label: "Order Service", size: 90]
+rect payment_svc [fill: "#ADD8E6", label: "Payment Service", size: 90]
+rect inventory_svc [fill: "#ADD8E6", label: "Inventory Service", size: 90]
+rect notif_svc [fill: "#ADD8E6", label: "Notification Service", size: 90]
+
+/* Bidirectional connections from hub to each service */
+hub <-> user_svc
+hub <-> order_svc
+hub <-> payment_svc
+hub <-> inventory_svc
+hub <-> notif_svc

@@ -1,0 +1,39 @@
+/* SPECIFICATION
+   What: Machine learning pipeline with linear flow and two feedback loops
+   Elements: Raw Data, Preprocessing, Feature Engineering, Model Training, Evaluation, Deployment
+   Relationships: Linear flow left-to-right; Evaluation loops back to Feature Engineering; Deployment loops back to Raw Data
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Long horizontal flow with two backward diagonal arrows
+   Strategy: Single row for main pipeline; use direct routing for diagonal loops
+   Structure: row { RawData Preprocessing FeatureEngineering ModelTraining Evaluation Deployment }
+*/
+
+/* ELEMENT MAPPING
+   RawData → rect [fill: #DDEEFF, label: "Raw Data"]
+   Preprocessing → rect [fill: #DDEEFF, label: "Preprocessing"]
+   FeatureEngineering → rect [fill: #DDEEFF, label: "Feature Engineering"]
+   ModelTraining → rect [fill: #FFE9CC, label: "Model Training"]
+   Evaluation → rect [fill: #FFE9CC, label: "Evaluation"]
+   Deployment → rect [fill: #FFE9CC, label: "Deployment"]
+*/
+
+// Now write the AIL code:
+row {
+  rect RawData [fill: #DDEEFF, label: "Raw Data"]
+  rect Preprocessing [fill: #DDEEFF, label: "Preprocessing"]
+  rect FeatureEngineering [fill: #DDEEFF, label: "Feature Engineering"]
+  rect ModelTraining [fill: #FFE9CC, label: "Model Training"]
+  rect Evaluation [fill: #FFE9CC, label: "Evaluation"]
+  rect Deployment [fill: #FFE9CC, label: "Deployment"]
+}
+
+RawData -> Preprocessing
+Preprocessing -> FeatureEngineering
+FeatureEngineering -> ModelTraining
+ModelTraining -> Evaluation
+Evaluation -> Deployment
+
+Evaluation -> FeatureEngineering [routing: direct]
+Deployment -> RawData [routing: direct]

@@ -1,0 +1,8 @@
+Create a machine learning pipeline diagram showing:
+
+Data flow: Raw Data → Preprocessing → Feature Engineering → Model Training → Evaluation → Deployment
+
+With a feedback loop from Evaluation back to Feature Engineering (for iteration)
+And a monitoring loop from Deployment back to Data collection
+
+Use distinct colors for data stages vs model stages.

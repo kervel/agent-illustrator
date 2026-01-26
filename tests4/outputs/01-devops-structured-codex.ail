@@ -1,0 +1,42 @@
+/************************ SPECIFICATION
+   What: DevOps infinity loop showing continuous cycle between Dev (Plan, Code, Build, Test) and Ops (Release, Deploy, Operate, Monitor)
+   Elements: Plan, Code, Build, Test, Release, Deploy, Operate, Monitor
+   Relationships: Plan -> Code -> Build -> Test -> Release -> Deploy -> Operate -> Monitor -> Plan (cycle)
+*/
+
+/************************ LAYOUT PLAN
+   Visual shape: Infinity (two loops side-by-side)
+   Strategy: Two 2x2 grids side-by-side; connect diagonally with direct routing to imply loop crossings
+   Structure: row { col { row { Plan Code } row { Build Test } } col { row { Release Deploy } row { Operate Monitor } } }
+*/
+
+/************************ ELEMENT MAPPING
+   Plan → rect plan [label: "Plan"]
+   Code → rect code [label: "Code"]
+   Build → rect build [label: "Build"]
+   Test → rect test [label: "Test"]
+   Release → rect release [label: "Release"]
+   Deploy → rect deploy [label: "Deploy"]
+   Operate → rect operate [label: "Operate"]
+   Monitor → rect monitor [label: "Monitor"]
+*/
+
+row {
+  col {
+    row { rect plan [label: "Plan"] rect code [label: "Code"] }
+    row { rect build [label: "Build"] rect test [label: "Test"] }
+  }
+  col {
+    row { rect release [label: "Release"] rect deploy [label: "Deploy"] }
+    row { rect operate [label: "Operate"] rect monitor [label: "Monitor"] }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release [routing: direct]
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan [routing: direct]

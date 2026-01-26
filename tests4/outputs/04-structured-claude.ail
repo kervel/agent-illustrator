@@ -1,0 +1,62 @@
+/* SPECIFICATION
+   What: Git branching diagram showing main branch with feature and hotfix branches
+   Elements: Main branch line, Feature branch with 3 commits, Hotfix branch with 1 commit, merge points
+   Relationships: Feature splits from main, has commits, merges back; Hotfix splits after feature split, has commit, merges back
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Three horizontal parallel lines converging at merge points
+   Strategy: Three rows representing main, feature, and hotfix branches; commits as circles on branches; diagonal connectors for branch/merge
+   Structure: col { row {main_commits} row {feature_commits} row {hotfix_commits} } with diagonal arrows for branch/merge
+*/
+
+/* ELEMENT MAPPING
+   Main branch → row of circles connected linearly
+   Feature branch → row with 3 circles (commits) connected linearly
+   Hotfix branch → row with 1 circle (commit) connected linearly
+   Branch point (feature from main) → diagonal line
+   Merge point (feature back to main) → diagonal line
+   Branch point (hotfix from main) → diagonal line
+   Merge point (hotfix back to main) → diagonal line
+   Commits → circle [fill: lightgray, label: "C#"]
+*/
+
+col [gap: 40] {
+  group "Main Branch" {
+    row [gap: 20] {
+      circle main_c1 [fill: "#C0C0C0", label: "C1", size: 30]
+      circle main_c2 [fill: "#C0C0C0", label: "C2", size: 30]
+      circle main_c3 [fill: "#C0C0C0", label: "C3", size: 30]
+      circle main_c4 [fill: "#C0C0C0", label: "C4", size: 30]
+    }
+  }
+
+  group "Feature Branch" {
+    row [gap: 20] {
+      circle feat_c1 [fill: "#87CEEB", label: "F1", size: 30]
+      circle feat_c2 [fill: "#87CEEB", label: "F2", size: 30]
+      circle feat_c3 [fill: "#87CEEB", label: "F3", size: 30]
+    }
+  }
+
+  group "Hotfix Branch" {
+    row [gap: 20] {
+      circle hotfix_c1 [fill: "#FFB6C1", label: "H1", size: 30]
+    }
+  }
+}
+
+/* Main branch commits */
+main_c1 -> main_c2
+main_c2 -> main_c3
+main_c3 -> main_c4
+
+/* Feature branch: splits from main_c1, has commits, merges back at main_c3 */
+main_c1 -> feat_c1 [routing: direct]
+feat_c1 -> feat_c2
+feat_c2 -> feat_c3
+feat_c3 -> main_c3 [routing: direct]
+
+/* Hotfix branch: splits from main_c2, has commit, merges back at main_c3 */
+main_c2 -> hotfix_c1 [routing: direct]
+hotfix_c1 -> main_c3 [routing: direct]

@@ -1,0 +1,11 @@
+Create a hub-and-spoke architecture diagram:
+
+Central hub: "API Gateway"
+Spokes radiating out to:
+- User Service
+- Order Service
+- Payment Service
+- Inventory Service
+- Notification Service
+
+Show bidirectional connections from hub to each spoke.

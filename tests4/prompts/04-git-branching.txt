@@ -1,0 +1,7 @@
+Create a Git branching diagram showing:
+
+Main branch (horizontal line at top)
+Feature branch splits off from main, has 3 commits, merges back
+Hotfix branch splits from main (after feature split), has 1 commit, merges back to main
+
+Show the branch/merge flow with clear direction.

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-85 -60 260 680">
+  <style>
+    :root {
+    --foreground-3: #999999;
+    --status-error: #f44336;
+    --foreground-dark: #1a1a1a;
+    --foreground-1: #333333;
+    --foreground-light: #e0e0e0;
+    --text-2: #666666;
+    --background-3: #eeeeee;
+    --text-1: #333333;
+    --foreground-2: #666666;
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --status-warning: #ff9800;
+    --text-3: #999999;
+    --background-1: #ffffff;
+    --accent-light: #e3f2fd;
+    --text-light: #ffffff;
+    --background-dark: #333333;
+    --text-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --accent-dark: #1565c0;
+    --status-success: #4caf50;
+    --background-light: #ffffff;
+    --accent-3: #bbdefb;
+  }
+
+  </style>
+  <g id="hub_spoke" class="ai-container">
+    <g class="ai-container">
+      <g class="ai-container">
+        <circle id="hub" class="ai-shape ai-circle" cx="45" cy="45" r="30"/>
+        <text class="ai-label" x="45" y="45" text-anchor="middle">API\nGateway</text>
+      </g>
+    </g>
+  </g>
+  <rect id="user_svc" class="ai-shape ai-rect" x="0" y="94" width="90" height="90"/>
+  <text class="ai-label" x="45" y="139" text-anchor="middle">User Service</text>
+  <rect id="order_svc" class="ai-shape ai-rect" x="0" y="188" width="90" height="90"/>
+  <text class="ai-label" x="45" y="233" text-anchor="middle">Order Service</text>
+  <rect id="payment_svc" class="ai-shape ai-rect" x="0" y="282" width="90" height="90"/>
+  <text class="ai-label" x="45" y="327" text-anchor="middle">Payment Service</text>
+  <rect id="inventory_svc" class="ai-shape ai-rect" x="0" y="376" width="90" height="90"/>
+  <text class="ai-label" x="45" y="421" text-anchor="middle">Inventory Service</text>
+  <rect id="notif_svc" class="ai-shape ai-rect" x="0" y="470" width="90" height="90"/>
+  <text class="ai-label" x="45" y="515" text-anchor="middle">Notification Service</text>
+  <path class="ai-connection" d="M45 75 L45 94" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 75 L45 188" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 75 L45 282" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 75 L45 376" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 75 L45 470" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

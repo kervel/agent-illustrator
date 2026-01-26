@@ -1,0 +1,29 @@
+LAYOUT: Infinity loop → Two 2x2 grids side-by-side with cross-connections
+row {
+    col {
+        rect plan [label: "Plan"]
+        rect code [label: "Code"]
+    }
+    col {
+        rect build [label: "Build"]
+        rect test [label: "Test"]
+    }
+    col {
+        rect release [label: "Release"]
+        rect deploy [label: "Deploy"]
+    }
+    col {
+        rect operate [label: "Operate"]
+        rect monitor [label: "Monitor"]
+    }
+}
+plan -> code
+code -> build
+build -> test
+test -> plan
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release
+test -> release
+monitor -> plan

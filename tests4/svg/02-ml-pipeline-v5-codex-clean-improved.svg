@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -158.21501925545573 992 379.21501925545573">
+  <style>
+    :root {
+    --background-3: #eeeeee;
+    --background-1: #ffffff;
+    --accent-1: #2196f3;
+    --foreground-3: #999999;
+    --accent-3: #bbdefb;
+    --foreground-dark: #1a1a1a;
+    --background-light: #ffffff;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-light: #ffffff;
+    --text-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --foreground-light: #e0e0e0;
+    --background-dark: #333333;
+    --foreground-2: #666666;
+    --foreground-1: #333333;
+    --background-2: #f5f5f5;
+    --accent-light: #e3f2fd;
+    --accent-2: #e3f2fd;
+    --text-1: #333333;
+    --status-success: #4caf50;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <g class="ai-container">
+      <ellipse id="raw_data" class="ai-shape ai-ellipse" cx="52" cy="32.5" rx="42" ry="22.5" fill="#FFE4B5" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="52" y="32.5" text-anchor="middle">Raw Data</text>
+      <rect id="preprocessing" class="ai-shape ai-rect" x="122" y="10" width="124" height="30" fill="#FFE4B5" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="184" y="25" text-anchor="middle">Preprocessing</text>
+      <rect id="feature_eng" class="ai-shape ai-rect" x="274" y="10" width="172" height="30" fill="#FFE4B5" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="360" y="25" text-anchor="middle">Feature Engineering</text>
+      <rect id="training" class="ai-shape ai-rect" x="474" y="10" width="132" height="30" fill="steelblue" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="540" y="25" text-anchor="middle">Model Training</text>
+      <rect id="evaluation" class="ai-shape ai-rect" x="634" y="10" width="100" height="30" fill="steelblue" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="684" y="25" text-anchor="middle">Evaluation</text>
+      <rect id="deployment" class="ai-shape ai-rect" x="762" y="10" width="100" height="30" fill="steelblue" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="812" y="25" text-anchor="middle">Deployment</text>
+    </g>
+    <g class="ai-container">
+      <circle id="data_collection" class="ai-shape ai-circle" cx="33" cy="128" r="23" fill="gold" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-shape ai-text" x="116" y="111" text-anchor="start" dominant-baseline="middle" font-size="12" fill="#333333">Data Collection</text>
+    </g>
+  </g>
+  <text class="ai-label" x="587" y="-8.5" text-anchor="middle">iterate</text>
+  <text class="ai-label" x="573.831514762516" y="-43.30198973042362" text-anchor="middle">monitoring</text>
+  <path class="ai-connection" d="M94 32.5 L122 25" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M246 25 L274 25" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M446 25 L474 25" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M606 25 L634 25" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M734 25 L762 25" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M634 25 Q540 -22 446 25" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M762 31.611039794608473 Q385.6630295250321 -98.21501925545572 56 124.9589216944801" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M37.575916230366495 105 Q55.04973821989529 82.4869109947644 47.52356020942408 55" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

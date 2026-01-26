@@ -1,0 +1,35 @@
+LAYOUT: Infinity/8 → Two 2x2 grids side-by-side, cross-connections
+
+row {
+  col {
+    text "Dev" [font_size: 16, fill: steelblue]
+    row {
+      rect plan [label: "Plan"]
+      rect code [label: "Code"]
+    }
+    row {
+      rect build [label: "Build"]
+      rect test [label: "Test"]
+    }
+  }
+  col {
+    text "Ops" [font_size: 16, fill: darkgreen]
+    row {
+      rect release [label: "Release"]
+      rect deploy [label: "Deploy"]
+    }
+    row {
+      rect operate [label: "Operate"]
+      rect monitor [label: "Monitor"]
+    }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan

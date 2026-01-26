@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 850 250">
+  <style>
+    :root {
+    --accent-dark: #1565c0;
+    --foreground-light: #e0e0e0;
+    --accent-3: #bbdefb;
+    --text-1: #333333;
+    --text-light: #ffffff;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --background-2: #f5f5f5;
+    --foreground-3: #999999;
+    --accent-2: #e3f2fd;
+    --status-warning: #ff9800;
+    --background-light: #ffffff;
+    --text-2: #666666;
+    --background-dark: #333333;
+    --text-3: #999999;
+    --background-3: #eeeeee;
+    --accent-1: #2196f3;
+    --foreground-dark: #1a1a1a;
+    --foreground-2: #666666;
+    --accent-light: #e3f2fd;
+    --foreground-1: #333333;
+    --background-1: #ffffff;
+    --text-dark: #1a1a1a;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <g id="pipeline" class="ai-container">
+      <g class="ai-container">
+        <rect id="raw_data" class="ai-shape ai-rect" x="15" y="15" width="100" height="100"/>
+        <text class="ai-label" x="65" y="65" text-anchor="middle">Raw Data</text>
+        <rect id="preproc" class="ai-shape ai-rect" x="135" y="15" width="100" height="100"/>
+        <text class="ai-label" x="185" y="65" text-anchor="middle">Preprocessing</text>
+        <rect id="feat_eng" class="ai-shape ai-rect" x="255" y="15" width="100" height="100"/>
+        <text class="ai-label" x="305" y="65" text-anchor="middle">Feature Eng</text>
+        <rect id="model_train" class="ai-shape ai-rect" x="375" y="15" width="100" height="100"/>
+        <text class="ai-label" x="425" y="65" text-anchor="middle">Model Training</text>
+        <rect id="eval" class="ai-shape ai-rect" x="495" y="15" width="100" height="100"/>
+        <text class="ai-label" x="545" y="65" text-anchor="middle">Evaluation</text>
+        <rect id="deploy" class="ai-shape ai-rect" x="615" y="15" width="100" height="100"/>
+        <text class="ai-label" x="665" y="65" text-anchor="middle">Deployment</text>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M115 65 L135 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M235 65 L255 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M355 65 L375 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M475 65 L495 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M595 65 L615 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M495 65 L355 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M615 65 L115 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

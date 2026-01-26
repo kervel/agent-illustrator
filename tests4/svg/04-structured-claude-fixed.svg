@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 330 360">
+  <style>
+    :root {
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --foreground-2: #666666;
+    --text-dark: #1a1a1a;
+    --text-3: #999999;
+    --accent-1: #2196f3;
+    --text-1: #333333;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-light: #ffffff;
+    --text-light: #ffffff;
+    --foreground-3: #999999;
+    --accent-light: #e3f2fd;
+    --foreground-1: #333333;
+    --status-success: #4caf50;
+    --accent-3: #bbdefb;
+    --accent-2: #e3f2fd;
+    --background-dark: #333333;
+    --accent-dark: #1565c0;
+    --status-error: #f44336;
+    --status-warning: #ff9800;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g class="ai-container">
+    <g id="main_branch" class="ai-container">
+      <g class="ai-container">
+        <circle id="main_c1" class="ai-shape ai-circle" cx="30" cy="30" r="15"/>
+        <text class="ai-label" x="30" y="30" text-anchor="middle">C1</text>
+        <circle id="main_c2" class="ai-shape ai-circle" cx="80" cy="30" r="15"/>
+        <text class="ai-label" x="80" y="30" text-anchor="middle">C2</text>
+        <circle id="main_c3" class="ai-shape ai-circle" cx="130" cy="30" r="15"/>
+        <text class="ai-label" x="130" y="30" text-anchor="middle">C3</text>
+        <circle id="main_c4" class="ai-shape ai-circle" cx="180" cy="30" r="15"/>
+        <text class="ai-label" x="180" y="30" text-anchor="middle">C4</text>
+      </g>
+    </g>
+    <g id="feature_branch" class="ai-container">
+      <g class="ai-container">
+        <circle id="feat_c1" class="ai-shape ai-circle" cx="30" cy="120" r="15"/>
+        <text class="ai-label" x="30" y="120" text-anchor="middle">F1</text>
+        <circle id="feat_c2" class="ai-shape ai-circle" cx="80" cy="120" r="15"/>
+        <text class="ai-label" x="80" y="120" text-anchor="middle">F2</text>
+        <circle id="feat_c3" class="ai-shape ai-circle" cx="130" cy="120" r="15"/>
+        <text class="ai-label" x="130" y="120" text-anchor="middle">F3</text>
+      </g>
+    </g>
+    <g id="hotfix_branch" class="ai-container">
+      <g class="ai-container">
+        <circle id="hotfix_c1" class="ai-shape ai-circle" cx="30" cy="210" r="15"/>
+        <text class="ai-label" x="30" y="210" text-anchor="middle">H1</text>
+      </g>
+    </g>
+  </g>
+  <path class="ai-connection" d="M45 30 L65 30" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M95 30 L115 30" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M145 30 L165 30" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M30 45 L30 105" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M45 120 L65 120" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M95 120 L115 120" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M130 105 L130 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M75.83333333333333 45 L34.166666666666664 195" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M38.33333333333333 195 L121.66666666666667 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

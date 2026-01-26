@@ -1,0 +1,44 @@
+/* SPECIFICATION
+   What: DevOps infinity loop showing continuous cycle of development and operations
+   Elements: Plan, Code, Build, Test (Dev side), Release, Deploy, Operate, Monitor (Ops side)
+   Relationships: Left loop flows downward (Plan→Code→Build→Test), right loop flows downward (Release→Deploy→Operate→Monitor), with cross-connections at top and bottom to form infinity symbol
+*/
+
+/* LAYOUT PLAN
+   Visual shape: Infinity symbol (∞) with two interconnected loops
+   Strategy: Two vertical 2x2 grids positioned side-by-side, with Test connecting to Release and Monitor connecting to Plan to complete the figure-8
+   Structure: col { row { left_loop right_loop } } where each loop is col { row { stage1 stage2 } row { stage3 stage4 } }
+*/
+
+/* ELEMENT MAPPING
+   Plan → rect [fill: lightblue, label: "Plan"]
+   Code → rect [fill: lightblue, label: "Code"]
+   Build → rect [fill: lightblue, label: "Build"]
+   Test → rect [fill: lightblue, label: "Test"]
+   Release → rect [fill: lightgreen, label: "Release"]
+   Deploy → rect [fill: lightgreen, label: "Deploy"]
+   Operate → rect [fill: lightgreen, label: "Operate"]
+   Monitor → rect [fill: lightgreen, label: "Monitor"]
+*/
+
+row {
+  col {
+    row { rect plan [label: "Plan"] rect code [label: "Code"] }
+    row { rect build [label: "Build"] rect test [label: "Test"] }
+
+  }
+  col {
+    row { rect release [label: "Release"] rect deploy [label: "Deploy"] }
+    row { rect operate [label: "Operate"] rect monitor [label: "Monitor"] }
+
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> release
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> plan

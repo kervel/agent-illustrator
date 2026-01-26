@@ -1,0 +1,8 @@
+Create a state machine diagram for a simple order:
+
+States: Pending → Processing → Shipped → Delivered
+         ↓ (cancel)
+       Cancelled
+
+From Processing, there's also a path to "Failed" state.
+Show initial state indicator and final states.

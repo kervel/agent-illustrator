@@ -1,0 +1,110 @@
+/* INTENT
+   What is being communicated? The DevOps infinity loop - continuous integration
+   between Development and Operations as an endless cycle.
+   Who is the audience? Engineers and stakeholders understanding DevOps flow.
+   What should they understand? Dev and Ops are two interconnected loops forming
+   a figure-8, with continuous flow between them.
+*/
+
+/* GLOBAL DESIGN
+   What visual metaphor captures the essence? Infinity symbol (∞) - two loops
+   joined at the center, representing never-ending improvement.
+   What shape should the whole diagram evoke? Horizontal figure-8 with Dev on
+   left loop, Ops on right loop.
+   What are the major visual groupings?
+   - Left loop: 4 Dev stages in 2x2 grid (Plan, Code top; Test, Build bottom)
+   - Right loop: 4 Ops stages in 2x2 grid (Release, Deploy top; Monitor, Operate bottom)
+   - Flow: clockwise in each loop, crossing at center
+*/
+
+/* LAYOUT PLAN
+   What goes where spatially?
+   Left 2x2:        Right 2x2:
+   [Plan] [Code]    [Release] [Deploy]
+   [Test] [Build]   [Monitor] [Operate]
+
+   Flow direction:
+   Left loop: Plan → Code → Build → Test → Plan (clockwise)
+   Right loop: Release → Deploy → Operate → Monitor → Release (clockwise)
+   Cross-connections: Test → Release, Monitor → Plan (the infinity crossing)
+
+   Structure: row { col { row row } col { row row } }
+*/
+
+/* AIL FEATURES
+   Elements:
+     plan, code, build, test → rect because process steps
+     release, deploy, operate, monitor → rect because process steps
+     dev_label, ops_label → text because group headers
+
+   Connections:
+     plan → code: default because horizontal sequential
+     code → build: default because vertical down
+     build → test: default because horizontal back
+     test → plan: curved because loop-back (going up-left)
+
+     release → deploy: default because horizontal sequential
+     deploy → operate: default because vertical down
+     operate → monitor: default because horizontal back
+     monitor → release: curved because loop-back (going up-left)
+
+     test → release: curved because infinity crossing (center)
+     monitor → plan: curved because infinity crossing (center)
+
+   Visual encoding:
+     Dev stages → lightblue fill because left-side identity
+     Ops stages → lightgreen fill because right-side identity
+*/
+
+/* DETAILS
+   The 2x2 arrangement allows the infinity crossing to happen naturally
+   between the inner edges (Code/Build side meets Release/Monitor side).
+   Curved routing on cross-connections creates the visual infinity effect.
+   Labels "Dev" and "Ops" positioned above each loop.
+*/
+
+row [gap: 40] {
+  group dev_side {
+    col [gap: 8] {
+      text "Dev" [font_size: 18]
+      col [gap: 16] {
+        row [gap: 16] {
+          rect plan [fill: lightblue, label: "Plan"]
+          rect code [fill: lightblue, label: "Code"]
+        }
+        row [gap: 16] {
+          rect test [fill: lightblue, label: "Test"]
+          rect build [fill: lightblue, label: "Build"]
+        }
+      }
+    }
+  }
+  group ops_side {
+    col [gap: 8] {
+      text "Ops" [font_size: 18]
+      col [gap: 16] {
+        row [gap: 16] {
+          rect release [fill: lightgreen, label: "Release"]
+          rect deploy [fill: lightgreen, label: "Deploy"]
+        }
+        row [gap: 16] {
+          rect monitor [fill: lightgreen, label: "Monitor"]
+          rect operate [fill: lightgreen, label: "Operate"]
+        }
+      }
+    }
+  }
+}
+
+plan -> code
+code -> build
+build -> test
+test -> plan [routing: curved]
+
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release [routing: curved]
+
+test -> release [routing: curved]
+monitor -> plan [routing: curved]

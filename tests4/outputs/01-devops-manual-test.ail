@@ -1,0 +1,28 @@
+/* Classic infinity DevOps - no decorative elements */
+
+row [gap: 60] {
+  col {
+    row { rect plan [fill: steelblue, label: "Plan"]  rect code [fill: steelblue, label: "Code"] }
+    row { rect test [fill: steelblue, label: "Test"]  rect build [fill: steelblue, label: "Build"] }
+  }
+  col {
+    row { rect release [fill: lightgreen, label: "Release"]  rect deploy [fill: lightgreen, label: "Deploy"] }
+    row { rect monitor [fill: lightgreen, label: "Monitor"]  rect operate [fill: lightgreen, label: "Operate"] }
+  }
+}
+
+// Dev loop (counterclockwise visually)
+plan -> code
+code -> build
+build -> test
+test -> plan [routing: curved]
+
+// Ops loop (counterclockwise visually)  
+release -> deploy
+deploy -> operate
+operate -> monitor
+monitor -> release [routing: curved]
+
+// Cross-connections (the infinity crossover)
+test -> release [routing: curved]
+monitor -> plan [routing: curved]
