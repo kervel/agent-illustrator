@@ -229,15 +229,20 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
 /// - If vertices have explicit negative coordinates, preserves them (no normalization)
 /// - If vertices have positive offsets (like y: 6), normalizes to bring content to origin
 fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
+    use std::collections::HashMap;
+
     let mut vertex_min_x = f64::INFINITY;
     let mut vertex_min_y = f64::INFINITY;
     let mut geometry_min_x = f64::INFINITY;
     let mut geometry_min_y = f64::INFINITY;
     let mut has_coords = false;
 
-    // Track current position for arc calculations
+    // Track current position for arc/curve calculations
     let mut current_x = 0.0_f64;
     let mut current_y = 0.0_f64;
+
+    // Build vertex map for resolving via references in curves
+    let mut vertices: HashMap<String, (f64, f64)> = HashMap::new();
 
     for cmd in &decl.body.commands {
         match &cmd.node {
@@ -247,6 +252,7 @@ fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
                 } else {
                     (0.0, 0.0)
                 };
+                vertices.insert(v.name.node.as_str().to_string(), (x, y));
                 vertex_min_x = vertex_min_x.min(x);
                 vertex_min_y = vertex_min_y.min(y);
                 geometry_min_x = geometry_min_x.min(x);
@@ -259,6 +265,7 @@ fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
                 if let Some(pos) = &lt.position {
                     let x = pos.x.unwrap_or(0.0);
                     let y = pos.y.unwrap_or(0.0);
+                    vertices.insert(lt.target.node.as_str().to_string(), (x, y));
                     vertex_min_x = vertex_min_x.min(x);
                     vertex_min_y = vertex_min_y.min(y);
                     geometry_min_x = geometry_min_x.min(x);
@@ -272,6 +279,7 @@ fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
                 if let Some(pos) = &at.position {
                     let end_x = pos.x.unwrap_or(0.0);
                     let end_y = pos.y.unwrap_or(0.0);
+                    vertices.insert(at.target.node.as_str().to_string(), (end_x, end_y));
 
                     // Include endpoint in vertex min
                     vertex_min_x = vertex_min_x.min(end_x);
@@ -292,30 +300,28 @@ fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
             }
             PathCommand::CurveTo(ct) => {
                 if let Some(pos) = &ct.position {
-                    let x = pos.x.unwrap_or(0.0);
-                    let y = pos.y.unwrap_or(0.0);
-                    vertex_min_x = vertex_min_x.min(x);
-                    vertex_min_y = vertex_min_y.min(y);
-                    geometry_min_x = geometry_min_x.min(x);
-                    geometry_min_y = geometry_min_y.min(y);
+                    let end_x = pos.x.unwrap_or(0.0);
+                    let end_y = pos.y.unwrap_or(0.0);
+                    vertices.insert(ct.target.node.as_str().to_string(), (end_x, end_y));
+                    vertex_min_x = vertex_min_x.min(end_x);
+                    vertex_min_y = vertex_min_y.min(end_y);
+                    geometry_min_x = geometry_min_x.min(end_x);
+                    geometry_min_y = geometry_min_y.min(end_y);
 
-                    // Include approximate control point for curves (geometry only)
-                    let mid_x = (current_x + x) / 2.0;
-                    let mid_y = (current_y + y) / 2.0;
-                    let dx = x - current_x;
-                    let dy = y - current_y;
-                    let chord_len = (dx * dx + dy * dy).sqrt();
-                    if chord_len > 0.001 {
-                        let offset = chord_len * 0.25;
-                        let perp_x = -dy / chord_len;
-                        let perp_y = dx / chord_len;
-                        geometry_min_x = geometry_min_x.min(mid_x + perp_x * offset);
-                        geometry_min_y = geometry_min_y.min(mid_y + perp_y * offset);
-                    }
+                    // Include curve apex in geometry min only
+                    let (apex_x, apex_y) = compute_curve_apex(
+                        current_x,
+                        current_y,
+                        end_x,
+                        end_y,
+                        ct.via.as_ref().and_then(|v| vertices.get(v.node.as_str())),
+                    );
+                    geometry_min_x = geometry_min_x.min(apex_x);
+                    geometry_min_y = geometry_min_y.min(apex_y);
 
                     has_coords = true;
-                    current_x = x;
-                    current_y = y;
+                    current_x = end_x;
+                    current_y = end_y;
                 }
             }
             PathCommand::Close | PathCommand::CloseArc(_) => {}
@@ -549,6 +555,51 @@ fn compute_arc_apex(
     let sign = if clockwise { -1.0 } else { 1.0 };
 
     (mid_x + sign * perp_x * sagitta, mid_y + sign * perp_y * sagitta)
+}
+
+/// Compute the apex point of a quadratic Bezier curve (where it bulges furthest from the chord)
+///
+/// For a quadratic Bezier with start P0, control P1, end P2:
+/// - The apex is at t=0.5: B(0.5) = 0.25*P0 + 0.5*P1 + 0.25*P2
+/// - This is the chord midpoint moved halfway toward the control point
+///
+/// If no control point (via) is specified, uses a default 25% perpendicular offset.
+fn compute_curve_apex(
+    start_x: f64,
+    start_y: f64,
+    end_x: f64,
+    end_y: f64,
+    via: Option<&(f64, f64)>,
+) -> (f64, f64) {
+    // Chord midpoint
+    let mid_x = (start_x + end_x) / 2.0;
+    let mid_y = (start_y + end_y) / 2.0;
+
+    if let Some(&(ctrl_x, ctrl_y)) = via {
+        // Actual curve apex: midpoint moved halfway toward control point
+        // B(0.5) = midpoint + 0.5 * (control - midpoint)
+        let apex_x = mid_x + 0.5 * (ctrl_x - mid_x);
+        let apex_y = mid_y + 0.5 * (ctrl_y - mid_y);
+        (apex_x, apex_y)
+    } else {
+        // Default: 25% perpendicular offset (matches auto-generated control points)
+        let dx = end_x - start_x;
+        let dy = end_y - start_y;
+        let chord_len = (dx * dx + dy * dy).sqrt();
+
+        if chord_len < 0.001 {
+            return (mid_x, mid_y);
+        }
+
+        let offset = chord_len * 0.25;
+        // Perpendicular direction (counterclockwise rotation)
+        let perp_x = -dy / chord_len;
+        let perp_y = dx / chord_len;
+
+        // Default apex is at 25% perpendicular offset, and curve reaches halfway there
+        // So actual curve apex is at 12.5% perpendicular offset
+        (mid_x + perp_x * offset * 0.5, mid_y + perp_y * offset * 0.5)
+    }
 }
 
 #[cfg(test)]
