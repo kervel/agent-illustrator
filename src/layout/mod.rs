@@ -50,8 +50,15 @@ fn collect_defined_identifiers(doc: &Document) -> HashSet<String> {
 fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
     match stmt {
         Statement::Shape(s) => {
+            // Check ShapeDecl.name first
             if let Some(name) = &s.name {
                 ids.insert(name.node.0.clone());
+            }
+            // For path shapes, the name is inside PathDecl
+            if let ShapeType::Path(path_decl) = &s.shape_type.node {
+                if let Some(name) = &path_decl.name {
+                    ids.insert(name.node.0.clone());
+                }
             }
         }
         Statement::Layout(l) => {

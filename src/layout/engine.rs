@@ -191,8 +191,17 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
         }
     });
 
+    // Get element ID - check ShapeDecl.name first, then PathDecl.name for paths
+    let id = shape.name.as_ref().map(|n| n.node.clone()).or_else(|| {
+        if let ShapeType::Path(path_decl) = &shape.shape_type.node {
+            path_decl.name.as_ref().map(|n| n.node.clone())
+        } else {
+            None
+        }
+    });
+
     ElementLayout {
-        id: shape.name.as_ref().map(|n| n.node.clone()),
+        id,
         element_type: ElementType::Shape(shape.shape_type.node.clone()),
         bounds: BoundingBox::new(position.x, position.y, width, height),
         styles,
@@ -256,10 +265,9 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
             let h = intrinsic_height.unwrap_or(config.default_rect_size.1);
             (w, h)
         }
-        ShapeType::Path(_) => {
-            // Path shapes use default rect size; actual size from vertex positions
-            // will be computed when rendering is implemented
-            config.default_rect_size
+        ShapeType::Path(path_decl) => {
+            // Compute bounds from path vertices
+            compute_path_bounds(path_decl).unwrap_or(config.default_rect_size)
         }
     };
 
@@ -276,6 +284,71 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
     let final_height = height.unwrap_or(default_height);
 
     (final_width, final_height)
+}
+
+/// Compute bounding box dimensions from path vertices
+fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
+    use crate::parser::ast::PathCommand;
+
+    let mut min_x = f64::INFINITY;
+    let mut min_y = f64::INFINITY;
+    let mut max_x = f64::NEG_INFINITY;
+    let mut max_y = f64::NEG_INFINITY;
+    let mut has_points = false;
+
+    let mut update_bounds = |x: f64, y: f64| {
+        min_x = min_x.min(x);
+        min_y = min_y.min(y);
+        max_x = max_x.max(x);
+        max_y = max_y.max(y);
+        has_points = true;
+    };
+
+    // Origin is at (0, 0)
+    update_bounds(0.0, 0.0);
+
+    for cmd in &path.body.commands {
+        match &cmd.node {
+            PathCommand::Vertex(v) => {
+                if let Some(pos) = &v.position {
+                    let x = pos.x.unwrap_or(0.0);
+                    let y = pos.y.unwrap_or(0.0);
+                    update_bounds(x, y);
+                }
+            }
+            PathCommand::LineTo(lt) => {
+                if let Some(pos) = &lt.position {
+                    let x = pos.x.unwrap_or(0.0);
+                    let y = pos.y.unwrap_or(0.0);
+                    update_bounds(x, y);
+                }
+            }
+            PathCommand::ArcTo(at) => {
+                if let Some(pos) = &at.position {
+                    let x = pos.x.unwrap_or(0.0);
+                    let y = pos.y.unwrap_or(0.0);
+                    update_bounds(x, y);
+                }
+            }
+            PathCommand::CurveTo(ct) => {
+                if let Some(pos) = &ct.position {
+                    let x = pos.x.unwrap_or(0.0);
+                    let y = pos.y.unwrap_or(0.0);
+                    update_bounds(x, y);
+                }
+            }
+            PathCommand::Close | PathCommand::CloseArc(_) => {}
+        }
+    }
+
+    if has_points && min_x.is_finite() && max_x.is_finite() {
+        let width = max_x - min_x;
+        let height = max_y - min_y;
+        // Ensure minimum size
+        Some((width.max(1.0), height.max(1.0)))
+    } else {
+        None
+    }
 }
 
 /// Extract the size modifier value from modifiers
