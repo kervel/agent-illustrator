@@ -347,11 +347,40 @@ where
         just(Token::Dash).to(ConnectionDirection::Undirected),
     ));
 
+    // Anchor name parser: accepts both identifiers and edge keywords (top, bottom, left, right, etc.)
+    // This is needed because edge keywords are lexed separately from identifiers
+    let anchor_name = choice((
+        select! { Token::Ident(s) => s },
+        just(Token::Top).to("top".to_string()),
+        just(Token::Bottom).to("bottom".to_string()),
+        just(Token::Left).to("left".to_string()),
+        just(Token::Right).to("right".to_string()),
+        just(Token::HorizontalCenter).to("horizontal_center".to_string()),
+        just(Token::VerticalCenter).to("vertical_center".to_string()),
+    ))
+    .map_with(|name, e| Spanned::new(name, span_range(&e.span())));
+
+    // Anchor reference parser: identifier { "." anchor_name }?
+    // Parses either:
+    //   - `element` -> AnchorReference with anchor=None
+    //   - `element.anchor_name` -> AnchorReference with anchor=Some
+    let anchor_reference = identifier
+        .clone()
+        .then(just(Token::Dot).ignore_then(anchor_name).or_not())
+        .map(|(element, anchor_opt)| {
+            match anchor_opt {
+                Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
+                None => AnchorReference::element_only(element),
+            }
+        });
+
     // Connection declaration (supports chained: a -> b -> c [modifiers])
-    let connection_decl = identifier
+    // Feature 009: Now supports anchor syntax (a.right -> b.left)
+    let connection_decl = anchor_reference
+        .clone()
         .then(
             connection_op
-                .then(identifier)
+                .then(anchor_reference.clone())
                 .repeated()
                 .at_least(1)
                 .collect::<Vec<_>>(),
@@ -700,11 +729,11 @@ where
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
             .map(|n| ("left", ParsedModifierValue::Number(n.node))),
-        just(Token::Ident("up".into()))
+        just(Token::Up)
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
             .map(|n| ("up", ParsedModifierValue::Number(n.node))),
-        just(Token::Ident("down".into()))
+        just(Token::Down)
             .ignore_then(just(Token::Colon))
             .ignore_then(number.clone())
             .map(|n| ("down", ParsedModifierValue::Number(n.node))),
@@ -910,6 +939,7 @@ where
                 name,
                 children,
                 modifiers: modifiers.unwrap_or_default(),
+                anchors: vec![],  // Parsed groups don't have custom anchors
             });
 
         // Label declaration: `label { ... }` or `label: <element>`
@@ -990,6 +1020,86 @@ where
                 }))
             });
 
+        // Anchor declaration: anchor name [position: element.property, direction: up/down/left/right]
+        // (Feature 009 - T010)
+        let anchor_direction = choice((
+            // Cardinal directions
+            just(Token::Up).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Up)),
+            just(Token::Down).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Down)),
+            just(Token::Left).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Left)),
+            just(Token::Right).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Right)),
+            // Handle edge keywords as cardinal directions too
+            just(Token::Top).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Up)),
+            just(Token::Bottom).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Down)),
+            // Numeric angle
+            number.clone().map(|n| AnchorDirectionSpec::Angle(n.node)),
+        ));
+
+        // Parse anchor position: element.property or element.property + offset
+        let anchor_position = property_ref
+            .clone()
+            .then(
+                just(Token::Plus)
+                    .ignore_then(number.clone())
+                    .map(|n| n.node)
+                    .or_not(),
+            )
+            .map(|(prop_ref, offset)| {
+                if let Some(off) = offset {
+                    AnchorPosition::PropertyRefWithOffset {
+                        prop_ref,
+                        offset: off,
+                    }
+                } else {
+                    AnchorPosition::PropertyRef(prop_ref)
+                }
+            });
+
+        // Parse anchor modifier: position: ..., direction: ...
+        let anchor_modifier = choice((
+            just(Token::Position)
+                .ignore_then(just(Token::Colon))
+                .ignore_then(anchor_position)
+                .map(|pos| ("position", Some(pos), None)),
+            just(Token::Direction)
+                .ignore_then(just(Token::Colon))
+                .ignore_then(anchor_direction)
+                .map(|dir| ("direction", None, Some(dir))),
+        ));
+
+        let anchor_decl = just(Token::Anchor)
+            .ignore_then(identifier.clone())
+            .then(
+                anchor_modifier
+                    .separated_by(just(Token::Comma))
+                    .allow_trailing()
+                    .collect::<Vec<_>>()
+                    .delimited_by(just(Token::BracketOpen), just(Token::BracketClose)),
+            )
+            .try_map(|(name, modifiers), span| {
+                let mut position: Option<AnchorPosition> = None;
+                let mut direction: Option<AnchorDirectionSpec> = None;
+
+                for (_, pos, dir) in modifiers {
+                    if pos.is_some() {
+                        position = pos;
+                    }
+                    if dir.is_some() {
+                        direction = dir;
+                    }
+                }
+
+                let pos = position.ok_or_else(|| {
+                    Rich::custom(span, "anchor declaration requires 'position' modifier")
+                })?;
+
+                Ok(Statement::AnchorDecl(AnchorDecl {
+                    name,
+                    position: pos,
+                    direction,
+                }))
+            });
+
         // All statements
         // Note: Order matters! More specific patterns should come first.
         // - constrain_decl before others (starts with 'constrain')
@@ -1007,6 +1117,7 @@ where
             file_template.clone(),
             inline_template,
             export_decl.clone().map(Statement::Export),
+            anchor_decl,  // Feature 009: anchor declarations
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
             label_decl,
@@ -1066,9 +1177,41 @@ mod tests {
         match &doc.statements[0].node {
             Statement::Connection(conns) => {
                 assert_eq!(conns.len(), 1);
-                assert_eq!(conns[0].from.node.as_str(), "a");
-                assert_eq!(conns[0].to.node.as_str(), "b");
+                // Feature 009: AnchorReference.element contains the identifier
+                assert_eq!(conns[0].from.element.node.as_str(), "a");
+                assert_eq!(conns[0].to.element.node.as_str(), "b");
+                assert!(conns[0].from.anchor.is_none());
+                assert!(conns[0].to.anchor.is_none());
                 assert_eq!(conns[0].direction, ConnectionDirection::Forward);
+            }
+            _ => panic!("Expected connection"),
+        }
+    }
+
+    #[test]
+    fn test_parse_connection_with_anchors() {
+        let doc = parse("a.right -> b.left").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Connection(conns) => {
+                assert_eq!(conns.len(), 1);
+                assert_eq!(conns[0].from.element.node.as_str(), "a");
+                assert_eq!(conns[0].from.anchor.as_ref().map(|s| s.node.as_str()), Some("right"));
+                assert_eq!(conns[0].to.element.node.as_str(), "b");
+                assert_eq!(conns[0].to.anchor.as_ref().map(|s| s.node.as_str()), Some("left"));
+            }
+            _ => panic!("Expected connection"),
+        }
+    }
+
+    #[test]
+    fn test_parse_connection_mixed_anchors() {
+        // One with anchor, one without
+        let doc = parse("a.top -> b").expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Connection(conns) => {
+                assert_eq!(conns[0].from.anchor.as_ref().map(|s| s.node.as_str()), Some("top"));
+                assert!(conns[0].to.anchor.is_none());
             }
             _ => panic!("Expected connection"),
         }
@@ -2163,6 +2306,125 @@ mod tests {
                 other => panic!("Expected Path, got {:?}", other),
             },
             other => panic!("Expected Shape, got {:?}", other),
+        }
+    }
+
+    // ==================== Anchor Declaration Tests (Feature 009 - T012) ====================
+
+    #[test]
+    fn test_parse_anchor_basic() {
+        let input = r#"anchor input [position: body.left]"#;
+        let doc = parse(input).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::AnchorDecl(a) => {
+                assert_eq!(a.name.node.as_str(), "input");
+                match &a.position {
+                    AnchorPosition::PropertyRef(pr) => {
+                        assert_eq!(pr.element.node.segments[0].node.as_str(), "body");
+                        assert!(matches!(pr.property.node, ConstraintProperty::Left));
+                    }
+                    _ => panic!("Expected PropertyRef"),
+                }
+                assert!(a.direction.is_none());
+            }
+            other => panic!("Expected AnchorDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_anchor_with_direction() {
+        let input = r#"anchor output [position: body.right, direction: right]"#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::AnchorDecl(a) => {
+                assert_eq!(a.name.node.as_str(), "output");
+                assert!(matches!(
+                    a.direction,
+                    Some(AnchorDirectionSpec::Cardinal(CardinalDirection::Right))
+                ));
+            }
+            other => panic!("Expected AnchorDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_anchor_with_angle_direction() {
+        let input = r#"anchor diagonal [position: body.top, direction: 45]"#;
+        let doc = parse(input).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::AnchorDecl(a) => {
+                match &a.direction {
+                    Some(AnchorDirectionSpec::Angle(angle)) => {
+                        assert_eq!(*angle, 45.0);
+                    }
+                    other => panic!("Expected Angle direction, got {:?}", other),
+                }
+            }
+            other => panic!("Expected AnchorDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_anchor_with_up_down_directions() {
+        // Test that up/down keywords work for anchor direction
+        let input_up = r#"anchor top_port [position: header.top, direction: up]"#;
+        let doc = parse(input_up).expect("Should parse up");
+        match &doc.statements[0].node {
+            Statement::AnchorDecl(a) => {
+                assert!(matches!(
+                    a.direction,
+                    Some(AnchorDirectionSpec::Cardinal(CardinalDirection::Up))
+                ));
+            }
+            _ => panic!("Expected AnchorDecl"),
+        }
+
+        let input_down = r#"anchor bottom_port [position: footer.bottom, direction: down]"#;
+        let doc = parse(input_down).expect("Should parse down");
+        match &doc.statements[0].node {
+            Statement::AnchorDecl(a) => {
+                assert!(matches!(
+                    a.direction,
+                    Some(AnchorDirectionSpec::Cardinal(CardinalDirection::Down))
+                ));
+            }
+            _ => panic!("Expected AnchorDecl"),
+        }
+    }
+
+    #[test]
+    fn test_parse_anchor_missing_position_error() {
+        // Anchor without position should fail
+        let input = r#"anchor invalid [direction: left]"#;
+        let result = parse(input);
+        assert!(result.is_err(), "Should fail without position");
+    }
+
+    #[test]
+    fn test_parse_anchor_in_template() {
+        let input = r#"
+            template "server" {
+                rect body [width: 100, height: 60]
+                anchor input [position: body.left, direction: left]
+                anchor output [position: body.right, direction: right]
+            }
+        "#;
+        let doc = parse(input).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.body.as_ref().unwrap().len(), 3);
+                // Check that anchors are parsed correctly inside template
+                let mut anchor_count = 0;
+                for stmt in t.body.as_ref().unwrap() {
+                    if matches!(stmt.node, Statement::AnchorDecl(_)) {
+                        anchor_count += 1;
+                    }
+                }
+                assert_eq!(anchor_count, 2);
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
         }
     }
 }

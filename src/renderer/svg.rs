@@ -1,8 +1,8 @@
 //! SVG generation from layout results
 
 use crate::layout::{
-    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point, ResolvedStyles,
-    RoutingMode, TextAnchor,
+    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point,
+    ResolvedStyles, RoutingMode, TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, ShapeType};
 use crate::stylesheet::Stylesheet;
@@ -986,7 +986,7 @@ fn strip_svg_wrapper(svg: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::layout::{ElementType, LayoutResult, ResolvedStyles};
+    use crate::layout::{AnchorSet, ElementType, LayoutResult, ResolvedStyles};
     use crate::parser::ast::{Identifier, LayoutType};
 
     #[test]
@@ -1037,6 +1037,7 @@ mod tests {
             styles: ResolvedStyles::default(),
             children: vec![],
             label: None,
+            anchors: AnchorSet::default(),
         });
         result.compute_bounds();
 
@@ -1059,6 +1060,7 @@ mod tests {
             styles: ResolvedStyles::default(),
             children: vec![],
             label: None,
+            anchors: AnchorSet::default(),
         });
         result.add_element(ElementLayout {
             id: Some(Identifier::new("b")),
@@ -1067,6 +1069,7 @@ mod tests {
             styles: ResolvedStyles::default(),
             children: vec![],
             label: None,
+            anchors: AnchorSet::default(),
         });
         result.connections.push(ConnectionLayout {
             from_id: Identifier::new("a"),
@@ -1104,6 +1107,7 @@ mod tests {
                     styles: ResolvedStyles::default(),
                     children: vec![],
                     label: None,
+                    anchors: AnchorSet::default(),
                 },
                 ElementLayout {
                     id: Some(Identifier::new("b")),
@@ -1112,9 +1116,11 @@ mod tests {
                     styles: ResolvedStyles::default(),
                     children: vec![],
                     label: None,
+                    anchors: AnchorSet::default(),
                 },
             ],
             label: None,
+            anchors: AnchorSet::default(),
         });
         result.compute_bounds();
 

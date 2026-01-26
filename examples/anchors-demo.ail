@@ -1,0 +1,96 @@
+// Feature 009: Anchor Support Demo
+// Demonstrates anchor-based connections
+
+// ============================================================
+// Part 1: Basic anchor connections between shapes
+// ============================================================
+
+// Create three rectangles
+rect a [width: 80, height: 40]
+rect b [width: 80, height: 40]
+rect c [width: 80, height: 40]
+
+// Position elements
+constrain b.left = a.right + 60
+constrain c.top = a.bottom + 40
+constrain c.horizontal_center = midpoint(a, b)
+
+// Anchor-based connections - specify exact attachment points
+a.right -> b.left    // Right edge of 'a' to left edge of 'b'
+a.bottom -> c.top    // Bottom of 'a' to top of 'c'
+
+// Mixed: explicit source anchor, auto-detect target
+b.bottom -> c
+
+// ============================================================
+// Part 2: Template with custom anchors
+// ============================================================
+
+// Define a server template with named connection points
+template "server" {
+    rect body [width: 100, height: 60, fill: background-2]
+    text "SRV" txt [font_size: 12]
+    constrain txt.center = body.center
+
+    // Custom anchors for network connections
+    anchor input [position: body.left, direction: left]
+    anchor output [position: body.right, direction: right]
+}
+
+// Create server instances
+server srv1
+server srv2
+
+// Position the servers
+constrain srv1.top = c.bottom + 60
+constrain srv1.left = a.left
+constrain srv2.left = srv1.right + 80
+constrain srv2.vertical_center = srv1.vertical_center
+
+// Connect using template-defined anchors
+c.bottom -> srv1.input
+srv1.output -> srv2.input
+
+// ============================================================
+// Part 3: Person template with S-shaped connections
+// ============================================================
+
+// Simple person icon with top and bottom anchors
+template "person" {
+    circle head [size: 24, fill: #f2c9a0, stroke: #333]
+    rect body [width: 30, height: 40, fill: #4a6fa5, stroke: #333]
+
+    constrain head.bottom = body.top - 4
+    constrain head.center_x = body.center_x
+
+    // Custom anchors at top of head and bottom of body
+    anchor crown [position: head.top, direction: up]
+    anchor feet [position: body.bottom, direction: down]
+}
+
+// Create two people
+person alice
+person bob
+
+// Position them side by side
+constrain alice.top = srv1.bottom + 80
+constrain alice.left = a.left
+constrain bob.left = alice.right + 100
+constrain bob.vertical_center = alice.vertical_center
+
+// Via points for S-shaped curves
+circle bottom_via [size: 1, fill: none, stroke: none]
+circle top_via [size: 1, fill: none, stroke: none]
+
+// Position via points: bottom goes down, top goes up
+constrain bottom_via.center_x = midpoint(alice, bob)
+constrain bottom_via.center_y = alice.bottom + 50
+
+constrain top_via.center_x = midpoint(alice, bob)
+constrain top_via.center_y = alice.top - 50
+
+// S-curve from alice's feet to bob's feet (going down)
+alice.feet -> bob.feet [stroke: #e65100, stroke_width: 2, routing: curved, via: bottom_via, label: "request"]
+
+// S-curve from bob's crown back to alice's crown (going up)
+bob.crown -> alice.crown [stroke: #1565c0, stroke_width: 2, routing: curved, via: top_via, label: "response"]

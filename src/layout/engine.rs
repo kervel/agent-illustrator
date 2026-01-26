@@ -144,10 +144,10 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // These are handled separately
             unreachable!("Connections and constraints should be filtered out")
         }
-        Statement::TemplateDecl(_) | Statement::Export(_) => {
-            // Template declarations and exports are metadata, not layout elements
+        Statement::TemplateDecl(_) | Statement::Export(_) | Statement::AnchorDecl(_) => {
+            // Template declarations, exports, and anchor declarations are metadata, not layout elements
             // They are handled during template resolution, not layout
-            unreachable!("Template declarations and exports should be filtered out before layout")
+            unreachable!("Template declarations, exports, and anchor declarations should be filtered out before layout")
         }
         Statement::TemplateInstance(_) => {
             // Template instances should be expanded before layout
@@ -200,13 +200,21 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
         }
     });
 
+    let bounds = BoundingBox::new(position.x, position.y, width, height);
+    // Feature 009: Compute anchors based on shape type
+    let anchors = match &shape.shape_type.node {
+        ShapeType::Path(_) => AnchorSet::path_shape(&bounds),
+        _ => AnchorSet::simple_shape(&bounds),
+    };
+
     ElementLayout {
         id,
         element_type: ElementType::Shape(shape.shape_type.node.clone()),
-        bounds: BoundingBox::new(position.x, position.y, width, height),
+        bounds,
         styles,
         children: vec![],
         label,
+        anchors,
     }
 }
 
@@ -669,6 +677,9 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         })
     };
 
+    // Feature 009: Containers get simple shape anchors
+    let anchors = AnchorSet::simple_shape(&bounds);
+
     ElementLayout {
         id: layout.name.as_ref().map(|n| n.node.clone()),
         element_type: ElementType::Layout(layout.layout_type.node),
@@ -676,6 +687,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         styles,
         children,
         label,
+        anchors,
     }
 }
 
@@ -721,6 +733,14 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         })
     };
 
+    // Feature 009: Groups get simple shape anchors, plus custom anchors from template
+    let mut anchors = AnchorSet::simple_shape(&bounds);
+
+    // Feature 009: Resolve custom anchor declarations from template expansion
+    if !group.anchors.is_empty() {
+        resolve_custom_anchors(&group.anchors, &children, &mut anchors);
+    }
+
     ElementLayout {
         id: group.name.as_ref().map(|n| n.node.clone()),
         element_type: ElementType::Group,
@@ -728,6 +748,90 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         styles,
         children,
         label,
+        anchors,
+    }
+}
+
+/// Resolve custom anchor declarations by looking up element properties in children (Feature 009)
+fn resolve_custom_anchors(
+    anchor_decls: &[AnchorDecl],
+    children: &[ElementLayout],
+    anchor_set: &mut AnchorSet,
+) {
+    // Build a map of child IDs to their bounds for quick lookup
+    let child_map: HashMap<&str, &BoundingBox> = children
+        .iter()
+        .filter_map(|c| c.id.as_ref().map(|id| (id.as_str(), &c.bounds)))
+        .collect();
+
+    for decl in anchor_decls {
+        // Get the element reference from the position
+        let (prop_ref, offset) = match &decl.position {
+            AnchorPosition::PropertyRef(pr) => (pr, 0.0),
+            AnchorPosition::PropertyRefWithOffset { prop_ref, offset } => (prop_ref, *offset),
+        };
+
+        // Get the element name (first segment of the path)
+        let element_name = prop_ref
+            .element
+            .node
+            .segments
+            .first()
+            .map(|s| s.node.as_str())
+            .unwrap_or("");
+
+        // Look up the child's bounds
+        if let Some(child_bounds) = child_map.get(element_name) {
+            // Get the position from the property
+            let base_position = match prop_ref.property.node {
+                ConstraintProperty::Left => child_bounds.left_center(),
+                ConstraintProperty::Right => child_bounds.right_center(),
+                ConstraintProperty::Top => child_bounds.top_center(),
+                ConstraintProperty::Bottom => child_bounds.bottom_center(),
+                ConstraintProperty::CenterX => child_bounds.center(),
+                ConstraintProperty::CenterY => child_bounds.center(),
+                ConstraintProperty::Center => child_bounds.center(),
+                _ => child_bounds.center(),
+            };
+
+            // Apply offset (along the axis of the property)
+            let position = match prop_ref.property.node {
+                ConstraintProperty::Left | ConstraintProperty::Right | ConstraintProperty::CenterX => {
+                    Point::new(base_position.x + offset, base_position.y)
+                }
+                ConstraintProperty::Top | ConstraintProperty::Bottom | ConstraintProperty::CenterY => {
+                    Point::new(base_position.x, base_position.y + offset)
+                }
+                _ => base_position,
+            };
+
+            // Determine direction: use explicit if provided, otherwise infer from property
+            let direction = if let Some(dir_spec) = &decl.direction {
+                match dir_spec {
+                    AnchorDirectionSpec::Cardinal(c) => match c {
+                        CardinalDirection::Up => AnchorDirection::Up,
+                        CardinalDirection::Down => AnchorDirection::Down,
+                        CardinalDirection::Left => AnchorDirection::Left,
+                        CardinalDirection::Right => AnchorDirection::Right,
+                    },
+                    AnchorDirectionSpec::Angle(a) => AnchorDirection::Angle(*a),
+                }
+            } else {
+                // Infer from property
+                match prop_ref.property.node {
+                    ConstraintProperty::Left => AnchorDirection::Left,
+                    ConstraintProperty::Right => AnchorDirection::Right,
+                    ConstraintProperty::Top => AnchorDirection::Up,
+                    ConstraintProperty::Bottom => AnchorDirection::Down,
+                    _ => AnchorDirection::Right, // Default
+                }
+            };
+
+            // Create and add the anchor
+            let anchor = Anchor::new(decl.name.node.as_str(), position, direction);
+            anchor_set.insert(anchor);
+        }
+        // If child not found, silently skip (could add warning in future)
     }
 }
 

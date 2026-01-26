@@ -5,7 +5,8 @@ use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::parser::ast::{
-    ExportDecl, ParameterDef, Spanned, Statement, StyleValue, TemplateDecl, TemplateSourceType,
+    AnchorDecl, ExportDecl, ParameterDef, Spanned, Statement, StyleValue, TemplateDecl,
+    TemplateSourceType,
 };
 
 /// Errors that can occur during template operations
@@ -67,20 +68,29 @@ pub struct TemplateDefinition {
     pub svg_dimensions: Option<(f64, f64)>,
     /// Exported identifiers for connection points
     pub exports: Vec<String>,
+    /// Anchor declarations for custom connection points (Feature 009)
+    pub anchors: Vec<AnchorDecl>,
 }
 
 impl TemplateDefinition {
     /// Create a new template definition from a TemplateDecl
     pub fn from_decl(decl: &TemplateDecl) -> Self {
         let mut exports = Vec::new();
+        let mut anchors = Vec::new();
 
-        // Extract exports from body if present
+        // Extract exports and anchors from body if present
         if let Some(body) = &decl.body {
             for stmt in body {
-                if let Statement::Export(ExportDecl { exports: exp }) = &stmt.node {
-                    for id in exp {
-                        exports.push(id.node.0.clone());
+                match &stmt.node {
+                    Statement::Export(ExportDecl { exports: exp }) => {
+                        for id in exp {
+                            exports.push(id.node.0.clone());
+                        }
                     }
+                    Statement::AnchorDecl(anchor) => {
+                        anchors.push(anchor.clone());
+                    }
+                    _ => {}
                 }
             }
         }
@@ -94,6 +104,7 @@ impl TemplateDefinition {
             svg_content: None,
             svg_dimensions: None,
             exports,
+            anchors,
         }
     }
 

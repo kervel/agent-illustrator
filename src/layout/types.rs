@@ -3,11 +3,194 @@
 use std::collections::HashMap;
 
 use crate::parser::ast::{
-    ColorValue, ConnectionDirection, Identifier, LayoutType, ShapeType, Span, Spanned, StyleKey,
-    StyleModifier, StyleValue,
+    ColorValue, ConnectionDirection, ConstraintProperty, Identifier, LayoutType, ShapeType, Span,
+    Spanned, StyleKey, StyleModifier, StyleValue,
 };
 
 use super::routing::RoutingMode;
+
+// ============================================
+// Anchor Types (Feature 009)
+// ============================================
+
+/// Direction a connector should approach/leave an anchor.
+/// Represents the outward normal at the anchor point.
+/// Connectors should arrive/depart perpendicular to the shape.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum AnchorDirection {
+    /// 270° - connector comes from above
+    Up,
+    /// 90° - connector comes from below
+    Down,
+    /// 180° - connector comes from the left
+    Left,
+    /// 0° - connector comes from the right
+    Right,
+    /// Custom angle in degrees (0=right, 90=down, 180=left, 270=up)
+    Angle(f64),
+}
+
+impl AnchorDirection {
+    /// Convert direction to a unit vector
+    pub fn to_vector(&self) -> Point {
+        let angle_rad = match self {
+            AnchorDirection::Up => 270.0_f64.to_radians(),
+            AnchorDirection::Down => 90.0_f64.to_radians(),
+            AnchorDirection::Left => 180.0_f64.to_radians(),
+            AnchorDirection::Right => 0.0_f64.to_radians(),
+            AnchorDirection::Angle(deg) => deg.to_radians(),
+        };
+        Point::new(angle_rad.cos(), angle_rad.sin())
+    }
+
+    /// Infer direction from a constraint property
+    pub fn from_property(prop: &ConstraintProperty) -> Self {
+        match prop {
+            ConstraintProperty::Left => AnchorDirection::Left,
+            ConstraintProperty::Right => AnchorDirection::Right,
+            ConstraintProperty::Top => AnchorDirection::Up,
+            ConstraintProperty::Bottom => AnchorDirection::Down,
+            // Default to Down for center and other properties
+            _ => AnchorDirection::Down,
+        }
+    }
+
+    /// Convert to angle in degrees
+    pub fn to_degrees(&self) -> f64 {
+        match self {
+            AnchorDirection::Up => 270.0,
+            AnchorDirection::Down => 90.0,
+            AnchorDirection::Left => 180.0,
+            AnchorDirection::Right => 0.0,
+            AnchorDirection::Angle(deg) => *deg,
+        }
+    }
+}
+
+/// A named attachment point on a shape (T002)
+#[derive(Debug, Clone, PartialEq)]
+pub struct Anchor {
+    /// Name of the anchor (e.g., "top", "left", "input")
+    pub name: String,
+    /// Position of the anchor in absolute coordinates
+    pub position: Point,
+    /// Direction connectors should approach/leave (outward normal)
+    pub direction: AnchorDirection,
+}
+
+impl Anchor {
+    /// Create a new anchor
+    pub fn new(name: impl Into<String>, position: Point, direction: AnchorDirection) -> Self {
+        Self {
+            name: name.into(),
+            position,
+            direction,
+        }
+    }
+}
+
+/// Collection of anchors for an element (T002)
+#[derive(Debug, Clone, Default)]
+pub struct AnchorSet {
+    anchors: HashMap<String, Anchor>,
+}
+
+impl AnchorSet {
+    /// Create an empty anchor set
+    pub fn new() -> Self {
+        Self {
+            anchors: HashMap::new(),
+        }
+    }
+
+    /// Get an anchor by name
+    pub fn get(&self, name: &str) -> Option<&Anchor> {
+        self.anchors.get(name)
+    }
+
+    /// Insert an anchor
+    pub fn insert(&mut self, anchor: Anchor) {
+        self.anchors.insert(anchor.name.clone(), anchor);
+    }
+
+    /// Get all anchor names
+    pub fn names(&self) -> impl Iterator<Item = &str> {
+        self.anchors.keys().map(|s| s.as_str())
+    }
+
+    /// Create anchors for a simple shape (rect, ellipse, circle)
+    /// Returns 4 anchors: top, bottom, left, right
+    pub fn simple_shape(bounds: &BoundingBox) -> Self {
+        let mut set = Self::new();
+        set.insert(Anchor::new("top", bounds.top_center(), AnchorDirection::Up));
+        set.insert(Anchor::new("bottom", bounds.bottom_center(), AnchorDirection::Down));
+        set.insert(Anchor::new("left", bounds.left_center(), AnchorDirection::Left));
+        set.insert(Anchor::new("right", bounds.right_center(), AnchorDirection::Right));
+        set
+    }
+
+    /// Create anchors for a path shape
+    /// Returns 8 anchors: top, bottom, left, right + 4 corners
+    pub fn path_shape(bounds: &BoundingBox) -> Self {
+        let mut set = Self::simple_shape(bounds);
+        // Add corner anchors with diagonal directions
+        set.insert(Anchor::new("top_left", bounds.top_left(), AnchorDirection::Angle(225.0)));
+        set.insert(Anchor::new("top_right", bounds.top_right(), AnchorDirection::Angle(315.0)));
+        set.insert(Anchor::new("bottom_left", bounds.bottom_left(), AnchorDirection::Angle(135.0)));
+        set.insert(Anchor::new("bottom_right", bounds.bottom_right(), AnchorDirection::Angle(45.0)));
+        set
+    }
+
+    /// Create anchors from a list of custom anchor definitions
+    pub fn from_custom(anchors: impl IntoIterator<Item = Anchor>) -> Self {
+        let mut set = Self::new();
+        for anchor in anchors {
+            set.insert(anchor);
+        }
+        set
+    }
+
+    /// Merge another anchor set into this one (other takes precedence)
+    pub fn merge(&mut self, other: &AnchorSet) {
+        for (name, anchor) in &other.anchors {
+            self.anchors.insert(name.clone(), anchor.clone());
+        }
+    }
+
+    /// Check if the set is empty
+    pub fn is_empty(&self) -> bool {
+        self.anchors.is_empty()
+    }
+
+    /// Get the number of anchors
+    pub fn len(&self) -> usize {
+        self.anchors.len()
+    }
+}
+
+/// Resolved anchor with absolute position for connection routing (T013)
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ResolvedAnchor {
+    /// Absolute position of the anchor
+    pub position: Point,
+    /// Direction connectors should approach/leave
+    pub direction: AnchorDirection,
+}
+
+impl ResolvedAnchor {
+    /// Create a new resolved anchor
+    pub fn new(position: Point, direction: AnchorDirection) -> Self {
+        Self { position, direction }
+    }
+
+    /// Create from an Anchor
+    pub fn from_anchor(anchor: &Anchor) -> Self {
+        Self {
+            position: anchor.position,
+            direction: anchor.direction,
+        }
+    }
+}
 
 /// A 2D point in the coordinate system
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -96,6 +279,50 @@ impl BoundingBox {
         let right = self.right().max(point.x);
         let bottom = self.bottom().max(point.y);
         BoundingBox::new(x, y, right - x, bottom - y)
+    }
+
+    // ============================================
+    // Anchor Position Helpers (T014)
+    // ============================================
+
+    /// Top edge center point
+    pub fn top_center(&self) -> Point {
+        Point::new(self.x + self.width / 2.0, self.y)
+    }
+
+    /// Bottom edge center point
+    pub fn bottom_center(&self) -> Point {
+        Point::new(self.x + self.width / 2.0, self.y + self.height)
+    }
+
+    /// Left edge center point
+    pub fn left_center(&self) -> Point {
+        Point::new(self.x, self.y + self.height / 2.0)
+    }
+
+    /// Right edge center point
+    pub fn right_center(&self) -> Point {
+        Point::new(self.x + self.width, self.y + self.height / 2.0)
+    }
+
+    /// Top-left corner point
+    pub fn top_left(&self) -> Point {
+        Point::new(self.x, self.y)
+    }
+
+    /// Top-right corner point
+    pub fn top_right(&self) -> Point {
+        Point::new(self.x + self.width, self.y)
+    }
+
+    /// Bottom-left corner point
+    pub fn bottom_left(&self) -> Point {
+        Point::new(self.x, self.y + self.height)
+    }
+
+    /// Bottom-right corner point
+    pub fn bottom_right(&self) -> Point {
+        Point::new(self.x + self.width, self.y + self.height)
     }
 }
 
@@ -293,6 +520,8 @@ pub struct ElementLayout {
     pub styles: ResolvedStyles,
     pub children: Vec<ElementLayout>,
     pub label: Option<LabelLayout>,
+    /// Anchor points on this element (Feature 009)
+    pub anchors: AnchorSet,
 }
 
 impl ElementLayout {
@@ -596,6 +825,7 @@ mod tests {
             styles: ResolvedStyles::default(),
             children: vec![],
             label: None,
+            anchors: AnchorSet::default(),
         };
 
         result.add_element(element);
@@ -624,5 +854,175 @@ mod tests {
 
         let styles = ResolvedStyles::from_modifiers(&modifiers);
         assert_eq!(styles.rotation, Some(45.0));
+    }
+
+    // ============================================
+    // Anchor Tests (Feature 009)
+    // ============================================
+
+    #[test]
+    fn test_anchor_direction_to_vector() {
+        let up = AnchorDirection::Up.to_vector();
+        assert!((up.x - 0.0).abs() < 0.001);
+        assert!((up.y - (-1.0)).abs() < 0.001);
+
+        let down = AnchorDirection::Down.to_vector();
+        assert!((down.x - 0.0).abs() < 0.001);
+        assert!((down.y - 1.0).abs() < 0.001);
+
+        let left = AnchorDirection::Left.to_vector();
+        assert!((left.x - (-1.0)).abs() < 0.001);
+        assert!((left.y - 0.0).abs() < 0.001);
+
+        let right = AnchorDirection::Right.to_vector();
+        assert!((right.x - 1.0).abs() < 0.001);
+        assert!((right.y - 0.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_anchor_direction_to_degrees() {
+        assert_eq!(AnchorDirection::Up.to_degrees(), 270.0);
+        assert_eq!(AnchorDirection::Down.to_degrees(), 90.0);
+        assert_eq!(AnchorDirection::Left.to_degrees(), 180.0);
+        assert_eq!(AnchorDirection::Right.to_degrees(), 0.0);
+        assert_eq!(AnchorDirection::Angle(45.0).to_degrees(), 45.0);
+    }
+
+    #[test]
+    fn test_anchor_direction_from_property() {
+        assert_eq!(
+            AnchorDirection::from_property(&ConstraintProperty::Left),
+            AnchorDirection::Left
+        );
+        assert_eq!(
+            AnchorDirection::from_property(&ConstraintProperty::Right),
+            AnchorDirection::Right
+        );
+        assert_eq!(
+            AnchorDirection::from_property(&ConstraintProperty::Top),
+            AnchorDirection::Up
+        );
+        assert_eq!(
+            AnchorDirection::from_property(&ConstraintProperty::Bottom),
+            AnchorDirection::Down
+        );
+    }
+
+    #[test]
+    fn test_bounding_box_anchor_positions() {
+        let bb = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+
+        let top = bb.top_center();
+        assert_eq!(top.x, 50.0);
+        assert_eq!(top.y, 0.0);
+
+        let bottom = bb.bottom_center();
+        assert_eq!(bottom.x, 50.0);
+        assert_eq!(bottom.y, 50.0);
+
+        let left = bb.left_center();
+        assert_eq!(left.x, 0.0);
+        assert_eq!(left.y, 25.0);
+
+        let right = bb.right_center();
+        assert_eq!(right.x, 100.0);
+        assert_eq!(right.y, 25.0);
+    }
+
+    #[test]
+    fn test_bounding_box_corner_positions() {
+        let bb = BoundingBox::new(10.0, 20.0, 100.0, 50.0);
+
+        assert_eq!(bb.top_left(), Point::new(10.0, 20.0));
+        assert_eq!(bb.top_right(), Point::new(110.0, 20.0));
+        assert_eq!(bb.bottom_left(), Point::new(10.0, 70.0));
+        assert_eq!(bb.bottom_right(), Point::new(110.0, 70.0));
+    }
+
+    #[test]
+    fn test_simple_shape_anchors() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let anchors = AnchorSet::simple_shape(&bounds);
+
+        assert_eq!(anchors.len(), 4);
+
+        let top = anchors.get("top").unwrap();
+        assert_eq!(top.position, Point::new(50.0, 0.0));
+        assert_eq!(top.direction, AnchorDirection::Up);
+
+        let bottom = anchors.get("bottom").unwrap();
+        assert_eq!(bottom.position, Point::new(50.0, 50.0));
+        assert_eq!(bottom.direction, AnchorDirection::Down);
+
+        let left = anchors.get("left").unwrap();
+        assert_eq!(left.position, Point::new(0.0, 25.0));
+        assert_eq!(left.direction, AnchorDirection::Left);
+
+        let right = anchors.get("right").unwrap();
+        assert_eq!(right.position, Point::new(100.0, 25.0));
+        assert_eq!(right.direction, AnchorDirection::Right);
+    }
+
+    #[test]
+    fn test_path_shape_anchors() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let anchors = AnchorSet::path_shape(&bounds);
+
+        // Should have 8 anchors: 4 edges + 4 corners
+        assert_eq!(anchors.len(), 8);
+
+        // Check corners exist with correct positions
+        let tl = anchors.get("top_left").unwrap();
+        assert_eq!(tl.position, Point::new(0.0, 0.0));
+        assert_eq!(tl.direction, AnchorDirection::Angle(225.0));
+
+        let tr = anchors.get("top_right").unwrap();
+        assert_eq!(tr.position, Point::new(100.0, 0.0));
+        assert_eq!(tr.direction, AnchorDirection::Angle(315.0));
+
+        let bl = anchors.get("bottom_left").unwrap();
+        assert_eq!(bl.position, Point::new(0.0, 50.0));
+        assert_eq!(bl.direction, AnchorDirection::Angle(135.0));
+
+        let br = anchors.get("bottom_right").unwrap();
+        assert_eq!(br.position, Point::new(100.0, 50.0));
+        assert_eq!(br.direction, AnchorDirection::Angle(45.0));
+    }
+
+    #[test]
+    fn test_anchor_set_names() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let anchors = AnchorSet::simple_shape(&bounds);
+
+        let names: Vec<&str> = anchors.names().collect();
+        assert!(names.contains(&"top"));
+        assert!(names.contains(&"bottom"));
+        assert!(names.contains(&"left"));
+        assert!(names.contains(&"right"));
+    }
+
+    #[test]
+    fn test_anchor_set_merge() {
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let mut base = AnchorSet::simple_shape(&bounds);
+
+        // Add custom anchor
+        let mut custom = AnchorSet::new();
+        custom.insert(Anchor::new("input", Point::new(0.0, 10.0), AnchorDirection::Left));
+
+        base.merge(&custom);
+
+        // Should have 5 anchors now
+        assert_eq!(base.len(), 5);
+        assert!(base.get("input").is_some());
+    }
+
+    #[test]
+    fn test_resolved_anchor_from_anchor() {
+        let anchor = Anchor::new("test", Point::new(50.0, 25.0), AnchorDirection::Right);
+        let resolved = ResolvedAnchor::from_anchor(&anchor);
+
+        assert_eq!(resolved.position, anchor.position);
+        assert_eq!(resolved.direction, anchor.direction);
     }
 }

@@ -113,14 +113,15 @@ fn test_all_layout_types() {
 
 #[test]
 fn test_all_constraint_relations() {
+    // Note: Using "reference" instead of "anchor" since "anchor" is a keyword (Feature 009)
     let input = r#"
-        rect anchor
+        rect reference
         rect subject
-        place subject right-of anchor
-        place subject left-of anchor
-        place subject above anchor
-        place subject below anchor
-        place subject inside anchor
+        place subject right-of reference
+        place subject left-of reference
+        place subject above reference
+        place subject below reference
+        place subject inside reference
     "#;
 
     let doc = parse(input).expect("Should parse");
@@ -459,8 +460,9 @@ fn test_text_shapes_with_connection() {
     match &doc.statements[2].node {
         agent_illustrator::parser::ast::Statement::Connection(conns) => {
             assert_eq!(conns.len(), 1);
-            assert_eq!(conns[0].from.node.as_str(), "a");
-            assert_eq!(conns[0].to.node.as_str(), "b");
+            // Feature 009: AnchorReference.element contains the identifier
+            assert_eq!(conns[0].from.element.node.as_str(), "a");
+            assert_eq!(conns[0].to.element.node.as_str(), "b");
         }
         _ => panic!("Expected connection statement"),
     }
