@@ -18,11 +18,19 @@ stack [name] [mod] { ... }   Overlapping elements
 
 CONNECTIONS
 -----------
-a -> b [mod]       Directed arrow from a to b
-a -> b -> c [mod]  Chained connections (modifiers apply to last segment)
-a <- b [mod]       Directed arrow from b to a
-a <-> b [mod]      Bidirectional arrow
-a -- b [mod]       Undirected line
+a -> b [mod]           Directed arrow from a to b
+a -> b -> c [mod]      Chained connections (modifiers apply to last segment)
+a <- b [mod]           Directed arrow from b to a
+a <-> b [mod]          Bidirectional arrow
+a -- b [mod]           Undirected line
+a.anchor -> b.anchor   Connect via custom anchors (see ANCHORS)
+
+Connection modifiers:
+    routing: orthogonal     Right-angle path (default)
+    routing: direct         Straight diagonal line
+    routing: curved         Smooth cubic Bezier curve
+    via: element            Route curve through element's center
+    label: "text"           Add label (at midpoint or curve apex)
 
 STYLE MODIFIERS
 ---------------
@@ -63,6 +71,25 @@ TEMPLATES
 ---------
 template "mytemplate" { ... }        Define reusable group (quoted name)
 mytemplate instance_name [params]    Instantiate template (unquoted)
+
+ANCHORS
+-------
+Custom connection points on elements (especially useful in templates).
+
+anchor name [position: elem.property, direction: dir]
+
+Position uses element properties: top, bottom, left, right, center_x, center_y
+Direction: up, down, left, right (controls curve perpendicular entry)
+Offset supported: elem.property + 10 or elem.property - 5
+
+Example in a template:
+    anchor crown [position: head.top - 4, direction: up]
+    anchor feet [position: torso.bottom + 4, direction: down]
+
+Connect using dot notation:
+    alice.crown -> bob.crown [routing: curved]
+
+Built-in anchors on all shapes: top, bottom, left, right, center
 
 RESERVED IDENTIFIERS
 --------------------

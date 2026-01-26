@@ -89,6 +89,9 @@ a -> b [routing: curved]  // smooth curve
 a <-> b                   // bidirectional
 a -- b                    // undirected
 a -> b [label: "text"]    // labeled connection
+a.top -> b.bottom         // connect via built-in anchors
+a.feet -> b.feet          // connect via custom anchors (see Anchors)
+a -> b [routing: curved, via: ctrl]  // curve through control point
 ```
 
 ### Modifiers
@@ -127,11 +130,15 @@ template "icon" {
     circle head [size: 20, fill: #f0f0f0]
     rect body [width: 30, height: 40, fill: #e0e0e0]
   }
+  // Custom anchors for semantic connection points
+  anchor top [position: head.top - 4, direction: up]
+  anchor bottom [position: body.bottom + 4, direction: down]
 }
 
-// Instantiate:
+// Instantiate and connect via anchors:
 icon alice
 icon bob
+alice.bottom -> bob.top [routing: curved]
 ```
 
 ### Custom Paths
@@ -190,7 +197,7 @@ Path commands:
 
 See `examples/` folder for non-trivial examples:
 - `feedback-loops.ail` - Two interconnected iteration cycles with cross-connections
-- `person.ail` - Reusable template with custom path shapes (hair, torso)
+- `person.ail` - Template with anchors, via points, and S-curved connections
 - `railway-topology.ail` - Complex multi-level diagram with constraints
 - `railway-topology-templated.ail` - Same diagram using templates
 
