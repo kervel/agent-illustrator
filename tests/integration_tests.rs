@@ -245,7 +245,8 @@ fn test_connection_routing_direct() {
 
     // Verify the connection has the routing modifier
     match &doc.statements[2].node {
-        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            let conn = &conns[0];
             assert_eq!(conn.modifiers.len(), 1);
             assert!(matches!(
                 conn.modifiers[0].node.key.node,
@@ -304,17 +305,19 @@ fn test_railway_junction_with_direct_routing() {
     ) -> usize {
         let mut count = 0;
         for stmt in stmts {
-            if let agent_illustrator::parser::ast::Statement::Connection(conn) = &stmt.node {
-                for modifier in &conn.modifiers {
-                    if matches!(
-                        modifier.node.key.node,
-                        agent_illustrator::parser::ast::StyleKey::Routing
-                    ) {
-                        if let agent_illustrator::parser::ast::StyleValue::Keyword(k) =
-                            &modifier.node.value.node
-                        {
-                            if k == "direct" {
-                                count += 1;
+            if let agent_illustrator::parser::ast::Statement::Connection(conns) = &stmt.node {
+                for conn in conns {
+                    for modifier in &conn.modifiers {
+                        if matches!(
+                            modifier.node.key.node,
+                            agent_illustrator::parser::ast::StyleKey::Routing
+                        ) {
+                            if let agent_illustrator::parser::ast::StyleValue::Keyword(k) =
+                                &modifier.node.value.node
+                            {
+                                if k == "direct" {
+                                    count += 1;
+                                }
                             }
                         }
                     }
@@ -454,9 +457,10 @@ fn test_text_shapes_with_connection() {
 
     // Verify connection
     match &doc.statements[2].node {
-        agent_illustrator::parser::ast::Statement::Connection(conn) => {
-            assert_eq!(conn.from.node.as_str(), "a");
-            assert_eq!(conn.to.node.as_str(), "b");
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            assert_eq!(conns.len(), 1);
+            assert_eq!(conns[0].from.node.as_str(), "a");
+            assert_eq!(conns[0].to.node.as_str(), "b");
         }
         _ => panic!("Expected connection statement"),
     }
@@ -700,7 +704,9 @@ fn test_connection_label_position_right() {
     assert_eq!(doc.statements.len(), 3);
 
     match &doc.statements[2].node {
-        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            assert_eq!(conns.len(), 1);
+            let conn = &conns[0];
             assert_eq!(conn.modifiers.len(), 2);
             // Verify label_position modifier exists
             let has_label_position = conn.modifiers.iter().any(|m| {
@@ -728,7 +734,8 @@ fn test_connection_label_position_left() {
     assert_eq!(doc.statements.len(), 3);
 
     match &doc.statements[2].node {
-        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            let conn = &conns[0];
             let label_position_modifier = conn.modifiers.iter().find(|m| {
                 matches!(
                     m.node.key.node,
@@ -763,7 +770,8 @@ fn test_connection_label_position_center() {
     assert_eq!(doc.statements.len(), 3);
 
     match &doc.statements[2].node {
-        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            let conn = &conns[0];
             let label_position_modifier = conn.modifiers.iter().find(|m| {
                 matches!(
                     m.node.key.node,
@@ -798,7 +806,8 @@ fn test_connection_label_without_position() {
     assert_eq!(doc.statements.len(), 3);
 
     match &doc.statements[2].node {
-        agent_illustrator::parser::ast::Statement::Connection(conn) => {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            let conn = &conns[0];
             // Should only have label modifier, no label_position
             assert_eq!(conn.modifiers.len(), 1);
             assert!(matches!(

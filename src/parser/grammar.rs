@@ -347,16 +347,33 @@ where
         just(Token::Dash).to(ConnectionDirection::Undirected),
     ));
 
-    // Connection declaration
+    // Connection declaration (supports chained: a -> b -> c [modifiers])
     let connection_decl = identifier
-        .then(connection_op)
-        .then(identifier)
+        .then(
+            connection_op
+                .then(identifier)
+                .repeated()
+                .at_least(1)
+                .collect::<Vec<_>>(),
+        )
         .then(modifier_block.clone().or_not())
-        .map(|(((from, direction), to), modifiers)| ConnectionDecl {
-            from,
-            to,
-            direction,
-            modifiers: modifiers.unwrap_or_default(),
+        .map(|((first, segments), modifiers)| {
+            let modifiers = modifiers.unwrap_or_default();
+            let len = segments.len();
+            let mut result = Vec::with_capacity(len);
+            let mut from = first;
+            for (i, (direction, to)) in segments.into_iter().enumerate() {
+                let is_last = i == len - 1;
+                result.push(ConnectionDecl {
+                    from: from.clone(),
+                    to: to.clone(),
+                    direction,
+                    // Only the last segment gets modifiers
+                    modifiers: if is_last { modifiers.clone() } else { vec![] },
+                });
+                from = to;
+            }
+            result
         });
 
     // Layout type
@@ -1047,10 +1064,11 @@ mod tests {
         let doc = parse("a -> b").expect("Should parse");
         assert_eq!(doc.statements.len(), 1);
         match &doc.statements[0].node {
-            Statement::Connection(c) => {
-                assert_eq!(c.from.node.as_str(), "a");
-                assert_eq!(c.to.node.as_str(), "b");
-                assert_eq!(c.direction, ConnectionDirection::Forward);
+            Statement::Connection(conns) => {
+                assert_eq!(conns.len(), 1);
+                assert_eq!(conns[0].from.node.as_str(), "a");
+                assert_eq!(conns[0].to.node.as_str(), "b");
+                assert_eq!(conns[0].direction, ConnectionDirection::Forward);
             }
             _ => panic!("Expected connection"),
         }
@@ -1467,7 +1485,9 @@ mod tests {
         let doc = parse("a -> b [label: my_label]").expect("Should parse");
         assert_eq!(doc.statements.len(), 1);
         match &doc.statements[0].node {
-            Statement::Connection(c) => {
+            Statement::Connection(conns) => {
+                assert_eq!(conns.len(), 1);
+                let c = &conns[0];
                 assert_eq!(c.modifiers.len(), 1);
                 assert!(matches!(c.modifiers[0].node.key.node, StyleKey::Label));
                 match &c.modifiers[0].node.value.node {

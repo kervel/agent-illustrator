@@ -472,12 +472,14 @@ fn substitute_parameters(
             group.modifiers = substitute_modifiers(&group.modifiers, params);
             Spanned::new(Statement::Group(group), stmt.span)
         }
-        Statement::Connection(mut conn) => {
-            // Prefix the connection endpoints
-            conn.from.node = Identifier::new(format!("{}_{}", prefix, conn.from.node.0));
-            conn.to.node = Identifier::new(format!("{}_{}", prefix, conn.to.node.0));
-            conn.modifiers = substitute_modifiers(&conn.modifiers, params);
-            Spanned::new(Statement::Connection(conn), stmt.span)
+        Statement::Connection(mut conns) => {
+            // Prefix all connection endpoints
+            for conn in &mut conns {
+                conn.from.node = Identifier::new(format!("{}_{}", prefix, conn.from.node.0));
+                conn.to.node = Identifier::new(format!("{}_{}", prefix, conn.to.node.0));
+                conn.modifiers = substitute_modifiers(&conn.modifiers, params);
+            }
+            Spanned::new(Statement::Connection(conns), stmt.span)
         }
         Statement::Constrain(decl) => {
             // Prefix all element references in the constraint expression

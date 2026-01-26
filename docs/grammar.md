@@ -1,0 +1,88 @@
+AGENT ILLUSTRATOR GRAMMAR
+=========================
+
+SHAPES
+------
+rect [name] [modifiers]      Rectangle (default 60x40)
+circle [name] [modifiers]    Circle
+ellipse [name] [modifiers]   Ellipse
+text "content" [name] [mod]  Text element
+path [name] [mod] { ... }    Custom shape with vertices/arcs
+
+LAYOUTS
+-------
+row [name] [mod] { ... }     Horizontal arrangement
+col [name] [mod] { ... }     Vertical arrangement
+group [name] [mod] { ... }   Semantic grouping (no layout)
+stack [name] [mod] { ... }   Overlapping elements
+
+CONNECTIONS
+-----------
+a -> b [mod]       Directed arrow from a to b
+a -> b -> c [mod]  Chained connections (modifiers apply to last segment)
+a <- b [mod]       Directed arrow from b to a
+a <-> b [mod]      Bidirectional arrow
+a -- b [mod]       Undirected line
+
+STYLE MODIFIERS
+---------------
+Modifiers go in brackets after the element name:
+    rect mybox [fill: blue, stroke: #333, stroke_width: 2]
+
+Common modifiers:
+    fill: <color>           Fill color
+    stroke: <color>         Border color
+    stroke_width: <number>  Border thickness
+    size: <number>          Width and height (square/circle)
+    width: <number>         Explicit width
+    height: <number>        Explicit height
+    gap: <number>           Space between children (layouts)
+    label: "text"           Add label to shape
+    rotation: <degrees>     Rotate element (clockwise)
+    routing: direct         Diagonal line (vs default orthogonal)
+    routing: curved         Smooth curve (for loops, crossings)
+
+COLORS
+------
+Hex:      #ff0000, #f00
+Named:    red, blue, green, steelblue
+Symbolic: foreground, background, accent, text
+          foreground-1, accent-dark, text-light
+
+CONSTRAINTS
+-----------
+constrain a.left = b.left              Align left edges
+constrain a.center_x = b.center_x      Center horizontally
+constrain a.top = b.bottom + 20        Position with offset
+constrain a.width = 100                Fixed dimension
+constrain container contains a, b [padding: 10]
+
+Properties: left, right, top, bottom, center_x, center_y, width, height
+
+TEMPLATES
+---------
+template mytemplate { ... }          Define reusable group
+mytemplate instance_name [params]    Instantiate template
+
+RESERVED IDENTIFIERS
+--------------------
+Cannot use as element names: left, right, top, bottom, x, y, width, height
+
+EXAMPLES
+--------
+Basic shapes:
+    rect server [fill: steelblue, label: "Server"]
+    circle node [fill: gold, size: 30]
+
+Layout:
+    row [gap: 20] {
+        rect a [label: "A"]
+        rect b [label: "B"]
+    }
+
+Connections:
+    a -> b                    // default orthogonal routing
+    b -> c [routing: curved]  // smooth curve
+    a -> b -> c -> d          // chained connections
+
+Run --examples for more detailed patterns.

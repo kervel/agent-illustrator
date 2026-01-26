@@ -130,7 +130,6 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
                     // Start from origin if no vertex was defined
                     segments.push(PathSegment::MoveTo(origin));
                     start_pos = Some(origin);
-                    current_pos = Some(origin);
                 }
 
                 segments.push(PathSegment::LineTo(pos));

@@ -217,6 +217,14 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         return (s, s);
     }
 
+    // Calculate minimum width needed to fit label (if present)
+    let label_min_width = extract_label(&shape.modifiers).map(|text| {
+        // Approximate: ~8px per character for 14px font, plus 20px padding
+        let char_width = 8.0;
+        let padding = 20.0;
+        text.len() as f64 * char_width + padding
+    });
+
     // If only width is provided, use it for width and default for height
     // If only height is provided, use default for width and it for height
     let (default_width, default_height) = match &shape.shape_type.node {
@@ -255,7 +263,16 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         }
     };
 
-    let final_width = width.unwrap_or(default_width);
+    // Start with specified or default width
+    let base_width = width.unwrap_or(default_width);
+
+    // If no explicit width was specified, ensure it's at least large enough for the label
+    let final_width = if width.is_none() {
+        label_min_width.map_or(base_width, |min| base_width.max(min))
+    } else {
+        base_width
+    };
+
     let final_height = height.unwrap_or(default_height);
 
     (final_width, final_height)

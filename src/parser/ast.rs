@@ -120,8 +120,8 @@ pub struct Document {
 pub enum Statement {
     /// Shape declaration: `rect "name" [styles]`
     Shape(ShapeDecl),
-    /// Connection: `a -> b [styles]`
-    Connection(ConnectionDecl),
+    /// Connection(s): `a -> b` or chained `a -> b -> c [styles]`
+    Connection(Vec<ConnectionDecl>),
     /// Layout container: `row { ... }`
     Layout(LayoutDecl),
     /// Semantic group: `group "name" { ... }`

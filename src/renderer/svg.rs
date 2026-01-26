@@ -899,17 +899,21 @@ fn format_text_styles(styles: &ResolvedStyles) -> String {
 }
 
 /// Format ResolvedStyles as SVG attribute string
+/// Applies sensible defaults when styles are not specified
 fn format_styles(styles: &ResolvedStyles) -> String {
     let mut parts = vec![];
-    if let Some(fill) = &styles.fill {
-        parts.push(format!(r#" fill="{}""#, fill));
-    }
-    if let Some(stroke) = &styles.stroke {
-        parts.push(format!(r#" stroke="{}""#, stroke));
-    }
-    if let Some(sw) = styles.stroke_width {
-        parts.push(format!(r#" stroke-width="{}""#, sw));
-    }
+
+    // Default fill: light gray for visibility
+    let fill = styles.fill.as_deref().unwrap_or("#f0f0f0");
+    parts.push(format!(r#" fill="{}""#, fill));
+
+    // Default stroke: dark gray
+    let stroke = styles.stroke.as_deref().unwrap_or("#333333");
+    parts.push(format!(r#" stroke="{}""#, stroke));
+
+    // Default stroke-width: 1.5
+    let sw = styles.stroke_width.unwrap_or(1.5);
+    parts.push(format!(r#" stroke-width="{}""#, sw));
     if let Some(dash) = &styles.stroke_dasharray {
         parts.push(format!(r#" stroke-dasharray="{}""#, dash));
     }

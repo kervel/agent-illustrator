@@ -403,58 +403,52 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
     ) -> Result<(), LayoutError> {
         for stmt in stmts {
             match &stmt.node {
-                Statement::Connection(conn) => {
-                    let from_element =
-                        result
-                            .get_element_by_name(&conn.from.node.0)
-                            .ok_or_else(|| {
+                Statement::Connection(conns) => {
+                    for conn in conns {
+                        let from_element =
+                            result
+                                .get_element_by_name(&conn.from.node.0)
+                                .ok_or_else(|| {
+                                    LayoutError::undefined(
+                                        conn.from.node.0.clone(),
+                                        conn.from.span.clone(),
+                                        vec![],
+                                    )
+                                })?;
+                        let to_element =
+                            result.get_element_by_name(&conn.to.node.0).ok_or_else(|| {
                                 LayoutError::undefined(
-                                    conn.from.node.0.clone(),
-                                    conn.from.span.clone(),
+                                    conn.to.node.0.clone(),
+                                    conn.to.span.clone(),
                                     vec![],
                                 )
                             })?;
-                    let to_element =
-                        result.get_element_by_name(&conn.to.node.0).ok_or_else(|| {
-                            LayoutError::undefined(
-                                conn.to.node.0.clone(),
-                                conn.to.span.clone(),
-                                vec![],
-                            )
-                        })?;
 
-                    let routing_mode = extract_routing_mode(&conn.modifiers);
+                        let routing_mode = extract_routing_mode(&conn.modifiers);
+                        let from_bounds = from_element.bounds;
+                        let to_bounds = to_element.bounds;
+                        let via_refs = extract_via_references(&conn.modifiers);
+                        let via_points = resolve_via_points(&via_refs, result)?;
+                        let path =
+                            route_connection(&from_bounds, &to_bounds, routing_mode, &via_points);
+                        let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
+                        let (label, label_ref_id) =
+                            extract_connection_label_with_ref(&conn.modifiers, &path, result);
 
-                    // Feature 008: Copy bounds before resolving via points to avoid borrow conflict
-                    let from_bounds = from_element.bounds;
-                    let to_bounds = to_element.bounds;
+                        if let Some(id) = label_ref_id {
+                            label_element_ids.insert(id);
+                        }
 
-                    // Feature 008: Resolve via references to control points
-                    let via_refs = extract_via_references(&conn.modifiers);
-                    let via_points = resolve_via_points(&via_refs, result)?;
-
-                    let path =
-                        route_connection(&from_bounds, &to_bounds, routing_mode, &via_points);
-                    let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
-
-                    // Extract label and track if it references an element
-                    let (label, label_ref_id) =
-                        extract_connection_label_with_ref(&conn.modifiers, &path, result);
-
-                    // Mark the referenced element for removal from rendering
-                    if let Some(id) = label_ref_id {
-                        label_element_ids.insert(id);
+                        result.connections.push(ConnectionLayout {
+                            from_id: conn.from.node.clone(),
+                            to_id: conn.to.node.clone(),
+                            direction: conn.direction,
+                            path,
+                            styles,
+                            label,
+                            routing_mode,
+                        });
                     }
-
-                    result.connections.push(ConnectionLayout {
-                        from_id: conn.from.node.clone(),
-                        to_id: conn.to.node.clone(),
-                        direction: conn.direction,
-                        path,
-                        styles,
-                        label,
-                        routing_mode,
-                    });
                 }
                 Statement::Layout(l) => {
                     process_statements(&l.children, result, label_element_ids)?;

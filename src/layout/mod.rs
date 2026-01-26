@@ -98,20 +98,22 @@ fn validate_refs_in_statement(
     _span: &Span,
 ) -> Result<(), LayoutError> {
     match stmt {
-        Statement::Connection(c) => {
-            if !defined.contains(&c.from.node.0) {
-                return Err(LayoutError::UndefinedIdentifier {
-                    name: c.from.node.0.clone(),
-                    span: c.from.span.clone(),
-                    suggestions: find_similar(defined, &c.from.node.0, 2),
-                });
-            }
-            if !defined.contains(&c.to.node.0) {
-                return Err(LayoutError::UndefinedIdentifier {
-                    name: c.to.node.0.clone(),
-                    span: c.to.span.clone(),
-                    suggestions: find_similar(defined, &c.to.node.0, 2),
-                });
+        Statement::Connection(conns) => {
+            for c in conns {
+                if !defined.contains(&c.from.node.0) {
+                    return Err(LayoutError::UndefinedIdentifier {
+                        name: c.from.node.0.clone(),
+                        span: c.from.span.clone(),
+                        suggestions: find_similar(defined, &c.from.node.0, 2),
+                    });
+                }
+                if !defined.contains(&c.to.node.0) {
+                    return Err(LayoutError::UndefinedIdentifier {
+                        name: c.to.node.0.clone(),
+                        span: c.to.span.clone(),
+                        suggestions: find_similar(defined, &c.to.node.0, 2),
+                    });
+                }
             }
         }
         Statement::Constraint(c) => {
