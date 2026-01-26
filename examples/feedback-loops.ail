@@ -1,0 +1,37 @@
+// Human-Agent Feedback Loop Diagram
+// Shows asymmetric collaboration: human tunes feedback, agent executes fast
+
+row main [gap: 100] {
+  // === HUMAN LOOP (slow, persistent) ===
+  col human_loop [gap: 18] {
+    rect evaluate [width: 125, height: 45, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Evaluate"]
+    rect spot [width: 125, height: 45, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Spot Patterns"]
+    rect improve [width: 125, height: 45, fill: #bbdefb, stroke: #1565c0, stroke_width: 3, label: "Tune Feedback"]
+    rect assign [width: 125, height: 45, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Assign Task"]
+  }
+
+  // === AGENT LOOP (fast, ephemeral) ===
+  col agent_loop [gap: 12] {
+    rect atask [width: 110, height: 42, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Task"]
+    rect execute [width: 110, height: 42, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Execute"]
+    rect feedback [width: 110, height: 52, fill: #ffcc80, stroke: #e65100, stroke_width: 3, label: "Feedback"]
+    rect result [width: 110, height: 42, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Result"]
+  }
+}
+
+// Human flow (slow cycle)
+evaluate -> spot
+spot -> improve
+improve -> assign
+assign -> evaluate [routing: curved]
+
+// Agent flow (fast cycle)
+atask -> execute
+execute -> feedback
+feedback -> result [label: "pass"]
+feedback -> atask [label: "retry", routing: curved]
+
+// Cross connections
+assign -> atask [label: "task"]
+result -> evaluate [label: "result"]
+improve -> feedback [label: "tunes"]
