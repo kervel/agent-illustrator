@@ -787,15 +787,14 @@ fn extract_connection_label_with_ref(
         }
     });
 
-    // Calculate midpoint of path
-    let mid_idx = path.len() / 2;
-    let (mid_x, mid_y, anchor) = if path.len() >= 2 {
+    // Calculate label position - for curves, use the actual curve midpoint
+    let (mid_x, mid_y, anchor) = if path.len() == 4 {
+        // Cubic Bezier: calculate actual midpoint at t=0.5
+        // B(0.5) = 0.125*P0 + 0.375*P1 + 0.375*P2 + 0.125*P3
         let start = path[0];
-        let end = path[path.len() - 1];
-        let p1 = path[mid_idx.saturating_sub(1)];
-        let p2 = path[mid_idx.min(path.len() - 1)];
-        let base_mid_x = (p1.x + p2.x) / 2.0;
-        let base_mid_y = (p1.y + p2.y) / 2.0;
+        let end = path[3];
+        let base_mid_x = 0.125 * path[0].x + 0.375 * path[1].x + 0.375 * path[2].x + 0.125 * path[3].x;
+        let base_mid_y = 0.125 * path[0].y + 0.375 * path[1].y + 0.375 * path[2].y + 0.125 * path[3].y;
 
         // Position based on explicit label_position or auto-detect
         match label_position {
@@ -803,15 +802,48 @@ fn extract_connection_label_with_ref(
             Some(LabelPosition::Left) => (base_mid_x - 10.0, base_mid_y, TextAnchor::End),
             Some(LabelPosition::Center) => (base_mid_x, base_mid_y, TextAnchor::Middle),
             None => {
-                // Auto-detect based on path direction
+                // For curves, offset perpendicular to the curve direction
+                // Use a small offset from the apex
+                let dx = end.x - start.x;
+                let dy = end.y - start.y;
+
+                if dy.abs() > dx.abs() {
+                    // Mostly vertical curve: position label to the side
+                    if base_mid_x < (start.x + end.x) / 2.0 {
+                        (base_mid_x - 10.0, base_mid_y, TextAnchor::End)
+                    } else {
+                        (base_mid_x + 10.0, base_mid_y, TextAnchor::Start)
+                    }
+                } else {
+                    // Mostly horizontal curve: position label above/below the apex
+                    if base_mid_y < (start.y + end.y) / 2.0 {
+                        (base_mid_x, base_mid_y - 10.0, TextAnchor::Middle)
+                    } else {
+                        (base_mid_x, base_mid_y + 15.0, TextAnchor::Middle)
+                    }
+                }
+            }
+        }
+    } else if path.len() >= 2 {
+        // Other paths: use midpoint of path points
+        let start = path[0];
+        let end = path[path.len() - 1];
+        let mid_idx = path.len() / 2;
+        let p1 = path[mid_idx.saturating_sub(1)];
+        let p2 = path[mid_idx.min(path.len() - 1)];
+        let base_mid_x = (p1.x + p2.x) / 2.0;
+        let base_mid_y = (p1.y + p2.y) / 2.0;
+
+        match label_position {
+            Some(LabelPosition::Right) => (base_mid_x + 10.0, base_mid_y, TextAnchor::Start),
+            Some(LabelPosition::Left) => (base_mid_x - 10.0, base_mid_y, TextAnchor::End),
+            Some(LabelPosition::Center) => (base_mid_x, base_mid_y, TextAnchor::Middle),
+            None => {
                 let dx = (end.x - start.x).abs();
                 let dy = (end.y - start.y).abs();
-
                 if dy > dx {
-                    // Vertical path: position label to the right
                     (base_mid_x + 10.0, base_mid_y, TextAnchor::Start)
                 } else {
-                    // Horizontal path: position label above
                     (base_mid_x, base_mid_y - 10.0, TextAnchor::Middle)
                 }
             }
