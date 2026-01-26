@@ -202,35 +202,6 @@ pub fn route_orthogonal(from: Point, to: Point) -> Vec<Point> {
 /// Minimum length for the final segment to ensure proper marker orientation.
 /// Short segments can cause browsers to calculate incorrect tangent directions.
 const MIN_FINAL_SEGMENT_LENGTH: f64 = 15.0;
-
-/// Compute control point for quadratic Bezier curve between two points (Feature 008)
-///
-/// Creates a control point perpendicular to the chord at 25% of the chord length.
-/// This produces gentle, visually pleasing curves by default.
-fn compute_curve_control_point(start: Point, end: Point) -> Point {
-    let chord_x = end.x - start.x;
-    let chord_y = end.y - start.y;
-    let chord_length = (chord_x * chord_x + chord_y * chord_y).sqrt();
-
-    // Degenerate case: start and end are the same point
-    if chord_length < 0.001 {
-        return start;
-    }
-
-    // Perpendicular vector (counterclockwise rotation)
-    let perp_x = -chord_y / chord_length;
-    let perp_y = chord_x / chord_length;
-
-    // Midpoint of chord
-    let mid_x = (start.x + end.x) / 2.0;
-    let mid_y = (start.y + end.y) / 2.0;
-
-    // Offset perpendicular at 25% of chord length
-    let offset = chord_length * 0.25;
-
-    Point::new(mid_x + perp_x * offset, mid_y + perp_y * offset)
-}
-
 /// Route a connection between two bounding boxes with the specified routing mode
 /// Optional via_points are control points for curved routing (Feature 008)
 pub fn route_connection(
@@ -338,7 +309,7 @@ pub fn route_connection_with_anchors(
             }
 
             // Add final segment to end
-            let last_via = via_points[via_points.len() - 1];
+            let _last_via = via_points[via_points.len() - 1];
             let final_ctrl = Point::new(
                 end.x + to_dir.x * control_distance * 0.5,
                 end.y + to_dir.y * control_distance * 0.5,
@@ -1257,25 +1228,6 @@ mod tests {
         assert!(
             (path[1].y - 25.0).abs() > 1.0 || (path[2].y - 25.0).abs() > 1.0,
             "At least one control point y should be offset from the center line"
-        );
-    }
-
-    #[test]
-    fn test_compute_curve_control_point() {
-        // Horizontal line
-        let start = Point::new(0.0, 0.0);
-        let end = Point::new(100.0, 0.0);
-        let control = compute_curve_control_point(start, end);
-
-        // Control should be at midpoint x
-        assert!(
-            (control.x - 50.0).abs() < 0.01,
-            "Control x should be at midpoint"
-        );
-        // Control should be offset perpendicular (25% of chord = 25 pixels)
-        assert!(
-            (control.y - 25.0).abs() < 0.01,
-            "Control y should be offset by 25% of chord length"
         );
     }
 

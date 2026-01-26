@@ -79,7 +79,7 @@ impl SvgBuilder {
         // Use fill="context-stroke" so the arrow inherits the line's stroke color.
         // Use markerUnits="strokeWidth" so arrow size scales with line thickness.
         self.defs.push(format!(
-            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>"#
         ));
@@ -360,6 +360,30 @@ impl SvgBuilder {
             .collect::<Vec<_>>()
             .join(" ");
 
+        // Shorten endpoint when marker is present to place arrow tip at anchor position
+        // The arrow marker has refX=1, so the arrow extends ~9 marker units past the endpoint.
+        // With markerWidth=4 and strokeWidth=2, that's about 7 pixels.
+        let path = if marker_end && path.len() >= 2 {
+            let mut shortened = path.to_vec();
+            let last_idx = shortened.len() - 1;
+            let prev_idx = last_idx - 1;
+
+            // Calculate tangent direction at endpoint
+            let dx = shortened[last_idx].x - shortened[prev_idx].x;
+            let dy = shortened[last_idx].y - shortened[prev_idx].y;
+            let len = (dx * dx + dy * dy).sqrt();
+
+            if len > 0.001 {
+                // Pull back to compensate for arrow length
+                let pullback = 7.0;
+                shortened[last_idx].x -= dx / len * pullback;
+                shortened[last_idx].y -= dy / len * pullback;
+            }
+            shortened
+        } else {
+            path.to_vec()
+        };
+
         // Generate path data based on routing mode
         let d = match routing_mode {
             RoutingMode::Curved if path.len() >= 4 => {
@@ -384,7 +408,7 @@ impl SvgBuilder {
                 }
                 d
             }
-            _ => path_to_d(path), // Default polyline for orthogonal/direct
+            _ => path_to_d(&path), // Default polyline for orthogonal/direct
         };
 
         let marker = if marker_end {
