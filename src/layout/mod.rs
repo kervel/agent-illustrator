@@ -107,18 +107,19 @@ fn validate_refs_in_statement(
     match stmt {
         Statement::Connection(conns) => {
             for c in conns {
-                if !defined.contains(&c.from.node.0) {
+                // Feature 009: AnchorReference.element contains the identifier
+                if !defined.contains(&c.from.element.node.0) {
                     return Err(LayoutError::UndefinedIdentifier {
-                        name: c.from.node.0.clone(),
-                        span: c.from.span.clone(),
-                        suggestions: find_similar(defined, &c.from.node.0, 2),
+                        name: c.from.element.node.0.clone(),
+                        span: c.from.element.span.clone(),
+                        suggestions: find_similar(defined, &c.from.element.node.0, 2),
                     });
                 }
-                if !defined.contains(&c.to.node.0) {
+                if !defined.contains(&c.to.element.node.0) {
                     return Err(LayoutError::UndefinedIdentifier {
-                        name: c.to.node.0.clone(),
-                        span: c.to.span.clone(),
-                        suggestions: find_similar(defined, &c.to.node.0, 2),
+                        name: c.to.element.node.0.clone(),
+                        span: c.to.element.span.clone(),
+                        suggestions: find_similar(defined, &c.to.element.node.0, 2),
                     });
                 }
             }

@@ -200,13 +200,21 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
         }
     });
 
+    let bounds = BoundingBox::new(position.x, position.y, width, height);
+    // Feature 009: Compute anchors based on shape type
+    let anchors = match &shape.shape_type.node {
+        ShapeType::Path(_) => AnchorSet::path_shape(&bounds),
+        _ => AnchorSet::simple_shape(&bounds),
+    };
+
     ElementLayout {
         id,
         element_type: ElementType::Shape(shape.shape_type.node.clone()),
-        bounds: BoundingBox::new(position.x, position.y, width, height),
+        bounds,
         styles,
         children: vec![],
         label,
+        anchors,
     }
 }
 
@@ -669,6 +677,9 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         })
     };
 
+    // Feature 009: Containers get simple shape anchors
+    let anchors = AnchorSet::simple_shape(&bounds);
+
     ElementLayout {
         id: layout.name.as_ref().map(|n| n.node.clone()),
         element_type: ElementType::Layout(layout.layout_type.node),
@@ -676,6 +687,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         styles,
         children,
         label,
+        anchors,
     }
 }
 
@@ -721,6 +733,9 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         })
     };
 
+    // Feature 009: Groups get simple shape anchors
+    let anchors = AnchorSet::simple_shape(&bounds);
+
     ElementLayout {
         id: group.name.as_ref().map(|n| n.node.clone()),
         element_type: ElementType::Group,
@@ -728,6 +743,7 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         styles,
         children,
         label,
+        anchors,
     }
 }
 

@@ -347,11 +347,40 @@ where
         just(Token::Dash).to(ConnectionDirection::Undirected),
     ));
 
+    // Anchor name parser: accepts both identifiers and edge keywords (top, bottom, left, right, etc.)
+    // This is needed because edge keywords are lexed separately from identifiers
+    let anchor_name = choice((
+        select! { Token::Ident(s) => s },
+        just(Token::Top).to("top".to_string()),
+        just(Token::Bottom).to("bottom".to_string()),
+        just(Token::Left).to("left".to_string()),
+        just(Token::Right).to("right".to_string()),
+        just(Token::HorizontalCenter).to("horizontal_center".to_string()),
+        just(Token::VerticalCenter).to("vertical_center".to_string()),
+    ))
+    .map_with(|name, e| Spanned::new(name, span_range(&e.span())));
+
+    // Anchor reference parser: identifier { "." anchor_name }?
+    // Parses either:
+    //   - `element` -> AnchorReference with anchor=None
+    //   - `element.anchor_name` -> AnchorReference with anchor=Some
+    let anchor_reference = identifier
+        .clone()
+        .then(just(Token::Dot).ignore_then(anchor_name).or_not())
+        .map(|(element, anchor_opt)| {
+            match anchor_opt {
+                Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
+                None => AnchorReference::element_only(element),
+            }
+        });
+
     // Connection declaration (supports chained: a -> b -> c [modifiers])
-    let connection_decl = identifier
+    // Feature 009: Now supports anchor syntax (a.right -> b.left)
+    let connection_decl = anchor_reference
+        .clone()
         .then(
             connection_op
-                .then(identifier)
+                .then(anchor_reference.clone())
                 .repeated()
                 .at_least(1)
                 .collect::<Vec<_>>(),
@@ -1066,9 +1095,41 @@ mod tests {
         match &doc.statements[0].node {
             Statement::Connection(conns) => {
                 assert_eq!(conns.len(), 1);
-                assert_eq!(conns[0].from.node.as_str(), "a");
-                assert_eq!(conns[0].to.node.as_str(), "b");
+                // Feature 009: AnchorReference.element contains the identifier
+                assert_eq!(conns[0].from.element.node.as_str(), "a");
+                assert_eq!(conns[0].to.element.node.as_str(), "b");
+                assert!(conns[0].from.anchor.is_none());
+                assert!(conns[0].to.anchor.is_none());
                 assert_eq!(conns[0].direction, ConnectionDirection::Forward);
+            }
+            _ => panic!("Expected connection"),
+        }
+    }
+
+    #[test]
+    fn test_parse_connection_with_anchors() {
+        let doc = parse("a.right -> b.left").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::Connection(conns) => {
+                assert_eq!(conns.len(), 1);
+                assert_eq!(conns[0].from.element.node.as_str(), "a");
+                assert_eq!(conns[0].from.anchor.as_ref().map(|s| s.node.as_str()), Some("right"));
+                assert_eq!(conns[0].to.element.node.as_str(), "b");
+                assert_eq!(conns[0].to.anchor.as_ref().map(|s| s.node.as_str()), Some("left"));
+            }
+            _ => panic!("Expected connection"),
+        }
+    }
+
+    #[test]
+    fn test_parse_connection_mixed_anchors() {
+        // One with anchor, one without
+        let doc = parse("a.top -> b").expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Connection(conns) => {
+                assert_eq!(conns[0].from.anchor.as_ref().map(|s| s.node.as_str()), Some("top"));
+                assert!(conns[0].to.anchor.is_none());
             }
             _ => panic!("Expected connection"),
         }

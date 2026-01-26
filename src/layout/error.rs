@@ -43,6 +43,15 @@ pub enum LayoutError {
     /// Constraint solver error
     #[error("constraint solver error: {0}")]
     SolverError(#[from] SolverError),
+
+    /// Invalid anchor reference (Feature 009)
+    #[error("invalid anchor '{anchor}' on element '{element}' (valid anchors: {valid_anchors})")]
+    InvalidAnchor {
+        element: String,
+        anchor: String,
+        valid_anchors: String,
+        span: Span,
+    },
 }
 
 impl LayoutError {
@@ -81,6 +90,7 @@ impl LayoutError {
         match self {
             Self::UndefinedIdentifier { span, .. } => Some(span),
             Self::PathNotFound { span, .. } => Some(span),
+            Self::InvalidAnchor { span, .. } => Some(span),
             _ => None,
         }
     }
@@ -106,6 +116,21 @@ impl LayoutError {
     /// Create a solver error from a SolverError
     pub fn solver_error(e: SolverError) -> Self {
         Self::SolverError(e)
+    }
+
+    /// Create an invalid anchor error (Feature 009)
+    pub fn invalid_anchor(
+        element: impl Into<String>,
+        anchor: impl Into<String>,
+        valid_anchors: Vec<String>,
+        span: Span,
+    ) -> Self {
+        Self::InvalidAnchor {
+            element: element.into(),
+            anchor: anchor.into(),
+            valid_anchors: valid_anchors.join(", "),
+            span,
+        }
     }
 }
 

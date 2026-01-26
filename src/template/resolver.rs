@@ -485,9 +485,10 @@ fn substitute_parameters(
         }
         Statement::Connection(mut conns) => {
             // Prefix all connection endpoints
+            // Feature 009: AnchorReference.element contains the identifier
             for conn in &mut conns {
-                conn.from.node = Identifier::new(format!("{}_{}", prefix, conn.from.node.0));
-                conn.to.node = Identifier::new(format!("{}_{}", prefix, conn.to.node.0));
+                conn.from.element.node = Identifier::new(format!("{}_{}", prefix, conn.from.element.node.0));
+                conn.to.element.node = Identifier::new(format!("{}_{}", prefix, conn.to.element.node.0));
                 conn.modifiers = substitute_modifiers(&conn.modifiers, params);
             }
             Spanned::new(Statement::Connection(conns), stmt.span)

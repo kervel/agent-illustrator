@@ -175,10 +175,13 @@ pub enum ShapeType {
 }
 
 /// Connection between shapes
+/// Updated in Feature 009 to support anchor references
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConnectionDecl {
-    pub from: Spanned<Identifier>,
-    pub to: Spanned<Identifier>,
+    /// Source element with optional anchor (e.g., `box_a.right`)
+    pub from: AnchorReference,
+    /// Target element with optional anchor (e.g., `box_b.left`)
+    pub to: AnchorReference,
     pub direction: ConnectionDirection,
     pub modifiers: Vec<Spanned<StyleModifier>>,
 }
@@ -638,6 +641,77 @@ pub struct PathDecl {
     pub body: PathBody,
     /// Style modifiers (fill, stroke, etc.)
     pub modifiers: Vec<Spanned<StyleModifier>>,
+}
+
+// ============================================
+// Anchor Types (Feature 009)
+// ============================================
+
+/// Reference to an element with optional anchor name (T003)
+/// Used in connections: `element.anchor` or just `element`
+#[derive(Debug, Clone, PartialEq)]
+pub struct AnchorReference {
+    /// The element being referenced
+    pub element: Spanned<Identifier>,
+    /// Optional anchor name (e.g., "top", "left", "input")
+    pub anchor: Option<Spanned<String>>,
+}
+
+impl AnchorReference {
+    /// Create a reference to just an element (anchor auto-detect)
+    pub fn element_only(element: Spanned<Identifier>) -> Self {
+        Self {
+            element,
+            anchor: None,
+        }
+    }
+
+    /// Create a reference to an element with a specific anchor
+    pub fn with_anchor(element: Spanned<Identifier>, anchor: Spanned<String>) -> Self {
+        Self {
+            element,
+            anchor: Some(anchor),
+        }
+    }
+}
+
+/// Cardinal direction for anchor direction specification (T004)
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CardinalDirection {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+/// Anchor direction specification in template declarations (T004)
+#[derive(Debug, Clone, PartialEq)]
+pub enum AnchorDirectionSpec {
+    /// Cardinal direction: up, down, left, right
+    Cardinal(CardinalDirection),
+    /// Angle in degrees (0=right, 90=down, 180=left, 270=up)
+    Angle(f64),
+}
+
+/// Position specification for template anchor declarations (T004)
+#[derive(Debug, Clone, PartialEq)]
+pub enum AnchorPosition {
+    /// Reference to an element's property: `body.left`, `header.bottom`
+    PropertyRef(PropertyRef),
+    /// Property reference with offset: `body.left + 10`
+    PropertyRefWithOffset { prop_ref: PropertyRef, offset: f64 },
+}
+
+/// Anchor declaration in a template (T004)
+/// Syntax: `anchor name [position: element.property, direction: up]`
+#[derive(Debug, Clone, PartialEq)]
+pub struct AnchorDecl {
+    /// Name of the anchor
+    pub name: Spanned<Identifier>,
+    /// Position specification
+    pub position: AnchorPosition,
+    /// Direction specification (optional, inferred from position property if not specified)
+    pub direction: Option<AnchorDirectionSpec>,
 }
 
 #[cfg(test)]

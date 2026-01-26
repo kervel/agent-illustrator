@@ -1,0 +1,19 @@
+// Feature 009: Anchor Support Demo
+// Demonstrates anchor-based connections
+
+// Basic anchor connections
+rect a [width: 80, height: 40]
+rect b [width: 80, height: 40]
+rect c [width: 80, height: 40]
+
+// Position elements
+constrain b.left = a.right + 60
+constrain c.top = a.bottom + 40
+constrain c.horizontal_center = midpoint(a, b)
+
+// Anchor-based connections
+a.right -> b.left
+a.bottom -> c.top
+
+// Mixed anchor/auto-detect
+b.bottom -> c

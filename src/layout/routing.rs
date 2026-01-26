@@ -81,6 +81,57 @@ pub fn boundary_point_toward(bounds: &BoundingBox, target: Point) -> Point {
     }
 }
 
+// ============================================
+// Anchor Resolution (Feature 009)
+// ============================================
+
+/// Resolve an anchor reference to a resolved anchor with position and direction.
+///
+/// When anchor is None, returns the center of the element with auto-computed direction
+/// toward the target element.
+/// When anchor is Some, looks up the anchor in the element's AnchorSet.
+pub fn resolve_anchor(
+    anchor_ref: &AnchorReference,
+    elements: &std::collections::HashMap<String, ElementLayout>,
+    target_bounds: Option<&BoundingBox>,
+) -> Result<ResolvedAnchor, LayoutError> {
+    let element_name = &anchor_ref.element.node.0;
+    let element = elements.get(element_name).ok_or_else(|| {
+        LayoutError::undefined(element_name.clone(), anchor_ref.element.span.clone(), vec![])
+    })?;
+
+    match &anchor_ref.anchor {
+        Some(anchor_name) => {
+            // Explicit anchor - look up in element's anchor set
+            let anchor = element.anchors.get(&anchor_name.node).ok_or_else(|| {
+                let valid_anchors: Vec<String> = element.anchors.names().map(String::from).collect();
+                LayoutError::invalid_anchor(
+                    element_name.clone(),
+                    anchor_name.node.clone(),
+                    valid_anchors,
+                    anchor_name.span.clone(),
+                )
+            })?;
+            Ok(ResolvedAnchor::from_anchor(anchor))
+        }
+        None => {
+            // Auto-detect - return center with direction toward target
+            let center = element.bounds.center();
+            let direction = if let Some(target) = target_bounds {
+                let dx = target.center().x - center.x;
+                let dy = target.center().y - center.y;
+                let angle = dy.atan2(dx).to_degrees();
+                // Normalize to 0-360 range
+                let angle = if angle < 0.0 { angle + 360.0 } else { angle };
+                AnchorDirection::Angle(angle)
+            } else {
+                AnchorDirection::Right // Default direction
+            };
+            Ok(ResolvedAnchor::new(center, direction))
+        }
+    }
+}
+
 /// Determine the best edges to connect two bounding boxes
 pub fn best_edges(from: &BoundingBox, to: &BoundingBox) -> (Edge, Edge) {
     let dx = to.center().x - from.center().x;
@@ -188,14 +239,35 @@ pub fn route_connection(
     mode: RoutingMode,
     via_points: &[Point],
 ) -> Vec<Point> {
+    // Delegate to anchored version without anchors
+    route_connection_with_anchors(from_bounds, to_bounds, mode, via_points, None, None)
+}
+
+/// Route a connection between two bounding boxes with optional explicit anchors (Feature 009)
+///
+/// When anchors are provided, uses their positions directly instead of auto-detecting
+/// attachment points from the bounding boxes.
+pub fn route_connection_with_anchors(
+    from_bounds: &BoundingBox,
+    to_bounds: &BoundingBox,
+    mode: RoutingMode,
+    via_points: &[Point],
+    from_anchor: Option<&ResolvedAnchor>,
+    to_anchor: Option<&ResolvedAnchor>,
+) -> Vec<Point> {
+    // Feature 009: Use anchor positions if provided, otherwise calculate from bounds
+    let from_center = from_bounds.center();
+    let to_center = to_bounds.center();
+
+    let start = from_anchor
+        .map(|a| a.position)
+        .unwrap_or_else(|| boundary_point_toward(from_bounds, to_center));
+    let end = to_anchor
+        .map(|a| a.position)
+        .unwrap_or_else(|| boundary_point_toward(to_bounds, from_center));
+
     // For curved routing, use quadratic Bezier (Feature 008)
     if mode == RoutingMode::Curved {
-        let from_center = from_bounds.center();
-        let to_center = to_bounds.center();
-
-        // Calculate boundary points
-        let start = boundary_point_toward(from_bounds, to_center);
-        let end = boundary_point_toward(to_bounds, from_center);
 
         if via_points.is_empty() {
             // No via points - auto-generate control point
@@ -228,16 +300,8 @@ pub fn route_connection(
         }
     }
 
-    // For direct routing, use boundary points that point toward each other's centers
+    // For direct routing, use the pre-calculated start/end positions
     if mode == RoutingMode::Direct {
-        let from_center = from_bounds.center();
-        let to_center = to_bounds.center();
-
-        // Calculate boundary points: direction is toward the other shape's center,
-        // but the point is on the boundary of this shape
-        let start = boundary_point_toward(from_bounds, to_center);
-        let end = boundary_point_toward(to_bounds, from_center);
-
         let dx = to_center.x - from_center.x;
         let dy = to_center.y - from_center.y;
 
@@ -267,10 +331,57 @@ pub fn route_connection(
         return vec![start, end];
     }
 
-    // Orthogonal routing: use edge-based attachment points
+    // Orthogonal routing: use anchor positions if provided, otherwise edge-based attachment
+    // Feature 009: When anchors are specified, use their positions
     let (from_edge, to_edge) = best_edges(from_bounds, to_bounds);
-    let start = attachment_point(from_bounds, from_edge);
-    let end = attachment_point(to_bounds, to_edge);
+    let (start, from_edge) = if let Some(anchor) = from_anchor {
+        // Use anchor position; infer edge from anchor direction
+        let edge = match anchor.direction {
+            AnchorDirection::Up => Edge::Top,
+            AnchorDirection::Down => Edge::Bottom,
+            AnchorDirection::Left => Edge::Left,
+            AnchorDirection::Right => Edge::Right,
+            AnchorDirection::Angle(deg) => {
+                // Map angle to closest edge (simplified)
+                let deg = deg.rem_euclid(360.0);
+                if deg < 45.0 || deg >= 315.0 {
+                    Edge::Right
+                } else if deg < 135.0 {
+                    Edge::Bottom
+                } else if deg < 225.0 {
+                    Edge::Left
+                } else {
+                    Edge::Top
+                }
+            }
+        };
+        (anchor.position, edge)
+    } else {
+        (attachment_point(from_bounds, from_edge), from_edge)
+    };
+    let (end, to_edge) = if let Some(anchor) = to_anchor {
+        let edge = match anchor.direction {
+            AnchorDirection::Up => Edge::Top,
+            AnchorDirection::Down => Edge::Bottom,
+            AnchorDirection::Left => Edge::Left,
+            AnchorDirection::Right => Edge::Right,
+            AnchorDirection::Angle(deg) => {
+                let deg = deg.rem_euclid(360.0);
+                if deg < 45.0 || deg >= 315.0 {
+                    Edge::Right
+                } else if deg < 135.0 {
+                    Edge::Bottom
+                } else if deg < 225.0 {
+                    Edge::Left
+                } else {
+                    Edge::Top
+                }
+            }
+        };
+        (anchor.position, edge)
+    } else {
+        (attachment_point(to_bounds, to_edge), to_edge)
+    };
 
     // Orthogonal routing: create paths with horizontal/vertical segments only
 
@@ -405,21 +516,22 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
             match &stmt.node {
                 Statement::Connection(conns) => {
                     for conn in conns {
+                        // Feature 009: Access element via AnchorReference.element
                         let from_element =
                             result
-                                .get_element_by_name(&conn.from.node.0)
+                                .get_element_by_name(&conn.from.element.node.0)
                                 .ok_or_else(|| {
                                     LayoutError::undefined(
-                                        conn.from.node.0.clone(),
-                                        conn.from.span.clone(),
+                                        conn.from.element.node.0.clone(),
+                                        conn.from.element.span.clone(),
                                         vec![],
                                     )
                                 })?;
                         let to_element =
-                            result.get_element_by_name(&conn.to.node.0).ok_or_else(|| {
+                            result.get_element_by_name(&conn.to.element.node.0).ok_or_else(|| {
                                 LayoutError::undefined(
-                                    conn.to.node.0.clone(),
-                                    conn.to.span.clone(),
+                                    conn.to.element.node.0.clone(),
+                                    conn.to.element.span.clone(),
                                     vec![],
                                 )
                             })?;
@@ -427,10 +539,25 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                         let routing_mode = extract_routing_mode(&conn.modifiers);
                         let from_bounds = from_element.bounds;
                         let to_bounds = to_element.bounds;
+
+                        // Feature 009: Resolve anchors for connection endpoints
+                        let from_anchor = resolve_anchor(&conn.from, &result.elements, Some(&to_bounds))?;
+                        let to_anchor = resolve_anchor(&conn.to, &result.elements, Some(&from_bounds))?;
+
+                        // Use anchors only if explicitly specified, otherwise auto-detect
+                        let from_anchor_opt = conn.from.anchor.as_ref().map(|_| &from_anchor);
+                        let to_anchor_opt = conn.to.anchor.as_ref().map(|_| &to_anchor);
+
                         let via_refs = extract_via_references(&conn.modifiers);
                         let via_points = resolve_via_points(&via_refs, result)?;
-                        let path =
-                            route_connection(&from_bounds, &to_bounds, routing_mode, &via_points);
+                        let path = route_connection_with_anchors(
+                            &from_bounds,
+                            &to_bounds,
+                            routing_mode,
+                            &via_points,
+                            from_anchor_opt,
+                            to_anchor_opt,
+                        );
                         let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
                         let (label, label_ref_id) =
                             extract_connection_label_with_ref(&conn.modifiers, &path, result);
@@ -440,8 +567,8 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                         }
 
                         result.connections.push(ConnectionLayout {
-                            from_id: conn.from.node.clone(),
-                            to_id: conn.to.node.clone(),
+                            from_id: conn.from.element.node.clone(),
+                            to_id: conn.to.element.node.clone(),
                             direction: conn.direction,
                             path,
                             styles,
