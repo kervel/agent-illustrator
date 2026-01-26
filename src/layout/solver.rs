@@ -149,16 +149,29 @@ impl ConstraintSource {
 // ============================================================================
 
 /// A constraint in the layout system
+///
+/// Constraints have implicit priorities:
+/// - Fixed: REQUIRED (must be satisfied, used for x/y modifiers and sizes)
+/// - Suggested: MEDIUM (can be overridden, used for layout positions)
+/// - Equal/GE/LE/Midpoint: STRONG (override layout, used for user constraints)
 #[derive(Debug, Clone)]
 pub enum LayoutConstraint {
-    /// Variable = constant
+    /// Variable = constant (REQUIRED - must be satisfied)
     Fixed {
         variable: LayoutVariable,
         value: f64,
         source: ConstraintSource,
     },
 
-    /// left_var = right_var + offset
+    /// Variable = constant (MEDIUM - can be overridden by user constraints)
+    /// Used for layout-computed positions
+    Suggested {
+        variable: LayoutVariable,
+        value: f64,
+        source: ConstraintSource,
+    },
+
+    /// left_var = right_var + offset (STRONG - overrides layout)
     Equal {
         left: LayoutVariable,
         right: LayoutVariable,
@@ -166,21 +179,21 @@ pub enum LayoutConstraint {
         source: ConstraintSource,
     },
 
-    /// variable >= value
+    /// variable >= value (STRONG - overrides layout)
     GreaterOrEqual {
         variable: LayoutVariable,
         value: f64,
         source: ConstraintSource,
     },
 
-    /// variable <= value
+    /// variable <= value (STRONG - overrides layout)
     LessOrEqual {
         variable: LayoutVariable,
         value: f64,
         source: ConstraintSource,
     },
 
-    /// target = (a + b) / 2 + offset
+    /// target = (a + b) / 2 + offset (STRONG - overrides layout)
     Midpoint {
         target: LayoutVariable,
         a: LayoutVariable,
@@ -196,6 +209,7 @@ impl LayoutConstraint {
     pub fn source(&self) -> &ConstraintSource {
         match self {
             LayoutConstraint::Fixed { source, .. } => source,
+            LayoutConstraint::Suggested { source, .. } => source,
             LayoutConstraint::Equal { source, .. } => source,
             LayoutConstraint::GreaterOrEqual { source, .. } => source,
             LayoutConstraint::LessOrEqual { source, .. } => source,
@@ -381,13 +395,37 @@ impl ConstraintSolver {
                 self.sources.push(source.clone());
             }
 
+            LayoutConstraint::Suggested {
+                variable,
+                value,
+                source,
+            } => {
+                // MEDIUM strength - can be overridden by user constraints (STRONG)
+                let expr = self.get_expression(variable);
+                let desc = format!(
+                    "{}.{:?} ~= {} (suggested)",
+                    variable.element_id, variable.property, value
+                );
+                self.solver
+                    .add_constraint(expr | EQ(Strength::MEDIUM) | *value)
+                    .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                self.sources.push(source.clone());
+            }
+
             LayoutConstraint::Equal {
                 left,
                 right,
                 offset,
                 source,
             } => {
-                // Use expressions to handle derived properties like CenterX/CenterY
+                // Use different strength based on origin:
+                // - UserDefined: STRONG (1,000,000) - user constraints take priority
+                // - LayoutContainer: STRONG * 0.1 (100,000) - can be broken by user constraints
+                let strength = match source.origin {
+                    ConstraintOrigin::UserDefined => Strength::STRONG,
+                    ConstraintOrigin::LayoutContainer => Strength::STRONG * 0.1,
+                    ConstraintOrigin::Intrinsic => Strength::STRONG,
+                };
                 let left_expr = self.get_expression(left);
                 let right_expr = self.get_expression(right);
                 let desc = if *offset == 0.0 {
@@ -402,7 +440,7 @@ impl ConstraintSolver {
                     )
                 };
                 self.solver
-                    .add_constraint(left_expr | EQ(Strength::REQUIRED) | right_expr + *offset)
+                    .add_constraint(left_expr | EQ(strength) | right_expr + *offset)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -412,14 +450,14 @@ impl ConstraintSolver {
                 value,
                 source,
             } => {
-                // Use expression to handle derived properties like CenterX/CenterY
+                // STRONG strength - overrides layout suggestions (MEDIUM) but not fixed (REQUIRED)
                 let expr = self.get_expression(variable);
                 let desc = format!(
                     "{}.{:?} >= {}",
                     variable.element_id, variable.property, value
                 );
                 self.solver
-                    .add_constraint(expr | GE(Strength::REQUIRED) | *value)
+                    .add_constraint(expr | GE(Strength::STRONG) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -429,14 +467,14 @@ impl ConstraintSolver {
                 value,
                 source,
             } => {
-                // Use expression to handle derived properties like CenterX/CenterY
+                // STRONG strength - overrides layout suggestions (MEDIUM) but not fixed (REQUIRED)
                 let expr = self.get_expression(variable);
                 let desc = format!(
                     "{}.{:?} <= {}",
                     variable.element_id, variable.property, value
                 );
                 self.solver
-                    .add_constraint(expr | LE(Strength::REQUIRED) | *value)
+                    .add_constraint(expr | LE(Strength::STRONG) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -448,7 +486,7 @@ impl ConstraintSolver {
                 offset,
                 source,
             } => {
-                // Use expressions to handle derived properties like CenterX/CenterY
+                // STRONG strength - overrides layout suggestions (MEDIUM) but not fixed (REQUIRED)
                 let target_expr = self.get_expression(target);
                 let a_expr = self.get_expression(a);
                 let b_expr = self.get_expression(b);
@@ -478,7 +516,7 @@ impl ConstraintSolver {
                 // Which is equivalent to: target = (a + b) / 2 + offset
                 self.solver
                     .add_constraint(
-                        2.0 * target_expr | EQ(Strength::REQUIRED) | a_expr + b_expr + 2.0 * offset,
+                        2.0 * target_expr | EQ(Strength::STRONG) | a_expr + b_expr + 2.0 * offset,
                     )
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
@@ -764,11 +802,13 @@ mod tests {
     }
 
     #[test]
-    fn test_conflicting_inequality_constraints_error() {
+    fn test_conflicting_inequality_constraints_compromise() {
+        // With STRONG strength for inequalities, conflicting constraints don't fail
+        // Instead, the solver finds a compromise solution
         let mut solver = ConstraintSolver::new();
         let x = LayoutVariable::x("box");
 
-        // x >= 200
+        // x >= 200 (STRONG - can be violated)
         solver
             .add_constraint(LayoutConstraint::GreaterOrEqual {
                 variable: x.clone(),
@@ -777,11 +817,45 @@ mod tests {
             })
             .unwrap();
 
-        // x <= 100 (conflicts with x >= 200)
+        // x <= 100 (STRONG - can be violated, conflicts with x >= 200)
         let result = solver.add_constraint(LayoutConstraint::LessOrEqual {
             variable: x.clone(),
             value: 100.0,
             source: ConstraintSource::user(15..25, "le constraint"),
+        });
+
+        // Both constraints use STRONG strength, so the solver accepts both
+        // and finds a compromise solution
+        assert!(result.is_ok());
+
+        // Solve and verify we get some value (the solver will compromise)
+        solver.suggest_value(&x, 150.0).unwrap();
+        let solution = solver.solve().unwrap();
+
+        // The solver should find some value - exact value depends on solver heuristics
+        assert!(solution.get(&x).is_some());
+    }
+
+    #[test]
+    fn test_conflicting_fixed_constraints_error() {
+        // REQUIRED (Fixed) constraints still conflict and cause errors
+        let mut solver = ConstraintSolver::new();
+        let x = LayoutVariable::x("box");
+
+        // x = 100 (REQUIRED)
+        solver
+            .add_constraint(LayoutConstraint::Fixed {
+                variable: x.clone(),
+                value: 100.0,
+                source: ConstraintSource::user(0..10, "first fixed"),
+            })
+            .unwrap();
+
+        // x = 200 (REQUIRED - conflicts with x = 100)
+        let result = solver.add_constraint(LayoutConstraint::Fixed {
+            variable: x.clone(),
+            value: 200.0,
+            source: ConstraintSource::user(15..25, "second fixed"),
         });
 
         // Should fail with Unsatisfiable error

@@ -1332,11 +1332,16 @@ pub fn resolve_constrain_statements(
     // Collect constraints from the document
     let mut collector = ConstraintCollector::new(config.clone());
 
+    // Collect row/col alignment constraints (siblings stay aligned)
+    // These use STRONG priority to keep siblings at the same y (rows) or x (cols)
+    collect_layout_alignment_constraints(&doc.statements, &mut collector);
+
     // Collect user constraints (constrain statements)
+    // These also use STRONG priority, so they work WITH layout alignment
     collect_constrain_statements(&doc.statements, &mut collector);
 
     // Also collect x/y modifiers from shapes as position constraints
-    // These override row/col layout because they become REQUIRED constraints
+    // These use REQUIRED priority, so they override everything
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
 
     if collector.constraints.is_empty() {
@@ -1414,6 +1419,174 @@ fn collect_constrain_statements(
     }
 }
 
+/// Collect only alignment constraints from row/col layouts
+///
+/// This ensures siblings in a row stay at the same y position,
+/// and siblings in a col stay at the same x position.
+/// We don't collect positioning constraints here because the procedural
+/// layout already computes those correctly.
+fn collect_layout_alignment_constraints(
+    stmts: &[Spanned<Statement>],
+    collector: &mut super::collector::ConstraintCollector,
+) {
+    use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutVariable};
+    use crate::parser::ast::LayoutType;
+
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Layout(l) => {
+                // Collect child IDs
+                let child_ids: Vec<String> = l
+                    .children
+                    .iter()
+                    .filter_map(|child| {
+                        match &child.node {
+                            Statement::Shape(s) => s.name.as_ref().map(|n| n.node.0.clone()),
+                            Statement::Layout(inner_l) => {
+                                inner_l.name.as_ref().map(|n| n.node.0.clone())
+                            }
+                            Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.clone()),
+                            _ => None,
+                        }
+                    })
+                    .collect();
+
+                // Extract gap from modifiers
+                let gap = crate::layout::collector::extract_number_modifier(&l.modifiers, "gap")
+                    .unwrap_or(20.0); // Default gap
+
+                if child_ids.len() > 1 {
+                    match l.layout_type.node {
+                        LayoutType::Row => {
+                            // Row: align all children vertically (same y)
+                            // AND maintain horizontal spacing (child[i].x = child[i-1].right + gap)
+                            for i in 1..child_ids.len() {
+                                // Vertical alignment
+                                collector.constraints.push(LayoutConstraint::Equal {
+                                    left: LayoutVariable::y(&child_ids[i]),
+                                    right: LayoutVariable::y(&child_ids[0]),
+                                    offset: 0.0,
+                                    source: ConstraintSource {
+                                        span: stmt.span.clone(),
+                                        description: format!(
+                                            "row alignment: {}.y = {}.y",
+                                            child_ids[i], child_ids[0]
+                                        ),
+                                        origin: ConstraintOrigin::LayoutContainer,
+                                    },
+                                });
+
+                                // Horizontal positioning: child[i].x = child[i-1].right + gap
+                                // This is expressed as: child[i].x = child[i-1].x + child[i-1].width + gap
+                                // But since we're using Equal which takes two variables with an offset,
+                                // and we can't express width directly, we use Right property:
+                                // child[i].x - child[i-1].right = gap
+                                // Which is: child[i].x = child[i-1].right + gap
+                                collector.constraints.push(LayoutConstraint::Equal {
+                                    left: LayoutVariable::x(&child_ids[i]),
+                                    right: LayoutVariable::new(
+                                        &child_ids[i - 1],
+                                        super::solver::LayoutProperty::Right,
+                                    ),
+                                    offset: gap,
+                                    source: ConstraintSource {
+                                        span: stmt.span.clone(),
+                                        description: format!(
+                                            "row spacing: {}.x = {}.right + {}",
+                                            child_ids[i], child_ids[i - 1], gap
+                                        ),
+                                        origin: ConstraintOrigin::LayoutContainer,
+                                    },
+                                });
+                            }
+                        }
+                        LayoutType::Column => {
+                            // Column: align all children horizontally (same x)
+                            // AND maintain vertical spacing (child[i].y = child[i-1].bottom + gap)
+                            for i in 1..child_ids.len() {
+                                // Horizontal alignment
+                                collector.constraints.push(LayoutConstraint::Equal {
+                                    left: LayoutVariable::x(&child_ids[i]),
+                                    right: LayoutVariable::x(&child_ids[0]),
+                                    offset: 0.0,
+                                    source: ConstraintSource {
+                                        span: stmt.span.clone(),
+                                        description: format!(
+                                            "col alignment: {}.x = {}.x",
+                                            child_ids[i], child_ids[0]
+                                        ),
+                                        origin: ConstraintOrigin::LayoutContainer,
+                                    },
+                                });
+
+                                // Vertical positioning: child[i].y = child[i-1].bottom + gap
+                                collector.constraints.push(LayoutConstraint::Equal {
+                                    left: LayoutVariable::y(&child_ids[i]),
+                                    right: LayoutVariable::new(
+                                        &child_ids[i - 1],
+                                        super::solver::LayoutProperty::Bottom,
+                                    ),
+                                    offset: gap,
+                                    source: ConstraintSource {
+                                        span: stmt.span.clone(),
+                                        description: format!(
+                                            "col spacing: {}.y = {}.bottom + {}",
+                                            child_ids[i], child_ids[i - 1], gap
+                                        ),
+                                        origin: ConstraintOrigin::LayoutContainer,
+                                    },
+                                });
+                            }
+                        }
+                        LayoutType::Stack => {
+                            // Stack: align all children (same x and y)
+                            for i in 1..child_ids.len() {
+                                collector.constraints.push(LayoutConstraint::Equal {
+                                    left: LayoutVariable::x(&child_ids[i]),
+                                    right: LayoutVariable::x(&child_ids[0]),
+                                    offset: 0.0,
+                                    source: ConstraintSource {
+                                        span: stmt.span.clone(),
+                                        description: format!(
+                                            "stack alignment: {}.x = {}.x",
+                                            child_ids[i], child_ids[0]
+                                        ),
+                                        origin: ConstraintOrigin::LayoutContainer,
+                                    },
+                                });
+                                collector.constraints.push(LayoutConstraint::Equal {
+                                    left: LayoutVariable::y(&child_ids[i]),
+                                    right: LayoutVariable::y(&child_ids[0]),
+                                    offset: 0.0,
+                                    source: ConstraintSource {
+                                        span: stmt.span.clone(),
+                                        description: format!(
+                                            "stack alignment: {}.y = {}.y",
+                                            child_ids[i], child_ids[0]
+                                        ),
+                                        origin: ConstraintOrigin::LayoutContainer,
+                                    },
+                                });
+                            }
+                        }
+                        LayoutType::Grid => {
+                            // Grid alignment is more complex - skip for now
+                            // Grid cells are aligned within their grid structure
+                        }
+                    }
+                }
+
+                // Recurse into children
+                collect_layout_alignment_constraints(&l.children, collector);
+            }
+            Statement::Group(g) => {
+                collect_layout_alignment_constraints(&g.children, collector);
+            }
+            _ => {}
+        }
+    }
+}
+
 /// Collect x/y modifiers from shapes and convert them to position constraints
 ///
 /// This allows `rect box [x: 100, y: 50]` to override row/col layout positions.
@@ -1476,27 +1649,36 @@ fn collect_position_constraints_from_shapes(
 
 /// Add current element positions as solver suggestions and fix sizes
 ///
-/// Position (X, Y) values are suggestions that can be adjusted by constraints.
-/// Size (Width, Height) values are fixed - user constraints should not resize elements.
+/// Position (X, Y) values use MEDIUM strength (Suggested) so they can be overridden
+/// by user constraints (STRONG strength).
+/// Size (Width, Height) values are fixed (REQUIRED) - constraints should not resize elements.
 fn add_element_positions_as_suggestions(
     solver: &mut super::solver::ConstraintSolver,
     elem: &ElementLayout,
-    result: &LayoutResult,
+    _result: &LayoutResult,
 ) -> Result<(), LayoutError> {
     use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
 
     if let Some(id) = &elem.id {
         let name = id.0.as_str();
 
-        // Suggest current position values (can be adjusted by constraints)
+        // Suggest current position values (MEDIUM strength - can be overridden by STRONG user constraints)
         solver
-            .suggest_value(&LayoutVariable::x(name), elem.bounds.x)
+            .add_constraint(LayoutConstraint::Suggested {
+                variable: LayoutVariable::x(name),
+                value: elem.bounds.x,
+                source: ConstraintSource::layout(0..0, "layout-computed x position"),
+            })
             .map_err(LayoutError::solver_error)?;
         solver
-            .suggest_value(&LayoutVariable::y(name), elem.bounds.y)
+            .add_constraint(LayoutConstraint::Suggested {
+                variable: LayoutVariable::y(name),
+                value: elem.bounds.y,
+                source: ConstraintSource::layout(0..0, "layout-computed y position"),
+            })
             .map_err(LayoutError::solver_error)?;
 
-        // Fix size values (should NOT be changed by user constraints)
+        // Fix size values (REQUIRED - should NOT be changed by user constraints)
         // This ensures constraints like `a.bottom = b.top - 2` move elements, not resize them
         solver
             .add_constraint(LayoutConstraint::Fixed {
@@ -1516,7 +1698,7 @@ fn add_element_positions_as_suggestions(
 
     // Recurse into children
     for child in &elem.children {
-        add_element_positions_as_suggestions(solver, child, result)?;
+        add_element_positions_as_suggestions(solver, child, _result)?;
     }
 
     Ok(())

@@ -1,37 +1,68 @@
-// Human-Agent Feedback Loop Diagram
-// Shows asymmetric collaboration: human tunes feedback, agent executes fast
+// Human-Agent Feedback Loop Diagram v7
+// Via points are outside containers to avoid col/row alignment conflicts
 
-row main [gap: 100] {
-  // === HUMAN LOOP (slow, persistent) ===
-  col human_loop [gap: 18] {
-    rect evaluate [width: 125, height: 45, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Evaluate"]
-    rect spot [width: 125, height: 45, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Spot Patterns"]
-    rect improve [width: 125, height: 45, fill: #bbdefb, stroke: #1565c0, stroke_width: 3, label: "Tune Feedback"]
-    rect assign [width: 125, height: 45, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Assign Task"]
+// Control points (defined outside containers)
+circle human_via [size: 1, fill: none, stroke: none]
+circle agent_via [size: 1, fill: none, stroke: none]
+
+col diagram [gap: 50] {
+  // === HUMAN LOOP (top) ===
+  col human_section [gap: 6] {
+    row human_header [gap: 8] {
+      text "HUMAN" human_title [font_size: 14, fill: #1565c0]
+      text "— slow · persistent" human_sub [font_size: 11, fill: #888]
+    }
+
+    row human_loop [gap: 20] {
+      rect assign [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Assign Task"]
+      rect tune [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Tune Feedback"]
+      rect spot [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Spot Patterns"]
+      rect evaluate [width: 120, height: 50, fill: #e3f2fd, stroke: #1565c0, stroke_width: 2, label: "Evaluate"]
+    }
   }
 
-  // === AGENT LOOP (fast, ephemeral) ===
-  col agent_loop [gap: 12] {
-    rect atask [width: 110, height: 42, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Task"]
-    rect execute [width: 110, height: 42, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Execute"]
-    rect feedback [width: 110, height: 52, fill: #ffcc80, stroke: #e65100, stroke_width: 3, label: "Feedback"]
-    rect result [width: 110, height: 42, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Result"]
+  // === AGENT LOOP (bottom) ===
+  col agent_section [gap: 6] {
+    row agent_header [gap: 8] {
+      text "AGENT" agent_title [font_size: 14, fill: #e65100]
+      text "— fast · ephemeral" agent_sub [font_size: 11, fill: #888]
+    }
+    row agent_loop [gap: 20] {
+      rect task [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Task"]
+      rect execute [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Execute"]
+      rect check [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Feedback"]
+      rect result [width: 120, height: 50, fill: #fff3e0, stroke: #e65100, stroke_width: 2, label: "Result"]
+    }
   }
 }
 
-// Human flow (slow cycle)
-evaluate -> spot
-spot -> improve
-improve -> assign
-assign -> evaluate [routing: curved]
+// Position via points (outside containers, so they can move freely)
+constrain human_via.center_x = midpoint(assign, evaluate)
+constrain human_via.center_y = assign.top - 40
 
-// Agent flow (fast cycle)
-atask -> execute
-execute -> feedback
-feedback -> result [label: "pass"]
-feedback -> atask [label: "retry", routing: curved]
+constrain agent_via.center_x = midpoint(task, result)
+constrain agent_via.center_y = result.bottom + 40
+
+// Align loops
+constrain assign.left = task.left
+
+// Human internal flow
+evaluate -> spot [stroke: #1565c0, stroke_width: 3]
+spot -> tune [stroke: #1565c0, stroke_width: 3]
+tune -> assign [stroke: #1565c0, stroke_width: 3]
+
+// Human loop-back
+assign -> evaluate [stroke: #1565c0, stroke_width: 3, routing: curved, via: human_via]
+
+// Agent internal flow
+task -> execute [stroke: #e65100, stroke_width: 3]
+execute -> check [stroke: #e65100, stroke_width: 3]
+check -> result [stroke: #e65100, stroke_width: 3]
+
+// Agent loop-back
+result -> task [stroke: #e65100, stroke_width: 3, routing: curved, via: agent_via]
 
 // Cross connections
-assign -> atask [label: "task"]
-result -> evaluate [label: "result"]
-improve -> feedback [label: "tunes"]
+assign -> task [stroke: #999, stroke_width: 1]
+result -> evaluate [stroke: #999, stroke_width: 1]
+tune -> check [stroke: #2196f3, stroke_width: 2, label: "tunes"]

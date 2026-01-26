@@ -469,7 +469,7 @@ impl ConstraintCollector {
 // ============================================================================
 
 /// Extract a numeric modifier value by key name
-fn extract_number_modifier(modifiers: &[Spanned<StyleModifier>], key: &str) -> Option<f64> {
+pub fn extract_number_modifier(modifiers: &[Spanned<StyleModifier>], key: &str) -> Option<f64> {
     for m in modifiers {
         let key_matches = match &m.node.key.node {
             StyleKey::Width if key == "width" => true,
