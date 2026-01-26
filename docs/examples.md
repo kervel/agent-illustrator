@@ -22,37 +22,61 @@ service -> db
 Nested layouts: col contains row contains two cols.
 Connections cross layout boundaries automatically.
 
-EXAMPLE 2: Feedback loops with cross-connections
-------------------------------------------------
-row main [gap: 100] {
-  col human_loop [gap: 18] {
-    rect evaluate [width: 125, height: 45, fill: #e3f2fd, label: "Evaluate"]
-    rect spot [width: 125, height: 45, fill: #e3f2fd, label: "Spot Patterns"]
-    rect improve [width: 125, height: 45, fill: #bbdefb, label: "Tune Feedback"]
-    rect assign [width: 125, height: 45, fill: #e3f2fd, label: "Assign Task"]
+EXAMPLE 2: Styleable feedback loops with via points
+----------------------------------------------------
+// Invisible via points control curve shape
+circle human_via [size: 1, fill: none, stroke: none]
+circle agent_via [size: 1, fill: none, stroke: none]
+
+col diagram [gap: 40] {
+  col human_section [gap: 8] {
+    row [gap: 8] {
+      text "HUMAN" [font_size: 14, fill: accent-dark]
+      text "— slow · persistent" [font_size: 11, fill: text-3]
+    }
+    row human_loop [gap: 20] {
+      rect assign [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Assign Task"]
+      rect tune [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Tune Feedback"]
+      rect spot [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Spot Patterns"]
+      rect evaluate [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Evaluate"]
+    }
   }
-  col agent_loop [gap: 12] {
-    rect task [width: 110, height: 42, fill: #fff3e0, label: "Task"]
-    rect execute [width: 110, height: 42, fill: #fff3e0, label: "Execute"]
-    rect feedback [width: 110, height: 52, fill: #ffcc80, label: "Feedback"]
-    rect result [width: 110, height: 42, fill: #fff3e0, label: "Result"]
+  col agent_section [gap: 8] {
+    row [gap: 8] {
+      text "AGENT" [font_size: 14, fill: secondary-dark]
+      text "— fast · ephemeral" [font_size: 11, fill: text-3]
+    }
+    row agent_loop [gap: 20] {
+      rect task [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Task"]
+      rect execute [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Execute"]
+      rect check [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Feedback"]
+      rect result [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Result"]
+    }
   }
 }
 
-// Internal flows
-evaluate -> spot -> improve -> assign
-assign -> evaluate [routing: curved]
-task -> execute -> feedback
-feedback -> result [label: "pass"]
-feedback -> task [label: "retry", routing: curved]
+// Position via points for curve control
+constrain human_via.center_x = midpoint(assign, evaluate)
+constrain human_via.center_y = assign.top - 50
+constrain agent_via.center_x = midpoint(task, result)
+constrain agent_via.center_y = result.bottom + 50
+
+// Human flow (right to left)
+evaluate -> spot -> tune -> assign [stroke: accent-dark, stroke_width: 3]
+assign.top -> evaluate.top [stroke: accent-dark, stroke_width: 3, routing: curved, via: human_via]
+
+// Agent flow (left to right)
+task -> execute -> check -> result [stroke: secondary-dark, stroke_width: 3]
+result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, routing: curved, via: agent_via]
 
 // Cross connections
-assign -> task [label: "task"]
-result -> evaluate [label: "result"]
-improve -> feedback [label: "tunes"]
+assign.bottom -> task.top [stroke: foreground-3, stroke_width: 1]
+result.top -> evaluate.bottom [stroke: foreground-3, stroke_width: 1]
+tune.bottom -> check.top [stroke: accent-1, stroke_width: 2, routing: curved, label: "tunes"]
 
-Two side-by-side iteration cycles with connections between them.
-Use curved routing for loop-back arrows.
+Styleable with symbolic colors (accent-dark, secondary-light, etc).
+Via points control curve bulge. Anchors (.top, .bottom) for precise connections.
+Use --stylesheet to apply different color themes.
 
 EXAMPLE 3: Templates with anchors and curved connections
 --------------------------------------------------------
