@@ -1,7 +1,7 @@
 //! SVG generation from layout results
 
 use crate::layout::{
-    AnchorSet, BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point,
+    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point,
     ResolvedStyles, RoutingMode, TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, ShapeType};

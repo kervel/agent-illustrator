@@ -113,14 +113,15 @@ fn test_all_layout_types() {
 
 #[test]
 fn test_all_constraint_relations() {
+    // Note: Using "reference" instead of "anchor" since "anchor" is a keyword (Feature 009)
     let input = r#"
-        rect anchor
+        rect reference
         rect subject
-        place subject right-of anchor
-        place subject left-of anchor
-        place subject above anchor
-        place subject below anchor
-        place subject inside anchor
+        place subject right-of reference
+        place subject left-of reference
+        place subject above reference
+        place subject below reference
+        place subject inside reference
     "#;
 
     let doc = parse(input).expect("Should parse");

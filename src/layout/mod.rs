@@ -93,8 +93,8 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Template instances define new element identifiers
             ids.insert(inst.instance_name.node.0.clone());
         }
-        Statement::Export(_) => {
-            // Exports don't define new identifiers
+        Statement::Export(_) | Statement::AnchorDecl(_) => {
+            // Exports and anchor declarations don't define new element identifiers
         }
     }
 }
@@ -174,8 +174,8 @@ fn validate_refs_in_statement(
                 });
             }
         }
-        Statement::Export(_) => {
-            // Exports are validated during template resolution
+        Statement::Export(_) | Statement::AnchorDecl(_) => {
+            // Exports and anchor declarations are validated during template resolution
         }
     }
     Ok(())

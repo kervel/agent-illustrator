@@ -140,6 +140,8 @@ pub enum Statement {
     TemplateInstance(TemplateInstance),
     /// Export declaration: `export port1, port2`
     Export(ExportDecl),
+    /// Anchor declaration: `anchor name [position: element.property]` (Feature 009)
+    AnchorDecl(AnchorDecl),
 }
 
 /// Shape declaration
@@ -223,6 +225,8 @@ pub struct GroupDecl {
     pub name: Option<Spanned<Identifier>>,
     pub children: Vec<Spanned<Statement>>,
     pub modifiers: Vec<Spanned<StyleModifier>>,
+    /// Custom anchor declarations (Feature 009 - from template expansion)
+    pub anchors: Vec<AnchorDecl>,
 }
 
 /// Position constraint

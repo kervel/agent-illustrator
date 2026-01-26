@@ -1,7 +1,11 @@
 // Feature 009: Anchor Support Demo
 // Demonstrates anchor-based connections
 
-// Basic anchor connections
+// ============================================================
+// Part 1: Basic anchor connections between shapes
+// ============================================================
+
+// Create three rectangles
 rect a [width: 80, height: 40]
 rect b [width: 80, height: 40]
 rect c [width: 80, height: 40]
@@ -11,9 +15,38 @@ constrain b.left = a.right + 60
 constrain c.top = a.bottom + 40
 constrain c.horizontal_center = midpoint(a, b)
 
-// Anchor-based connections
-a.right -> b.left
-a.bottom -> c.top
+// Anchor-based connections - specify exact attachment points
+a.right -> b.left    // Right edge of 'a' to left edge of 'b'
+a.bottom -> c.top    // Bottom of 'a' to top of 'c'
 
-// Mixed anchor/auto-detect
+// Mixed: explicit source anchor, auto-detect target
 b.bottom -> c
+
+// ============================================================
+// Part 2: Template with custom anchors
+// ============================================================
+
+// Define a server template with named connection points
+template "server" {
+    rect body [width: 100, height: 60, fill: background-2]
+    text "SRV" txt [font_size: 12]
+    constrain txt.center = body.center
+
+    // Custom anchors for network connections
+    anchor input [position: body.left, direction: left]
+    anchor output [position: body.right, direction: right]
+}
+
+// Create server instances
+server srv1
+server srv2
+
+// Position the servers
+constrain srv1.top = c.bottom + 60
+constrain srv1.left = a.left
+constrain srv2.left = srv1.right + 80
+constrain srv2.vertical_center = srv1.vertical_center
+
+// Connect using template-defined anchors
+c.bottom -> srv1.input
+srv1.output -> srv2.input

@@ -69,6 +69,17 @@ pub enum Token {
     From,
     #[token("export")]
     Export,
+    #[token("anchor")]
+    Anchor,
+    #[token("direction")]
+    Direction,
+    #[token("position")]
+    Position,
+    // Cardinal direction keywords for anchor declarations
+    #[token("up")]
+    Up,
+    #[token("down")]
+    Down,
 
     // Constraint keywords
     #[token("place")]
@@ -538,5 +549,17 @@ mod tests {
         assert!(tokens.contains(&Token::Vertex));
         assert!(tokens.contains(&Token::LineTo));
         assert!(tokens.contains(&Token::Close));
+    }
+
+    // Anchor keyword tests (Feature 009)
+    #[test]
+    fn test_anchor_keywords() {
+        let tokens: Vec<_> = lex("anchor direction position up down")
+            .map(|(t, _)| t)
+            .collect();
+        assert_eq!(
+            tokens,
+            vec![Token::Anchor, Token::Direction, Token::Position, Token::Up, Token::Down]
+        );
     }
 }

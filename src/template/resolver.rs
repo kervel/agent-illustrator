@@ -3,8 +3,9 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
-    ConstrainDecl, ConstraintExpr, Document, ElementPath, GroupDecl, Identifier, PropertyRef,
-    ShapeDecl, ShapeType, Spanned, Statement, StyleModifier, StyleValue, TemplateInstance,
+    AnchorDecl, AnchorPosition, ConstrainDecl, ConstraintExpr, Document, ElementPath, GroupDecl,
+    Identifier, PropertyRef, ShapeDecl, ShapeType, Spanned, Statement, StyleModifier, StyleValue,
+    TemplateInstance,
 };
 
 use super::registry::{TemplateError, TemplateRegistry};
@@ -340,8 +341,9 @@ fn resolve_inline_template(
 
     for stmt in body {
         match &stmt.node {
-            Statement::Export(_) => {
-                // Exports are metadata, skip during expansion
+            Statement::Export(_) | Statement::AnchorDecl(_) => {
+                // Exports and anchor declarations are metadata, skip during expansion
+                // Anchors are processed separately and attached to the group
                 continue;
             }
             Statement::TemplateInstance(nested_inst) => {
@@ -359,9 +361,16 @@ fn resolve_inline_template(
         }
     }
 
-    // If there's only one shape, rename it to the instance name
-    // If there are multiple, wrap them in a group with the instance name
-    if expanded.len() == 1 {
+    // Prefix anchor declarations with instance name (Feature 009)
+    let prefixed_anchors: Vec<_> = def
+        .anchors
+        .iter()
+        .map(|a| prefix_anchor_decl(a, instance_name))
+        .collect();
+
+    // If there's only one shape and no custom anchors, rename it to the instance name
+    // If there are multiple, or if there are custom anchors, wrap in a group
+    if expanded.len() == 1 && prefixed_anchors.is_empty() {
         // Rename the single element to the instance name
         if let Statement::Shape(mut shape) = expanded[0].node.clone() {
             shape.name = Some(Spanned::new(Identifier::new(instance_name), span.clone()));
@@ -369,12 +378,14 @@ fn resolve_inline_template(
         }
     }
 
-    // Multiple elements: wrap them in a group with the instance name
+    // Multiple elements or custom anchors: wrap them in a group with the instance name
     // This allows the instance name to be used in connections and constraints
+    // Custom anchors are attached to the group for layout resolution
     let group = GroupDecl {
         name: Some(Spanned::new(Identifier::new(instance_name), span.clone())),
         children: expanded,
         modifiers: vec![],
+        anchors: prefixed_anchors,
     };
     Ok(vec![Spanned::new(Statement::Group(group), span.clone())])
 }
@@ -625,6 +636,27 @@ fn substitute_modifiers(
         .collect()
 }
 
+/// Prefix element references in an anchor declaration (Feature 009)
+fn prefix_anchor_decl(anchor: &AnchorDecl, prefix: &str) -> AnchorDecl {
+    let prefixed_position = match &anchor.position {
+        AnchorPosition::PropertyRef(prop_ref) => {
+            AnchorPosition::PropertyRef(prefix_property_ref(prop_ref, prefix))
+        }
+        AnchorPosition::PropertyRefWithOffset { prop_ref, offset } => {
+            AnchorPosition::PropertyRefWithOffset {
+                prop_ref: prefix_property_ref(prop_ref, prefix),
+                offset: *offset,
+            }
+        }
+    };
+
+    AnchorDecl {
+        name: anchor.name.clone(),
+        position: prefixed_position,
+        direction: anchor.direction.clone(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -716,5 +748,84 @@ mod tests {
         let result = resolve_templates(doc, &mut registry);
 
         assert!(matches!(result, Err(TemplateError::NotFound { .. })));
+    }
+
+    // Feature 009: Template anchor tests (T023)
+
+    #[test]
+    fn test_template_with_anchors_resolves_to_group() {
+        // When a template has custom anchors, it should always expand to a group
+        // (even with a single element) so the anchors can be attached
+        let source = r#"
+            template "server" {
+                rect body [width: 100, height: 60]
+                anchor input [position: body.left, direction: left]
+                anchor output [position: body.right, direction: right]
+            }
+            server myserver
+        "#;
+
+        let doc = parse(source).expect("Should parse");
+        let mut registry = TemplateRegistry::new();
+        let resolved = resolve_templates(doc, &mut registry).expect("Should resolve");
+
+        assert_eq!(resolved.statements.len(), 1);
+        match &resolved.statements[0].node {
+            Statement::Group(g) => {
+                assert_eq!(g.name.as_ref().unwrap().node.as_str(), "myserver");
+                // Should have one child (the body rect)
+                assert_eq!(g.children.len(), 1);
+                // Should have 2 custom anchors
+                assert_eq!(g.anchors.len(), 2);
+                // Check anchor names and that element refs are prefixed
+                let anchor_names: Vec<_> = g.anchors.iter().map(|a| a.name.node.as_str()).collect();
+                assert!(anchor_names.contains(&"input"));
+                assert!(anchor_names.contains(&"output"));
+            }
+            other => panic!("Expected Group with anchors, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_template_anchors_are_prefixed() {
+        // Verify that element references in anchors are prefixed with instance name
+        let source = r#"
+            template "box" {
+                rect content [width: 80]
+                anchor top_port [position: content.top]
+            }
+            box mybox
+        "#;
+
+        let doc = parse(source).expect("Should parse");
+        let mut registry = TemplateRegistry::new();
+        let resolved = resolve_templates(doc, &mut registry).expect("Should resolve");
+
+        match &resolved.statements[0].node {
+            Statement::Group(g) => {
+                let anchor = &g.anchors[0];
+                // The anchor position should reference the prefixed element name
+                match &anchor.position {
+                    AnchorPosition::PropertyRef(pr) => {
+                        let element_name = pr.element.node.segments[0].node.as_str();
+                        // The element reference should be prefixed with the instance name
+                        assert!(
+                            element_name.starts_with("mybox_"),
+                            "Element ref should be prefixed, got: {}",
+                            element_name
+                        );
+                    }
+                    AnchorPosition::PropertyRefWithOffset { prop_ref, .. } => {
+                        let element_name = prop_ref.element.node.segments[0].node.as_str();
+                        assert!(
+                            element_name.starts_with("mybox_"),
+                            "Element ref should be prefixed, got: {}",
+                            element_name
+                        );
+                    }
+                }
+            }
+            other => panic!("Expected Group, got {:?}", other),
+        }
     }
 }
