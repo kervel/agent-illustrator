@@ -1332,9 +1332,12 @@ pub fn resolve_constrain_statements(
     // Collect constraints from the document
     let mut collector = ConstraintCollector::new(config.clone());
 
-    // Only collect user constraints (constrain statements), not intrinsics or layout
-    // since those are handled by the procedural layout engine
+    // Collect user constraints (constrain statements)
     collect_constrain_statements(&doc.statements, &mut collector);
+
+    // Also collect x/y modifiers from shapes as position constraints
+    // These override row/col layout because they become REQUIRED constraints
+    collect_position_constraints_from_shapes(&doc.statements, &mut collector);
 
     if collector.constraints.is_empty() {
         return Ok(());
@@ -1405,6 +1408,66 @@ fn collect_constrain_statements(
             }
             Statement::Group(g) => {
                 collect_constrain_statements(&g.children, collector);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Collect x/y modifiers from shapes and convert them to position constraints
+///
+/// This allows `rect box [x: 100, y: 50]` to override row/col layout positions.
+/// The constraints are REQUIRED strength, so they take precedence over
+/// the STRONG suggestions from the procedural layout engine.
+fn collect_position_constraints_from_shapes(
+    stmts: &[Spanned<Statement>],
+    collector: &mut super::collector::ConstraintCollector,
+) {
+    use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutVariable};
+    use crate::parser::ast::{StyleKey, StyleValue};
+
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Shape(s) => {
+                if let Some(name) = &s.name {
+                    let id = &name.node.0;
+
+                    // Check for x modifier
+                    for modifier in &s.modifiers {
+                        if matches!(modifier.node.key.node, StyleKey::X) {
+                            if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                                collector.constraints.push(LayoutConstraint::Fixed {
+                                    variable: LayoutVariable::x(id),
+                                    value: *value,
+                                    source: ConstraintSource {
+                                        span: modifier.span.clone(),
+                                        description: format!("{}.x = {}", id, value),
+                                        origin: ConstraintOrigin::UserDefined,
+                                    },
+                                });
+                            }
+                        }
+                        if matches!(modifier.node.key.node, StyleKey::Y) {
+                            if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                                collector.constraints.push(LayoutConstraint::Fixed {
+                                    variable: LayoutVariable::y(id),
+                                    value: *value,
+                                    source: ConstraintSource {
+                                        span: modifier.span.clone(),
+                                        description: format!("{}.y = {}", id, value),
+                                        origin: ConstraintOrigin::UserDefined,
+                                    },
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            Statement::Layout(l) => {
+                collect_position_constraints_from_shapes(&l.children, collector);
+            }
+            Statement::Group(g) => {
+                collect_position_constraints_from_shapes(&g.children, collector);
             }
             _ => {}
         }
