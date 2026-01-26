@@ -266,38 +266,91 @@ pub fn route_connection_with_anchors(
         .map(|a| a.position)
         .unwrap_or_else(|| boundary_point_toward(to_bounds, from_center));
 
-    // For curved routing, use quadratic Bezier (Feature 008)
+    // For curved routing, use cubic Bezier
     if mode == RoutingMode::Curved {
+        let dx = end.x - start.x;
+        let dy = end.y - start.y;
+        let distance = (dx * dx + dy * dy).sqrt();
 
-        if via_points.is_empty() {
-            // No via points - auto-generate control point
-            let control = compute_curve_control_point(start, end);
-            return vec![start, control, end];
-        } else if via_points.len() == 1 {
-            // Single via point - use as control point
-            return vec![start, via_points[0], end];
+        // Determine control point distance (the "bulge" of the curve)
+        let control_distance = if !via_points.is_empty() {
+            // Use the first via point to determine the bulge amount
+            let via = &via_points[0];
+            let mid_x = (start.x + end.x) / 2.0;
+            let mid_y = (start.y + end.y) / 2.0;
+            let via_dx = via.x - mid_x;
+            let via_dy = via.y - mid_y;
+            (via_dx * via_dx + via_dy * via_dy).sqrt() * 1.5
         } else {
-            // Multiple via points - create chained curve segments
-            // For n via points, we create path: start, via1, junction1, via2, junction2, ..., end
-            // The renderer will interpret this as: Q via1 junction1, T junction2, T junction3, ..., T end
-            let mut path = vec![start];
+            distance * 0.4
+        };
 
-            // Calculate junction points between via points
-            // For smooth chaining, junctions are at midpoints between consecutive via points
+        // Determine control point directions
+        let (from_dir, to_dir) = if let (Some(from_anch), Some(to_anch)) = (from_anchor, to_anchor)
+        {
+            // Use anchor directions for perpendicular entry/exit
+            (from_anch.direction.to_vector(), to_anch.direction.to_vector())
+        } else {
+            // Auto-compute directions perpendicular to the line
+            let perp = if distance > 0.001 {
+                Point::new(-dy / distance, dx / distance)
+            } else {
+                Point::new(0.0, 1.0)
+            };
+            // Both control points on the same side (creates an arc)
+            (perp, perp)
+        };
+
+        // Control point 1: from start in the from direction
+        let control1 = Point::new(
+            start.x + from_dir.x * control_distance,
+            start.y + from_dir.y * control_distance,
+        );
+
+        // Control point 2: from end in the to direction
+        let control2 = Point::new(
+            end.x + to_dir.x * control_distance,
+            end.y + to_dir.y * control_distance,
+        );
+
+        // For multiple via points, create chained segments
+        if via_points.len() > 1 {
+            // Build path: start, ctrl1, ctrl2, via1, ctrl, via2, ..., ctrl, end
+            let mut path = vec![start, control1];
+
+            // Add via points with control points for smooth continuation
             for i in 0..via_points.len() {
-                path.push(via_points[i]);
-                if i < via_points.len() - 1 {
-                    // Add junction point (midpoint to next via)
-                    let junction = Point::new(
-                        (via_points[i].x + via_points[i + 1].x) / 2.0,
-                        (via_points[i].y + via_points[i + 1].y) / 2.0,
+                let via = via_points[i];
+                if i == 0 {
+                    // First via point - control2 leads into it
+                    path.push(control2);
+                    path.push(via);
+                } else {
+                    // Subsequent via points - compute smooth control point
+                    let prev = via_points[i - 1];
+                    let ctrl = Point::new(
+                        via.x - (via.x - prev.x) * 0.3,
+                        via.y - (via.y - prev.y) * 0.3,
                     );
-                    path.push(junction);
+                    path.push(ctrl);
+                    path.push(via);
                 }
             }
+
+            // Add final segment to end
+            let last_via = via_points[via_points.len() - 1];
+            let final_ctrl = Point::new(
+                end.x + to_dir.x * control_distance * 0.5,
+                end.y + to_dir.y * control_distance * 0.5,
+            );
+            path.push(final_ctrl);
             path.push(end);
+
             return path;
         }
+
+        // Single or no via point: simple cubic Bezier
+        return vec![start, control1, control2, end];
     }
 
     // For direct routing, use the pre-calculated start/end positions
@@ -1184,8 +1237,8 @@ mod tests {
 
         let path = route_connection(&from_bounds, &to_bounds, RoutingMode::Curved, &[]);
 
-        // Curved routing returns exactly 3 points: start, control, end
-        assert_eq!(path.len(), 3, "Curved routing should return 3 points");
+        // Curved routing returns 4 points: start, control1, control2, end (cubic Bezier)
+        assert_eq!(path.len(), 4, "Curved routing should return 4 points");
 
         // Start point should be on right edge of from_bounds
         assert!(
@@ -1195,19 +1248,15 @@ mod tests {
 
         // End point should be on left edge of to_bounds
         assert!(
-            (path[2].x - 150.0).abs() < 1.0,
+            (path[3].x - 150.0).abs() < 1.0,
             "End x should be at left edge of to_bounds"
         );
 
-        // Control point should be between start and end, offset perpendicular
+        // Control points should create a curve
+        // For horizontal connection without anchors, control points are offset perpendicular
         assert!(
-            path[1].x > path[0].x && path[1].x < path[2].x,
-            "Control x should be between start and end"
-        );
-        // For horizontal connection, control y should be offset (perpendicular)
-        assert!(
-            (path[1].y - 25.0).abs() > 1.0,
-            "Control y should be offset from the line"
+            (path[1].y - 25.0).abs() > 1.0 || (path[2].y - 25.0).abs() > 1.0,
+            "At least one control point y should be offset from the center line"
         );
     }
 

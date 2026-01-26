@@ -360,27 +360,27 @@ impl SvgBuilder {
             .collect::<Vec<_>>()
             .join(" ");
 
-        // Generate path data based on routing mode (Feature 008)
+        // Generate path data based on routing mode
         let d = match routing_mode {
-            RoutingMode::Curved if path.len() == 3 => {
-                // Single via point: M start Q control end
-                format!(
-                    "M{} {} Q{} {} {} {}",
-                    path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y
-                )
-            }
-            RoutingMode::Curved if path.len() > 3 => {
-                // Multi-via chained curves: M start Q via1 junction1 T junction2 T ... T end
-                // Path format: [start, via1, junction1, via2, junction2, ..., end]
-                let mut d = format!("M{} {}", path[0].x, path[0].y);
-                // First segment is Q (quadratic Bezier)
-                d.push_str(&format!(
-                    " Q{} {} {} {}",
-                    path[1].x, path[1].y, path[2].x, path[2].y
-                ));
-                // Subsequent points use T (smooth quadratic continuation)
-                for point in &path[3..] {
-                    d.push_str(&format!(" T{} {}", point.x, point.y));
+            RoutingMode::Curved if path.len() >= 4 => {
+                // Cubic Bezier: M start C control1 control2 end [S control2 end]...
+                let mut d = format!(
+                    "M{} {} C{} {} {} {} {} {}",
+                    path[0].x, path[0].y,
+                    path[1].x, path[1].y,
+                    path[2].x, path[2].y,
+                    path[3].x, path[3].y
+                );
+                // Additional segments use S (smooth cubic continuation)
+                // Each additional segment needs 2 points: control2 and endpoint
+                let remaining = &path[4..];
+                for chunk in remaining.chunks(2) {
+                    if chunk.len() == 2 {
+                        d.push_str(&format!(" S{} {} {} {}", chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y));
+                    } else if chunk.len() == 1 {
+                        // Odd point at end - just draw line to it
+                        d.push_str(&format!(" L{} {}", chunk[0].x, chunk[0].y));
+                    }
                 }
                 d
             }

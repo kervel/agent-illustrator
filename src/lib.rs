@@ -326,7 +326,7 @@ mod tests {
 
     #[test]
     fn test_render_connection_curved_routing() {
-        // Feature 008: Curved routing should produce a quadratic Bezier (M ... Q ...)
+        // Curved routing should produce a cubic Bezier (M ... C ...)
         let svg = render(
             r#"
             row {
@@ -340,10 +340,10 @@ mod tests {
 
         assert!(svg.contains("ai-connection"));
         assert!(svg.contains("<path"));
-        // Curved routing uses SVG Q command for quadratic Bezier
+        // Curved routing uses SVG C command for cubic Bezier
         assert!(
-            svg.contains(" Q") || svg.contains("Q "),
-            "Curved routing should use quadratic Bezier (Q command)"
+            svg.contains(" C") || svg.contains("C "),
+            "Curved routing should use cubic Bezier (C command)"
         );
     }
 
@@ -413,7 +413,7 @@ mod tests {
 
     #[test]
     fn test_render_curved_connection_with_via() {
-        // Feature 008: Curved connection with external via point
+        // Curved connection with external via point (determines curve bulge)
         let svg = render(
             r#"
             rect a [x: 0, y: 0]
@@ -425,16 +425,16 @@ mod tests {
         .unwrap();
         assert!(svg.contains("ai-connection"));
         assert!(svg.contains("<path"));
-        // Should use Q command with ctrl's position as control point
+        // Should use C command for cubic Bezier
         assert!(
-            svg.contains(" Q") || svg.contains("Q "),
-            "Via-routed curve should use quadratic Bezier (Q command)"
+            svg.contains(" C") || svg.contains("C "),
+            "Via-routed curve should use cubic Bezier (C command)"
         );
     }
 
     #[test]
     fn test_render_curved_connection_multi_via() {
-        // Feature 008: Multi-via for S-curves
+        // Multi-via for S-curves
         let svg = render(
             r#"
             rect a [x: 0, y: 0]
@@ -447,14 +447,14 @@ mod tests {
         .unwrap();
         assert!(svg.contains("ai-connection"));
         assert!(svg.contains("<path"));
-        // Multi-via should produce Q followed by T commands
+        // Multi-via should produce C followed by S commands for smooth chaining
         assert!(
-            svg.contains(" Q") || svg.contains("Q "),
-            "Multi-via should start with Q command"
+            svg.contains(" C") || svg.contains("C "),
+            "Multi-via should start with C command"
         );
         assert!(
-            svg.contains(" T") || svg.contains("T "),
-            "Multi-via should chain with T commands"
+            svg.contains(" S") || svg.contains("S "),
+            "Multi-via should chain with S commands"
         );
     }
 }
