@@ -61,8 +61,8 @@ Properties: left, right, top, bottom, center_x, center_y, width, height
 
 TEMPLATES
 ---------
-template mytemplate { ... }          Define reusable group
-mytemplate instance_name [params]    Instantiate template
+template "mytemplate" { ... }        Define reusable group (quoted name)
+mytemplate instance_name [params]    Instantiate template (unquoted)
 
 RESERVED IDENTIFIERS
 --------------------
