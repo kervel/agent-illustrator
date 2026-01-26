@@ -193,13 +193,11 @@ Path commands:
 
 ---
 
-## Examples
+## More Information
 
-See `examples/` folder for non-trivial examples:
-- `feedback-loops.ail` - Two interconnected iteration cycles with cross-connections
-- `person.ail` - Template with anchors, via points, and S-curved connections
-- `railway-topology.ail` - Complex multi-level diagram with constraints
-- `railway-topology-templated.ail` - Same diagram using templates
+Run `agent-illustrator --examples` for annotated examples including:
+- Nested layouts with cross-connections
+- Templates with anchors, via points, and S-curved connections
+- Constraints for precise positioning
 
-Run `agent-illustrator --examples` for more annotated examples.
 Run `agent-illustrator --grammar` for the full syntax reference.
