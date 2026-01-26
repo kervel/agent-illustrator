@@ -220,51 +220,102 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
     ResolvedPath { segments }
 }
 
-/// Compute the minimum x and y coordinates from all path vertices
+/// Compute the minimum x and y coordinates from all path geometry
 /// Returns (min_x, min_y) which can be used to normalize the path
 ///
-/// Only returns positive offsets - if the path uses negative coordinates intentionally,
-/// those are preserved (returns 0.0 for that axis). This ensures that paths with a gap
-/// at the origin (like starting at y: 6) are normalized, but paths with intentional
-/// negative positioning (like a control point at y: -30) are not shifted.
+/// This function uses a nuanced approach:
+/// - Tracks vertex minimums separately from arc geometry minimums
+/// - If arc geometry extends beyond vertices (e.g., arc bulge), normalizes to include it
+/// - If vertices have explicit negative coordinates, preserves them (no normalization)
+/// - If vertices have positive offsets (like y: 6), normalizes to bring content to origin
 fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
-    let mut min_x = f64::INFINITY;
-    let mut min_y = f64::INFINITY;
+    let mut vertex_min_x = f64::INFINITY;
+    let mut vertex_min_y = f64::INFINITY;
+    let mut geometry_min_x = f64::INFINITY;
+    let mut geometry_min_y = f64::INFINITY;
     let mut has_coords = false;
+
+    // Track current position for arc calculations
+    let mut current_x = 0.0_f64;
+    let mut current_y = 0.0_f64;
 
     for cmd in &decl.body.commands {
         match &cmd.node {
             PathCommand::Vertex(v) => {
-                if let Some(pos) = &v.position {
-                    min_x = min_x.min(pos.x.unwrap_or(0.0));
-                    min_y = min_y.min(pos.y.unwrap_or(0.0));
-                    has_coords = true;
+                let (x, y) = if let Some(pos) = &v.position {
+                    (pos.x.unwrap_or(0.0), pos.y.unwrap_or(0.0))
                 } else {
-                    // Vertex with no position defaults to (0, 0)
-                    min_x = min_x.min(0.0);
-                    min_y = min_y.min(0.0);
-                    has_coords = true;
-                }
+                    (0.0, 0.0)
+                };
+                vertex_min_x = vertex_min_x.min(x);
+                vertex_min_y = vertex_min_y.min(y);
+                geometry_min_x = geometry_min_x.min(x);
+                geometry_min_y = geometry_min_y.min(y);
+                has_coords = true;
+                current_x = x;
+                current_y = y;
             }
             PathCommand::LineTo(lt) => {
                 if let Some(pos) = &lt.position {
-                    min_x = min_x.min(pos.x.unwrap_or(0.0));
-                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    let x = pos.x.unwrap_or(0.0);
+                    let y = pos.y.unwrap_or(0.0);
+                    vertex_min_x = vertex_min_x.min(x);
+                    vertex_min_y = vertex_min_y.min(y);
+                    geometry_min_x = geometry_min_x.min(x);
+                    geometry_min_y = geometry_min_y.min(y);
                     has_coords = true;
+                    current_x = x;
+                    current_y = y;
                 }
             }
             PathCommand::ArcTo(at) => {
                 if let Some(pos) = &at.position {
-                    min_x = min_x.min(pos.x.unwrap_or(0.0));
-                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    let end_x = pos.x.unwrap_or(0.0);
+                    let end_y = pos.y.unwrap_or(0.0);
+
+                    // Include endpoint in vertex min
+                    vertex_min_x = vertex_min_x.min(end_x);
+                    vertex_min_y = vertex_min_y.min(end_y);
+                    geometry_min_x = geometry_min_x.min(end_x);
+                    geometry_min_y = geometry_min_y.min(end_y);
+
+                    // Include arc bulge point in geometry min only
+                    let (apex_x, apex_y) =
+                        compute_arc_apex(current_x, current_y, end_x, end_y, &at.params);
+                    geometry_min_x = geometry_min_x.min(apex_x);
+                    geometry_min_y = geometry_min_y.min(apex_y);
+
                     has_coords = true;
+                    current_x = end_x;
+                    current_y = end_y;
                 }
             }
             PathCommand::CurveTo(ct) => {
                 if let Some(pos) = &ct.position {
-                    min_x = min_x.min(pos.x.unwrap_or(0.0));
-                    min_y = min_y.min(pos.y.unwrap_or(0.0));
+                    let x = pos.x.unwrap_or(0.0);
+                    let y = pos.y.unwrap_or(0.0);
+                    vertex_min_x = vertex_min_x.min(x);
+                    vertex_min_y = vertex_min_y.min(y);
+                    geometry_min_x = geometry_min_x.min(x);
+                    geometry_min_y = geometry_min_y.min(y);
+
+                    // Include approximate control point for curves (geometry only)
+                    let mid_x = (current_x + x) / 2.0;
+                    let mid_y = (current_y + y) / 2.0;
+                    let dx = x - current_x;
+                    let dy = y - current_y;
+                    let chord_len = (dx * dx + dy * dy).sqrt();
+                    if chord_len > 0.001 {
+                        let offset = chord_len * 0.25;
+                        let perp_x = -dy / chord_len;
+                        let perp_y = dx / chord_len;
+                        geometry_min_x = geometry_min_x.min(mid_x + perp_x * offset);
+                        geometry_min_y = geometry_min_y.min(mid_y + perp_y * offset);
+                    }
+
                     has_coords = true;
+                    current_x = x;
+                    current_y = y;
                 }
             }
             PathCommand::Close | PathCommand::CloseArc(_) => {}
@@ -275,11 +326,31 @@ fn compute_path_min_coords(decl: &PathDecl) -> (f64, f64) {
         return (0.0, 0.0);
     }
 
-    // Only normalize positive offsets - preserve negative coordinates
-    // This ensures paths starting at y: 6 are shifted to start at y: 0,
-    // but paths with intentional negative coords (like y: -30) are unchanged
-    let offset_x = if min_x > 0.0 { min_x } else { 0.0 };
-    let offset_y = if min_y > 0.0 { min_y } else { 0.0 };
+    // Determine normalization offsets:
+    // - If arc geometry extends beyond vertices (geometry_min < vertex_min), use geometry_min
+    // - If vertices have negative coordinates, preserve them (return 0)
+    // - If vertices have positive offset, normalize to bring content to origin
+    let offset_x = if geometry_min_x < vertex_min_x {
+        // Arc extends beyond vertices - normalize to include arc
+        geometry_min_x
+    } else if vertex_min_x < 0.0 {
+        // Intentional negative coordinate - preserve
+        0.0
+    } else {
+        // Positive offset - normalize
+        vertex_min_x
+    };
+
+    let offset_y = if geometry_min_y < vertex_min_y {
+        // Arc extends beyond vertices - normalize to include arc
+        geometry_min_y
+    } else if vertex_min_y < 0.0 {
+        // Intentional negative coordinate - preserve
+        0.0
+    } else {
+        // Positive offset - normalize
+        vertex_min_y
+    };
 
     (offset_x, offset_y)
 }
@@ -422,6 +493,64 @@ fn compute_default_control_point(start: Point, end: Point) -> Point {
     )
 }
 
+/// Compute the apex point of an arc (where it bulges furthest from the chord)
+///
+/// This is used to include arc geometry in min-coordinate calculations for path normalization.
+fn compute_arc_apex(
+    start_x: f64,
+    start_y: f64,
+    end_x: f64,
+    end_y: f64,
+    params: &ArcParams,
+) -> (f64, f64) {
+    // Chord vector and length
+    let dx = end_x - start_x;
+    let dy = end_y - start_y;
+    let chord_len = (dx * dx + dy * dy).sqrt();
+
+    if chord_len < 0.001 {
+        // Degenerate: start and end are the same
+        return (start_x, start_y);
+    }
+
+    // Midpoint of chord
+    let mid_x = (start_x + end_x) / 2.0;
+    let mid_y = (start_y + end_y) / 2.0;
+
+    // Perpendicular unit vector (counterclockwise rotation of chord direction)
+    let perp_x = -dy / chord_len;
+    let perp_y = dx / chord_len;
+
+    // Compute sagitta (bulge height) based on arc parameters
+    let (sagitta, clockwise) = match params {
+        ArcParams::Radius { radius, sweep } => {
+            let r = *radius;
+            if chord_len > 2.0 * r {
+                // Radius too small - use semicircle
+                (chord_len / 2.0, matches!(sweep, SweepDirection::Clockwise))
+            } else {
+                // sagitta = r - sqrt(r² - (chord/2)²)
+                let half_chord = chord_len / 2.0;
+                let h = r - (r * r - half_chord * half_chord).sqrt();
+                (h, matches!(sweep, SweepDirection::Clockwise))
+            }
+        }
+        ArcParams::Bulge(bulge) => {
+            // Bulge = tan(θ/4), sagitta = |bulge| * chord / 2
+            let h = bulge.abs() * chord_len / 2.0;
+            // Positive bulge = clockwise in our coordinate system
+            (h, *bulge > 0.0)
+        }
+    };
+
+    // Direction of bulge: clockwise means to the "right" of chord direction
+    // In standard coordinates, "right" of (dx, dy) is (dy, -dx)
+    // Our perpendicular is (-dy, dx) which is "left", so negate for clockwise
+    let sign = if clockwise { -1.0 } else { 1.0 };
+
+    (mid_x + sign * perp_x * sagitta, mid_y + sign * perp_y * sagitta)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -541,9 +670,13 @@ mod tests {
         let resolved = resolve_path(&decl, origin);
         let d = resolved.to_svg_d();
 
-        assert!(d.starts_with("M0.00 0.00"), "Should start at origin");
+        // With bulge 0.5 and chord 50, the arc bulges upward by 12.5 pixels.
+        // Arc apex is at y = -12.5 (above vertices at y = 0).
+        // Path is normalized so visual top (arc apex) is at origin.y = 0.
+        // This shifts vertices from y=0 to y=12.5.
+        assert!(d.starts_with("M0.00 12.50"), "Should start at normalized position (arc bulges above)");
         assert!(d.contains(" A"), "Should contain arc command");
-        assert!(d.contains("50.00 0.00"), "Should end at (50, 0)");
+        assert!(d.contains("50.00 12.50"), "Should end at (50, 12.5) after normalization");
     }
 
     #[test]

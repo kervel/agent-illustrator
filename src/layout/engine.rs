@@ -286,11 +286,11 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
     (final_width, final_height)
 }
 
-/// Compute bounding box dimensions from path vertices
+/// Compute bounding box dimensions from path geometry
 ///
-/// Computes the actual content dimensions based on the path's vertices,
-/// not assuming the path starts at (0, 0). The renderer will normalize
-/// the path coordinates to match these bounds.
+/// Computes the actual content dimensions based on the path's vertices AND
+/// arc/curve extents. Arcs can bulge beyond their endpoints, so we compute
+/// the arc's geometric bounds, not just the endpoint positions.
 fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
     use crate::parser::ast::PathCommand;
 
@@ -299,6 +299,10 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
     let mut max_x = f64::NEG_INFINITY;
     let mut max_y = f64::NEG_INFINITY;
     let mut has_points = false;
+
+    // Track current position for arc calculations
+    let mut current_x = 0.0_f64;
+    let mut current_y = 0.0_f64;
 
     let mut update_bounds = |x: f64, y: f64| {
         min_x = min_x.min(x);
@@ -311,27 +315,39 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
     for cmd in &path.body.commands {
         match &cmd.node {
             PathCommand::Vertex(v) => {
-                if let Some(pos) = &v.position {
-                    let x = pos.x.unwrap_or(0.0);
-                    let y = pos.y.unwrap_or(0.0);
-                    update_bounds(x, y);
+                let (x, y) = if let Some(pos) = &v.position {
+                    (pos.x.unwrap_or(0.0), pos.y.unwrap_or(0.0))
                 } else {
-                    // Vertex with no position defaults to (0, 0)
-                    update_bounds(0.0, 0.0);
-                }
+                    (0.0, 0.0)
+                };
+                update_bounds(x, y);
+                current_x = x;
+                current_y = y;
             }
             PathCommand::LineTo(lt) => {
                 if let Some(pos) = &lt.position {
                     let x = pos.x.unwrap_or(0.0);
                     let y = pos.y.unwrap_or(0.0);
                     update_bounds(x, y);
+                    current_x = x;
+                    current_y = y;
                 }
             }
             PathCommand::ArcTo(at) => {
                 if let Some(pos) = &at.position {
-                    let x = pos.x.unwrap_or(0.0);
-                    let y = pos.y.unwrap_or(0.0);
-                    update_bounds(x, y);
+                    let end_x = pos.x.unwrap_or(0.0);
+                    let end_y = pos.y.unwrap_or(0.0);
+
+                    // Include endpoint
+                    update_bounds(end_x, end_y);
+
+                    // Compute arc bulge and include it in bounds
+                    let (bulge_x, bulge_y) =
+                        compute_arc_bulge_point(current_x, current_y, end_x, end_y, &at.params);
+                    update_bounds(bulge_x, bulge_y);
+
+                    current_x = end_x;
+                    current_y = end_y;
                 }
             }
             PathCommand::CurveTo(ct) => {
@@ -339,6 +355,24 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
                     let x = pos.x.unwrap_or(0.0);
                     let y = pos.y.unwrap_or(0.0);
                     update_bounds(x, y);
+
+                    // For curves, also include an approximate control point position
+                    // (25% perpendicular offset from chord midpoint)
+                    let mid_x = (current_x + x) / 2.0;
+                    let mid_y = (current_y + y) / 2.0;
+                    let dx = x - current_x;
+                    let dy = y - current_y;
+                    let chord_len = (dx * dx + dy * dy).sqrt();
+                    if chord_len > 0.001 {
+                        let offset = chord_len * 0.25;
+                        // Perpendicular direction (counterclockwise rotation)
+                        let perp_x = -dy / chord_len;
+                        let perp_y = dx / chord_len;
+                        update_bounds(mid_x + perp_x * offset, mid_y + perp_y * offset);
+                    }
+
+                    current_x = x;
+                    current_y = y;
                 }
             }
             PathCommand::Close | PathCommand::CloseArc(_) => {}
@@ -353,6 +387,64 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
     } else {
         None
     }
+}
+
+/// Compute the apex point of an arc (where it bulges furthest from the chord)
+fn compute_arc_bulge_point(
+    start_x: f64,
+    start_y: f64,
+    end_x: f64,
+    end_y: f64,
+    params: &crate::parser::ast::ArcParams,
+) -> (f64, f64) {
+    use crate::parser::ast::{ArcParams, SweepDirection};
+
+    // Chord vector and length
+    let dx = end_x - start_x;
+    let dy = end_y - start_y;
+    let chord_len = (dx * dx + dy * dy).sqrt();
+
+    if chord_len < 0.001 {
+        // Degenerate: start and end are the same
+        return (start_x, start_y);
+    }
+
+    // Midpoint of chord
+    let mid_x = (start_x + end_x) / 2.0;
+    let mid_y = (start_y + end_y) / 2.0;
+
+    // Perpendicular unit vector (counterclockwise rotation of chord direction)
+    let perp_x = -dy / chord_len;
+    let perp_y = dx / chord_len;
+
+    // Compute sagitta (bulge height) based on arc parameters
+    let (sagitta, clockwise) = match params {
+        ArcParams::Radius { radius, sweep } => {
+            let r = *radius;
+            if chord_len > 2.0 * r {
+                // Radius too small - use semicircle
+                (chord_len / 2.0, matches!(sweep, SweepDirection::Clockwise))
+            } else {
+                // sagitta = r - sqrt(r² - (chord/2)²)
+                let half_chord = chord_len / 2.0;
+                let h = r - (r * r - half_chord * half_chord).sqrt();
+                (h, matches!(sweep, SweepDirection::Clockwise))
+            }
+        }
+        ArcParams::Bulge(bulge) => {
+            // Bulge = tan(θ/4), sagitta = |bulge| * chord / 2
+            let h = bulge.abs() * chord_len / 2.0;
+            // Positive bulge = clockwise in our coordinate system
+            (h, *bulge > 0.0)
+        }
+    };
+
+    // Direction of bulge: clockwise means to the "right" of chord direction
+    // In standard coordinates, "right" of (dx, dy) is (dy, -dx)
+    // Our perpendicular is (-dy, dx) which is "left", so negate for clockwise
+    let sign = if clockwise { -1.0 } else { 1.0 };
+
+    (mid_x + sign * perp_x * sagitta, mid_y + sign * perp_y * sagitta)
 }
 
 /// Extract the size modifier value from modifiers
