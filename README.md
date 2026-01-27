@@ -1,6 +1,18 @@
 # Agent Illustrator
 
 A declarative illustration language for AI agents. Describe *what* to draw, not *how* to render it.
+This was built as an experiment to see how far i could get using specswarm. I did:
+
+* No manual coding, no code reviews, only input via specswarm.
+* Use specs to build all features
+* No input on what crates could be used
+
+Results:
+
+* It works. Claude could sometimes spend more than 1 hour on a spec without any user intervention. This is a big difference compared to just using an agent.
+* Claude created 228 tests, but they don't catch real regressions (which were frequent), so it didn't actually create useful tests.
+* The grammar / parser it wrote was very naive (it has a lot of duplication), yet seems to be ergonomic.
+* The concept seems to have some merit (easier to create illustrations using agents)
 
 ## The Problem
 
