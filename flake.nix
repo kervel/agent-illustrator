@@ -44,6 +44,7 @@
 
           # autoPatchelfHook fixes dynamic linker paths for prebuilt binaries on NixOS
           nativeBuildInputs = pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.autoPatchelfHook ];
+          buildInputs = pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.stdenv.cc.cc.lib ];
 
           installPhase = ''
             mkdir -p $out/bin
