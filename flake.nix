@@ -20,14 +20,13 @@
           "aarch64-darwin" = "agent-illustrator-macos-aarch64";
         }.${system} or (throw "Unsupported system: ${system}");
 
-        # Hashes will need to be updated after first release
-        # Use: nix-prefetch-url <url>
+        # Hashes for v0.1.0 release binaries
         artifactHash = {
-          "x86_64-linux" = pkgs.lib.fakeHash;
-          "aarch64-linux" = pkgs.lib.fakeHash;
-          "x86_64-darwin" = pkgs.lib.fakeHash;
-          "aarch64-darwin" = pkgs.lib.fakeHash;
-        }.${system} or pkgs.lib.fakeHash;
+          "x86_64-linux" = "sha256-oJRGUjMkpx4O19iDmF+rRa/AdGuZj/7kgqBUi+oJU4I=";
+          "aarch64-linux" = "sha256-/X+D0eSGuuO6RtYN8BPaAiBSBsy97w471Q0dcy1bupI=";
+          "x86_64-darwin" = "sha256-NUdET+r1BqbJVY+H1SnyXxD0+wK1sgP8Hvjdcbsu3L8=";
+          "aarch64-darwin" = "sha256-aipTR/VZwHaovIjT0oAo+1ZWOf8d9pyj0RehxKTOslM=";
+        }.${system} or (throw "Unsupported system: ${system}");
 
       in
       {
