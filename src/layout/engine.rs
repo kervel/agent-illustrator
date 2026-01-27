@@ -1516,11 +1516,9 @@ pub fn resolve_constrain_statements(
         let mut external_solver = ConstraintSolver::new();
 
         // Add positions for all elements referenced in external constraints
-        // For TARGET elements: add Suggested positions (solver can move them)
-        // For non-target elements: add Fixed positions (solver uses them but can't change them)
+        // For each property: if it's targeted → SUGGESTED (can move), else → FIXED (reference)
         for element_name in &referenced_elements {
-            let is_target = target_vars.iter().any(|(id, _)| id == element_name);
-            add_element_by_name_with_strength(&mut external_solver, result, element_name, is_target, config.trace)?;
+            add_element_by_name_with_per_property_strength(&mut external_solver, result, element_name, &target_vars, config.trace)?;
         }
 
         for constraint in external_constraints {
@@ -2229,24 +2227,38 @@ fn collect_position_constraints_from_shapes(
     }
 }
 
-/// Add position and size for a specific element by name
-/// If is_target is true, adds Suggested positions (can be moved by solver)
-/// If is_target is false, adds Fixed positions (can't be moved - used as reference values)
-fn add_element_by_name_with_strength(
+/// Add position and size for a specific element by name, with per-property targeting
+/// For each axis (X/Y), if any property on that axis is targeted → SUGGESTED (can move)
+/// Otherwise → FIXED (used as reference value)
+fn add_element_by_name_with_per_property_strength(
     solver: &mut super::solver::ConstraintSolver,
     result: &LayoutResult,
     element_name: &str,
-    is_target: bool,
+    target_vars: &std::collections::HashSet<(String, super::solver::LayoutProperty)>,
     trace: bool,
 ) -> Result<(), LayoutError> {
-    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+    use super::solver::{ConstraintSource, LayoutConstraint, LayoutProperty, LayoutVariable};
 
     if let Some(elem) = result.get_element_by_name(element_name) {
+        // Check if X axis is targeted (X, CenterX, Right, or Left all map to X)
+        let x_is_targeted = target_vars.contains(&(element_name.to_string(), LayoutProperty::X))
+            || target_vars.contains(&(element_name.to_string(), LayoutProperty::CenterX))
+            || target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
+
+        // Check if Y axis is targeted (Y, CenterY, Bottom, or Top all map to Y)
+        let y_is_targeted = target_vars.contains(&(element_name.to_string(), LayoutProperty::Y))
+            || target_vars.contains(&(element_name.to_string(), LayoutProperty::CenterY))
+            || target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
+
         if trace {
-            eprintln!("TRACE: adding {} is_target={} at ({}, {})", element_name, is_target, elem.bounds.x, elem.bounds.y);
+            eprintln!(
+                "TRACE: adding {} x_targeted={} y_targeted={} at ({}, {})",
+                element_name, x_is_targeted, y_is_targeted, elem.bounds.x, elem.bounds.y
+            );
         }
-        if is_target {
-            // Target elements: add position as SUGGESTED (solver can move them)
+
+        // Add X position - SUGGESTED if targeted, FIXED if reference only
+        if x_is_targeted {
             solver
                 .add_constraint(LayoutConstraint::Suggested {
                     variable: LayoutVariable::x(element_name),
@@ -2254,6 +2266,18 @@ fn add_element_by_name_with_strength(
                     source: ConstraintSource::layout(0..0, "target element x"),
                 })
                 .map_err(LayoutError::solver_error)?;
+        } else {
+            solver
+                .add_constraint(LayoutConstraint::Fixed {
+                    variable: LayoutVariable::x(element_name),
+                    value: elem.bounds.x,
+                    source: ConstraintSource::intrinsic("reference element x"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        }
+
+        // Add Y position - SUGGESTED if targeted, FIXED if reference only
+        if y_is_targeted {
             solver
                 .add_constraint(LayoutConstraint::Suggested {
                     variable: LayoutVariable::y(element_name),
@@ -2262,14 +2286,6 @@ fn add_element_by_name_with_strength(
                 })
                 .map_err(LayoutError::solver_error)?;
         } else {
-            // Non-target elements: add position as FIXED (can't be moved, used as reference)
-            solver
-                .add_constraint(LayoutConstraint::Fixed {
-                    variable: LayoutVariable::x(element_name),
-                    value: elem.bounds.x,
-                    source: ConstraintSource::intrinsic("reference element x"),
-                })
-                .map_err(LayoutError::solver_error)?;
             solver
                 .add_constraint(LayoutConstraint::Fixed {
                     variable: LayoutVariable::y(element_name),
