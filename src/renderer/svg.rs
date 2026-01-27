@@ -297,7 +297,7 @@ impl SvgBuilder {
         };
 
         self.elements.push(format!(
-            r#"{}<text class="{}label" x="{}" y="{}" text-anchor="{}"{}>{}</text>"#,
+            r#"{}<text class="{}label" x="{}" y="{}" text-anchor="{}" dominant-baseline="middle"{}>{}</text>"#,
             self.indent_str(),
             prefix,
             x,
@@ -878,12 +878,13 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
 
     // Render connection label if present
     if let Some(label) = &conn.label {
-        // Use label's own styles if available (from referenced element), otherwise empty
+        // Use label's own styles if available (from referenced element),
+        // otherwise apply subtle defaults for connector labels
         let label_styles = label
             .styles
             .as_ref()
             .map(format_text_styles)
-            .unwrap_or_default();
+            .unwrap_or_else(|| r#" fill="var(--text-2)" font-size="12""#.to_string());
         builder.add_text(
             &label.text,
             label.position.x,
