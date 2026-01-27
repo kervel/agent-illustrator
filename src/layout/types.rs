@@ -141,6 +141,36 @@ impl AnchorSet {
         set
     }
 
+    /// Create anchors for an element type with the given bounds.
+    /// This determines the appropriate anchor set based on element type:
+    /// - Path shapes get 8 anchors (4 sides + 4 corners)
+    /// - All other shapes, layouts, and groups get 4 anchors (top, bottom, left, right)
+    pub fn for_element_type(element_type: &ElementType, bounds: &BoundingBox) -> Self {
+        match element_type {
+            ElementType::Shape(ShapeType::Path(_)) => Self::path_shape(bounds),
+            _ => Self::simple_shape(bounds),
+        }
+    }
+
+    /// Update the built-in anchors (top, bottom, left, right, and corners for paths)
+    /// to reflect new bounds. Custom anchors are preserved but NOT updated.
+    /// Use this after moving an element to keep anchors in sync with bounds.
+    pub fn update_builtin_from_bounds(&mut self, element_type: &ElementType, bounds: &BoundingBox) {
+        // Always update the 4 cardinal anchors
+        self.insert(Anchor::new("top", bounds.top_center(), AnchorDirection::Up));
+        self.insert(Anchor::new("bottom", bounds.bottom_center(), AnchorDirection::Down));
+        self.insert(Anchor::new("left", bounds.left_center(), AnchorDirection::Left));
+        self.insert(Anchor::new("right", bounds.right_center(), AnchorDirection::Right));
+
+        // For path shapes, also update corner anchors
+        if matches!(element_type, ElementType::Shape(ShapeType::Path(_))) {
+            self.insert(Anchor::new("top_left", bounds.top_left(), AnchorDirection::Angle(225.0)));
+            self.insert(Anchor::new("top_right", bounds.top_right(), AnchorDirection::Angle(315.0)));
+            self.insert(Anchor::new("bottom_left", bounds.bottom_left(), AnchorDirection::Angle(135.0)));
+            self.insert(Anchor::new("bottom_right", bounds.bottom_right(), AnchorDirection::Angle(45.0)));
+        }
+    }
+
     /// Create anchors from a list of custom anchor definitions
     pub fn from_custom(anchors: impl IntoIterator<Item = Anchor>) -> Self {
         let mut set = Self::new();
@@ -1024,5 +1054,90 @@ mod tests {
 
         assert_eq!(resolved.position, anchor.position);
         assert_eq!(resolved.direction, anchor.direction);
+    }
+
+    #[test]
+    fn test_for_element_type_rect() {
+        let bounds = BoundingBox::new(10.0, 20.0, 100.0, 50.0);
+        let element_type = ElementType::Shape(ShapeType::Rectangle);
+        let anchors = AnchorSet::for_element_type(&element_type, &bounds);
+
+        // Simple shapes get 4 anchors
+        assert_eq!(anchors.len(), 4);
+        assert!(anchors.get("top").is_some());
+        assert!(anchors.get("bottom").is_some());
+        assert!(anchors.get("left").is_some());
+        assert!(anchors.get("right").is_some());
+    }
+
+    #[test]
+    fn test_for_element_type_path() {
+        use crate::parser::ast::{PathBody, PathDecl};
+        let bounds = BoundingBox::new(10.0, 20.0, 100.0, 50.0);
+        let element_type = ElementType::Shape(ShapeType::Path(PathDecl {
+            name: None,
+            body: PathBody { commands: vec![] },
+            modifiers: vec![],
+        }));
+        let anchors = AnchorSet::for_element_type(&element_type, &bounds);
+
+        // Path shapes get 8 anchors (4 edges + 4 corners)
+        assert_eq!(anchors.len(), 8);
+        assert!(anchors.get("top_left").is_some());
+        assert!(anchors.get("top_right").is_some());
+        assert!(anchors.get("bottom_left").is_some());
+        assert!(anchors.get("bottom_right").is_some());
+    }
+
+    #[test]
+    fn test_update_builtin_from_bounds() {
+        // Create anchors at initial position
+        let initial_bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let element_type = ElementType::Shape(ShapeType::Rectangle);
+        let mut anchors = AnchorSet::for_element_type(&element_type, &initial_bounds);
+
+        // Verify initial "top" anchor position
+        let top = anchors.get("top").unwrap();
+        assert_eq!(top.position, Point::new(50.0, 0.0));
+
+        // Move element to new position
+        let new_bounds = BoundingBox::new(200.0, 100.0, 100.0, 50.0);
+        anchors.update_builtin_from_bounds(&element_type, &new_bounds);
+
+        // Verify "top" anchor is updated
+        let top = anchors.get("top").unwrap();
+        assert_eq!(top.position, Point::new(250.0, 100.0));
+
+        // Verify other anchors are also updated
+        let bottom = anchors.get("bottom").unwrap();
+        assert_eq!(bottom.position, Point::new(250.0, 150.0));
+
+        let left = anchors.get("left").unwrap();
+        assert_eq!(left.position, Point::new(200.0, 125.0));
+
+        let right = anchors.get("right").unwrap();
+        assert_eq!(right.position, Point::new(300.0, 125.0));
+    }
+
+    #[test]
+    fn test_update_builtin_preserves_custom_anchors() {
+        // Create anchors with a custom anchor
+        let initial_bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let element_type = ElementType::Shape(ShapeType::Rectangle);
+        let mut anchors = AnchorSet::for_element_type(&element_type, &initial_bounds);
+
+        // Add a custom anchor
+        anchors.insert(Anchor::new("custom", Point::new(10.0, 10.0), AnchorDirection::Angle(45.0)));
+        assert_eq!(anchors.len(), 5);
+
+        // Move element to new position
+        let new_bounds = BoundingBox::new(200.0, 100.0, 100.0, 50.0);
+        anchors.update_builtin_from_bounds(&element_type, &new_bounds);
+
+        // Custom anchor should still exist with its ORIGINAL position
+        // (custom anchors are NOT updated by update_builtin_from_bounds)
+        let custom = anchors.get("custom").unwrap();
+        assert_eq!(custom.position, Point::new(10.0, 10.0));
+        assert_eq!(anchors.len(), 5);
     }
 }

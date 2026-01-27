@@ -251,7 +251,7 @@ pub fn route_connection_with_anchors(
             let mid_y = (start.y + end.y) / 2.0;
             let via_dx = via.x - mid_x;
             let via_dy = via.y - mid_y;
-            (via_dx * via_dx + via_dy * via_dy).sqrt() * 1.5
+            (via_dx * via_dx + via_dy * via_dy).sqrt()
         } else {
             distance * 0.4
         };

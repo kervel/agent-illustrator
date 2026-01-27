@@ -60,8 +60,9 @@ pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<
     // Apply position offsets from place statements
     apply_position_offsets(result, doc)?;
 
-    // Recompute bounds after constraint resolution
+    // Recompute bounds and anchors after constraint resolution
     result.compute_bounds();
+    recompute_builtin_anchors(result);
     Ok(())
 }
 
@@ -1582,10 +1583,35 @@ pub fn resolve_constrain_statements(
         }
     }
 
-    // Recompute bounds and custom anchors after applying constraints
+    // Recompute bounds and anchors after applying constraints
     result.compute_bounds();
+    recompute_builtin_anchors(result);
     recompute_custom_anchors(result, doc);
     Ok(())
+}
+
+/// Recompute built-in anchors (top, bottom, left, right, and corners for paths)
+/// for all elements after constraint resolution has moved them.
+/// This ensures anchors stay in sync with element bounds.
+fn recompute_builtin_anchors(result: &mut LayoutResult) {
+    // Update anchors in the tree structure
+    for elem in &mut result.root_elements {
+        recompute_builtin_anchors_recursive(elem);
+    }
+
+    // Update anchors in the HashMap (used for connection routing)
+    for elem in result.elements.values_mut() {
+        elem.anchors.update_builtin_from_bounds(&elem.element_type, &elem.bounds);
+    }
+}
+
+/// Recursively update built-in anchors for an element and all its children
+fn recompute_builtin_anchors_recursive(elem: &mut ElementLayout) {
+    elem.anchors.update_builtin_from_bounds(&elem.element_type, &elem.bounds);
+
+    for child in &mut elem.children {
+        recompute_builtin_anchors_recursive(child);
+    }
 }
 
 /// Recompute custom anchors for all groups after constraint resolution
