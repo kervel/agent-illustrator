@@ -42,6 +42,9 @@
           dontUnpack = true;
           dontBuild = true;
 
+          # autoPatchelfHook fixes dynamic linker paths for prebuilt binaries on NixOS
+          nativeBuildInputs = pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.autoPatchelfHook ];
+
           installPhase = ''
             mkdir -p $out/bin
             cp $src $out/bin/agent-illustrator
