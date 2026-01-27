@@ -1,0 +1,128 @@
+stages:
+  - build
+  - release
+
+variables:
+  CARGO_TERM_COLOR: always
+
+# Linux x86_64 build
+build-linux-x86_64:
+  stage: build
+  image: rust:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*/
+  script:
+    - rustup target add x86_64-unknown-linux-gnu
+    - cargo build --release --target x86_64-unknown-linux-gnu
+    - cp target/x86_64-unknown-linux-gnu/release/agent-illustrator agent-illustrator-linux-x86_64
+  artifacts:
+    paths:
+      - agent-illustrator-linux-x86_64
+    expire_in: 1 week
+
+# Linux aarch64 build (cross-compilation)
+build-linux-aarch64:
+  stage: build
+  image: rust:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*/
+  before_script:
+    - apt-get update && apt-get install -y gcc-aarch64-linux-gnu
+  script:
+    - rustup target add aarch64-unknown-linux-gnu
+    - export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+    - cargo build --release --target aarch64-unknown-linux-gnu
+    - cp target/aarch64-unknown-linux-gnu/release/agent-illustrator agent-illustrator-linux-aarch64
+  artifacts:
+    paths:
+      - agent-illustrator-linux-aarch64
+    expire_in: 1 week
+
+# macOS x86_64 build - requires macOS runner
+build-macos-x86_64:
+  stage: build
+  tags:
+    - macos
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*/
+  script:
+    - rustup target add x86_64-apple-darwin
+    - cargo build --release --target x86_64-apple-darwin
+    - cp target/x86_64-apple-darwin/release/agent-illustrator agent-illustrator-macos-x86_64
+  artifacts:
+    paths:
+      - agent-illustrator-macos-x86_64
+    expire_in: 1 week
+
+# macOS aarch64 build - requires macOS runner
+build-macos-aarch64:
+  stage: build
+  tags:
+    - macos
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*/
+  script:
+    - rustup target add aarch64-apple-darwin
+    - cargo build --release --target aarch64-apple-darwin
+    - cp target/aarch64-apple-darwin/release/agent-illustrator agent-illustrator-macos-aarch64
+  artifacts:
+    paths:
+      - agent-illustrator-macos-aarch64
+    expire_in: 1 week
+
+# Windows x86_64 build - requires Windows runner
+build-windows-x86_64:
+  stage: build
+  tags:
+    - windows
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*/
+  script:
+    - rustup target add x86_64-pc-windows-msvc
+    - cargo build --release --target x86_64-pc-windows-msvc
+    - cp target/x86_64-pc-windows-msvc/release/agent-illustrator.exe agent-illustrator-windows-x86_64.exe
+  artifacts:
+    paths:
+      - agent-illustrator-windows-x86_64.exe
+    expire_in: 1 week
+
+# Create GitLab release with all artifacts
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*/
+  needs:
+    - job: build-linux-x86_64
+      artifacts: true
+    - job: build-linux-aarch64
+      artifacts: true
+    - job: build-macos-x86_64
+      artifacts: true
+    - job: build-macos-aarch64
+      artifacts: true
+    - job: build-windows-x86_64
+      artifacts: true
+  script:
+    - echo "Creating release for $CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Release $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: agent-illustrator-linux-x86_64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/agent-illustrator-linux-x86_64"
+          filepath: /binaries/agent-illustrator-linux-x86_64
+        - name: agent-illustrator-linux-aarch64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/agent-illustrator-linux-aarch64"
+          filepath: /binaries/agent-illustrator-linux-aarch64
+        - name: agent-illustrator-macos-x86_64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/agent-illustrator-macos-x86_64"
+          filepath: /binaries/agent-illustrator-macos-x86_64
+        - name: agent-illustrator-macos-aarch64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/agent-illustrator-macos-aarch64"
+          filepath: /binaries/agent-illustrator-macos-aarch64
+        - name: agent-illustrator-windows-x86_64.exe
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/agent-illustrator-windows-x86_64.exe"
+          filepath: /binaries/agent-illustrator-windows-x86_64.exe
