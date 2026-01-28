@@ -716,7 +716,10 @@ pub fn route_connection_with_anchors(
     // Orthogonal routing: create paths with horizontal/vertical segments only
     if let (Some(from_anchor), Some(to_anchor)) = (from_anchor, to_anchor) {
         let from_dir = cardinal_direction_for_anchor(from_anchor.direction);
-        let to_dir = cardinal_direction_for_anchor(to_anchor.direction);
+        let anchor_facing = cardinal_direction_for_anchor(to_anchor.direction);
+        // The wire must arrive INTO the anchor from the anchor's facing direction,
+        // so the last segment goes opposite to the anchor's outward-facing direction.
+        let to_dir = Point::new(-anchor_facing.x, -anchor_facing.y);
         if let Some(path) = orthogonal_with_directions(start, end, from_dir, to_dir) {
             return path;
         }
