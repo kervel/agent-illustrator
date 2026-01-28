@@ -14,7 +14,7 @@
 
 // Resistor template - IEC style (stroke-only rectangle)
 template "resistor" (value: "R") {
-    rect body [width: 40, height: 16, fill: none, stroke: foreground-1, stroke_width: 2, label: value]
+    rect body [width: 40, height: 16, fill: none, stroke: foreground-1, stroke_width: 2, label: value, font_size: 10]
 
     rect left_lead [width: 10, height: 2, fill: foreground-1, stroke: none]
     rect right_lead [width: 10, height: 2, fill: foreground-1, stroke: none]
@@ -305,7 +305,7 @@ template "ground_sym" {
 
 // GPIO Pin template
 template "gpio_pin" (name: "GPIO") {
-    rect body [width: 50, height: 20, fill: accent-2, stroke: accent-1, stroke_width: 1.5, label: name]
+    rect body [width: 50, height: 20, fill: accent-2, stroke: accent-1, stroke_width: 1.5, label: name, font_size: 10]
     anchor output [position: body.right + 4, direction: right]
 }
 
@@ -349,7 +349,7 @@ ground_sym gnd_led
 // === LAYOUT ===
 
 // 12V power rail and load - right side, top
-constrain vcc_12v.center_x = 350
+constrain vcc_12v.center_x = 450
 constrain vcc_12v.top = 20
 
 constrain load_motor.positive_x = vcc_12v.conn_x
@@ -363,28 +363,28 @@ constrain q_main.drain_x = load_motor.negative_x
 constrain q_main.top = load_motor.bottom + 40
 
 constrain gnd_main.conn_x = q_main.source_x
-constrain gnd_main.top = q_main.bottom + 30
+constrain gnd_main.top = q_main.bottom + 40
 
 
 // 5V gate drive section - middle
-constrain vcc_5v.center_x = 180
+constrain vcc_5v.center_x = 200
 constrain vcc_5v.top = 20
 
 constrain r_pullup.center_x = vcc_5v.center_x
 constrain r_pullup.top = vcc_5v.bottom + 30
 
-constrain r_gate.center_y = r_pullup.bottom + 30
-constrain r_gate.left = r_pullup.right + 20
+constrain r_gate.center_y = r_pullup.bottom + 40
+constrain r_gate.left = r_pullup.right + 30
 
-// NPN driver below pullup
+// NPN driver below gate resistor
 constrain q_driver.center_x = vcc_5v.center_x
-constrain q_driver.top = r_pullup.bottom + 80
+constrain q_driver.top = r_gate.bottom + 40
 
-constrain r_pulldown.center_x = r_gate.center_x + 40
-constrain r_pulldown.top = r_gate.center_y + 20
+constrain r_pulldown.center_x = r_gate.center_x + 50
+constrain r_pulldown.bottom = gnd_driver.top - 10
 
 constrain gnd_driver.conn_x = q_driver.emitter_x
-constrain gnd_driver.top = q_driver.bottom + 30
+constrain gnd_driver.top = gnd_main.top
 
 
 // 3.3V control section - left side
@@ -404,7 +404,7 @@ constrain status_led.anode_x = r_led.right_conn_x
 constrain status_led.top = r_led.bottom + 30
 
 constrain gnd_led.conn_x = status_led.cathode_x
-constrain gnd_led.top = status_led.bottom + 30
+constrain gnd_led.top = gnd_main.top
 
 
 // === CONNECTIONS ===
@@ -431,8 +431,8 @@ q_driver.emitter -- gnd_driver.conn [stroke: foreground-2, stroke_width: 1.5]
 gpio.output -- r_base.left_conn [stroke: accent-2, stroke_width: 2]
 r_base.right_conn -- q_driver.base [stroke: accent-2, stroke_width: 2]
 
-// Status LED path (shows when GPIO is active)
-gpio.output -- r_led.left_conn [stroke: accent-2, stroke_width: 1.5]
+// Status LED path (3.3V power indicator)
+vcc_3v3.conn -- r_led.left_conn [stroke: accent-2, stroke_width: 1.5]
 r_led.right_conn -- status_led.anode [stroke: accent-2, stroke_width: 1.5]
 status_led.cathode -- gnd_led.conn [stroke: foreground-2, stroke_width: 1.5]
 
