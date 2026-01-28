@@ -65,6 +65,34 @@ impl AnchorDirection {
             AnchorDirection::Angle(deg) => *deg,
         }
     }
+
+    /// Create an AnchorDirection from an angle in degrees.
+    ///
+    /// Snaps to cardinal directions if within 1 degree tolerance.
+    /// Normalizes angles to 0-360 range.
+    ///
+    /// # Arguments
+    /// * `degrees` - Angle in degrees (0=right, 90=down, 180=left, 270=up)
+    ///
+    /// # Returns
+    /// The appropriate AnchorDirection variant
+    pub fn from_degrees(degrees: f64) -> Self {
+        // Normalize to 0-360
+        let normalized = ((degrees % 360.0) + 360.0) % 360.0;
+
+        // Snap to cardinal if close (within 1 degree)
+        if (normalized - 0.0).abs() < 1.0 || (normalized - 360.0).abs() < 1.0 {
+            AnchorDirection::Right
+        } else if (normalized - 90.0).abs() < 1.0 {
+            AnchorDirection::Down
+        } else if (normalized - 180.0).abs() < 1.0 {
+            AnchorDirection::Left
+        } else if (normalized - 270.0).abs() < 1.0 {
+            AnchorDirection::Up
+        } else {
+            AnchorDirection::Angle(normalized)
+        }
+    }
 }
 
 /// A named attachment point on a shape (T002)
@@ -195,6 +223,26 @@ impl AnchorSet {
     /// Get the number of anchors
     pub fn len(&self) -> usize {
         self.anchors.len()
+    }
+
+    /// Transform all anchors in this set using the given rotation.
+    ///
+    /// Creates a new AnchorSet with all anchor positions and directions
+    /// transformed according to the rotation.
+    ///
+    /// # Arguments
+    /// * `rotation` - The rotation transform to apply
+    ///
+    /// # Returns
+    /// A new AnchorSet with transformed anchors
+    pub fn transform(&self, rotation: &super::transform::RotationTransform) -> AnchorSet {
+        AnchorSet {
+            anchors: self
+                .anchors
+                .iter()
+                .map(|(name, anchor)| (name.clone(), rotation.transform_anchor(anchor)))
+                .collect(),
+        }
     }
 }
 
@@ -768,6 +816,68 @@ impl Default for LayoutResult {
     }
 }
 
+// ============================================
+// Local Solver Types (Feature 010)
+// ============================================
+
+/// Result of the local constraint solving phase for a single template instance.
+///
+/// During the two-phase constraint solver:
+/// 1. Local phase: Solve constraints within each template instance independently
+/// 2. This struct captures the solved positions before rotation transformation
+/// 3. Global phase: Apply rotation, then solve cross-template constraints
+#[derive(Debug, Clone)]
+pub struct LocalSolverResult {
+    /// The template instance identifier (e.g., "alice", "bob")
+    pub template_instance: String,
+    /// Bounds of all elements within this template instance, keyed by element name
+    pub element_bounds: HashMap<String, BoundingBox>,
+    /// Anchor sets for all elements within this template instance
+    pub anchors: HashMap<String, AnchorSet>,
+    /// Rotation angle in degrees (if template instance has rotation)
+    pub rotation: Option<f64>,
+}
+
+impl LocalSolverResult {
+    /// Create a new local solver result for a template instance
+    pub fn new(template_instance: impl Into<String>) -> Self {
+        Self {
+            template_instance: template_instance.into(),
+            element_bounds: HashMap::new(),
+            anchors: HashMap::new(),
+            rotation: None,
+        }
+    }
+
+    /// Set the rotation angle for this template instance
+    pub fn with_rotation(mut self, angle_degrees: f64) -> Self {
+        self.rotation = Some(angle_degrees);
+        self
+    }
+
+    /// Add an element's bounds to this result
+    pub fn add_element_bounds(&mut self, element_name: impl Into<String>, bounds: BoundingBox) {
+        self.element_bounds.insert(element_name.into(), bounds);
+    }
+
+    /// Add an element's anchors to this result
+    pub fn add_anchors(&mut self, element_name: impl Into<String>, anchors: AnchorSet) {
+        self.anchors.insert(element_name.into(), anchors);
+    }
+
+    /// Get the bounding box that encompasses all elements in this template instance
+    pub fn combined_bounds(&self) -> Option<BoundingBox> {
+        let mut combined: Option<BoundingBox> = None;
+        for bounds in self.element_bounds.values() {
+            combined = Some(match combined {
+                Some(existing) => existing.union(bounds),
+                None => *bounds,
+            });
+        }
+        combined
+    }
+}
+
 /// Information about a constraint for error reporting
 #[derive(Debug, Clone)]
 pub struct ConstraintInfo {
@@ -1139,5 +1249,82 @@ mod tests {
         let custom = anchors.get("custom").unwrap();
         assert_eq!(custom.position, Point::new(10.0, 10.0));
         assert_eq!(anchors.len(), 5);
+    }
+
+    // ============================================
+    // Local Solver Result Tests (Feature 010)
+    // ============================================
+
+    #[test]
+    fn test_local_solver_result_new() {
+        let result = LocalSolverResult::new("alice");
+        assert_eq!(result.template_instance, "alice");
+        assert!(result.element_bounds.is_empty());
+        assert!(result.anchors.is_empty());
+        assert!(result.rotation.is_none());
+    }
+
+    #[test]
+    fn test_local_solver_result_with_rotation() {
+        let result = LocalSolverResult::new("bob").with_rotation(90.0);
+        assert_eq!(result.template_instance, "bob");
+        assert_eq!(result.rotation, Some(90.0));
+    }
+
+    #[test]
+    fn test_local_solver_result_add_element_bounds() {
+        let mut result = LocalSolverResult::new("alice");
+        let bounds = BoundingBox::new(10.0, 20.0, 100.0, 50.0);
+        result.add_element_bounds("head", bounds);
+
+        assert_eq!(result.element_bounds.len(), 1);
+        assert_eq!(result.element_bounds.get("head"), Some(&bounds));
+    }
+
+    #[test]
+    fn test_local_solver_result_add_anchors() {
+        let mut result = LocalSolverResult::new("alice");
+        let bounds = BoundingBox::new(0.0, 0.0, 100.0, 50.0);
+        let anchors = AnchorSet::simple_shape(&bounds);
+        result.add_anchors("head", anchors.clone());
+
+        assert_eq!(result.anchors.len(), 1);
+        assert!(result.anchors.get("head").is_some());
+    }
+
+    #[test]
+    fn test_local_solver_result_combined_bounds_empty() {
+        let result = LocalSolverResult::new("alice");
+        assert!(result.combined_bounds().is_none());
+    }
+
+    #[test]
+    fn test_local_solver_result_combined_bounds_single() {
+        let mut result = LocalSolverResult::new("alice");
+        let bounds = BoundingBox::new(10.0, 20.0, 100.0, 50.0);
+        result.add_element_bounds("head", bounds);
+
+        let combined = result.combined_bounds().unwrap();
+        assert_eq!(combined.x, 10.0);
+        assert_eq!(combined.y, 20.0);
+        assert_eq!(combined.width, 100.0);
+        assert_eq!(combined.height, 50.0);
+    }
+
+    #[test]
+    fn test_local_solver_result_combined_bounds_multiple() {
+        let mut result = LocalSolverResult::new("alice");
+
+        // Head at (0, 0) with size 30x30
+        result.add_element_bounds("head", BoundingBox::new(0.0, 0.0, 30.0, 30.0));
+        // Torso at (0, 40) with size 30x50
+        result.add_element_bounds("torso", BoundingBox::new(0.0, 40.0, 30.0, 50.0));
+
+        let combined = result.combined_bounds().unwrap();
+        // Combined should be from (0,0) to (30, 90)
+        assert_eq!(combined.x, 0.0);
+        assert_eq!(combined.y, 0.0);
+        assert_eq!(combined.width, 30.0);
+        assert_eq!(combined.height, 90.0);
     }
 }

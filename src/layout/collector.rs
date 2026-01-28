@@ -140,6 +140,7 @@ impl ConstraintCollector {
                         child_ids[i], child_ids[0]
                     ),
                     origin: ConstraintOrigin::LayoutContainer,
+                    template_instance: None,
                 },
             });
         }
@@ -161,6 +162,7 @@ impl ConstraintCollector {
                     span: span.clone(),
                     description: format!("row horizontal: {} after {}", curr, prev),
                     origin: ConstraintOrigin::LayoutContainer,
+                    template_instance: None,
                 },
             });
         }
@@ -188,6 +190,7 @@ impl ConstraintCollector {
                         child_ids[i], child_ids[0]
                     ),
                     origin: ConstraintOrigin::LayoutContainer,
+                    template_instance: None,
                 },
             });
         }
@@ -204,6 +207,7 @@ impl ConstraintCollector {
                     span: span.clone(),
                     description: format!("col vertical: {} after {}", curr, prev),
                     origin: ConstraintOrigin::LayoutContainer,
+                    template_instance: None,
                 },
             });
         }
@@ -226,6 +230,7 @@ impl ConstraintCollector {
                     span: span.clone(),
                     description: format!("stack x: {} = {}", child_ids[i], child_ids[0]),
                     origin: ConstraintOrigin::LayoutContainer,
+                    template_instance: None,
                 },
             });
             // Same y
@@ -237,6 +242,7 @@ impl ConstraintCollector {
                     span: span.clone(),
                     description: format!("stack y: {} = {}", child_ids[i], child_ids[0]),
                     origin: ConstraintOrigin::LayoutContainer,
+                    template_instance: None,
                 },
             });
         }

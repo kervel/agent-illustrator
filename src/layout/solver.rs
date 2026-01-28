@@ -116,6 +116,10 @@ pub struct ConstraintSource {
     pub description: String,
     /// Origin type
     pub origin: ConstraintOrigin,
+    /// Template instance this constraint belongs to (Feature 010).
+    /// - `None` for top-level elements or constraints between templates
+    /// - `Some("r1")` for constraints within template instance "r1"
+    pub template_instance: Option<String>,
 }
 
 impl ConstraintSource {
@@ -124,6 +128,7 @@ impl ConstraintSource {
             span,
             description: description.into(),
             origin: ConstraintOrigin::UserDefined,
+            template_instance: None,
         }
     }
 
@@ -132,6 +137,7 @@ impl ConstraintSource {
             span,
             description: description.into(),
             origin: ConstraintOrigin::LayoutContainer,
+            template_instance: None,
         }
     }
 
@@ -140,7 +146,14 @@ impl ConstraintSource {
             span: 0..0,
             description: description.into(),
             origin: ConstraintOrigin::Intrinsic,
+            template_instance: None,
         }
+    }
+
+    /// Set the template instance for this constraint (Feature 010).
+    pub fn with_template_instance(mut self, instance: impl Into<String>) -> Self {
+        self.template_instance = Some(instance.into());
+        self
     }
 }
 
@@ -214,6 +227,25 @@ impl LayoutConstraint {
             LayoutConstraint::GreaterOrEqual { source, .. } => source,
             LayoutConstraint::LessOrEqual { source, .. } => source,
             LayoutConstraint::Midpoint { source, .. } => source,
+        }
+    }
+
+    /// Get all element IDs referenced by this constraint (Feature 010).
+    ///
+    /// Used to determine if a constraint is local (all elements in same template)
+    /// or global (elements span multiple templates or top-level).
+    pub fn element_ids(&self) -> Vec<&str> {
+        match self {
+            LayoutConstraint::Fixed { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::Suggested { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::Equal { left, right, .. } => {
+                vec![&left.element_id, &right.element_id]
+            }
+            LayoutConstraint::GreaterOrEqual { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::LessOrEqual { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::Midpoint {
+                target, a, b, ..
+            } => vec![&target.element_id, &a.element_id, &b.element_id],
         }
     }
 }

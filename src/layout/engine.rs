@@ -1,4 +1,31 @@
 //! Layout computation engine
+//!
+//! This module computes element positions and sizes from a parsed AST, producing
+//! a `LayoutResult` with positioned elements and routed connections.
+//!
+//! ## Two-Phase Constraint Solving (Feature 010)
+//!
+//! For templates with rotation support, the constraint solver operates in phases:
+//!
+//! 1. **Constraint Collection**: Gather all constraints from the document
+//! 2. **Constraint Partitioning**: Classify constraints as Local (within one template) or Global
+//! 3. **Local Solving**: Solve each template's internal constraints independently
+//! 4. **Rotation Transformation**: Apply rotation to templates with the `rotation` modifier
+//! 5. **Apply Local Results**: Update the layout with locally solved positions
+//! 6. **Global Solving**: Solve cross-template constraints using post-rotation bounds
+//! 7. **Anchor Recomputation**: Update anchor positions after all transformations
+//!
+//! This phased approach ensures that external constraints (like `constrain label.left = component.right`)
+//! see the rotated bounding box rather than the pre-rotation bounds.
+//!
+//! ## Key Functions
+//!
+//! - [`compute`]: Main entry point for layout computation
+//! - [`resolve_constrain_statements`]: Original single-pass constraint solver
+//! - [`resolve_constrain_statements_two_phase`]: Two-phase solver with rotation support
+//! - [`classify_constraint`]: Determine if a constraint is local or global
+//! - [`partition_constraints`]: Group constraints by scope
+//! - [`build_element_to_template_map`]: Map elements to their template instances
 
 use std::collections::HashMap;
 
@@ -7,6 +34,602 @@ use crate::parser::ast::*;
 use super::config::LayoutConfig;
 use super::error::LayoutError;
 use super::types::*;
+
+// ============================================
+// Constraint Classification (Feature 010)
+// ============================================
+
+/// Classification of a constraint's scope for two-phase solving.
+///
+/// Used to partition constraints during the local/global solver separation:
+/// - Local constraints can be solved independently within a template instance
+/// - Global constraints must wait until after rotation transformation
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ConstraintScope {
+    /// Constraint is internal to a specific template instance.
+    /// All variables in the constraint belong to elements within this template.
+    Local(String),
+    /// Constraint spans multiple templates or involves top-level elements.
+    /// Must be solved in the global phase after rotation transformation.
+    Global,
+}
+
+/// Classify a constraint as Local (within one template) or Global (cross-template).
+///
+/// This function determines whether a constraint can be solved in the local phase
+/// (within a single template instance, before rotation) or must wait for the global
+/// phase (after rotation transformation).
+///
+/// Classification logic:
+/// 1. If the constraint has a `template_instance` set, use that directly
+/// 2. Otherwise, fall back to prefix-based detection (for backwards compatibility)
+/// 3. If all variables belong to the same template instance, it's Local
+/// 4. Otherwise, it's Global
+///
+/// # Arguments
+/// * `constraint` - The constraint to classify
+/// * `element_to_template` - Optional map from element ID to template instance
+///
+/// # Returns
+/// `ConstraintScope::Local(instance)` if all variables are in the same template,
+/// `ConstraintScope::Global` otherwise.
+pub fn classify_constraint(
+    constraint: &super::solver::LayoutConstraint,
+    element_to_template: &HashMap<String, String>,
+) -> ConstraintScope {
+    use std::collections::HashSet;
+
+    // First, check if the constraint source has template_instance set
+    let source = constraint.source();
+    if let Some(instance) = &source.template_instance {
+        return ConstraintScope::Local(instance.clone());
+    }
+
+    // Otherwise, look up each element's template membership
+    let element_ids = constraint.element_ids();
+    let mut template_instances: HashSet<Option<&String>> = HashSet::new();
+
+    for elem_id in &element_ids {
+        let instance = element_to_template.get(*elem_id);
+        template_instances.insert(instance);
+    }
+
+    // If all elements belong to the same template instance (and it's not None), it's local
+    if template_instances.len() == 1 {
+        if let Some(Some(instance)) = template_instances.iter().next() {
+            return ConstraintScope::Local((*instance).clone());
+        }
+    }
+
+    // Mixed templates, or top-level elements, or unknown = global
+    ConstraintScope::Global
+}
+
+/// Partition constraints into local (per-template) and global sets (Feature 010).
+///
+/// # Arguments
+/// * `constraints` - All constraints to partition
+/// * `element_to_template` - Map from element ID to template instance name
+///
+/// # Returns
+/// A tuple of:
+/// - `HashMap<String, Vec<LayoutConstraint>>`: Local constraints grouped by template instance
+/// - `Vec<LayoutConstraint>`: Global constraints that span templates
+pub fn partition_constraints(
+    constraints: &[super::solver::LayoutConstraint],
+    element_to_template: &HashMap<String, String>,
+) -> (
+    HashMap<String, Vec<super::solver::LayoutConstraint>>,
+    Vec<super::solver::LayoutConstraint>,
+) {
+    let mut local_by_instance: HashMap<String, Vec<super::solver::LayoutConstraint>> =
+        HashMap::new();
+    let mut global: Vec<super::solver::LayoutConstraint> = Vec::new();
+
+    for constraint in constraints {
+        match classify_constraint(constraint, element_to_template) {
+            ConstraintScope::Local(instance) => {
+                local_by_instance
+                    .entry(instance)
+                    .or_default()
+                    .push(constraint.clone());
+            }
+            ConstraintScope::Global => {
+                global.push(constraint.clone());
+            }
+        }
+    }
+
+    (local_by_instance, global)
+}
+
+/// Build a map from element ID to template instance name (Feature 010).
+///
+/// This function walks the document tree and identifies which elements belong
+/// to which template instances. Elements are associated with a template instance
+/// if they have a prefixed name matching the pattern `{instance}_{child}`.
+///
+/// # Arguments
+/// * `doc` - The document after template resolution
+///
+/// # Returns
+/// A HashMap where keys are element IDs (e.g., "alice_head") and values are
+/// template instance names (e.g., "alice").
+pub fn build_element_to_template_map(doc: &Document) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+
+    for stmt in &doc.statements {
+        collect_element_template_mapping(&stmt.node, &mut map, None);
+    }
+
+    map
+}
+
+/// Recursively collect element-to-template mappings from a statement.
+///
+/// # Arguments
+/// * `stmt` - The statement to process
+/// * `map` - The map to populate
+/// * `current_template` - The current template instance context (if inside a template Group)
+fn collect_element_template_mapping(
+    stmt: &Statement,
+    map: &mut HashMap<String, String>,
+    current_template: Option<&str>,
+) {
+    match stmt {
+        Statement::Shape(s) => {
+            if let Some(name) = &s.name {
+                let elem_id = &name.node.0;
+
+                // If we're inside a template context, map this element
+                if let Some(template) = current_template {
+                    map.insert(elem_id.clone(), template.to_string());
+                }
+                // Also check if this element's name has a prefix pattern
+                // (for backwards compatibility with prefix-based detection)
+                else if let Some(prefix) = extract_template_prefix(elem_id) {
+                    map.insert(elem_id.clone(), prefix.to_string());
+                }
+            }
+        }
+        Statement::Group(g) => {
+            let group_name = g.name.as_ref().map(|n| n.node.0.as_str());
+
+            // Determine if this Group is a template instance container
+            // Template instances create Groups where children have prefixed names
+            let template_context = if let Some(name) = group_name {
+                // Check if any children have names prefixed with this group's name
+                let has_prefixed_children = g.children.iter().any(|child| {
+                    if let Some(child_id) = get_statement_id(&child.node) {
+                        child_id.starts_with(name) && child_id.len() > name.len()
+                            && child_id.chars().nth(name.len()) == Some('_')
+                    } else {
+                        false
+                    }
+                });
+
+                if has_prefixed_children {
+                    Some(name)
+                } else {
+                    current_template
+                }
+            } else {
+                current_template
+            };
+
+            // Map the group itself if we're inside a template context
+            if let Some(name) = group_name {
+                if let Some(template) = current_template {
+                    map.insert(name.to_string(), template.to_string());
+                }
+            }
+
+            // Recurse into children with the appropriate context
+            for child in &g.children {
+                collect_element_template_mapping(&child.node, map, template_context);
+            }
+        }
+        Statement::Layout(l) => {
+            // Layouts don't change template context, just recurse
+            for child in &l.children {
+                collect_element_template_mapping(&child.node, map, current_template);
+            }
+        }
+        Statement::Label(inner) => {
+            collect_element_template_mapping(inner, map, current_template);
+        }
+        _ => {}
+    }
+}
+
+/// Extract the template prefix from an element ID.
+///
+/// Template children are named like `{prefix}_{child}`, so "alice_head" has prefix "alice".
+/// Returns None if the element doesn't appear to have a template prefix.
+fn extract_template_prefix(elem_id: &str) -> Option<&str> {
+    // Find the first underscore
+    elem_id.find('_').map(|idx| &elem_id[..idx])
+}
+
+/// Get the ID (name) of a statement, if it has one.
+fn get_statement_id(stmt: &Statement) -> Option<&str> {
+    match stmt {
+        Statement::Shape(s) => s.name.as_ref().map(|n| n.node.0.as_str()),
+        Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.as_str()),
+        Statement::Layout(l) => l.name.as_ref().map(|n| n.node.0.as_str()),
+        _ => None,
+    }
+}
+
+// ============================================
+// Two-Phase Solver Functions (Feature 010)
+// ============================================
+
+/// Solve constraints for a single template instance in isolation (Phase 1).
+///
+/// This function:
+/// 1. Creates a constraint solver with the template's child elements
+/// 2. Adds current bounds as suggestions (MEDIUM strength)
+/// 3. Adds the local constraints (STRONG strength)
+/// 4. Solves and extracts the results
+///
+/// # Arguments
+/// * `instance` - The template instance name (e.g., "alice")
+/// * `constraints` - The local constraints for this template
+/// * `result` - The current layout result (to get element bounds)
+/// * `element_to_template` - Map from element ID to template instance
+///
+/// # Returns
+/// A `LocalSolverResult` with solved bounds and anchors, or an error if unsolvable.
+pub fn solve_local(
+    instance: &str,
+    constraints: &[super::solver::LayoutConstraint],
+    result: &LayoutResult,
+    element_to_template: &HashMap<String, String>,
+) -> Result<LocalSolverResult, LayoutError> {
+    use super::solver::ConstraintSolver;
+
+    let mut solver = ConstraintSolver::new();
+    let mut local_result = LocalSolverResult::new(instance);
+
+    // Find all elements belonging to this template instance
+    let elements: Vec<&str> = element_to_template
+        .iter()
+        .filter(|(_, t)| *t == instance)
+        .map(|(e, _)| e.as_str())
+        .collect();
+
+    // Add current bounds as suggestions for all template elements
+    for elem_id in &elements {
+        if let Some(elem) = result.elements.get(*elem_id) {
+            add_element_suggestions_to_solver(&mut solver, elem)?;
+            local_result.add_element_bounds(elem_id.to_string(), elem.bounds);
+            local_result.add_anchors(elem_id.to_string(), elem.anchors.clone());
+        }
+    }
+
+    // Add local constraints
+    for constraint in constraints {
+        solver
+            .add_constraint(constraint.clone())
+            .map_err(LayoutError::solver_error)?;
+    }
+
+    // Solve
+    let solution = solver.solve().map_err(LayoutError::solver_error)?;
+
+    // Extract results - update bounds from solution
+    for (var, value) in &solution.values {
+        if let Some(bounds) = local_result.element_bounds.get_mut(&var.element_id) {
+            match var.property {
+                super::solver::LayoutProperty::X => bounds.x = *value,
+                super::solver::LayoutProperty::Y => bounds.y = *value,
+                super::solver::LayoutProperty::Width => bounds.width = *value,
+                super::solver::LayoutProperty::Height => bounds.height = *value,
+                _ => {} // Derived properties are computed from base properties
+            }
+        }
+    }
+
+    // Update anchors based on new bounds
+    // Collect updates separately to avoid borrow conflicts
+    let anchor_updates: Vec<(String, AnchorSet)> = local_result
+        .element_bounds
+        .iter()
+        .filter_map(|(elem_id, bounds)| {
+            result.elements.get(elem_id).map(|elem| {
+                let mut anchors = AnchorSet::for_element_type(&elem.element_type, bounds);
+                // Preserve any custom anchors from the original
+                anchors.merge(&elem.anchors);
+                (elem_id.clone(), anchors)
+            })
+        })
+        .collect();
+
+    for (elem_id, anchors) in anchor_updates {
+        local_result.add_anchors(elem_id, anchors);
+    }
+
+    Ok(local_result)
+}
+
+/// Add element bounds as suggestions to a constraint solver.
+fn add_element_suggestions_to_solver(
+    solver: &mut super::solver::ConstraintSolver,
+    elem: &ElementLayout,
+) -> Result<(), LayoutError> {
+    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+    let id = elem
+        .id
+        .as_ref()
+        .map(|i| i.0.as_str())
+        .unwrap_or("unnamed");
+
+    // Add position suggestions
+    solver
+        .add_constraint(LayoutConstraint::Suggested {
+            variable: LayoutVariable::x(id),
+            value: elem.bounds.x,
+            source: ConstraintSource::intrinsic(format!("{} x suggestion", id)),
+        })
+        .map_err(LayoutError::solver_error)?;
+
+    solver
+        .add_constraint(LayoutConstraint::Suggested {
+            variable: LayoutVariable::y(id),
+            value: elem.bounds.y,
+            source: ConstraintSource::intrinsic(format!("{} y suggestion", id)),
+        })
+        .map_err(LayoutError::solver_error)?;
+
+    // Add size as fixed (elements don't resize)
+    solver
+        .add_constraint(LayoutConstraint::Fixed {
+            variable: LayoutVariable::width(id),
+            value: elem.bounds.width,
+            source: ConstraintSource::intrinsic(format!("{} width", id)),
+        })
+        .map_err(LayoutError::solver_error)?;
+
+    solver
+        .add_constraint(LayoutConstraint::Fixed {
+            variable: LayoutVariable::height(id),
+            value: elem.bounds.height,
+            source: ConstraintSource::intrinsic(format!("{} height", id)),
+        })
+        .map_err(LayoutError::solver_error)?;
+
+    Ok(())
+}
+
+/// Apply rotation transformation to a local solver result (Phase 2).
+///
+/// This function:
+/// 1. Computes the rotation center from the combined child bounds
+/// 2. Creates a rotation transform for the given angle
+/// 3. Transforms all element bounds using the "loose bounds" algorithm
+/// 4. Transforms all anchor positions and directions
+///
+/// # Arguments
+/// * `local_result` - The local solver result to transform in place
+/// * `angle_degrees` - The rotation angle in degrees (clockwise positive)
+pub fn apply_rotation_to_local_result(local_result: &mut LocalSolverResult, angle_degrees: f64) {
+    use super::transform::RotationTransform;
+
+    // Skip if no rotation needed
+    if angle_degrees.abs() < f64::EPSILON {
+        return;
+    }
+
+    // Compute rotation center from combined bounds
+    let center = match local_result.combined_bounds() {
+        Some(bounds) => bounds.center(),
+        None => return, // No elements to rotate
+    };
+
+    let transform = RotationTransform::new(angle_degrees, center);
+
+    // Transform all element bounds
+    for bounds in local_result.element_bounds.values_mut() {
+        *bounds = transform.transform_bounds(bounds);
+    }
+
+    // Transform all anchors
+    for anchors in local_result.anchors.values_mut() {
+        *anchors = anchors.transform(&transform);
+    }
+
+    // Record the rotation
+    local_result.rotation = Some(angle_degrees);
+}
+
+/// Apply local solver results back to the main layout result (Phase 3).
+///
+/// This function:
+/// 1. Updates element bounds in the layout result
+/// 2. Updates element anchors in the layout result
+///
+/// # Arguments
+/// * `result` - The main layout result to update
+/// * `local_results` - Map from template instance name to its local solver result
+pub fn apply_local_results(
+    result: &mut LayoutResult,
+    local_results: &HashMap<String, LocalSolverResult>,
+) {
+    for local_result in local_results.values() {
+        // Update bounds
+        for (elem_id, bounds) in &local_result.element_bounds {
+            if let Some(elem) = result.elements.get_mut(elem_id) {
+                elem.bounds = *bounds;
+            }
+        }
+
+        // Update anchors
+        for (elem_id, anchors) in &local_result.anchors {
+            if let Some(elem) = result.elements.get_mut(elem_id) {
+                elem.anchors = anchors.clone();
+            }
+        }
+    }
+
+    // Also update the tree structure (root_elements)
+    for local_result in local_results.values() {
+        for (elem_id, bounds) in &local_result.element_bounds {
+            update_element_bounds_in_tree(&mut result.root_elements, elem_id, *bounds);
+        }
+        for (elem_id, anchors) in &local_result.anchors {
+            update_element_anchors_in_tree(&mut result.root_elements, elem_id, anchors.clone());
+        }
+    }
+
+    // Recompute overall bounds
+    result.compute_bounds();
+}
+
+/// Recursively update element bounds in the tree structure.
+fn update_element_bounds_in_tree(elements: &mut [ElementLayout], elem_id: &str, bounds: BoundingBox) {
+    for elem in elements.iter_mut() {
+        if elem.id.as_ref().map(|i| i.0.as_str()) == Some(elem_id) {
+            elem.bounds = bounds;
+            return;
+        }
+        update_element_bounds_in_tree(&mut elem.children, elem_id, bounds);
+    }
+}
+
+/// Recursively update element anchors in the tree structure.
+fn update_element_anchors_in_tree(elements: &mut [ElementLayout], elem_id: &str, anchors: AnchorSet) {
+    for elem in elements.iter_mut() {
+        if elem.id.as_ref().map(|i| i.0.as_str()) == Some(elem_id) {
+            elem.anchors = anchors;
+            return;
+        }
+        update_element_anchors_in_tree(&mut elem.children, elem_id, anchors.clone());
+    }
+}
+
+/// Solve global (cross-template) constraints using post-rotation bounds (Phase 4).
+///
+/// This function:
+/// 1. Creates a constraint solver with all elements (now at their rotated positions)
+/// 2. Adds current bounds as suggestions (MEDIUM strength for targets, FIXED for references)
+/// 3. Adds the global constraints (STRONG strength)
+/// 4. Solves and applies the results
+///
+/// # Arguments
+/// * `result` - The main layout result to update
+/// * `constraints` - The global constraints (cross-template or involving top-level elements)
+/// * `config` - Layout configuration (for trace output)
+///
+/// # Returns
+/// Ok(()) on success, or an error if constraints are unsolvable.
+pub fn solve_global(
+    result: &mut LayoutResult,
+    constraints: &[super::solver::LayoutConstraint],
+    config: &super::config::LayoutConfig,
+) -> Result<(), LayoutError> {
+    use super::solver::{ConstraintSolver, LayoutProperty};
+
+    if constraints.is_empty() {
+        return Ok(());
+    }
+
+    // Collect the target (element_id, property) pairs from constraints
+    // We only want to move the specific property that is targeted
+    let target_vars: std::collections::HashSet<(String, LayoutProperty)> = constraints
+        .iter()
+        .filter_map(|c| get_constraint_target_var(c))
+        .collect();
+
+    // Collect all elements referenced in constraints
+    let referenced_elements: std::collections::HashSet<String> = constraints
+        .iter()
+        .flat_map(|c| get_constraint_referenced_elements(c))
+        .collect();
+
+    let mut solver = ConstraintSolver::new();
+
+    // Add positions for all elements referenced in constraints
+    // For each property: if it's targeted → SUGGESTED (can move), else → FIXED (reference)
+    for element_name in &referenced_elements {
+        add_element_by_name_with_per_property_strength(
+            &mut solver,
+            result,
+            element_name,
+            &target_vars,
+            config.trace,
+        )?;
+    }
+
+    // Add global constraints
+    for constraint in constraints {
+        solver
+            .add_constraint(constraint.clone())
+            .map_err(LayoutError::solver_error)?;
+    }
+
+    let solution = solver.solve().map_err(LayoutError::solver_error)?;
+
+    // Trace: print all solution values
+    if config.trace {
+        for (var, value) in &solution.values {
+            eprintln!(
+                "TRACE: global solution {} {:?} = {}",
+                var.element_id, var.property, value
+            );
+        }
+    }
+
+    // Apply solution - but only to explicitly targeted (element, property) pairs
+    for (var, value) in &solution.values {
+        let is_targeted = target_vars.contains(&(var.element_id.clone(), var.property))
+            || match var.property {
+                LayoutProperty::X => {
+                    target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterX))
+                        || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Right))
+                }
+                LayoutProperty::Y => {
+                    target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterY))
+                        || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Bottom))
+                }
+                _ => false,
+            };
+
+        if config.trace {
+            eprintln!(
+                "TRACE: global {} {:?} is_targeted={}",
+                var.element_id, var.property, is_targeted
+            );
+        }
+
+        if !is_targeted {
+            continue;
+        }
+
+        let current = get_element_property(result, &var.element_id, var.property);
+        if let Some(current_value) = current {
+            let delta = value - current_value;
+            if delta.abs() > 0.001 && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
+            {
+                let axis = if var.property == LayoutProperty::X {
+                    Axis::Horizontal
+                } else {
+                    Axis::Vertical
+                };
+                if config.trace {
+                    eprintln!(
+                        "TRACE: global shifting {} by {} on {:?}",
+                        var.element_id, delta, axis
+                    );
+                }
+                shift_element_by_name(result, &var.element_id, delta, axis)?;
+            }
+        }
+    }
+
+    Ok(())
+}
 
 /// Compute the layout for a document
 pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, LayoutError> {
@@ -1418,8 +2041,100 @@ fn shift_element_and_children(elem: &mut ElementLayout, delta: f64, axis: Axis) 
 }
 
 // ============================================================================
-// Constrain Statement Resolution (Feature 005)
+// Constrain Statement Resolution (Feature 005 + Feature 010)
 // ============================================================================
+
+/// Resolve `constrain` statements using the two-phase architecture (Feature 010).
+///
+/// This is the new implementation that properly handles template rotation:
+/// 1. Build element-to-template mapping
+/// 2. Partition constraints into local (per-template) and global
+/// 3. Solve local constraints for each template instance
+/// 4. Apply rotation transformation to rotated templates
+/// 5. Apply local results back to the layout
+/// 6. Solve global (cross-template) constraints
+///
+/// # Arguments
+/// * `result` - The layout result to update
+/// * `doc` - The document containing constraints
+/// * `config` - Layout configuration
+/// * `template_rotations` - Map from template instance name to rotation angle in degrees
+pub fn resolve_constrain_statements_two_phase(
+    result: &mut LayoutResult,
+    doc: &Document,
+    config: &LayoutConfig,
+    template_rotations: &HashMap<String, f64>,
+) -> Result<(), LayoutError> {
+    use super::collector::ConstraintCollector;
+
+    // Collect constraints from the document
+    let mut collector = ConstraintCollector::new(config.clone());
+
+    // Collect row/col alignment constraints (siblings stay aligned)
+    collect_layout_alignment_constraints(&doc.statements, &mut collector);
+
+    // Collect user constraints (constrain statements)
+    collect_constrain_statements(&doc.statements, &mut collector);
+
+    // Also collect x/y modifiers from shapes as position constraints
+    collect_position_constraints_from_shapes(&doc.statements, &mut collector);
+
+    if collector.constraints.is_empty() {
+        return Ok(());
+    }
+
+    // Build element-to-template mapping
+    let element_to_template = build_element_to_template_map(doc);
+
+    // Partition constraints into local (per-template) and global
+    let (local_by_instance, global_constraints) =
+        partition_constraints(&collector.constraints, &element_to_template);
+
+    if config.trace {
+        eprintln!("TRACE: Two-phase constraint solver");
+        eprintln!("TRACE: {} template instances with local constraints", local_by_instance.len());
+        for (instance, constraints) in &local_by_instance {
+            eprintln!("TRACE:   {}: {} local constraints", instance, constraints.len());
+        }
+        eprintln!("TRACE: {} global constraints", global_constraints.len());
+    }
+
+    // Phase 1 & 2: Solve local constraints for each template, then apply rotation
+    let mut local_results: HashMap<String, LocalSolverResult> = HashMap::new();
+
+    for (instance, local_constraints) in &local_by_instance {
+        // Phase 1: Solve local constraints
+        let mut local_result = solve_local(instance, local_constraints, result, &element_to_template)?;
+
+        // Phase 2: Apply rotation if this template has one
+        if let Some(&angle) = template_rotations.get(instance) {
+            if angle.abs() > f64::EPSILON {
+                if config.trace {
+                    eprintln!("TRACE: Applying {}° rotation to template '{}'", angle, instance);
+                }
+                apply_rotation_to_local_result(&mut local_result, angle);
+            }
+        }
+
+        local_results.insert(instance.clone(), local_result);
+    }
+
+    // Phase 3: Apply local results back to the layout
+    apply_local_results(result, &local_results);
+
+    // Recompute group bounds after local constraints
+    recompute_group_bounds(result);
+
+    // Phase 4: Solve global constraints (using post-rotation positions)
+    solve_global(result, &global_constraints, config)?;
+
+    // Recompute bounds and anchors after applying all constraints
+    result.compute_bounds();
+    recompute_builtin_anchors(result);
+    recompute_custom_anchors(result, doc);
+
+    Ok(())
+}
 
 /// Resolve `constrain` statements after initial layout
 ///
@@ -1449,11 +2164,20 @@ pub fn resolve_constrain_statements(
         return Ok(());
     }
 
-    // Separate constraints into internal (within a group) and external (between groups)
-    // Internal constraints: both elements share a common prefix (e.g., p1_head and p1_body)
-    // External constraints: elements have different prefixes or are root elements
-    let (internal_constraints, external_constraints): (Vec<_>, Vec<_>) =
-        collector.constraints.into_iter().partition(|c| is_internal_constraint(c));
+    // Build element-to-template map for constraint classification
+    let element_to_template = build_element_to_template_map(doc);
+
+    // Separate constraints into internal (within a template) and external (across templates)
+    // using the proper constraint classification based on template instance tracking
+    let (local_by_instance, external_constraints) =
+        partition_constraints(&collector.constraints, &element_to_template);
+
+    // Flatten all local constraints into a single Vec for solving together
+    // (The old approach solved all internal constraints in one pass)
+    let internal_constraints: Vec<_> = local_by_instance
+        .into_values()
+        .flatten()
+        .collect();
 
 
     // PASS 1: Solve internal constraints first
@@ -1736,45 +2460,6 @@ fn update_element_anchors_recursive(elem: &mut ElementLayout, name: &str, anchor
     }
     for child in &mut elem.children {
         update_element_anchors_recursive(child, name, anchors);
-    }
-}
-
-/// Check if a constraint is internal (both elements are children of the same group)
-/// Internal constraints have element IDs that share a common prefix (e.g., p1_head and p1_body)
-fn is_internal_constraint(constraint: &super::solver::LayoutConstraint) -> bool {
-    use super::solver::{ConstraintOrigin, LayoutConstraint};
-
-    match constraint {
-        LayoutConstraint::Equal { left, right, source, .. } => {
-            // Layout container constraints are internal (alignment within row/col)
-            if matches!(source.origin, ConstraintOrigin::LayoutContainer) {
-                return true;
-            }
-            // User-defined constraints are internal if both elements share a common prefix
-            // (i.e., they are siblings within the same template instance)
-            // e.g., "gnd_line1" and "gnd_line2" share prefix "gnd"
-            if matches!(source.origin, ConstraintOrigin::UserDefined) {
-                return elements_share_parent_prefix(&left.element_id, &right.element_id);
-            }
-            false
-        }
-        _ => false,
-    }
-}
-
-/// Check if two element IDs share a common parent prefix
-/// Template children are named like "parent_child", so "gnd_line1" and "gnd_line2" share "gnd"
-fn elements_share_parent_prefix(a: &str, b: &str) -> bool {
-    // Extract prefix (everything before the FIRST underscore)
-    // Template instance prefix is always the first segment before underscore
-    // e.g., "q1_gate_ext" has prefix "q1", not "q1_gate"
-    fn get_prefix(s: &str) -> Option<&str> {
-        s.find('_').map(|idx| &s[..idx])
-    }
-
-    match (get_prefix(a), get_prefix(b)) {
-        (Some(prefix_a), Some(prefix_b)) => prefix_a == prefix_b,
-        _ => false,
     }
 }
 
@@ -2077,6 +2762,7 @@ fn collect_layout_alignment_constraints(
                                             child_ids[i], child_ids[0]
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
+                                        template_instance: None,
                                     },
                                 });
 
@@ -2100,6 +2786,7 @@ fn collect_layout_alignment_constraints(
                                             child_ids[i], child_ids[i - 1], gap
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
+                                        template_instance: None,
                                     },
                                 });
                             }
@@ -2120,6 +2807,7 @@ fn collect_layout_alignment_constraints(
                                             child_ids[i], child_ids[0]
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
+                                        template_instance: None,
                                     },
                                 });
 
@@ -2138,6 +2826,7 @@ fn collect_layout_alignment_constraints(
                                             child_ids[i], child_ids[i - 1], gap
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
+                                        template_instance: None,
                                     },
                                 });
                             }
@@ -2156,6 +2845,7 @@ fn collect_layout_alignment_constraints(
                                             child_ids[i], child_ids[0]
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
+                                        template_instance: None,
                                     },
                                 });
                                 collector.constraints.push(LayoutConstraint::Equal {
@@ -2169,6 +2859,7 @@ fn collect_layout_alignment_constraints(
                                             child_ids[i], child_ids[0]
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
+                                        template_instance: None,
                                     },
                                 });
                             }
@@ -2220,6 +2911,7 @@ fn collect_position_constraints_from_shapes(
                                         span: modifier.span.clone(),
                                         description: format!("{}.x = {}", id, value),
                                         origin: ConstraintOrigin::UserDefined,
+                                        template_instance: None,
                                     },
                                 });
                             }
@@ -2233,6 +2925,7 @@ fn collect_position_constraints_from_shapes(
                                         span: modifier.span.clone(),
                                         description: format!("{}.y = {}", id, value),
                                         origin: ConstraintOrigin::UserDefined,
+                                        template_instance: None,
                                     },
                                 });
                             }
@@ -2529,5 +3222,332 @@ mod tests {
         // The template should be at x=200 (or near it given constraint solving)
         assert!(gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
             "gnd should be near x=200, got {}", gnd.bounds.x);
+    }
+
+    // ============================================
+    // Feature 010: Constraint Classification Tests
+    // ============================================
+
+    #[test]
+    fn test_build_element_to_template_map() {
+        use crate::template::{resolve_templates, TemplateRegistry};
+
+        let doc = parse(r#"
+            template "person" {
+                rect head [width: 20, height: 20]
+                rect body [width: 30, height: 40]
+                constrain body.top = head.bottom + 5
+            }
+            person alice
+            person bob
+            rect server
+        "#).unwrap();
+
+        let mut registry = TemplateRegistry::new();
+        let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
+
+        let map = build_element_to_template_map(&doc);
+
+        // Alice's children should map to "alice"
+        assert_eq!(map.get("alice_head"), Some(&"alice".to_string()));
+        assert_eq!(map.get("alice_body"), Some(&"alice".to_string()));
+
+        // Bob's children should map to "bob"
+        assert_eq!(map.get("bob_head"), Some(&"bob".to_string()));
+        assert_eq!(map.get("bob_body"), Some(&"bob".to_string()));
+
+        // Top-level elements should not be in the map
+        assert!(map.get("server").is_none());
+    }
+
+    #[test]
+    fn test_classify_constraint_local() {
+        use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+        let mut element_map = HashMap::new();
+        element_map.insert("alice_head".to_string(), "alice".to_string());
+        element_map.insert("alice_body".to_string(), "alice".to_string());
+
+        // Constraint between two elements in the same template
+        let constraint = LayoutConstraint::Equal {
+            left: LayoutVariable::y("alice_body"),
+            right: LayoutVariable::y("alice_head"),
+            offset: 25.0,
+            source: ConstraintSource::layout(0..10, "body below head"),
+        };
+
+        let scope = classify_constraint(&constraint, &element_map);
+        assert_eq!(scope, ConstraintScope::Local("alice".to_string()));
+    }
+
+    #[test]
+    fn test_classify_constraint_global() {
+        use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+        let mut element_map = HashMap::new();
+        element_map.insert("alice_head".to_string(), "alice".to_string());
+        element_map.insert("bob_head".to_string(), "bob".to_string());
+
+        // Constraint between elements in different templates
+        let constraint = LayoutConstraint::Equal {
+            left: LayoutVariable::x("bob_head"),
+            right: LayoutVariable::x("alice_head"),
+            offset: 100.0,
+            source: ConstraintSource::user(0..10, "bob right of alice"),
+        };
+
+        let scope = classify_constraint(&constraint, &element_map);
+        assert_eq!(scope, ConstraintScope::Global);
+    }
+
+    #[test]
+    fn test_classify_constraint_with_template_instance_set() {
+        use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+        let element_map = HashMap::new(); // Empty map - shouldn't matter
+
+        // Constraint with template_instance explicitly set
+        let constraint = LayoutConstraint::Fixed {
+            variable: LayoutVariable::x("alice_head"),
+            value: 100.0,
+            source: ConstraintSource::user(0..10, "head position")
+                .with_template_instance("alice"),
+        };
+
+        let scope = classify_constraint(&constraint, &element_map);
+        assert_eq!(scope, ConstraintScope::Local("alice".to_string()));
+    }
+
+    #[test]
+    fn test_partition_constraints() {
+        use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
+
+        let mut element_map = HashMap::new();
+        element_map.insert("alice_head".to_string(), "alice".to_string());
+        element_map.insert("alice_body".to_string(), "alice".to_string());
+        element_map.insert("bob_head".to_string(), "bob".to_string());
+
+        let constraints = vec![
+            // Local to alice
+            LayoutConstraint::Equal {
+                left: LayoutVariable::y("alice_body"),
+                right: LayoutVariable::y("alice_head"),
+                offset: 25.0,
+                source: ConstraintSource::layout(0..10, "alice internal"),
+            },
+            // Global (cross-template)
+            LayoutConstraint::Equal {
+                left: LayoutVariable::x("bob_head"),
+                right: LayoutVariable::x("alice_head"),
+                offset: 100.0,
+                source: ConstraintSource::user(0..10, "global positioning"),
+            },
+            // Local to bob (single element, uses element_map)
+            LayoutConstraint::Fixed {
+                variable: LayoutVariable::width("bob_head"),
+                value: 20.0,
+                source: ConstraintSource::intrinsic("bob head width"),
+            },
+        ];
+
+        let (local, global) = partition_constraints(&constraints, &element_map);
+
+        // Should have alice's constraint
+        assert!(local.contains_key("alice"));
+        assert_eq!(local.get("alice").unwrap().len(), 1);
+
+        // Should have bob's constraint
+        assert!(local.contains_key("bob"));
+        assert_eq!(local.get("bob").unwrap().len(), 1);
+
+        // Should have one global constraint
+        assert_eq!(global.len(), 1);
+    }
+
+    #[test]
+    fn test_solve_local_basic() {
+        use crate::template::{resolve_templates, TemplateRegistry};
+
+        let doc = parse(r#"
+            template "person" {
+                rect head [width: 20, height: 20]
+                rect body [width: 30, height: 40]
+                constrain body.top = head.bottom + 5
+            }
+            person alice
+        "#).unwrap();
+
+        let mut registry = TemplateRegistry::new();
+        let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
+
+        let config = LayoutConfig::default();
+        let result = compute(&doc, &config).unwrap();
+
+        // Build element-to-template map
+        let element_map = build_element_to_template_map(&doc);
+
+        // Create a simple local constraint
+        use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable, LayoutProperty};
+        let constraints = vec![
+            LayoutConstraint::Equal {
+                left: LayoutVariable::new("alice_body", LayoutProperty::Y),
+                right: LayoutVariable::new("alice_head", LayoutProperty::Bottom),
+                offset: 5.0,
+                source: ConstraintSource::user(0..10, "body below head"),
+            },
+        ];
+
+        // Solve locally
+        let local_result = solve_local("alice", &constraints, &result, &element_map)
+            .expect("solve_local should succeed");
+
+        // Verify template instance
+        assert_eq!(local_result.template_instance, "alice");
+
+        // Verify bounds were captured
+        assert!(local_result.element_bounds.contains_key("alice_head"));
+        assert!(local_result.element_bounds.contains_key("alice_body"));
+
+        // Verify anchors were captured
+        assert!(local_result.anchors.contains_key("alice_head"));
+        assert!(local_result.anchors.contains_key("alice_body"));
+    }
+
+    #[test]
+    fn test_apply_rotation_to_local_result() {
+        let mut local_result = LocalSolverResult::new("test");
+
+        // Add a 100x50 element at (0, 0)
+        local_result.add_element_bounds("elem", BoundingBox::new(0.0, 0.0, 100.0, 50.0));
+
+        // Apply 90 degree rotation
+        apply_rotation_to_local_result(&mut local_result, 90.0);
+
+        // After 90° rotation around center (50, 25):
+        // - Width and height should swap
+        let bounds = local_result.element_bounds.get("elem").unwrap();
+
+        // The "loose bounds" algorithm gives us an AABB that contains the rotated rectangle
+        // For a 100x50 rect rotated 90° around its center, we expect ~50x100
+        assert!((bounds.width - 50.0).abs() < 1.0, "width should be ~50, got {}", bounds.width);
+        assert!((bounds.height - 100.0).abs() < 1.0, "height should be ~100, got {}", bounds.height);
+
+        // Rotation should be recorded
+        assert_eq!(local_result.rotation, Some(90.0));
+    }
+
+    #[test]
+    fn test_apply_rotation_zero_does_nothing() {
+        let mut local_result = LocalSolverResult::new("test");
+        local_result.add_element_bounds("elem", BoundingBox::new(10.0, 20.0, 100.0, 50.0));
+
+        // Original bounds
+        let original = *local_result.element_bounds.get("elem").unwrap();
+
+        // Apply zero rotation
+        apply_rotation_to_local_result(&mut local_result, 0.0);
+
+        // Bounds should be unchanged
+        let after = local_result.element_bounds.get("elem").unwrap();
+        assert_eq!(original.x, after.x);
+        assert_eq!(original.y, after.y);
+        assert_eq!(original.width, after.width);
+        assert_eq!(original.height, after.height);
+    }
+
+    #[test]
+    fn test_resolve_constrain_statements_two_phase_no_rotation() {
+        // Test that the two-phase solver produces similar results to the original
+        // when no rotation is involved
+        use crate::template::{resolve_templates, TemplateRegistry};
+
+        let doc = parse(r#"
+            template "stack3" {
+                rect line1 [width: 40, height: 3]
+                rect line2 [width: 26, height: 3]
+                rect line3 [width: 12, height: 3]
+                constrain line2.top = line1.bottom + 4
+                constrain line3.top = line2.bottom + 4
+                constrain line2.center_x = line1.center_x
+                constrain line3.center_x = line1.center_x
+            }
+            stack3 gnd
+            constrain gnd.x = 200
+        "#).unwrap();
+
+        let mut registry = TemplateRegistry::new();
+        let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
+
+        let config = LayoutConfig::default();
+        let mut result = compute(&doc, &config).unwrap();
+
+        // No rotations
+        let rotations: HashMap<String, f64> = HashMap::new();
+
+        // Apply two-phase constraint resolution
+        resolve_constrain_statements_two_phase(&mut result, &doc, &config, &rotations)
+            .expect("two-phase constraint resolution should succeed");
+
+        // Verify the template is positioned correctly
+        let gnd = result.elements.get("gnd").expect("gnd should exist");
+        assert!(gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
+            "gnd should be near x=200, got {}", gnd.bounds.x);
+
+        // Verify children are centered
+        let line1 = result.elements.get("gnd_line1").expect("gnd_line1 should exist");
+        let line2 = result.elements.get("gnd_line2").expect("gnd_line2 should exist");
+        let line3 = result.elements.get("gnd_line3").expect("gnd_line3 should exist");
+
+        let center1 = line1.bounds.x + line1.bounds.width / 2.0;
+        let center2 = line2.bounds.x + line2.bounds.width / 2.0;
+        let center3 = line3.bounds.x + line3.bounds.width / 2.0;
+
+        assert!((center1 - center2).abs() < 1.0,
+            "line1 and line2 should be centered: {} vs {}", center1, center2);
+        assert!((center1 - center3).abs() < 1.0,
+            "line1 and line3 should be centered: {} vs {}", center1, center3);
+    }
+
+    #[test]
+    fn test_resolve_constrain_statements_two_phase_with_rotation() {
+        // Test that the two-phase solver correctly handles rotated templates
+        use crate::template::{resolve_templates, TemplateRegistry};
+
+        // Use a template with multiple elements so it gets wrapped in a Group
+        let doc = parse(r#"
+            template "box" {
+                rect body [width: 100, height: 50]
+                rect pin [width: 5, height: 5]
+                constrain pin.left = body.right + 2
+            }
+            box b1
+        "#).unwrap();
+
+        let mut registry = TemplateRegistry::new();
+        let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
+
+        let config = LayoutConfig::default();
+        let mut result = compute(&doc, &config).unwrap();
+
+        // Get original dimensions
+        let original_body = result.elements.get("b1_body").expect("b1_body should exist");
+        let original_width = original_body.bounds.width;
+        let original_height = original_body.bounds.height;
+
+        // Apply 90° rotation to the template
+        let mut rotations: HashMap<String, f64> = HashMap::new();
+        rotations.insert("b1".to_string(), 90.0);
+
+        resolve_constrain_statements_two_phase(&mut result, &doc, &config, &rotations)
+            .expect("two-phase constraint resolution should succeed");
+
+        // After 90° rotation, width and height should swap
+        let body = result.elements.get("b1_body").expect("b1_body should exist");
+
+        // The rotated bounds should have swapped dimensions (loose bounds)
+        assert!((body.bounds.width - original_height).abs() < 1.0,
+            "width should be ~{} (original height), got {}", original_height, body.bounds.width);
+        assert!((body.bounds.height - original_width).abs() < 1.0,
+            "height should be ~{} (original width), got {}", original_width, body.bounds.height);
     }
 }

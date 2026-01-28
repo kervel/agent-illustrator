@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 400 574.5">
+  <style>
+    :root {
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --foreground-1: #333333;
+    --secondary-light: #fff3e0;
+    --foreground-light: #e0e0e0;
+    --text-2: #666666;
+    --background-3: #eeeeee;
+    --text-3: #999999;
+    --text-light: #ffffff;
+    --background-dark: #333333;
+    --accent-1: #2196f3;
+    --foreground-2: #666666;
+    --accent-2: #e3f2fd;
+    --secondary-1: #ff9800;
+    --text-1: #333333;
+    --accent-3: #bbdefb;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --accent-light: #e3f2fd;
+    --background-2: #f5f5f5;
+    --status-warning: #ff9800;
+    --background-light: #ffffff;
+    --text-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --foreground-3: #999999;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <rect id="a" class="ai-shape ai-rect" x="0" y="0" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+  <rect id="b" class="ai-shape ai-rect" x="140" y="44" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+  <rect id="c" class="ai-shape ai-rect" x="70" y="80" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+  <g id="srv1" class="ai-container">
+    <rect id="srv1_body" class="ai-shape ai-rect" x="0" y="180" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
+    <text id="srv1_txt" class="ai-shape ai-text" x="39.2" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+  </g>
+  <g id="srv2" class="ai-container">
+    <rect id="srv2_body" class="ai-shape ai-rect" x="180" y="180" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
+    <text id="srv2_txt" class="ai-shape ai-text" x="219.2" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+  </g>
+  <g id="alice" class="ai-container">
+    <circle id="alice_head" class="ai-shape ai-circle" cx="15" cy="348" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
+    <rect id="alice_body" class="ai-shape ai-rect" x="0" y="364" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
+  </g>
+  <g id="bob" class="ai-container">
+    <circle id="bob_head" class="ai-shape ai-circle" cx="145" cy="348" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
+    <rect id="bob_body" class="ai-shape ai-rect" x="130" y="364" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
+  </g>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="80" cy="454" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="80" cy="286" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="67.5" y="444" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
+  <text class="ai-label" x="92.5" y="276" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <path class="ai-connection" d="M80 20 L125 20 L125 64 L132.8 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M40 40 L40 60 L110 60 L110 72.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M180 84 L180 92 L150 92 L150 92.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M110 120 L110 165 L0 165 L0 202.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M100 210 L172.8 210" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M15 404 C15.000000000000004 454 55 454 80 454 S145 454 145 411.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M145 336 C145 286 105 286 80 286 S14.999999999999991 286 14.999999999999998 328.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

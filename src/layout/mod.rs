@@ -9,12 +9,14 @@ pub mod engine;
 pub mod error;
 pub mod routing;
 pub mod solver;
+pub mod transform;
 pub mod types;
 
 pub use collector::ConstraintCollector;
 pub use solver::{
     ConstraintSolver, LayoutConstraint, LayoutProperty, LayoutVariable, Solution, SolverError,
 };
+pub use transform::RotationTransform;
 
 #[cfg(test)]
 mod solver_spike;

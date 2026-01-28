@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-144.7 -44 505.9 538">
+  <style>
+    :root {
+    --text-dark: #1a1a1a;
+    --text-2: #666666;
+    --secondary-2: #fff3e0;
+    --accent-dark: #1565c0;
+    --secondary-1: #ff9800;
+    --secondary-3: #ffe0b2;
+    --foreground-light: #e0e0e0;
+    --background-3: #eeeeee;
+    --text-light: #ffffff;
+    --accent-1: #2196f3;
+    --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --accent-light: #e3f2fd;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --text-1: #333333;
+    --accent-3: #bbdefb;
+    --background-dark: #333333;
+    --foreground-1: #333333;
+    --accent-2: #e3f2fd;
+    --foreground-2: #666666;
+    --foreground-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --foreground-3: #999999;
+    --background-1: #ffffff;
+    --background-light: #ffffff;
+    --text-3: #999999;
+  }
+
+  </style>
+  <g id="vcc" class="ai-container">
+    <rect id="vcc_rail" class="ai-shape ai-rect" x="160" y="42" width="80" height="4" fill="var(--secondary-dark)" stroke="none" stroke-width="1.5"/>
+    <rect id="vcc_label_bg" class="ai-shape ai-rect" x="175" y="20" width="50" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="200" y="30" text-anchor="middle" dominant-baseline="middle">+5V</text>
+  </g>
+  <g id="r_limit" class="ai-container">
+    <rect id="r_limit_body" class="ai-shape ai-rect" x="180" y="86" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <text class="ai-label" x="200" y="94" text-anchor="middle" dominant-baseline="middle">220Ω</text>
+    <rect id="r_limit_left_lead" class="ai-shape ai-rect" x="170" y="93" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="r_limit_right_lead" class="ai-shape ai-rect" x="220" y="93" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g id="status_led" class="ai-container">
+    <path id="status_led_triangle" class="ai-shape ai-path" d="M184.00 147.00 L204.00 147.00 L194.00 165.00 Z"  fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="182" y="168" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="193" y="132" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="193" y="170" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <path id="status_led_arrow1" class="ai-shape ai-path" d="M208.00 157.00 L218.00 149.00"  fill="none" stroke="green" stroke-width="1.5"/>
+    <path id="status_led_head1" class="ai-shape ai-path" d="M218.00 149.00 L214.00 149.00 L218.00 153.00 Z"  fill="green" stroke="none" stroke-width="1.5"/>
+    <path id="status_led_arrow2" class="ai-shape ai-path" d="M208.00 167.00 L218.00 159.00"  fill="none" stroke="green" stroke-width="1.5"/>
+    <path id="status_led_head2" class="ai-shape ai-path" d="M218.00 159.00 L214.00 159.00 L218.00 163.00 Z"  fill="green" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g id="gpio" class="ai-container">
+    <rect id="gpio_body" class="ai-shape ai-rect" x="4.5" y="268" width="50" height="20" fill="var(--accent-2)" stroke="var(--accent-1)" stroke-width="1.5"/>
+    <text class="ai-label" x="29.5" y="278" text-anchor="middle" dominant-baseline="middle">GPIO_5</text>
+  </g>
+  <g id="r_gate" class="ai-container">
+    <rect id="r_gate_body" class="ai-shape ai-rect" x="84.5" y="270" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <text class="ai-label" x="104.5" y="278" text-anchor="middle" dominant-baseline="middle">10kΩ</text>
+    <rect id="r_gate_left_lead" class="ai-shape ai-rect" x="74.5" y="277" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="r_gate_right_lead" class="ai-shape ai-rect" x="124.5" y="277" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g id="q1" class="ai-container">
+    <circle id="q1_body" class="ai-shape ai-circle" cx="215.5" cy="278" r="30" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <rect id="q1_channel" class="ai-shape ai-rect" x="222.5" y="260" width="2" height="36" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_gate_bar" class="ai-shape ai-rect" x="210.5" y="260" width="2" height="36" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_gate_lead" class="ai-shape ai-rect" x="180.5" y="277" width="30" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_drain_stub" class="ai-shape ai-rect" x="207.5" y="263" width="16" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_mid_stub" class="ai-shape ai-rect" x="207.5" y="277" width="16" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_source_stub" class="ai-shape ai-rect" x="207.5" y="291" width="16" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_drain_lead" class="ai-shape ai-rect" x="207.5" y="241" width="2" height="24" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_source_lead" class="ai-shape ai-rect" x="207.5" y="291" width="2" height="24" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="q1_arrow" class="ai-shape ai-rect" x="199.5" y="277" width="8" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <text id="q1_g_label" class="ai-shape ai-text" x="154.5" y="278" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--foreground-1)">G</text>
+    <text id="q1_d_label" class="ai-shape ai-text" x="198.5" y="231" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--foreground-1)">D</text>
+    <text id="q1_s_label" class="ai-shape ai-text" x="198.5" y="325" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--foreground-1)">S</text>
+  </g>
+  <g id="r_pulldown" class="ai-container">
+    <rect id="r_pulldown_body" class="ai-shape ai-rect" x="180" y="371" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <text class="ai-label" x="200" y="379" text-anchor="middle" dominant-baseline="middle">10kΩ</text>
+    <rect id="r_pulldown_left_lead" class="ai-shape ai-rect" x="170" y="378" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="r_pulldown_right_lead" class="ai-shape ai-rect" x="220" y="378" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g id="gnd" class="ai-container">
+    <rect id="gnd_line1" class="ai-shape ai-rect" x="180" y="417" width="40" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_line2" class="ai-shape ai-rect" x="187" y="424" width="26" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_line3" class="ai-shape ai-rect" x="194" y="431" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <text id="label_5v" class="ai-shape ai-text" x="255" y="33" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--secondary-dark)">5V Load</text>
+  <text id="label_3v" class="ai-shape ai-text" x="-84.7" y="278" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-1)">3.3V Control</text>
+  <path class="ai-connection" d="M200 50 L200 72 L170 72 L170 94" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <path class="ai-connection" d="M230 94 L230 113 L194 113 L194 132" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <path class="ai-connection" d="M194 185 L208.5 241" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <path class="ai-connection" d="M58.5 278 L74.5 278" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M134.5 278 L180.5 278" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M208.5 315 L208.5 347 L170 347 L170 379" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M230 379 L230 396 L200 396 L200 413" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+</svg>

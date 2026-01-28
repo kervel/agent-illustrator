@@ -14,6 +14,8 @@ created_at: 2026-01-28T14:30:00+01:00
 - Q: How handle top-level elements with rotation? → A: Same as templates in principle (local solve, rotate, global solve). Simple shapes have nothing to solve locally, but paths with vertices may need investigation.
 - Q: Can external constraints reference path vertices? → A: Defer investigation to planning phase. Unknown if currently supported.
 - Q: How to compute bounding box of complex paths (arcs, curves) after rotation? → A: Use "loose bounds" approach: compute unrotated AABB, rotate its 4 corners, take AABB of those corners. Simpler than finding mathematical extrema, consistent with CSS/SVG behavior.
+- Q: What should happen when the local solver encounters an unsolvable constraint within a template? → A: Fail fast - abort entire render with clear error message pointing to the template.
+- Q: How should the rotation center be determined for template instances? → A: Use the geometric center of the bounding box enclosing all child elements (child bounds center).
 
 ## Overview
 
@@ -251,13 +253,14 @@ An anchor that has been transformed from local to global coordinates, including 
 
 ## Assumptions
 
-- All template instances have a well-defined center point for rotation (computed from child bounds)
+- All template instances have a well-defined center point for rotation: the geometric center of the bounding box enclosing all child elements
 - Rotation angles are specified in degrees (consistent with Feature 006)
 - Clockwise positive rotation convention (consistent with SVG and Feature 006)
 - Two-phase solving adds acceptable overhead for typical diagram sizes (50-500 elements)
 - External constraints referencing non-exported elements remain an error (no change from current behavior)
 - Layout containers (row, col, stack) inside templates are resolved during local solving
 - Top-level rotated elements follow the same local/global pattern (trivial local phase for simple shapes)
+- Unsolvable constraints within a template cause immediate failure with clear error message (fail fast)
 
 ## Investigation Required
 
