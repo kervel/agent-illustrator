@@ -470,8 +470,93 @@ constrain foo.left = c1_body.right + 10  // c1_body = instance name + underscore
 
 **Example**: BUG-002 (rotation on templates) led to discovering that the entire solver architecture needs refactoring (Feature 010). A workaround would have hidden this architectural issue.
 
+### LL-11: Use Constraints to Connect Sub-elements, Not Hardcoded Coordinates
+
+**Problem**: When drawing complex symbols with multiple pieces (e.g., a diagonal line that should connect to a vertical lead), manually computing coordinates results in gaps and misalignment.
+
+**Solution**: Use the constraint system to join pieces at their bounding box edges:
+```ail
+// Diagonal goes up-right from base bar
+path collector_diag [...] { vertex a [x: 0, y: 14] line_to b [x: 17, y: 0] }
+constrain collector_diag.left = base_bar.right
+
+// Lead connects exactly to the diagonal's endpoint via constraints
+rect collector_lead [width: 2, height: 18, ...]
+constrain collector_lead.center_x = collector_diag.right
+constrain collector_lead.bottom = collector_diag.top
+```
+
+**Rationale**: Constraints express intent ("these two pieces must touch") rather than requiring the author to compute exact coordinates. This is critical for agent-generated diagrams where spatial reasoning is unreliable.
+
+### LL-12: Reference Real-World Symbol Standards (IEEE 315, IEC 60617)
+
+**Problem**: AI agents tend to draw schematic symbols from memory, producing incorrect or non-standard representations.
+
+**Solution**: When drawing electronic (or any domain-specific) symbols, look up the standard symbol and compare. Key features to verify:
+- NPN BJT: diagonal collector/emitter lines from base bar, arrow on emitter pointing OUT
+- N-channel enhancement MOSFET: broken channel (3 segments), arrow pointing toward gate, separate drain/source
+- Diodes: triangle + bar, correct orientation for current flow direction
+
+**Rationale**: "Close enough" symbols confuse domain experts. Standard symbols have precise meaning.
+
+### LL-13: Three-Phase Iterative Workflow for Schematic Diagrams
+
+**Problem**: Trying to get everything right in one pass is unrealistic. Different aspects of a diagram require different focus.
+
+**Solution**: Use a structured three-phase iteration:
+
+1. **Phase 1 - Component Symbols**: Get each template right in isolation
+   - Compare against standard references (IEEE 315, etc.)
+   - Test each symbol standalone before integrating
+   - Use constraints to connect sub-elements (LL-11)
+   - Verify anchors are at correct positions with correct directions
+
+2. **Phase 2 - Global Layout**: Position components in the overall diagram
+   - Establish voltage domains / functional groups
+   - Set primary alignment axes (power rails at top, grounds at bottom)
+   - Space components to avoid overlap
+   - Align related elements (e.g., all grounds at same y)
+
+3. **Phase 3 - Connections and Labels**: Optimize wiring and annotation
+   - Check for overlapping connectors — resolve by adjusting spacing or routing
+   - Verify all rails/nets actually connect to something
+   - Ensure labels don't overlap with wires or components
+   - Simplify routing: prefer straight lines, minimize detours
+   - Font sizes appropriate to component scale
+
+**Rationale**: Each phase has a clear focus and success criteria. Mixing concerns leads to iterating forever without converging.
+
+### LL-14: Avoid Conflicting Constraints on the Same Dimension
+
+**Problem**: Setting both a size attribute (e.g., `width: 2`) and constraints on both edges of the same dimension (e.g., `left` and `right`) creates conflicts. The constraint solver cannot stretch elements.
+
+**Solution**: When spanning a computed distance, use one of:
+- A `path` element with line_to (can be positioned freely)
+- A rect with only ONE positional constraint per axis plus a size attribute
+- A rect with two edge constraints but NO size attribute (if the solver supports stretching)
+
+**Example of conflict**:
+```ail
+// BAD: height: 2 conflicts with top/bottom constraints
+rect bar [width: 2, height: 2, ...]
+constrain bar.top = element_a.center_y    // wants to set position
+constrain bar.bottom = element_b.center_y  // wants to set position + stretch
+```
+
+### LL-15: Anchor Direction Semantics — "Facing" vs "Arrival"
+
+**Problem**: Anchor `direction` means "the direction this anchor faces outward." Connection routing must interpret this correctly for the wire's last segment to arrive INTO the anchor from outside.
+
+**Solution**: For orthogonal routing, negate `to_dir` so the last segment goes opposite to the anchor's facing direction:
+- Anchor faces UP → wire arrives from above, last segment goes DOWN
+- Anchor faces LEFT → wire arrives from left, last segment goes RIGHT
+
+For curved routing, this is automatic: the control point is placed in the `to_dir` direction, naturally making the curve approach from outside.
+
+**Example of the bug**: When `to_dir` was used directly (not negated), wires made U-turns at their destination, going away from the anchor instead of into it.
+
 ---
 
 *Created: 2026-01-28*
-*Updated: 2026-01-28 (added Lessons Learned LL-6 through LL-9 from solver discussion)*
+*Updated: 2026-01-28 (added LL-11 through LL-15 from symbol redesign and routing sessions)*
 *Feature: 009-mosfet-driver-example*
