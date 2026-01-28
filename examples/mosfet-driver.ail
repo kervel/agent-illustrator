@@ -291,7 +291,7 @@ npn q_driver
 // Control section (3.3V domain)
 gpio_pin gpio [name: "GPIO_4"]
 resistor r_base [value: "1kΩ"]
-resistor r_led [value: "330Ω"]
+resistor r_led [value: "330Ω", rotation: 90]
 led status_led [color: green]
 
 // Ground symbols
@@ -306,17 +306,17 @@ ground_sym gnd_led
 constrain vcc_12v.center_x = 350
 constrain vcc_12v.top = 20
 
-constrain load_motor.center_x = vcc_12v.center_x
+constrain load_motor.positive_x = vcc_12v.conn_x
 constrain load_motor.top = vcc_12v.bottom + 30
 
 constrain d_flyback.center_x = load_motor.center_x + 60
 constrain d_flyback.center_y = load_motor.center_y
 
-// MOSFET below motor
-constrain q_main.center_x = load_motor.center_x
+// MOSFET below motor - drain aligns with motor negative terminal
+constrain q_main.drain_x = load_motor.negative_x
 constrain q_main.top = load_motor.bottom + 40
 
-constrain gnd_main.center_x = q_main.center_x
+constrain gnd_main.conn_x = q_main.source_x
 constrain gnd_main.top = q_main.bottom + 30
 
 
@@ -337,7 +337,7 @@ constrain q_driver.top = r_pullup.bottom + 80
 constrain r_pulldown.center_x = r_gate.center_x + 40
 constrain r_pulldown.top = r_gate.center_y + 20
 
-constrain gnd_driver.center_x = q_driver.center_x
+constrain gnd_driver.conn_x = q_driver.emitter_x
 constrain gnd_driver.top = q_driver.bottom + 30
 
 
@@ -351,13 +351,13 @@ constrain gpio.top = vcc_3v3.bottom + 60
 constrain r_base.left = gpio.right + 15
 constrain r_base.center_y = gpio.center_y
 
-constrain r_led.center_x = vcc_3v3.center_x
+constrain r_led.left_conn_x = vcc_3v3.center_x
 constrain r_led.top = gpio.bottom + 40
 
-constrain status_led.center_x = r_led.center_x
+constrain status_led.anode_x = r_led.right_conn_x
 constrain status_led.top = r_led.bottom + 30
 
-constrain gnd_led.center_x = status_led.center_x
+constrain gnd_led.conn_x = status_led.cathode_x
 constrain gnd_led.top = status_led.bottom + 30
 
 

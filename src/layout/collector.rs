@@ -359,43 +359,70 @@ impl ConstraintCollector {
                 );
 
                 if !left_is_anchor && !right_is_anchor {
-                    // No anchors involved — use standard collection
                     self.collect_constrain(expr, span);
                     return Ok(());
                 }
 
+                // Resolve anchor references to Equal constraints with offsets.
+                // anchor_x = element.x + offset, so the constraint stays valid
+                // even when the element moves during global solving.
                 if left_is_anchor && right_is_anchor {
-                    // Both sides are anchors: resolve both to constants, emit nothing
-                    // (two constants can't form a useful constraint)
-                    return Err(
-                        "Cannot constrain two anchor references against each other".to_string()
+                    // Both anchors: left_elem.X + left_off = right_elem.X + right_off
+                    let (left_off, left_prop) =
+                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
+                    let (right_off, right_prop) =
+                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
+                    let left_var = LayoutVariable::new(
+                        left.element.node.leaf().0.clone(),
+                        left_prop,
                     );
-                }
-
-                if right_is_anchor {
-                    // Right side is anchor: constrain left_var = constant
+                    let right_var = LayoutVariable::new(
+                        right.element.node.leaf().0.clone(),
+                        right_prop,
+                    );
+                    // left_var + left_off = right_var + right_off
+                    // → left_var = right_var + (right_off - left_off)
+                    self.constraints.push(LayoutConstraint::Equal {
+                        left: left_var,
+                        right: right_var,
+                        offset: right_off - left_off,
+                        source: ConstraintSource::user(span.clone(), "constrain anchor to anchor"),
+                    });
+                } else if right_is_anchor {
+                    // Right side is anchor: left_var = right_elem.X + anchor_offset
                     let left_var = self.property_to_variable(left);
-                    let value = resolve_anchor_value(
-                        &right.element.node,
-                        &right.property.node,
-                        layout_result,
-                    )?;
-                    self.constraints.push(LayoutConstraint::Fixed {
-                        variable: left_var,
-                        value,
+                    let (anchor_off, anchor_prop) =
+                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
+                    let right_var = LayoutVariable::new(
+                        right.element.node.leaf().0.clone(),
+                        anchor_prop,
+                    );
+                    self.constraints.push(LayoutConstraint::Equal {
+                        left: left_var,
+                        right: right_var,
+                        offset: anchor_off,
                         source: ConstraintSource::user(span.clone(), "constrain to anchor"),
                     });
                 } else {
-                    // Left side is anchor: constrain right_var = constant
+                    // Left side is anchor: right_var = left_elem.X + anchor_offset
+                    // → left_elem.X + anchor_off = right_var
+                    // → right_var = left_elem.X + anchor_off (swap left/right)
                     let right_var = self.property_to_variable(right);
-                    let value = resolve_anchor_value(
-                        &left.element.node,
-                        &left.property.node,
-                        layout_result,
-                    )?;
-                    self.constraints.push(LayoutConstraint::Fixed {
-                        variable: right_var,
-                        value,
+                    let (anchor_off, anchor_prop) =
+                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
+                    let left_var = LayoutVariable::new(
+                        left.element.node.leaf().0.clone(),
+                        anchor_prop,
+                    );
+                    // left_var + anchor_off = right_var → right_var = left_var + anchor_off
+                    // Equal says: left = right + offset → left_var_anchor = right_var + offset
+                    // We want: right_var = left_var + anchor_off
+                    // → right_var - left_var = anchor_off
+                    // Equal format: left = right + offset → swap: right_var = left_var + anchor_off
+                    self.constraints.push(LayoutConstraint::Equal {
+                        left: right_var,
+                        right: left_var,
+                        offset: anchor_off,
                         source: ConstraintSource::user(span.clone(), "constrain to anchor"),
                     });
                 }
@@ -421,48 +448,59 @@ impl ConstraintCollector {
                 }
 
                 if left_is_anchor && right_is_anchor {
-                    return Err(
-                        "Cannot constrain two anchor references against each other".to_string()
+                    // left_elem.X + left_off = right_elem.X + right_off + user_offset
+                    let (left_off, left_prop) =
+                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
+                    let (right_off, right_prop) =
+                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
+                    let left_var = LayoutVariable::new(
+                        left.element.node.leaf().0.clone(),
+                        left_prop,
                     );
-                }
-
-                if right_is_anchor {
+                    let right_var = LayoutVariable::new(
+                        right.element.node.leaf().0.clone(),
+                        right_prop,
+                    );
+                    self.constraints.push(LayoutConstraint::Equal {
+                        left: left_var,
+                        right: right_var,
+                        offset: right_off - left_off + offset,
+                        source: ConstraintSource::user(span.clone(), "constrain anchor to anchor with offset"),
+                    });
+                } else if right_is_anchor {
+                    // left_var = right_elem.X + anchor_off + user_offset
                     let left_var = self.property_to_variable(left);
-                    let value = resolve_anchor_value(
-                        &right.element.node,
-                        &right.property.node,
-                        layout_result,
-                    )?;
-                    self.constraints.push(LayoutConstraint::Fixed {
-                        variable: left_var,
-                        value: value + offset,
-                        source: ConstraintSource::user(
-                            span.clone(),
-                            "constrain to anchor with offset",
-                        ),
+                    let (anchor_off, anchor_prop) =
+                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
+                    let right_var = LayoutVariable::new(
+                        right.element.node.leaf().0.clone(),
+                        anchor_prop,
+                    );
+                    self.constraints.push(LayoutConstraint::Equal {
+                        left: left_var,
+                        right: right_var,
+                        offset: anchor_off + offset,
+                        source: ConstraintSource::user(span.clone(), "constrain to anchor with offset"),
                     });
                 } else {
+                    // left_elem.X + anchor_off = right_var + user_offset
+                    // → right_var = left_elem.X + anchor_off - user_offset
                     let right_var = self.property_to_variable(right);
-                    let value = resolve_anchor_value(
-                        &left.element.node,
-                        &left.property.node,
-                        layout_result,
-                    )?;
-                    // left = right + offset → right = left - offset → right = value - offset
-                    self.constraints.push(LayoutConstraint::Fixed {
-                        variable: right_var,
-                        value: value - offset,
-                        source: ConstraintSource::user(
-                            span.clone(),
-                            "constrain to anchor with offset",
-                        ),
+                    let (anchor_off, anchor_prop) =
+                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
+                    let left_var = LayoutVariable::new(
+                        left.element.node.leaf().0.clone(),
+                        anchor_prop,
+                    );
+                    self.constraints.push(LayoutConstraint::Equal {
+                        left: right_var,
+                        right: left_var,
+                        offset: anchor_off - offset,
+                        source: ConstraintSource::user(span.clone(), "constrain to anchor with offset"),
                     });
                 }
                 Ok(())
             }
-            // For Constant, GreaterOrEqual, LessOrEqual, Midpoint, Contains:
-            // The left side could theoretically be an anchor, but that doesn't make sense
-            // (you can't set an anchor's position via constraint). Fall through to standard.
             _ => {
                 self.collect_constrain(expr, span);
                 Ok(())
@@ -668,15 +706,19 @@ fn expr_has_anchor_ref(expr: &ConstraintExpr) -> bool {
     }
 }
 
-/// Resolve an anchor reference to a concrete coordinate value (Feature 011).
+/// Resolve an anchor reference to an offset from the element's origin (Feature 011).
 ///
-/// Looks up the named anchor on the specified element in the layout result
-/// and returns its x or y coordinate.
-fn resolve_anchor_value(
+/// Returns (offset, base_property) where:
+/// - offset = anchor position - element origin on the relevant axis
+/// - base_property = LayoutProperty::X or Y depending on the anchor axis
+///
+/// This allows the constraint solver to express anchor positions as
+/// `element.X + offset`, which stays correct when the element moves.
+fn resolve_anchor_offset(
     element_path: &ElementPath,
     property: &ConstraintProperty,
     layout_result: &LayoutResult,
-) -> Result<f64, String> {
+) -> Result<(f64, super::solver::LayoutProperty), String> {
     let element_id = element_path.leaf().0.as_str();
     let (anchor_name, axis) = match property {
         ConstraintProperty::AnchorX(name) => (name.as_str(), "x"),
@@ -704,8 +746,14 @@ fn resolve_anchor_value(
     })?;
 
     Ok(match axis {
-        "x" => anchor.position.x,
-        "y" => anchor.position.y,
+        "x" => (
+            anchor.position.x - element.bounds.x,
+            super::solver::LayoutProperty::X,
+        ),
+        "y" => (
+            anchor.position.y - element.bounds.y,
+            super::solver::LayoutProperty::Y,
+        ),
         _ => unreachable!(),
     })
 }
