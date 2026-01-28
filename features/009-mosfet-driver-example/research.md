@@ -271,12 +271,29 @@ cargo run -- /tmp/test-component.ail > test.svg
 **Solution**: Use the `path` element with vertices for complex shapes:
 ```ail
 path triangle [fill: none, stroke: foreground-1, stroke_width: 2] {
-    vertex top_left [x: 0, y: 0]
-    line_to top_right [x: 20, y: 0]
+    vertex tl [x: 0, y: 0]
+    line_to tr [x: 20, y: 0]
     line_to tip [x: 10, y: 18]
     close
 }
 ```
+
+**Note**: Avoid reserved keywords as vertex names (`left`, `right`, `top`, `bottom`, etc.). Use abbreviations like `tl`, `tr`, `bl`, `br`.
+
+### LL-3b: Test One Component Per Image
+
+**Problem**: Testing multiple components in one "all components" image leads to the same trap as debugging the full diagram - issues get lost.
+
+**Solution**: Create separate test files for each component:
+```bash
+# Test resistor
+echo 'template "resistor" {...} resistor r1' > /tmp/test-resistor.ail
+# Test LED
+echo 'template "led" {...} led d1' > /tmp/test-led.ail
+# Test each in isolation
+```
+
+**Rationale**: One component per image means one thing to focus on.
 
 ### LL-4: Color References Must Be Exact
 

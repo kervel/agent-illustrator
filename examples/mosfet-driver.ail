@@ -96,8 +96,8 @@ template "nmos" {
 template "led" (color: accent-1) {
     // Triangle body (diode) pointing down - using path
     path triangle [fill: none, stroke: foreground-1, stroke_width: 2] {
-        vertex top_left [x: 0, y: 0]
-        line_to top_right [x: 20, y: 0]
+        vertex tl [x: 0, y: 0]
+        line_to tr [x: 20, y: 0]
         line_to tip [x: 10, y: 18]
         close
     }
@@ -117,13 +117,36 @@ template "led" (color: accent-1) {
     constrain cathode_lead.center_x = cathode_bar.center_x
     constrain cathode_lead.top = cathode_bar.bottom
 
-    // Light emission arrows (colored to show LED color)
-    rect arrow1 [width: 10, height: 2, fill: color, stroke: none]
-    rect arrow2 [width: 10, height: 2, fill: color, stroke: none]
-    constrain arrow1.left = triangle.right + 6
-    constrain arrow1.center_y = triangle.top + 8
-    constrain arrow2.left = triangle.right + 6
-    constrain arrow2.center_y = triangle.top + 14
+    // Light emission arrows - diagonal pointing up-right with arrowheads
+    path arrow1 [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 10, y: 0]
+    }
+    path head1 [fill: color, stroke: none] {
+        vertex t [x: 10, y: 0]
+        line_to bl [x: 6, y: 0]
+        line_to br [x: 10, y: 4]
+        close
+    }
+    constrain arrow1.left = triangle.right + 4
+    constrain arrow1.top = triangle.top + 2
+    constrain head1.left = arrow1.left + 6
+    constrain head1.top = arrow1.top
+
+    path arrow2 [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 10, y: 0]
+    }
+    path head2 [fill: color, stroke: none] {
+        vertex t [x: 10, y: 0]
+        line_to bl [x: 6, y: 0]
+        line_to br [x: 10, y: 4]
+        close
+    }
+    constrain arrow2.left = triangle.right + 4
+    constrain arrow2.top = arrow1.bottom + 2
+    constrain head2.left = arrow2.left + 6
+    constrain head2.top = arrow2.top
 
     anchor anode [position: anode_lead.top, direction: up]
     anchor cathode [position: cathode_lead.bottom, direction: down]
