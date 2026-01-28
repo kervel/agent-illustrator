@@ -1,0 +1,204 @@
+// MOSFET Driver with LED Status Indicator
+// Demonstrates: Templates, parameterization, semantic anchors, circuit layout
+// Voltage domains: 3.3V (GPIO) and 5V (load)
+//
+// Note: Uses `--` (undirected) connections instead of `->` (arrows)
+// because electronic schematics don't typically use arrows on wires.
+
+// === COMPONENT TEMPLATES ===
+
+// T001: Resistor template with configurable value
+template "resistor" (value: "R") {
+    rect body [width: 60, height: 20, fill: background-2, stroke: foreground, stroke_width: 1.5, label: value]
+    anchor left_conn [position: body.left, direction: left]
+    anchor right_conn [position: body.right, direction: right]
+}
+
+// T002: N-Channel MOSFET template with proper symbol
+// Standard symbol: circle with vertical channel, gate bar, and arrow on source
+template "nmos" {
+    // Circle body enclosing the transistor - thicker stroke for visibility
+    circle body [size: 50, fill: none, stroke: foreground, stroke_width: 2]
+
+    // Gate bar (vertical, inside circle on left side)
+    rect gate_bar [width: 2, height: 28, fill: foreground, stroke: none]
+    constrain gate_bar.center_x = body.center_x - 6
+    constrain gate_bar.center_y = body.center_y
+
+    // Vertical channel line (right of gate bar, with gap)
+    rect channel [width: 2, height: 28, fill: foreground, stroke: none]
+    constrain channel.center_x = body.center_x + 6
+    constrain channel.center_y = body.center_y
+
+    // Gate line: extends from gate_bar left edge out through circle
+    rect gate_line [width: 35, height: 2, fill: foreground, stroke: none]
+    constrain gate_line.right = gate_bar.left
+    constrain gate_line.center_y = body.center_y
+
+    // Drain: horizontal stub from channel top + vertical line up out of circle
+    rect drain_stub [width: 12, height: 2, fill: foreground, stroke: none]
+    constrain drain_stub.right = channel.center_x + 1
+    constrain drain_stub.center_y = channel.top + 2
+
+    rect drain_vert [width: 2, height: 18, fill: foreground, stroke: none]
+    constrain drain_vert.center_x = drain_stub.left
+    constrain drain_vert.bottom = body.top
+
+    // Source: horizontal stub from channel bottom + vertical line down out of circle
+    rect source_stub [width: 12, height: 2, fill: foreground, stroke: none]
+    constrain source_stub.right = channel.center_x + 1
+    constrain source_stub.center_y = channel.bottom - 2
+
+    rect source_vert [width: 2, height: 18, fill: foreground, stroke: none]
+    constrain source_vert.center_x = source_stub.left
+    constrain source_vert.top = body.bottom
+
+    // Arrow on source stub pointing toward channel (N-channel indicator)
+    rect arrow_shaft [width: 6, height: 2, fill: foreground, stroke: none]
+    constrain arrow_shaft.right = channel.left - 2
+    constrain arrow_shaft.center_y = source_stub.center_y
+
+    // Terminal labels outside the circle
+    text "G" g_label [font_size: 12, fill: foreground]
+    text "D" d_label [font_size: 12, fill: foreground]
+    text "S" s_label [font_size: 12, fill: foreground]
+
+    constrain g_label.right = gate_line.left - 6
+    constrain g_label.center_y = gate_line.center_y
+    constrain d_label.center_x = drain_vert.center_x
+    constrain d_label.bottom = drain_vert.top - 6
+    constrain s_label.center_x = source_vert.center_x
+    constrain s_label.top = source_vert.bottom + 6
+
+    // Semantic anchors at terminal ends
+    anchor gate [position: gate_line.left, direction: left]
+    anchor drain [position: drain_vert.top, direction: up]
+    anchor source [position: source_vert.bottom, direction: down]
+}
+
+// T003: LED template with configurable color - simplified rectangle style
+template "led" (color: accent-1) {
+    // Main LED body
+    rect body [width: 24, height: 30, fill: color, stroke: foreground, stroke_width: 1.5]
+
+    // Polarity indicator (line at cathode)
+    rect cathode_mark [width: 24, height: 4, fill: foreground, stroke: none]
+    constrain cathode_mark.center_x = body.center_x
+    constrain cathode_mark.top = body.bottom
+
+    // Label
+    text "LED" led_label [font_size: 10, fill: text-2]
+    constrain led_label.center_x = body.center_x
+    constrain led_label.top = cathode_mark.bottom + 2
+
+    // Semantic anchors (current flows anode to cathode)
+    anchor anode [position: body.top - 4, direction: up]
+    anchor cathode [position: cathode_mark.bottom + 4, direction: down]
+}
+
+// T004: GPIO Pin template
+template "gpio_pin" (name: "GPIO") {
+    rect body [width: 80, height: 30, fill: accent-2, stroke: accent-1, stroke_width: 1.5, label: name]
+    anchor output [position: body.right + 4, direction: right]
+}
+
+// T005: Power rail template
+template "power_rail" (voltage: "+5V") {
+    // Power symbol: horizontal bar with label
+    rect rail [width: 80, height: 4, fill: secondary-dark, stroke: none]
+    rect label_bg [width: 50, height: 20, fill: none, stroke: none, label: voltage]
+    constrain label_bg.center_x = rail.center_x
+    constrain label_bg.bottom = rail.top - 2
+    anchor conn [position: rail.bottom + 4, direction: down]
+}
+
+// T006: Ground symbol template - three horizontal bars decreasing in width
+template "ground_sym" {
+    // Use explicit positioning for centering
+    rect line1 [width: 40, height: 3, fill: foreground-2, stroke: none]
+    rect line2 [width: 26, height: 3, fill: foreground-2, stroke: none]
+    rect line3 [width: 12, height: 3, fill: foreground-2, stroke: none]
+
+    // Stack vertically with gaps
+    constrain line2.top = line1.bottom + 4
+    constrain line3.top = line2.bottom + 4
+
+    // Center all lines
+    constrain line2.center_x = line1.center_x
+    constrain line3.center_x = line1.center_x
+
+    anchor conn [position: line1.top - 4, direction: up]
+}
+
+
+// === CIRCUIT LAYOUT ===
+
+// Instantiate all components
+power_rail vcc [voltage: "+5V"]
+resistor r_limit [value: "220Ω"]
+led status_led [color: green]
+gpio_pin gpio [name: "GPIO_5"]
+resistor r_gate [value: "10kΩ"]
+nmos q1
+resistor r_pulldown [value: "10kΩ"]
+ground_sym gnd
+
+// === LAYOUT POSITIONING ===
+
+// Power rail at top center
+constrain vcc.center_x = 200
+constrain vcc.top = 20
+
+// Load section: resistor and LED below power rail
+constrain r_limit.center_x = vcc.center_x
+constrain r_limit.top = vcc.bottom + 40
+
+constrain status_led.center_x = vcc.center_x
+constrain status_led.top = r_limit.bottom + 30
+
+// MOSFET below LED, aligned
+constrain q1.center_x = vcc.center_x
+constrain q1.top = status_led.bottom + 40
+
+// GPIO and gate resistor to the left of MOSFET
+constrain gpio.right = q1.left - 100
+constrain gpio.center_y = q1.center_y
+
+constrain r_gate.left = gpio.right + 20
+constrain r_gate.center_y = q1.center_y
+
+// Pulldown resistor below MOSFET
+constrain r_pulldown.center_x = q1.center_x
+constrain r_pulldown.top = q1.bottom + 40
+
+// Ground below pulldown
+constrain gnd.center_x = q1.center_x
+constrain gnd.top = r_pulldown.bottom + 30
+
+
+// === CONNECTIONS (using -- for no arrows) ===
+
+// 5V domain (load path)
+vcc.conn -- r_limit.left_conn [stroke: secondary-dark, stroke_width: 2]
+r_limit.right_conn -- status_led.anode [stroke: secondary-dark, stroke_width: 2]
+status_led.cathode -- q1.drain [stroke: secondary-dark, stroke_width: 2]
+
+// 3.3V domain (gate drive)
+gpio.output -- r_gate.left_conn [stroke: accent-1, stroke_width: 2]
+r_gate.right_conn -- q1.gate [stroke: accent-1, stroke_width: 2]
+
+// Ground path
+q1.source -- r_pulldown.left_conn [stroke: foreground-2, stroke_width: 1.5]
+r_pulldown.right_conn -- gnd.conn [stroke: foreground-2, stroke_width: 1.5]
+
+
+// === ANNOTATIONS ===
+
+text "5V Load" label_5v [font_size: 11, fill: secondary-dark]
+text "3.3V Control" label_3v [font_size: 11, fill: accent-1]
+
+constrain label_5v.left = vcc.right + 15
+constrain label_5v.center_y = vcc.center_y
+
+constrain label_3v.right = gpio.left - 10
+constrain label_3v.center_y = gpio.center_y

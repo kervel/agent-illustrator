@@ -167,6 +167,72 @@ pub fn render(source: &str) -> Result<String, RenderError> {
     render_with_config(source, RenderConfig::default())
 }
 
+/// Validate all color references in a document against the stylesheet
+///
+/// Returns an error if any symbolic color (like `foreground`, `accent-1`) is not
+/// defined in the stylesheet or default palette.
+fn validate_colors(doc: &Document, stylesheet: &Stylesheet) -> Result<(), RenderError> {
+    use parser::ast::{Statement, StyleValue};
+
+    fn check_color(value: &StyleValue, stylesheet: &Stylesheet) -> Result<(), String> {
+        if let StyleValue::Color(color_value) = value {
+            if let Some(token) = color_value.token_string() {
+                stylesheet::validate_color_token(&token, stylesheet)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn validate_modifiers(
+        modifiers: &[parser::Spanned<parser::ast::StyleModifier>],
+        stylesheet: &Stylesheet,
+    ) -> Result<(), String> {
+        for modifier in modifiers {
+            check_color(&modifier.node.value.node, stylesheet)?;
+        }
+        Ok(())
+    }
+
+    fn validate_statement(stmt: &Statement, stylesheet: &Stylesheet) -> Result<(), String> {
+        match stmt {
+            Statement::Shape(s) => validate_modifiers(&s.modifiers, stylesheet)?,
+            Statement::Layout(l) => {
+                validate_modifiers(&l.modifiers, stylesheet)?;
+                for child in &l.children {
+                    validate_statement(&child.node, stylesheet)?;
+                }
+            }
+            Statement::Group(g) => {
+                validate_modifiers(&g.modifiers, stylesheet)?;
+                for child in &g.children {
+                    validate_statement(&child.node, stylesheet)?;
+                }
+            }
+            Statement::Connection(connections) => {
+                for conn in connections {
+                    validate_modifiers(&conn.modifiers, stylesheet)?;
+                }
+            }
+            Statement::TemplateDecl(t) => {
+                if let Some(body) = &t.body {
+                    for child in body {
+                        validate_statement(&child.node, stylesheet)?;
+                    }
+                }
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
+    for stmt in &doc.statements {
+        validate_statement(&stmt.node, stylesheet)
+            .map_err(|e| RenderError::Layout(layout::LayoutError::validation_error(e)))?;
+    }
+
+    Ok(())
+}
+
 /// Render DSL source to SVG with custom configuration
 ///
 /// # Example
@@ -196,6 +262,9 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
     } else {
         doc
     };
+
+    // Validate color references against stylesheet
+    validate_colors(&doc, &config.stylesheet)?;
 
     // Create layout config with trace flag propagated
     let mut layout_config = config.layout.clone();

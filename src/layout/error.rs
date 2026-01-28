@@ -52,6 +52,10 @@ pub enum LayoutError {
         valid_anchors: String,
         span: Span,
     },
+
+    /// Validation error (e.g., invalid color reference)
+    #[error("{0}")]
+    ValidationError(String),
 }
 
 impl LayoutError {
@@ -131,6 +135,11 @@ impl LayoutError {
             valid_anchors: valid_anchors.join(", "),
             span,
         }
+    }
+
+    /// Create a validation error (e.g., invalid color reference)
+    pub fn validation_error(message: impl Into<String>) -> Self {
+        Self::ValidationError(message.into())
     }
 }
 

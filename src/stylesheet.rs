@@ -161,6 +161,53 @@ impl Default for Stylesheet {
     }
 }
 
+/// Check if a symbolic color token is valid (exists in the palette)
+///
+/// Returns Ok(()) if valid, Err with message if not.
+/// Only validates symbolic tokens (foreground-1, accent-2, etc.),
+/// not hex colors (#ff0000) or named colors (red, blue).
+pub fn validate_color_token(token: &str, stylesheet: &Stylesheet) -> Result<(), String> {
+    // Try to resolve the token
+    if stylesheet.resolve(token).is_some() {
+        return Ok(());
+    }
+
+    // Check in default palette
+    let default = Stylesheet::default();
+    if default.resolve(token).is_some() {
+        return Ok(());
+    }
+
+    // Token not found - generate helpful error message
+    let category = if token.starts_with("foreground") {
+        "foreground"
+    } else if token.starts_with("background") {
+        "background"
+    } else if token.starts_with("text") {
+        "text"
+    } else if token.starts_with("accent") {
+        "accent"
+    } else if token.starts_with("secondary") {
+        "secondary"
+    } else if token.starts_with("status") {
+        "status"
+    } else {
+        ""
+    };
+
+    // List valid tokens in that category
+    let valid_tokens: Vec<_> = default.colors.keys()
+        .filter(|k| category.is_empty() || k.starts_with(category))
+        .cloned()
+        .collect();
+
+    Err(format!(
+        "Unknown color '{}'. Did you mean one of: {}?",
+        token,
+        valid_tokens.join(", ")
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

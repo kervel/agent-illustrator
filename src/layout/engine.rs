@@ -1745,11 +1745,35 @@ fn is_internal_constraint(constraint: &super::solver::LayoutConstraint) -> bool 
     use super::solver::{ConstraintOrigin, LayoutConstraint};
 
     match constraint {
-        LayoutConstraint::Equal { source, .. } => {
+        LayoutConstraint::Equal { left, right, source, .. } => {
             // Layout container constraints are internal (alignment within row/col)
-            // User-defined and intrinsic constraints are external (cross-container)
-            matches!(source.origin, ConstraintOrigin::LayoutContainer)
+            if matches!(source.origin, ConstraintOrigin::LayoutContainer) {
+                return true;
+            }
+            // User-defined constraints are internal if both elements share a common prefix
+            // (i.e., they are siblings within the same template instance)
+            // e.g., "gnd_line1" and "gnd_line2" share prefix "gnd"
+            if matches!(source.origin, ConstraintOrigin::UserDefined) {
+                return elements_share_parent_prefix(&left.element_id, &right.element_id);
+            }
+            false
         }
+        _ => false,
+    }
+}
+
+/// Check if two element IDs share a common parent prefix
+/// Template children are named like "parent_child", so "gnd_line1" and "gnd_line2" share "gnd"
+fn elements_share_parent_prefix(a: &str, b: &str) -> bool {
+    // Extract prefix (everything before the FIRST underscore)
+    // Template instance prefix is always the first segment before underscore
+    // e.g., "q1_gate_ext" has prefix "q1", not "q1_gate"
+    fn get_prefix(s: &str) -> Option<&str> {
+        s.find('_').map(|idx| &s[..idx])
+    }
+
+    match (get_prefix(a), get_prefix(b)) {
+        (Some(prefix_a), Some(prefix_b)) => prefix_a == prefix_b,
         _ => false,
     }
 }
@@ -2455,5 +2479,55 @@ mod tests {
         assert_eq!(result.root_elements[0].bounds.width, 100.0);
         // Height should be the default rect height (30.0)
         assert_eq!(result.root_elements[0].bounds.height, 30.0);
+    }
+
+    #[test]
+    fn test_template_internal_constraints_centering() {
+        // Regression test: template-internal constraints should keep children aligned
+        // when the template instance is moved by external constraints.
+        // Before the fix, children would get double-shifted.
+        use crate::template::{resolve_templates, TemplateRegistry};
+
+        let doc = parse(r#"
+            template "stack3" {
+                rect line1 [width: 40, height: 3]
+                rect line2 [width: 26, height: 3]
+                rect line3 [width: 12, height: 3]
+                constrain line2.top = line1.bottom + 4
+                constrain line3.top = line2.bottom + 4
+                constrain line2.center_x = line1.center_x
+                constrain line3.center_x = line1.center_x
+            }
+            stack3 gnd
+            constrain gnd.x = 200
+        "#).unwrap();
+
+        let mut registry = TemplateRegistry::new();
+        let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
+        let config = LayoutConfig::default();
+        let mut result = compute(&doc, &config).unwrap();
+        // Apply constraint solver (needed for `constrain` statements to take effect)
+        resolve_constrain_statements(&mut result, &doc, &config).unwrap();
+
+        // Find the template instance
+        let gnd = result.elements.get("gnd").expect("gnd should exist");
+        let line1 = result.elements.get("gnd_line1").expect("gnd_line1 should exist");
+        let line2 = result.elements.get("gnd_line2").expect("gnd_line2 should exist");
+        let line3 = result.elements.get("gnd_line3").expect("gnd_line3 should exist");
+
+        // All three lines should be centered on the same x coordinate
+        let center1 = line1.bounds.x + line1.bounds.width / 2.0;
+        let center2 = line2.bounds.x + line2.bounds.width / 2.0;
+        let center3 = line3.bounds.x + line3.bounds.width / 2.0;
+
+        // Allow small floating point tolerance
+        assert!((center1 - center2).abs() < 1.0,
+            "line1 and line2 should be centered: {} vs {}", center1, center2);
+        assert!((center1 - center3).abs() < 1.0,
+            "line1 and line3 should be centered: {} vs {}", center1, center3);
+
+        // The template should be at x=200 (or near it given constraint solving)
+        assert!(gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
+            "gnd should be near x=200, got {}", gnd.bounds.x);
     }
 }
