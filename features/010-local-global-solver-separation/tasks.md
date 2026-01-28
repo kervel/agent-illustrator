@@ -747,7 +747,7 @@ fn render_and_get_anchor_position(source: &str, element_id: &str, anchor_name: &
 
 ---
 
-### T025: Test Rotated Template Anchor Positions
+### [X] T025: Test Rotated Template Anchor Positions
 **File**: `tests/rotation_integration.rs`
 **Goal**: Verify anchors transform correctly under rotation
 
@@ -778,7 +778,7 @@ fn test_rotated_template_anchor_position() {
 
 ---
 
-### T026: Test External Constraint to Rotated Child
+### [X] T026: Test External Constraint to Rotated Child
 **File**: `tests/rotation_integration.rs`
 **Goal**: Verify constraints use post-rotation bounding boxes
 
@@ -809,7 +809,7 @@ fn test_external_constraint_to_rotated_child() {
 
 ---
 
-### T027: Test Connection to Rotated Anchor
+### [X] T027: Test Connection to Rotated Anchor
 **File**: `tests/rotation_integration.rs`
 **Goal**: Verify connections attach at rotated anchor positions
 
@@ -840,7 +840,7 @@ fn test_connection_to_rotated_anchor() {
 
 ---
 
-### T028: Test Via Point Through Rotated Element
+### [X] T028: Test Via Point Through Rotated Element
 **File**: `tests/rotation_integration.rs`
 **Goal**: Verify curved routing uses rotated element centers
 

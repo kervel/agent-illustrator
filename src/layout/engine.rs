@@ -509,6 +509,21 @@ fn update_element_anchors_in_tree(elements: &mut [ElementLayout], elem_id: &str,
     }
 }
 
+/// Recursively rotate anchor directions for an element in the tree structure.
+fn rotate_anchor_directions_in_tree(
+    elem: &mut ElementLayout,
+    target_id: &str,
+    rotation: &super::transform::RotationTransform,
+) {
+    if elem.id.as_ref().map(|i| i.0.as_str()) == Some(target_id) {
+        elem.anchors.rotate_directions(rotation);
+        return;
+    }
+    for child in &mut elem.children {
+        rotate_anchor_directions_in_tree(child, target_id, rotation);
+    }
+}
+
 /// Solve global (cross-template) constraints using post-rotation bounds (Phase 4).
 ///
 /// This function:
@@ -2079,7 +2094,8 @@ pub fn resolve_constrain_statements_two_phase(
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
 
-    if collector.constraints.is_empty() {
+    // Only return early if there are no constraints AND no rotations
+    if collector.constraints.is_empty() && template_rotations.is_empty() {
         return Ok(());
     }
 
@@ -2119,6 +2135,56 @@ pub fn resolve_constrain_statements_two_phase(
         local_results.insert(instance.clone(), local_result);
     }
 
+    // Phase 2b: Handle templates with rotation but no constraints
+    // These still need rotation applied to their bounds and anchors
+    if config.trace {
+        eprintln!("TRACE: Phase 2b - Processing {} templates with rotation", template_rotations.len());
+    }
+    for (instance, &angle) in template_rotations {
+        if config.trace {
+            eprintln!("TRACE: Checking template '{}' angle={}", instance, angle);
+        }
+        if local_results.contains_key(instance) {
+            if config.trace {
+                eprintln!("TRACE: Skipping '{}' - already processed", instance);
+            }
+            continue; // Already processed above
+        }
+        if angle.abs() <= f64::EPSILON {
+            if config.trace {
+                eprintln!("TRACE: Skipping '{}' - angle is ~0", instance);
+            }
+            continue; // No rotation to apply
+        }
+
+        if config.trace {
+            eprintln!("TRACE: Applying {}° rotation to template '{}' (no constraints)", angle, instance);
+        }
+
+        // Create a LocalSolverResult with current bounds for all elements in this template
+        let mut local_result = LocalSolverResult::new(instance.clone()).with_rotation(angle);
+
+        // Find all elements belonging to this template instance
+        for (elem_id, template_name) in &element_to_template {
+            if template_name == instance {
+                if let Some(elem) = result.elements.get(elem_id) {
+                    local_result.add_element_bounds(elem_id.clone(), elem.bounds);
+                    local_result.add_anchors(elem_id.clone(), elem.anchors.clone());
+                }
+            }
+        }
+
+        // Also add the template instance group itself
+        if let Some(elem) = result.elements.get(instance) {
+            local_result.add_element_bounds(instance.clone(), elem.bounds);
+            local_result.add_anchors(instance.clone(), elem.anchors.clone());
+        }
+
+        // Apply rotation
+        apply_rotation_to_local_result(&mut local_result, angle);
+        local_results.insert(instance.clone(), local_result);
+    }
+
     // Phase 3: Apply local results back to the layout
     apply_local_results(result, &local_results);
 
@@ -2132,6 +2198,26 @@ pub fn resolve_constrain_statements_two_phase(
     result.compute_bounds();
     recompute_builtin_anchors(result);
     recompute_custom_anchors(result, doc);
+
+    // Re-apply anchor direction rotation for rotated templates
+    // (recompute_custom_anchors overwrites with non-rotated directions from AST)
+    for (instance, &angle) in template_rotations {
+        if angle.abs() <= f64::EPSILON {
+            continue;
+        }
+
+        let rotation = super::transform::RotationTransform::new(angle, super::types::Point { x: 0.0, y: 0.0 });
+
+        // Rotate anchor directions for template instance group
+        if let Some(elem) = result.elements.get_mut(instance) {
+            elem.anchors.rotate_directions(&rotation);
+        }
+
+        // Also update in root_elements tree
+        for root in &mut result.root_elements {
+            rotate_anchor_directions_in_tree(root, instance, &rotation);
+        }
+    }
 
     Ok(())
 }

@@ -233,6 +233,53 @@ fn validate_colors(doc: &Document, stylesheet: &Stylesheet) -> Result<(), Render
     Ok(())
 }
 
+/// Extract rotation modifiers from template instances in a document.
+///
+/// Scans all statements (including nested ones) for template instances with
+/// a `rotation` modifier and builds a map from instance name to rotation angle.
+fn extract_template_rotations(doc: &Document) -> std::collections::HashMap<String, f64> {
+    use parser::ast::{Statement, StyleValue};
+    let mut rotations = std::collections::HashMap::new();
+
+    fn visit_statements(
+        stmts: &[parser::ast::Spanned<Statement>],
+        rotations: &mut std::collections::HashMap<String, f64>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::TemplateInstance(inst) => {
+                    // Check for rotation modifier
+                    for (key, value) in &inst.arguments {
+                        if key.node.0 == "rotation" {
+                            if let StyleValue::Number { value: angle, .. } = &value.node {
+                                rotations.insert(inst.instance_name.node.0.clone(), *angle);
+                            }
+                        }
+                    }
+                }
+                Statement::Layout(l) => {
+                    visit_statements(&l.children, rotations);
+                }
+                Statement::Group(g) => {
+                    visit_statements(&g.children, rotations);
+                }
+                Statement::Label(inner) => {
+                    // Labels contain a single inner statement
+                    let inner_spanned = parser::ast::Spanned {
+                        node: (**inner).clone(),
+                        span: stmt.span.clone(),
+                    };
+                    visit_statements(&[inner_spanned], rotations);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    visit_statements(&doc.statements, &mut rotations);
+    rotations
+}
+
 /// Render DSL source to SVG with custom configuration
 ///
 /// # Example
@@ -250,6 +297,10 @@ fn validate_colors(doc: &Document, stylesheet: &Stylesheet) -> Result<(), Render
 pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, RenderError> {
     // Parse the source
     let doc = parse(source)?;
+
+    // Extract rotation modifiers from template instances BEFORE resolution
+    // (template instances are converted to groups during resolution, losing their modifiers)
+    let template_rotations = extract_template_rotations(&doc);
 
     // Resolve templates if enabled
     let doc = if config.resolve_templates {
@@ -275,7 +326,17 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
 
     // Resolve constrain statements first (constraint-solver based positioning)
     // This must run before place statements so that offsets are applied after alignment
-    layout::resolve_constrain_statements(&mut result, &doc, &layout_config)?;
+    // Use two-phase solver when there are rotations, otherwise use single-phase
+    if template_rotations.is_empty() {
+        layout::resolve_constrain_statements(&mut result, &doc, &layout_config)?;
+    } else {
+        layout::engine::resolve_constrain_statements_two_phase(
+            &mut result,
+            &doc,
+            &layout_config,
+            &template_rotations,
+        )?;
+    }
 
     // Resolve constraints (relational positioning and offsets from `place` statements)
     layout::resolve_constraints(&mut result, &doc)?;

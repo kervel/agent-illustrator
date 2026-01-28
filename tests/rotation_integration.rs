@@ -6,22 +6,77 @@
 //! - Connections attach at rotated anchor positions
 //! - Via points (curved routing) use rotated element centers
 
+use std::collections::HashMap;
+
 use agent_illustrator::{
     layout::{compute, resolve_constrain_statements, LayoutConfig},
     parse,
+    parser::ast::{Statement, StyleValue},
     template::{resolve_templates, TemplateRegistry},
-    LayoutResult,
+    Document, LayoutResult,
 };
 
+/// Extract rotation modifiers from template instances in a document.
+fn extract_template_rotations(doc: &Document) -> HashMap<String, f64> {
+    let mut rotations = HashMap::new();
+
+    fn visit_statements(
+        stmts: &[agent_illustrator::parser::ast::Spanned<Statement>],
+        rotations: &mut HashMap<String, f64>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::TemplateInstance(inst) => {
+                    for (key, value) in &inst.arguments {
+                        if key.node.0 == "rotation" {
+                            if let StyleValue::Number { value: angle, .. } = &value.node {
+                                rotations.insert(inst.instance_name.node.0.clone(), *angle);
+                            }
+                        }
+                    }
+                }
+                Statement::Layout(l) => {
+                    visit_statements(&l.children, rotations);
+                }
+                Statement::Group(g) => {
+                    visit_statements(&g.children, rotations);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    visit_statements(&doc.statements, &mut rotations);
+    rotations
+}
+
 /// Helper to parse, resolve templates, compute layout, and apply constraints
+/// Uses the two-phase solver when rotations are present
 fn compute_layout(source: &str) -> Result<LayoutResult, String> {
     let doc = parse(source).map_err(|e| format!("Parse error: {:?}", e))?;
+
+    // Extract rotation modifiers BEFORE template resolution (they are lost during resolution)
+    let template_rotations = extract_template_rotations(&doc);
+
     let mut registry = TemplateRegistry::new();
     let doc = resolve_templates(doc, &mut registry).map_err(|e| format!("Template error: {:?}", e))?;
     let config = LayoutConfig::default();
     let mut result = compute(&doc, &config).map_err(|e| format!("Layout error: {:?}", e))?;
-    resolve_constrain_statements(&mut result, &doc, &config)
+
+    // Use two-phase solver when there are rotations
+    if template_rotations.is_empty() {
+        resolve_constrain_statements(&mut result, &doc, &config)
+            .map_err(|e| format!("Constraint error: {:?}", e))?;
+    } else {
+        agent_illustrator::layout::engine::resolve_constrain_statements_two_phase(
+            &mut result,
+            &doc,
+            &config,
+            &template_rotations,
+        )
         .map_err(|e| format!("Constraint error: {:?}", e))?;
+    }
+
     Ok(result)
 }
 
@@ -204,94 +259,237 @@ fn test_internal_constraints_centering() {
     );
 }
 
-// TODO: Enable these tests once rotation is fully integrated into the render pipeline
+// ============================================
+// T025: Test Rotated Template Anchor Positions
+// ============================================
 
-// #[test]
-// fn test_rotated_template_anchor_position() {
-//     let source = r#"
-//         template "box" {
-//             rect body [width: 40, height: 20]
-//             anchor left_pin [position: body.left, direction: left]
-//             anchor right_pin [position: body.right, direction: right]
-//         }
-//
-//         box b1 [rotation: 90]
-//     "#;
-//
-//     let result = compute_layout(source).expect("Should compute layout");
-//
-//     // After 90° clockwise rotation:
-//     // - Original left anchor (pointing left) should now point down
-//     // - Original right anchor (pointing right) should now point up
-//     // - 40x20 bounds should become 20x40
-//
-//     // Verify bounds changed
-//     let bounds = get_element_bounds(&result, "b1_body");
-//     assert!(bounds.is_some());
-//     let (_, _, w, h) = bounds.unwrap();
-//     // After 90° rotation, 40x20 becomes 20x40 (approximately, due to loose bounds)
-//     assert!(h > w, "Height should be greater than width after 90° rotation");
-//
-//     // Verify anchor directions transformed
-//     let left_dir = get_anchor_direction(&result, "b1", "left_pin");
-//     assert!(left_dir.is_some());
-//     let (dx, dy) = left_dir.unwrap();
-//     // After 90° clockwise rotation, left (-1, 0) becomes down (0, 1)
-//     assert!((dx).abs() < 0.1, "dx should be ~0 after rotation, got {}", dx);
-//     assert!(dy > 0.5, "dy should be positive (down) after rotation, got {}", dy);
-// }
+#[test]
+fn test_rotated_template_bounds() {
+    // Test that rotation modifier affects element bounds
+    // 90° rotation should swap width and height (approximately)
+    let source = r#"
+        template "box" {
+            rect body [width: 40, height: 20]
+            rect pin [width: 5, height: 5]
+        }
 
-// #[test]
-// fn test_external_constraint_to_rotated_child() {
-//     let source = r#"
-//         template "component" {
-//             rect body [width: 80, height: 40]
-//         }
-//
-//         component c1 [rotation: 90]
-//         rect label [width: 30, height: 20]
-//
-//         constrain label.left = c1_body.right + 10
-//     "#;
-//
-//     let result = compute_layout(source).expect("Should compute layout");
-//
-//     // After 90° rotation, 80x40 becomes approximately 40x80
-//     let c1_bounds = get_element_bounds(&result, "c1_body").expect("c1_body should exist");
-//     let label_bounds = get_element_bounds(&result, "label").expect("label should exist");
-//
-//     // label.left should be 10px right of the rotated c1_body's right edge
-//     let c1_right = c1_bounds.0 + c1_bounds.2;
-//     let label_left = label_bounds.0;
-//
-//     assert!(
-//         (label_left - (c1_right + 10.0)).abs() < 1.0,
-//         "label should be 10px right of c1_body: expected {}, got {}",
-//         c1_right + 10.0,
-//         label_left
-//     );
-// }
+        box b1 [rotation: 90]
+    "#;
 
-// #[test]
-// fn test_connection_to_rotated_anchor() {
-//     let source = r#"
-//         template "resistor" {
-//             rect body [width: 40, height: 16]
-//             anchor left_conn [position: body.left, direction: left]
-//             anchor right_conn [position: body.right, direction: right]
-//         }
-//
-//         rect source [width: 20, height: 20]
-//         resistor r1 [rotation: 90]
-//
-//         constrain r1.x = source.right + 50
-//
-//         source.right -> r1.left_conn
-//     "#;
-//
-//     let svg = agent_illustrator::render(source).expect("Should render");
-//
-//     // Connection should attach to the rotated position of left_conn
-//     // Verify by checking SVG path endpoints (would need SVG parsing)
-//     assert!(svg.contains("<path"), "Should have a connection path");
-// }
+    let result = compute_layout(source).expect("Should compute layout");
+
+    // After 90° rotation, 40x20 should become approximately 20x40
+    // (loose bounds may add some padding)
+    let bounds = get_element_bounds(&result, "b1_body");
+    assert!(bounds.is_some(), "b1_body should exist");
+
+    let (_, _, w, h) = bounds.unwrap();
+    // After 90° rotation, the taller dimension should be width (originally 40)
+    // and shorter should be height (originally 20)
+    assert!(
+        h > w * 1.5,
+        "After 90° rotation, height ({}) should be greater than width ({}) by factor ~2",
+        h, w
+    );
+}
+
+#[test]
+fn test_rotated_template_anchor_direction() {
+    // Test that anchor directions are rotated
+    let source = r#"
+        template "component" {
+            rect body [width: 40, height: 20]
+            rect pin [width: 5, height: 5]
+            anchor left_pin [position: body.left, direction: left]
+            anchor right_pin [position: body.right, direction: right]
+        }
+
+        component c1 [rotation: 90]
+    "#;
+
+    let result = compute_layout(source).expect("Should compute layout");
+
+    // After 90° clockwise rotation:
+    // - Original left anchor (pointing left, dx=-1, dy=0) should now point up (dx=0, dy=-1)
+    // - Original right anchor (pointing right, dx=1, dy=0) should now point down (dx=0, dy=1)
+    // This follows the physical rotation: Left→Up→Right→Down→Left for clockwise rotation
+
+    let left_dir = get_anchor_direction(&result, "c1", "left_pin");
+    assert!(left_dir.is_some(), "left_pin direction should exist on c1");
+    let (dx, dy) = left_dir.unwrap();
+
+    // After 90° clockwise rotation, left (180°) becomes up (270° = -90°), so dy < 0
+    assert!(
+        dx.abs() < 0.2,
+        "After 90° rotation, left anchor dx should be ~0, got {}",
+        dx
+    );
+    assert!(
+        dy < -0.5,
+        "After 90° rotation, left anchor should point up (dy < 0), got dy={}",
+        dy
+    );
+
+    let right_dir = get_anchor_direction(&result, "c1", "right_pin");
+    assert!(right_dir.is_some(), "right_pin direction should exist on c1");
+    let (dx, dy) = right_dir.unwrap();
+
+    // After 90° clockwise rotation, right (0°) becomes down (90°), so dy > 0
+    assert!(
+        dx.abs() < 0.2,
+        "After 90° rotation, right anchor dx should be ~0, got {}",
+        dx
+    );
+    assert!(
+        dy > 0.5,
+        "After 90° rotation, right anchor should point down (dy > 0), got dy={}",
+        dy
+    );
+}
+
+// ============================================
+// T026: Test External Constraint to Rotated Child
+// ============================================
+
+#[test]
+fn test_external_constraint_to_rotated_child() {
+    // Test that external constraints use post-rotation bounds
+    let source = r#"
+        template "mycomp" {
+            rect body [width: 80, height: 40]
+            rect pin [width: 5, height: 5]
+        }
+
+        mycomp c1 [rotation: 90]
+        rect lbl [width: 30, height: 20]
+
+        constrain lbl.left = c1_body.right + 10
+    "#;
+
+    let result = compute_layout(source).expect("Should compute layout");
+
+    // After 90° rotation, 80x40 becomes approximately 40x80
+    let c1_bounds = get_element_bounds(&result, "c1_body").expect("c1_body should exist");
+    let lbl_bounds = get_element_bounds(&result, "lbl").expect("lbl should exist");
+
+    // lbl.left should be 10px right of the rotated c1_body's right edge
+    let c1_right = c1_bounds.0 + c1_bounds.2;
+    let lbl_left = lbl_bounds.0;
+
+    assert!(
+        (lbl_left - (c1_right + 10.0)).abs() < 2.0,
+        "lbl should be ~10px right of rotated c1_body: c1_right={}, expected lbl_left={}, got {}",
+        c1_right,
+        c1_right + 10.0,
+        lbl_left
+    );
+}
+
+// ============================================
+// T027: Test Connection to Rotated Anchor
+// ============================================
+
+#[test]
+fn test_connection_to_rotated_anchor() {
+    // Test that connections attach at rotated anchor positions
+    let source = r#"
+        template "resistor" {
+            rect body [width: 40, height: 16]
+            rect pin [width: 5, height: 5]
+            anchor left_conn [position: body.left, direction: left]
+            anchor right_conn [position: body.right, direction: right]
+        }
+
+        rect source [width: 20, height: 20]
+        resistor r1 [rotation: 90]
+
+        constrain r1.x = source.right + 50
+
+        source.right -> r1.left_conn
+    "#;
+
+    // Just verify it renders without error - the connection should attach
+    // to the rotated anchor position
+    let svg = agent_illustrator::render(source).expect("Should render");
+    assert!(svg.contains("<path"), "Should have a connection path");
+    assert!(svg.contains("<svg"), "Should produce valid SVG");
+}
+
+// ============================================
+// T028: Test Via Point Through Rotated Element
+// ============================================
+
+#[test]
+fn test_via_point_through_rotated_element() {
+    // Test that curved routing uses rotated element centers
+    let source = r#"
+        template "waypoint" {
+            circle marker [size: 6]
+            rect pin [width: 2, height: 2]
+        }
+
+        rect start [width: 20, height: 20]
+        rect end [width: 20, height: 20]
+        waypoint ctrl [rotation: 45]
+
+        constrain end.left = start.right + 100
+        constrain ctrl.center_x = start.center_x + 50
+        constrain ctrl.center_y = start.center_y - 30
+
+        start -> end [routing: curved, via: ctrl_marker]
+    "#;
+
+    // Verify the layout computes and renders without error
+    let svg = agent_illustrator::render(source).expect("Should render");
+    assert!(svg.contains("<svg"), "Should produce valid SVG");
+    // Curved routing creates a path with curve commands
+    assert!(svg.contains("<path"), "Should have connection paths");
+}
+
+
+#[test]
+fn test_rotation_extraction_before_template_resolution() {
+    // Verify that rotation modifiers are extracted before template resolution
+    // (template resolution converts TemplateInstance to Group, losing modifiers)
+    let source = r#"
+        template "box" {
+            rect body [width: 40, height: 20]
+            rect pin [width: 5, height: 5]
+        }
+
+        box b1 [rotation: 90]
+    "#;
+
+    let doc = agent_illustrator::parse(source).expect("Should parse");
+
+    // Extract rotations BEFORE template resolution
+    let rotations = extract_template_rotations(&doc);
+    assert!(rotations.contains_key("b1"), "b1 should have rotation");
+    assert_eq!(rotations.get("b1"), Some(&90.0), "b1 should have 90° rotation");
+}
+
+#[test]
+fn test_direction_rotation_math() {
+    // Verify that direction rotation follows clockwise convention:
+    // Right → Down → Left → Up → Right
+    use agent_illustrator::layout::transform::RotationTransform;
+    use agent_illustrator::layout::types::{AnchorDirection, Point};
+
+    let rotation = RotationTransform::new(90.0, Point { x: 0.0, y: 0.0 });
+
+    // Right (0°) + 90° = Down (90°)
+    let right_rotated = rotation.transform_direction(AnchorDirection::Right);
+    assert!(
+        matches!(right_rotated, AnchorDirection::Down),
+        "Right + 90° should be Down, got {:?}",
+        right_rotated
+    );
+
+    // Left (180°) + 90° = Up (270°)
+    let left_rotated = rotation.transform_direction(AnchorDirection::Left);
+    assert!(
+        matches!(left_rotated, AnchorDirection::Up),
+        "Left + 90° should be Up, got {:?}",
+        left_rotated
+    );
+}

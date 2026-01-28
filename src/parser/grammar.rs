@@ -1008,6 +1008,7 @@ where
                             StyleKey::Width => "width".to_string(),
                             StyleKey::Height => "height".to_string(),
                             StyleKey::Label => "label".to_string(),
+                            StyleKey::Rotation => "rotation".to_string(),
                             StyleKey::Custom(s) => s.clone(),
                             _ => return None,
                         };

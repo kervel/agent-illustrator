@@ -196,8 +196,11 @@ impl RotationTransform {
     ///
     /// # Returns
     /// The rotated direction
-    fn transform_direction(&self, dir: AnchorDirection) -> AnchorDirection {
+    pub fn transform_direction(&self, dir: AnchorDirection) -> AnchorDirection {
         let original_angle = dir.to_degrees();
+        // Add angle for clockwise rotation in SVG coordinates
+        // When shape rotates 90° CW, direction vectors rotate 90° CW too:
+        // Right (0°) -> Down (90°), Down (90°) -> Left (180°), etc.
         let new_angle = original_angle + self.angle_degrees;
         AnchorDirection::from_degrees(new_angle)
     }

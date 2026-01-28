@@ -244,6 +244,19 @@ impl AnchorSet {
                 .collect(),
         }
     }
+
+    /// Rotate only the directions of all anchors in place (positions unchanged).
+    ///
+    /// Used to re-apply direction rotation after `recompute_custom_anchors` which
+    /// overwrites directions from the original (non-rotated) AST.
+    ///
+    /// # Arguments
+    /// * `rotation` - The rotation transform to apply to directions
+    pub fn rotate_directions(&mut self, rotation: &super::transform::RotationTransform) {
+        for anchor in self.anchors.values_mut() {
+            anchor.direction = rotation.transform_direction(anchor.direction);
+        }
+    }
 }
 
 /// Resolved anchor with absolute position for connection routing (T013)
