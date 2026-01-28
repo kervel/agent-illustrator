@@ -89,38 +89,57 @@ template "nmos" {
     anchor source [position: source_lead.bottom, direction: down]
 }
 
-// NPN Bipolar Junction Transistor template
+// NPN Bipolar Junction Transistor template (IEEE 315 style)
 template "npn" {
     circle body [size: 50, fill: none, stroke: foreground-1, stroke_width: 2]
 
-    // Base bar
-    rect base_bar [width: 2, height: 24, fill: foreground-1, stroke: none]
-    constrain base_bar.center_x = body.center_x - 6
+    // Base bar (vertical line inside circle, left of center)
+    rect base_bar [width: 2, height: 20, fill: foreground-1, stroke: none]
+    constrain base_bar.center_x = body.center_x - 8
     constrain base_bar.center_y = body.center_y
 
-    // Base lead
-    rect base_lead [width: 20, height: 2, fill: foreground-1, stroke: none]
+    // Base lead (horizontal, from circle edge to base bar)
+    rect base_lead [width: 17, height: 2, fill: foreground-1, stroke: none]
     constrain base_lead.right = base_bar.left
     constrain base_lead.center_y = body.center_y
 
-    // Collector lead (vertical, going up)
-    rect collector_lead [width: 2, height: 20, fill: foreground-1, stroke: none]
-    constrain collector_lead.center_x = body.center_x + 8
-    constrain collector_lead.bottom = body.top + 10
+    // Collector diagonal: from base bar (upper) going up-right
+    // Path goes from (0, 14) to (17, 0) — bbox: left=0, top=0, right=17, bottom=14
+    path collector_diag [fill: none, stroke: foreground-1, stroke_width: 2] {
+        vertex a [x: 0, y: 14]
+        line_to b [x: 17, y: 0]
+    }
+    constrain collector_diag.left = base_bar.right
+    constrain collector_diag.bottom = body.center_y - 6
 
-    // Emitter lead (vertical, going down)
-    rect emitter_lead [width: 2, height: 20, fill: foreground-1, stroke: none]
-    constrain emitter_lead.center_x = body.center_x + 8
-    constrain emitter_lead.top = body.bottom - 10
+    // Collector lead: vertical, connected to diagonal endpoint via constraints
+    rect collector_lead [width: 2, height: 18, fill: foreground-1, stroke: none]
+    constrain collector_lead.center_x = collector_diag.right
+    constrain collector_lead.bottom = collector_diag.top
 
-    // Internal connections (simplified - no diagonal stubs for now)
-    rect to_collector [width: 14, height: 2, fill: foreground-1, stroke: none]
-    constrain to_collector.left = base_bar.right
-    constrain to_collector.center_y = body.center_y - 8
+    // Emitter diagonal: from base bar (lower) going down-right
+    // Path goes from (0, 0) to (17, 14) — bbox: left=0, top=0, right=17, bottom=14
+    path emitter_diag [fill: none, stroke: foreground-1, stroke_width: 2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 17, y: 14]
+    }
+    constrain emitter_diag.left = base_bar.right
+    constrain emitter_diag.top = body.center_y + 6
 
-    rect to_emitter [width: 14, height: 2, fill: foreground-1, stroke: none]
-    constrain to_emitter.left = base_bar.right
-    constrain to_emitter.center_y = body.center_y + 8
+    // Emitter lead: vertical, connected to diagonal endpoint via constraints
+    rect emitter_lead [width: 2, height: 18, fill: foreground-1, stroke: none]
+    constrain emitter_lead.center_x = emitter_diag.right
+    constrain emitter_lead.top = emitter_diag.bottom
+
+    // Emitter arrow (pointing outward, at diagonal tip)
+    path emitter_arrow [fill: foreground-1, stroke: none] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: -3, y: -7]
+        line_to c [x: -8, y: -2]
+        close
+    }
+    constrain emitter_arrow.right = emitter_diag.right + 1
+    constrain emitter_arrow.bottom = emitter_diag.bottom + 1
 
     // Labels
     text "B" b_label [font_size: 11, fill: foreground-1]
