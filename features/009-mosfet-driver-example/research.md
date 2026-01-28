@@ -233,6 +233,23 @@ Based on documentation analysis, predicted failure modes:
 
 **Regression Test Added**: `test_template_internal_constraints_centering` in `src/layout/engine.rs` verifies that template children stay properly centered when the template instance is moved.
 
+### BUG-002: Rotation Modifier Doesn't Work on Template Instances
+
+**Severity**: Medium (workaround available)
+
+**Description**: The `rotation` modifier works on simple shapes but has no effect on template instances.
+
+**Reproduction**:
+```ail
+template "resistor" { rect body [...] }
+resistor r1 [value: "10k"]
+resistor r2 [value: "20k", rotation: 90]  // No effect - r2 is still horizontal
+```
+
+**Workaround**: Create separate templates for different orientations, or adjust layout to avoid needing rotation.
+
+**Status**: NOT FIXED - needs investigation
+
 ---
 
 ## 8. Lessons Learned (Skill Documentation Candidates)
@@ -315,8 +332,67 @@ constrain left_lead.right = body.left
 anchor left_conn [position: left_lead.left, direction: left]
 ```
 
+### LL-6: Constraint Coordinates Are Always Local
+
+**Problem**: When a template has rotation, it's unclear whether property references like `.left` refer to pre-rotation or post-rotation coordinates.
+
+**Design Decision**: Property references ALWAYS use local (pre-rotation) coordinates.
+
+**Rationale**:
+- If you rotate 44°, your constraints still work
+- If you then change to 46°, your constraints still work
+- You don't have to rewrite constraints when changing rotation angle
+- Rotation is a presentation concern, not a constraint concern
+
+**Example**:
+```ail
+resistor r2 [rotation: 90]
+constrain foo.left = r2_body.right + 10
+```
+
+Here `r2_body.right` refers to the right edge in local (pre-rotation) space, even though visually the element is rotated.
+
+### LL-7: External Constraints Can Reference Exported Elements
+
+**Problem**: Template elements are "internal" but sometimes external code needs to reference them.
+
+**Pattern**: Use `export` to expose internal elements, then reference them with the `instance_element` naming convention:
+
+```ail
+template "component" {
+    rect body [...]
+    export body
+}
+component c1
+constrain foo.left = c1_body.right + 10  // c1_body = instance name + underscore + exported name
+```
+
+**Caution**: This couples external layout to internal template structure. Use sparingly.
+
+### LL-8: Template Rotation Requires Solver Separation
+
+**Problem**: Template rotation (Feature 006) was designed as render-only, but this breaks:
+- Anchor positions (point to pre-rotation coordinates)
+- Via points in curves (reference pre-rotation element centers)
+- External constraints (violated after visual rotation)
+
+**Solution**: Feature 010 introduces local/global solver separation:
+1. Local solver: template-internal constraints
+2. Rotation applied to local results
+3. Global solver: external constraints with rotated coordinates
+
+**Workaround Until 010**: Avoid rotation on templates with external connections. Create separate templates for different orientations.
+
+### LL-9: Don't Work Around Bugs - Fix Them
+
+**Problem**: When encountering a bug, the temptation is to work around it (e.g., create horizontal and vertical resistor templates instead of using rotation).
+
+**Principle**: Workarounds accumulate technical debt and mask design issues. If a feature should work but doesn't, investigate and fix the root cause.
+
+**Example**: BUG-002 (rotation on templates) led to discovering that the entire solver architecture needs refactoring (Feature 010). A workaround would have hidden this architectural issue.
+
 ---
 
 *Created: 2026-01-28*
-*Updated: 2026-01-28 (added Lessons Learned section)*
+*Updated: 2026-01-28 (added Lessons Learned LL-6 through LL-9 from solver discussion)*
 *Feature: 009-mosfet-driver-example*
