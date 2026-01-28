@@ -7,93 +7,126 @@
 
 // === COMPONENT TEMPLATES ===
 
-// T001: Resistor template with configurable value
+// T001: Resistor template - IEC style (stroke-only, matches MOSFET style)
 template "resistor" (value: "R") {
-    rect body [width: 60, height: 20, fill: background-2, stroke: foreground, stroke_width: 1.5, label: value]
-    anchor left_conn [position: body.left, direction: left]
-    anchor right_conn [position: body.right, direction: right]
+    rect body [width: 40, height: 16, fill: none, stroke: foreground-1, stroke_width: 2, label: value]
+
+    // Lead extensions for cleaner connections
+    rect left_lead [width: 10, height: 2, fill: foreground-1, stroke: none]
+    rect right_lead [width: 10, height: 2, fill: foreground-1, stroke: none]
+    constrain left_lead.right = body.left
+    constrain left_lead.center_y = body.center_y
+    constrain right_lead.left = body.right
+    constrain right_lead.center_y = body.center_y
+
+    anchor left_conn [position: left_lead.left, direction: left]
+    anchor right_conn [position: right_lead.right, direction: right]
 }
 
 // T002: N-Channel MOSFET template with proper symbol
-// Standard symbol: circle with vertical channel, gate bar, and arrow on source
+// Standard symbol: circle with vertical channel (3 stubs), gate bar, and arrow
 template "nmos" {
-    // Circle body enclosing the transistor - thicker stroke for visibility
-    circle body [size: 50, fill: none, stroke: foreground, stroke_width: 2]
+    // Circle enclosing the transistor
+    circle body [size: 60, fill: none, stroke: foreground-1, stroke_width: 2]
 
-    // Gate bar (vertical, inside circle on left side)
-    rect gate_bar [width: 2, height: 28, fill: foreground, stroke: none]
-    constrain gate_bar.center_x = body.center_x - 6
-    constrain gate_bar.center_y = body.center_y
-
-    // Vertical channel line (right of gate bar, with gap)
-    rect channel [width: 2, height: 28, fill: foreground, stroke: none]
-    constrain channel.center_x = body.center_x + 6
+    // Vertical channel (right side, inside circle) - 3 horizontal stubs connect here
+    rect channel [width: 2, height: 36, fill: foreground-1, stroke: none]
+    constrain channel.center_x = body.center_x + 8
     constrain channel.center_y = body.center_y
 
-    // Gate line: extends from gate_bar left edge out through circle
-    rect gate_line [width: 35, height: 2, fill: foreground, stroke: none]
-    constrain gate_line.right = gate_bar.left
-    constrain gate_line.center_y = body.center_y
+    // Gate bar (left of channel, with visible gap)
+    rect gate_bar [width: 2, height: 36, fill: foreground-1, stroke: none]
+    constrain gate_bar.center_x = body.center_x - 4
+    constrain gate_bar.center_y = body.center_y
 
-    // Drain: horizontal stub from channel top + vertical line up out of circle
-    rect drain_stub [width: 12, height: 2, fill: foreground, stroke: none]
-    constrain drain_stub.right = channel.center_x + 1
-    constrain drain_stub.center_y = channel.top + 2
+    // Gate lead extending left out of circle
+    rect gate_lead [width: 30, height: 2, fill: foreground-1, stroke: none]
+    constrain gate_lead.right = gate_bar.left
+    constrain gate_lead.center_y = body.center_y
 
-    rect drain_vert [width: 2, height: 18, fill: foreground, stroke: none]
-    constrain drain_vert.center_x = drain_stub.left
-    constrain drain_vert.bottom = body.top
+    // Three horizontal stubs from channel (proper MOSFET symbol)
+    // Drain stub (top)
+    rect drain_stub [width: 16, height: 2, fill: foreground-1, stroke: none]
+    constrain drain_stub.right = channel.left + 1
+    constrain drain_stub.center_y = channel.top + 4
 
-    // Source: horizontal stub from channel bottom + vertical line down out of circle
-    rect source_stub [width: 12, height: 2, fill: foreground, stroke: none]
-    constrain source_stub.right = channel.center_x + 1
-    constrain source_stub.center_y = channel.bottom - 2
+    // Middle stub (part of standard symbol)
+    rect mid_stub [width: 16, height: 2, fill: foreground-1, stroke: none]
+    constrain mid_stub.right = channel.left + 1
+    constrain mid_stub.center_y = body.center_y
 
-    rect source_vert [width: 2, height: 18, fill: foreground, stroke: none]
-    constrain source_vert.center_x = source_stub.left
-    constrain source_vert.top = body.bottom
+    // Source stub (bottom)
+    rect source_stub [width: 16, height: 2, fill: foreground-1, stroke: none]
+    constrain source_stub.right = channel.left + 1
+    constrain source_stub.center_y = channel.bottom - 4
 
-    // Arrow on source stub pointing toward channel (N-channel indicator)
-    rect arrow_shaft [width: 6, height: 2, fill: foreground, stroke: none]
-    constrain arrow_shaft.right = channel.left - 2
-    constrain arrow_shaft.center_y = source_stub.center_y
+    // Drain lead going up from drain_stub, out through circle top
+    rect drain_lead [width: 2, height: 24, fill: foreground-1, stroke: none]
+    constrain drain_lead.center_x = drain_stub.left + 1
+    constrain drain_lead.bottom = drain_stub.center_y + 1
 
-    // Terminal labels outside the circle
-    text "G" g_label [font_size: 12, fill: foreground]
-    text "D" d_label [font_size: 12, fill: foreground]
-    text "S" s_label [font_size: 12, fill: foreground]
+    // Source lead going down from source_stub, out through circle bottom
+    rect source_lead [width: 2, height: 24, fill: foreground-1, stroke: none]
+    constrain source_lead.center_x = source_stub.left + 1
+    constrain source_lead.top = source_stub.center_y - 1
 
-    constrain g_label.right = gate_line.left - 6
-    constrain g_label.center_y = gate_line.center_y
-    constrain d_label.center_x = drain_vert.center_x
-    constrain d_label.bottom = drain_vert.top - 6
-    constrain s_label.center_x = source_vert.center_x
-    constrain s_label.top = source_vert.bottom + 6
+    // Arrow on middle stub pointing right (toward channel) - indicates N-channel
+    rect arrow [width: 8, height: 2, fill: foreground-1, stroke: none]
+    constrain arrow.right = mid_stub.left
+    constrain arrow.center_y = mid_stub.center_y
 
-    // Semantic anchors at terminal ends
-    anchor gate [position: gate_line.left, direction: left]
-    anchor drain [position: drain_vert.top, direction: up]
-    anchor source [position: source_vert.bottom, direction: down]
+    // Labels
+    text "G" g_label [font_size: 12, fill: foreground-1]
+    text "D" d_label [font_size: 12, fill: foreground-1]
+    text "S" s_label [font_size: 12, fill: foreground-1]
+
+    constrain g_label.right = gate_lead.left - 6
+    constrain g_label.center_y = gate_lead.center_y
+    constrain d_label.center_x = drain_lead.center_x
+    constrain d_label.bottom = drain_lead.top - 4
+    constrain s_label.center_x = source_lead.center_x
+    constrain s_label.top = source_lead.bottom + 4
+
+    anchor gate [position: gate_lead.left, direction: left]
+    anchor drain [position: drain_lead.top, direction: up]
+    anchor source [position: source_lead.bottom, direction: down]
 }
 
-// T003: LED template with configurable color - simplified rectangle style
+// T003: LED template - schematic style (triangle diode with emission arrows)
 template "led" (color: accent-1) {
-    // Main LED body
-    rect body [width: 24, height: 30, fill: color, stroke: foreground, stroke_width: 1.5]
+    // Triangle body (diode) pointing down - using path
+    path triangle [fill: none, stroke: foreground-1, stroke_width: 2] {
+        vertex top_left [x: 0, y: 0]
+        line_to top_right [x: 20, y: 0]
+        line_to tip [x: 10, y: 18]
+        close
+    }
 
-    // Polarity indicator (line at cathode)
-    rect cathode_mark [width: 24, height: 4, fill: foreground, stroke: none]
-    constrain cathode_mark.center_x = body.center_x
-    constrain cathode_mark.top = body.bottom
+    // Cathode bar below triangle tip
+    rect cathode_bar [width: 24, height: 2, fill: foreground-1, stroke: none]
+    constrain cathode_bar.center_x = triangle.center_x
+    constrain cathode_bar.top = triangle.bottom + 3
 
-    // Label
-    text "LED" led_label [font_size: 10, fill: text-2]
-    constrain led_label.center_x = body.center_x
-    constrain led_label.top = cathode_mark.bottom + 2
+    // Anode lead up
+    rect anode_lead [width: 2, height: 15, fill: foreground-1, stroke: none]
+    constrain anode_lead.center_x = triangle.center_x
+    constrain anode_lead.bottom = triangle.top
 
-    // Semantic anchors (current flows anode to cathode)
-    anchor anode [position: body.top - 4, direction: up]
-    anchor cathode [position: cathode_mark.bottom + 4, direction: down]
+    // Cathode lead down
+    rect cathode_lead [width: 2, height: 15, fill: foreground-1, stroke: none]
+    constrain cathode_lead.center_x = cathode_bar.center_x
+    constrain cathode_lead.top = cathode_bar.bottom
+
+    // Light emission arrows (colored to show LED color)
+    rect arrow1 [width: 10, height: 2, fill: color, stroke: none]
+    rect arrow2 [width: 10, height: 2, fill: color, stroke: none]
+    constrain arrow1.left = triangle.right + 6
+    constrain arrow1.center_y = triangle.top + 8
+    constrain arrow2.left = triangle.right + 6
+    constrain arrow2.center_y = triangle.top + 14
+
+    anchor anode [position: anode_lead.top, direction: up]
+    anchor cathode [position: cathode_lead.bottom, direction: down]
 }
 
 // T004: GPIO Pin template

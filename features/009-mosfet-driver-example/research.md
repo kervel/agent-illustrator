@@ -235,6 +235,71 @@ Based on documentation analysis, predicted failure modes:
 
 ---
 
+## 8. Lessons Learned (Skill Documentation Candidates)
+
+These lessons are **general-purpose** (SC-5 compliant - not specific to electronic schematics):
+
+### LL-1: Isolate Components When Debugging Templates
+
+**Problem**: When debugging a template within a large diagram, issues get lost in the big picture.
+
+**Solution**: Create a minimal test file with just the component being debugged:
+```bash
+cat > /tmp/test-component.ail << 'EOF'
+template "my_component" { ... }
+my_component instance1
+EOF
+cargo run -- /tmp/test-component.ail > test.svg
+```
+
+**Rationale**: Isolated testing makes issues immediately obvious and iteration faster.
+
+### LL-2: Consistent Design Language Within Diagrams
+
+**Problem**: Mixing different visual styles creates unprofessional-looking diagrams.
+
+**Solution**: Before creating templates, decide on a consistent visual language:
+- Stroke-only vs filled shapes (pick one, stick to it)
+- Consistent stroke widths (e.g., 2px for primary, 1.5px for secondary)
+- Proportional sizing between related components
+- Consistent use of color semantics
+
+### LL-3: Use `path` for Complex Shapes
+
+**Problem**: Approximating shapes with multiple rectangles is fragile and often misaligned.
+
+**Solution**: Use the `path` element with vertices for complex shapes:
+```ail
+path triangle [fill: none, stroke: foreground-1, stroke_width: 2] {
+    vertex top_left [x: 0, y: 0]
+    line_to top_right [x: 20, y: 0]
+    line_to tip [x: 10, y: 18]
+    close
+}
+```
+
+### LL-4: Color References Must Be Exact
+
+**Problem**: Using undefined colors like `foreground` (instead of `foreground-1`) causes silent rendering failures (now fixed with validation).
+
+**Solution**: Always use exact color names from the palette. Run `agent-illustrator` without arguments to see error if color is invalid:
+```
+Error: Unknown color 'foreground'. Did you mean one of: foreground-1, foreground-2?
+```
+
+### LL-5: Lead Extensions Improve Connections
+
+**Problem**: Anchors placed directly on shape edges can cause awkward connection routing.
+
+**Solution**: Add short "lead" rectangles extending from shapes to provide cleaner connection points:
+```ail
+rect left_lead [width: 10, height: 2, fill: foreground-1]
+constrain left_lead.right = body.left
+anchor left_conn [position: left_lead.left, direction: left]
+```
+
+---
+
 *Created: 2026-01-28*
-*Updated: 2026-01-28 (BUG-001 FIXED)*
+*Updated: 2026-01-28 (added Lessons Learned section)*
 *Feature: 009-mosfet-driver-example*
