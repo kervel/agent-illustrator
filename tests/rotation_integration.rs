@@ -515,3 +515,230 @@ fn test_direction_rotation_math() {
         left_rotated
     );
 }
+
+/// Helper: rotate a point around a center by angle degrees (CW, SVG convention)
+fn rotate_point(x: f64, y: f64, cx: f64, cy: f64, angle_deg: f64) -> (f64, f64) {
+    let rad = angle_deg * std::f64::consts::PI / 180.0;
+    let dx = x - cx;
+    let dy = y - cy;
+    let rx = dx * rad.cos() - dy * rad.sin() + cx;
+    let ry = dx * rad.sin() + dy * rad.cos() + cy;
+    (rx, ry)
+}
+
+#[test]
+fn test_rotated_anchor_positions_match_svg_transform() {
+    // Verify that the mathematically transformed anchor positions used for routing
+    // match where the SVG transform visually places the anchor.
+    // This is critical: connections are drawn in global coords, elements are
+    // rendered with SVG group transforms.
+    let source = r#"
+        template "box" {
+            rect body [width: 40, height: 20, fill: #4a6fa5]
+            anchor left_conn [position: body.left, direction: left]
+            anchor right_conn [position: body.right, direction: right]
+            anchor top_conn [position: body.top, direction: up]
+            anchor bottom_conn [position: body.bottom, direction: down]
+        }
+
+        box a
+        box b [rotation: 90]
+
+        constrain b.left = a.right + 80
+        constrain b.vertical_center = a.vertical_center
+    "#;
+
+    let result = compute_layout(source).expect("Should compute layout");
+
+    // Get a's anchor (no rotation - straightforward)
+    let a_right = get_anchor_position(&result, "a", "right_conn")
+        .expect("a.right_conn should exist");
+
+    // Get b's anchors (rotated 90°)
+    let b_left = get_anchor_position(&result, "b", "left_conn")
+        .expect("b.left_conn should exist");
+    let b_right = get_anchor_position(&result, "b", "right_conn")
+        .expect("b.right_conn should exist");
+    let b_top = get_anchor_position(&result, "b", "top_conn")
+        .expect("b.top_conn should exist");
+    let b_bottom = get_anchor_position(&result, "b", "bottom_conn")
+        .expect("b.bottom_conn should exist");
+
+    // After 90° CW rotation of a 40x20 box:
+    // - left_conn (was at left edge, mid height) should move to top center
+    // - right_conn (was at right edge) should move to bottom center
+    // - top_conn (was at top center) should move to right middle
+    // - bottom_conn (was at bottom center) should move to left middle
+
+    // Verify relative positions: left_conn should be above right_conn after 90° rotation
+    assert!(
+        b_left.1 < b_right.1,
+        "After 90° rotation, left_conn ({:.1},{:.1}) should be above right_conn ({:.1},{:.1})",
+        b_left.0, b_left.1, b_right.0, b_right.1
+    );
+
+    // top_conn should be to the right of bottom_conn after 90° rotation
+    assert!(
+        b_top.0 > b_bottom.0,
+        "After 90° rotation, top_conn ({:.1},{:.1}) should be right of bottom_conn ({:.1},{:.1})",
+        b_top.0, b_top.1, b_bottom.0, b_bottom.1
+    );
+
+    // Verify the computed anchor positions match what SVG transform would produce.
+    // Get b's group bounds center (SVG rotation center)
+    let b_bounds = get_element_bounds(&result, "b").expect("b should exist");
+    let b_cx = b_bounds.0 + b_bounds.2 / 2.0;
+    let b_cy = b_bounds.1 + b_bounds.3 / 2.0;
+
+    // Get b_body's local bounds (pre-rotation)
+    let b_body = get_element_bounds(&result, "b_body").expect("b_body should exist");
+    let body_left_x = b_body.0;
+    let body_center_y = b_body.1 + b_body.3 / 2.0;
+    let body_right_x = b_body.0 + b_body.2;
+    let body_center_x = b_body.0 + b_body.2 / 2.0;
+    let body_top_y = b_body.1;
+
+    // The SVG transform rotates around (b_cx, b_cy)
+    // The anchor positions should match the rotated local positions
+    let (expected_left_x, expected_left_y) =
+        rotate_point(body_left_x, body_center_y, b_cx, b_cy, 90.0);
+    let (expected_right_x, expected_right_y) =
+        rotate_point(body_right_x, body_center_y, b_cx, b_cy, 90.0);
+    let (expected_top_x, expected_top_y) =
+        rotate_point(body_center_x, body_top_y, b_cx, b_cy, 90.0);
+
+    let tol = 1.0; // 1px tolerance
+    assert!(
+        (b_left.0 - expected_left_x).abs() < tol && (b_left.1 - expected_left_y).abs() < tol,
+        "left_conn: expected ({:.1},{:.1}), got ({:.1},{:.1})",
+        expected_left_x, expected_left_y, b_left.0, b_left.1
+    );
+    assert!(
+        (b_right.0 - expected_right_x).abs() < tol && (b_right.1 - expected_right_y).abs() < tol,
+        "right_conn: expected ({:.1},{:.1}), got ({:.1},{:.1})",
+        expected_right_x, expected_right_y, b_right.0, b_right.1
+    );
+    assert!(
+        (b_top.0 - expected_top_x).abs() < tol && (b_top.1 - expected_top_y).abs() < tol,
+        "top_conn: expected ({:.1},{:.1}), got ({:.1},{:.1})",
+        expected_top_x, expected_top_y, b_top.0, b_top.1
+    );
+}
+
+#[test]
+fn test_rotated_anchor_directions() {
+    // Verify anchor directions transform correctly for all 4 cardinal rotations
+    let source = r#"
+        template "component" {
+            rect body [width: 40, height: 20]
+            anchor left_conn [position: body.left, direction: left]
+            anchor right_conn [position: body.right, direction: right]
+            anchor top_conn [position: body.top, direction: up]
+            anchor bottom_conn [position: body.bottom, direction: down]
+        }
+
+        component c90 [rotation: 90]
+        component c180 [rotation: 180]
+        component c270 [rotation: 270]
+
+        constrain c180.left = c90.right + 40
+        constrain c270.left = c180.right + 40
+        constrain c180.vertical_center = c90.vertical_center
+        constrain c270.vertical_center = c90.vertical_center
+    "#;
+
+    let result = compute_layout(source).expect("Should compute layout");
+
+    // 90° CW: Right→Down, Down→Left, Left→Up, Up→Right
+    let (dx, dy) = get_anchor_direction(&result, "c90", "right_conn").unwrap();
+    assert!(dy > 0.5, "right_conn at 90°: expected Down, got ({:.2},{:.2})", dx, dy);
+
+    let (dx, dy) = get_anchor_direction(&result, "c90", "left_conn").unwrap();
+    assert!(dy < -0.5, "left_conn at 90°: expected Up, got ({:.2},{:.2})", dx, dy);
+
+    let (dx, dy) = get_anchor_direction(&result, "c90", "top_conn").unwrap();
+    assert!(dx > 0.5, "top_conn at 90°: expected Right, got ({:.2},{:.2})", dx, dy);
+
+    let (dx, dy) = get_anchor_direction(&result, "c90", "bottom_conn").unwrap();
+    assert!(dx < -0.5, "bottom_conn at 90°: expected Left, got ({:.2},{:.2})", dx, dy);
+
+    // 180°: Right→Left, Left→Right, Up→Down, Down→Up
+    let (dx, _) = get_anchor_direction(&result, "c180", "right_conn").unwrap();
+    assert!(dx < -0.5, "right_conn at 180°: expected Left, got dx={:.2}", dx);
+
+    let (dx, _) = get_anchor_direction(&result, "c180", "left_conn").unwrap();
+    assert!(dx > 0.5, "left_conn at 180°: expected Right, got dx={:.2}", dx);
+
+    // 270°: Right→Up, Left→Down, Up→Left, Down→Right
+    let (_, dy) = get_anchor_direction(&result, "c270", "right_conn").unwrap();
+    assert!(dy < -0.5, "right_conn at 270°: expected Up, got dy={:.2}", dy);
+
+    let (_, dy) = get_anchor_direction(&result, "c270", "left_conn").unwrap();
+    assert!(dy > 0.5, "left_conn at 270°: expected Down, got dy={:.2}", dy);
+}
+
+#[test]
+fn test_person_rotation_renders_all_angles() {
+    // Verify the full person-rotation example computes without errors
+    // and all expected elements exist with reasonable bounds
+    let source = std::fs::read_to_string("examples/person-rotation.ail")
+        .expect("Should read person-rotation.ail");
+    let result = compute_layout(&source).expect("Should compute layout");
+
+    // All six persons should exist
+    for name in &["p0", "p90", "p180", "p270", "p45", "p135"] {
+        assert!(
+            result.elements.contains_key(*name),
+            "Element {} should exist",
+            name
+        );
+    }
+
+    // Row 1: p0, p90, p180 should be horizontally ordered
+    let p0 = get_element_bounds(&result, "p0").unwrap();
+    let p90 = get_element_bounds(&result, "p90").unwrap();
+    let p180 = get_element_bounds(&result, "p180").unwrap();
+    assert!(p0.0 < p90.0, "p0 should be left of p90");
+    assert!(p90.0 < p180.0, "p90 should be left of p180");
+
+    // Row 2: p270, p45, p135 should be horizontally ordered
+    let p270 = get_element_bounds(&result, "p270").unwrap();
+    let p45 = get_element_bounds(&result, "p45").unwrap();
+    let p135 = get_element_bounds(&result, "p135").unwrap();
+    assert!(p270.0 < p45.0, "p270 should be left of p45");
+    assert!(p45.0 < p135.0, "p45 should be left of p135");
+
+    // Row 2 should be below row 1
+    assert!(p270.1 > p0.1 + p0.3, "Row 2 should be below Row 1");
+
+    // All persons should have anchors
+    for name in &["p0", "p90", "p180", "p270", "p45", "p135"] {
+        let crown = get_anchor_position(&result, name, "crown");
+        let feet = get_anchor_position(&result, name, "feet");
+        let hand_left = get_anchor_position(&result, name, "hand_left");
+        let hand_right = get_anchor_position(&result, name, "hand_right");
+        assert!(crown.is_some(), "{}.crown should exist", name);
+        assert!(feet.is_some(), "{}.feet should exist", name);
+        assert!(hand_left.is_some(), "{}.hand_left should exist", name);
+        assert!(hand_right.is_some(), "{}.hand_right should exist", name);
+    }
+
+    // Verify rotated persons have transformed anchor positions
+    // p90 (90° CW): crown (was up) should now be to the right
+    let p90_crown = get_anchor_position(&result, "p90", "crown").unwrap();
+    let p90_feet = get_anchor_position(&result, "p90", "feet").unwrap();
+    assert!(
+        p90_crown.0 > p90_feet.0,
+        "p90 crown ({:.1},{:.1}) should be right of feet ({:.1},{:.1}) after 90° rotation",
+        p90_crown.0, p90_crown.1, p90_feet.0, p90_feet.1
+    );
+
+    // p180 (180°): crown should be below feet (upside down)
+    let p180_crown = get_anchor_position(&result, "p180", "crown").unwrap();
+    let p180_feet = get_anchor_position(&result, "p180", "feet").unwrap();
+    assert!(
+        p180_crown.1 > p180_feet.1,
+        "p180 crown ({:.1},{:.1}) should be below feet ({:.1},{:.1}) after 180° rotation",
+        p180_crown.0, p180_crown.1, p180_feet.0, p180_feet.1
+    );
+}

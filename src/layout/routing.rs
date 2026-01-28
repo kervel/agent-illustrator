@@ -317,99 +317,143 @@ fn orthogonal_with_directions(
     from_dir: Point,
     to_dir: Point,
 ) -> Option<Vec<Point>> {
+    let dx = end.x - start.x;
+    let dy = end.y - start.y;
+    let from_h = from_dir.x.abs() > 0.5; // from is horizontal
+    let to_h = to_dir.x.abs() > 0.5; // to is horizontal
+
     let mut candidates: Vec<Vec<Point>> = Vec::new();
 
-    // Try direct L-shape if axes differ and directions match
-    if from_dir.x != 0.0 && to_dir.y != 0.0 {
-        let dx = end.x - start.x;
-        let dy = end.y - start.y;
+    // Case 1: Different axes → try L-shape (2 segments)
+    if from_h && !to_h {
+        // from horizontal, to vertical
         if dx.signum() == from_dir.x && dy.signum() == to_dir.y {
             candidates.push(vec![start, Point::new(end.x, start.y), end]);
         }
-    } else if from_dir.y != 0.0 && to_dir.x != 0.0 {
-        let dx = end.x - start.x;
-        let dy = end.y - start.y;
+    } else if !from_h && to_h {
+        // from vertical, to horizontal
         if dy.signum() == from_dir.y && dx.signum() == to_dir.x {
             candidates.push(vec![start, Point::new(start.x, end.y), end]);
         }
-    } else if from_dir.x != 0.0 && to_dir.x != 0.0 && from_dir.x == to_dir.x {
-        // Same axis (horizontal) and same direction: use a 3-segment path
-        let dx = end.x - start.x;
-        if dx.signum() == from_dir.x {
-            let mid_x = (start.x + end.x) / 2.0;
-            candidates.push(vec![
-                start,
-                Point::new(mid_x, start.y),
-                Point::new(mid_x, end.y),
-                end,
-            ]);
-        }
-    } else if from_dir.y != 0.0 && to_dir.y != 0.0 && from_dir.y == to_dir.y {
-        // Same axis (vertical) and same direction
-        let dy = end.y - start.y;
-        if dy.signum() == from_dir.y {
-            let mid_y = (start.y + end.y) / 2.0;
-            candidates.push(vec![
-                start,
-                Point::new(start.x, mid_y),
-                Point::new(end.x, mid_y),
-                end,
-            ]);
-        }
     }
 
-    // Fallback: force initial and final directions with stubs, then connect via a bend
-    let distance = segment_length(start, end);
-    let mut stub = MIN_FINAL_SEGMENT_LENGTH;
-    if distance > 0.0 {
-        stub = stub.min(distance / 2.0).max(1.0);
+    // Case 2: Same axis, same direction → Z-shape (3 segments) through midpoint
+    if from_h && to_h && from_dir.x == to_dir.x && dx.signum() == from_dir.x {
+        let mid_x = (start.x + end.x) / 2.0;
+        candidates.push(vec![
+            start,
+            Point::new(mid_x, start.y),
+            Point::new(mid_x, end.y),
+            end,
+        ]);
+    } else if !from_h && !to_h && from_dir.y == to_dir.y && dy.signum() == from_dir.y {
+        let mid_y = (start.y + end.y) / 2.0;
+        candidates.push(vec![
+            start,
+            Point::new(start.x, mid_y),
+            Point::new(end.x, mid_y),
+            end,
+        ]);
     }
 
-    let start_out = Point::new(start.x + from_dir.x * stub, start.y + from_dir.y * stub);
-    let end_in = Point::new(end.x - to_dir.x * stub, end.y - to_dir.y * stub);
-    let hv_stub = vec![
-        start,
-        start_out,
-        Point::new(end_in.x, start_out.y),
-        end_in,
-        end,
-    ];
-    let vh_stub = vec![
-        start,
-        start_out,
-        Point::new(start_out.x, end_in.y),
-        end_in,
-        end,
-    ];
-    candidates.push(hv_stub);
-    candidates.push(vh_stub);
+    // Case 3: Same axis, opposing direction → U-shape (3 segments)
+    // e.g., from=RIGHT, to=LEFT: →  ↕  ←
+    if from_h && to_h && from_dir.x == -to_dir.x {
+        // Choose perpendicular offset to avoid crossing between start and end
+        let perp_offset = if (end.y - start.y).abs() > MIN_FINAL_SEGMENT_LENGTH {
+            // Use the midpoint y if there's enough vertical separation
+            (start.y + end.y) / 2.0
+        } else {
+            // Go above or below, choosing the side with more room
+            let offset = MIN_FINAL_SEGMENT_LENGTH.max((end.x - start.x).abs() / 4.0);
+            if start.y < end.y { start.y - offset } else { start.y + offset }
+        };
+        let start_out_x = start.x + from_dir.x * MIN_FINAL_SEGMENT_LENGTH;
+        let end_in_x = end.x - to_dir.x * MIN_FINAL_SEGMENT_LENGTH;
+        candidates.push(vec![
+            start,
+            Point::new(start_out_x, start.y),
+            Point::new(start_out_x, perp_offset),
+            Point::new(end_in_x, perp_offset),
+            Point::new(end_in_x, end.y),
+            end,
+        ]);
+    } else if !from_h && !to_h && from_dir.y == -to_dir.y {
+        let perp_offset = if (end.x - start.x).abs() > MIN_FINAL_SEGMENT_LENGTH {
+            (start.x + end.x) / 2.0
+        } else {
+            let offset = MIN_FINAL_SEGMENT_LENGTH.max((end.y - start.y).abs() / 4.0);
+            if start.x < end.x { start.x - offset } else { start.x + offset }
+        };
+        let start_out_y = start.y + from_dir.y * MIN_FINAL_SEGMENT_LENGTH;
+        let end_in_y = end.y - to_dir.y * MIN_FINAL_SEGMENT_LENGTH;
+        candidates.push(vec![
+            start,
+            Point::new(start.x, start_out_y),
+            Point::new(perp_offset, start_out_y),
+            Point::new(perp_offset, end_in_y),
+            Point::new(end.x, end_in_y),
+            end,
+        ]);
+    }
 
-    let mut best: Option<Vec<Point>> = None;
+    // Case 4: Different axes, geometry opposes direction → stub + L + stub
+    // e.g., from=DOWN but target is above → go down, across, up, then into target
+    if !candidates.iter().any(|c| c.len() <= 3) {
+        let stub = MIN_FINAL_SEGMENT_LENGTH;
+        let start_out = Point::new(start.x + from_dir.x * stub, start.y + from_dir.y * stub);
+        let end_in = Point::new(end.x - to_dir.x * stub, end.y - to_dir.y * stub);
+
+        // Try routing: start_out → horizontal → end_in
+        candidates.push(vec![
+            start,
+            start_out,
+            Point::new(end_in.x, start_out.y),
+            end_in,
+            end,
+        ]);
+        // Try routing: start_out → vertical → end_in
+        candidates.push(vec![
+            start,
+            start_out,
+            Point::new(start_out.x, end_in.y),
+            end_in,
+            end,
+        ]);
+    }
+
+    // Select best valid candidate by total path length (prefer shorter paths)
+    let mut best: Option<(Vec<Point>, f64)> = None;
     for path in candidates {
         let simplified = simplify_path(path);
         if simplified.len() < 2 {
             continue;
         }
-        if segment_length(simplified[0], simplified[1]) < 0.001
+        // Skip paths with degenerate first/last segments
+        if segment_length(simplified[0], simplified[1]) < 0.5
             || segment_length(
                 simplified[simplified.len() - 2],
                 simplified[simplified.len() - 1],
-            ) < 0.001
+            ) < 0.5
         {
             continue;
         }
         if is_valid_orthogonal_path(&simplified, from_dir, to_dir) {
+            let total_len: f64 = simplified
+                .windows(2)
+                .map(|w| segment_length(w[0], w[1]))
+                .sum();
             let replace = match &best {
                 None => true,
-                Some(existing) => simplified.len() < existing.len(),
+                Some((_, best_len)) => total_len < *best_len,
             };
             if replace {
-                best = Some(simplified);
+                best = Some((simplified, total_len));
             }
         }
     }
 
-    best
+    best.map(|(path, _)| path)
 }
 
 fn forced_stub_path(start: Point, end: Point, from_dir: Point, to_dir: Point) -> Vec<Point> {
