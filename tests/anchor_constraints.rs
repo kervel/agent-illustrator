@@ -275,6 +275,72 @@ constrain target.center_y = c1.right_conn_y
 }
 
 #[test]
+fn test_rotated_template_deterministic_positioning() {
+    // Regression: template instance bounds must be recomputed from children
+    // after local solving, otherwise non-deterministic procedural layout causes
+    // internal elements to shift on repeated runs.
+    let source = r#"
+template "diode" {
+    path triangle [fill: none, stroke: foreground-1, stroke_width: 2] {
+        vertex tl [x: 0, y: 0]
+        line_to tr [x: 16, y: 0]
+        line_to tip [x: 8, y: 14]
+        close
+    }
+    rect cathode_bar [width: 20, height: 2, fill: foreground-1, stroke: none]
+    constrain cathode_bar.center_x = triangle.center_x
+    constrain cathode_bar.top = triangle.bottom + 2
+    rect anode_lead [width: 2, height: 12, fill: foreground-1, stroke: none]
+    constrain anode_lead.center_x = triangle.center_x
+    constrain anode_lead.bottom = triangle.top
+    rect cathode_lead [width: 2, height: 12, fill: foreground-1, stroke: none]
+    constrain cathode_lead.center_x = cathode_bar.center_x
+    constrain cathode_lead.top = cathode_bar.bottom
+    anchor anode [position: anode_lead.top, direction: up]
+    anchor cathode [position: cathode_lead.bottom, direction: down]
+}
+
+rect reference [width: 50, height: 50]
+diode d1 [rotation: 180]
+
+constrain d1.center_y = reference.center_y
+constrain d1.left = reference.right + 20
+"#;
+
+    // Run multiple times to check for non-determinism
+    let mut center_ys = Vec::new();
+    for _ in 0..5 {
+        let result = compute_layout(source).expect("Should succeed");
+        let d1 = result.elements.get("d1").expect("d1 should exist");
+        let reference = result.elements.get("reference").expect("reference should exist");
+
+        let d1_center_y = d1.bounds.y + d1.bounds.height / 2.0;
+        let ref_center_y = reference.bounds.y + reference.bounds.height / 2.0;
+
+        // Constraint must be satisfied: d1.center_y = reference.center_y
+        assert!(
+            (d1_center_y - ref_center_y).abs() < 1.0,
+            "d1 center_y ({}) should match reference center_y ({})",
+            d1_center_y,
+            ref_center_y
+        );
+
+        center_ys.push(d1_center_y);
+    }
+
+    // All runs should produce the same center_y (deterministic)
+    for (i, cy) in center_ys.iter().enumerate().skip(1) {
+        assert!(
+            (cy - center_ys[0]).abs() < 0.01,
+            "Run {} produced center_y={}, but run 0 produced {} (non-deterministic!)",
+            i,
+            cy,
+            center_ys[0]
+        );
+    }
+}
+
+#[test]
 fn test_mosfet_driver_renders() {
     // Verify the MOSFET driver example renders without errors
     let source = std::fs::read_to_string("examples/mosfet-driver.ail");
