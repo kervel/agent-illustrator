@@ -114,14 +114,19 @@ pub fn resolve_anchor(
 ) -> Result<ResolvedAnchor, LayoutError> {
     let element_name = &anchor_ref.element.node.0;
     let element = elements.get(element_name).ok_or_else(|| {
-        LayoutError::undefined(element_name.clone(), anchor_ref.element.span.clone(), vec![])
+        LayoutError::undefined(
+            element_name.clone(),
+            anchor_ref.element.span.clone(),
+            vec![],
+        )
     })?;
 
     match &anchor_ref.anchor {
         Some(anchor_name) => {
             // Explicit anchor - look up in element's anchor set
             let anchor = element.anchors.get(&anchor_name.node).ok_or_else(|| {
-                let valid_anchors: Vec<String> = element.anchors.names().map(String::from).collect();
+                let valid_anchors: Vec<String> =
+                    element.anchors.names().map(String::from).collect();
                 LayoutError::invalid_anchor(
                     element_name.clone(),
                     anchor_name.node.clone(),
@@ -272,11 +277,7 @@ fn simplify_path(points: Vec<Point>) -> Vec<Point> {
     simplified
 }
 
-fn is_valid_orthogonal_path(
-    path: &[Point],
-    from_dir: Point,
-    to_dir: Point,
-) -> bool {
+fn is_valid_orthogonal_path(path: &[Point], from_dir: Point, to_dir: Point) -> bool {
     if path.len() < 2 {
         return false;
     }
@@ -366,7 +367,11 @@ fn orthogonal_with_directions(
         } else {
             // Go above or below, choosing the side with more room
             let offset = MIN_FINAL_SEGMENT_LENGTH.max((end.x - start.x).abs() / 4.0);
-            if start.y < end.y { start.y - offset } else { start.y + offset }
+            if start.y < end.y {
+                start.y - offset
+            } else {
+                start.y + offset
+            }
         };
         let start_out_x = start.x + from_dir.x * MIN_FINAL_SEGMENT_LENGTH;
         let end_in_x = end.x - to_dir.x * MIN_FINAL_SEGMENT_LENGTH;
@@ -383,7 +388,11 @@ fn orthogonal_with_directions(
             (start.x + end.x) / 2.0
         } else {
             let offset = MIN_FINAL_SEGMENT_LENGTH.max((end.y - start.y).abs() / 4.0);
-            if start.x < end.x { start.x - offset } else { start.x + offset }
+            if start.x < end.x {
+                start.x - offset
+            } else {
+                start.x + offset
+            }
         };
         let start_out_y = start.y + from_dir.y * MIN_FINAL_SEGMENT_LENGTH;
         let end_in_y = end.y - to_dir.y * MIN_FINAL_SEGMENT_LENGTH;
@@ -558,7 +567,10 @@ pub fn route_connection_with_anchors(
         let (from_dir, to_dir) = if let (Some(from_anch), Some(to_anch)) = (from_anchor, to_anchor)
         {
             // Use anchor directions for perpendicular entry/exit
-            (from_anch.direction.to_vector(), to_anch.direction.to_vector())
+            (
+                from_anch.direction.to_vector(),
+                to_anch.direction.to_vector(),
+            )
         } else {
             // Auto-compute directions perpendicular to the line
             let perp = if distance > 0.001 {
@@ -614,10 +626,7 @@ pub fn route_connection_with_anchors(
             };
             // Position ctrl2 on the start side of via, along the tangent direction
             let tangent_dist = control_distance * 0.5;
-            let ctrl2 = Point::new(
-                via.x - norm_x * tangent_dist,
-                via.y - norm_y * tangent_dist,
-            );
+            let ctrl2 = Point::new(via.x - norm_x * tangent_dist, via.y - norm_y * tangent_dist);
 
             // Segment 2: via -> end (using S command for smooth continuation)
             // ctrl3: mirror of ctrl2 relative to via (for G1 continuity)
@@ -705,12 +714,18 @@ pub fn route_connection_with_anchors(
     let (start, from_edge) = if let Some(anchor) = from_anchor {
         (anchor.position, default_from_edge)
     } else {
-        (attachment_point(from_bounds, default_from_edge), default_from_edge)
+        (
+            attachment_point(from_bounds, default_from_edge),
+            default_from_edge,
+        )
     };
     let (end, to_edge) = if let Some(anchor) = to_anchor {
         (anchor.position, default_to_edge)
     } else {
-        (attachment_point(to_bounds, default_to_edge), default_to_edge)
+        (
+            attachment_point(to_bounds, default_to_edge),
+            default_to_edge,
+        )
     };
 
     // Orthogonal routing: create paths with horizontal/vertical segments only
@@ -787,8 +802,8 @@ fn extract_routing_mode(modifiers: &[Spanned<StyleModifier>]) -> RoutingMode {
                 match k.as_str() {
                     "direct" => return RoutingMode::Direct,
                     "orthogonal" => return RoutingMode::Orthogonal,
-                    "curved" => return RoutingMode::Curved,  // Feature 008
-                    _ => {} // Unknown value, use default
+                    "curved" => return RoutingMode::Curved, // Feature 008
+                    _ => {}                                 // Unknown value, use default
                 }
             }
         }
@@ -861,18 +876,18 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                 Statement::Connection(conns) => {
                     for conn in conns {
                         // Feature 009: Access element via AnchorReference.element
-                        let from_element =
-                            result
-                                .get_element_by_name(&conn.from.element.node.0)
-                                .ok_or_else(|| {
-                                    LayoutError::undefined(
-                                        conn.from.element.node.0.clone(),
-                                        conn.from.element.span.clone(),
-                                        vec![],
-                                    )
-                                })?;
-                        let to_element =
-                            result.get_element_by_name(&conn.to.element.node.0).ok_or_else(|| {
+                        let from_element = result
+                            .get_element_by_name(&conn.from.element.node.0)
+                            .ok_or_else(|| {
+                                LayoutError::undefined(
+                                    conn.from.element.node.0.clone(),
+                                    conn.from.element.span.clone(),
+                                    vec![],
+                                )
+                            })?;
+                        let to_element = result
+                            .get_element_by_name(&conn.to.element.node.0)
+                            .ok_or_else(|| {
                                 LayoutError::undefined(
                                     conn.to.element.node.0.clone(),
                                     conn.to.element.span.clone(),
@@ -885,8 +900,10 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                         let to_bounds = to_element.bounds;
 
                         // Feature 009: Resolve anchors for connection endpoints
-                        let from_anchor = resolve_anchor(&conn.from, &result.elements, Some(&to_bounds))?;
-                        let to_anchor = resolve_anchor(&conn.to, &result.elements, Some(&from_bounds))?;
+                        let from_anchor =
+                            resolve_anchor(&conn.from, &result.elements, Some(&to_bounds))?;
+                        let to_anchor =
+                            resolve_anchor(&conn.to, &result.elements, Some(&from_bounds))?;
 
                         // Use anchors only if explicitly specified, otherwise auto-detect
                         let from_anchor_opt = conn.from.anchor.as_ref().map(|_| &from_anchor);
@@ -1007,11 +1024,7 @@ fn resolve_label_overlaps(connections: &mut [ConnectionLayout]) {
                 let nudge = (overlap_amount / 2.0) + MIN_SEPARATION;
 
                 // Determine which one is above (smaller y = higher up)
-                let (upper_idx, lower_idx) = if a.y <= b.y {
-                    (i, j)
-                } else {
-                    (j, i)
-                };
+                let (upper_idx, lower_idx) = if a.y <= b.y { (i, j) } else { (j, i) };
 
                 // Apply nudges to the actual connection labels
                 if let Some(ref mut label) = connections[labels[upper_idx].conn_idx].label {
@@ -1113,8 +1126,10 @@ fn extract_connection_label_with_ref(
         // B(0.5) = 0.125*P0 + 0.375*P1 + 0.375*P2 + 0.125*P3
         let start = path[0];
         let end = path[3];
-        let base_mid_x = 0.125 * path[0].x + 0.375 * path[1].x + 0.375 * path[2].x + 0.125 * path[3].x;
-        let base_mid_y = 0.125 * path[0].y + 0.375 * path[1].y + 0.375 * path[2].y + 0.125 * path[3].y;
+        let base_mid_x =
+            0.125 * path[0].x + 0.375 * path[1].x + 0.375 * path[2].x + 0.125 * path[3].x;
+        let base_mid_y =
+            0.125 * path[0].y + 0.375 * path[1].y + 0.375 * path[2].y + 0.125 * path[3].y;
 
         // Position based on explicit label_position or auto-detect
         match label_position {

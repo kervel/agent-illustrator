@@ -72,7 +72,7 @@ fn span_range(e: &impl chumsky::span::Span<Offset = usize>) -> std::ops::Range<u
 enum ParsedModifierValue {
     Number(f64),
     Sweep(SweepDirection),
-    Identifier(Spanned<Identifier>),  // Feature 008: for via references
+    Identifier(Spanned<Identifier>), // Feature 008: for via references
 }
 
 /// Helper struct for parsing arc modifiers within brackets
@@ -83,7 +83,7 @@ struct ParsedArcModifiers {
     radius: Option<f64>,
     bulge: Option<f64>,
     sweep: Option<SweepDirection>,
-    via: Option<Spanned<Identifier>>,  // Feature 008: steering vertex reference
+    via: Option<Spanned<Identifier>>, // Feature 008: steering vertex reference
 }
 
 impl ParsedArcModifiers {
@@ -285,9 +285,9 @@ where
             let value = match id.node.as_str() {
                 // Common style value keywords (not alignment edges)
                 // Feature 008: added "curved" for curved routing
-                "center" | "direct" | "orthogonal" | "curved" | "none" | "auto" | "solid" | "dashed"
-                | "dotted" | "hidden" | "bold" | "italic" | "normal" | "start" | "middle"
-                | "end" => StyleValue::Keyword(id.node.0.clone()),
+                "center" | "direct" | "orthogonal" | "curved" | "none" | "auto" | "solid"
+                | "dashed" | "dotted" | "hidden" | "bold" | "italic" | "normal" | "start"
+                | "middle" | "end" => StyleValue::Keyword(id.node.0.clone()),
                 // Color keywords
                 "red" | "green" | "blue" | "black" | "white" | "gray" | "grey" | "yellow"
                 | "orange" | "purple" | "pink" | "cyan" | "magenta" | "transparent" => {
@@ -370,11 +370,9 @@ where
     let anchor_reference = identifier
         .clone()
         .then(just(Token::Dot).ignore_then(anchor_name).or_not())
-        .map(|(element, anchor_opt)| {
-            match anchor_opt {
-                Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
-                None => AnchorReference::element_only(element),
-            }
+        .map(|(element, anchor_opt)| match anchor_opt {
+            Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
+            None => AnchorReference::element_only(element),
         });
 
     // Connection declaration (supports chained: a -> b -> c [modifiers])
@@ -876,7 +874,13 @@ where
         just(Token::Close).map_with(|_, e| Spanned::new(PathCommand::Close, span_range(&e.span())));
 
     // Parse path command (vertex | line_to | arc_to | curve_to | close)
-    let path_command = choice((vertex_decl, line_to_decl, arc_to_decl, curve_to_decl, close_decl));
+    let path_command = choice((
+        vertex_decl,
+        line_to_decl,
+        arc_to_decl,
+        curve_to_decl,
+        close_decl,
+    ));
 
     // Parse path body: { commands* }
     let path_body = path_command
@@ -944,7 +948,7 @@ where
                 name,
                 children,
                 modifiers: modifiers.unwrap_or_default(),
-                anchors: vec![],  // Parsed groups don't have custom anchors
+                anchors: vec![], // Parsed groups don't have custom anchors
             });
 
         // Label declaration: `label { ... }` or `label: <element>`
@@ -1128,7 +1132,7 @@ where
             file_template.clone(),
             inline_template,
             export_decl.clone().map(Statement::Export),
-            anchor_decl,  // Feature 009: anchor declarations
+            anchor_decl, // Feature 009: anchor declarations
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
             label_decl,
@@ -1207,9 +1211,15 @@ mod tests {
             Statement::Connection(conns) => {
                 assert_eq!(conns.len(), 1);
                 assert_eq!(conns[0].from.element.node.as_str(), "a");
-                assert_eq!(conns[0].from.anchor.as_ref().map(|s| s.node.as_str()), Some("right"));
+                assert_eq!(
+                    conns[0].from.anchor.as_ref().map(|s| s.node.as_str()),
+                    Some("right")
+                );
                 assert_eq!(conns[0].to.element.node.as_str(), "b");
-                assert_eq!(conns[0].to.anchor.as_ref().map(|s| s.node.as_str()), Some("left"));
+                assert_eq!(
+                    conns[0].to.anchor.as_ref().map(|s| s.node.as_str()),
+                    Some("left")
+                );
             }
             _ => panic!("Expected connection"),
         }
@@ -1221,7 +1231,10 @@ mod tests {
         let doc = parse("a.top -> b").expect("Should parse");
         match &doc.statements[0].node {
             Statement::Connection(conns) => {
-                assert_eq!(conns[0].from.anchor.as_ref().map(|s| s.node.as_str()), Some("top"));
+                assert_eq!(
+                    conns[0].from.anchor.as_ref().map(|s| s.node.as_str()),
+                    Some("top")
+                );
                 assert!(conns[0].to.anchor.is_none());
             }
             _ => panic!("Expected connection"),
@@ -2364,14 +2377,12 @@ mod tests {
         let input = r#"anchor diagonal [position: body.top, direction: 45]"#;
         let doc = parse(input).expect("Should parse");
         match &doc.statements[0].node {
-            Statement::AnchorDecl(a) => {
-                match &a.direction {
-                    Some(AnchorDirectionSpec::Angle(angle)) => {
-                        assert_eq!(*angle, 45.0);
-                    }
-                    other => panic!("Expected Angle direction, got {:?}", other),
+            Statement::AnchorDecl(a) => match &a.direction {
+                Some(AnchorDirectionSpec::Angle(angle)) => {
+                    assert_eq!(*angle, 45.0);
                 }
-            }
+                other => panic!("Expected Angle direction, got {:?}", other),
+            },
             other => panic!("Expected AnchorDecl, got {:?}", other),
         }
     }

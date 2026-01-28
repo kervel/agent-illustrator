@@ -142,18 +142,12 @@ impl RotationTransform {
         let rotated: Vec<Point> = corners.iter().map(|p| self.transform_point(*p)).collect();
 
         // Find AABB of rotated corners
-        let min_x = rotated
-            .iter()
-            .map(|p| p.x)
-            .fold(f64::INFINITY, f64::min);
+        let min_x = rotated.iter().map(|p| p.x).fold(f64::INFINITY, f64::min);
         let max_x = rotated
             .iter()
             .map(|p| p.x)
             .fold(f64::NEG_INFINITY, f64::max);
-        let min_y = rotated
-            .iter()
-            .map(|p| p.y)
-            .fold(f64::INFINITY, f64::min);
+        let min_y = rotated.iter().map(|p| p.y).fold(f64::INFINITY, f64::min);
         let max_y = rotated
             .iter()
             .map(|p| p.y)
@@ -235,8 +229,16 @@ mod tests {
         // Point (1, 0) rotated 90° clockwise around origin should be (0, 1)
         let p = Point { x: 1.0, y: 0.0 };
         let result = t.transform_point(p);
-        assert!(approx_eq(result.x, 0.0), "x: expected 0.0, got {}", result.x);
-        assert!(approx_eq(result.y, 1.0), "y: expected 1.0, got {}", result.y);
+        assert!(
+            approx_eq(result.x, 0.0),
+            "x: expected 0.0, got {}",
+            result.x
+        );
+        assert!(
+            approx_eq(result.y, 1.0),
+            "y: expected 1.0, got {}",
+            result.y
+        );
     }
 
     #[test]
@@ -251,7 +253,11 @@ mod tests {
             "x: expected -1.0, got {}",
             result.x
         );
-        assert!(approx_eq(result.y, 0.0), "y: expected 0.0, got {}", result.y);
+        assert!(
+            approx_eq(result.y, 0.0),
+            "y: expected 0.0, got {}",
+            result.y
+        );
     }
 
     #[test]
@@ -261,7 +267,11 @@ mod tests {
         // Point (1, 0) rotated 270° clockwise (= 90° counter-clockwise) should be (0, -1)
         let p = Point { x: 1.0, y: 0.0 };
         let result = t.transform_point(p);
-        assert!(approx_eq(result.x, 0.0), "x: expected 0.0, got {}", result.x);
+        assert!(
+            approx_eq(result.x, 0.0),
+            "x: expected 0.0, got {}",
+            result.x
+        );
         assert!(
             approx_eq(result.y, -1.0),
             "y: expected -1.0, got {}",

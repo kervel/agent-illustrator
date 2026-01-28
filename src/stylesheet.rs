@@ -196,7 +196,9 @@ pub fn validate_color_token(token: &str, stylesheet: &Stylesheet) -> Result<(), 
     };
 
     // List valid tokens in that category
-    let valid_tokens: Vec<_> = default.colors.keys()
+    let valid_tokens: Vec<_> = default
+        .colors
+        .keys()
         .filter(|k| category.is_empty() || k.starts_with(category))
         .cloned()
         .collect();

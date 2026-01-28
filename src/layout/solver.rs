@@ -243,9 +243,9 @@ impl LayoutConstraint {
             }
             LayoutConstraint::GreaterOrEqual { variable, .. } => vec![&variable.element_id],
             LayoutConstraint::LessOrEqual { variable, .. } => vec![&variable.element_id],
-            LayoutConstraint::Midpoint {
-                target, a, b, ..
-            } => vec![&target.element_id, &a.element_id, &b.element_id],
+            LayoutConstraint::Midpoint { target, a, b, .. } => {
+                vec![&target.element_id, &a.element_id, &b.element_id]
+            }
         }
     }
 }

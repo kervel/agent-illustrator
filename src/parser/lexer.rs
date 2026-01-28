@@ -559,7 +559,13 @@ mod tests {
             .collect();
         assert_eq!(
             tokens,
-            vec![Token::Anchor, Token::Direction, Token::Position, Token::Up, Token::Down]
+            vec![
+                Token::Anchor,
+                Token::Direction,
+                Token::Position,
+                Token::Up,
+                Token::Down
+            ]
         );
     }
 }

@@ -21,10 +21,7 @@ pub enum PathSegment {
         sweep: bool, // true = clockwise in SVG coordinates (y-down)
     },
     /// Quadratic Bezier curve (Feature 008)
-    QuadraticTo {
-        control: Point,
-        end: Point,
-    },
+    QuadraticTo { control: Point, end: Point },
     /// Smooth quadratic continuation (Feature 008)
     /// Uses SVG T command - control point is auto-reflected
     SmoothQuadraticTo(Point),
@@ -563,7 +560,10 @@ fn compute_arc_apex(
     // Our perpendicular is (-dy, dx) which is "left", so negate for clockwise
     let sign = if clockwise { -1.0 } else { 1.0 };
 
-    (mid_x + sign * perp_x * sagitta, mid_y + sign * perp_y * sagitta)
+    (
+        mid_x + sign * perp_x * sagitta,
+        mid_y + sign * perp_y * sagitta,
+    )
 }
 
 /// Compute the apex point of a quadratic Bezier curve (where it bulges furthest from the chord)
@@ -614,7 +614,9 @@ fn compute_curve_apex(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::ast::{ArcToDecl, CurveToDecl, Identifier, LineToDecl, PathBody, Spanned, VertexDecl};
+    use crate::parser::ast::{
+        ArcToDecl, CurveToDecl, Identifier, LineToDecl, PathBody, Spanned, VertexDecl,
+    };
 
     fn make_vertex(name: &str, x: Option<f64>, y: Option<f64>) -> Spanned<PathCommand> {
         Spanned::new(
@@ -734,9 +736,15 @@ mod tests {
         // Arc apex is at y = -12.5 (above vertices at y = 0).
         // Path is normalized so visual top (arc apex) is at origin.y = 0.
         // This shifts vertices from y=0 to y=12.5.
-        assert!(d.starts_with("M0.00 12.50"), "Should start at normalized position (arc bulges above)");
+        assert!(
+            d.starts_with("M0.00 12.50"),
+            "Should start at normalized position (arc bulges above)"
+        );
         assert!(d.contains(" A"), "Should contain arc command");
-        assert!(d.contains("50.00 12.50"), "Should end at (50, 12.5) after normalization");
+        assert!(
+            d.contains("50.00 12.50"),
+            "Should end at (50, 12.5) after normalization"
+        );
     }
 
     #[test]
@@ -886,7 +894,10 @@ mod tests {
         let d = resolved.to_svg_d();
 
         // Should contain Q command with control point at (50, -30) and end at (100, 0)
-        assert!(d.contains(" Q50.00 -30.00 100.00 0.00"), "Should use ctrl vertex as control point");
+        assert!(
+            d.contains(" Q50.00 -30.00 100.00 0.00"),
+            "Should use ctrl vertex as control point"
+        );
     }
 
     #[test]
@@ -936,7 +947,10 @@ mod tests {
         // Offset is 25% of 100 = 25 in perpendicular direction
         // So control should be at (50, 25) - below the chord (positive Y in SVG)
         assert!((control.x - 50.0).abs() < 0.01, "Control x should be 50");
-        assert!((control.y - 25.0).abs() < 0.01, "Control y should be 25 (perpendicular offset)");
+        assert!(
+            (control.y - 25.0).abs() < 0.01,
+            "Control y should be 25 (perpendicular offset)"
+        );
     }
 
     #[test]

@@ -1,8 +1,8 @@
 //! SVG generation from layout results
 
 use crate::layout::{
-    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point,
-    ResolvedStyles, RoutingMode, TextAnchor,
+    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point, ResolvedStyles,
+    RoutingMode, TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, ShapeType};
 use crate::stylesheet::Stylesheet;
@@ -392,17 +392,24 @@ impl SvgBuilder {
                 // Cubic Bezier: M start C control1 control2 end [S control2 end]...
                 let mut d = format!(
                     "M{} {} C{} {} {} {} {} {}",
-                    path[0].x, path[0].y,
-                    path[1].x, path[1].y,
-                    path[2].x, path[2].y,
-                    path[3].x, path[3].y
+                    path[0].x,
+                    path[0].y,
+                    path[1].x,
+                    path[1].y,
+                    path[2].x,
+                    path[2].y,
+                    path[3].x,
+                    path[3].y
                 );
                 // Additional segments use S (smooth cubic continuation)
                 // Each additional segment needs 2 points: control2 and endpoint
                 let remaining = &path[4..];
                 for chunk in remaining.chunks(2) {
                     if chunk.len() == 2 {
-                        d.push_str(&format!(" S{} {} {} {}", chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y));
+                        d.push_str(&format!(
+                            " S{} {} {} {}",
+                            chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y
+                        ));
                     } else if chunk.len() == 1 {
                         // Odd point at end - just draw line to it
                         d.push_str(&format!(" L{} {}", chunk[0].x, chunk[0].y));
@@ -815,11 +822,8 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
         ElementType::Shape(ShapeType::Path(path_decl)) => {
             // Path shape rendering (Feature 007)
             let origin = Point::new(element.bounds.x, element.bounds.y);
-            let resolved = super::path::resolve_path_with_options(
-                path_decl,
-                origin,
-                element.path_normalize,
-            );
+            let resolved =
+                super::path::resolve_path_with_options(path_decl, origin, element.path_normalize);
             let d = resolved.to_svg_d();
 
             if d.is_empty() {
@@ -888,7 +892,14 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
         ConnectionDirection::Forward | ConnectionDirection::Bidirectional
     );
 
-    builder.add_connection_path(&conn.path, conn.routing_mode, &classes, &styles, marker_end, stroke_width);
+    builder.add_connection_path(
+        &conn.path,
+        conn.routing_mode,
+        &classes,
+        &styles,
+        marker_end,
+        stroke_width,
+    );
 
     // Render connection label if present
     if let Some(label) = &conn.label {

@@ -107,7 +107,9 @@ impl<'a> From<chumsky::error::Rich<'a, crate::parser::lexer::Token>> for ParseEr
                     chumsky::error::RichPattern::Token(tok) => Some(format_token(tok)),
                     chumsky::error::RichPattern::Label(label) => Some(label.to_string()),
                     chumsky::error::RichPattern::EndOfInput => Some("end of input".to_string()),
-                    chumsky::error::RichPattern::Identifier(s) => Some(format!("identifier '{}'", s)),
+                    chumsky::error::RichPattern::Identifier(s) => {
+                        Some(format!("identifier '{}'", s))
+                    }
                     chumsky::error::RichPattern::Any => Some("any token".to_string()),
                     chumsky::error::RichPattern::SomethingElse => None, // Skip "something else"
                 }
@@ -130,7 +132,7 @@ fn format_token(tok: &crate::parser::lexer::Token) -> String {
         Token::String(s) => format!("string \"{}\"", s),
         Token::Number(n) => format!("number {}", n),
         Token::HexColor(c) => format!("color {}", c),
-        Token::Arrow => "'->'"  .to_string(),
+        Token::Arrow => "'->'".to_string(),
         Token::ArrowBack => "'<-'".to_string(),
         Token::ArrowBoth => "'<->'".to_string(),
         Token::Dash => "'--'".to_string(),
