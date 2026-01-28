@@ -191,12 +191,12 @@ template "ground_sym" {
 
 // Instantiate all components
 power_rail vcc [voltage: "+5V"]
-resistor r_limit [value: "220Ω"]
+resistor r_limit [value: "220Ω", rotation: 90]  // Vertical for load path
 led status_led [color: green]
 gpio_pin gpio [name: "GPIO_5"]
-resistor r_gate [value: "10kΩ"]
+resistor r_gate [value: "10kΩ"]  // Horizontal for gate drive
 nmos q1
-resistor r_pulldown [value: "10kΩ"]
+resistor r_pulldown [value: "10kΩ", rotation: 90]  // Vertical for ground path
 ground_sym gnd
 
 // === LAYOUT POSITIONING ===
@@ -210,7 +210,7 @@ constrain r_limit.center_x = vcc.center_x
 constrain r_limit.top = vcc.bottom + 40
 
 constrain status_led.center_x = vcc.center_x
-constrain status_led.top = r_limit.bottom + 30
+constrain status_led.top = r_limit.bottom + 50  // More gap for rotated resistor
 
 // MOSFET below LED, aligned
 constrain q1.center_x = vcc.center_x
@@ -223,7 +223,7 @@ constrain gpio.center_y = q1.center_y
 constrain r_gate.left = gpio.right + 20
 constrain r_gate.center_y = q1.center_y
 
-// Pulldown resistor below MOSFET
+// Pulldown resistor below MOSFET - rotated 90° for vertical flow
 constrain r_pulldown.center_x = q1.center_x
 constrain r_pulldown.top = q1.bottom + 40
 

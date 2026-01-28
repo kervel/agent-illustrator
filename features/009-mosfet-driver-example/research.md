@@ -383,7 +383,25 @@ constrain foo.left = c1_body.right + 10  // c1_body = instance name + underscore
 
 **Workaround Until 010**: Avoid rotation on templates with external connections. Create separate templates for different orientations.
 
-### LL-9: Don't Work Around Bugs - Fix Them
+### LL-9: Local-Then-Global Optimization Workflow
+
+**Problem**: When optimizing a complex diagram, trying to fix everything at once leads to confusion and missed issues.
+
+**Solution**: Use a two-phase optimization approach:
+
+1. **Local Optimization Phase**: Optimize each component/template in isolation
+   - Test each template with a minimal single-instance file
+   - Fix internal layout, proportions, and anchor positions
+   - Verify the component looks correct standalone
+
+2. **Global Optimization Phase**: Optimize the overall diagram layout
+   - Position components relative to each other
+   - Adjust spacing and alignment
+   - Fix connection routing issues
+
+**Rationale**: Local issues are easier to spot and fix in isolation. Once all components are individually correct, global layout problems become clear.
+
+### LL-10: Don't Work Around Bugs - Fix Them
 
 **Problem**: When encountering a bug, the temptation is to work around it (e.g., create horizontal and vertical resistor templates instead of using rotation).
 
