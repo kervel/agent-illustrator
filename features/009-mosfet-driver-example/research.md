@@ -248,7 +248,22 @@ resistor r2 [value: "20k", rotation: 90]  // No effect - r2 is still horizontal
 
 **Workaround**: Create separate templates for different orientations, or adjust layout to avoid needing rotation.
 
-**Status**: NOT FIXED - needs investigation
+**Status**: FIXED by Feature 010 (local/global solver separation)
+
+### BUG-003: Cannot Constrain Based on Anchor Positions
+
+**Severity**: Medium (design limitation)
+
+**Description**: Constraints can only reference element bounds (`.left`, `.top`, `.center_x`, etc.) but cannot reference anchor positions. This makes it impossible to align elements precisely with connection points that are offset from the element center.
+
+**Example**: The MOSFET's drain anchor is at `drain_lead.top`, which is offset from the body's center. You cannot write:
+```ail
+constrain d_flyback.center_x = q_main.drain.x  // Not supported
+```
+
+**Workaround**: Manually position elements or accept misalignment.
+
+**Status**: Feature request - not a bug, but a missing capability
 
 ---
 
