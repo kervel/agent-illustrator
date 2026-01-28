@@ -176,20 +176,38 @@ fn collect_element_template_mapping(
     map: &mut HashMap<String, String>,
     current_template: Option<&str>,
 ) {
+    use crate::parser::ast::ShapeType;
+
+    /// Helper to add an element ID to the map with appropriate template context
+    fn add_element_to_map(
+        elem_id: &str,
+        map: &mut HashMap<String, String>,
+        current_template: Option<&str>,
+    ) {
+        // If we're inside a template context, map this element
+        if let Some(template) = current_template {
+            map.insert(elem_id.to_string(), template.to_string());
+        }
+        // Also check if this element's name has a prefix pattern
+        // (for backwards compatibility with prefix-based detection)
+        else if let Some(prefix) = extract_template_prefix(elem_id) {
+            map.insert(elem_id.to_string(), prefix.to_string());
+        }
+    }
+
     match stmt {
         Statement::Shape(s) => {
-            if let Some(name) = &s.name {
-                let elem_id = &name.node.0;
+            // Get element ID - check ShapeDecl.name first, then PathDecl.name for path shapes
+            let elem_id = s.name.as_ref().map(|n| n.node.0.as_str()).or_else(|| {
+                if let ShapeType::Path(path_decl) = &s.shape_type.node {
+                    path_decl.name.as_ref().map(|n| n.node.0.as_str())
+                } else {
+                    None
+                }
+            });
 
-                // If we're inside a template context, map this element
-                if let Some(template) = current_template {
-                    map.insert(elem_id.clone(), template.to_string());
-                }
-                // Also check if this element's name has a prefix pattern
-                // (for backwards compatibility with prefix-based detection)
-                else if let Some(prefix) = extract_template_prefix(elem_id) {
-                    map.insert(elem_id.clone(), prefix.to_string());
-                }
+            if let Some(elem_id) = elem_id {
+                add_element_to_map(elem_id, map, current_template);
             }
         }
         Statement::Group(g) => {
@@ -238,7 +256,14 @@ fn collect_element_template_mapping(
         Statement::Label(inner) => {
             collect_element_template_mapping(inner, map, current_template);
         }
-        _ => {}
+        // These statement types don't have element IDs or children to process
+        Statement::Connection(_)
+        | Statement::Constraint(_)
+        | Statement::Constrain(_)
+        | Statement::TemplateDecl(_)
+        | Statement::TemplateInstance(_)
+        | Statement::Export(_)
+        | Statement::AnchorDecl(_) => {}
     }
 }
 
@@ -253,11 +278,29 @@ fn extract_template_prefix(elem_id: &str) -> Option<&str> {
 
 /// Get the ID (name) of a statement, if it has one.
 fn get_statement_id(stmt: &Statement) -> Option<&str> {
+    use crate::parser::ast::ShapeType;
     match stmt {
-        Statement::Shape(s) => s.name.as_ref().map(|n| n.node.0.as_str()),
+        Statement::Shape(s) => {
+            // Check ShapeDecl.name first, then PathDecl.name for path shapes
+            s.name.as_ref().map(|n| n.node.0.as_str()).or_else(|| {
+                if let ShapeType::Path(path_decl) = &s.shape_type.node {
+                    path_decl.name.as_ref().map(|n| n.node.0.as_str())
+                } else {
+                    None
+                }
+            })
+        }
         Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.as_str()),
         Statement::Layout(l) => l.name.as_ref().map(|n| n.node.0.as_str()),
-        _ => None,
+        // These statement types don't have element IDs
+        Statement::Connection(_)
+        | Statement::Constraint(_)
+        | Statement::Constrain(_)
+        | Statement::TemplateDecl(_)
+        | Statement::TemplateInstance(_)
+        | Statement::Export(_)
+        | Statement::AnchorDecl(_)
+        | Statement::Label(_) => None,
     }
 }
 
