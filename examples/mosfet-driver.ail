@@ -27,51 +27,78 @@ template "resistor" (value: "R") {
     anchor right_conn [position: right_lead.right, direction: right]
 }
 
-// N-Channel MOSFET template
+// N-Channel Enhancement MOSFET template (IEEE 315 style)
 template "nmos" {
     circle body [size: 60, fill: none, stroke: foreground-1, stroke_width: 2]
 
-    // Vertical channel
-    rect channel [width: 2, height: 36, fill: foreground-1, stroke: none]
-    constrain channel.center_x = body.center_x + 8
-    constrain channel.center_y = body.center_y
-
-    // Gate bar
-    rect gate_bar [width: 2, height: 36, fill: foreground-1, stroke: none]
-    constrain gate_bar.center_x = body.center_x - 4
+    // Gate bar (vertical, left of center)
+    rect gate_bar [width: 2, height: 30, fill: foreground-1, stroke: none]
+    constrain gate_bar.center_x = body.center_x - 6
     constrain gate_bar.center_y = body.center_y
 
-    // Gate lead
-    rect gate_lead [width: 30, height: 2, fill: foreground-1, stroke: none]
+    // Channel: three short vertical segments (broken = enhancement mode)
+    rect chan_top [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect chan_mid [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect chan_bot [width: 2, height: 8, fill: foreground-1, stroke: none]
+    constrain chan_top.center_x = body.center_x + 2
+    constrain chan_mid.center_x = body.center_x + 2
+    constrain chan_bot.center_x = body.center_x + 2
+    constrain chan_top.top = gate_bar.top
+    constrain chan_mid.center_y = body.center_y
+    constrain chan_bot.bottom = gate_bar.bottom
+
+    // Gate lead (horizontal, from circle edge to gate bar)
+    rect gate_lead [width: 24, height: 2, fill: foreground-1, stroke: none]
     constrain gate_lead.right = gate_bar.left
     constrain gate_lead.center_y = body.center_y
 
-    // Channel stubs
-    rect drain_stub [width: 16, height: 2, fill: foreground-1, stroke: none]
-    constrain drain_stub.right = channel.left + 1
-    constrain drain_stub.center_y = channel.top + 4
+    // Three horizontal stubs from channel segments going right
+    rect drain_stub [width: 14, height: 2, fill: foreground-1, stroke: none]
+    constrain drain_stub.left = chan_top.right
+    constrain drain_stub.center_y = chan_top.center_y
 
-    rect mid_stub [width: 16, height: 2, fill: foreground-1, stroke: none]
-    constrain mid_stub.right = channel.left + 1
-    constrain mid_stub.center_y = body.center_y
+    rect mid_stub [width: 14, height: 2, fill: foreground-1, stroke: none]
+    constrain mid_stub.left = chan_mid.right
+    constrain mid_stub.center_y = chan_mid.center_y
 
-    rect source_stub [width: 16, height: 2, fill: foreground-1, stroke: none]
-    constrain source_stub.right = channel.left + 1
-    constrain source_stub.center_y = channel.bottom - 4
+    rect source_stub [width: 14, height: 2, fill: foreground-1, stroke: none]
+    constrain source_stub.left = chan_bot.right
+    constrain source_stub.center_y = chan_bot.center_y
 
-    // Drain/Source leads
-    rect drain_lead [width: 2, height: 24, fill: foreground-1, stroke: none]
-    constrain drain_lead.center_x = drain_stub.left + 1
+    // Drain lead (vertical, going up from drain stub through circle)
+    rect drain_lead [width: 2, height: 20, fill: foreground-1, stroke: none]
+    constrain drain_lead.center_x = drain_stub.right
     constrain drain_lead.bottom = drain_stub.center_y + 1
 
-    rect source_lead [width: 2, height: 24, fill: foreground-1, stroke: none]
-    constrain source_lead.center_x = source_stub.left + 1
+    // Source lead (vertical, going down from source stub through circle)
+    // Also carries the mid stub connection (body-source short)
+    rect source_lead [width: 2, height: 20, fill: foreground-1, stroke: none]
+    constrain source_lead.center_x = source_stub.right
     constrain source_lead.top = source_stub.center_y - 1
 
-    // Arrow (N-channel indicator)
-    rect arrow [width: 8, height: 2, fill: foreground-1, stroke: none]
-    constrain arrow.right = mid_stub.left
-    constrain arrow.center_y = mid_stub.center_y
+    // Body-source short: vertical from mid stub level down to source stub level
+    // At the same x as source_lead (source_stub.right)
+    path body_source [fill: none, stroke: foreground-1, stroke_width: 2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 0, y: 11]
+    }
+    constrain body_source.center_x = source_stub.right
+    constrain body_source.top = mid_stub.center_y
+
+    // Arrow pointing LEFT toward gate (N-channel indicator, on mid stub)
+    path arrow [fill: foreground-1, stroke: none] {
+        vertex tip [x: 0, y: 4]
+        line_to upper [x: 6, y: 0]
+        line_to lower [x: 6, y: 8]
+        close
+    }
+    constrain arrow.right = chan_mid.left + 6
+    constrain arrow.center_y = body.center_y
+
+    // Dot at body-source junction
+    circle dot [size: 5, fill: foreground-1, stroke: none]
+    constrain dot.center_x = source_stub.right
+    constrain dot.center_y = source_stub.center_y
 
     // Labels
     text "G" g_label [font_size: 12, fill: foreground-1]
