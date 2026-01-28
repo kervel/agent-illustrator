@@ -13,7 +13,7 @@ Extend the constraint system to allow referencing anchor positions in constraint
 
 **Use Case**: In electronic schematics, a MOSFET's drain anchor is offset from the body center. To align a flyback diode with the drain, users currently cannot write:
 ```ail
-constrain d_flyback.center_x = q_main.drain.x  // Not currently supported
+constrain d_flyback.center_x = q_main.drain_x  // Not currently supported
 ```
 
 Instead, they must manually position elements or accept misalignment.
@@ -55,23 +55,25 @@ There is no way to reference anchor positions in constraints. This prevents:
 
 ### Syntax Extension
 
-Allow constraint expressions to reference anchor coordinates using dot notation:
+Allow constraint expressions to reference anchor coordinates using underscore suffix notation:
 
 ```ail
-constrain foo.center_x = bar.anchor_name.x
-constrain foo.center_y = bar.anchor_name.y
+constrain foo.center_x = bar.anchor_name_x
+constrain foo.center_y = bar.anchor_name_y
 ```
 
 Where:
 - `bar` is the template instance name
 - `anchor_name` is the name of an anchor defined in the template
-- `.x` and `.y` access the x and y coordinates of the anchor position
+- `_x` and `_y` suffixes access the x and y coordinates of the anchor position
+
+This syntax is consistent with existing properties like `center_x` and `center_y`.
 
 ### Interaction with Rotation
 
 When a template instance has rotation applied (Feature 010), anchor positions are transformed to global coordinates during Phase 2 (Rotation Application). Constraint references to anchors use these transformed positions.
 
-This means `bar.anchor_name.x` returns the post-rotation x-coordinate of the anchor.
+This means `bar.anchor_name_x` returns the post-rotation x-coordinate of the anchor.
 
 ## User Scenarios
 
@@ -84,7 +86,7 @@ nmos q_main
 diode d_flyback
 
 // Align diode anode horizontally with MOSFET drain anchor
-constrain d_flyback.center_x = q_main.drain.x
+constrain d_flyback.center_x = q_main.drain_x
 constrain d_flyback.center_y = q_main.center_y
 ```
 
@@ -105,10 +107,10 @@ led led_top
 led led_bottom
 
 // Place LEDs symmetrically around the driver output
-constrain led_top.center_x = drv.output.x + 20
-constrain led_bottom.center_x = drv.output.x + 20
-constrain led_top.bottom = drv.output.y - 10
-constrain led_bottom.top = drv.output.y + 10
+constrain led_top.center_x = drv.output_x + 20
+constrain led_bottom.center_x = drv.output_x + 20
+constrain led_top.bottom = drv.output_y - 10
+constrain led_bottom.top = drv.output_y + 10
 ```
 
 ### Scenario 3: Rotated Template Anchor Reference
@@ -120,8 +122,8 @@ resistor r1 [rotation: 90]  // Vertical resistor
 rect junction
 
 // Align junction with the (rotated) left connector anchor
-constrain junction.center_x = r1.left_conn.x
-constrain junction.center_y = r1.left_conn.y
+constrain junction.center_x = r1.left_conn_x
+constrain junction.center_y = r1.left_conn_y
 ```
 
 The junction aligns with the post-rotation position of `left_conn`, which points upward after 90° rotation.
@@ -130,11 +132,11 @@ The junction aligns with the post-rotation position of `left_conn`, which points
 
 ### FR1: Anchor Coordinate Access Syntax
 
-Constraints must support `instance.anchor.x` and `instance.anchor.y` syntax.
+Constraints must support `instance.anchorname_x` and `instance.anchorname_y` syntax.
 
-- `instance.anchor.x` returns the x-coordinate of the anchor position
-- `instance.anchor.y` returns the y-coordinate of the anchor position
-- `instance.anchor` without `.x` or `.y` is a syntax error
+- `instance.anchorname_x` returns the x-coordinate of the anchor named "anchorname"
+- `instance.anchorname_y` returns the y-coordinate of the anchor named "anchorname"
+- The `_x` and `_y` suffixes are appended to the anchor name (e.g., `drain_x`, `left_conn_y`)
 
 ### FR2: Anchor Resolution Order
 
@@ -158,24 +160,41 @@ Clear error messages for invalid anchor references.
 
 - Error: "Unknown anchor 'xyz' on instance 'foo'" if anchor doesn't exist
 - Error: "Cannot reference anchor on non-template element 'bar'" if bar is a simple shape without anchors
-- Error: "Missing coordinate selector - use 'foo.anchor.x' or 'foo.anchor.y'" if bare anchor used
+- Error: "Missing coordinate selector - use 'foo.anchor_x' or 'foo.anchor_y'" if bare anchor used
 
 ### FR5: Parser Extension
 
-The constraint parser must be extended to recognize anchor references.
+The constraint parser must be extended to recognize anchor references via `ConstraintProperty::from_str()`.
 
-Current grammar (simplified):
-```
-property_ref := identifier '.' property
-property := 'left' | 'right' | 'top' | 'bottom' | 'center_x' | 'center_y'
+Current property parsing:
+```rust
+match s {
+    "center_x" => Some(Self::CenterX),
+    "left" => Some(Self::Left),
+    // etc.
+    _ => None,
+}
 ```
 
-Extended grammar:
+Extended parsing (underscore suffix pattern):
+```rust
+match s {
+    "center_x" => Some(Self::CenterX),
+    "left" => Some(Self::Left),
+    // etc.
+    _ if s.ends_with("_x") => {
+        let anchor_name = &s[..s.len() - 2];
+        Some(Self::AnchorX(anchor_name.to_string()))
+    }
+    _ if s.ends_with("_y") => {
+        let anchor_name = &s[..s.len() - 2];
+        Some(Self::AnchorY(anchor_name.to_string()))
+    }
+    _ => None,
+}
 ```
-property_ref := identifier '.' (property | anchor_ref)
-anchor_ref := identifier '.' ('x' | 'y')
-property := 'left' | 'right' | 'top' | 'bottom' | 'center_x' | 'center_y'
-```
+
+This approach requires no grammar changes—anchor properties are recognized as a fallback when the property string ends with `_x` or `_y` and isn't a built-in property.
 
 ### FR6: Backward Compatibility
 
@@ -187,24 +206,27 @@ Existing constraint syntax must continue to work unchanged.
 
 ### FR7: Template Self-Reference
 
-Within a template, anchors can be referenced by their name only (without instance prefix).
+Within a template, anchors can be referenced using the standard syntax with anchor name suffixes.
 
 ```ail
 template "component" {
     rect body [...]
     anchor output [position: body.right, direction: right]
 
-    // Within template, reference own anchor
-    constrain internal_element.left = output.x + 5  // 'output' is local anchor
+    // Reference own anchor using component name (after resolution)
+    // This works because template children are prefixed with instance name
+    constrain internal_element.left = output_x + 5
 }
 ```
 
+Note: Since templates don't know their instance name at definition time, internal anchor references may need special handling. This can be addressed by treating unprefixed anchor properties as local references during constraint collection within templates.
+
 ## Success Criteria
 
-- Constraints can reference anchor positions using `instance.anchor.x` and `instance.anchor.y` syntax
+- Constraints can reference anchor positions using `instance.anchor_x` and `instance.anchor_y` syntax
 - Anchor references work with both non-rotated and rotated template instances
 - Clear error messages for invalid anchor references (unknown anchor, wrong element type, missing coordinate)
-- Parser correctly distinguishes between element properties (`.left`, `.center_x`) and anchor references (`.anchor_name.x`)
+- Parser correctly distinguishes between element properties (`.left`, `.center_x`) and anchor references (`.anchor_name_x`)
 - Existing constraint syntax continues to work unchanged
 - The MOSFET driver example can be updated to use anchor-based alignment for the flyback diode
 

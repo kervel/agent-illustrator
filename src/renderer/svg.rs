@@ -815,7 +815,11 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
         ElementType::Shape(ShapeType::Path(path_decl)) => {
             // Path shape rendering (Feature 007)
             let origin = Point::new(element.bounds.x, element.bounds.y);
-            let resolved = super::path::resolve_path(path_decl, origin);
+            let resolved = super::path::resolve_path_with_options(
+                path_decl,
+                origin,
+                element.path_normalize,
+            );
             let d = resolved.to_svg_d();
 
             if d.is_empty() {
@@ -828,12 +832,22 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
             });
         }
         ElementType::Layout(_) | ElementType::Group => {
-            // Start a group for containers
+            // Start a group for containers (with optional rotation)
             let prefix = builder.prefix();
             let container_classes = std::iter::once(format!("{}container", prefix))
                 .chain(classes.iter().cloned())
                 .collect::<Vec<_>>();
-            builder.start_group(id, &container_classes);
+            if let Some(rotation) = element.styles.rotation {
+                if rotation.abs() > f64::EPSILON {
+                    let center = element.bounds.center();
+                    let transform = format!("rotate({} {} {})", rotation, center.x, center.y);
+                    builder.start_group_with_transform(id, &container_classes, &transform);
+                } else {
+                    builder.start_group(id, &container_classes);
+                }
+            } else {
+                builder.start_group(id, &container_classes);
+            }
 
             // Render children
             for child in &element.children {
@@ -1068,6 +1082,7 @@ mod tests {
             children: vec![],
             label: None,
             anchors: AnchorSet::default(),
+            path_normalize: true,
         });
         result.compute_bounds();
 
@@ -1091,6 +1106,7 @@ mod tests {
             children: vec![],
             label: None,
             anchors: AnchorSet::default(),
+            path_normalize: true,
         });
         result.add_element(ElementLayout {
             id: Some(Identifier::new("b")),
@@ -1100,6 +1116,7 @@ mod tests {
             children: vec![],
             label: None,
             anchors: AnchorSet::default(),
+            path_normalize: true,
         });
         result.connections.push(ConnectionLayout {
             from_id: Identifier::new("a"),
@@ -1138,6 +1155,7 @@ mod tests {
                     children: vec![],
                     label: None,
                     anchors: AnchorSet::default(),
+                    path_normalize: true,
                 },
                 ElementLayout {
                     id: Some(Identifier::new("b")),
@@ -1147,10 +1165,12 @@ mod tests {
                     children: vec![],
                     label: None,
                     anchors: AnchorSet::default(),
+                    path_normalize: true,
                 },
             ],
             label: None,
             anchors: AnchorSet::default(),
+            path_normalize: true,
         });
         result.compute_bounds();
 

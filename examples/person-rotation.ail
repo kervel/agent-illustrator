@@ -1,0 +1,98 @@
+// Rotation stress test: person template with path geometry, anchors, and connections.
+// Exercises rotation of path geometry, anchors, and via points.
+
+template "person" {
+  col [gap: 6] {
+    stack head_stack {
+      circle head [size: 18, fill: #f2c9a0, stroke: #333, stroke_width: 1]
+      path hair [fill: #2b1b0e] {
+        vertex a [x: 0, y: 6]
+        arc_to b [x: 18, y: 6, radius: 9]
+        line_to c [x: 18, y: 6]
+        line_to d [x: 13, y: 4]
+        line_to e [x: 9, y: 6]
+        line_to f [x: 6, y: 5]
+        line_to g [x: 0, y: 6]
+        close
+      }
+    }
+    path torso [fill: #4a6fa5, stroke: #333, stroke_width: 1] {
+      vertex a [x: 0, y: 6]
+      arc_to b [x: 26, y: 6, radius: 13]
+      line_to c [x: 26, y: 14]
+      line_to d [x: 0, y: 14]
+      close
+    }
+    path collar [fill: #ffffff, stroke: none] {
+      vertex a [x: 11, y: 6]
+      arc_to b [x: 17, y: 6, radius: 14]
+      line_to c [x: 14, y: 12]
+      close
+    }
+  }
+  constrain head.center_x = torso.center_x
+  constrain hair.center_x = head.center_x
+  constrain hair.top = head.top
+  constrain head.bottom = torso.top
+  constrain collar.center_x = torso.center_x
+  constrain collar.top = torso.top
+
+  // Custom anchors (with small offset for spacing)
+  anchor crown [position: head.top - 4, direction: up]
+  anchor feet [position: torso.bottom + 4, direction: down]
+  anchor hand_left [position: torso.left, direction: left]
+  anchor hand_right [position: torso.right, direction: right]
+}
+
+// Row 1: 0°, 90°, 180°
+person p0
+person p90 [rotation: 90]
+person p180 [rotation: 180]
+
+constrain p90.left = p0.right + 120
+constrain p180.left = p90.right + 120
+constrain p90.vertical_center = p0.vertical_center
+constrain p180.vertical_center = p0.vertical_center
+
+// Row 2: 270°, 45°, 135°
+person p270 [rotation: 270]
+person p45 [rotation: 45]
+person p135 [rotation: 135]
+
+constrain p270.top = p0.bottom + 140
+constrain p270.left = p0.left
+constrain p45.left = p270.right + 120
+constrain p135.left = p45.right + 120
+constrain p45.vertical_center = p270.vertical_center
+constrain p135.vertical_center = p270.vertical_center
+
+// Via points for curved connections
+circle top_via [size: 1, fill: none, stroke: none]
+circle bottom_via [size: 1, fill: none, stroke: none]
+
+constrain top_via.center_x = midpoint(p0, p180)
+constrain top_via.center_y = p0.top - 40
+
+constrain bottom_via.center_x = midpoint(p270, p135)
+constrain bottom_via.center_y = p270.bottom + 40
+
+// Curved connectors across each row
+p0.crown -> p180.crown [stroke: #1565c0, stroke_width: 2, routing: curved, via: top_via, label: "crowns"]
+p0.feet -> p180.feet [stroke: #e65100, stroke_width: 2, routing: curved, via: top_via, label: "feet"]
+
+p270.crown -> p135.crown [stroke: #1565c0, stroke_width: 2, routing: curved, via: bottom_via, label: "crowns"]
+p270.feet -> p135.feet [stroke: #e65100, stroke_width: 2, routing: curved, via: bottom_via, label: "feet"]
+
+// Hand-to-hand straight connections between adjacent people
+p0.hand_right -> p90.hand_left [stroke: #2e7d32, stroke_width: 2]
+p90.hand_right -> p180.hand_left [stroke: #2e7d32, stroke_width: 2]
+
+p270.hand_right -> p45.hand_left [stroke: #2e7d32, stroke_width: 2]
+p45.hand_right -> p135.hand_left [stroke: #2e7d32, stroke_width: 2]
+
+// Curved hand connectors for anchor-angle verification
+p0.hand_right -> p90.hand_left [stroke: #8e24aa, stroke_width: 2, routing: curved]
+p90.hand_right -> p180.hand_left [stroke: #8e24aa, stroke_width: 2, routing: curved]
+
+p270.hand_right -> p45.hand_left [stroke: #8e24aa, stroke_width: 2, routing: curved]
+p45.hand_right -> p135.hand_left [stroke: #8e24aa, stroke_width: 2, routing: curved]

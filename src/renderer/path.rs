@@ -91,17 +91,21 @@ impl ResolvedPath {
     }
 }
 
-/// Resolve a PathDecl into concrete coordinates
+/// Resolve a PathDecl into concrete coordinates with optional normalization.
 ///
 /// The origin point is the top-left corner of the element's bounding box.
-/// All vertex positions are normalized so the path content starts at the origin.
-/// This means if a path has vertices starting at (0, 6), they are shifted to start at (0, 0)
-/// relative to the element's bounds, ensuring constraints like `element.top` refer to the
-/// actual visual top of the content.
-pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
+/// When normalization is enabled, all vertex positions are shifted so the path
+/// content starts at the origin. This means if a path has vertices starting at
+/// (0, 6), they are shifted to start at (0, 0) relative to the element's bounds,
+/// ensuring constraints like `element.top` refer to the actual visual top of the content.
+pub fn resolve_path_with_options(decl: &PathDecl, origin: Point, normalize: bool) -> ResolvedPath {
     // First pass: compute the min x and y from all path coordinates
     // This allows us to normalize the path so content starts at (0, 0)
-    let (min_x, min_y) = compute_path_min_coords(decl);
+    let (min_x, min_y) = if normalize {
+        compute_path_min_coords(decl)
+    } else {
+        (0.0, 0.0)
+    };
 
     let mut vertices: HashMap<String, Point> = HashMap::new();
     let mut segments: Vec<PathSegment> = Vec::new();
@@ -218,6 +222,11 @@ pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
     }
 
     ResolvedPath { segments }
+}
+
+/// Resolve a PathDecl into concrete coordinates
+pub fn resolve_path(decl: &PathDecl, origin: Point) -> ResolvedPath {
+    resolve_path_with_options(decl, origin, true)
 }
 
 /// Compute the minimum x and y coordinates from all path geometry

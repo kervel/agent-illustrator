@@ -263,7 +263,53 @@ constrain d_flyback.center_x = q_main.drain.x  // Not supported
 
 **Workaround**: Manually position elements or accept misalignment.
 
-**Status**: Feature request - not a bug, but a missing capability
+**Status**: Feature request - Feature 011 spec created
+
+### BUG-004: Rotation Does Not Transform Path Geometry
+
+**Severity**: High (no workaround for complex templates)
+
+**Description**: When rotating a template instance, element *positions* are transformed correctly, but path *geometry* (vertex coordinates, arc directions) is not rotated. This causes complex shapes to appear distorted.
+
+**Reproduction**:
+```ail
+template "person" {
+  circle head [...]
+  path hair [fill: #2b1b0e] {
+    vertex a [x: 0, y: 6]
+    arc_to b [x: 18, y: 6, radius: 9]  // Arc curves downward
+    ...
+  }
+}
+person alice
+person bob [rotation: 90]   // Hair arc still curves same direction!
+person charlie [rotation: 180]  // Hair appears on chin, not crown
+```
+
+**Observed**:
+- Element bounding boxes rotate correctly (head moves to correct position)
+- Path vertex coordinates are NOT transformed (hair, collar, torso shapes unchanged)
+- Arcs curve in the original direction regardless of rotation
+- Result: "upside down" person has hair on chin instead of crown
+
+**Root Cause**: Feature 010 implemented rotation by:
+1. Transforming element bounding box positions ✓
+2. Swapping width/height for rectangles ✓
+3. Keeping text horizontal (intentional) ✓
+4. NOT transforming path vertex coordinates ✗
+
+**What Works**:
+- Simple shapes (rect, circle) - position + dimension swap is sufficient
+- Text - stays horizontal, which is actually desirable
+- Layout positioning - elements move to correct rotated positions
+
+**What Breaks**:
+- Paths with directional geometry (arcs, asymmetric shapes)
+- Any template where internal shape orientation matters
+
+**Workaround**: None for complex paths. Must create separate templates for each orientation.
+
+**Status**: Open - requires path vertex transformation in rotation phase
 
 ---
 

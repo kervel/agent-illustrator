@@ -267,6 +267,15 @@ fn test_internal_constraints_centering() {
 fn test_rotated_template_bounds() {
     // Test that rotation modifier affects element bounds
     // 90° rotation should swap width and height (approximately)
+    let base_source = r#"
+        template "box" {
+            rect body [width: 40, height: 20]
+            rect pin [width: 5, height: 5]
+        }
+
+        box b1
+    "#;
+
     let source = r#"
         template "box" {
             rect body [width: 40, height: 20]
@@ -276,20 +285,33 @@ fn test_rotated_template_bounds() {
         box b1 [rotation: 90]
     "#;
 
+    let base_result = compute_layout(base_source).expect("Should compute layout");
     let result = compute_layout(source).expect("Should compute layout");
 
-    // After 90° rotation, 40x20 should become approximately 20x40
-    // (loose bounds may add some padding)
-    let bounds = get_element_bounds(&result, "b1_body");
-    assert!(bounds.is_some(), "b1_body should exist");
-
-    let (_, _, w, h) = bounds.unwrap();
-    // After 90° rotation, the taller dimension should be width (originally 40)
-    // and shorter should be height (originally 20)
+    // Internal element bounds should be unchanged
+    let body = get_element_bounds(&result, "b1_body");
+    assert!(body.is_some(), "b1_body should exist");
+    let (_, _, body_w, body_h) = body.unwrap();
     assert!(
-        h > w * 1.5,
-        "After 90° rotation, height ({}) should be greater than width ({}) by factor ~2",
-        h, w
+        (body_w - 40.0).abs() < 0.1 && (body_h - 20.0).abs() < 0.1,
+        "b1_body should remain 40x20, got {}x{}",
+        body_w,
+        body_h
+    );
+
+    // Template instance bounds should rotate for global constraints
+    let base_bounds = get_element_bounds(&base_result, "b1").expect("b1 should exist");
+    let (_, _, base_w, base_h) = base_bounds;
+    let bounds = get_element_bounds(&result, "b1");
+    assert!(bounds.is_some(), "b1 should exist");
+    let (_, _, w, h) = bounds.unwrap();
+    assert!(
+        (w - base_h).abs() < 1.0 && (h - base_w).abs() < 1.0,
+        "After 90° rotation, bounds should swap: base {}x{}, got {}x{}",
+        base_w,
+        base_h,
+        w,
+        h
     );
 }
 

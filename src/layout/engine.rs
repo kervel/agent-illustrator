@@ -27,7 +27,7 @@
 //! - [`partition_constraints`]: Group constraints by scope
 //! - [`build_element_to_template_map`]: Map elements to their template instances
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::*;
 
@@ -162,6 +162,33 @@ pub fn build_element_to_template_map(doc: &Document) -> HashMap<String, String> 
         collect_element_template_mapping(&stmt.node, &mut map, None);
     }
 
+    map
+}
+
+/// Build a map from group name to its custom anchor declarations.
+fn build_group_anchor_decl_map(doc: &Document) -> HashMap<String, Vec<AnchorDecl>> {
+    fn visit(
+        stmts: &[Spanned<Statement>],
+        map: &mut HashMap<String, Vec<AnchorDecl>>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Group(g) => {
+                    if let Some(name) = g.name.as_ref().map(|n| n.node.0.clone()) {
+                        if !g.anchors.is_empty() {
+                            map.insert(name, g.anchors.clone());
+                        }
+                    }
+                    visit(&g.children, map);
+                }
+                Statement::Layout(l) => visit(&l.children, map),
+                _ => {}
+            }
+        }
+    }
+
+    let mut map = HashMap::new();
+    visit(&doc.statements, &mut map);
     map
 }
 
@@ -329,6 +356,7 @@ pub fn solve_local(
     constraints: &[super::solver::LayoutConstraint],
     result: &LayoutResult,
     element_to_template: &HashMap<String, String>,
+    group_anchor_decls: &HashMap<String, Vec<AnchorDecl>>,
 ) -> Result<LocalSolverResult, LayoutError> {
     use super::solver::ConstraintSolver;
 
@@ -349,6 +377,12 @@ pub fn solve_local(
             local_result.add_element_bounds(elem_id.to_string(), elem.bounds);
             local_result.add_anchors(elem_id.to_string(), elem.anchors.clone());
         }
+    }
+
+    // Also include the template instance group itself (for custom anchors)
+    if let Some(elem) = result.elements.get(instance) {
+        local_result.add_element_bounds(instance.to_string(), elem.bounds);
+        local_result.add_anchors(instance.to_string(), elem.anchors.clone());
     }
 
     // Add local constraints
@@ -381,9 +415,9 @@ pub fn solve_local(
         .iter()
         .filter_map(|(elem_id, bounds)| {
             result.elements.get(elem_id).map(|elem| {
-                let mut anchors = AnchorSet::for_element_type(&elem.element_type, bounds);
-                // Preserve any custom anchors from the original
-                anchors.merge(&elem.anchors);
+                let mut anchors = elem.anchors.clone();
+                // Update built-in anchors to reflect new bounds, keep custom anchors
+                anchors.update_builtin_from_bounds(&elem.element_type, bounds);
                 (elem_id.clone(), anchors)
             })
         })
@@ -391,6 +425,20 @@ pub fn solve_local(
 
     for (elem_id, anchors) in anchor_updates {
         local_result.add_anchors(elem_id, anchors);
+    }
+
+    // Recompute custom anchors for the template group using updated child bounds
+    if let Some(anchor_decls) = group_anchor_decls.get(instance) {
+        let bounds_map: HashMap<&str, &BoundingBox> = local_result
+            .element_bounds
+            .iter()
+            .map(|(id, bounds)| (id.as_str(), bounds))
+            .collect();
+        if let Some(group_bounds) = local_result.element_bounds.get(instance) {
+            let mut anchors = AnchorSet::simple_shape(group_bounds);
+            resolve_custom_anchors_from_bounds(anchor_decls, &bounds_map, &mut anchors);
+            local_result.add_anchors(instance.to_string(), anchors);
+        }
     }
 
     Ok(local_result)
@@ -451,8 +499,8 @@ fn add_element_suggestions_to_solver(
 /// This function:
 /// 1. Computes the rotation center from the combined child bounds
 /// 2. Creates a rotation transform for the given angle
-/// 3. Transforms all element bounds using the "loose bounds" algorithm
-/// 4. Transforms all anchor positions and directions
+/// 3. Transforms only the template instance bounds (for global constraints)
+/// 4. Transforms all anchor positions and directions (for external routing)
 ///
 /// # Arguments
 /// * `local_result` - The local solver result to transform in place
@@ -465,6 +513,13 @@ pub fn apply_rotation_to_local_result(local_result: &mut LocalSolverResult, angl
         return;
     }
 
+    if local_result.pre_rotation_bounds.is_empty() {
+        local_result.pre_rotation_bounds = local_result.element_bounds.clone();
+    }
+    if local_result.pre_rotation_anchors.is_empty() {
+        local_result.pre_rotation_anchors = local_result.anchors.clone();
+    }
+
     // Compute rotation center from combined bounds
     let center = match local_result.combined_bounds() {
         Some(bounds) => bounds.center(),
@@ -473,8 +528,11 @@ pub fn apply_rotation_to_local_result(local_result: &mut LocalSolverResult, angl
 
     let transform = RotationTransform::new(angle_degrees, center);
 
-    // Transform all element bounds
-    for bounds in local_result.element_bounds.values_mut() {
+    // Transform only the template instance bounds
+    if let Some(bounds) = local_result
+        .element_bounds
+        .get_mut(&local_result.template_instance)
+    {
         *bounds = transform.transform_bounds(bounds);
     }
 
@@ -485,6 +543,7 @@ pub fn apply_rotation_to_local_result(local_result: &mut LocalSolverResult, angl
 
     // Record the rotation
     local_result.rotation = Some(angle_degrees);
+    local_result.rotation_center = Some(center);
 }
 
 /// Apply local solver results back to the main layout result (Phase 3).
@@ -530,6 +589,7 @@ pub fn apply_local_results(
     result.compute_bounds();
 }
 
+/// Apply rotation to path geometry for rotated template instances.
 /// Recursively update element bounds in the tree structure.
 fn update_element_bounds_in_tree(elements: &mut [ElementLayout], elem_id: &str, bounds: BoundingBox) {
     for elem in elements.iter_mut() {
@@ -552,18 +612,14 @@ fn update_element_anchors_in_tree(elements: &mut [ElementLayout], elem_id: &str,
     }
 }
 
-/// Recursively rotate anchor directions for an element in the tree structure.
-fn rotate_anchor_directions_in_tree(
-    elem: &mut ElementLayout,
-    target_id: &str,
-    rotation: &super::transform::RotationTransform,
-) {
-    if elem.id.as_ref().map(|i| i.0.as_str()) == Some(target_id) {
-        elem.anchors.rotate_directions(rotation);
-        return;
-    }
-    for child in &mut elem.children {
-        rotate_anchor_directions_in_tree(child, target_id, rotation);
+/// Recursively update rotation style for an element in the tree structure.
+fn update_element_rotation_in_tree(elements: &mut [ElementLayout], elem_id: &str, rotation: f64) {
+    for elem in elements.iter_mut() {
+        if elem.id.as_ref().map(|i| i.0.as_str()) == Some(elem_id) {
+            elem.styles.rotation = Some(rotation);
+            return;
+        }
+        update_element_rotation_in_tree(&mut elem.children, elem_id, rotation);
     }
 }
 
@@ -585,6 +641,7 @@ fn rotate_anchor_directions_in_tree(
 pub fn solve_global(
     result: &mut LayoutResult,
     constraints: &[super::solver::LayoutConstraint],
+    element_to_template: &HashMap<String, String>,
     config: &super::config::LayoutConfig,
 ) -> Result<(), LayoutError> {
     use super::solver::{ConstraintSolver, LayoutProperty};
@@ -640,6 +697,7 @@ pub fn solve_global(
     }
 
     // Apply solution - but only to explicitly targeted (element, property) pairs
+    let mut applied_deltas: HashMap<(String, u8), f64> = HashMap::new();
     for (var, value) in &solution.values {
         let is_targeted = target_vars.contains(&(var.element_id.clone(), var.property))
             || match var.property {
@@ -675,13 +733,30 @@ pub fn solve_global(
                 } else {
                     Axis::Vertical
                 };
+                let target_id = element_to_template
+                    .get(&var.element_id)
+                    .filter(|template_name| result.elements.contains_key(*template_name))
+                    .cloned()
+                    .unwrap_or_else(|| var.element_id.clone());
+
+                let axis_key = if axis == Axis::Horizontal { 0 } else { 1 };
+                if let Some(existing) = applied_deltas.get(&(target_id.clone(), axis_key)) {
+                    if (existing - delta).abs() > 0.001 {
+                        return Err(LayoutError::validation_error(format!(
+                            "conflicting global shifts for template '{}': {} vs {} on {:?}",
+                            target_id, existing, delta, axis
+                        )));
+                    }
+                    continue;
+                }
                 if config.trace {
                     eprintln!(
                         "TRACE: global shifting {} by {} on {:?}",
-                        var.element_id, delta, axis
+                        target_id, delta, axis
                     );
                 }
-                shift_element_by_name(result, &var.element_id, delta, axis)?;
+                shift_element_by_name(result, &target_id, delta, axis)?;
+                applied_deltas.insert((target_id, axis_key), delta);
             }
         }
     }
@@ -743,7 +818,7 @@ pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<
 
     // Recompute bounds and anchors after constraint resolution
     result.compute_bounds();
-    recompute_builtin_anchors(result);
+    recompute_builtin_anchors(result, None);
     Ok(())
 }
 
@@ -897,6 +972,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
         children: vec![],
         label,
         anchors,
+        path_normalize: true,
     }
 }
 
@@ -1081,6 +1157,8 @@ fn compute_path_bounds(path: &PathDecl) -> Option<(f64, f64)> {
         None
     }
 }
+
+// Rotation is now applied at render time for template instances.
 
 /// Compute the apex point of an arc (where it bulges furthest from the chord)
 fn compute_arc_bulge_point(
@@ -1370,6 +1448,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         children,
         label,
         anchors,
+        path_normalize: true,
     }
 }
 
@@ -1431,6 +1510,7 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         children,
         label,
         anchors,
+        path_normalize: true,
     }
 }
 
@@ -1440,12 +1520,30 @@ fn resolve_custom_anchors(
     children: &[ElementLayout],
     anchor_set: &mut AnchorSet,
 ) {
-    // Build a map of child IDs to their bounds for quick lookup
-    let child_map: HashMap<&str, &BoundingBox> = children
-        .iter()
-        .filter_map(|c| c.id.as_ref().map(|id| (id.as_str(), &c.bounds)))
-        .collect();
+    // Build a map of descendant IDs to their bounds for quick lookup
+    fn collect_bounds<'a>(elements: &'a [ElementLayout], map: &mut HashMap<&'a str, &'a BoundingBox>) {
+        for elem in elements {
+            if let Some(id) = elem.id.as_ref() {
+                map.insert(id.as_str(), &elem.bounds);
+            }
+            if !elem.children.is_empty() {
+                collect_bounds(&elem.children, map);
+            }
+        }
+    }
 
+    let mut child_map: HashMap<&str, &BoundingBox> = HashMap::new();
+    collect_bounds(children, &mut child_map);
+
+    resolve_custom_anchors_from_bounds(anchor_decls, &child_map, anchor_set);
+}
+
+/// Resolve custom anchors using a precomputed bounds map (element id -> bounds).
+fn resolve_custom_anchors_from_bounds(
+    anchor_decls: &[AnchorDecl],
+    child_map: &HashMap<&str, &BoundingBox>,
+    anchor_set: &mut AnchorSet,
+) {
     for decl in anchor_decls {
         // Get the element reference from the position
         let (prop_ref, offset) = match &decl.position {
@@ -2013,12 +2111,14 @@ fn shift_element_by_name(
                     if let Some(label) = &mut indexed_elem.label {
                         label.position.x += delta;
                     }
+                    indexed_elem.anchors.translate(delta, 0.0);
                 }
                 Axis::Vertical => {
                     indexed_elem.bounds.y += delta;
                     if let Some(label) = &mut indexed_elem.label {
                         label.position.y += delta;
                     }
+                    indexed_elem.anchors.translate(0.0, delta);
                 }
             }
         }
@@ -2083,12 +2183,14 @@ fn shift_element_and_children(elem: &mut ElementLayout, delta: f64, axis: Axis) 
             if let Some(label) = &mut elem.label {
                 label.position.x += delta;
             }
+            elem.anchors.translate(delta, 0.0);
         }
         Axis::Vertical => {
             elem.bounds.y += delta;
             if let Some(label) = &mut elem.label {
                 label.position.y += delta;
             }
+            elem.anchors.translate(0.0, delta);
         }
     }
 
@@ -2142,8 +2244,9 @@ pub fn resolve_constrain_statements_two_phase(
         return Ok(());
     }
 
-    // Build element-to-template mapping
+    // Build element-to-template mapping and group anchor declarations
     let element_to_template = build_element_to_template_map(doc);
+    let group_anchor_decls = build_group_anchor_decl_map(doc);
 
     // Partition constraints into local (per-template) and global
     let (local_by_instance, global_constraints) =
@@ -2163,7 +2266,13 @@ pub fn resolve_constrain_statements_two_phase(
 
     for (instance, local_constraints) in &local_by_instance {
         // Phase 1: Solve local constraints
-        let mut local_result = solve_local(instance, local_constraints, result, &element_to_template)?;
+        let mut local_result = solve_local(
+            instance,
+            local_constraints,
+            result,
+            &element_to_template,
+            &group_anchor_decls,
+        )?;
 
         // Phase 2: Apply rotation if this template has one
         if let Some(&angle) = template_rotations.get(instance) {
@@ -2231,36 +2340,61 @@ pub fn resolve_constrain_statements_two_phase(
     // Phase 3: Apply local results back to the layout
     apply_local_results(result, &local_results);
 
-    // Recompute group bounds after local constraints
-    recompute_group_bounds(result);
+    let rotated_instances: HashSet<String> = template_rotations
+        .iter()
+        .filter_map(|(name, angle)| {
+            if angle.abs() > f64::EPSILON {
+                Some(name.clone())
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // Recompute group bounds after local constraints, but keep rotated template bounds
+    let skip_groups = if rotated_instances.is_empty() {
+        None
+    } else {
+        Some(&rotated_instances)
+    };
+    recompute_group_bounds(result, skip_groups);
+
+    // Apply render-time rotation to template instance groups
+    for (instance, angle) in template_rotations {
+        if angle.abs() < f64::EPSILON {
+            continue;
+        }
+        if let Some(elem) = result.elements.get_mut(instance) {
+            elem.styles.rotation = Some(*angle);
+        }
+        update_element_rotation_in_tree(&mut result.root_elements, instance, *angle);
+    }
 
     // Phase 4: Solve global constraints (using post-rotation positions)
-    solve_global(result, &global_constraints, config)?;
+    solve_global(result, &global_constraints, &element_to_template, config)?;
+
+    // Build skip set for rotated template internals
+    let mut skip_anchors: HashSet<String> = HashSet::new();
+    for (elem_id, template_name) in &element_to_template {
+        if template_rotations
+            .get(template_name)
+            .map(|angle| angle.abs() > f64::EPSILON)
+            .unwrap_or(false)
+        {
+            skip_anchors.insert(elem_id.clone());
+            skip_anchors.insert(template_name.clone());
+        }
+    }
 
     // Recompute bounds and anchors after applying all constraints
     result.compute_bounds();
-    recompute_builtin_anchors(result);
-    recompute_custom_anchors(result, doc);
-
-    // Re-apply anchor direction rotation for rotated templates
-    // (recompute_custom_anchors overwrites with non-rotated directions from AST)
-    for (instance, &angle) in template_rotations {
-        if angle.abs() <= f64::EPSILON {
-            continue;
-        }
-
-        let rotation = super::transform::RotationTransform::new(angle, super::types::Point { x: 0.0, y: 0.0 });
-
-        // Rotate anchor directions for template instance group
-        if let Some(elem) = result.elements.get_mut(instance) {
-            elem.anchors.rotate_directions(&rotation);
-        }
-
-        // Also update in root_elements tree
-        for root in &mut result.root_elements {
-            rotate_anchor_directions_in_tree(root, instance, &rotation);
-        }
-    }
+    let skip = if skip_anchors.is_empty() {
+        None
+    } else {
+        Some(&skip_anchors)
+    };
+    recompute_builtin_anchors(result, skip);
+    recompute_custom_anchors(result, doc, skip);
 
     Ok(())
 }
@@ -2346,7 +2480,7 @@ pub fn resolve_constrain_statements(
         }
 
         // Recompute group bounds after internal constraints
-        recompute_group_bounds(result);
+        recompute_group_bounds(result, None);
     }
 
     // PASS 2: Solve external constraints
@@ -2436,55 +2570,76 @@ pub fn resolve_constrain_statements(
 
     // Recompute bounds and anchors after applying constraints
     result.compute_bounds();
-    recompute_builtin_anchors(result);
-    recompute_custom_anchors(result, doc);
+    recompute_builtin_anchors(result, None);
+    recompute_custom_anchors(result, doc, None);
     Ok(())
 }
 
 /// Recompute built-in anchors (top, bottom, left, right, and corners for paths)
 /// for all elements after constraint resolution has moved them.
 /// This ensures anchors stay in sync with element bounds.
-fn recompute_builtin_anchors(result: &mut LayoutResult) {
+fn recompute_builtin_anchors(result: &mut LayoutResult, skip: Option<&HashSet<String>>) {
     // Update anchors in the tree structure
     for elem in &mut result.root_elements {
-        recompute_builtin_anchors_recursive(elem);
+        recompute_builtin_anchors_recursive(elem, skip);
     }
 
     // Update anchors in the HashMap (used for connection routing)
-    for elem in result.elements.values_mut() {
+    for (id, elem) in result.elements.iter_mut() {
+        if skip.map_or(false, |s| s.contains(id)) {
+            continue;
+        }
         elem.anchors.update_builtin_from_bounds(&elem.element_type, &elem.bounds);
     }
 }
 
 /// Recursively update built-in anchors for an element and all its children
-fn recompute_builtin_anchors_recursive(elem: &mut ElementLayout) {
-    elem.anchors.update_builtin_from_bounds(&elem.element_type, &elem.bounds);
+fn recompute_builtin_anchors_recursive(elem: &mut ElementLayout, skip: Option<&HashSet<String>>) {
+    let should_skip = elem
+        .id
+        .as_ref()
+        .map(|id| skip.map_or(false, |s| s.contains(id.as_str())))
+        .unwrap_or(false);
+    if !should_skip {
+        elem.anchors
+            .update_builtin_from_bounds(&elem.element_type, &elem.bounds);
+    }
 
     for child in &mut elem.children {
-        recompute_builtin_anchors_recursive(child);
+        recompute_builtin_anchors_recursive(child, skip);
     }
 }
 
 /// Recompute custom anchors for all groups after constraint resolution
 /// This is needed because anchor positions are computed during initial layout,
 /// but internal constraints may move children afterward.
-fn recompute_custom_anchors(result: &mut LayoutResult, doc: &Document) {
-    recompute_anchors_in_statements(&doc.statements, result);
+fn recompute_custom_anchors(
+    result: &mut LayoutResult,
+    doc: &Document,
+    skip: Option<&HashSet<String>>,
+) {
+    recompute_anchors_in_statements(&doc.statements, result, skip);
 }
 
-fn recompute_anchors_in_statements(stmts: &[Spanned<Statement>], result: &mut LayoutResult) {
+fn recompute_anchors_in_statements(
+    stmts: &[Spanned<Statement>],
+    result: &mut LayoutResult,
+    skip: Option<&HashSet<String>>,
+) {
     for stmt in stmts {
         match &stmt.node {
             Statement::Group(g) => {
                 if !g.anchors.is_empty() {
                     if let Some(group_name) = g.name.as_ref().map(|n| n.node.as_str()) {
-                        recompute_group_anchors(result, group_name, &g.anchors);
+                        if !skip.map_or(false, |s| s.contains(group_name)) {
+                            recompute_group_anchors(result, group_name, &g.anchors);
+                        }
                     }
                 }
-                recompute_anchors_in_statements(&g.children, result);
+                recompute_anchors_in_statements(&g.children, result, skip);
             }
             Statement::Layout(l) => {
-                recompute_anchors_in_statements(&l.children, result);
+                recompute_anchors_in_statements(&l.children, result, skip);
             }
             _ => {}
         }
@@ -2771,10 +2926,10 @@ fn shift_single_element_recursive(
 }
 
 /// Recompute bounding boxes for all groups based on their children
-fn recompute_group_bounds(result: &mut LayoutResult) {
+fn recompute_group_bounds(result: &mut LayoutResult, skip: Option<&HashSet<String>>) {
     // First pass: recompute bounds in the tree
     for elem in &mut result.root_elements {
-        recompute_element_bounds_recursive(elem);
+        recompute_element_bounds_recursive(elem, skip);
     }
 
     // Second pass: collect all updated bounds
@@ -2791,14 +2946,18 @@ fn recompute_group_bounds(result: &mut LayoutResult) {
     }
 }
 
-fn recompute_element_bounds_recursive(elem: &mut ElementLayout) {
+fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&HashSet<String>>) {
     // First, recurse into children
     for child in &mut elem.children {
-        recompute_element_bounds_recursive(child);
+        recompute_element_bounds_recursive(child, skip);
     }
 
     // If this element has children, recompute its bounds from children
-    if !elem.children.is_empty() {
+    if !elem.children.is_empty()
+        && !skip
+            .and_then(|set| elem.id.as_ref().map(|id| set.contains(&id.0)))
+            .unwrap_or(false)
+    {
         let mut bounds = elem.children[0].bounds;
         for child in &elem.children[1..] {
             bounds = bounds.union(&child.bounds);
@@ -3514,6 +3673,7 @@ mod tests {
 
         // Build element-to-template map
         let element_map = build_element_to_template_map(&doc);
+        let group_anchor_decls = build_group_anchor_decl_map(&doc);
 
         // Create a simple local constraint
         use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable, LayoutProperty};
@@ -3527,7 +3687,13 @@ mod tests {
         ];
 
         // Solve locally
-        let local_result = solve_local("alice", &constraints, &result, &element_map)
+        let local_result = solve_local(
+            "alice",
+            &constraints,
+            &result,
+            &element_map,
+            &group_anchor_decls,
+        )
             .expect("solve_local should succeed");
 
         // Verify template instance
@@ -3546,18 +3712,20 @@ mod tests {
     fn test_apply_rotation_to_local_result() {
         let mut local_result = LocalSolverResult::new("test");
 
-        // Add a 100x50 element at (0, 0)
+        // Add a 100x50 element and a template instance group at (0, 0)
         local_result.add_element_bounds("elem", BoundingBox::new(0.0, 0.0, 100.0, 50.0));
+        local_result.add_element_bounds("test", BoundingBox::new(0.0, 0.0, 100.0, 50.0));
 
         // Apply 90 degree rotation
         apply_rotation_to_local_result(&mut local_result, 90.0);
 
-        // After 90° rotation around center (50, 25):
-        // - Width and height should swap
-        let bounds = local_result.element_bounds.get("elem").unwrap();
+        // Internal element bounds should be unchanged
+        let elem_bounds = local_result.element_bounds.get("elem").unwrap();
+        assert!((elem_bounds.width - 100.0).abs() < 1.0, "width should remain 100, got {}", elem_bounds.width);
+        assert!((elem_bounds.height - 50.0).abs() < 1.0, "height should remain 50, got {}", elem_bounds.height);
 
-        // The "loose bounds" algorithm gives us an AABB that contains the rotated rectangle
-        // For a 100x50 rect rotated 90° around its center, we expect ~50x100
+        // Template instance bounds should be rotated for global constraints
+        let bounds = local_result.element_bounds.get("test").unwrap();
         assert!((bounds.width - 50.0).abs() < 1.0, "width should be ~50, got {}", bounds.width);
         assert!((bounds.height - 100.0).abs() < 1.0, "height should be ~100, got {}", bounds.height);
 
@@ -3662,6 +3830,9 @@ mod tests {
         let original_body = result.elements.get("b1_body").expect("b1_body should exist");
         let original_width = original_body.bounds.width;
         let original_height = original_body.bounds.height;
+        let original_group = result.elements.get("b1").expect("b1 should exist");
+        let original_group_width = original_group.bounds.width;
+        let original_group_height = original_group.bounds.height;
 
         // Apply 90° rotation to the template
         let mut rotations: HashMap<String, f64> = HashMap::new();
@@ -3670,13 +3841,19 @@ mod tests {
         resolve_constrain_statements_two_phase(&mut result, &doc, &config, &rotations)
             .expect("two-phase constraint resolution should succeed");
 
-        // After 90° rotation, width and height should swap
+        // After 90° rotation, internal element bounds should stay the same
         let body = result.elements.get("b1_body").expect("b1_body should exist");
 
-        // The rotated bounds should have swapped dimensions (loose bounds)
-        assert!((body.bounds.width - original_height).abs() < 1.0,
-            "width should be ~{} (original height), got {}", original_height, body.bounds.width);
-        assert!((body.bounds.height - original_width).abs() < 1.0,
-            "height should be ~{} (original width), got {}", original_width, body.bounds.height);
+        assert!((body.bounds.width - original_width).abs() < 1.0,
+            "width should remain ~{}, got {}", original_width, body.bounds.width);
+        assert!((body.bounds.height - original_height).abs() < 1.0,
+            "height should remain ~{}, got {}", original_height, body.bounds.height);
+
+        // Template instance bounds should swap for global constraints
+        let group = result.elements.get("b1").expect("b1 should exist");
+        assert!((group.bounds.width - original_group_height).abs() < 1.0,
+            "group width should be ~{} (original height), got {}", original_group_height, group.bounds.width);
+        assert!((group.bounds.height - original_group_width).abs() < 1.0,
+            "group height should be ~{} (original width), got {}", original_group_width, group.bounds.height);
     }
 }

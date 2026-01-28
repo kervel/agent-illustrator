@@ -5,6 +5,23 @@ use crate::parser::ast::*;
 use super::error::LayoutError;
 use super::types::*;
 
+fn cardinal_direction_for_anchor(direction: AnchorDirection) -> Point {
+    match direction {
+        AnchorDirection::Up => Point::new(0.0, -1.0),
+        AnchorDirection::Down => Point::new(0.0, 1.0),
+        AnchorDirection::Left => Point::new(-1.0, 0.0),
+        AnchorDirection::Right => Point::new(1.0, 0.0),
+        AnchorDirection::Angle(_) => {
+            let vec = direction.to_vector();
+            if vec.x.abs() >= vec.y.abs() {
+                Point::new(vec.x.signum(), 0.0)
+            } else {
+                Point::new(0.0, vec.y.signum())
+            }
+        }
+    }
+}
+
 /// Routing mode for connections
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum RoutingMode {
@@ -196,6 +213,243 @@ pub fn route_orthogonal(from: Point, to: Point) -> Vec<Point> {
         // Go down first, then across, then down to target
         let mid_y = (from.y + to.y) / 2.0;
         vec![from, Point::new(from.x, mid_y), Point::new(to.x, mid_y), to]
+    }
+}
+
+fn segment_direction(from: Point, to: Point) -> Point {
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    if dx.abs() < 0.001 && dy.abs() < 0.001 {
+        return Point::new(0.0, 0.0);
+    }
+    if dx.abs() >= dy.abs() {
+        Point::new(dx.signum(), 0.0)
+    } else {
+        Point::new(0.0, dy.signum())
+    }
+}
+
+fn segment_length(from: Point, to: Point) -> f64 {
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    (dx * dx + dy * dy).sqrt()
+}
+
+fn simplify_path(points: Vec<Point>) -> Vec<Point> {
+    if points.len() <= 2 {
+        return points;
+    }
+
+    let mut cleaned: Vec<Point> = Vec::with_capacity(points.len());
+    for point in points {
+        if cleaned
+            .last()
+            .map(|last| (last.x - point.x).abs() < 0.001 && (last.y - point.y).abs() < 0.001)
+            .unwrap_or(false)
+        {
+            continue;
+        }
+        cleaned.push(point);
+    }
+
+    let mut simplified: Vec<Point> = Vec::with_capacity(cleaned.len());
+    for point in cleaned {
+        while simplified.len() >= 2 {
+            let len = simplified.len();
+            let a = simplified[len - 2];
+            let b = simplified[len - 1];
+            let collinear = (a.x - b.x).abs() < 0.001 && (b.x - point.x).abs() < 0.001
+                || (a.y - b.y).abs() < 0.001 && (b.y - point.y).abs() < 0.001;
+            if collinear {
+                simplified.pop();
+            } else {
+                break;
+            }
+        }
+        simplified.push(point);
+    }
+
+    simplified
+}
+
+fn is_valid_orthogonal_path(
+    path: &[Point],
+    from_dir: Point,
+    to_dir: Point,
+) -> bool {
+    if path.len() < 2 {
+        return false;
+    }
+
+    let first_dir = segment_direction(path[0], path[1]);
+    let last_dir = segment_direction(path[path.len() - 2], path[path.len() - 1]);
+    if first_dir.x == 0.0 && first_dir.y == 0.0 {
+        return false;
+    }
+    if last_dir.x == 0.0 && last_dir.y == 0.0 {
+        return false;
+    }
+    if first_dir.x * from_dir.x + first_dir.y * from_dir.y <= 0.0 {
+        return false;
+    }
+    if last_dir.x * to_dir.x + last_dir.y * to_dir.y <= 0.0 {
+        return false;
+    }
+
+    let mut prev_dir = first_dir;
+    for window in path.windows(2).skip(1) {
+        let dir = segment_direction(window[0], window[1]);
+        if dir.x == 0.0 && dir.y == 0.0 {
+            return false;
+        }
+        if dir.x * prev_dir.x + dir.y * prev_dir.y < -0.5 {
+            return false;
+        }
+        prev_dir = dir;
+    }
+
+    true
+}
+
+fn orthogonal_with_directions(
+    start: Point,
+    end: Point,
+    from_dir: Point,
+    to_dir: Point,
+) -> Option<Vec<Point>> {
+    let mut candidates: Vec<Vec<Point>> = Vec::new();
+
+    // Try direct L-shape if axes differ and directions match
+    if from_dir.x != 0.0 && to_dir.y != 0.0 {
+        let dx = end.x - start.x;
+        let dy = end.y - start.y;
+        if dx.signum() == from_dir.x && dy.signum() == to_dir.y {
+            candidates.push(vec![start, Point::new(end.x, start.y), end]);
+        }
+    } else if from_dir.y != 0.0 && to_dir.x != 0.0 {
+        let dx = end.x - start.x;
+        let dy = end.y - start.y;
+        if dy.signum() == from_dir.y && dx.signum() == to_dir.x {
+            candidates.push(vec![start, Point::new(start.x, end.y), end]);
+        }
+    } else if from_dir.x != 0.0 && to_dir.x != 0.0 && from_dir.x == to_dir.x {
+        // Same axis (horizontal) and same direction: use a 3-segment path
+        let dx = end.x - start.x;
+        if dx.signum() == from_dir.x {
+            let mid_x = (start.x + end.x) / 2.0;
+            candidates.push(vec![
+                start,
+                Point::new(mid_x, start.y),
+                Point::new(mid_x, end.y),
+                end,
+            ]);
+        }
+    } else if from_dir.y != 0.0 && to_dir.y != 0.0 && from_dir.y == to_dir.y {
+        // Same axis (vertical) and same direction
+        let dy = end.y - start.y;
+        if dy.signum() == from_dir.y {
+            let mid_y = (start.y + end.y) / 2.0;
+            candidates.push(vec![
+                start,
+                Point::new(start.x, mid_y),
+                Point::new(end.x, mid_y),
+                end,
+            ]);
+        }
+    }
+
+    // Fallback: force initial and final directions with stubs, then connect via a bend
+    let distance = segment_length(start, end);
+    let mut stub = MIN_FINAL_SEGMENT_LENGTH;
+    if distance > 0.0 {
+        stub = stub.min(distance / 2.0).max(1.0);
+    }
+
+    let start_out = Point::new(start.x + from_dir.x * stub, start.y + from_dir.y * stub);
+    let end_in = Point::new(end.x - to_dir.x * stub, end.y - to_dir.y * stub);
+    let hv_stub = vec![
+        start,
+        start_out,
+        Point::new(end_in.x, start_out.y),
+        end_in,
+        end,
+    ];
+    let vh_stub = vec![
+        start,
+        start_out,
+        Point::new(start_out.x, end_in.y),
+        end_in,
+        end,
+    ];
+    candidates.push(hv_stub);
+    candidates.push(vh_stub);
+
+    let mut best: Option<Vec<Point>> = None;
+    for path in candidates {
+        let simplified = simplify_path(path);
+        if simplified.len() < 2 {
+            continue;
+        }
+        if segment_length(simplified[0], simplified[1]) < 0.001
+            || segment_length(
+                simplified[simplified.len() - 2],
+                simplified[simplified.len() - 1],
+            ) < 0.001
+        {
+            continue;
+        }
+        if is_valid_orthogonal_path(&simplified, from_dir, to_dir) {
+            let replace = match &best {
+                None => true,
+                Some(existing) => simplified.len() < existing.len(),
+            };
+            if replace {
+                best = Some(simplified);
+            }
+        }
+    }
+
+    best
+}
+
+fn forced_stub_path(start: Point, end: Point, from_dir: Point, to_dir: Point) -> Vec<Point> {
+    let distance = segment_length(start, end);
+    let mut stub = MIN_FINAL_SEGMENT_LENGTH;
+    if distance > 0.0 {
+        stub = stub.min(distance / 2.0).max(1.0);
+    }
+
+    let start_out = Point::new(start.x + from_dir.x * stub, start.y + from_dir.y * stub);
+    let end_in = Point::new(end.x - to_dir.x * stub, end.y - to_dir.y * stub);
+
+    let hv = vec![
+        start,
+        start_out,
+        Point::new(end_in.x, start_out.y),
+        end_in,
+        end,
+    ];
+    let vh = vec![
+        start,
+        start_out,
+        Point::new(start_out.x, end_in.y),
+        end_in,
+        end,
+    ];
+
+    let hv_len: f64 = hv
+        .windows(2)
+        .map(|pair| segment_length(pair[0], pair[1]))
+        .sum();
+    let vh_len: f64 = vh
+        .windows(2)
+        .map(|pair| segment_length(pair[0], pair[1]))
+        .sum();
+
+    if hv_len <= vh_len {
+        simplify_path(hv)
+    } else {
+        simplify_path(vh)
     }
 }
 
@@ -403,57 +657,27 @@ pub fn route_connection_with_anchors(
 
     // Orthogonal routing: use anchor positions if provided, otherwise edge-based attachment
     // Feature 009: When anchors are specified, use their positions
-    let (from_edge, to_edge) = best_edges(from_bounds, to_bounds);
+    let (default_from_edge, default_to_edge) = best_edges(from_bounds, to_bounds);
     let (start, from_edge) = if let Some(anchor) = from_anchor {
-        // Use anchor position; infer edge from anchor direction
-        let edge = match anchor.direction {
-            AnchorDirection::Up => Edge::Top,
-            AnchorDirection::Down => Edge::Bottom,
-            AnchorDirection::Left => Edge::Left,
-            AnchorDirection::Right => Edge::Right,
-            AnchorDirection::Angle(deg) => {
-                // Map angle to closest edge (simplified)
-                let deg = deg.rem_euclid(360.0);
-                if deg < 45.0 || deg >= 315.0 {
-                    Edge::Right
-                } else if deg < 135.0 {
-                    Edge::Bottom
-                } else if deg < 225.0 {
-                    Edge::Left
-                } else {
-                    Edge::Top
-                }
-            }
-        };
-        (anchor.position, edge)
+        (anchor.position, default_from_edge)
     } else {
-        (attachment_point(from_bounds, from_edge), from_edge)
+        (attachment_point(from_bounds, default_from_edge), default_from_edge)
     };
     let (end, to_edge) = if let Some(anchor) = to_anchor {
-        let edge = match anchor.direction {
-            AnchorDirection::Up => Edge::Top,
-            AnchorDirection::Down => Edge::Bottom,
-            AnchorDirection::Left => Edge::Left,
-            AnchorDirection::Right => Edge::Right,
-            AnchorDirection::Angle(deg) => {
-                let deg = deg.rem_euclid(360.0);
-                if deg < 45.0 || deg >= 315.0 {
-                    Edge::Right
-                } else if deg < 135.0 {
-                    Edge::Bottom
-                } else if deg < 225.0 {
-                    Edge::Left
-                } else {
-                    Edge::Top
-                }
-            }
-        };
-        (anchor.position, edge)
+        (anchor.position, default_to_edge)
     } else {
-        (attachment_point(to_bounds, to_edge), to_edge)
+        (attachment_point(to_bounds, default_to_edge), default_to_edge)
     };
 
     // Orthogonal routing: create paths with horizontal/vertical segments only
+    if let (Some(from_anchor), Some(to_anchor)) = (from_anchor, to_anchor) {
+        let from_dir = cardinal_direction_for_anchor(from_anchor.direction);
+        let to_dir = cardinal_direction_for_anchor(to_anchor.direction);
+        if let Some(path) = orthogonal_with_directions(start, end, from_dir, to_dir) {
+            return path;
+        }
+        return forced_stub_path(start, end, from_dir, to_dir);
+    }
 
     // For vertical connections (Bottom to Top), create a proper downward path
     // even if the x coordinates are different

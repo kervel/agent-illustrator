@@ -245,6 +245,14 @@ impl AnchorSet {
         }
     }
 
+    /// Translate all anchor positions by the given delta.
+    pub fn translate(&mut self, dx: f64, dy: f64) {
+        for anchor in self.anchors.values_mut() {
+            anchor.position.x += dx;
+            anchor.position.y += dy;
+        }
+    }
+
     /// Rotate only the directions of all anchors in place (positions unchanged).
     ///
     /// Used to re-apply direction rotation after `recompute_custom_anchors` which
@@ -613,6 +621,9 @@ pub struct ElementLayout {
     pub label: Option<LabelLayout>,
     /// Anchor points on this element (Feature 009)
     pub anchors: AnchorSet,
+    /// Whether to normalize path geometry to the element origin when rendering.
+    /// Paths that have already been rotated in layout should skip normalization.
+    pub path_normalize: bool,
 }
 
 impl ElementLayout {
@@ -849,6 +860,12 @@ pub struct LocalSolverResult {
     pub anchors: HashMap<String, AnchorSet>,
     /// Rotation angle in degrees (if template instance has rotation)
     pub rotation: Option<f64>,
+    /// Pre-rotation bounds for elements within this template instance
+    pub pre_rotation_bounds: HashMap<String, BoundingBox>,
+    /// Pre-rotation anchors for elements within this template instance
+    pub pre_rotation_anchors: HashMap<String, AnchorSet>,
+    /// Rotation center for this template instance (if rotated)
+    pub rotation_center: Option<Point>,
 }
 
 impl LocalSolverResult {
@@ -859,6 +876,9 @@ impl LocalSolverResult {
             element_bounds: HashMap::new(),
             anchors: HashMap::new(),
             rotation: None,
+            pre_rotation_bounds: HashMap::new(),
+            pre_rotation_anchors: HashMap::new(),
+            rotation_center: None,
         }
     }
 
@@ -979,6 +999,7 @@ mod tests {
             children: vec![],
             label: None,
             anchors: AnchorSet::default(),
+            path_normalize: true,
         };
 
         result.add_element(element);
