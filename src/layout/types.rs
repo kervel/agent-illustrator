@@ -151,9 +151,21 @@ impl AnchorSet {
     pub fn simple_shape(bounds: &BoundingBox) -> Self {
         let mut set = Self::new();
         set.insert(Anchor::new("top", bounds.top_center(), AnchorDirection::Up));
-        set.insert(Anchor::new("bottom", bounds.bottom_center(), AnchorDirection::Down));
-        set.insert(Anchor::new("left", bounds.left_center(), AnchorDirection::Left));
-        set.insert(Anchor::new("right", bounds.right_center(), AnchorDirection::Right));
+        set.insert(Anchor::new(
+            "bottom",
+            bounds.bottom_center(),
+            AnchorDirection::Down,
+        ));
+        set.insert(Anchor::new(
+            "left",
+            bounds.left_center(),
+            AnchorDirection::Left,
+        ));
+        set.insert(Anchor::new(
+            "right",
+            bounds.right_center(),
+            AnchorDirection::Right,
+        ));
         set
     }
 
@@ -162,10 +174,26 @@ impl AnchorSet {
     pub fn path_shape(bounds: &BoundingBox) -> Self {
         let mut set = Self::simple_shape(bounds);
         // Add corner anchors with diagonal directions
-        set.insert(Anchor::new("top_left", bounds.top_left(), AnchorDirection::Angle(225.0)));
-        set.insert(Anchor::new("top_right", bounds.top_right(), AnchorDirection::Angle(315.0)));
-        set.insert(Anchor::new("bottom_left", bounds.bottom_left(), AnchorDirection::Angle(135.0)));
-        set.insert(Anchor::new("bottom_right", bounds.bottom_right(), AnchorDirection::Angle(45.0)));
+        set.insert(Anchor::new(
+            "top_left",
+            bounds.top_left(),
+            AnchorDirection::Angle(225.0),
+        ));
+        set.insert(Anchor::new(
+            "top_right",
+            bounds.top_right(),
+            AnchorDirection::Angle(315.0),
+        ));
+        set.insert(Anchor::new(
+            "bottom_left",
+            bounds.bottom_left(),
+            AnchorDirection::Angle(135.0),
+        ));
+        set.insert(Anchor::new(
+            "bottom_right",
+            bounds.bottom_right(),
+            AnchorDirection::Angle(45.0),
+        ));
         set
     }
 
@@ -186,16 +214,44 @@ impl AnchorSet {
     pub fn update_builtin_from_bounds(&mut self, element_type: &ElementType, bounds: &BoundingBox) {
         // Always update the 4 cardinal anchors
         self.insert(Anchor::new("top", bounds.top_center(), AnchorDirection::Up));
-        self.insert(Anchor::new("bottom", bounds.bottom_center(), AnchorDirection::Down));
-        self.insert(Anchor::new("left", bounds.left_center(), AnchorDirection::Left));
-        self.insert(Anchor::new("right", bounds.right_center(), AnchorDirection::Right));
+        self.insert(Anchor::new(
+            "bottom",
+            bounds.bottom_center(),
+            AnchorDirection::Down,
+        ));
+        self.insert(Anchor::new(
+            "left",
+            bounds.left_center(),
+            AnchorDirection::Left,
+        ));
+        self.insert(Anchor::new(
+            "right",
+            bounds.right_center(),
+            AnchorDirection::Right,
+        ));
 
         // For path shapes, also update corner anchors
         if matches!(element_type, ElementType::Shape(ShapeType::Path(_))) {
-            self.insert(Anchor::new("top_left", bounds.top_left(), AnchorDirection::Angle(225.0)));
-            self.insert(Anchor::new("top_right", bounds.top_right(), AnchorDirection::Angle(315.0)));
-            self.insert(Anchor::new("bottom_left", bounds.bottom_left(), AnchorDirection::Angle(135.0)));
-            self.insert(Anchor::new("bottom_right", bounds.bottom_right(), AnchorDirection::Angle(45.0)));
+            self.insert(Anchor::new(
+                "top_left",
+                bounds.top_left(),
+                AnchorDirection::Angle(225.0),
+            ));
+            self.insert(Anchor::new(
+                "top_right",
+                bounds.top_right(),
+                AnchorDirection::Angle(315.0),
+            ));
+            self.insert(Anchor::new(
+                "bottom_left",
+                bounds.bottom_left(),
+                AnchorDirection::Angle(135.0),
+            ));
+            self.insert(Anchor::new(
+                "bottom_right",
+                bounds.bottom_right(),
+                AnchorDirection::Angle(45.0),
+            ));
         }
     }
 
@@ -279,7 +335,10 @@ pub struct ResolvedAnchor {
 impl ResolvedAnchor {
     /// Create a new resolved anchor
     pub fn new(position: Point, direction: AnchorDirection) -> Self {
-        Self { position, direction }
+        Self {
+            position,
+            direction,
+        }
     }
 
     /// Create from an Anchor
@@ -642,7 +701,7 @@ pub struct ConnectionLayout {
     pub path: Vec<Point>,
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,
-    pub routing_mode: RoutingMode,  // Feature 008: track routing mode for rendering
+    pub routing_mode: RoutingMode, // Feature 008: track routing mode for rendering
 }
 
 /// The complete result of layout computation
@@ -1182,7 +1241,11 @@ mod tests {
 
         // Add custom anchor
         let mut custom = AnchorSet::new();
-        custom.insert(Anchor::new("input", Point::new(0.0, 10.0), AnchorDirection::Left));
+        custom.insert(Anchor::new(
+            "input",
+            Point::new(0.0, 10.0),
+            AnchorDirection::Left,
+        ));
 
         base.merge(&custom);
 
@@ -1271,7 +1334,11 @@ mod tests {
         let mut anchors = AnchorSet::for_element_type(&element_type, &initial_bounds);
 
         // Add a custom anchor
-        anchors.insert(Anchor::new("custom", Point::new(10.0, 10.0), AnchorDirection::Angle(45.0)));
+        anchors.insert(Anchor::new(
+            "custom",
+            Point::new(10.0, 10.0),
+            AnchorDirection::Angle(45.0),
+        ));
         assert_eq!(anchors.len(), 5);
 
         // Move element to new position

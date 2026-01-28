@@ -225,9 +225,11 @@ Note: Since templates don't know their instance name at definition time, interna
 
 - Constraints can reference anchor positions using `instance.anchor_x` and `instance.anchor_y` syntax
 - Anchor references work with both non-rotated and rotated template instances
+- Anchor references on rotated templates use post-rotation coordinates (integration with Feature 010 two-phase solver)
 - Clear error messages for invalid anchor references (unknown anchor, wrong element type, missing coordinate)
 - Parser correctly distinguishes between element properties (`.left`, `.center_x`) and anchor references (`.anchor_name_x`)
 - Existing constraint syntax continues to work unchanged
+- The `person-rotation.ail` example continues to render correctly (regression)
 - The MOSFET driver example can be updated to use anchor-based alignment for the flyback diode
 
 ## Key Entities

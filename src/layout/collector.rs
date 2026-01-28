@@ -10,10 +10,21 @@ use crate::parser::ast::*;
 
 use super::config::LayoutConfig;
 use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutVariable};
+use super::types::LayoutResult;
+
+/// A deferred anchor constraint expression, stored during collection
+/// and resolved after local constraint solving when anchor positions are known.
+#[derive(Debug, Clone)]
+pub struct DeferredAnchorConstraint {
+    pub expr: ConstraintExpr,
+    pub span: Span,
+}
 
 /// Collects all constraints from a document
 pub struct ConstraintCollector {
     pub constraints: Vec<LayoutConstraint>,
+    /// Anchor-based constraints deferred for resolution after local solving
+    pub deferred_anchor_constraints: Vec<DeferredAnchorConstraint>,
     config: LayoutConfig,
 }
 
@@ -21,6 +32,7 @@ impl ConstraintCollector {
     pub fn new(config: LayoutConfig) -> Self {
         Self {
             constraints: Vec::new(),
+            deferred_anchor_constraints: Vec::new(),
             config,
         }
     }
@@ -297,10 +309,165 @@ impl ConstraintCollector {
         }
     }
 
-    /// Public method to collect a single constrain expression
-    /// Used by the engine to collect constraints selectively
+    /// Public method to collect a single constrain expression.
+    /// Used by the engine to collect constraints selectively.
+    /// If the expression involves anchor references, it is deferred
+    /// for resolution after local constraint solving (Feature 011).
     pub fn collect_constrain_expr(&mut self, expr: &ConstraintExpr, span: &Span) {
-        self.collect_constrain(expr, span);
+        if expr_has_anchor_ref(expr) {
+            self.deferred_anchor_constraints
+                .push(DeferredAnchorConstraint {
+                    expr: expr.clone(),
+                    span: span.clone(),
+                });
+        } else {
+            self.collect_constrain(expr, span);
+        }
+    }
+
+    /// Resolve deferred anchor constraints using the current layout result.
+    /// Call this AFTER local constraint solving is complete, so that anchor
+    /// positions reflect their post-solve coordinates.
+    pub fn resolve_deferred_anchors(&mut self, layout_result: &LayoutResult) -> Result<(), String> {
+        let deferred = std::mem::take(&mut self.deferred_anchor_constraints);
+        for d in &deferred {
+            self.collect_constrain_expr_with_anchors(&d.expr, &d.span, layout_result)?;
+        }
+        Ok(())
+    }
+
+    /// Collect a constrain expression with anchor resolution (Feature 011).
+    ///
+    /// When a constraint references an anchor property (e.g., `bar.drain_x`),
+    /// this resolves it to the anchor's current position from the LayoutResult,
+    /// producing a Fixed constraint instead of an Equal constraint.
+    pub fn collect_constrain_expr_with_anchors(
+        &mut self,
+        expr: &ConstraintExpr,
+        span: &Span,
+        layout_result: &LayoutResult,
+    ) -> Result<(), String> {
+        match expr {
+            ConstraintExpr::Equal { left, right } => {
+                let left_is_anchor = matches!(
+                    &left.property.node,
+                    ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+                );
+                let right_is_anchor = matches!(
+                    &right.property.node,
+                    ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+                );
+
+                if !left_is_anchor && !right_is_anchor {
+                    // No anchors involved — use standard collection
+                    self.collect_constrain(expr, span);
+                    return Ok(());
+                }
+
+                if left_is_anchor && right_is_anchor {
+                    // Both sides are anchors: resolve both to constants, emit nothing
+                    // (two constants can't form a useful constraint)
+                    return Err(
+                        "Cannot constrain two anchor references against each other".to_string()
+                    );
+                }
+
+                if right_is_anchor {
+                    // Right side is anchor: constrain left_var = constant
+                    let left_var = self.property_to_variable(left);
+                    let value = resolve_anchor_value(
+                        &right.element.node,
+                        &right.property.node,
+                        layout_result,
+                    )?;
+                    self.constraints.push(LayoutConstraint::Fixed {
+                        variable: left_var,
+                        value,
+                        source: ConstraintSource::user(span.clone(), "constrain to anchor"),
+                    });
+                } else {
+                    // Left side is anchor: constrain right_var = constant
+                    let right_var = self.property_to_variable(right);
+                    let value = resolve_anchor_value(
+                        &left.element.node,
+                        &left.property.node,
+                        layout_result,
+                    )?;
+                    self.constraints.push(LayoutConstraint::Fixed {
+                        variable: right_var,
+                        value,
+                        source: ConstraintSource::user(span.clone(), "constrain to anchor"),
+                    });
+                }
+                Ok(())
+            }
+            ConstraintExpr::EqualWithOffset {
+                left,
+                right,
+                offset,
+            } => {
+                let left_is_anchor = matches!(
+                    &left.property.node,
+                    ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+                );
+                let right_is_anchor = matches!(
+                    &right.property.node,
+                    ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+                );
+
+                if !left_is_anchor && !right_is_anchor {
+                    self.collect_constrain(expr, span);
+                    return Ok(());
+                }
+
+                if left_is_anchor && right_is_anchor {
+                    return Err(
+                        "Cannot constrain two anchor references against each other".to_string()
+                    );
+                }
+
+                if right_is_anchor {
+                    let left_var = self.property_to_variable(left);
+                    let value = resolve_anchor_value(
+                        &right.element.node,
+                        &right.property.node,
+                        layout_result,
+                    )?;
+                    self.constraints.push(LayoutConstraint::Fixed {
+                        variable: left_var,
+                        value: value + offset,
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            "constrain to anchor with offset",
+                        ),
+                    });
+                } else {
+                    let right_var = self.property_to_variable(right);
+                    let value = resolve_anchor_value(
+                        &left.element.node,
+                        &left.property.node,
+                        layout_result,
+                    )?;
+                    // left = right + offset → right = left - offset → right = value - offset
+                    self.constraints.push(LayoutConstraint::Fixed {
+                        variable: right_var,
+                        value: value - offset,
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            "constrain to anchor with offset",
+                        ),
+                    });
+                }
+                Ok(())
+            }
+            // For Constant, GreaterOrEqual, LessOrEqual, Midpoint, Contains:
+            // The left side could theoretically be an anchor, but that doesn't make sense
+            // (you can't set an anchor's position via constraint). Fall through to standard.
+            _ => {
+                self.collect_constrain(expr, span);
+                Ok(())
+            }
+        }
     }
 
     fn collect_constrain(&mut self, expr: &ConstraintExpr, span: &Span) {
@@ -373,7 +540,7 @@ impl ConstraintCollector {
                 // This ensures centers are compared with centers for proper alignment
                 let a_var = LayoutVariable::new(
                     &a.node.0,
-                    match target.property.node {
+                    match &target.property.node {
                         ConstraintProperty::CenterX | ConstraintProperty::Center => {
                             super::solver::LayoutProperty::CenterX
                         }
@@ -389,7 +556,7 @@ impl ConstraintCollector {
                 );
                 let b_var = LayoutVariable::new(
                     &b.node.0,
-                    match target.property.node {
+                    match &target.property.node {
                         ConstraintProperty::CenterX | ConstraintProperty::Center => {
                             super::solver::LayoutProperty::CenterX
                         }
@@ -451,7 +618,7 @@ impl ConstraintCollector {
         let id = prop_ref.element.node.leaf().0.clone();
 
         // Map constraint properties to layout properties
-        let property = match prop_ref.property.node {
+        let property = match &prop_ref.property.node {
             ConstraintProperty::X | ConstraintProperty::Left => super::solver::LayoutProperty::X,
             ConstraintProperty::Y | ConstraintProperty::Top => super::solver::LayoutProperty::Y,
             ConstraintProperty::Width => super::solver::LayoutProperty::Width,
@@ -464,6 +631,9 @@ impl ConstraintCollector {
             // Right and Bottom are derived properties (right = x + width, bottom = y + height)
             ConstraintProperty::Right => super::solver::LayoutProperty::Right,
             ConstraintProperty::Bottom => super::solver::LayoutProperty::Bottom,
+            // Anchor coordinates map to X/Y — actual value resolved in engine
+            ConstraintProperty::AnchorX(_) => super::solver::LayoutProperty::X,
+            ConstraintProperty::AnchorY(_) => super::solver::LayoutProperty::Y,
         };
 
         LayoutVariable::new(id, property)
@@ -473,6 +643,72 @@ impl ConstraintCollector {
 // ============================================================================
 // Helper functions
 // ============================================================================
+
+/// Check if a constraint expression references any anchor properties.
+fn expr_has_anchor_ref(expr: &ConstraintExpr) -> bool {
+    fn prop_is_anchor(prop: &ConstraintProperty) -> bool {
+        matches!(
+            prop,
+            ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+        )
+    }
+
+    match expr {
+        ConstraintExpr::Equal { left, right } => {
+            prop_is_anchor(&left.property.node) || prop_is_anchor(&right.property.node)
+        }
+        ConstraintExpr::EqualWithOffset { left, right, .. } => {
+            prop_is_anchor(&left.property.node) || prop_is_anchor(&right.property.node)
+        }
+        ConstraintExpr::Constant { left, .. } => prop_is_anchor(&left.property.node),
+        ConstraintExpr::GreaterOrEqual { left, .. } => prop_is_anchor(&left.property.node),
+        ConstraintExpr::LessOrEqual { left, .. } => prop_is_anchor(&left.property.node),
+        ConstraintExpr::Midpoint { target, .. } => prop_is_anchor(&target.property.node),
+        ConstraintExpr::Contains { .. } => false,
+    }
+}
+
+/// Resolve an anchor reference to a concrete coordinate value (Feature 011).
+///
+/// Looks up the named anchor on the specified element in the layout result
+/// and returns its x or y coordinate.
+fn resolve_anchor_value(
+    element_path: &ElementPath,
+    property: &ConstraintProperty,
+    layout_result: &LayoutResult,
+) -> Result<f64, String> {
+    let element_id = element_path.leaf().0.as_str();
+    let (anchor_name, axis) = match property {
+        ConstraintProperty::AnchorX(name) => (name.as_str(), "x"),
+        ConstraintProperty::AnchorY(name) => (name.as_str(), "y"),
+        _ => return Err(format!("Not an anchor property: {:?}", property)),
+    };
+
+    let element = layout_result
+        .elements
+        .get(element_id)
+        .ok_or_else(|| format!("Element '{}' not found in layout result", element_id))?;
+
+    let anchor = element.anchors.get(anchor_name).ok_or_else(|| {
+        let available: Vec<&str> = element.anchors.names().collect();
+        format!(
+            "Unknown anchor '{}' on element '{}'. Available anchors: {}",
+            anchor_name,
+            element_id,
+            if available.is_empty() {
+                "(none)".to_string()
+            } else {
+                available.join(", ")
+            }
+        )
+    })?;
+
+    Ok(match axis {
+        "x" => anchor.position.x,
+        "y" => anchor.position.y,
+        _ => unreachable!(),
+    })
+}
 
 /// Extract a numeric modifier value by key name
 pub fn extract_number_modifier(modifiers: &[Spanned<StyleModifier>], key: &str) -> Option<f64> {

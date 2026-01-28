@@ -449,7 +449,7 @@ impl std::fmt::Display for ElementPath {
 // ============================================
 
 /// Properties that can be referenced in constraints
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ConstraintProperty {
     // Position
     X,
@@ -466,12 +466,18 @@ pub enum ConstraintProperty {
     CenterX,
     CenterY,
     Center, // Both center_x and center_y
+    // Anchor coordinates (Feature 011)
+    /// X-coordinate of a named anchor (e.g., "drain" from "drain_x")
+    AnchorX(String),
+    /// Y-coordinate of a named anchor (e.g., "gate" from "gate_y")
+    AnchorY(String),
 }
 
 impl ConstraintProperty {
     /// Parse from string (for parser integration)
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
+            // Built-in properties FIRST — order matters for precedence
             "x" => Some(Self::X),
             "y" => Some(Self::Y),
             "width" => Some(Self::Width),
@@ -483,6 +489,15 @@ impl ConstraintProperty {
             "center_x" | "horizontal_center" => Some(Self::CenterX),
             "center_y" | "vertical_center" => Some(Self::CenterY),
             "center" => Some(Self::Center),
+            // Anchor fallback — ONLY reached if not a built-in property
+            _ if s.ends_with("_x") => {
+                let anchor_name = &s[..s.len() - 2];
+                Some(Self::AnchorX(anchor_name.to_string()))
+            }
+            _ if s.ends_with("_y") => {
+                let anchor_name = &s[..s.len() - 2];
+                Some(Self::AnchorY(anchor_name.to_string()))
+            }
             _ => None,
         }
     }
@@ -746,6 +761,114 @@ mod tests {
         assert!(path.is_simple());
         assert_eq!(path.leaf().as_str(), "foo");
         assert_eq!(path.to_string(), "foo");
+    }
+
+    #[test]
+    fn test_constraint_property_from_str_builtins() {
+        assert_eq!(
+            ConstraintProperty::from_str("x"),
+            Some(ConstraintProperty::X)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("y"),
+            Some(ConstraintProperty::Y)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("left"),
+            Some(ConstraintProperty::Left)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("right"),
+            Some(ConstraintProperty::Right)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("top"),
+            Some(ConstraintProperty::Top)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("bottom"),
+            Some(ConstraintProperty::Bottom)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("center_x"),
+            Some(ConstraintProperty::CenterX)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("center_y"),
+            Some(ConstraintProperty::CenterY)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("horizontal_center"),
+            Some(ConstraintProperty::CenterX)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("vertical_center"),
+            Some(ConstraintProperty::CenterY)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("center"),
+            Some(ConstraintProperty::Center)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("width"),
+            Some(ConstraintProperty::Width)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("height"),
+            Some(ConstraintProperty::Height)
+        );
+        assert_eq!(ConstraintProperty::from_str("unknown"), None);
+    }
+
+    #[test]
+    fn test_constraint_property_from_str_anchors() {
+        // Anchor references use _x/_y suffix
+        assert_eq!(
+            ConstraintProperty::from_str("drain_x"),
+            Some(ConstraintProperty::AnchorX("drain".to_string()))
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("drain_y"),
+            Some(ConstraintProperty::AnchorY("drain".to_string()))
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("gate_x"),
+            Some(ConstraintProperty::AnchorX("gate".to_string()))
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("gate_y"),
+            Some(ConstraintProperty::AnchorY("gate".to_string()))
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("left_conn_x"),
+            Some(ConstraintProperty::AnchorX("left_conn".to_string()))
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("left_conn_y"),
+            Some(ConstraintProperty::AnchorY("left_conn".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_constraint_property_builtins_not_treated_as_anchors() {
+        // center_x and center_y must resolve to builtins, NOT AnchorX("center")/AnchorY("center")
+        assert_eq!(
+            ConstraintProperty::from_str("center_x"),
+            Some(ConstraintProperty::CenterX)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("center_y"),
+            Some(ConstraintProperty::CenterY)
+        );
+        // "x" and "y" are builtins too — they're not "_x"/"_y" suffixed
+        assert_eq!(
+            ConstraintProperty::from_str("x"),
+            Some(ConstraintProperty::X)
+        );
+        assert_eq!(
+            ConstraintProperty::from_str("y"),
+            Some(ConstraintProperty::Y)
+        );
     }
 
     #[test]

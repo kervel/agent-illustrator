@@ -123,7 +123,11 @@ fn test_svg_regression_all_examples() {
         }
     }
 
-    println!("SVG Rendering: {} tested, {} failures", tested, failures.len());
+    println!(
+        "SVG Rendering: {} tested, {} failures",
+        tested,
+        failures.len()
+    );
 
     if !failures.is_empty() {
         for failure in &failures {
@@ -196,6 +200,10 @@ fn test_feedback_loops_example() {
     let source = fs::read_to_string("examples/feedback-loops.ail");
     if let Ok(source) = source {
         let result = render(&source);
-        assert!(result.is_ok(), "Failed to render feedback-loops.ail: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to render feedback-loops.ail: {:?}",
+            result.err()
+        );
     }
 }

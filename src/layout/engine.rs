@@ -167,10 +167,7 @@ pub fn build_element_to_template_map(doc: &Document) -> HashMap<String, String> 
 
 /// Build a map from group name to its custom anchor declarations.
 fn build_group_anchor_decl_map(doc: &Document) -> HashMap<String, Vec<AnchorDecl>> {
-    fn visit(
-        stmts: &[Spanned<Statement>],
-        map: &mut HashMap<String, Vec<AnchorDecl>>,
-    ) {
+    fn visit(stmts: &[Spanned<Statement>], map: &mut HashMap<String, Vec<AnchorDecl>>) {
         for stmt in stmts {
             match &stmt.node {
                 Statement::Group(g) => {
@@ -246,7 +243,8 @@ fn collect_element_template_mapping(
                 // Check if any children have names prefixed with this group's name
                 let has_prefixed_children = g.children.iter().any(|child| {
                     if let Some(child_id) = get_statement_id(&child.node) {
-                        child_id.starts_with(name) && child_id.len() > name.len()
+                        child_id.starts_with(name)
+                            && child_id.len() > name.len()
                             && child_id.chars().nth(name.len()) == Some('_')
                     } else {
                         false
@@ -451,11 +449,7 @@ fn add_element_suggestions_to_solver(
 ) -> Result<(), LayoutError> {
     use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
 
-    let id = elem
-        .id
-        .as_ref()
-        .map(|i| i.0.as_str())
-        .unwrap_or("unnamed");
+    let id = elem.id.as_ref().map(|i| i.0.as_str()).unwrap_or("unnamed");
 
     // Add position suggestions
     solver
@@ -591,7 +585,11 @@ pub fn apply_local_results(
 
 /// Apply rotation to path geometry for rotated template instances.
 /// Recursively update element bounds in the tree structure.
-fn update_element_bounds_in_tree(elements: &mut [ElementLayout], elem_id: &str, bounds: BoundingBox) {
+fn update_element_bounds_in_tree(
+    elements: &mut [ElementLayout],
+    elem_id: &str,
+    bounds: BoundingBox,
+) {
     for elem in elements.iter_mut() {
         if elem.id.as_ref().map(|i| i.0.as_str()) == Some(elem_id) {
             elem.bounds = bounds;
@@ -602,7 +600,11 @@ fn update_element_bounds_in_tree(elements: &mut [ElementLayout], elem_id: &str, 
 }
 
 /// Recursively update element anchors in the tree structure.
-fn update_element_anchors_in_tree(elements: &mut [ElementLayout], elem_id: &str, anchors: AnchorSet) {
+fn update_element_anchors_in_tree(
+    elements: &mut [ElementLayout],
+    elem_id: &str,
+    anchors: AnchorSet,
+) {
     for elem in elements.iter_mut() {
         if elem.id.as_ref().map(|i| i.0.as_str()) == Some(elem_id) {
             elem.anchors = anchors;
@@ -1215,7 +1217,10 @@ fn compute_arc_bulge_point(
     // Our perpendicular is (-dy, dx) which is "left", so negate for clockwise
     let sign = if clockwise { -1.0 } else { 1.0 };
 
-    (mid_x + sign * perp_x * sagitta, mid_y + sign * perp_y * sagitta)
+    (
+        mid_x + sign * perp_x * sagitta,
+        mid_y + sign * perp_y * sagitta,
+    )
 }
 
 /// Compute the apex point of a quadratic Bezier curve (where it bulges furthest from the chord)
@@ -1521,7 +1526,10 @@ fn resolve_custom_anchors(
     anchor_set: &mut AnchorSet,
 ) {
     // Build a map of descendant IDs to their bounds for quick lookup
-    fn collect_bounds<'a>(elements: &'a [ElementLayout], map: &mut HashMap<&'a str, &'a BoundingBox>) {
+    fn collect_bounds<'a>(
+        elements: &'a [ElementLayout],
+        map: &mut HashMap<&'a str, &'a BoundingBox>,
+    ) {
         for elem in elements {
             if let Some(id) = elem.id.as_ref() {
                 map.insert(id.as_str(), &elem.bounds);
@@ -1563,7 +1571,7 @@ fn resolve_custom_anchors_from_bounds(
         // Look up the child's bounds
         if let Some(child_bounds) = child_map.get(element_name) {
             // Get the position from the property
-            let base_position = match prop_ref.property.node {
+            let base_position = match &prop_ref.property.node {
                 ConstraintProperty::Left => child_bounds.left_center(),
                 ConstraintProperty::Right => child_bounds.right_center(),
                 ConstraintProperty::Top => child_bounds.top_center(),
@@ -1575,11 +1583,15 @@ fn resolve_custom_anchors_from_bounds(
             };
 
             // Apply offset (along the axis of the property)
-            let position = match prop_ref.property.node {
-                ConstraintProperty::Left | ConstraintProperty::Right | ConstraintProperty::CenterX => {
+            let position = match &prop_ref.property.node {
+                ConstraintProperty::Left
+                | ConstraintProperty::Right
+                | ConstraintProperty::CenterX => {
                     Point::new(base_position.x + offset, base_position.y)
                 }
-                ConstraintProperty::Top | ConstraintProperty::Bottom | ConstraintProperty::CenterY => {
+                ConstraintProperty::Top
+                | ConstraintProperty::Bottom
+                | ConstraintProperty::CenterY => {
                     Point::new(base_position.x, base_position.y + offset)
                 }
                 _ => base_position,
@@ -1598,7 +1610,7 @@ fn resolve_custom_anchors_from_bounds(
                 }
             } else {
                 // Infer from property
-                match prop_ref.property.node {
+                match &prop_ref.property.node {
                     ConstraintProperty::Left => AnchorDirection::Left,
                     ConstraintProperty::Right => AnchorDirection::Right,
                     ConstraintProperty::Top => AnchorDirection::Up,
@@ -2234,13 +2246,15 @@ pub fn resolve_constrain_statements_two_phase(
     collect_layout_alignment_constraints(&doc.statements, &mut collector);
 
     // Collect user constraints (constrain statements)
+    // Anchor-based constraints are automatically deferred by the collector (Feature 011)
     collect_constrain_statements(&doc.statements, &mut collector);
 
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
 
-    // Only return early if there are no constraints AND no rotations
-    if collector.constraints.is_empty() && template_rotations.is_empty() {
+    // Only return early if there are no constraints AND no rotations AND no deferred anchors
+    let has_deferred_anchors = !collector.deferred_anchor_constraints.is_empty();
+    if collector.constraints.is_empty() && template_rotations.is_empty() && !has_deferred_anchors {
         return Ok(());
     }
 
@@ -2254,9 +2268,16 @@ pub fn resolve_constrain_statements_two_phase(
 
     if config.trace {
         eprintln!("TRACE: Two-phase constraint solver");
-        eprintln!("TRACE: {} template instances with local constraints", local_by_instance.len());
+        eprintln!(
+            "TRACE: {} template instances with local constraints",
+            local_by_instance.len()
+        );
         for (instance, constraints) in &local_by_instance {
-            eprintln!("TRACE:   {}: {} local constraints", instance, constraints.len());
+            eprintln!(
+                "TRACE:   {}: {} local constraints",
+                instance,
+                constraints.len()
+            );
         }
         eprintln!("TRACE: {} global constraints", global_constraints.len());
     }
@@ -2278,7 +2299,10 @@ pub fn resolve_constrain_statements_two_phase(
         if let Some(&angle) = template_rotations.get(instance) {
             if angle.abs() > f64::EPSILON {
                 if config.trace {
-                    eprintln!("TRACE: Applying {}° rotation to template '{}'", angle, instance);
+                    eprintln!(
+                        "TRACE: Applying {}° rotation to template '{}'",
+                        angle, instance
+                    );
                 }
                 apply_rotation_to_local_result(&mut local_result, angle);
             }
@@ -2290,7 +2314,10 @@ pub fn resolve_constrain_statements_two_phase(
     // Phase 2b: Handle templates with rotation but no constraints
     // These still need rotation applied to their bounds and anchors
     if config.trace {
-        eprintln!("TRACE: Phase 2b - Processing {} templates with rotation", template_rotations.len());
+        eprintln!(
+            "TRACE: Phase 2b - Processing {} templates with rotation",
+            template_rotations.len()
+        );
     }
     for (instance, &angle) in template_rotations {
         if config.trace {
@@ -2310,7 +2337,10 @@ pub fn resolve_constrain_statements_two_phase(
         }
 
         if config.trace {
-            eprintln!("TRACE: Applying {}° rotation to template '{}' (no constraints)", angle, instance);
+            eprintln!(
+                "TRACE: Applying {}° rotation to template '{}' (no constraints)",
+                angle, instance
+            );
         }
 
         // Create a LocalSolverResult with current bounds for all elements in this template
@@ -2370,8 +2400,46 @@ pub fn resolve_constrain_statements_two_phase(
         update_element_rotation_in_tree(&mut result.root_elements, instance, *angle);
     }
 
+    // Phase 3b: Resolve deferred anchor constraints (Feature 011)
+    // Now that local constraints are solved and bounds/anchors are recomputed,
+    // anchor positions are accurate. Resolve anchor refs to Fixed constraints.
+    let mut all_global = global_constraints;
+    if !collector.deferred_anchor_constraints.is_empty() {
+        // Build skip set for rotated template internals — must NOT overwrite their anchors
+        let mut skip_anchors_3b: HashSet<String> = HashSet::new();
+        for (elem_id, template_name) in &element_to_template {
+            if template_rotations
+                .get(template_name)
+                .map(|angle| angle.abs() > f64::EPSILON)
+                .unwrap_or(false)
+            {
+                skip_anchors_3b.insert(elem_id.clone());
+                skip_anchors_3b.insert(template_name.clone());
+            }
+        }
+        let skip_3b = if skip_anchors_3b.is_empty() {
+            None
+        } else {
+            Some(&skip_anchors_3b)
+        };
+
+        // Recompute anchors so positions reflect post-local-solve state,
+        // but skip rotated template internals (their anchors are already correct)
+        recompute_builtin_anchors(result, skip_3b);
+        recompute_custom_anchors(result, doc, skip_3b);
+
+        let pre_count = collector.constraints.len();
+        collector
+            .resolve_deferred_anchors(result)
+            .map_err(|e| LayoutError::ValidationError(e))?;
+
+        // All newly resolved anchor constraints are treated as global
+        // (they reference template instance anchor positions which are cross-template)
+        all_global.extend(collector.constraints[pre_count..].iter().cloned());
+    }
+
     // Phase 4: Solve global constraints (using post-rotation positions)
-    solve_global(result, &global_constraints, &element_to_template, config)?;
+    solve_global(result, &all_global, &element_to_template, config)?;
 
     // Build skip set for rotated template internals
     let mut skip_anchors: HashSet<String> = HashSet::new();
@@ -2418,12 +2486,14 @@ pub fn resolve_constrain_statements(
     collect_layout_alignment_constraints(&doc.statements, &mut collector);
 
     // Collect user constraints (constrain statements)
+    // Anchor-based constraints are automatically deferred by the collector (Feature 011)
     collect_constrain_statements(&doc.statements, &mut collector);
 
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
 
-    if collector.constraints.is_empty() {
+    let has_deferred_anchors = !collector.deferred_anchor_constraints.is_empty();
+    if collector.constraints.is_empty() && !has_deferred_anchors {
         return Ok(());
     }
 
@@ -2437,11 +2507,7 @@ pub fn resolve_constrain_statements(
 
     // Flatten all local constraints into a single Vec for solving together
     // (The old approach solved all internal constraints in one pass)
-    let internal_constraints: Vec<_> = local_by_instance
-        .into_values()
-        .flatten()
-        .collect();
-
+    let internal_constraints: Vec<_> = local_by_instance.into_values().flatten().collect();
 
     // PASS 1: Solve internal constraints first
     // These position children relative to each other within their groups
@@ -2466,7 +2532,9 @@ pub fn resolve_constrain_statements(
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
                 let delta = value - current_value;
-                if delta.abs() > 0.001 && matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
+                if delta.abs() > 0.001
+                    && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
+                {
                     let axis = if var.property == LayoutProperty::X {
                         Axis::Horizontal
                     } else {
@@ -2481,6 +2549,23 @@ pub fn resolve_constrain_statements(
 
         // Recompute group bounds after internal constraints
         recompute_group_bounds(result, None);
+    }
+
+    // Resolve deferred anchor constraints (Feature 011)
+    // After internal constraints are solved, anchor positions are accurate.
+    let mut external_constraints = external_constraints;
+    if !collector.deferred_anchor_constraints.is_empty() {
+        // Recompute anchors so positions reflect post-internal-solve state
+        recompute_builtin_anchors(result, None);
+        recompute_custom_anchors(result, doc, None);
+
+        let pre_count = collector.constraints.len();
+        collector
+            .resolve_deferred_anchors(result)
+            .map_err(|e| LayoutError::ValidationError(e))?;
+
+        // Resolved anchor constraints are global (cross-template)
+        external_constraints.extend(collector.constraints[pre_count..].iter().cloned());
     }
 
     // PASS 2: Solve external constraints
@@ -2505,12 +2590,18 @@ pub fn resolve_constrain_statements(
         // Add positions for all elements referenced in external constraints
         // For each property: if it's targeted → SUGGESTED (can move), else → FIXED (reference)
         for element_name in &referenced_elements {
-            add_element_by_name_with_per_property_strength(&mut external_solver, result, element_name, &target_vars, config.trace)?;
+            add_element_by_name_with_per_property_strength(
+                &mut external_solver,
+                result,
+                element_name,
+                &target_vars,
+                config.trace,
+            )?;
         }
 
-        for constraint in external_constraints {
+        for constraint in &external_constraints {
             external_solver
-                .add_constraint(constraint)
+                .add_constraint(constraint.clone())
                 .map_err(LayoutError::solver_error)?;
         }
 
@@ -2519,7 +2610,10 @@ pub fn resolve_constrain_statements(
         // Trace: print all solution values
         if config.trace {
             for (var, value) in &external_solution.values {
-                eprintln!("TRACE: solution {} {:?} = {}", var.element_id, var.property, value);
+                eprintln!(
+                    "TRACE: solution {} {:?} = {}",
+                    var.element_id, var.property, value
+                );
             }
         }
 
@@ -2533,17 +2627,22 @@ pub fn resolve_constrain_statements(
                 || match var.property {
                     LayoutProperty::X => {
                         target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterX))
-                            || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Right))
+                            || target_vars
+                                .contains(&(var.element_id.clone(), LayoutProperty::Right))
                     }
                     LayoutProperty::Y => {
                         target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterY))
-                            || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Bottom))
+                            || target_vars
+                                .contains(&(var.element_id.clone(), LayoutProperty::Bottom))
                     }
                     _ => false,
                 };
 
             if config.trace {
-                eprintln!("TRACE: {} {:?} is_targeted={}", var.element_id, var.property, is_targeted);
+                eprintln!(
+                    "TRACE: {} {:?} is_targeted={}",
+                    var.element_id, var.property, is_targeted
+                );
             }
 
             if !is_targeted {
@@ -2553,14 +2652,19 @@ pub fn resolve_constrain_statements(
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
                 let delta = value - current_value;
-                if delta.abs() > 0.001 && matches!(var.property, LayoutProperty::X | LayoutProperty::Y) {
+                if delta.abs() > 0.001
+                    && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
+                {
                     let axis = if var.property == LayoutProperty::X {
                         Axis::Horizontal
                     } else {
                         Axis::Vertical
                     };
                     if config.trace {
-                        eprintln!("TRACE: shifting {} by {} on {:?}", var.element_id, delta, axis);
+                        eprintln!(
+                            "TRACE: shifting {} by {} on {:?}",
+                            var.element_id, delta, axis
+                        );
                     }
                     shift_element_by_name(result, &var.element_id, delta, axis)?;
                 }
@@ -2589,7 +2693,8 @@ fn recompute_builtin_anchors(result: &mut LayoutResult, skip: Option<&HashSet<St
         if skip.map_or(false, |s| s.contains(id)) {
             continue;
         }
-        elem.anchors.update_builtin_from_bounds(&elem.element_type, &elem.bounds);
+        elem.anchors
+            .update_builtin_from_bounds(&elem.element_type, &elem.bounds);
     }
 }
 
@@ -2683,22 +2788,26 @@ fn recompute_group_anchors(
             .unwrap_or_default();
 
         if let Some(child_bounds) = children_bounds.get(&element_name) {
-            let base_position = match prop_ref.property.node {
+            let base_position = match &prop_ref.property.node {
                 ConstraintProperty::Left => child_bounds.left_center(),
                 ConstraintProperty::Right => child_bounds.right_center(),
                 ConstraintProperty::Top => child_bounds.top_center(),
                 ConstraintProperty::Bottom => child_bounds.bottom_center(),
-                ConstraintProperty::CenterX | ConstraintProperty::CenterY | ConstraintProperty::Center => {
-                    child_bounds.center()
-                }
+                ConstraintProperty::CenterX
+                | ConstraintProperty::CenterY
+                | ConstraintProperty::Center => child_bounds.center(),
                 _ => child_bounds.center(),
             };
 
-            let position = match prop_ref.property.node {
-                ConstraintProperty::Left | ConstraintProperty::Right | ConstraintProperty::CenterX => {
+            let position = match &prop_ref.property.node {
+                ConstraintProperty::Left
+                | ConstraintProperty::Right
+                | ConstraintProperty::CenterX => {
                     Point::new(base_position.x + offset, base_position.y)
                 }
-                ConstraintProperty::Top | ConstraintProperty::Bottom | ConstraintProperty::CenterY => {
+                ConstraintProperty::Top
+                | ConstraintProperty::Bottom
+                | ConstraintProperty::CenterY => {
                     Point::new(base_position.x, base_position.y + offset)
                 }
                 _ => base_position,
@@ -2715,7 +2824,7 @@ fn recompute_group_anchors(
                     AnchorDirectionSpec::Angle(a) => AnchorDirection::Angle(*a),
                 }
             } else {
-                match prop_ref.property.node {
+                match &prop_ref.property.node {
                     ConstraintProperty::Left => AnchorDirection::Left,
                     ConstraintProperty::Right => AnchorDirection::Right,
                     ConstraintProperty::Top => AnchorDirection::Up,
@@ -2756,9 +2865,7 @@ fn get_constraint_target_var(
     use super::solver::LayoutConstraint;
 
     match constraint {
-        LayoutConstraint::Equal { left, .. } => {
-            Some((left.element_id.clone(), left.property))
-        }
+        LayoutConstraint::Equal { left, .. } => Some((left.element_id.clone(), left.property)),
         LayoutConstraint::Midpoint { target, .. } => {
             Some((target.element_id.clone(), target.property))
         }
@@ -2779,9 +2886,7 @@ fn get_constraint_target_var(
 
 /// Collect all element IDs referenced in a constraint
 /// This includes both left/right sides of Equal constraints, both endpoints of Midpoint, etc.
-fn get_constraint_referenced_elements(
-    constraint: &super::solver::LayoutConstraint,
-) -> Vec<String> {
+fn get_constraint_referenced_elements(constraint: &super::solver::LayoutConstraint) -> Vec<String> {
     use super::solver::LayoutConstraint;
 
     match constraint {
@@ -2789,7 +2894,11 @@ fn get_constraint_referenced_elements(
             vec![left.element_id.clone(), right.element_id.clone()]
         }
         LayoutConstraint::Midpoint { target, a, b, .. } => {
-            vec![target.element_id.clone(), a.element_id.clone(), b.element_id.clone()]
+            vec![
+                target.element_id.clone(),
+                a.element_id.clone(),
+                b.element_id.clone(),
+            ]
         }
         LayoutConstraint::GreaterOrEqual { variable, .. } => {
             vec![variable.element_id.clone()]
@@ -3016,15 +3125,13 @@ fn collect_layout_alignment_constraints(
                 let child_ids: Vec<String> = l
                     .children
                     .iter()
-                    .filter_map(|child| {
-                        match &child.node {
-                            Statement::Shape(s) => s.name.as_ref().map(|n| n.node.0.clone()),
-                            Statement::Layout(inner_l) => {
-                                inner_l.name.as_ref().map(|n| n.node.0.clone())
-                            }
-                            Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.clone()),
-                            _ => None,
+                    .filter_map(|child| match &child.node {
+                        Statement::Shape(s) => s.name.as_ref().map(|n| n.node.0.clone()),
+                        Statement::Layout(inner_l) => {
+                            inner_l.name.as_ref().map(|n| n.node.0.clone())
                         }
+                        Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.clone()),
+                        _ => None,
                     })
                     .collect();
 
@@ -3071,7 +3178,9 @@ fn collect_layout_alignment_constraints(
                                         span: stmt.span.clone(),
                                         description: format!(
                                             "row spacing: {}.x = {}.right + {}",
-                                            child_ids[i], child_ids[i - 1], gap
+                                            child_ids[i],
+                                            child_ids[i - 1],
+                                            gap
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
                                         template_instance: None,
@@ -3111,7 +3220,9 @@ fn collect_layout_alignment_constraints(
                                         span: stmt.span.clone(),
                                         description: format!(
                                             "col spacing: {}.y = {}.bottom + {}",
-                                            child_ids[i], child_ids[i - 1], gap
+                                            child_ids[i],
+                                            child_ids[i - 1],
+                                            gap
                                         ),
                                         origin: ConstraintOrigin::LayoutContainer,
                                         template_instance: None,
@@ -3469,7 +3580,8 @@ mod tests {
         // Before the fix, children would get double-shifted.
         use crate::template::{resolve_templates, TemplateRegistry};
 
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             template "stack3" {
                 rect line1 [width: 40, height: 3]
                 rect line2 [width: 26, height: 3]
@@ -3481,7 +3593,9 @@ mod tests {
             }
             stack3 gnd
             constrain gnd.x = 200
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
 
         let mut registry = TemplateRegistry::new();
         let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
@@ -3492,9 +3606,18 @@ mod tests {
 
         // Find the template instance
         let gnd = result.elements.get("gnd").expect("gnd should exist");
-        let line1 = result.elements.get("gnd_line1").expect("gnd_line1 should exist");
-        let line2 = result.elements.get("gnd_line2").expect("gnd_line2 should exist");
-        let line3 = result.elements.get("gnd_line3").expect("gnd_line3 should exist");
+        let line1 = result
+            .elements
+            .get("gnd_line1")
+            .expect("gnd_line1 should exist");
+        let line2 = result
+            .elements
+            .get("gnd_line2")
+            .expect("gnd_line2 should exist");
+        let line3 = result
+            .elements
+            .get("gnd_line3")
+            .expect("gnd_line3 should exist");
 
         // All three lines should be centered on the same x coordinate
         let center1 = line1.bounds.x + line1.bounds.width / 2.0;
@@ -3502,14 +3625,25 @@ mod tests {
         let center3 = line3.bounds.x + line3.bounds.width / 2.0;
 
         // Allow small floating point tolerance
-        assert!((center1 - center2).abs() < 1.0,
-            "line1 and line2 should be centered: {} vs {}", center1, center2);
-        assert!((center1 - center3).abs() < 1.0,
-            "line1 and line3 should be centered: {} vs {}", center1, center3);
+        assert!(
+            (center1 - center2).abs() < 1.0,
+            "line1 and line2 should be centered: {} vs {}",
+            center1,
+            center2
+        );
+        assert!(
+            (center1 - center3).abs() < 1.0,
+            "line1 and line3 should be centered: {} vs {}",
+            center1,
+            center3
+        );
 
         // The template should be at x=200 (or near it given constraint solving)
-        assert!(gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
-            "gnd should be near x=200, got {}", gnd.bounds.x);
+        assert!(
+            gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
+            "gnd should be near x=200, got {}",
+            gnd.bounds.x
+        );
     }
 
     // ============================================
@@ -3520,7 +3654,8 @@ mod tests {
     fn test_build_element_to_template_map() {
         use crate::template::{resolve_templates, TemplateRegistry};
 
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             template "person" {
                 rect head [width: 20, height: 20]
                 rect body [width: 30, height: 40]
@@ -3529,7 +3664,9 @@ mod tests {
             person alice
             person bob
             rect server
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
 
         let mut registry = TemplateRegistry::new();
         let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
@@ -3598,8 +3735,7 @@ mod tests {
         let constraint = LayoutConstraint::Fixed {
             variable: LayoutVariable::x("alice_head"),
             value: 100.0,
-            source: ConstraintSource::user(0..10, "head position")
-                .with_template_instance("alice"),
+            source: ConstraintSource::user(0..10, "head position").with_template_instance("alice"),
         };
 
         let scope = classify_constraint(&constraint, &element_map);
@@ -3656,14 +3792,17 @@ mod tests {
     fn test_solve_local_basic() {
         use crate::template::{resolve_templates, TemplateRegistry};
 
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             template "person" {
                 rect head [width: 20, height: 20]
                 rect body [width: 30, height: 40]
                 constrain body.top = head.bottom + 5
             }
             person alice
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
 
         let mut registry = TemplateRegistry::new();
         let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
@@ -3676,15 +3815,15 @@ mod tests {
         let group_anchor_decls = build_group_anchor_decl_map(&doc);
 
         // Create a simple local constraint
-        use super::super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable, LayoutProperty};
-        let constraints = vec![
-            LayoutConstraint::Equal {
-                left: LayoutVariable::new("alice_body", LayoutProperty::Y),
-                right: LayoutVariable::new("alice_head", LayoutProperty::Bottom),
-                offset: 5.0,
-                source: ConstraintSource::user(0..10, "body below head"),
-            },
-        ];
+        use super::super::solver::{
+            ConstraintSource, LayoutConstraint, LayoutProperty, LayoutVariable,
+        };
+        let constraints = vec![LayoutConstraint::Equal {
+            left: LayoutVariable::new("alice_body", LayoutProperty::Y),
+            right: LayoutVariable::new("alice_head", LayoutProperty::Bottom),
+            offset: 5.0,
+            source: ConstraintSource::user(0..10, "body below head"),
+        }];
 
         // Solve locally
         let local_result = solve_local(
@@ -3694,7 +3833,7 @@ mod tests {
             &element_map,
             &group_anchor_decls,
         )
-            .expect("solve_local should succeed");
+        .expect("solve_local should succeed");
 
         // Verify template instance
         assert_eq!(local_result.template_instance, "alice");
@@ -3721,13 +3860,29 @@ mod tests {
 
         // Internal element bounds should be unchanged
         let elem_bounds = local_result.element_bounds.get("elem").unwrap();
-        assert!((elem_bounds.width - 100.0).abs() < 1.0, "width should remain 100, got {}", elem_bounds.width);
-        assert!((elem_bounds.height - 50.0).abs() < 1.0, "height should remain 50, got {}", elem_bounds.height);
+        assert!(
+            (elem_bounds.width - 100.0).abs() < 1.0,
+            "width should remain 100, got {}",
+            elem_bounds.width
+        );
+        assert!(
+            (elem_bounds.height - 50.0).abs() < 1.0,
+            "height should remain 50, got {}",
+            elem_bounds.height
+        );
 
         // Template instance bounds should be rotated for global constraints
         let bounds = local_result.element_bounds.get("test").unwrap();
-        assert!((bounds.width - 50.0).abs() < 1.0, "width should be ~50, got {}", bounds.width);
-        assert!((bounds.height - 100.0).abs() < 1.0, "height should be ~100, got {}", bounds.height);
+        assert!(
+            (bounds.width - 50.0).abs() < 1.0,
+            "width should be ~50, got {}",
+            bounds.width
+        );
+        assert!(
+            (bounds.height - 100.0).abs() < 1.0,
+            "height should be ~100, got {}",
+            bounds.height
+        );
 
         // Rotation should be recorded
         assert_eq!(local_result.rotation, Some(90.0));
@@ -3758,7 +3913,8 @@ mod tests {
         // when no rotation is involved
         use crate::template::{resolve_templates, TemplateRegistry};
 
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             template "stack3" {
                 rect line1 [width: 40, height: 3]
                 rect line2 [width: 26, height: 3]
@@ -3770,7 +3926,9 @@ mod tests {
             }
             stack3 gnd
             constrain gnd.x = 200
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
 
         let mut registry = TemplateRegistry::new();
         let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
@@ -3787,22 +3945,42 @@ mod tests {
 
         // Verify the template is positioned correctly
         let gnd = result.elements.get("gnd").expect("gnd should exist");
-        assert!(gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
-            "gnd should be near x=200, got {}", gnd.bounds.x);
+        assert!(
+            gnd.bounds.x >= 195.0 && gnd.bounds.x <= 205.0,
+            "gnd should be near x=200, got {}",
+            gnd.bounds.x
+        );
 
         // Verify children are centered
-        let line1 = result.elements.get("gnd_line1").expect("gnd_line1 should exist");
-        let line2 = result.elements.get("gnd_line2").expect("gnd_line2 should exist");
-        let line3 = result.elements.get("gnd_line3").expect("gnd_line3 should exist");
+        let line1 = result
+            .elements
+            .get("gnd_line1")
+            .expect("gnd_line1 should exist");
+        let line2 = result
+            .elements
+            .get("gnd_line2")
+            .expect("gnd_line2 should exist");
+        let line3 = result
+            .elements
+            .get("gnd_line3")
+            .expect("gnd_line3 should exist");
 
         let center1 = line1.bounds.x + line1.bounds.width / 2.0;
         let center2 = line2.bounds.x + line2.bounds.width / 2.0;
         let center3 = line3.bounds.x + line3.bounds.width / 2.0;
 
-        assert!((center1 - center2).abs() < 1.0,
-            "line1 and line2 should be centered: {} vs {}", center1, center2);
-        assert!((center1 - center3).abs() < 1.0,
-            "line1 and line3 should be centered: {} vs {}", center1, center3);
+        assert!(
+            (center1 - center2).abs() < 1.0,
+            "line1 and line2 should be centered: {} vs {}",
+            center1,
+            center2
+        );
+        assert!(
+            (center1 - center3).abs() < 1.0,
+            "line1 and line3 should be centered: {} vs {}",
+            center1,
+            center3
+        );
     }
 
     #[test]
@@ -3811,14 +3989,17 @@ mod tests {
         use crate::template::{resolve_templates, TemplateRegistry};
 
         // Use a template with multiple elements so it gets wrapped in a Group
-        let doc = parse(r#"
+        let doc = parse(
+            r#"
             template "box" {
                 rect body [width: 100, height: 50]
                 rect pin [width: 5, height: 5]
                 constrain pin.left = body.right + 2
             }
             box b1
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
 
         let mut registry = TemplateRegistry::new();
         let doc = resolve_templates(doc, &mut registry).expect("template resolution failed");
@@ -3827,7 +4008,10 @@ mod tests {
         let mut result = compute(&doc, &config).unwrap();
 
         // Get original dimensions
-        let original_body = result.elements.get("b1_body").expect("b1_body should exist");
+        let original_body = result
+            .elements
+            .get("b1_body")
+            .expect("b1_body should exist");
         let original_width = original_body.bounds.width;
         let original_height = original_body.bounds.height;
         let original_group = result.elements.get("b1").expect("b1 should exist");
@@ -3842,18 +4026,37 @@ mod tests {
             .expect("two-phase constraint resolution should succeed");
 
         // After 90° rotation, internal element bounds should stay the same
-        let body = result.elements.get("b1_body").expect("b1_body should exist");
+        let body = result
+            .elements
+            .get("b1_body")
+            .expect("b1_body should exist");
 
-        assert!((body.bounds.width - original_width).abs() < 1.0,
-            "width should remain ~{}, got {}", original_width, body.bounds.width);
-        assert!((body.bounds.height - original_height).abs() < 1.0,
-            "height should remain ~{}, got {}", original_height, body.bounds.height);
+        assert!(
+            (body.bounds.width - original_width).abs() < 1.0,
+            "width should remain ~{}, got {}",
+            original_width,
+            body.bounds.width
+        );
+        assert!(
+            (body.bounds.height - original_height).abs() < 1.0,
+            "height should remain ~{}, got {}",
+            original_height,
+            body.bounds.height
+        );
 
         // Template instance bounds should swap for global constraints
         let group = result.elements.get("b1").expect("b1 should exist");
-        assert!((group.bounds.width - original_group_height).abs() < 1.0,
-            "group width should be ~{} (original height), got {}", original_group_height, group.bounds.width);
-        assert!((group.bounds.height - original_group_width).abs() < 1.0,
-            "group height should be ~{} (original width), got {}", original_group_width, group.bounds.height);
+        assert!(
+            (group.bounds.width - original_group_height).abs() < 1.0,
+            "group width should be ~{} (original height), got {}",
+            original_group_height,
+            group.bounds.width
+        );
+        assert!(
+            (group.bounds.height - original_group_width).abs() < 1.0,
+            "group height should be ~{} (original width), got {}",
+            original_group_width,
+            group.bounds.height
+        );
     }
 }
