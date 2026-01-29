@@ -206,6 +206,219 @@ fn test_railway_topology_cross_level_alignment() {
     );
 }
 
+/// Rotated template instances with custom anchors and cross-instance constraints.
+/// Verifies that:
+/// 1. `constrain p90.left = p0.right + 120` places p90 to the right of p0
+/// 2. `constrain p90.vertical_center = p0.vertical_center` aligns centers vertically
+/// 3. Rotated instances have correct relative positioning
+#[test]
+fn test_rotated_template_cross_instance_constraints() {
+    let source = r#"
+template "box" {
+    col [gap: 4] {
+        rect head [width: 20, height: 20]
+        rect body [width: 30, height: 20]
+    }
+    constrain head.center_x = body.center_x
+    anchor top_point [position: head.top - 2, direction: up]
+    anchor bot_point [position: body.bottom + 2, direction: down]
+}
+
+box p0
+box p90 [rotation: 90]
+box p180 [rotation: 180]
+
+constrain p90.left = p0.right + 80
+constrain p180.left = p90.right + 80
+constrain p90.vertical_center = p0.vertical_center
+constrain p180.vertical_center = p0.vertical_center
+"#;
+
+    let result = compute_layout(source).expect("layout should succeed");
+
+    let get_cy = |id: &str| -> f64 {
+        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        elem.bounds.y + elem.bounds.height / 2.0
+    };
+    let get_left = |id: &str| -> f64 {
+        result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id)).bounds.x
+    };
+    let get_right = |id: &str| -> f64 {
+        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        elem.bounds.x + elem.bounds.width
+    };
+
+    // p90.left = p0.right + 80
+    let p0_right = get_right("p0");
+    let p90_left = get_left("p90");
+    assert!(
+        (p90_left - (p0_right + 80.0)).abs() < TOLERANCE,
+        "p90.left should be p0.right + 80: p90.left={}, p0.right+80={}",
+        p90_left, p0_right + 80.0,
+    );
+
+    // p180.left = p90.right + 80
+    let p90_right = get_right("p90");
+    let p180_left = get_left("p180");
+    assert!(
+        (p180_left - (p90_right + 80.0)).abs() < TOLERANCE,
+        "p180.left should be p90.right + 80: p180.left={}, p90.right+80={}",
+        p180_left, p90_right + 80.0,
+    );
+
+    // Vertical center alignment
+    let p0_cy = get_cy("p0");
+    let p90_cy = get_cy("p90");
+    let p180_cy = get_cy("p180");
+    assert!(
+        (p90_cy - p0_cy).abs() < TOLERANCE,
+        "p90.vertical_center should equal p0.vertical_center: p90={}, p0={}",
+        p90_cy, p0_cy,
+    );
+    assert!(
+        (p180_cy - p0_cy).abs() < TOLERANCE,
+        "p180.vertical_center should equal p0.vertical_center: p180={}, p0={}",
+        p180_cy, p0_cy,
+    );
+}
+
+/// Load the actual person-rotation.ail example and verify key constraints.
+/// This exercises templates with path geometry, custom anchors, rotation,
+/// and cross-instance positioning constraints.
+#[test]
+fn test_person_rotation_cross_instance_alignment() {
+    let source = std::fs::read_to_string("examples/person-rotation.ail")
+        .expect("person-rotation.ail should exist");
+
+    let result = compute_layout(&source).expect("layout should succeed");
+
+    let get_cy = |id: &str| -> f64 {
+        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        elem.bounds.y + elem.bounds.height / 2.0
+    };
+    let get_left = |id: &str| -> f64 {
+        result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id)).bounds.x
+    };
+    let get_right = |id: &str| -> f64 {
+        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        elem.bounds.x + elem.bounds.width
+    };
+
+    // Row 1: constrain p90.vertical_center = p0.vertical_center
+    let p0_cy = get_cy("p0");
+    let p90_cy = get_cy("p90");
+    let p180_cy = get_cy("p180");
+    assert!(
+        (p90_cy - p0_cy).abs() < TOLERANCE,
+        "p90.vertical_center should equal p0: p90={}, p0={}",
+        p90_cy, p0_cy,
+    );
+    assert!(
+        (p180_cy - p0_cy).abs() < TOLERANCE,
+        "p180.vertical_center should equal p0: p180={}, p0={}",
+        p180_cy, p0_cy,
+    );
+
+    // constrain p90.left = p0.right + 120
+    let p0_right = get_right("p0");
+    let p90_left = get_left("p90");
+    assert!(
+        (p90_left - (p0_right + 120.0)).abs() < TOLERANCE,
+        "p90.left should be p0.right + 120: p90.left={}, expected={}",
+        p90_left, p0_right + 120.0,
+    );
+
+    // constrain p180.left = p90.right + 120
+    let p90_right = get_right("p90");
+    let p180_left = get_left("p180");
+    assert!(
+        (p180_left - (p90_right + 120.0)).abs() < TOLERANCE,
+        "p180.left should be p90.right + 120: p180.left={}, expected={}",
+        p180_left, p90_right + 120.0,
+    );
+
+    // Row 2: constrain p45.vertical_center = p270.vertical_center
+    let p270_cy = get_cy("p270");
+    let p45_cy = get_cy("p45");
+    let p135_cy = get_cy("p135");
+    assert!(
+        (p45_cy - p270_cy).abs() < TOLERANCE,
+        "p45.vertical_center should equal p270: p45={}, p270={}",
+        p45_cy, p270_cy,
+    );
+    assert!(
+        (p135_cy - p270_cy).abs() < TOLERANCE,
+        "p135.vertical_center should equal p270: p135={}, p270={}",
+        p135_cy, p270_cy,
+    );
+
+    // Row 2 should be below Row 1: constrain p270.top = p0.bottom + 140
+    let p0_bottom = {
+        let elem = result.elements.get("p0").unwrap();
+        elem.bounds.y + elem.bounds.height
+    };
+    let p270_top = result.elements.get("p270").unwrap().bounds.y;
+    assert!(
+        (p270_top - (p0_bottom + 140.0)).abs() < TOLERANCE,
+        "p270.top should be p0.bottom + 140: p270.top={}, expected={}",
+        p270_top, p0_bottom + 140.0,
+    );
+}
+
+/// Load the feedback-loops.ail example and verify:
+/// 1. Row alignment: all boxes in human_loop at the same Y
+/// 2. Row alignment: all boxes in agent_loop at the same Y
+/// 3. Cross-row constraint: assign.left = task.left
+#[test]
+fn test_feedback_loops_row_alignment_and_constraints() {
+    let source = std::fs::read_to_string("examples/feedback-loops.ail")
+        .expect("feedback-loops.ail should exist");
+
+    let result = compute_layout(&source).expect("layout should succeed");
+
+    // Human loop row: assign, tune, spot, evaluate should share Y
+    let (_, assign_y, _, _) = get_bounds(&result, "assign");
+    let (_, tune_y, _, _) = get_bounds(&result, "tune");
+    let (_, spot_y, _, _) = get_bounds(&result, "spot");
+    let (_, evaluate_y, _, _) = get_bounds(&result, "evaluate");
+    assert!(
+        (assign_y - tune_y).abs() < TOLERANCE
+            && (tune_y - spot_y).abs() < TOLERANCE
+            && (spot_y - evaluate_y).abs() < TOLERANCE,
+        "human_loop items should share Y: assign={}, tune={}, spot={}, evaluate={}",
+        assign_y, tune_y, spot_y, evaluate_y,
+    );
+
+    // Agent loop row: task, execute, check, result should share Y
+    let (_, task_y, _, _) = get_bounds(&result, "task");
+    let (_, execute_y, _, _) = get_bounds(&result, "execute");
+    let (_, check_y, _, _) = get_bounds(&result, "check");
+    let (_, result_y, _, _) = get_bounds(&result, "result");
+    assert!(
+        (task_y - execute_y).abs() < TOLERANCE
+            && (execute_y - check_y).abs() < TOLERANCE
+            && (check_y - result_y).abs() < TOLERANCE,
+        "agent_loop items should share Y: task={}, execute={}, check={}, result={}",
+        task_y, execute_y, check_y, result_y,
+    );
+
+    // Cross-row constraint: constrain assign.left = task.left
+    let (assign_x, _, _, _) = get_bounds(&result, "assign");
+    let (task_x, _, _, _) = get_bounds(&result, "task");
+    assert!(
+        (assign_x - task_x).abs() < TOLERANCE,
+        "assign.left should equal task.left: assign={}, task={}",
+        assign_x, task_x,
+    );
+
+    // Agent loop should be below human loop
+    assert!(
+        task_y > assign_y + 40.0,
+        "agent_loop should be below human_loop: task.y={}, assign.y={}",
+        task_y, assign_y,
+    );
+}
+
 /// Constraint-based layout: explicit positioning should be exactly satisfied.
 #[test]
 fn test_explicit_position_constraints_satisfied() {
