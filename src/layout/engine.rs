@@ -3084,8 +3084,12 @@ fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&Ha
         recompute_element_bounds_recursive(child, skip);
     }
 
-    // If this element has children, recompute its bounds from children
-    if !elem.children.is_empty()
+    // Only recompute bounds for Group containers (not Row/Col/Grid/Stack whose bounds
+    // were set by auto-layout with proper gaps and padding)
+    let is_group = matches!(elem.element_type, ElementType::Group);
+
+    if is_group
+        && !elem.children.is_empty()
         && !skip
             .and_then(|set| elem.id.as_ref().map(|id| set.contains(&id.0)))
             .unwrap_or(false)

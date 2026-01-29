@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -59 190 199">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 211 210">
   <style>
     :root {
-    --text-dark: #1a1a1a;
-    --secondary-2: #fff3e0;
-    --background-dark: #333333;
-    --accent-dark: #1565c0;
+    --text-light: #ffffff;
+    --foreground-1: #333333;
+    --background-2: #f5f5f5;
     --text-3: #999999;
-    --background-3: #eeeeee;
-    --background-1: #ffffff;
-    --foreground-light: #e0e0e0;
-    --foreground-3: #999999;
-    --foreground-2: #666666;
-    --secondary-light: #fff3e0;
     --secondary-dark: #e65100;
+    --foreground-3: #999999;
+    --text-2: #666666;
+    --accent-light: #e3f2fd;
+    --accent-1: #2196f3;
+    --secondary-1: #ff9800;
+    --text-dark: #1a1a1a;
+    --text-1: #333333;
     --foreground-dark: #1a1a1a;
+    --foreground-2: #666666;
+    --background-light: #ffffff;
+    --background-dark: #333333;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
     --status-success: #4caf50;
+    --foreground-light: #e0e0e0;
+    --background-1: #ffffff;
+    --background-3: #eeeeee;
+    --accent-2: #e3f2fd;
     --status-warning: #ff9800;
     --status-error: #f44336;
-    --accent-light: #e3f2fd;
-    --text-light: #ffffff;
-    --background-2: #f5f5f5;
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --background-light: #ffffff;
-    --text-1: #333333;
-    --secondary-1: #ff9800;
-    --secondary-3: #ffe0b2;
-    --foreground-1: #333333;
-    --accent-3: #bbdefb;
-    --text-2: #666666;
   }
 
   </style>
@@ -44,25 +44,25 @@
       <circle id="entry_south" class="ai-shape ai-circle" cx="15" cy="55" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
     </g>
     <g id="junction_center" class="ai-container">
-      <circle id="j1" class="ai-shape ai-circle" cx="45" cy="15" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="45" y="15" text-anchor="middle" dominant-baseline="middle">Switch 1</text>
+      <circle id="j1" class="ai-shape ai-circle" cx="55" cy="15" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="55" y="15" text-anchor="middle" dominant-baseline="middle">Switch 1</text>
       <circle id="j2" class="ai-shape ai-circle" cx="39" cy="45" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
       <text class="ai-label" x="39" y="45" text-anchor="middle" dominant-baseline="middle">Switch 2</text>
-      <circle id="j3" class="ai-shape ai-circle" cx="39" cy="75" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="75" text-anchor="middle" dominant-baseline="middle">Switch 3</text>
+      <circle id="j3" class="ai-shape ai-circle" cx="55" cy="75" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="55" y="75" text-anchor="middle" dominant-baseline="middle">Switch 3</text>
     </g>
     <g id="exit" class="ai-container">
-      <circle id="exit_t1" class="ai-shape ai-circle" cx="75" cy="15" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
-      <circle id="exit_t2" class="ai-shape ai-circle" cx="75" cy="45" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
-      <circle id="exit_t3" class="ai-shape ai-circle" cx="75" cy="75" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
+      <circle id="exit_t1" class="ai-shape ai-circle" cx="95" cy="15" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
+      <circle id="exit_t2" class="ai-shape ai-circle" cx="95" cy="45" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
+      <circle id="exit_t3" class="ai-shape ai-circle" cx="95" cy="75" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
     </g>
   </g>
-  <path class="ai-connection" d="M20 15 L29.2 15" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M20 55 L19 55 L19 75 L23.2 75" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M50 15 L62.8 15" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M48.53553390593274 18.535533905932738 L66.37329726952412 36.37329726952412" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M44 45 L62.8 45" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M42.84110639798688 71.7990780016776 L65.62770038891202 52.810249675906654" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M44 75 L62.8 75" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M44 45 L55 45 L55 15 L66.4 15" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M20 15 L39.2 15" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M20 55 L35 55 L35 75 L39.2 75" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M60 15 L82.8 15" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M59 18 L85.24 37.68" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M44 45 L82.8 45" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M59 72 L85.24 52.32" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M60 75 L82.8 75" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M44 45 L75 45 L75 15 L86.4 15" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ai-arrow)"/>
 </svg>
