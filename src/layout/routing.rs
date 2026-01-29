@@ -613,56 +613,52 @@ pub fn route_connection_with_anchors(
                 start.y + from_dir.y * control_distance,
             );
 
-            // ctrl2: positioned on the START side of via along the overall connection direction
-            // For G1 continuity, ctrl2 and ctrl3 should be collinear through via
-            // The tangent at via should point from start toward end (the overall flow direction)
-            let dir_x = end.x - start.x;
-            let dir_y = end.y - start.y;
-            let dir_len = (dir_x * dir_x + dir_y * dir_y).sqrt();
-            let (norm_x, norm_y) = if dir_len > 0.001 {
-                (dir_x / dir_len, dir_y / dir_len)
-            } else {
-                (1.0, 0.0)
-            };
-            // Position ctrl2 on the start side of via, along the tangent direction
+            // Helper: compute ctrl2 for a via point, aimed toward its next target.
+            // ctrl2 sits on the incoming side of via, along the via→next direction.
+            // This prevents loops when the via point is far from the straight line.
             let tangent_dist = control_distance * 0.5;
-            let ctrl2 = Point::new(via.x - norm_x * tangent_dist, via.y - norm_y * tangent_dist);
+            let ctrl2_for_via = |via: Point, next: Point| -> Point {
+                let dx = next.x - via.x;
+                let dy = next.y - via.y;
+                let len = (dx * dx + dy * dy).sqrt();
+                if len > 0.001 {
+                    Point::new(
+                        via.x - dx / len * tangent_dist,
+                        via.y - dy / len * tangent_dist,
+                    )
+                } else {
+                    via
+                }
+            };
 
             // Segment 2: via -> end (using S command for smooth continuation)
-            // ctrl3: mirror of ctrl2 relative to via (for G1 continuity)
-            // The S command auto-computes ctrl3 as reflection of ctrl2, so we just need final_ctrl
             // final_ctrl: extend from end in to_direction (perpendicular entry)
             let final_ctrl = Point::new(
                 end.x + to_dir.x * control_distance,
                 end.y + to_dir.y * control_distance,
             );
 
-            // For multiple via points, chain them
+            // For a single via point: M start C ctrl1 ctrl2 via S final_ctrl end
             if via_points.len() == 1 {
+                // Next target after this via is end
+                let ctrl2 = ctrl2_for_via(via, end);
                 return vec![start, ctrl1, ctrl2, via, final_ctrl, end];
             }
 
             // Multiple via points: chain cubic segments with smooth continuity
+            // First segment: start -> via[0], ctrl2 aims toward via[1]
+            let ctrl2 = ctrl2_for_via(via_points[0], via_points[1]);
             let mut path = vec![start, ctrl1, ctrl2, via_points[0]];
 
             for i in 1..via_points.len() {
-                let prev_via = via_points[i - 1];
                 let curr_via = via_points[i];
-                // Control point along the tangent from prev_via toward curr_via
-                let seg_dx = curr_via.x - prev_via.x;
-                let seg_dy = curr_via.y - prev_via.y;
-                let seg_len = (seg_dx * seg_dx + seg_dy * seg_dy).sqrt();
-                let ctrl = if seg_len > 0.001 {
-                    Point::new(
-                        curr_via.x - seg_dx / seg_len * tangent_dist,
-                        curr_via.y - seg_dy / seg_len * tangent_dist,
-                    )
+                // Next target is either the next via or end
+                let next = if i + 1 < via_points.len() {
+                    via_points[i + 1]
                 } else {
-                    Point::new(
-                        (prev_via.x + curr_via.x) / 2.0,
-                        (prev_via.y + curr_via.y) / 2.0,
-                    )
+                    end
                 };
+                let ctrl = ctrl2_for_via(curr_via, next);
                 path.push(ctrl);
                 path.push(curr_via);
             }
