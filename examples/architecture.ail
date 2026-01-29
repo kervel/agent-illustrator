@@ -1,0 +1,180 @@
+/* INTENT
+   Communicate the fullstack-sota system architecture.
+   Audience: developers joining the project.
+   They should understand: what services exist, how they connect,
+   and the major technology choices (Angular, Django, PostgreSQL, Redis, etc.)
+*/
+
+// === TEMPLATES ===
+
+template "svc" (name: "Service") {
+    rect body [width: 140, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: name]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+template "store" (name: "DB") {
+    ellipse body [width: 130, height: 55, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: name]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+template "ext" (name: "External") {
+    rect body [width: 130, height: 44, fill: foreground-3, stroke: foreground-1, stroke_width: 1, label: name]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+// === ELEMENTS ===
+
+group diagram {
+    // Background zones (drawn first = behind)
+    rect app_bg [width: 500, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
+    text "Application Layer" app_label [font_size: 12, fill: accent-dark]
+
+    rect async_bg [width: 380, height: 100, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
+    text "Async / Real-time" async_label [font_size: 12, fill: accent-dark]
+
+    rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15]
+    text "Data Layer" data_label [font_size: 12, fill: secondary-dark]
+
+    // Client
+    rect browser [width: 160, height: 46, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "Browser"]
+
+    // Gateway
+    svc nginx [name: "Nginx Gateway"]
+
+    // Application layer
+    svc angular [name: "Angular 21"]
+    svc django [name: "Django 6 API"]
+
+    // Async layer
+    svc celery [name: "Celery Workers"]
+    svc channels [name: "Django Channels"]
+
+    // Data layer
+    store postgres [name: "PostgreSQL"]
+    store redis [name: "Redis"]
+    store minio [name: "MinIO / S3"]
+
+    // External / Auth
+    ext keycloak [name: "OAuth2 / OIDC"]
+    ext sentry [name: "Sentry"]
+
+    // PostGIS sub-label
+    text "+ PostGIS" postgis_label [font_size: 10, fill: secondary-dark]
+
+    // Via points for routing Django data connections around async layer
+    circle via_pg [size: 1, opacity: 0]
+    circle via_minio [size: 1, opacity: 0]
+}
+
+// === LAYOUT VIA CONSTRAINTS ===
+
+// Title
+text "fullstack-sota Architecture" diagram_title [font_size: 18, fill: foreground-1]
+constrain diagram_title.center_x = 310
+constrain diagram_title.center_y = 10
+
+// Browser at top
+constrain browser.center_x = 310
+constrain browser.center_y = 50
+
+// Nginx below browser
+constrain nginx.center_x = 310
+constrain nginx.center_y = 130
+
+// App layer background
+constrain app_bg.center_x = 310
+constrain app_bg.center_y = 235
+constrain app_label.center_x = 310
+constrain app_label.top = app_bg.top + 6
+
+// Angular and Django side by side
+constrain angular.center_x = 180
+constrain angular.center_y = 250
+constrain django.center_x = 440
+constrain django.center_y = 250
+
+// Async layer background — narrower, centered between celery and channels
+constrain async_bg.center_x = 310
+constrain async_bg.center_y = 370
+constrain async_label.center_x = 310
+constrain async_label.top = async_bg.top + 6
+
+// Celery and Channels
+constrain celery.center_x = 210
+constrain celery.center_y = 385
+constrain channels.center_x = 410
+constrain channels.center_y = 385
+
+// Data layer background
+constrain data_bg.center_x = 310
+constrain data_bg.center_y = 520
+constrain data_label.left = data_bg.left + 10
+constrain data_label.top = data_bg.top + 6
+
+// Data stores
+constrain postgres.center_x = 120
+constrain postgres.center_y = 535
+constrain redis.center_x = 310
+constrain redis.center_y = 535
+constrain minio.center_x = 510
+constrain minio.center_y = 535
+
+// PostGIS label below PostgreSQL
+constrain postgis_label.center_x = 120
+constrain postgis_label.top = 568
+
+// External services on the right
+constrain keycloak.center_x = 680
+constrain keycloak.center_y = 130
+constrain sentry.center_x = 680
+constrain sentry.center_y = 250
+
+// Via points for routing Django → data connections around async layer
+constrain via_pg.center_x = 200
+constrain via_pg.center_y = 420
+constrain via_minio.center_x = 530
+constrain via_minio.center_y = 420
+
+// === CONNECTIONS ===
+
+// Browser to Nginx
+browser.bottom -> nginx.top_conn [label: "HTTP / WS"]
+
+// Nginx fans out to apps
+nginx.bottom_conn -> angular.top_conn [label: "/web/"]
+nginx.bottom_conn -> django.top_conn [label: "/fs/"]
+
+// Angular talks to Django via API
+angular.right_conn -> django.left_conn [label: "REST API"]
+
+// Django dispatches to async workers
+django.bottom_conn -> celery.top_conn [label: "tasks"]
+django.bottom_conn -> channels.top_conn [label: "WS"]
+
+// Celery to data stores
+celery.bottom_conn -> postgres.top_conn
+celery.bottom_conn -> redis.top_conn [label: "broker"]
+
+// Channels to Redis
+channels.bottom_conn -> redis.top_conn [label: "channel layer"]
+
+// Django → PostgreSQL routed around left side of async layer
+django.left_conn -> postgres.top_conn [routing: curved, via: via_pg, label: "ORM"]
+
+// Django → MinIO routed around right side of async layer
+django.right_conn -> minio.top_conn [routing: curved, via: via_minio, label: "files"]
+
+// Auth
+nginx.right_conn -> keycloak.left_conn [label: "OIDC"]
+
+// External
+django.right_conn -> sentry.left_conn [label: "errors"]

@@ -1,18 +1,6 @@
 # Agent Illustrator
 
 A declarative illustration language for AI agents. Describe *what* to draw, not *how* to render it.
-This was built as an experiment to see how far i could get using specswarm. I did:
-
-* No manual coding, no code reviews, only input via specswarm.
-* Use specs to build all features
-* No input on what crates could be used
-
-Results:
-
-* It works. Claude could sometimes spend more than 1 hour on a spec without any user intervention. This is a big difference compared to just using an agent.
-* Claude created 228 tests, but they don't catch real regressions (which were frequent), so it didn't actually create useful tests.
-* The grammar / parser it wrote was very naive (it has a lot of duplication), yet seems to be ergonomic.
-* The concept seems to have some merit (easier to create illustrations using agents)
 
 ## The Problem
 
@@ -22,6 +10,19 @@ AI agents can generate two kinds of visual output:
 2. **Low-level graphics** (SVG, TikZ) — Can draw anything, but LLMs fail with coordinates and spatial reasoning
 
 Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-friendly**.
+
+## Examples
+
+| | |
+|---|---|
+| **Software Architecture** | **Feedback Loops** |
+| [![Architecture](examples/architecture.svg)](examples/architecture.ail) | [![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail) |
+| Constraint-based layout with templates, curved routing via waypoints, and background zones. Agent-generated from a codebase scan. | Curved connections, stacked layouts, and semantic coloring for a human-agent interaction flow. |
+| **Railway Topology** | |
+| [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | |
+| Three-level abstraction (network / line / station) using nested row/col layouts and connection routing. | |
+
+Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
 
 ## Installation
 
@@ -56,61 +57,50 @@ cargo install --git https://github.com/kervel/agent-illustrator
 ## Quick Start
 
 ```bash
-# Show examples
-agent-illustrator --examples
+# Render a file
+agent-illustrator diagram.ail > diagram.svg
 
 # Show grammar reference
 agent-illustrator --grammar
 
-# Render a file
-agent-illustrator diagram.ail > diagram.svg
+# Show annotated examples
+agent-illustrator --examples
 
-# Use a custom stylesheet
-agent-illustrator diagram.ail --stylesheet kapernikov.toml > diagram.svg
+# Use with an AI agent (outputs a skill prompt)
+agent-illustrator --skill
 ```
-
-## Example
-
-```
-col main {
-    text "System Architecture" title [font_size: 20]
-    row components {
-        col frontend {
-            rect ui [label: "UI"]
-            rect api [label: "API"]
-        }
-        col backend {
-            rect service [label: "Service"]
-            rect db [label: "Database", fill: accent-dark]
-        }
-    }
-}
-api -> service
-service -> db
-```
-
-This produces an SVG with:
-- Nested layouts (col contains row contains cols)
-- Automatic positioning and spacing
-- Connections that cross layout boundaries
-- Styleable colors via CSS custom properties
 
 ## Features
 
 - **Semantic layouts**: `row`, `col`, `stack`, `grid` — describe structure, not coordinates
-- **Smart connections**: `a -> b` routes automatically, supports curved paths with `via:` points
-- **Anchors**: `a.top -> b.bottom` for precise connection points
+- **Constraint positioning**: `constrain a.left = b.right + 20` for precise control
+- **Smart connections**: `a -> b` routes automatically, supports curved paths with `via:` waypoints
+- **Templates**: Reusable components with parameters and internal anchors
 - **Styleable colors**: `accent-dark`, `secondary-light` — swap palettes with `--stylesheet`
-- **Constraints**: `constrain a.left = b.right + 20` for advanced positioning
-- **Templates**: Reusable components with parameters
 
-## Documentation
+## AI Agent Integration
+
+Agent Illustrator ships with built-in LLM support:
 
 ```bash
-agent-illustrator --grammar    # Language reference
-agent-illustrator --examples   # Annotated examples
-agent-illustrator --skill      # LLM integration prompt
+# Get a skill prompt for your agent
+agent-illustrator --skill
+
+# Get the full grammar reference
+agent-illustrator --grammar
+
+# Get annotated examples
+agent-illustrator --examples
 ```
+
+Pass `--skill`, `--grammar`, and `--examples` as context to your AI agent. The skill prompt includes a 6-phase design methodology that guides the agent from intent to implementation.
+
+## About
+
+Built as an experiment in [specswarm](https://github.com/kervel/specswarm)-driven development:
+- No manual coding or code reviews — only specification-driven agent work
+- Claude autonomously implemented features from specs, sometimes working over an hour without intervention
+- The grammar/parser was agent-designed and turns out to be ergonomic despite being naive
 
 ## License
 

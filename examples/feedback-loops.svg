@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -87.75 660 471.75">
+  <style>
+    :root {
+    --background-light: #ffffff;
+    --background-dark: #333333;
+    --background-1: #ffffff;
+    --text-3: #999999;
+    --foreground-2: #666666;
+    --text-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --accent-2: #e3f2fd;
+    --accent-light: #e3f2fd;
+    --status-success: #4caf50;
+    --text-1: #333333;
+    --background-3: #eeeeee;
+    --foreground-3: #999999;
+    --accent-3: #bbdefb;
+    --foreground-light: #e0e0e0;
+    --accent-dark: #1565c0;
+    --text-2: #666666;
+    --foreground-1: #333333;
+    --foreground-dark: #1a1a1a;
+    --text-light: #ffffff;
+    --accent-1: #2196f3;
+    --secondary-1: #ff9800;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --secondary-2: #fff3e0;
+    --secondary-light: #fff3e0;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <circle id="human_via" class="ai-shape ai-circle" cx="285" cy="0.5" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="agent_via" class="ai-shape ai-circle" cx="285" cy="299" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <g id="diagram" class="ai-container">
+    <g id="human_section" class="ai-container">
+      <g id="human_header" class="ai-container">
+        <text id="human_title" class="ai-shape ai-text" x="15" y="32" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--accent-dark)">HUMAN</text>
+        <text id="human_sub" class="ai-shape ai-text" x="65" y="30.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">— slow · persistent</text>
+      </g>
+      <g id="human_loop" class="ai-container">
+        <rect id="assign" class="ai-shape ai-rect" x="15" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="75" y="82" text-anchor="middle">Assign Task</text>
+        <rect id="tune" class="ai-shape ai-rect" x="155" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="215" y="82" text-anchor="middle">Tune Feedback</text>
+        <rect id="spot" class="ai-shape ai-rect" x="295" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="355" y="82" text-anchor="middle">Spot Patterns</text>
+        <rect id="evaluate" class="ai-shape ai-rect" x="435" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="495" y="82" text-anchor="middle">Evaluate</text>
+      </g>
+    </g>
+    <g id="agent_section" class="ai-container">
+      <g id="agent_header" class="ai-container">
+        <text id="agent_title" class="ai-shape ai-text" x="15" y="174" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--secondary-dark)">AGENT</text>
+        <text id="agent_sub" class="ai-shape ai-text" x="65" y="172.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">— fast · ephemeral</text>
+      </g>
+      <g id="agent_loop" class="ai-container">
+        <rect id="task" class="ai-shape ai-rect" x="15" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="75" y="224" text-anchor="middle">Task</text>
+        <rect id="execute" class="ai-shape ai-rect" x="155" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="215" y="224" text-anchor="middle">Execute</text>
+        <rect id="check" class="ai-shape ai-rect" x="295" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="355" y="224" text-anchor="middle">Feedback</text>
+        <rect id="result" class="ai-shape ai-rect" x="435" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="495" y="224" text-anchor="middle">Result</text>
+      </g>
+    </g>
+  </g>
+  <text class="ai-label" x="285" y="168" text-anchor="middle">tunes</text>
+  <path class="ai-connection" d="M435 82 L425.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M295 82 L285.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M155 82 L145.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M75 57 C74.99999999999999 -27.75 242.625 0.5 285 0.5 S495 -27.75 495 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M135 224 L144.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M275 224 L284.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M415 224 L424.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M495 249 C495 324 322.5 299 285 299 S75 324 75 259.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M75 107 L75 195.4" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M495 199 L495 110.6" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M215 107 C215 174.00925309239017 355 131.99074690760983 355 191.8" fill="none" stroke="var(--accent-1)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>
