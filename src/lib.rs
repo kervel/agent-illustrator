@@ -577,7 +577,7 @@ mod tests {
 
     #[test]
     fn test_render_curved_connection_multi_via() {
-        // Multi-via for S-curves
+        // Multi-via with explicit C commands for each segment
         let svg = render(
             r#"
             rect a [x: 0, y: 0]
@@ -590,14 +590,10 @@ mod tests {
         .unwrap();
         assert!(svg.contains("ai-connection"));
         assert!(svg.contains("<path"));
-        // Multi-via should produce C followed by S commands for smooth chaining
+        // Multi-via should produce multiple C commands (explicit cubic Beziers)
         assert!(
             svg.contains(" C") || svg.contains("C "),
-            "Multi-via should start with C command"
-        );
-        assert!(
-            svg.contains(" S") || svg.contains("S "),
-            "Multi-via should chain with S commands"
+            "Multi-via should use C commands"
         );
     }
 }

@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -87.75 660 471.75">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -78 660 462">
   <style>
     :root {
-    --background-dark: #333333;
-    --foreground-dark: #1a1a1a;
-    --accent-dark: #1565c0;
-    --secondary-2: #fff3e0;
-    --background-2: #f5f5f5;
-    --accent-3: #bbdefb;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --status-error: #f44336;
-    --foreground-1: #333333;
-    --text-light: #ffffff;
-    --text-2: #666666;
+    --foreground-light: #e0e0e0;
     --text-1: #333333;
-    --background-1: #ffffff;
+    --background-light: #ffffff;
+    --text-3: #999999;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --accent-light: #e3f2fd;
+    --status-warning: #ff9800;
+    --background-dark: #333333;
+    --accent-2: #e3f2fd;
+    --secondary-dark: #e65100;
+    --status-error: #f44336;
+    --text-2: #666666;
+    --accent-1: #2196f3;
+    --status-success: #4caf50;
+    --foreground-3: #999999;
+    --accent-3: #bbdefb;
     --secondary-1: #ff9800;
     --foreground-2: #666666;
-    --accent-2: #e3f2fd;
-    --secondary-light: #fff3e0;
-    --accent-1: #2196f3;
-    --accent-light: #e3f2fd;
-    --text-3: #999999;
-    --foreground-3: #999999;
-    --text-dark: #1a1a1a;
-    --background-light: #ffffff;
-    --foreground-light: #e0e0e0;
+    --text-light: #ffffff;
+    --foreground-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
     --background-3: #eeeeee;
+    --text-dark: #1a1a1a;
+    --foreground-1: #333333;
   }
 
   </style>
@@ -38,7 +38,7 @@
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
   </defs>
-  <circle id="human_via" class="ai-shape ai-circle" cx="285" cy="0.5" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="human_via" class="ai-shape ai-circle" cx="285" cy="7" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <circle id="agent_via" class="ai-shape ai-circle" cx="285" cy="299" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <g id="diagram" class="ai-container">
     <g id="human_section" class="ai-container">
@@ -78,7 +78,7 @@
   <path class="ai-connection" d="M435 82 L425.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M295 82 L285.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M155 82 L145.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M75 57 C74.99999999999999 -27.75 242.625 0.5 285 0.5 S495 -27.75 495 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M75 57 C74.99999999999999 -18 247.5 7 285 7 S495 -18 495 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M135 224 L144.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M275 224 L284.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M415 224 L424.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>

@@ -401,13 +401,20 @@ impl SvgBuilder {
                     path[3].x,
                     path[3].y
                 );
-                // Additional segments use S (smooth cubic continuation)
-                // Each additional segment needs 2 points: control2 and endpoint
+                // Additional segments use C (cubic Bezier with explicit control points)
+                // Each additional segment needs 3 points: ctrl1, ctrl2, endpoint
                 let remaining = &path[4..];
-                for chunk in remaining.chunks(2) {
-                    if chunk.len() == 2 {
+                for chunk in remaining.chunks(3) {
+                    if chunk.len() == 3 {
                         d.push_str(&format!(
-                            " S{} {} {} {}",
+                            " C{} {} {} {} {} {}",
+                            chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y,
+                            chunk[2].x, chunk[2].y
+                        ));
+                    } else if chunk.len() == 2 {
+                        // Fallback: 2 points as quadratic Bezier
+                        d.push_str(&format!(
+                            " Q{} {} {} {}",
                             chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y
                         ));
                     } else if chunk.len() == 1 {
