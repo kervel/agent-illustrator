@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-91 -52 740 435">
   <style>
     :root {
-    --text-1: #333333;
+    --secondary-2: #fff3e0;
+    --foreground-light: #e0e0e0;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --secondary-dark: #e65100;
     --foreground-2: #666666;
+    --foreground-3: #999999;
+    --accent-dark: #1565c0;
+    --secondary-3: #ffe0b2;
+    --accent-1: #2196f3;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
     --accent-2: #e3f2fd;
+    --background-3: #eeeeee;
+    --text-3: #999999;
+    --text-light: #ffffff;
+    --background-dark: #333333;
+    --text-2: #666666;
     --accent-3: #bbdefb;
     --secondary-1: #ff9800;
-    --text-dark: #1a1a1a;
-    --background-light: #ffffff;
-    --secondary-dark: #e65100;
-    --foreground-dark: #1a1a1a;
-    --status-success: #4caf50;
-    --accent-1: #2196f3;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
     --background-2: #f5f5f5;
-    --text-light: #ffffff;
-    --background-1: #ffffff;
-    --foreground-1: #333333;
-    --text-2: #666666;
     --accent-light: #e3f2fd;
-    --foreground-light: #e0e0e0;
-    --text-3: #999999;
-    --accent-dark: #1565c0;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
     --secondary-light: #fff3e0;
-    --status-warning: #ff9800;
-    --foreground-3: #999999;
-    --status-error: #f44336;
+    --text-1: #333333;
+    --foreground-1: #333333;
+    --background-light: #ffffff;
+    --text-dark: #1a1a1a;
   }
 
   </style>
@@ -125,9 +125,9 @@
   </g>
   <g id="status_led" class="ai-container">
     <path id="status_led_triangle" class="ai-shape ai-path" d="M15.00 249.00 L35.00 249.00 L25.00 267.00 Z"  fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="13" y="270" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="24" y="234" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="24" y="272" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="13.000000000000004" y="270" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="24.000000000000004" y="234" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="24.000000000000004" y="272" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <path id="status_led_arrow1" class="ai-shape ai-path" d="M39.00 259.00 L49.00 251.00"  fill="none" stroke="green" stroke-width="1.5"/>
     <path id="status_led_head1" class="ai-shape ai-path" d="M49.00 251.00 L45.00 251.00 L49.00 255.00 Z"  fill="green" stroke="none" stroke-width="1.5"/>
     <path id="status_led_arrow2" class="ai-shape ai-path" d="M39.00 269.00 L49.00 261.00"  fill="none" stroke="green" stroke-width="1.5"/>
@@ -168,6 +168,6 @@
   <path class="ai-connection" d="M59 94 L70 94" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M130 94 L158.25 94 L158.25 254 L186.5 254" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M30 28 L30 86 L24.999999999999996 86 L24.999999999999996 144" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M25.000000000000004 204 L25 234" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M25 287 L25.000000000000004 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M25.000000000000004 204 L25.000000000000004 234" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M25.000000000000004 287 L25.000000000000004 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
 </svg>

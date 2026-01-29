@@ -79,8 +79,22 @@ pub fn classify_constraint(
 ) -> ConstraintScope {
     use std::collections::HashSet;
 
-    // First, check if the constraint source has template_instance set
     let source = constraint.source();
+
+    // Layout-generated constraints (row/col alignment, spacing) are always internal.
+    // They should be solved in PASS 1 so that explicit user constraints in PASS 2
+    // can override them when they conflict.
+    if source.origin == super::solver::ConstraintOrigin::LayoutContainer {
+        // Use the first element ID as the group key (all elements are siblings)
+        let element_ids = constraint.element_ids();
+        let group_key = element_ids
+            .first()
+            .map(|id| format!("__layout_{}", id))
+            .unwrap_or_else(|| "__layout".to_string());
+        return ConstraintScope::Local(group_key);
+    }
+
+    // Check if the constraint source has template_instance set
     if let Some(instance) = &source.template_instance {
         return ConstraintScope::Local(instance.clone());
     }
@@ -3711,16 +3725,30 @@ mod tests {
         element_map.insert("alice_head".to_string(), "alice".to_string());
         element_map.insert("alice_body".to_string(), "alice".to_string());
 
-        // Constraint between two elements in the same template
+        // Constraint between two elements in the same template (user-defined)
         let constraint = LayoutConstraint::Equal {
+            left: LayoutVariable::y("alice_body"),
+            right: LayoutVariable::y("alice_head"),
+            offset: 25.0,
+            source: ConstraintSource::user(0..10, "body below head"),
+        };
+
+        let scope = classify_constraint(&constraint, &element_map);
+        assert_eq!(scope, ConstraintScope::Local("alice".to_string()));
+
+        // LayoutContainer-origin constraints get their own local key
+        let layout_constraint = LayoutConstraint::Equal {
             left: LayoutVariable::y("alice_body"),
             right: LayoutVariable::y("alice_head"),
             offset: 25.0,
             source: ConstraintSource::layout(0..10, "body below head"),
         };
 
-        let scope = classify_constraint(&constraint, &element_map);
-        assert_eq!(scope, ConstraintScope::Local("alice".to_string()));
+        let scope = classify_constraint(&layout_constraint, &element_map);
+        assert_eq!(
+            scope,
+            ConstraintScope::Local("__layout_alice_body".to_string())
+        );
     }
 
     #[test]
@@ -3770,14 +3798,14 @@ mod tests {
         element_map.insert("bob_head".to_string(), "bob".to_string());
 
         let constraints = vec![
-            // Local to alice
+            // LayoutContainer origin → local with __layout_ prefix
             LayoutConstraint::Equal {
                 left: LayoutVariable::y("alice_body"),
                 right: LayoutVariable::y("alice_head"),
                 offset: 25.0,
                 source: ConstraintSource::layout(0..10, "alice internal"),
             },
-            // Global (cross-template)
+            // Global (cross-template, user-defined)
             LayoutConstraint::Equal {
                 left: LayoutVariable::x("bob_head"),
                 right: LayoutVariable::x("alice_head"),
@@ -3794,9 +3822,9 @@ mod tests {
 
         let (local, global) = partition_constraints(&constraints, &element_map);
 
-        // Should have alice's constraint
-        assert!(local.contains_key("alice"));
-        assert_eq!(local.get("alice").unwrap().len(), 1);
+        // LayoutContainer constraint gets __layout_ prefixed key
+        assert!(local.contains_key("__layout_alice_body"));
+        assert_eq!(local.get("__layout_alice_body").unwrap().len(), 1);
 
         // Should have bob's constraint
         assert!(local.contains_key("bob"));
