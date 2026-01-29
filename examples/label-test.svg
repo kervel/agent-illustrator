@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -50 428 406">
   <style>
     :root {
-    --background-3: #eeeeee;
-    --text-dark: #1a1a1a;
-    --foreground-2: #666666;
-    --secondary-2: #fff3e0;
-    --secondary-light: #fff3e0;
-    --secondary-dark: #e65100;
-    --background-dark: #333333;
-    --status-success: #4caf50;
-    --status-error: #f44336;
-    --foreground-light: #e0e0e0;
-    --text-3: #999999;
-    --accent-light: #e3f2fd;
-    --secondary-3: #ffe0b2;
-    --background-light: #ffffff;
-    --status-warning: #ff9800;
-    --foreground-dark: #1a1a1a;
     --accent-3: #bbdefb;
-    --secondary-1: #ff9800;
-    --background-1: #ffffff;
-    --accent-2: #e3f2fd;
-    --foreground-3: #999999;
-    --accent-dark: #1565c0;
-    --text-1: #333333;
-    --text-light: #ffffff;
     --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --secondary-dark: #e65100;
+    --foreground-2: #666666;
+    --text-1: #333333;
+    --text-dark: #1a1a1a;
+    --background-3: #eeeeee;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --secondary-1: #ff9800;
+    --foreground-light: #e0e0e0;
     --accent-1: #2196f3;
-    --text-2: #666666;
+    --background-light: #ffffff;
+    --text-light: #ffffff;
+    --accent-light: #e3f2fd;
     --foreground-1: #333333;
+    --background-1: #ffffff;
+    --secondary-2: #fff3e0;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --text-3: #999999;
+    --text-2: #666666;
+    --accent-2: #e3f2fd;
+    --accent-dark: #1565c0;
   }
 
   </style>
@@ -47,8 +47,8 @@
   </g>
   <g id="another" class="ai-container">
     <g id="items" class="ai-container">
-      <circle id="c1" class="ai-shape ai-circle" cx="35" cy="89" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <circle id="c2" class="ai-shape ai-circle" cx="35" cy="159" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <circle id="c1" class="ai-shape ai-circle" cx="35" cy="73" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <circle id="c2" class="ai-shape ai-circle" cx="35" cy="143" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
     </g>
     <text id="mylbl" class="ai-shape ai-text" x="-110.8" y="116" text-anchor="start" dominant-baseline="middle" font-size="14">Inline Label</text>
   </g>
