@@ -13,14 +13,17 @@ Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-fr
 
 ## Examples
 
-| | |
-|---|---|
-| **Software Architecture** | **Feedback Loops** |
-| [![Architecture](examples/architecture.svg)](examples/architecture.ail) | [![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail) |
-| Constraint-based layout with templates, curved routing via waypoints, and background zones. Agent-generated from a codebase scan. | Curved connections, stacked layouts, and semantic coloring for a human-agent interaction flow. |
-| **Railway Topology** | |
-| [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | |
-| Three-level abstraction (network / line / station) using nested row/col layouts and connection routing. | |
+**Software Architecture** — Agent-generated from a codebase scan. Constraint-based layout with templates, curved routing via waypoints, and background zones.
+
+[![Architecture](examples/architecture.svg)](examples/architecture.ail)
+
+**Feedback Loops** — Curved connections, stacked layouts, and semantic coloring for a human-agent interaction flow.
+
+[![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail)
+
+**Railway Topology** — Three-level abstraction (network / line / station) using nested row/col layouts and connection routing.
+
+[![Railway](examples/railway-topology.svg)](examples/railway-topology.ail)
 
 Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
 
