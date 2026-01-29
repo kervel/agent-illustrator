@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -40 529 427">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-181.60000000000002 -40 597 404">
   <style>
     :root {
+    --status-success: #4caf50;
+    --background-light: #ffffff;
+    --background-1: #ffffff;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --background-2: #f5f5f5;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
+    --foreground-dark: #1a1a1a;
+    --background-dark: #333333;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --status-error: #f44336;
+    --text-2: #666666;
+    --accent-2: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --text-1: #333333;
+    --accent-1: #2196f3;
+    --secondary-2: #fff3e0;
+    --text-3: #999999;
     --secondary-light: #fff3e0;
     --status-warning: #ff9800;
-    --background-dark: #333333;
-    --accent-1: #2196f3;
-    --text-1: #333333;
-    --text-3: #999999;
-    --foreground-2: #666666;
-    --status-error: #f44336;
     --foreground-3: #999999;
-    --secondary-1: #ff9800;
-    --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --background-light: #ffffff;
-    --secondary-dark: #e65100;
     --text-light: #ffffff;
-    --status-success: #4caf50;
-    --foreground-dark: #1a1a1a;
-    --background-3: #eeeeee;
-    --accent-3: #bbdefb;
     --text-dark: #1a1a1a;
-    --accent-2: #e3f2fd;
-    --accent-dark: #1565c0;
-    --secondary-2: #fff3e0;
-    --accent-light: #e3f2fd;
-    --foreground-1: #333333;
-    --text-2: #666666;
-    --foreground-light: #e0e0e0;
-    --secondary-3: #ffe0b2;
+    --background-3: #eeeeee;
   }
 
   </style>
@@ -43,81 +43,81 @@
       <g id="tracks" class="ai-container">
         <g id="trackA" class="ai-container">
           <circle id="a1" class="ai-shape ai-circle" cx="23" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-          <circle id="jA1" class="ai-shape ai-circle" cx="42" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-          <circle id="jA2" class="ai-shape ai-circle" cx="262" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-          <circle id="a2" class="ai-shape ai-circle" cx="281" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="jA1" class="ai-shape ai-circle" cx="69" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="jA2" class="ai-shape ai-circle" cx="289" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="a2" class="ai-shape ai-circle" cx="335" cy="23" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
         </g>
         <g id="trackB" class="ai-container">
-          <circle id="b1" class="ai-shape ai-circle" cx="23" cy="69" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-          <circle id="jB1" class="ai-shape ai-circle" cx="82" cy="69" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-          <circle id="jB2" class="ai-shape ai-circle" cx="222" cy="69" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-          <circle id="b2" class="ai-shape ai-circle" cx="281" cy="69" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="b1" class="ai-shape ai-circle" cx="23" cy="59" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="jB1" class="ai-shape ai-circle" cx="109" cy="59" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="jB2" class="ai-shape ai-circle" cx="249" cy="59" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+          <circle id="b2" class="ai-shape ai-circle" cx="335" cy="59" r="3" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
         </g>
       </g>
       <g id="micro_label" class="ai-container">
-        <text id="micro_lbl" class="ai-shape ai-text" x="-96.39999999999998" y="38" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Micro</text>
-        <text class="ai-shape ai-text" x="-110.79999999999998" y="58" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Detailed tracks</text>
+        <text id="micro_lbl" class="ai-shape ai-text" x="-103.6" y="38" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Micro</text>
+        <text class="ai-shape ai-text" x="-110.80000000000001" y="58" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Detailed tracks</text>
       </g>
     </g>
     <g id="meso" class="ai-container">
       <g id="meso_content" class="ai-container">
-        <ellipse id="op1" class="ai-shape ai-ellipse" cx="62" cy="141" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="62" y="141" text-anchor="middle">OP 1 (Station)</text>
-        <ellipse id="op2" class="ai-shape ai-ellipse" cx="242" cy="141" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="242" y="141" text-anchor="middle">OP 2 (Station)</text>
+        <ellipse id="op1" class="ai-shape ai-ellipse" cx="112.39999999999999" cy="132" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <text class="ai-label" x="112.39999999999999" y="132" text-anchor="middle" dominant-baseline="middle">OP 1 (Station)</text>
+        <ellipse id="op2" class="ai-shape ai-ellipse" cx="158.39999999999998" cy="132" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <text class="ai-label" x="158.39999999999998" y="132" text-anchor="middle" dominant-baseline="middle">OP 2 (Station)</text>
         <g id="meso_tracks" class="ai-container">
           <g id="mtrackA" class="ai-container">
-            <circle id="ma1" class="ai-shape ai-circle" cx="23" cy="118" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-            <circle id="mjA1" class="ai-shape ai-circle" cx="42" cy="118" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-            <circle id="mjA2" class="ai-shape ai-circle" cx="262" cy="118" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-            <circle id="ma2" class="ai-shape ai-circle" cx="281" cy="118" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="ma1" class="ai-shape ai-circle" cx="40.39999999999999" cy="104" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="mjA1" class="ai-shape ai-circle" cx="131.39999999999998" cy="104" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="mjA2" class="ai-shape ai-circle" cx="217.39999999999998" cy="104" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="ma2" class="ai-shape ai-circle" cx="352.4" cy="104" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
           </g>
           <g id="mtrackB" class="ai-container">
-            <circle id="mb1" class="ai-shape ai-circle" cx="23" cy="164" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-            <circle id="mjB1" class="ai-shape ai-circle" cx="82" cy="164" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-            <circle id="mjB2" class="ai-shape ai-circle" cx="222" cy="164" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-            <circle id="mb2" class="ai-shape ai-circle" cx="281" cy="164" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="mb1" class="ai-shape ai-circle" cx="-38.60000000000001" cy="154" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="mjB1" class="ai-shape ai-circle" cx="47.39999999999999" cy="154" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="mjB2" class="ai-shape ai-circle" cx="187.39999999999998" cy="154" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+            <circle id="mb2" class="ai-shape ai-circle" cx="313.4" cy="154" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
           </g>
         </g>
       </g>
       <g id="meso_label" class="ai-container">
-        <text id="meso_lbl" class="ai-shape ai-text" x="-101.2" y="133" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Meso</text>
-        <text class="ai-shape ai-text" x="-100" y="153" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">OPs + Tracks</text>
+        <text id="meso_lbl" class="ai-shape ai-text" x="-119.2" y="124" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Meso</text>
+        <text class="ai-shape ai-text" x="-121.60000000000001" y="144" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">OPs + Tracks</text>
       </g>
     </g>
     <g id="macro" class="ai-container">
       <g id="graph" class="ai-container">
-        <circle id="n1" class="ai-shape ai-circle" cx="45" cy="230" r="25" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-        <text class="ai-label" x="45" y="230" text-anchor="middle">OP 1</text>
-        <circle id="n2" class="ai-shape ai-circle" cx="259" cy="230" r="25" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-        <text class="ai-label" x="259" y="230" text-anchor="middle">OP 2</text>
+        <circle id="n1" class="ai-shape ai-circle" cx="30.599999999999994" cy="217" r="25" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="30.599999999999994" y="217" text-anchor="middle" dominant-baseline="middle">OP 1</text>
+        <circle id="n2" class="ai-shape ai-circle" cx="313" cy="217" r="25" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="313" y="217" text-anchor="middle" dominant-baseline="middle">OP 2</text>
       </g>
       <g id="macro_label" class="ai-container">
-        <text id="macro_lbl" class="ai-shape ai-text" x="-103.6" y="222" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Macro</text>
-        <text class="ai-shape ai-text" x="-103.6" y="242" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Nodes &amp; Lines</text>
+        <text id="macro_lbl" class="ai-shape ai-text" x="-118" y="209" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Macro</text>
+        <text class="ai-shape ai-text" x="-118" y="229" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Nodes &amp; Lines</text>
       </g>
     </g>
   </g>
-  <text class="ai-label" x="152" y="220" text-anchor="middle">Section of Line (SoL)</text>
-  <text class="ai-label" x="-46.8" y="93.5" text-anchor="start" fill="var(--foreground-3)" font-size="11">Aggregation</text>
-  <text class="ai-label" x="-46.8" y="185.5" text-anchor="start" fill="var(--foreground-3)" font-size="11">Simplification</text>
-  <path class="ai-connection" d="M26 23 L39 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M45 23 L259 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M265 23 L278 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M26 69 L79 69" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M85 69 L219 69" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M225 69 L278 69" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M43.96853614477436 25.263816566490515 L80.03146385522564 66.73618343350948" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M223.96853614477436 66.73618343350948 L260.03146385522564 25.263816566490515" fill="none" stroke="var(--text-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M26 118 L39 118" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M45 118 L259 118" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M265 118 L278 118" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M26 164 L79 164" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M85 164 L219 164" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M225 164 L278 164" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M43.96853614477436 120.26381656649052 L80.03146385522564 161.7361834335095" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M223.96853614477436 161.7361834335095 L260.03146385522564 120.26381656649052" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M70 230 L234 230" fill="none" stroke="var(--accent-1)" stroke-width="3"/>
-  <path class="ai-connection" d="M-56.8 64 L-56.8 115.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M-56.8 159 L-56.8 204.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <text class="ai-label" x="171.8" y="207" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">Section of Line (SoL)</text>
+  <text class="ai-label" x="-57.60000000000001" y="89" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Aggregation</text>
+  <text class="ai-label" x="-64.80000000000001" y="174.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Simplification</text>
+  <path class="ai-connection" d="M26 23 L66 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M72 23 L286 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M292 23 L332 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M26 59 L106 59" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M112 59 L246 59" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M252 59 L332 59" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M71.2298824387415 25.00689419486735 L106.7701175612585 56.99310580513265" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M251.2298824387415 56.99310580513265 L286.7701175612585 25.00689419486735" fill="none" stroke="var(--text-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M43.39999999999999 104 L128.39999999999998 104" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M134.39999999999998 104 L214.39999999999998 104" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M220.39999999999998 104 L349.4 104" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M-35.60000000000001 154 L44.39999999999999 154" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M50.39999999999999 154 L184.39999999999998 154" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M190.39999999999998 154 L310.4 154" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M128.82212134677087 105.53445157930305 L49.97787865322911 152.46554842069696" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M188.94348726628255 151.42752122286237 L215.8565127337174 106.57247877713763" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M55.599999999999994 217 L288 217" fill="none" stroke="var(--accent-1)" stroke-width="3"/>
+  <path class="ai-connection" d="M-67.60000000000001 64 L-67.60000000000001 106.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-74.80000000000001 150 L-74.80000000000001 191.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

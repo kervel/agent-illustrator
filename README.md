@@ -21,6 +21,10 @@ Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-fr
 
 [![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail)
 
+**MOSFET Driver Schematic** — Electronics schematic with custom component templates (resistor, LED, MOSFET), anchor-based wiring, and IEEE 315 symbols.
+
+[![MOSFET Driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail)
+
 **Railway Topology** — Three-level abstraction (network / line / station) using nested row/col layouts and connection routing.
 
 [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail)

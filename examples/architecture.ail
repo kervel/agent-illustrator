@@ -38,7 +38,7 @@ group diagram {
     rect app_bg [width: 500, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
     text "Application Layer" app_label [font_size: 12, fill: accent-dark]
 
-    rect async_bg [width: 380, height: 100, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
+    rect async_bg [width: 380, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
     text "Async / Real-time" async_label [font_size: 12, fill: accent-dark]
 
     rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15]
@@ -102,35 +102,35 @@ constrain angular.center_y = 250
 constrain django.center_x = 440
 constrain django.center_y = 250
 
-// Async layer background — narrower, centered between celery and channels
+// Async layer background — more vertical space from app layer
 constrain async_bg.center_x = 310
-constrain async_bg.center_y = 370
-constrain async_label.center_x = 310
-constrain async_label.top = async_bg.top + 6
+constrain async_bg.center_y = 395
+constrain async_label.right = async_bg.right - 10
+constrain async_label.bottom = async_bg.bottom - 4
 
-// Celery and Channels
+// Celery and Channels — more space from Django
 constrain celery.center_x = 210
-constrain celery.center_y = 385
+constrain celery.center_y = 412
 constrain channels.center_x = 410
-constrain channels.center_y = 385
+constrain channels.center_y = 412
 
-// Data layer background
+// Data layer background — more vertical space
 constrain data_bg.center_x = 310
-constrain data_bg.center_y = 520
+constrain data_bg.center_y = 555
 constrain data_label.left = data_bg.left + 10
 constrain data_label.top = data_bg.top + 6
 
 // Data stores
 constrain postgres.center_x = 120
-constrain postgres.center_y = 535
+constrain postgres.center_y = 570
 constrain redis.center_x = 310
-constrain redis.center_y = 535
+constrain redis.center_y = 570
 constrain minio.center_x = 510
-constrain minio.center_y = 535
+constrain minio.center_y = 570
 
 // PostGIS label below PostgreSQL
 constrain postgis_label.center_x = 120
-constrain postgis_label.top = 568
+constrain postgis_label.top = 603
 
 // External services on the right
 constrain keycloak.center_x = 680
@@ -139,10 +139,10 @@ constrain sentry.center_x = 680
 constrain sentry.center_y = 250
 
 // Via points for routing Django → data connections around async layer
-constrain via_pg.center_x = 200
-constrain via_pg.center_y = 420
-constrain via_minio.center_x = 530
-constrain via_minio.center_y = 420
+constrain via_pg.center_x = 95
+constrain via_pg.center_y = 440
+constrain via_minio.center_x = 545
+constrain via_minio.center_y = 440
 
 // === CONNECTIONS ===
 

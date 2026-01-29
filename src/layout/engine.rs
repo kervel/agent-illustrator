@@ -2472,13 +2472,16 @@ pub fn resolve_constrain_statements_two_phase(
         }
     }
 
-    // Recompute bounds and anchors after applying all constraints
-    result.compute_bounds();
+    // Recompute group bounds from children after global constraints moved them,
+    // but skip rotated template instances (their bounds reflect rotation transforms)
     let skip = if skip_anchors.is_empty() {
         None
     } else {
         Some(&skip_anchors)
     };
+    recompute_group_bounds(result, skip);
+    // Recompute bounds and anchors after applying all constraints
+    result.compute_bounds();
     recompute_builtin_anchors(result, skip);
     recompute_custom_anchors(result, doc, skip);
 
@@ -2690,6 +2693,8 @@ pub fn resolve_constrain_statements(
         }
     }
 
+    // Recompute group bounds from children after external constraints moved them
+    recompute_group_bounds(result, None);
     // Recompute bounds and anchors after applying constraints
     result.compute_bounds();
     recompute_builtin_anchors(result, None);
