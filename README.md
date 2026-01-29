@@ -1,6 +1,6 @@
 # Agent Illustrator
 
-A declarative illustration language for AI agents. Describe *what* to draw, not *how* to render it.
+A declarative illustration language for AI agents. Describe *what* to draw, not *how* to render it. I use this to generate powerpoint-like illustrations when creating presentations with markdown+MARP.
 
 ## The Problem
 
@@ -32,6 +32,8 @@ Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-fr
 Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
 
 ## Installation
+
+You can grab the binary directly from the releases page, but using nix is so much easier (and easier to integrate in other workflows)
 
 ### Nix (Linux & macOS)
 
@@ -100,11 +102,11 @@ agent-illustrator --grammar
 agent-illustrator --examples
 ```
 
-Pass `--skill`, `--grammar`, and `--examples` as context to your AI agent. The skill prompt includes a 6-phase design methodology that guides the agent from intent to implementation.
+Pass `--skill`, `--grammar`, and `--examples` as context to your AI agent, or just tell your agent to figure it out himself (which should lead to the same). The skill prompt includes a 6-phase design methodology that guides the agent from intent to implementation. Tested with codex GPT-5.2-codex and Claude Opus 4.5.
 
 ## About
 
-Built as an experiment in [specswarm](https://github.com/kervel/specswarm)-driven development:
+Built as an experiment in [specswarm](https://specswarm.com/)-driven development:
 - No manual coding or code reviews — only specification-driven agent work
 - Claude autonomously implemented features from specs, sometimes working over an hour without intervention
 - The grammar/parser was agent-designed and turns out to be ergonomic despite being naive
