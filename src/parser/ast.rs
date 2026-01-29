@@ -229,6 +229,8 @@ pub struct GroupDecl {
     pub modifiers: Vec<Spanned<StyleModifier>>,
     /// Custom anchor declarations (Feature 009 - from template expansion)
     pub anchors: Vec<AnchorDecl>,
+    /// Whether this group was created by template expansion (vs user-authored)
+    pub is_template_instance: bool,
 }
 
 /// Position constraint

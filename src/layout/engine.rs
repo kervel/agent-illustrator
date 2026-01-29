@@ -84,13 +84,21 @@ pub fn classify_constraint(
     // Layout-generated constraints (row/col alignment, spacing) are always internal.
     // They should be solved in PASS 1 so that explicit user constraints in PASS 2
     // can override them when they conflict.
+    // Group by parent container name so all constraints from the same row/col/stack
+    // are solved together coherently.
     if source.origin == super::solver::ConstraintOrigin::LayoutContainer {
-        // Use the first element ID as the group key (all elements are siblings)
-        let element_ids = constraint.element_ids();
-        let group_key = element_ids
-            .first()
-            .map(|id| format!("__layout_{}", id))
-            .unwrap_or_else(|| "__layout".to_string());
+        let group_key = source
+            .layout_container
+            .as_ref()
+            .map(|name| format!("__layout_{}", name))
+            .unwrap_or_else(|| {
+                // Fallback: use first element ID if no container name
+                let element_ids = constraint.element_ids();
+                element_ids
+                    .first()
+                    .map(|id| format!("__layout_{}", id))
+                    .unwrap_or_else(|| "__layout".to_string())
+            });
         return ConstraintScope::Local(group_key);
     }
 
@@ -226,11 +234,6 @@ fn collect_element_template_mapping(
         if let Some(template) = current_template {
             map.insert(elem_id.to_string(), template.to_string());
         }
-        // Also check if this element's name has a prefix pattern
-        // (for backwards compatibility with prefix-based detection)
-        else if let Some(prefix) = extract_template_prefix(elem_id) {
-            map.insert(elem_id.to_string(), prefix.to_string());
-        }
     }
 
     match stmt {
@@ -251,21 +254,11 @@ fn collect_element_template_mapping(
         Statement::Group(g) => {
             let group_name = g.name.as_ref().map(|n| n.node.0.as_str());
 
-            // Determine if this Group is a template instance container
-            // Template instances create Groups where children have prefixed names
+            // Determine if this Group is a template instance container.
+            // Use the explicit flag set by the template resolver, falling back
+            // to prefix-based detection for backwards compatibility.
             let template_context = if let Some(name) = group_name {
-                // Check if any children have names prefixed with this group's name
-                let has_prefixed_children = g.children.iter().any(|child| {
-                    if let Some(child_id) = get_statement_id(&child.node) {
-                        child_id.starts_with(name)
-                            && child_id.len() > name.len()
-                            && child_id.chars().nth(name.len()) == Some('_')
-                    } else {
-                        false
-                    }
-                });
-
-                if has_prefixed_children {
+                if g.is_template_instance {
                     Some(name)
                 } else {
                     current_template
@@ -308,40 +301,6 @@ fn collect_element_template_mapping(
 
 /// Extract the template prefix from an element ID.
 ///
-/// Template children are named like `{prefix}_{child}`, so "alice_head" has prefix "alice".
-/// Returns None if the element doesn't appear to have a template prefix.
-fn extract_template_prefix(elem_id: &str) -> Option<&str> {
-    // Find the first underscore
-    elem_id.find('_').map(|idx| &elem_id[..idx])
-}
-
-/// Get the ID (name) of a statement, if it has one.
-fn get_statement_id(stmt: &Statement) -> Option<&str> {
-    use crate::parser::ast::ShapeType;
-    match stmt {
-        Statement::Shape(s) => {
-            // Check ShapeDecl.name first, then PathDecl.name for path shapes
-            s.name.as_ref().map(|n| n.node.0.as_str()).or_else(|| {
-                if let ShapeType::Path(path_decl) = &s.shape_type.node {
-                    path_decl.name.as_ref().map(|n| n.node.0.as_str())
-                } else {
-                    None
-                }
-            })
-        }
-        Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.as_str()),
-        Statement::Layout(l) => l.name.as_ref().map(|n| n.node.0.as_str()),
-        // These statement types don't have element IDs
-        Statement::Connection(_)
-        | Statement::Constraint(_)
-        | Statement::Constrain(_)
-        | Statement::TemplateDecl(_)
-        | Statement::TemplateInstance(_)
-        | Statement::Export(_)
-        | Statement::AnchorDecl(_)
-        | Statement::Label(_) => None,
-    }
-}
 
 // ============================================
 // Two-Phase Solver Functions (Feature 010)
@@ -3147,7 +3106,7 @@ fn collect_layout_alignment_constraints(
     stmts: &[Spanned<Statement>],
     collector: &mut super::collector::ConstraintCollector,
 ) {
-    use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutVariable};
+    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
     use crate::parser::ast::LayoutType;
 
     for stmt in stmts {
@@ -3171,34 +3130,32 @@ fn collect_layout_alignment_constraints(
                 let gap = crate::layout::collector::extract_number_modifier(&l.modifiers, "gap")
                     .unwrap_or(20.0); // Default gap
 
+                // Container name for grouping layout constraints together
+                let container_name = l
+                    .name
+                    .as_ref()
+                    .map(|n| n.node.0.clone())
+                    .unwrap_or_else(|| format!("__anon_{}", stmt.span.start));
+
+                let make_source = |desc: String| -> ConstraintSource {
+                    ConstraintSource::layout(stmt.span.clone(), desc)
+                        .with_layout_container(container_name.clone())
+                };
+
                 if child_ids.len() > 1 {
                     match l.layout_type.node {
                         LayoutType::Row => {
-                            // Row: align all children vertically (same y)
-                            // AND maintain horizontal spacing (child[i].x = child[i-1].right + gap)
                             for i in 1..child_ids.len() {
-                                // Vertical alignment
                                 collector.constraints.push(LayoutConstraint::Equal {
                                     left: LayoutVariable::y(&child_ids[i]),
                                     right: LayoutVariable::y(&child_ids[0]),
                                     offset: 0.0,
-                                    source: ConstraintSource {
-                                        span: stmt.span.clone(),
-                                        description: format!(
-                                            "row alignment: {}.y = {}.y",
-                                            child_ids[i], child_ids[0]
-                                        ),
-                                        origin: ConstraintOrigin::LayoutContainer,
-                                        template_instance: None,
-                                    },
+                                    source: make_source(format!(
+                                        "row alignment: {}.y = {}.y",
+                                        child_ids[i], child_ids[0]
+                                    )),
                                 });
 
-                                // Horizontal positioning: child[i].x = child[i-1].right + gap
-                                // This is expressed as: child[i].x = child[i-1].x + child[i-1].width + gap
-                                // But since we're using Equal which takes two variables with an offset,
-                                // and we can't express width directly, we use Right property:
-                                // child[i].x - child[i-1].right = gap
-                                // Which is: child[i].x = child[i-1].right + gap
                                 collector.constraints.push(LayoutConstraint::Equal {
                                     left: LayoutVariable::x(&child_ids[i]),
                                     right: LayoutVariable::new(
@@ -3206,41 +3163,27 @@ fn collect_layout_alignment_constraints(
                                         super::solver::LayoutProperty::Right,
                                     ),
                                     offset: gap,
-                                    source: ConstraintSource {
-                                        span: stmt.span.clone(),
-                                        description: format!(
-                                            "row spacing: {}.x = {}.right + {}",
-                                            child_ids[i],
-                                            child_ids[i - 1],
-                                            gap
-                                        ),
-                                        origin: ConstraintOrigin::LayoutContainer,
-                                        template_instance: None,
-                                    },
+                                    source: make_source(format!(
+                                        "row spacing: {}.x = {}.right + {}",
+                                        child_ids[i],
+                                        child_ids[i - 1],
+                                        gap
+                                    )),
                                 });
                             }
                         }
                         LayoutType::Column => {
-                            // Column: align all children horizontally (same x)
-                            // AND maintain vertical spacing (child[i].y = child[i-1].bottom + gap)
                             for i in 1..child_ids.len() {
-                                // Horizontal alignment
                                 collector.constraints.push(LayoutConstraint::Equal {
                                     left: LayoutVariable::x(&child_ids[i]),
                                     right: LayoutVariable::x(&child_ids[0]),
                                     offset: 0.0,
-                                    source: ConstraintSource {
-                                        span: stmt.span.clone(),
-                                        description: format!(
-                                            "col alignment: {}.x = {}.x",
-                                            child_ids[i], child_ids[0]
-                                        ),
-                                        origin: ConstraintOrigin::LayoutContainer,
-                                        template_instance: None,
-                                    },
+                                    source: make_source(format!(
+                                        "col alignment: {}.x = {}.x",
+                                        child_ids[i], child_ids[0]
+                                    )),
                                 });
 
-                                // Vertical positioning: child[i].y = child[i-1].bottom + gap
                                 collector.constraints.push(LayoutConstraint::Equal {
                                     left: LayoutVariable::y(&child_ids[i]),
                                     right: LayoutVariable::new(
@@ -3248,56 +3191,39 @@ fn collect_layout_alignment_constraints(
                                         super::solver::LayoutProperty::Bottom,
                                     ),
                                     offset: gap,
-                                    source: ConstraintSource {
-                                        span: stmt.span.clone(),
-                                        description: format!(
-                                            "col spacing: {}.y = {}.bottom + {}",
-                                            child_ids[i],
-                                            child_ids[i - 1],
-                                            gap
-                                        ),
-                                        origin: ConstraintOrigin::LayoutContainer,
-                                        template_instance: None,
-                                    },
+                                    source: make_source(format!(
+                                        "col spacing: {}.y = {}.bottom + {}",
+                                        child_ids[i],
+                                        child_ids[i - 1],
+                                        gap
+                                    )),
                                 });
                             }
                         }
                         LayoutType::Stack => {
-                            // Stack: align all children (same x and y)
                             for i in 1..child_ids.len() {
                                 collector.constraints.push(LayoutConstraint::Equal {
                                     left: LayoutVariable::x(&child_ids[i]),
                                     right: LayoutVariable::x(&child_ids[0]),
                                     offset: 0.0,
-                                    source: ConstraintSource {
-                                        span: stmt.span.clone(),
-                                        description: format!(
-                                            "stack alignment: {}.x = {}.x",
-                                            child_ids[i], child_ids[0]
-                                        ),
-                                        origin: ConstraintOrigin::LayoutContainer,
-                                        template_instance: None,
-                                    },
+                                    source: make_source(format!(
+                                        "stack alignment: {}.x = {}.x",
+                                        child_ids[i], child_ids[0]
+                                    )),
                                 });
                                 collector.constraints.push(LayoutConstraint::Equal {
                                     left: LayoutVariable::y(&child_ids[i]),
                                     right: LayoutVariable::y(&child_ids[0]),
                                     offset: 0.0,
-                                    source: ConstraintSource {
-                                        span: stmt.span.clone(),
-                                        description: format!(
-                                            "stack alignment: {}.y = {}.y",
-                                            child_ids[i], child_ids[0]
-                                        ),
-                                        origin: ConstraintOrigin::LayoutContainer,
-                                        template_instance: None,
-                                    },
+                                    source: make_source(format!(
+                                        "stack alignment: {}.y = {}.y",
+                                        child_ids[i], child_ids[0]
+                                    )),
                                 });
                             }
                         }
                         LayoutType::Grid => {
                             // Grid alignment is more complex - skip for now
-                            // Grid cells are aligned within their grid structure
                         }
                     }
                 }
@@ -3343,6 +3269,7 @@ fn collect_position_constraints_from_shapes(
                                         description: format!("{}.x = {}", id, value),
                                         origin: ConstraintOrigin::UserDefined,
                                         template_instance: None,
+                                        layout_container: None,
                                     },
                                 });
                             }
@@ -3357,6 +3284,7 @@ fn collect_position_constraints_from_shapes(
                                         description: format!("{}.y = {}", id, value),
                                         origin: ConstraintOrigin::UserDefined,
                                         template_instance: None,
+                                        layout_container: None,
                                     },
                                 });
                             }

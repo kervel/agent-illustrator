@@ -3,33 +3,33 @@
   <style>
     :root {
     --background-light: #ffffff;
-    --accent-2: #e3f2fd;
-    --text-1: #333333;
-    --accent-dark: #1565c0;
-    --secondary-3: #ffe0b2;
-    --secondary-light: #fff3e0;
-    --foreground-2: #666666;
-    --background-2: #f5f5f5;
+    --accent-1: #2196f3;
     --text-3: #999999;
-    --background-3: #eeeeee;
     --foreground-1: #333333;
-    --text-dark: #1a1a1a;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
+    --text-1: #333333;
+    --background-3: #eeeeee;
+    --background-2: #f5f5f5;
+    --accent-2: #e3f2fd;
     --foreground-dark: #1a1a1a;
     --background-dark: #333333;
     --secondary-1: #ff9800;
-    --foreground-light: #e0e0e0;
-    --text-2: #666666;
     --secondary-dark: #e65100;
-    --foreground-3: #999999;
-    --status-error: #f44336;
-    --secondary-2: #fff3e0;
-    --text-light: #ffffff;
-    --accent-light: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-1: #2196f3;
     --background-1: #ffffff;
+    --text-light: #ffffff;
+    --accent-dark: #1565c0;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --text-2: #666666;
+    --accent-light: #e3f2fd;
+    --status-success: #4caf50;
+    --foreground-2: #666666;
+    --foreground-light: #e0e0e0;
+    --text-dark: #1a1a1a;
+    --status-warning: #ff9800;
+    --foreground-3: #999999;
+    --accent-3: #bbdefb;
   }
 
   </style>

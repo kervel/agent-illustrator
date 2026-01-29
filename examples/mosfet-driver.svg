@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-91 -52 740 435">
   <style>
     :root {
-    --secondary-2: #fff3e0;
-    --foreground-light: #e0e0e0;
-    --status-success: #4caf50;
+    --secondary-dark: #e65100;
+    --text-1: #333333;
     --status-warning: #ff9800;
     --status-error: #f44336;
-    --secondary-dark: #e65100;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --accent-dark: #1565c0;
-    --secondary-3: #ffe0b2;
-    --accent-1: #2196f3;
-    --foreground-dark: #1a1a1a;
-    --background-1: #ffffff;
-    --accent-2: #e3f2fd;
-    --background-3: #eeeeee;
+    --background-2: #f5f5f5;
     --text-3: #999999;
-    --text-light: #ffffff;
     --background-dark: #333333;
-    --text-2: #666666;
+    --foreground-2: #666666;
     --accent-3: #bbdefb;
     --secondary-1: #ff9800;
-    --background-2: #f5f5f5;
+    --secondary-3: #ffe0b2;
     --accent-light: #e3f2fd;
-    --secondary-light: #fff3e0;
-    --text-1: #333333;
     --foreground-1: #333333;
+    --foreground-dark: #1a1a1a;
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --status-success: #4caf50;
+    --foreground-3: #999999;
+    --foreground-light: #e0e0e0;
+    --background-3: #eeeeee;
+    --text-light: #ffffff;
     --background-light: #ffffff;
     --text-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --accent-dark: #1565c0;
+    --text-2: #666666;
+    --secondary-2: #fff3e0;
+    --secondary-light: #fff3e0;
   }
 
   </style>

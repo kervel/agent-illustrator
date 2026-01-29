@@ -153,6 +153,7 @@ impl ConstraintCollector {
                     ),
                     origin: ConstraintOrigin::LayoutContainer,
                     template_instance: None,
+                    layout_container: None,
                 },
             });
         }
@@ -175,6 +176,7 @@ impl ConstraintCollector {
                     description: format!("row horizontal: {} after {}", curr, prev),
                     origin: ConstraintOrigin::LayoutContainer,
                     template_instance: None,
+                    layout_container: None,
                 },
             });
         }
@@ -203,6 +205,7 @@ impl ConstraintCollector {
                     ),
                     origin: ConstraintOrigin::LayoutContainer,
                     template_instance: None,
+                    layout_container: None,
                 },
             });
         }
@@ -220,6 +223,7 @@ impl ConstraintCollector {
                     description: format!("col vertical: {} after {}", curr, prev),
                     origin: ConstraintOrigin::LayoutContainer,
                     template_instance: None,
+                    layout_container: None,
                 },
             });
         }
@@ -243,6 +247,7 @@ impl ConstraintCollector {
                     description: format!("stack x: {} = {}", child_ids[i], child_ids[0]),
                     origin: ConstraintOrigin::LayoutContainer,
                     template_instance: None,
+                    layout_container: None,
                 },
             });
             // Same y
@@ -255,6 +260,7 @@ impl ConstraintCollector {
                     description: format!("stack y: {} = {}", child_ids[i], child_ids[0]),
                     origin: ConstraintOrigin::LayoutContainer,
                     template_instance: None,
+                    layout_container: None,
                 },
             });
         }

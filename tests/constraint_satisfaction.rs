@@ -419,6 +419,53 @@ fn test_feedback_loops_row_alignment_and_constraints() {
     );
 }
 
+/// Verify that ellipse positioning constraints in the railway topology
+/// are satisfied: op1/op2 should be centered over their respective junction areas.
+#[test]
+fn test_railway_topology_ellipse_positioning() {
+    let source = std::fs::read_to_string("examples/railway-topology.ail")
+        .expect("railway-topology.ail should exist");
+
+    let result = compute_layout(&source).expect("layout should succeed");
+
+    let get_cx = |id: &str| -> f64 {
+        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        elem.bounds.x + elem.bounds.width / 2.0
+    };
+
+    // op1.center_x = midpoint(mjA1, mjB1)
+    let mja1_cx = get_cx("mjA1");
+    let mjb1_cx = get_cx("mjB1");
+    let op1_cx = get_cx("op1");
+    let expected_op1_cx = (mja1_cx + mjb1_cx) / 2.0;
+    assert!(
+        (op1_cx - expected_op1_cx).abs() < TOLERANCE,
+        "op1.center_x should be midpoint(mjA1, mjB1): op1={}, expected={}",
+        op1_cx, expected_op1_cx,
+    );
+
+    // op2.center_x = midpoint(mjA2, mjB2)
+    let mja2_cx = get_cx("mjA2");
+    let mjb2_cx = get_cx("mjB2");
+    let op2_cx = get_cx("op2");
+    let expected_op2_cx = (mja2_cx + mjb2_cx) / 2.0;
+    assert!(
+        (op2_cx - expected_op2_cx).abs() < TOLERANCE,
+        "op2.center_x should be midpoint(mjA2, mjB2): op2={}, expected={}",
+        op2_cx, expected_op2_cx,
+    );
+
+    // The ellipses should NOT overlap significantly (positive separation)
+    let op1_right = result.elements.get("op1").unwrap().bounds.x
+        + result.elements.get("op1").unwrap().bounds.width;
+    let op2_left = result.elements.get("op2").unwrap().bounds.x;
+    assert!(
+        op2_left > op1_right - TOLERANCE,
+        "op1 and op2 should not overlap: op1_right={}, op2_left={}",
+        op1_right, op2_left,
+    );
+}
+
 /// Constraint-based layout: explicit positioning should be exactly satisfied.
 #[test]
 fn test_explicit_position_constraints_satisfied() {

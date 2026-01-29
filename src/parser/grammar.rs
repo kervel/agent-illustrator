@@ -949,6 +949,7 @@ where
                 children,
                 modifiers: modifiers.unwrap_or_default(),
                 anchors: vec![], // Parsed groups don't have custom anchors
+                is_template_instance: false,
             });
 
         // Label declaration: `label { ... }` or `label: <element>`

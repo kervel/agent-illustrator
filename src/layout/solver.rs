@@ -120,6 +120,9 @@ pub struct ConstraintSource {
     /// - `None` for top-level elements or constraints between templates
     /// - `Some("r1")` for constraints within template instance "r1"
     pub template_instance: Option<String>,
+    /// Parent layout container name (for LayoutContainer origin).
+    /// Used to group row/col/stack constraints together in PASS 1.
+    pub layout_container: Option<String>,
 }
 
 impl ConstraintSource {
@@ -129,6 +132,7 @@ impl ConstraintSource {
             description: description.into(),
             origin: ConstraintOrigin::UserDefined,
             template_instance: None,
+            layout_container: None,
         }
     }
 
@@ -138,6 +142,7 @@ impl ConstraintSource {
             description: description.into(),
             origin: ConstraintOrigin::LayoutContainer,
             template_instance: None,
+            layout_container: None,
         }
     }
 
@@ -147,12 +152,19 @@ impl ConstraintSource {
             description: description.into(),
             origin: ConstraintOrigin::Intrinsic,
             template_instance: None,
+            layout_container: None,
         }
     }
 
     /// Set the template instance for this constraint (Feature 010).
     pub fn with_template_instance(mut self, instance: impl Into<String>) -> Self {
         self.template_instance = Some(instance.into());
+        self
+    }
+
+    /// Set the parent layout container name.
+    pub fn with_layout_container(mut self, container: impl Into<String>) -> Self {
+        self.layout_container = Some(container.into());
         self
     }
 }

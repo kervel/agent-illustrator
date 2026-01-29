@@ -386,6 +386,7 @@ fn resolve_inline_template(
         children: expanded,
         modifiers: vec![],
         anchors: prefixed_anchors,
+        is_template_instance: true,
     };
     Ok(vec![Spanned::new(Statement::Group(group), span.clone())])
 }
