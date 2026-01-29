@@ -596,72 +596,123 @@ pub fn route_connection_with_anchors(
 
         // Handle via points to create multi-segment curves with smooth S-curve
         if !via_points.is_empty() {
-            // For a single via point, create two cubic Bezier segments that:
-            // 1. Leave start perpendicular (using from_dir)
-            // 2. Pass smoothly through the via point
-            // 3. Enter end perpendicular (using to_dir)
-            //
-            // Path structure: M start C ctrl1 ctrl2 via S ctrl3 end
-            // (S command mirrors the previous control point for G1 continuity)
+            // Build waypoint chain: [start, via0, via1, ..., end]
+            let mut waypoints = Vec::with_capacity(via_points.len() + 2);
+            waypoints.push(start);
+            waypoints.extend_from_slice(&via_points);
+            waypoints.push(end);
 
-            let via = via_points[0];
-
-            // Segment 1: start -> via
-            // ctrl1: extend from start in from_direction (perpendicular exit)
-            let ctrl1 = Point::new(
-                start.x + from_dir.x * control_distance,
-                start.y + from_dir.y * control_distance,
-            );
-
-            // Helper: compute ctrl2 for a via point.
-            // ctrl2 sits on the incoming side of via. We use the prev→via direction
-            // so the tangent flows naturally along the incoming path. The S-command
-            // reflects ctrl2 to create the outgoing tangent, giving G1 continuity.
-            //
-            // Using prev→via (instead of via→next) prevents kinks when the via point
-            // is centered above/below the start-end line (symmetric arc case).
-            // Using prev→via also prevents loops because the reflected tangent points
-            // roughly toward the next target.
-            let tangent_dist = control_distance * 0.5;
-            let ctrl2_from_prev = |prev: Point, via: Point| -> Point {
-                let dx = via.x - prev.x;
-                let dy = via.y - prev.y;
-                let len = (dx * dx + dy * dy).sqrt();
-                if len > 0.001 {
-                    // ctrl2 is behind via (on the side coming from prev)
-                    Point::new(
-                        via.x - dx / len * tangent_dist,
-                        via.y - dy / len * tangent_dist,
-                    )
-                } else {
-                    via
-                }
+            // Helper: distance between two points
+            let dist = |a: Point, b: Point| -> f64 {
+                let dx = b.x - a.x;
+                let dy = b.y - a.y;
+                (dx * dx + dy * dy).sqrt()
             };
 
-            // Segment 2: via -> end (using S command for smooth continuation)
-            // final_ctrl: extend from end in to_direction (perpendicular entry)
-            let final_ctrl = Point::new(
-                end.x + to_dir.x * control_distance,
-                end.y + to_dir.y * control_distance,
+            // Helper: compute ctrl2 for a via point using bisector tangent.
+            //
+            // The tangent at each via point is the bisector of the incoming and
+            // outgoing directions (Catmull-Rom style):
+            //   incoming = normalize(via - prev)
+            //   outgoing = normalize(next - via)
+            //   tangent  = normalize(incoming + outgoing)
+            //
+            // The control distance is proportional to the shorter adjacent
+            // segment, preventing overshooting when segments differ in length.
+            //
+            // Why bisector works universally:
+            // - Symmetric arc (feedback-loops): incoming and outgoing mirror,
+            //   so bisector is horizontal → smooth arc apex.
+            // - Asymmetric turn (architecture): bisector follows the turn
+            //   without forcing the curve backwards → no loops.
+            let ctrl2_bisector =
+                |prev: Point, via: Point, next: Point, seg_dist: f64| -> Point {
+                    let tangent_d = seg_dist / 3.0;
+
+                    let in_dx = via.x - prev.x;
+                    let in_dy = via.y - prev.y;
+                    let in_len = (in_dx * in_dx + in_dy * in_dy).sqrt();
+
+                    let out_dx = next.x - via.x;
+                    let out_dy = next.y - via.y;
+                    let out_len = (out_dx * out_dx + out_dy * out_dy).sqrt();
+
+                    if in_len < 0.001 && out_len < 0.001 {
+                        return via;
+                    }
+                    if in_len < 0.001 || out_len < 0.001 {
+                        let dx = if in_len > 0.001 {
+                            in_dx / in_len
+                        } else {
+                            out_dx / out_len
+                        };
+                        let dy = if in_len > 0.001 {
+                            in_dy / in_len
+                        } else {
+                            out_dy / out_len
+                        };
+                        return Point::new(via.x - dx * tangent_d, via.y - dy * tangent_d);
+                    }
+
+                    // Bisector of normalized incoming and outgoing directions
+                    let bisect_x = in_dx / in_len + out_dx / out_len;
+                    let bisect_y = in_dy / in_len + out_dy / out_len;
+                    let bisect_len = (bisect_x * bisect_x + bisect_y * bisect_y).sqrt();
+
+                    if bisect_len < 0.001 {
+                        // 180° turn: use incoming direction as fallback
+                        return Point::new(
+                            via.x - in_dx / in_len * tangent_d,
+                            via.y - in_dy / in_len * tangent_d,
+                        );
+                    }
+
+                    Point::new(
+                        via.x - bisect_x / bisect_len * tangent_d,
+                        via.y - bisect_y / bisect_len * tangent_d,
+                    )
+                };
+
+            // Segment 1: start → first via point
+            let first_via = via_points[0];
+            let seg1_dist = dist(start, first_via);
+            let ctrl1_dist = seg1_dist / 3.0;
+            let ctrl1 = Point::new(
+                start.x + from_dir.x * ctrl1_dist,
+                start.y + from_dir.y * ctrl1_dist,
             );
 
-            // For a single via point: M start C ctrl1 ctrl2 via S final_ctrl end
+            // Last segment: last via → end
+            let last_via = *via_points.last().unwrap();
+            let last_seg_dist = dist(last_via, end);
+            let final_ctrl_dist = last_seg_dist / 3.0;
+            let final_ctrl = Point::new(
+                end.x + to_dir.x * final_ctrl_dist,
+                end.y + to_dir.y * final_ctrl_dist,
+            );
+
+            // Single via point: M start C ctrl1 ctrl2 via S final_ctrl end
             if via_points.len() == 1 {
-                let ctrl2 = ctrl2_from_prev(start, via);
-                return vec![start, ctrl1, ctrl2, via, final_ctrl, end];
+                let seg_dist = seg1_dist.min(last_seg_dist);
+                let ctrl2 = ctrl2_bisector(start, first_via, end, seg_dist);
+                return vec![start, ctrl1, ctrl2, first_via, final_ctrl, end];
             }
 
             // Multiple via points: chain cubic segments with smooth continuity
-            // First segment: start -> via[0]
-            let ctrl2 = ctrl2_from_prev(start, via_points[0]);
+            let seg_dist_0 = seg1_dist.min(dist(via_points[0], via_points[1]));
+            let ctrl2 = ctrl2_bisector(start, via_points[0], via_points[1], seg_dist_0);
             let mut path = vec![start, ctrl1, ctrl2, via_points[0]];
 
             for i in 1..via_points.len() {
-                let prev_via = via_points[i - 1];
-                let curr_via = via_points[i];
-                let ctrl = ctrl2_from_prev(prev_via, curr_via);
+                let prev = waypoints[i]; // via_points[i-1] = waypoints[i]
+                let curr = waypoints[i + 1]; // via_points[i] = waypoints[i+1]
+                let next = waypoints[i + 2]; // next via or end
+                let d_prev = dist(prev, curr);
+                let d_next = dist(curr, next);
+                let seg_d = d_prev.min(d_next);
+                let ctrl = ctrl2_bisector(prev, curr, next, seg_d);
                 path.push(ctrl);
-                path.push(curr_via);
+                path.push(curr);
             }
 
             path.push(final_ctrl);

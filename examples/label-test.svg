@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -50 412 406">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -50 428 406">
   <style>
     :root {
-    --accent-light: #e3f2fd;
-    --accent-dark: #1565c0;
-    --text-1: #333333;
-    --foreground-1: #333333;
-    --foreground-light: #e0e0e0;
-    --background-light: #ffffff;
-    --background-dark: #333333;
-    --text-dark: #1a1a1a;
-    --accent-3: #bbdefb;
-    --foreground-dark: #1a1a1a;
-    --secondary-light: #fff3e0;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --foreground-2: #666666;
-    --text-light: #ffffff;
-    --background-3: #eeeeee;
-    --secondary-3: #ffe0b2;
-    --text-3: #999999;
     --status-error: #f44336;
-    --accent-1: #2196f3;
-    --background-2: #f5f5f5;
-    --secondary-dark: #e65100;
-    --background-1: #ffffff;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --foreground-2: #666666;
+    --secondary-3: #ffe0b2;
     --accent-2: #e3f2fd;
+    --foreground-1: #333333;
+    --background-light: #ffffff;
+    --accent-3: #bbdefb;
+    --text-light: #ffffff;
+    --background-2: #f5f5f5;
+    --text-3: #999999;
+    --background-3: #eeeeee;
+    --foreground-dark: #1a1a1a;
+    --text-1: #333333;
+    --background-1: #ffffff;
+    --accent-dark: #1565c0;
+    --secondary-2: #fff3e0;
+    --secondary-light: #fff3e0;
     --foreground-3: #999999;
+    --text-dark: #1a1a1a;
+    --secondary-1: #ff9800;
+    --status-success: #4caf50;
+    --background-dark: #333333;
+    --text-2: #666666;
+    --accent-light: #e3f2fd;
+    --status-warning: #ff9800;
+    --accent-1: #2196f3;
+    --secondary-dark: #e65100;
   }
 
   </style>
@@ -40,15 +40,15 @@
   </defs>
   <g id="mygroup" class="ai-container">
     <g id="content" class="ai-container">
-      <rect id="a" class="ai-shape ai-rect" x="-6" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <rect id="b" class="ai-shape ai-rect" x="94" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <rect id="a" class="ai-shape ai-rect" x="10" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <rect id="b" class="ai-shape ai-rect" x="110" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
     </g>
     <text class="ai-shape ai-text" x="-118" y="25" text-anchor="start" dominant-baseline="middle" font-size="18" fill="red">Test Label</text>
   </g>
   <g id="another" class="ai-container">
     <g id="items" class="ai-container">
-      <circle id="c1" class="ai-shape ai-circle" cx="35" cy="89" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <circle id="c2" class="ai-shape ai-circle" cx="35" cy="159" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <circle id="c1" class="ai-shape ai-circle" cx="35" cy="73" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <circle id="c2" class="ai-shape ai-circle" cx="35" cy="143" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
     </g>
     <text id="mylbl" class="ai-shape ai-text" x="-110.8" y="116" text-anchor="start" dominant-baseline="middle" font-size="14">Inline Label</text>
   </g>
