@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -58.79051318265099 660 423.581026365302">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -78 660 462">
   <style>
     :root {
-    --secondary-light: #fff3e0;
-    --foreground-dark: #1a1a1a;
-    --background-2: #f5f5f5;
-    --background-light: #ffffff;
-    --accent-3: #bbdefb;
     --accent-dark: #1565c0;
-    --secondary-dark: #e65100;
-    --status-error: #f44336;
-    --background-dark: #333333;
-    --text-1: #333333;
-    --secondary-2: #fff3e0;
+    --foreground-1: #333333;
+    --accent-3: #bbdefb;
+    --accent-1: #2196f3;
     --accent-light: #e3f2fd;
     --secondary-3: #ffe0b2;
-    --foreground-3: #999999;
-    --background-3: #eeeeee;
-    --foreground-1: #333333;
+    --text-1: #333333;
     --accent-2: #e3f2fd;
-    --background-1: #ffffff;
-    --status-warning: #ff9800;
-    --foreground-light: #e0e0e0;
+    --secondary-dark: #e65100;
     --status-success: #4caf50;
-    --text-dark: #1a1a1a;
-    --foreground-2: #666666;
-    --text-2: #666666;
-    --text-3: #999999;
-    --secondary-1: #ff9800;
     --text-light: #ffffff;
-    --accent-1: #2196f3;
+    --text-dark: #1a1a1a;
+    --secondary-1: #ff9800;
+    --background-dark: #333333;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --background-2: #f5f5f5;
+    --text-3: #999999;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --background-light: #ffffff;
+    --foreground-dark: #1a1a1a;
+    --text-2: #666666;
+    --secondary-2: #fff3e0;
+    --background-3: #eeeeee;
+    --secondary-light: #fff3e0;
+    --foreground-light: #e0e0e0;
+    --background-1: #ffffff;
   }
 
   </style>
@@ -48,13 +48,13 @@
       </g>
       <g id="human_loop" class="ai-container">
         <rect id="assign" class="ai-shape ai-rect" x="15" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="75" y="82" text-anchor="middle" dominant-baseline="middle">Assign Task</text>
+        <text class="ai-label" x="75" y="82" text-anchor="middle">Assign Task</text>
         <rect id="tune" class="ai-shape ai-rect" x="155" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="215" y="82" text-anchor="middle" dominant-baseline="middle">Tune Feedback</text>
+        <text class="ai-label" x="215" y="82" text-anchor="middle">Tune Feedback</text>
         <rect id="spot" class="ai-shape ai-rect" x="295" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="355" y="82" text-anchor="middle" dominant-baseline="middle">Spot Patterns</text>
+        <text class="ai-label" x="355" y="82" text-anchor="middle">Spot Patterns</text>
         <rect id="evaluate" class="ai-shape ai-rect" x="435" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="495" y="82" text-anchor="middle" dominant-baseline="middle">Evaluate</text>
+        <text class="ai-label" x="495" y="82" text-anchor="middle">Evaluate</text>
       </g>
     </g>
     <g id="agent_section" class="ai-container">
@@ -64,25 +64,25 @@
       </g>
       <g id="agent_loop" class="ai-container">
         <rect id="task" class="ai-shape ai-rect" x="15" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="75" y="224" text-anchor="middle" dominant-baseline="middle">Task</text>
+        <text class="ai-label" x="75" y="224" text-anchor="middle">Task</text>
         <rect id="execute" class="ai-shape ai-rect" x="155" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="215" y="224" text-anchor="middle" dominant-baseline="middle">Execute</text>
+        <text class="ai-label" x="215" y="224" text-anchor="middle">Execute</text>
         <rect id="check" class="ai-shape ai-rect" x="295" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="355" y="224" text-anchor="middle" dominant-baseline="middle">Feedback</text>
+        <text class="ai-label" x="355" y="224" text-anchor="middle">Feedback</text>
         <rect id="result" class="ai-shape ai-rect" x="435" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="495" y="224" text-anchor="middle" dominant-baseline="middle">Result</text>
+        <text class="ai-label" x="495" y="224" text-anchor="middle">Result</text>
       </g>
     </g>
   </g>
-  <text class="ai-label" x="285" y="168" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">tunes</text>
+  <text class="ai-label" x="285" y="168" text-anchor="middle">tunes</text>
   <path class="ai-connection" d="M435 82 L425.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M295 82 L285.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M155 82 L145.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M75 57 C74.99999999999999 7 260.6798446328658 1.2094868173490072 285 7 S495 7 495 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M75 57 C74.99999999999999 -18 247.5 7 285 7 S495 -18 495 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M135 224 L144.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M275 224 L284.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M415 224 L424.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M495 249 C495 299 309.3201553671342 304.790513182651 285 299 S75 299 75 259.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M495 249 C495 324 322.5 299 285 299 S75 324 75 259.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M75 107 L75 195.4" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M495 199 L495 110.6" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M215 107 C215 174.00925309239017 355 131.99074690760983 355 191.8" fill="none" stroke="var(--accent-1)" stroke-width="2" marker-end="url(#ai-arrow)"/>

@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -59 178 199">
   <style>
     :root {
-    --background-dark: #333333;
-    --accent-dark: #1565c0;
-    --foreground-1: #333333;
-    --foreground-light: #e0e0e0;
-    --text-3: #999999;
-    --foreground-2: #666666;
     --text-dark: #1a1a1a;
-    --text-2: #666666;
     --accent-3: #bbdefb;
-    --secondary-1: #ff9800;
-    --background-3: #eeeeee;
-    --text-light: #ffffff;
     --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --background-1: #ffffff;
     --foreground-dark: #1a1a1a;
+    --secondary-3: #ffe0b2;
     --secondary-dark: #e65100;
-    --accent-2: #e3f2fd;
-    --accent-light: #e3f2fd;
-    --secondary-light: #fff3e0;
-    --background-light: #ffffff;
-    --status-success: #4caf50;
-    --background-2: #f5f5f5;
-    --foreground-3: #999999;
-    --text-1: #333333;
+    --background-3: #eeeeee;
     --accent-1: #2196f3;
+    --background-2: #f5f5f5;
+    --foreground-light: #e0e0e0;
+    --background-light: #ffffff;
+    --text-1: #333333;
+    --accent-light: #e3f2fd;
+    --text-3: #999999;
     --status-error: #f44336;
+    --foreground-3: #999999;
+    --text-light: #ffffff;
+    --secondary-light: #fff3e0;
+    --status-success: #4caf50;
+    --accent-dark: #1565c0;
+    --background-dark: #333333;
+    --text-2: #666666;
+    --accent-2: #e3f2fd;
+    --secondary-1: #ff9800;
     --status-warning: #ff9800;
+    --background-1: #ffffff;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
   }
 
   </style>
@@ -45,11 +45,11 @@
     </g>
     <g id="junction_center" class="ai-container">
       <circle id="j1" class="ai-shape ai-circle" cx="39" cy="15" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="15" text-anchor="middle" dominant-baseline="middle">Switch 1</text>
+      <text class="ai-label" x="39" y="15" text-anchor="middle">Switch 1</text>
       <circle id="j2" class="ai-shape ai-circle" cx="39" cy="45" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="45" text-anchor="middle" dominant-baseline="middle">Switch 2</text>
+      <text class="ai-label" x="39" y="45" text-anchor="middle">Switch 2</text>
       <circle id="j3" class="ai-shape ai-circle" cx="39" cy="75" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="75" text-anchor="middle" dominant-baseline="middle">Switch 3</text>
+      <text class="ai-label" x="39" y="75" text-anchor="middle">Switch 3</text>
     </g>
     <g id="exit" class="ai-container">
       <circle id="exit_t1" class="ai-shape ai-circle" cx="63" cy="15" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>

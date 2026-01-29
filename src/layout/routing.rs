@@ -613,15 +613,22 @@ pub fn route_connection_with_anchors(
                 start.y + from_dir.y * control_distance,
             );
 
-            // Helper: compute ctrl2 for a via point, aimed toward its next target.
-            // ctrl2 sits on the incoming side of via, along the via→next direction.
-            // This prevents loops when the via point is far from the straight line.
+            // Helper: compute ctrl2 for a via point.
+            // ctrl2 sits on the incoming side of via. We use the prev→via direction
+            // so the tangent flows naturally along the incoming path. The S-command
+            // reflects ctrl2 to create the outgoing tangent, giving G1 continuity.
+            //
+            // Using prev→via (instead of via→next) prevents kinks when the via point
+            // is centered above/below the start-end line (symmetric arc case).
+            // Using prev→via also prevents loops because the reflected tangent points
+            // roughly toward the next target.
             let tangent_dist = control_distance * 0.5;
-            let ctrl2_for_via = |via: Point, next: Point| -> Point {
-                let dx = next.x - via.x;
-                let dy = next.y - via.y;
+            let ctrl2_from_prev = |prev: Point, via: Point| -> Point {
+                let dx = via.x - prev.x;
+                let dy = via.y - prev.y;
                 let len = (dx * dx + dy * dy).sqrt();
                 if len > 0.001 {
+                    // ctrl2 is behind via (on the side coming from prev)
                     Point::new(
                         via.x - dx / len * tangent_dist,
                         via.y - dy / len * tangent_dist,
@@ -640,25 +647,19 @@ pub fn route_connection_with_anchors(
 
             // For a single via point: M start C ctrl1 ctrl2 via S final_ctrl end
             if via_points.len() == 1 {
-                // Next target after this via is end
-                let ctrl2 = ctrl2_for_via(via, end);
+                let ctrl2 = ctrl2_from_prev(start, via);
                 return vec![start, ctrl1, ctrl2, via, final_ctrl, end];
             }
 
             // Multiple via points: chain cubic segments with smooth continuity
-            // First segment: start -> via[0], ctrl2 aims toward via[1]
-            let ctrl2 = ctrl2_for_via(via_points[0], via_points[1]);
+            // First segment: start -> via[0]
+            let ctrl2 = ctrl2_from_prev(start, via_points[0]);
             let mut path = vec![start, ctrl1, ctrl2, via_points[0]];
 
             for i in 1..via_points.len() {
+                let prev_via = via_points[i - 1];
                 let curr_via = via_points[i];
-                // Next target is either the next via or end
-                let next = if i + 1 < via_points.len() {
-                    via_points[i + 1]
-                } else {
-                    end
-                };
-                let ctrl = ctrl2_for_via(curr_via, next);
+                let ctrl = ctrl2_from_prev(prev_via, curr_via);
                 path.push(ctrl);
                 path.push(curr_via);
             }

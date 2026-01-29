@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 415 589.2427690212423">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 435 621.5">
   <style>
     :root {
-    --background-light: #ffffff;
-    --background-2: #f5f5f5;
-    --text-dark: #1a1a1a;
-    --text-3: #999999;
-    --secondary-2: #fff3e0;
-    --secondary-light: #fff3e0;
-    --text-1: #333333;
-    --secondary-dark: #e65100;
-    --foreground-3: #999999;
-    --background-dark: #333333;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --foreground-dark: #1a1a1a;
-    --foreground-2: #666666;
-    --secondary-1: #ff9800;
-    --background-3: #eeeeee;
-    --background-1: #ffffff;
-    --text-light: #ffffff;
-    --foreground-light: #e0e0e0;
     --accent-3: #bbdefb;
-    --secondary-3: #ffe0b2;
-    --foreground-1: #333333;
-    --status-error: #f44336;
-    --text-2: #666666;
+    --status-warning: #ff9800;
     --accent-2: #e3f2fd;
-    --accent-light: #e3f2fd;
     --accent-1: #2196f3;
+    --secondary-2: #fff3e0;
+    --status-error: #f44336;
+    --secondary-1: #ff9800;
+    --secondary-dark: #e65100;
+    --foreground-light: #e0e0e0;
+    --background-light: #ffffff;
+    --text-dark: #1a1a1a;
+    --background-3: #eeeeee;
+    --accent-light: #e3f2fd;
     --accent-dark: #1565c0;
+    --secondary-3: #ffe0b2;
+    --background-1: #ffffff;
+    --secondary-light: #fff3e0;
+    --status-success: #4caf50;
+    --background-dark: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --text-2: #666666;
+    --text-light: #ffffff;
+    --text-1: #333333;
+    --text-3: #999999;
+    --foreground-1: #333333;
   }
 
   </style>
@@ -42,30 +42,30 @@
   <rect id="b" class="ai-shape ai-rect" x="140" y="44" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
   <rect id="c" class="ai-shape ai-rect" x="70" y="80" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
   <g id="srv1" class="ai-container">
-    <rect id="srv1_body" class="ai-shape ai-rect" x="0" y="180" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
-    <text id="srv1_txt" class="ai-shape ai-text" x="39.2" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+    <rect id="srv1_body" class="ai-shape ai-rect" x="5" y="185" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
+    <text id="srv1_txt" class="ai-shape ai-text" x="44.2" y="255" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
   </g>
   <g id="srv2" class="ai-container">
-    <rect id="srv2_body" class="ai-shape ai-rect" x="180" y="180" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
-    <text id="srv2_txt" class="ai-shape ai-text" x="219.2" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+    <rect id="srv2_body" class="ai-shape ai-rect" x="195" y="185" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
+    <text id="srv2_txt" class="ai-shape ai-text" x="234.2" y="255" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
   </g>
   <g id="alice" class="ai-container">
-    <circle id="alice_head" class="ai-shape ai-circle" cx="15" cy="348" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
-    <rect id="alice_body" class="ai-shape ai-rect" x="0" y="364" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
+    <circle id="alice_head" class="ai-shape ai-circle" cx="20" cy="363" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
+    <rect id="alice_body" class="ai-shape ai-rect" x="5" y="379" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
   </g>
   <g id="bob" class="ai-container">
-    <circle id="bob_head" class="ai-shape ai-circle" cx="145" cy="348" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
-    <rect id="bob_body" class="ai-shape ai-rect" x="130" y="364" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
+    <circle id="bob_head" class="ai-shape ai-circle" cx="20" cy="411" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
+    <rect id="bob_body" class="ai-shape ai-rect" x="145" y="379" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
   </g>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="80" cy="454" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="top_via" class="ai-shape ai-circle" cx="80" cy="286" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="70.0922001361925" y="451.62138451062117" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
-  <text class="ai-label" x="89.9077998638075" y="268.37861548937883" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
-  <path class="ai-connection" d="M80 20 L110 20 L110 64 L132.8 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M40 40 L40 60 L110 60 L110 72.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M180 84 L180 92 L150 92 L150 92.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M110 120 L110 135 L-15 135 L-15 210 L-7.2 210" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M100 210 L172.8 210" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M15 404 C15.000000000000004 454 60.184400272385 469.24276902124234 80 454 S145 454 145 411.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M145 336 C145 286 99.815599727615 270.75723097875766 80 286 S14.999999999999991 286 14.999999999999998 328.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="90" cy="474" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="90" cy="296" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="69.375" y="464" text-anchor="middle">request</text>
+  <text class="ai-label" x="100" y="335.58160083927885" text-anchor="start">response</text>
+  <path class="ai-connection" d="M80 20 L-15 20 L-15 64 L-7.2 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M40 40 L40 80.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M40 84 L40 92 L150 92 L150 92.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M40 128 L40 171.5 L5 171.5 L5 207.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M105 215 L187.8 215" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M20 419 C20.000000000000004 501.5 48.75 474 90 474 S160 501.5 160 426.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M20 399 C19.99999999999997 240.6735966428846 90 375.1632016785577 90 296 S19.99999999999997 192.6735966428846 20 343.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>
