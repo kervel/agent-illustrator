@@ -2472,16 +2472,13 @@ pub fn resolve_constrain_statements_two_phase(
         }
     }
 
-    // Recompute group bounds from children after global constraints moved them,
-    // but skip rotated template instances (their bounds reflect rotation transforms)
+    // Recompute bounds and anchors after applying all constraints
+    result.compute_bounds();
     let skip = if skip_anchors.is_empty() {
         None
     } else {
         Some(&skip_anchors)
     };
-    recompute_group_bounds(result, skip);
-    // Recompute bounds and anchors after applying all constraints
-    result.compute_bounds();
     recompute_builtin_anchors(result, skip);
     recompute_custom_anchors(result, doc, skip);
 
@@ -2693,8 +2690,6 @@ pub fn resolve_constrain_statements(
         }
     }
 
-    // Recompute group bounds from children after external constraints moved them
-    recompute_group_bounds(result, None);
     // Recompute bounds and anchors after applying constraints
     result.compute_bounds();
     recompute_builtin_anchors(result, None);
@@ -3084,12 +3079,8 @@ fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&Ha
         recompute_element_bounds_recursive(child, skip);
     }
 
-    // Only recompute bounds for Group containers (not Row/Col/Grid/Stack whose bounds
-    // were set by auto-layout with proper gaps and padding)
-    let is_group = matches!(elem.element_type, ElementType::Group);
-
-    if is_group
-        && !elem.children.is_empty()
+    // If this element has children, recompute its bounds from children
+    if !elem.children.is_empty()
         && !skip
             .and_then(|set| elem.id.as_ref().map(|id| set.contains(&id.0)))
             .unwrap_or(false)

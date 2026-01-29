@@ -788,17 +788,21 @@ impl LayoutResult {
         }
     }
 
-    /// Compute the bounding box that contains all elements
+    /// Compute the bounding box that contains all elements.
+    /// Walks leaf elements recursively so that container bounds (which may be
+    /// stale after constraint solving) don't inflate the viewBox.
     pub fn compute_bounds(&mut self) {
         if self.root_elements.is_empty() {
             self.bounds = BoundingBox::zero();
             return;
         }
 
-        let mut bounds = self.root_elements[0].bounds;
-        for element in &self.root_elements[1..] {
-            bounds = bounds.union(&element.bounds);
+        let mut leaf_bounds: Option<BoundingBox> = None;
+        for element in &self.root_elements {
+            collect_leaf_bounds(element, &mut leaf_bounds);
         }
+
+        let mut bounds = leaf_bounds.unwrap_or_else(BoundingBox::zero);
 
         // Also include connection paths
         for conn in &self.connections {
@@ -817,6 +821,21 @@ impl LayoutResult {
         }
 
         self.bounds = bounds;
+    }
+}
+
+/// Recursively collect bounds from leaf elements (those without children).
+/// This avoids using container bounds which may be stale after constraint solving.
+fn collect_leaf_bounds(element: &ElementLayout, bounds: &mut Option<BoundingBox>) {
+    if element.children.is_empty() {
+        *bounds = Some(match bounds {
+            Some(b) => b.union(&element.bounds),
+            None => element.bounds,
+        });
+    } else {
+        for child in &element.children {
+            collect_leaf_bounds(child, bounds);
+        }
     }
 }
 

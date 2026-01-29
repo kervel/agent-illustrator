@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -116.32115482669812 276 301.4680997037857">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -97.36276245875648 252 251.58828737626942">
   <style>
     :root {
-    --status-warning: #ff9800;
-    --background-3: #eeeeee;
-    --accent-dark: #1565c0;
-    --background-2: #f5f5f5;
-    --background-light: #ffffff;
-    --text-3: #999999;
-    --accent-1: #2196f3;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --accent-3: #bbdefb;
-    --background-dark: #333333;
     --text-light: #ffffff;
     --text-2: #666666;
-    --foreground-dark: #1a1a1a;
-    --foreground-3: #999999;
-    --secondary-1: #ff9800;
-    --background-1: #ffffff;
-    --foreground-2: #666666;
-    --text-dark: #1a1a1a;
-    --secondary-light: #fff3e0;
-    --accent-2: #e3f2fd;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
     --secondary-dark: #e65100;
-    --status-success: #4caf50;
+    --background-light: #ffffff;
+    --status-warning: #ff9800;
     --status-error: #f44336;
-    --text-1: #333333;
-    --foreground-light: #e0e0e0;
+    --accent-3: #bbdefb;
+    --background-dark: #333333;
     --foreground-1: #333333;
+    --text-3: #999999;
+    --accent-dark: #1565c0;
+    --foreground-3: #999999;
+    --accent-2: #e3f2fd;
+    --background-3: #eeeeee;
+    --foreground-2: #666666;
+    --status-success: #4caf50;
+    --background-2: #f5f5f5;
+    --background-1: #ffffff;
+    --text-dark: #1a1a1a;
+    --secondary-1: #ff9800;
+    --foreground-light: #e0e0e0;
     --accent-light: #e3f2fd;
+    --text-1: #333333;
+    --secondary-light: #fff3e0;
+    --foreground-dark: #1a1a1a;
+    --accent-1: #2196f3;
   }
 
   </style>
@@ -41,27 +41,27 @@
   <g id="alice" class="ai-container">
     <g class="ai-container">
       <g id="alice_head_stack" class="ai-container">
-        <circle id="alice_head" class="ai-shape ai-circle" cx="24" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
-        <path id="alice_hair" class="ai-shape ai-path" d="M15.00 35.00 A9.00 9.00 0 0 1 33.00 35.00 L33.00 35.00 L28.00 33.00 L24.00 35.00 L21.00 34.00 L15.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
+        <circle id="alice_head" class="ai-shape ai-circle" cx="23" cy="28.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <path id="alice_hair" class="ai-shape ai-path" d="M14.00 28.50 A9.00 9.00 0 0 1 32.00 28.50 L32.00 28.50 L27.00 26.50 L23.00 28.50 L20.00 27.50 L14.00 28.50 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
-      <path id="alice_torso" class="ai-shape ai-path" d="M11.00 57.00 A13.00 13.00 0 0 1 37.00 57.00 L37.00 65.00 L11.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
-      <path id="alice_collar" class="ai-shape ai-path" d="M21.00 44.33 A14.00 14.00 0 0 1 27.00 44.33 L24.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
+      <path id="alice_torso" class="ai-shape ai-path" d="M10.00 50.50 A13.00 13.00 0 0 1 36.00 50.50 L36.00 58.50 L10.00 58.50 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
+      <path id="alice_collar" class="ai-shape ai-path" d="M20.00 37.83 A14.00 14.00 0 0 1 26.00 37.83 L23.00 43.83 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
   <g id="bob" class="ai-container">
     <g class="ai-container">
       <g id="bob_head_stack" class="ai-container">
-        <circle id="bob_head" class="ai-shape ai-circle" cx="142" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
-        <path id="bob_hair" class="ai-shape ai-path" d="M133.00 35.00 A9.00 9.00 0 0 1 151.00 35.00 L151.00 35.00 L146.00 33.00 L142.00 35.00 L139.00 34.00 L133.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
+        <circle id="bob_head" class="ai-shape ai-circle" cx="129" cy="28.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <path id="bob_hair" class="ai-shape ai-path" d="M120.00 28.50 A9.00 9.00 0 0 1 138.00 28.50 L138.00 28.50 L133.00 26.50 L129.00 28.50 L126.00 27.50 L120.00 28.50 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
-      <path id="bob_torso" class="ai-shape ai-path" d="M129.00 57.00 A13.00 13.00 0 0 1 155.00 57.00 L155.00 65.00 L129.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
-      <path id="bob_collar" class="ai-shape ai-path" d="M139.00 44.33 A14.00 14.00 0 0 1 145.00 44.33 L142.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
+      <path id="bob_torso" class="ai-shape ai-path" d="M116.00 50.50 A13.00 13.00 0 0 1 142.00 50.50 L142.00 58.50 L116.00 58.50 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
+      <path id="bob_collar" class="ai-shape ai-path" d="M126.00 37.83 A14.00 14.00 0 0 1 132.00 37.83 L129.00 43.83 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="83" cy="112.32520566882266" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="top_via" class="ai-shape ai-circle" cx="83" cy="-25" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="74.26971699718894" y="108.73607527295513" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
-  <text class="ai-label" x="92.1903858462806" y="-42.32115482669811" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
-  <path class="ai-connection" d="M24 69 C24.000000000000004 112.32520566882266 65.53943399437787 125.14694487708762 83 112.32520566882266 S142 112.32520566882266 142 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M142 22 C142 -25 101.38077169256121 -39.642309653396225 83 -25 S23.999999999999993 -25 24 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="76" cy="88.5" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="76" cy="-10.5" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="70.16436883407334" y="81.36276245875648" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
+  <text class="ai-label" x="81.83563116592666" y="-23.362762458756478" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <path class="ai-connection" d="M23 62.5 C23 88.5 64.32873766814667 94.22552491751296 76 88.5 S129 88.5 129 69.7" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129 15.5 C129 -10.5 87.67126233185333 -16.225524917512953 76 -10.5 S22.999999999999996 -10.5 23 8.3" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>
