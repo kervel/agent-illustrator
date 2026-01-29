@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -162.86092262994055 296 364.3642493232828">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -88 252 243.5">
   <style>
     :root {
-    --accent-2: #e3f2fd;
-    --secondary-light: #fff3e0;
-    --accent-light: #e3f2fd;
-    --status-success: #4caf50;
-    --accent-3: #bbdefb;
-    --status-warning: #ff9800;
-    --status-error: #f44336;
-    --secondary-dark: #e65100;
-    --accent-1: #2196f3;
-    --secondary-2: #fff3e0;
-    --text-2: #666666;
-    --text-3: #999999;
-    --background-3: #eeeeee;
-    --foreground-2: #666666;
-    --background-light: #ffffff;
-    --foreground-light: #e0e0e0;
-    --foreground-dark: #1a1a1a;
-    --foreground-3: #999999;
-    --text-1: #333333;
     --background-2: #f5f5f5;
-    --background-1: #ffffff;
-    --background-dark: #333333;
     --foreground-1: #333333;
-    --text-light: #ffffff;
-    --text-dark: #1a1a1a;
+    --text-3: #999999;
     --accent-dark: #1565c0;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --text-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --background-dark: #333333;
+    --accent-3: #bbdefb;
     --secondary-1: #ff9800;
+    --background-3: #eeeeee;
+    --text-dark: #1a1a1a;
+    --secondary-2: #fff3e0;
+    --text-light: #ffffff;
+    --accent-light: #e3f2fd;
+    --secondary-light: #fff3e0;
+    --background-1: #ffffff;
     --secondary-3: #ffe0b2;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --foreground-light: #e0e0e0;
+    --accent-2: #e3f2fd;
+    --text-1: #333333;
+    --foreground-2: #666666;
+    --accent-1: #2196f3;
+    --background-light: #ffffff;
   }
 
   </style>
@@ -51,17 +51,17 @@
   <g id="bob" class="ai-container">
     <g class="ai-container">
       <g id="bob_head_stack" class="ai-container">
-        <circle id="bob_head" class="ai-shape ai-circle" cx="23" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
-        <path id="bob_hair" class="ai-shape ai-path" d="M142.00 35.00 A9.00 9.00 0 0 1 160.00 35.00 L160.00 35.00 L155.00 33.00 L151.00 35.00 L148.00 34.00 L142.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
+        <circle id="bob_head" class="ai-shape ai-circle" cx="129" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <path id="bob_hair" class="ai-shape ai-path" d="M120.00 35.00 A9.00 9.00 0 0 1 138.00 35.00 L138.00 35.00 L133.00 33.00 L129.00 35.00 L126.00 34.00 L120.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
-      <path id="bob_torso" class="ai-shape ai-path" d="M138.00 57.00 A13.00 13.00 0 0 1 164.00 57.00 L164.00 65.00 L138.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
-      <path id="bob_collar" class="ai-shape ai-path" d="M148.00 44.33 A14.00 14.00 0 0 1 154.00 44.33 L151.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
+      <path id="bob_torso" class="ai-shape ai-path" d="M116.00 57.00 A13.00 13.00 0 0 1 142.00 57.00 L142.00 65.00 L116.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
+      <path id="bob_collar" class="ai-shape ai-path" d="M126.00 44.33 A14.00 14.00 0 0 1 132.00 44.33 L129.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="88" cy="117.32520566882266" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="top_via" class="ai-shape ai-circle" cx="88" cy="-30" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="69.87416832666443" y="107.32520566882266" text-anchor="middle">request</text>
-  <text class="ai-label" x="56.78476934251486" y="-40" text-anchor="middle">response</text>
-  <path class="ai-connection" d="M23 69 C23.000000000000004 141.5033266933423 51.74833665332885 117.32520566882266 88 117.32520566882266 S151 141.5033266933423 151 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M23 22 C22.99999999999998 -102.86092262994055 25.569538685029727 -30 88 -30 S22.99999999999998 -102.86092262994055 23 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="76" cy="95" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="76" cy="-4" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="66.16101857123637" y="85" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
+  <text class="ai-label" x="85.83898142876363" y="-14" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <path class="ai-connection" d="M23 69 C23 88.67796285752726 56.322037142472745 95 76 95 C95.67796285752726 95 129 88.67796285752726 129 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129 22 C129 2.3220371424727446 95.67796285752726 -4 76 -4 C56.322037142472745 -4 22.999999999999996 2.3220371424727446 23 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>
