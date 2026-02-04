@@ -2014,3 +2014,62 @@ fn test_constrain_contains_resizes_container() {
         bg_height
     );
 }
+
+#[test]
+fn test_constrain_contains_only_wraps_specified_elements() {
+    // Regression: contains was engulfing all siblings in the group,
+    // not just the specified elements.
+    let input = r#"
+        group diagram {
+            rect bg [fill: accent-light, stroke: accent-dark]
+            rect unrelated [width: 80, height: 40, label: "Unrelated"]
+            rect box_a [width: 100, height: 40, label: "Box A"]
+            rect box_b [width: 100, height: 40, label: "Box B"]
+        }
+        constrain unrelated.center_x = 80
+        constrain unrelated.center_y = 150
+        constrain box_a.center_x = 280
+        constrain box_a.center_y = 120
+        constrain box_b.center_x = 280
+        constrain box_b.center_y = 200
+        constrain bg contains box_a, box_b [padding: 20]
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+
+    // Parse bg rect position and dimensions
+    let bg_line = svg
+        .lines()
+        .find(|l| l.contains("id=\"bg\""))
+        .expect("should find bg rect");
+    let parse_attr = |attr: &str| -> f64 {
+        bg_line
+            .split(&format!("{}=\"", attr))
+            .nth(1)
+            .and_then(|s| s.split('"').next())
+            .and_then(|s| s.parse().ok())
+            .unwrap_or_else(|| panic!("should find {} in bg", attr))
+    };
+    let bg_x = parse_attr("x");
+    let bg_width = parse_attr("width");
+    let bg_right = bg_x + bg_width;
+
+    // bg should NOT extend left to cover unrelated (which is at x=40)
+    assert!(
+        bg_x > 100.0,
+        "bg left edge ({}) should not extend to cover unrelated box at x=40",
+        bg_x
+    );
+    // bg should tightly wrap box_a and box_b (at x=230, width=100)
+    // so bg.x should be around 210 (230 - 20 padding)
+    assert!(
+        bg_x <= 215.0,
+        "bg left edge ({}) should be near 210 (box_a.x - padding)",
+        bg_x
+    );
+    // bg right should be around 350 (330 + 20 padding)
+    assert!(
+        bg_right >= 345.0,
+        "bg right edge ({}) should be near 350 (box_a.right + padding)",
+        bg_right
+    );
+}

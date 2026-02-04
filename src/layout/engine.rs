@@ -3432,12 +3432,25 @@ fn add_element_by_name_with_per_property_strength(
             );
         }
 
+        // Detect contains-style targeting: both position AND opposite edge targeted
+        // means the solver needs to find the tightest fit, so suggest position at a
+        // large value (solver pulls it back to the constraint boundary) and size at
+        // a small value (solver grows it just enough).
+        let contains_x =
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::X))
+                && target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
+        let contains_y =
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Y))
+                && target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
+
         // Add X position - SUGGESTED if targeted, FIXED if reference only
+        // For contains: suggest at large value so LE constraint pulls it tight
         if x_is_targeted {
+            let suggested_x = if contains_x { 99999.0 } else { elem.bounds.x };
             solver
                 .add_constraint(LayoutConstraint::Suggested {
                     variable: LayoutVariable::x(element_name),
-                    value: elem.bounds.x,
+                    value: suggested_x,
                     source: ConstraintSource::layout(0..0, "target element x"),
                 })
                 .map_err(LayoutError::solver_error)?;
@@ -3452,11 +3465,13 @@ fn add_element_by_name_with_per_property_strength(
         }
 
         // Add Y position - SUGGESTED if targeted, FIXED if reference only
+        // For contains: suggest at large value so LE constraint pulls it tight
         if y_is_targeted {
+            let suggested_y = if contains_y { 99999.0 } else { elem.bounds.y };
             solver
                 .add_constraint(LayoutConstraint::Suggested {
                     variable: LayoutVariable::y(element_name),
-                    value: elem.bounds.y,
+                    value: suggested_y,
                     source: ConstraintSource::layout(0..0, "target element y"),
                 })
                 .map_err(LayoutError::solver_error)?;
@@ -3471,6 +3486,7 @@ fn add_element_by_name_with_per_property_strength(
         }
 
         // Size: SUGGESTED if width/height axis is targeted (e.g. contains constraint), else FIXED
+        // For contains: suggest small value so solver grows it just enough
         let width_is_targeted =
             target_vars.contains(&(element_name.to_string(), LayoutProperty::Width))
                 || target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
@@ -3479,10 +3495,11 @@ fn add_element_by_name_with_per_property_strength(
                 || target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
 
         if width_is_targeted {
+            let suggested_w = if contains_x { 1.0 } else { elem.bounds.width };
             solver
                 .add_constraint(LayoutConstraint::Suggested {
                     variable: LayoutVariable::width(element_name),
-                    value: elem.bounds.width,
+                    value: suggested_w,
                     source: ConstraintSource::layout(0..0, "container width"),
                 })
                 .map_err(LayoutError::solver_error)?;
@@ -3496,10 +3513,11 @@ fn add_element_by_name_with_per_property_strength(
                 .map_err(LayoutError::solver_error)?;
         }
         if height_is_targeted {
+            let suggested_h = if contains_y { 1.0 } else { elem.bounds.height };
             solver
                 .add_constraint(LayoutConstraint::Suggested {
                     variable: LayoutVariable::height(element_name),
-                    value: elem.bounds.height,
+                    value: suggested_h,
                     source: ConstraintSource::layout(0..0, "container height"),
                 })
                 .map_err(LayoutError::solver_error)?;
