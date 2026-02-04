@@ -152,7 +152,7 @@ constrain a.center_x = midpoint(b, c)    // center between two elements
 
 ### DEFAULT: Constraint-based positioning
 
-For >8 elements, position everything explicitly with `constrain`. See Example 6 in `--examples` for a full working example with templates, backgrounds, and connections.
+For >8 elements, wrap in a `group` and position everything with `constrain`. `group` uses column layout by default — constrain every element to override. Unconstrained elements fall back to column stacking. See Example 6 in `--examples`.
 
 ### ALTERNATIVE: Row/col for simple diagrams (≤8 elements)
 
@@ -183,7 +183,7 @@ rect bg [width: 500, height: 350, fill: accent-light, stroke: accent-dark, opaci
 constrain svc.center_x = bg.center_x
 constrain svc.center_y = bg.center_y
 ```
-Declare backgrounds FIRST in a `group` so they render behind foreground elements. Note: `group` uses column layout by default — constrain every element to override. After rendering, verify the boundary surrounds all elements.
+Declare backgrounds FIRST in a `group` so they render behind foreground elements. After rendering, verify the boundary surrounds all elements.
 
 ---
 
