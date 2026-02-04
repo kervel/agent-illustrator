@@ -215,7 +215,13 @@ After each render, verify ALL of these. If any fail, fix and re-render:
 6. All connections go to correct elements
 7. Elements are at least 60x35px
 
-Then do an **adversarial review**: for each element, ask "what's wrong with THIS one?" Look for gaps between shapes that should be continuous, detached parts, misaligned edges. Fix and re-render until nothing is found. Do NOT declare done until both passes are clean.
+### Adversarial Review (MANDATORY before declaring done)
+
+**Option A — Subagent review (preferred):** Spawn a separate agent with the rendered PNG and the original prompt. Its only job: "List every visual defect. Be harsh." Fix every issue it finds, re-render, and re-submit until it returns clean.
+
+**Option B — Self-review (if subagents unavailable):** Describe every element and its spatial relationships in text. Then compare that description to the actual image. Mismatches are bugs. Go element-by-element: for each one, ask "what's wrong with THIS one?" Look for gaps, detached parts, overlapping labels, misaligned edges.
+
+Do NOT declare done until the adversarial review passes clean.
 
 ---
 
