@@ -1,0 +1,112 @@
+// ============================================================
+// TRUE NEGATIVES: Intentional overlaps that should NOT be flagged
+// Each section demonstrates a pattern that looks like an overlap
+// but is correct by design.
+// ============================================================
+
+
+// ------------------------------------------------------------
+// TEST 1: Zone background (low opacity) with opaque elements on top
+// A semi-transparent rect acts as a visual zone. Opaque elements
+// placed inside it overlap the zone — this is intentional.
+// ------------------------------------------------------------
+
+group zone_with_elements {
+    rect zone_bg [width: 300, height: 150, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.2]
+    rect svc_a [width: 100, height: 40, fill: accent-1, stroke: foreground-1, label: "Service A"]
+    rect svc_b [width: 100, height: 40, fill: accent-1, stroke: foreground-1, label: "Service B"]
+}
+
+constrain zone_bg.center_x = 200
+constrain zone_bg.center_y = 100
+constrain svc_a.center_x = 140
+constrain svc_a.center_y = 100
+constrain svc_b.center_x = 260
+constrain svc_b.center_y = 100
+
+
+// ------------------------------------------------------------
+// TEST 2: Contains constraint properly satisfied
+// The container wraps its contents — the overlap between
+// container rect and contained elements is the whole point.
+// ------------------------------------------------------------
+
+group proper_contains {
+    rect wrapper [fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.3]
+    rect child_a [width: 80, height: 40, fill: accent-light, stroke: accent-dark, label: "Child A"]
+    rect child_b [width: 80, height: 40, fill: accent-light, stroke: accent-dark, label: "Child B"]
+}
+
+constrain child_a.center_x = 200
+constrain child_a.center_y = 280
+constrain child_b.center_x = 330
+constrain child_b.center_y = 280
+
+// Container auto-sizes to wrap both children
+constrain wrapper contains child_a, child_b [padding: 20]
+
+
+// ------------------------------------------------------------
+// TEST 3: Text labels placed on top of shapes (normal labeling)
+// Placing a text element directly over a rect is standard
+// practice for titles, annotations, etc.
+// ------------------------------------------------------------
+
+group text_on_shape {
+    rect info_box [width: 160, height: 80, fill: accent-light, stroke: accent-dark]
+    text "System Status" status_title [font_size: 14, fill: foreground-1]
+    text "All systems operational" status_detail [font_size: 10, fill: foreground-2]
+}
+
+constrain info_box.center_x = 500
+constrain info_box.center_y = 100
+constrain status_title.center_x = info_box.center_x
+constrain status_title.center_y = info_box.center_y - 12
+constrain status_detail.center_x = info_box.center_x
+constrain status_detail.center_y = info_box.center_y + 12
+
+
+// ------------------------------------------------------------
+// TEST 4: Connection crossing a zone background (low opacity)
+// The connection passes over a semi-transparent background
+// rect — this is normal and should not be flagged.
+// ------------------------------------------------------------
+
+group conn_crosses_zone {
+    rect zone_net [width: 200, height: 100, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15, label: "Network"]
+    rect sender [width: 80, height: 40, fill: accent-1, stroke: foreground-1, label: "Sender"]
+    rect receiver [width: 80, height: 40, fill: accent-1, stroke: foreground-1, label: "Receiver"]
+}
+
+// Place sender and receiver on opposite sides of the zone
+constrain sender.center_x = 80
+constrain sender.center_y = 400
+constrain zone_net.center_x = 250
+constrain zone_net.center_y = 400
+constrain receiver.center_x = 420
+constrain receiver.center_y = 400
+
+// Connection routes across the zone — acceptable
+sender -> receiver [label: "data"]
+
+
+// ------------------------------------------------------------
+// TEST 5: Elements in different groups overlapping in global coords
+// Two separate groups are positioned so their elements overlap
+// in global space. Since they are in different groups, the
+// overlap may be intentional (e.g., layered diagram sections).
+// ------------------------------------------------------------
+
+group layer_front {
+    rect front_panel [width: 120, height: 60, fill: accent-light, stroke: accent-dark, opacity: 0.5, label: "Front"]
+}
+
+group layer_back {
+    rect back_panel [width: 120, height: 60, fill: secondary-light, stroke: secondary-dark, opacity: 0.5, label: "Back"]
+}
+
+// Position both groups so their panels overlap
+constrain front_panel.center_x = 500
+constrain front_panel.center_y = 400
+constrain back_panel.center_x = 540
+constrain back_panel.center_y = 420

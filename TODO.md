@@ -4,22 +4,10 @@ Collected from real agent usage feedback (2026-02-04 IoT edge architecture exper
 
 ## High Priority
 
-### `--lint` mode for machine-verifiable diagram validation
-Deterministic checks that eliminate the need for LLM review of mechanical defects.
-Report defects to stderr as structured warnings, exit non-zero if any found.
-
-Checks to implement:
-- Constraint violations (unsatisfied after solving)
-- Bounding box overlaps between sibling elements
-- Connection lines intersecting non-endpoint elements
-- Labels overlapping other labels or elements
-- Elements outside their declared container
-
-This would make the adversarial review subagent only responsible for subjective
-layout quality (spacing, readability, aesthetic balance) — the mechanical stuff
-becomes free, instant, and zero false positives.
-
-Needs a SpecSwarm spec — touches layout, routing, and renderer.
+### ~~`--lint` mode for machine-verifiable diagram validation~~ DONE
+Implemented. Checks: sibling overlap, contains violation, label overlap, connection crossing.
+Heuristics: skips opacity<1.0 zones, contains targets, text-on-shape.
+Exit code 1 on warnings, structured stderr output.
 
 ### `stroke_dasharray` fixes
 Already implemented for shapes (`stroke_dasharray: "4,2"`) but has issues:
@@ -41,10 +29,8 @@ over where it sits. Options:
 - `merge_x: 200` / `merge_y: 150` on connection groups
 - Junction dots at merge points
 
-### Crossing detection warnings
-When `routing: direct` lines intersect non-endpoint elements, emit a stderr warning:
-`warning: connection a→b crosses element c`. Helps agents catch issues without rendering.
-Don't try to auto-adjust — just warn.
+### ~~Crossing detection warnings~~ DONE
+Covered by `--lint` mode.
 
 ### `label_side` on connections
 Place connection label above or below the line instead of centered on it.

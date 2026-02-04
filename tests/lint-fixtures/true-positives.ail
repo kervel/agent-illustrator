@@ -1,0 +1,87 @@
+// ============================================================
+// TRUE POSITIVES: Layout problems a linter SHOULD catch
+// Each section contains a deliberate defect.
+// ============================================================
+
+
+// ------------------------------------------------------------
+// TEST 1: Two opaque sibling rectangles overlapping
+// Both rects are fully opaque, similar size, positioned so
+// they collide. This is almost always a layout bug.
+// ------------------------------------------------------------
+
+group overlap_rects {
+    rect solid_box_a [width: 120, height: 60, fill: accent-1, stroke: foreground-1, label: "Box A"]
+    rect solid_box_b [width: 120, height: 60, fill: accent-2, stroke: foreground-1, label: "Box B"]
+}
+
+// Place them so they overlap by ~40px horizontally
+constrain solid_box_a.center_x = 100
+constrain solid_box_a.center_y = 60
+constrain solid_box_b.center_x = 180
+constrain solid_box_b.center_y = 60
+
+
+// ------------------------------------------------------------
+// TEST 2: Two text labels overlapping each other
+// Labels placed at nearly the same position — unreadable.
+// ------------------------------------------------------------
+
+group overlap_labels {
+    text "Temperature" label_temp [font_size: 14, fill: foreground-1]
+    text "Pressure" label_press [font_size: 14, fill: foreground-1]
+}
+
+constrain label_temp.center_x = 400
+constrain label_temp.center_y = 60
+constrain label_press.center_x = 420
+constrain label_press.center_y = 65
+
+
+// ------------------------------------------------------------
+// TEST 3: Connection routing through a solid element
+// The connection from src to dst passes through blocker,
+// which is fully opaque and is neither source nor target.
+// ------------------------------------------------------------
+
+group conn_through_solid {
+    rect src [width: 80, height: 40, fill: accent-light, stroke: accent-dark, label: "Source"]
+    rect blocker [width: 80, height: 60, fill: accent-1, stroke: foreground-1, label: "Blocker"]
+    rect dst [width: 80, height: 40, fill: accent-light, stroke: accent-dark, label: "Dest"]
+}
+
+// Place blocker directly between src and dst
+constrain src.center_x = 100
+constrain src.center_y = 200
+constrain blocker.center_x = 100
+constrain blocker.center_y = 280
+constrain dst.center_x = 100
+constrain dst.center_y = 360
+
+// This connection must route through blocker
+src -> dst
+
+
+// ------------------------------------------------------------
+// TEST 4: Contains constraint not satisfied
+// The container has a hard-constrained right edge that conflicts
+// with the contains requirement — the solver can't expand the
+// container far enough. The linter should verify the final
+// geometry and report the containment violation.
+// ------------------------------------------------------------
+
+group broken_contains {
+    rect container_box [fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Container"]
+    rect escapee [width: 60, height: 40, fill: accent-1, stroke: foreground-1, label: "Escapee"]
+    rect extra [width: 60, height: 40, fill: accent-2, stroke: foreground-1, label: "Extra"]
+}
+
+// Position elements far apart
+constrain escapee.center_x = 350
+constrain escapee.center_y = 280
+constrain extra.center_x = 550
+constrain extra.center_y = 280
+
+// Container should wrap both, but we also pin its right edge too close
+constrain container_box contains escapee, extra [padding: 10]
+constrain container_box.right = 450

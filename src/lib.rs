@@ -72,6 +72,8 @@ pub struct RenderConfig {
     pub debug: bool,
     /// Trace mode: show internal constraint solver and routing debug output
     pub trace: bool,
+    /// Lint mode: check for layout defects
+    pub lint: bool,
     /// Whether to resolve templates (default: true)
     pub resolve_templates: bool,
     /// Base path for resolving template file references
@@ -86,6 +88,7 @@ impl Default for RenderConfig {
             stylesheet: Stylesheet::default(),
             debug: false,
             trace: false,
+            lint: false,
             resolve_templates: true, // Templates are resolved by default
             template_base_path: None,
         }
@@ -125,6 +128,12 @@ impl RenderConfig {
     /// Enable or disable trace mode (internal debug output)
     pub fn with_trace(mut self, trace: bool) -> Self {
         self.trace = trace;
+        self
+    }
+
+    /// Enable or disable lint mode
+    pub fn with_lint(mut self, lint: bool) -> Self {
+        self.lint = lint;
         self
     }
 
@@ -295,6 +304,25 @@ fn extract_template_rotations(doc: &Document) -> std::collections::HashMap<Strin
 /// assert!(svg.contains("<svg"));
 /// ```
 pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, RenderError> {
+    let (svg, _) = render_pipeline(source, config)?;
+    Ok(svg)
+}
+
+/// Render DSL source to SVG with lint checking.
+///
+/// Returns the SVG string and any lint warnings found.
+pub fn render_with_lint(
+    source: &str,
+    config: RenderConfig,
+) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {
+    render_pipeline(source, config)
+}
+
+/// Internal shared render pipeline.
+fn render_pipeline(
+    source: &str,
+    config: RenderConfig,
+) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {
     // Parse the source
     let doc = parse(source)?;
 
@@ -364,10 +392,17 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
         eprintln!("====================");
     }
 
+    // Lint pass
+    let lint_warnings = if config.lint {
+        layout::lint::check(&result, &doc)
+    } else {
+        Vec::new()
+    };
+
     // Generate SVG with stylesheet
     let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet, config.debug);
 
-    Ok(svg)
+    Ok((svg, lint_warnings))
 }
 
 #[cfg(test)]

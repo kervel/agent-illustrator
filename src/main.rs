@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use agent_illustrator::{render_with_config, RenderConfig, Stylesheet};
+use agent_illustrator::{render_with_config, render_with_lint, RenderConfig, Stylesheet};
 
 #[derive(Parser)]
 #[command(name = "agent-illustrator")]
@@ -48,6 +48,10 @@ struct Cli {
     /// Output LLM-optimized skill document for agent integration
     #[arg(long)]
     skill: bool,
+
+    /// Lint mode: check for layout defects (overlaps, containment violations, etc.)
+    #[arg(long)]
+    lint: bool,
 }
 
 fn main() {
@@ -112,14 +116,37 @@ fn main() {
     let config = RenderConfig::new()
         .with_stylesheet(stylesheet)
         .with_debug(cli.debug)
-        .with_trace(cli.trace);
-    match render_with_config(&source, config) {
-        Ok(svg) => {
-            println!("{}", svg);
+        .with_trace(cli.trace)
+        .with_lint(cli.lint);
+
+    if cli.lint {
+        match render_with_lint(&source, config) {
+            Ok((svg, lint_warnings)) => {
+                println!("{}", svg);
+                if lint_warnings.is_empty() {
+                    eprintln!("lint: clean");
+                } else {
+                    for w in &lint_warnings {
+                        eprintln!("lint: {}: {}", w.category, w.message);
+                    }
+                    eprintln!("lint: {} warning(s)", lint_warnings.len());
+                    std::process::exit(1);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
         }
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
+    } else {
+        match render_with_config(&source, config) {
+            Ok(svg) => {
+                println!("{}", svg);
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
         }
     }
 }

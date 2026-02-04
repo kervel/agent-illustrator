@@ -205,15 +205,18 @@ Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2
 
 After each render, verify ALL of these. If any fail, fix and re-render:
 
-1. No overlapping elements or labels
-2. Connections don't route through text
-3. Background containers surround their content
-4. All labels readable at rendered size
-5. No excessive whitespace gaps
-6. All connections go to correct elements
-7. Elements are at least 60x35px
+1. Run `agent-illustrator --lint diagram.ail` and fix all warnings before proceeding to adversarial review
+2. No overlapping elements or labels
+3. Connections don't route through text
+4. Background containers surround their content
+5. All labels readable at rendered size
+6. No excessive whitespace gaps
+7. All connections go to correct elements
+8. Elements are at least 60x35px
 
 ### Adversarial Review (MANDATORY before declaring done)
+
+If `--lint` is available, run it first. It catches mechanical defects (overlaps, containment violations, connection crossings) instantly and deterministically. The adversarial review subagent should then focus only on subjective layout quality.
 
 **Option A — Subagent review (preferred):** Render to PNG first, then spawn a subagent (haiku model is sufficient) with the PNG file path and the original prompt. The subagent MUST use the Read tool to view the image directly — do NOT describe the diagram to the subagent, that reintroduces your own bias and defeats the purpose.
 
