@@ -9,7 +9,7 @@
 use crate::parser::ast::*;
 
 use super::config::LayoutConfig;
-use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutVariable};
+use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutProperty, LayoutVariable};
 use super::types::LayoutResult;
 
 /// A deferred anchor constraint expression, stored during collection
@@ -631,28 +631,56 @@ impl ConstraintCollector {
             } => {
                 let pad = padding.unwrap_or(0.0);
 
-                // For containment, we generate inequality constraints:
-                // container.left <= element.left - padding
-                // container.right >= element.right + padding
-                // (and same for top/bottom)
+                // For containment, generate relational inequality constraints:
+                // container.x <= element.x - padding
+                // container.x + container.width >= element.x + element.width + padding
+                // container.y <= element.y - padding
+                // container.y + container.height >= element.y + element.height + padding
                 for elem in elements {
-                    // Left edge
-                    self.constraints.push(LayoutConstraint::LessOrEqual {
-                        variable: LayoutVariable::x(&container.node.0),
-                        value: 0.0, // This is simplified - actual constraint is relative
+                    // Left: container.x <= element.x - padding
+                    self.constraints.push(LayoutConstraint::LessOrEqualRelational {
+                        left: LayoutVariable::x(&container.node.0),
+                        right: LayoutVariable::x(&elem.node.0),
+                        offset: -pad,
                         source: ConstraintSource::user(
                             span.clone(),
                             format!("{} contains {} (left)", container.node.0, elem.node.0),
                         ),
                     });
 
-                    // Note: Full containment constraints require more complex handling
-                    // with derived properties. For now, we just record the intent.
-                }
+                    // Right: container.right >= element.right + padding
+                    self.constraints.push(LayoutConstraint::GreaterOrEqualRelational {
+                        left: LayoutVariable::new(&container.node.0, LayoutProperty::Right),
+                        right: LayoutVariable::new(&elem.node.0, LayoutProperty::Right),
+                        offset: pad,
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            format!("{} contains {} (right)", container.node.0, elem.node.0),
+                        ),
+                    });
 
-                // Store containment as a series of inequality hints
-                // The actual implementation will handle this specially
-                let _ = (container, elements, pad); // Mark as used
+                    // Top: container.y <= element.y - padding
+                    self.constraints.push(LayoutConstraint::LessOrEqualRelational {
+                        left: LayoutVariable::y(&container.node.0),
+                        right: LayoutVariable::y(&elem.node.0),
+                        offset: -pad,
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            format!("{} contains {} (top)", container.node.0, elem.node.0),
+                        ),
+                    });
+
+                    // Bottom: container.bottom >= element.bottom + padding
+                    self.constraints.push(LayoutConstraint::GreaterOrEqualRelational {
+                        left: LayoutVariable::new(&container.node.0, LayoutProperty::Bottom),
+                        right: LayoutVariable::new(&elem.node.0, LayoutProperty::Bottom),
+                        offset: pad,
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            format!("{} contains {} (bottom)", container.node.0, elem.node.0),
+                        ),
+                    });
+                }
             }
         }
     }

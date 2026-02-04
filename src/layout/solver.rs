@@ -218,6 +218,22 @@ pub enum LayoutConstraint {
         source: ConstraintSource,
     },
 
+    /// left_var <= right_var + offset (STRONG - overrides layout)
+    LessOrEqualRelational {
+        left: LayoutVariable,
+        right: LayoutVariable,
+        offset: f64,
+        source: ConstraintSource,
+    },
+
+    /// left_var >= right_var + offset (STRONG - overrides layout)
+    GreaterOrEqualRelational {
+        left: LayoutVariable,
+        right: LayoutVariable,
+        offset: f64,
+        source: ConstraintSource,
+    },
+
     /// target = (a + b) / 2 + offset (STRONG - overrides layout)
     Midpoint {
         target: LayoutVariable,
@@ -238,6 +254,8 @@ impl LayoutConstraint {
             LayoutConstraint::Equal { source, .. } => source,
             LayoutConstraint::GreaterOrEqual { source, .. } => source,
             LayoutConstraint::LessOrEqual { source, .. } => source,
+            LayoutConstraint::LessOrEqualRelational { source, .. } => source,
+            LayoutConstraint::GreaterOrEqualRelational { source, .. } => source,
             LayoutConstraint::Midpoint { source, .. } => source,
         }
     }
@@ -255,6 +273,12 @@ impl LayoutConstraint {
             }
             LayoutConstraint::GreaterOrEqual { variable, .. } => vec![&variable.element_id],
             LayoutConstraint::LessOrEqual { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::LessOrEqualRelational { left, right, .. } => {
+                vec![&left.element_id, &right.element_id]
+            }
+            LayoutConstraint::GreaterOrEqualRelational { left, right, .. } => {
+                vec![&left.element_id, &right.element_id]
+            }
             LayoutConstraint::Midpoint { target, a, b, .. } => {
                 vec![&target.element_id, &a.element_id, &b.element_id]
             }
@@ -519,6 +543,42 @@ impl ConstraintSolver {
                 );
                 self.solver
                     .add_constraint(expr | LE(Strength::STRONG) | *value)
+                    .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                self.sources.push(source.clone());
+            }
+
+            LayoutConstraint::LessOrEqualRelational {
+                left,
+                right,
+                offset,
+                source,
+            } => {
+                let left_expr = self.get_expression(left);
+                let right_expr = self.get_expression(right);
+                let desc = format!(
+                    "{}.{:?} <= {}.{:?} + {}",
+                    left.element_id, left.property, right.element_id, right.property, offset
+                );
+                self.solver
+                    .add_constraint(left_expr | LE(Strength::STRONG) | right_expr + *offset)
+                    .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                self.sources.push(source.clone());
+            }
+
+            LayoutConstraint::GreaterOrEqualRelational {
+                left,
+                right,
+                offset,
+                source,
+            } => {
+                let left_expr = self.get_expression(left);
+                let right_expr = self.get_expression(right);
+                let desc = format!(
+                    "{}.{:?} >= {}.{:?} + {}",
+                    left.element_id, left.property, right.element_id, right.property, offset
+                );
+                self.solver
+                    .add_constraint(left_expr | GE(Strength::STRONG) | right_expr + *offset)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }

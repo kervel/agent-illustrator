@@ -702,6 +702,12 @@ pub fn solve_global(
                     target_vars.contains(&(var.element_id.clone(), LayoutProperty::CenterY))
                         || target_vars.contains(&(var.element_id.clone(), LayoutProperty::Bottom))
                 }
+                LayoutProperty::Width => {
+                    target_vars.contains(&(var.element_id.clone(), LayoutProperty::Right))
+                }
+                LayoutProperty::Height => {
+                    target_vars.contains(&(var.element_id.clone(), LayoutProperty::Bottom))
+                }
                 _ => false,
             };
 
@@ -719,37 +725,50 @@ pub fn solve_global(
         let current = get_element_property(result, &var.element_id, var.property);
         if let Some(current_value) = current {
             let delta = value - current_value;
-            if delta.abs() > 0.001 && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
-            {
-                let axis = if var.property == LayoutProperty::X {
-                    Axis::Horizontal
-                } else {
-                    Axis::Vertical
-                };
-                let target_id = element_to_template
-                    .get(&var.element_id)
-                    .filter(|template_name| result.elements.contains_key(*template_name))
-                    .cloned()
-                    .unwrap_or_else(|| var.element_id.clone());
+            if delta.abs() > 0.001 {
+                match var.property {
+                    LayoutProperty::X | LayoutProperty::Y => {
+                        let axis = if var.property == LayoutProperty::X {
+                            Axis::Horizontal
+                        } else {
+                            Axis::Vertical
+                        };
+                        let target_id = element_to_template
+                            .get(&var.element_id)
+                            .filter(|template_name| result.elements.contains_key(*template_name))
+                            .cloned()
+                            .unwrap_or_else(|| var.element_id.clone());
 
-                let axis_key = if axis == Axis::Horizontal { 0 } else { 1 };
-                if let Some(existing) = applied_deltas.get(&(target_id.clone(), axis_key)) {
-                    if (existing - delta).abs() > 0.001 {
-                        return Err(LayoutError::validation_error(format!(
-                            "conflicting global shifts for template '{}': {} vs {} on {:?}",
-                            target_id, existing, delta, axis
-                        )));
+                        let axis_key = if axis == Axis::Horizontal { 0 } else { 1 };
+                        if let Some(existing) = applied_deltas.get(&(target_id.clone(), axis_key)) {
+                            if (existing - delta).abs() > 0.001 {
+                                return Err(LayoutError::validation_error(format!(
+                                    "conflicting global shifts for template '{}': {} vs {} on {:?}",
+                                    target_id, existing, delta, axis
+                                )));
+                            }
+                            continue;
+                        }
+                        if config.trace {
+                            eprintln!(
+                                "TRACE: global shifting {} by {} on {:?}",
+                                target_id, delta, axis
+                            );
+                        }
+                        shift_element_by_name(result, &target_id, delta, axis)?;
+                        applied_deltas.insert((target_id, axis_key), delta);
                     }
-                    continue;
+                    LayoutProperty::Width | LayoutProperty::Height => {
+                        if config.trace {
+                            eprintln!(
+                                "TRACE: global resizing {} {:?} from {} to {}",
+                                var.element_id, var.property, current_value, value
+                            );
+                        }
+                        resize_element_by_name(result, &var.element_id, var.property, *value)?;
+                    }
+                    _ => {}
                 }
-                if config.trace {
-                    eprintln!(
-                        "TRACE: global shifting {} by {} on {:?}",
-                        target_id, delta, axis
-                    );
-                }
-                shift_element_by_name(result, &target_id, delta, axis)?;
-                applied_deltas.insert((target_id, axis_key), delta);
             }
         }
     }
@@ -2130,6 +2149,54 @@ fn shift_element_by_name(
     Ok(())
 }
 
+/// Resize an element's width or height by name
+fn resize_element_by_name(
+    result: &mut LayoutResult,
+    name: &str,
+    property: super::solver::LayoutProperty,
+    new_value: f64,
+) -> Result<(), LayoutError> {
+    use super::solver::LayoutProperty;
+    // Update in tree
+    for elem in &mut result.root_elements {
+        if resize_element_recursive(elem, name, property, new_value) {
+            break;
+        }
+    }
+    // Update in HashMap
+    if let Some(elem) = result.elements.get_mut(name) {
+        match property {
+            LayoutProperty::Width => elem.bounds.width = new_value,
+            LayoutProperty::Height => elem.bounds.height = new_value,
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn resize_element_recursive(
+    elem: &mut ElementLayout,
+    name: &str,
+    property: super::solver::LayoutProperty,
+    new_value: f64,
+) -> bool {
+    use super::solver::LayoutProperty;
+    if elem.id.as_ref().map(|id| id.0.as_str()) == Some(name) {
+        match property {
+            LayoutProperty::Width => elem.bounds.width = new_value,
+            LayoutProperty::Height => elem.bounds.height = new_value,
+            _ => {}
+        }
+        return true;
+    }
+    for child in &mut elem.children {
+        if resize_element_recursive(child, name, property, new_value) {
+            return true;
+        }
+    }
+    false
+}
+
 /// Recursively collect all element IDs starting from an element with the given name
 /// Returns true if the element was found
 fn collect_element_ids_recursive(elem: &ElementLayout, name: &str, ids: &mut Vec<String>) -> bool {
@@ -2626,6 +2693,14 @@ pub fn resolve_constrain_statements(
                             || target_vars
                                 .contains(&(var.element_id.clone(), LayoutProperty::Bottom))
                     }
+                    LayoutProperty::Width => {
+                        target_vars
+                            .contains(&(var.element_id.clone(), LayoutProperty::Right))
+                    }
+                    LayoutProperty::Height => {
+                        target_vars
+                            .contains(&(var.element_id.clone(), LayoutProperty::Bottom))
+                    }
                     _ => false,
                 };
 
@@ -2643,21 +2718,33 @@ pub fn resolve_constrain_statements(
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
                 let delta = value - current_value;
-                if delta.abs() > 0.001
-                    && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
-                {
-                    let axis = if var.property == LayoutProperty::X {
-                        Axis::Horizontal
-                    } else {
-                        Axis::Vertical
-                    };
-                    if config.trace {
-                        eprintln!(
-                            "TRACE: shifting {} by {} on {:?}",
-                            var.element_id, delta, axis
-                        );
+                if delta.abs() > 0.001 {
+                    match var.property {
+                        LayoutProperty::X | LayoutProperty::Y => {
+                            let axis = if var.property == LayoutProperty::X {
+                                Axis::Horizontal
+                            } else {
+                                Axis::Vertical
+                            };
+                            if config.trace {
+                                eprintln!(
+                                    "TRACE: shifting {} by {} on {:?}",
+                                    var.element_id, delta, axis
+                                );
+                            }
+                            shift_element_by_name(result, &var.element_id, delta, axis)?;
+                        }
+                        LayoutProperty::Width | LayoutProperty::Height => {
+                            if config.trace {
+                                eprintln!(
+                                    "TRACE: resizing {} {:?} from {} to {}",
+                                    var.element_id, var.property, current_value, value
+                                );
+                            }
+                            resize_element_by_name(result, &var.element_id, var.property, *value)?;
+                        }
+                        _ => {}
                     }
-                    shift_element_by_name(result, &var.element_id, delta, axis)?;
                 }
             }
         }
@@ -2872,6 +2959,12 @@ fn get_constraint_target_var(
         LayoutConstraint::Suggested { variable, .. } => {
             Some((variable.element_id.clone(), variable.property))
         }
+        LayoutConstraint::LessOrEqualRelational { left, .. } => {
+            Some((left.element_id.clone(), left.property))
+        }
+        LayoutConstraint::GreaterOrEqualRelational { left, .. } => {
+            Some((left.element_id.clone(), left.property))
+        }
     }
 }
 
@@ -2902,6 +2995,12 @@ fn get_constraint_referenced_elements(constraint: &super::solver::LayoutConstrai
         }
         LayoutConstraint::Suggested { variable, .. } => {
             vec![variable.element_id.clone()]
+        }
+        LayoutConstraint::LessOrEqualRelational { left, right, .. } => {
+            vec![left.element_id.clone(), right.element_id.clone()]
+        }
+        LayoutConstraint::GreaterOrEqualRelational { left, right, .. } => {
+            vec![left.element_id.clone(), right.element_id.clone()]
         }
     }
 }
@@ -3371,21 +3470,48 @@ fn add_element_by_name_with_per_property_strength(
                 .map_err(LayoutError::solver_error)?;
         }
 
-        // Size is always FIXED
-        solver
-            .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::width(element_name),
-                value: elem.bounds.width,
-                source: ConstraintSource::intrinsic("fixed width"),
-            })
-            .map_err(LayoutError::solver_error)?;
-        solver
-            .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::height(element_name),
-                value: elem.bounds.height,
-                source: ConstraintSource::intrinsic("fixed height"),
-            })
-            .map_err(LayoutError::solver_error)?;
+        // Size: SUGGESTED if width/height axis is targeted (e.g. contains constraint), else FIXED
+        let width_is_targeted =
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Width))
+                || target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
+        let height_is_targeted =
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Height))
+                || target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
+
+        if width_is_targeted {
+            solver
+                .add_constraint(LayoutConstraint::Suggested {
+                    variable: LayoutVariable::width(element_name),
+                    value: elem.bounds.width,
+                    source: ConstraintSource::layout(0..0, "container width"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        } else {
+            solver
+                .add_constraint(LayoutConstraint::Fixed {
+                    variable: LayoutVariable::width(element_name),
+                    value: elem.bounds.width,
+                    source: ConstraintSource::intrinsic("fixed width"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        }
+        if height_is_targeted {
+            solver
+                .add_constraint(LayoutConstraint::Suggested {
+                    variable: LayoutVariable::height(element_name),
+                    value: elem.bounds.height,
+                    source: ConstraintSource::layout(0..0, "container height"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        } else {
+            solver
+                .add_constraint(LayoutConstraint::Fixed {
+                    variable: LayoutVariable::height(element_name),
+                    value: elem.bounds.height,
+                    source: ConstraintSource::intrinsic("fixed height"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        }
     }
 
     Ok(())

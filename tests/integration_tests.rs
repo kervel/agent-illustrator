@@ -1963,3 +1963,54 @@ fn test_path_large_arc() {
         "large_arc should set large-arc-flag to 1"
     );
 }
+
+#[test]
+fn test_constrain_contains_resizes_container() {
+    let input = r#"
+        group main {
+            rect bg [width: 10, height: 10, fill: accent-light]
+            rect a [label: "A", width: 80, height: 30]
+            rect b [label: "B", width: 80, height: 30]
+            constrain a.center_x = bg.center_x - 60
+            constrain b.center_x = bg.center_x + 60
+            constrain a.center_y = bg.center_y
+            constrain b.center_y = bg.center_y
+            constrain bg contains a, b [padding: 20]
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render contains constraint");
+    // Parse bg rect dimensions from SVG
+    // bg should be resized to contain both a and b with 20px padding
+    // a is 80px wide, b is 80px wide, separated by 120px center-to-center
+    // so bg width should be >= 80 + 120 + 80 + 2*20 = 240 (allowing small tolerance)
+    let bg_width: f64 = svg
+        .lines()
+        .find(|l| l.contains("id=\"bg\""))
+        .and_then(|l| {
+            l.split("width=\"")
+                .nth(1)
+                .and_then(|s| s.split('"').next())
+                .and_then(|s| s.parse().ok())
+        })
+        .expect("should find bg width");
+    let bg_height: f64 = svg
+        .lines()
+        .find(|l| l.contains("id=\"bg\""))
+        .and_then(|l| {
+            l.split("height=\"")
+                .nth(1)
+                .and_then(|s| s.split('"').next())
+                .and_then(|s| s.parse().ok())
+        })
+        .expect("should find bg height");
+    assert!(
+        bg_width >= 230.0,
+        "bg should be wide enough to contain both elements: got {}",
+        bg_width
+    );
+    assert!(
+        bg_height >= 60.0,
+        "bg should be tall enough to contain both elements: got {}",
+        bg_height
+    );
+}

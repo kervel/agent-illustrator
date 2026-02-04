@@ -176,14 +176,12 @@ Keep via-points 30-60px from the connection line. Too far = huge loops.
 
 ### Background containers
 
-No auto-sizing exists. Place a manually-sized rect behind content:
+Use `contains` to auto-size a background rect around its content:
 ```
-rect bg [width: 500, height: 350, fill: accent-light, stroke: accent-dark, opacity: 0.3]
-// Position content inside bg with constraints
-constrain svc.center_x = bg.center_x
-constrain svc.center_y = bg.center_y
+rect bg [fill: accent-light, stroke: accent-dark, opacity: 0.3]
+constrain bg contains svc1, svc2, svc3 [padding: 30]
 ```
-Declare backgrounds FIRST in a `group` so they render behind foreground elements. After rendering, verify the boundary surrounds all elements.
+The container grows to fit all listed elements with the specified padding. Declare backgrounds FIRST in a `group` so they render behind foreground elements.
 
 ---
 
@@ -221,6 +219,10 @@ After each render, verify ALL of these. If any fail, fix and re-render:
 
 **Option B — Self-review (if subagents unavailable):** Describe every element and its spatial relationships in text. Then compare that description to the actual image. Mismatches are bugs. Go element-by-element: for each one, ask "what's wrong with THIS one?" Look for gaps, detached parts, overlapping labels, misaligned edges.
 
+**Both options MUST include these quantitative checks** (don't eyeball — compute):
+- **Containment arithmetic**: for every background/zone, compute whether all children fit within its pixel boundaries.
+- **Alignment verification**: for every connection that should be straight, verify source and target share the exact same x or y coordinate.
+
 Do NOT declare done until the adversarial review passes clean.
 
 ---
@@ -229,7 +231,6 @@ Do NOT declare done until the adversarial review passes clean.
 
 Do not attempt to use these — they will waste iteration cycles:
 
-- `contains` constraint — no auto-sizing of containers
 - `padding`, `margin`, `border`, `align` modifiers — use `constrain`, `gap`, `stroke`
 - `label` on `text` elements — use `text "content" name`, not `text name [label: "content"]`
 - Percentage-based sizing — all sizes are in pixels

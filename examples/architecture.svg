@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -59 865 734">
   <style>
     :root {
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --status-error: #f44336;
-    --foreground-light: #e0e0e0;
-    --secondary-dark: #e65100;
-    --background-3: #eeeeee;
-    --secondary-3: #ffe0b2;
-    --text-2: #666666;
-    --text-light: #ffffff;
-    --accent-2: #e3f2fd;
-    --secondary-1: #ff9800;
-    --foreground-3: #999999;
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-dark: #1a1a1a;
     --text-3: #999999;
     --text-dark: #1a1a1a;
-    --accent-1: #2196f3;
     --accent-light: #e3f2fd;
-    --text-1: #333333;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --foreground-dark: #1a1a1a;
+    --text-light: #ffffff;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --accent-3: #bbdefb;
     --background-1: #ffffff;
+    --foreground-2: #666666;
+    --foreground-1: #333333;
+    --foreground-3: #999999;
+    --foreground-light: #e0e0e0;
     --background-light: #ffffff;
     --background-dark: #333333;
-    --accent-3: #bbdefb;
+    --text-2: #666666;
+    --accent-2: #e3f2fd;
     --accent-dark: #1565c0;
-    --secondary-2: #fff3e0;
-    --secondary-light: #fff3e0;
-    --background-2: #f5f5f5;
+    --secondary-1: #ff9800;
+    --text-1: #333333;
+    --accent-1: #2196f3;
   }
 
   </style>
@@ -42,7 +42,7 @@
     <rect id="app_bg" class="ai-shape ai-rect" x="60" y="170" width="500" height="130" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="1" opacity="0.15"/>
     <text id="app_label" class="ai-shape ai-text" x="248.8" y="182" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)">Application Layer</text>
     <rect id="async_bg" class="ai-shape ai-rect" x="120" y="340" width="380" height="110" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="1" opacity="0.1"/>
-    <text id="async_label" class="ai-shape ai-text" x="367.6" y="440" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)">Async / Real-time</text>
+    <text id="async_label" class="ai-shape ai-text" x="5" y="440" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)">Async / Real-time</text>
     <rect id="data_bg" class="ai-shape ai-rect" x="0" y="495" width="620" height="120" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="1" opacity="0.15"/>
     <text id="data_label" class="ai-shape ai-text" x="10" y="507" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--secondary-dark)">Data Layer</text>
     <rect id="browser" class="ai-shape ai-rect" x="230" y="27" width="160" height="46" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="2"/>

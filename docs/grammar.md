@@ -78,7 +78,11 @@ constrain a.left = b.left              Align left edges
 constrain a.center_x = b.center_x      Center horizontally
 constrain a.top = b.bottom + 20        Position with offset
 constrain a.width = 100                Fixed dimension
-constrain container contains a, b [padding: 10]
+constrain a.center_x = midpoint(b, c)  Center between two elements
+constrain bg contains a, b [padding: 10]   Auto-size container
+
+Contains: container grows to surround listed elements with padding.
+          Container width/height become flexible; position may shift.
 
 Properties: left, right, top, bottom, center_x, center_y, width, height
 
