@@ -108,17 +108,18 @@ IMPORTANT: Do NOT use ImageMagick `convert` or `rsvg-convert` — they don't sup
 After each render, verify ALL of these. If any fail, fix and re-render:
 
 1. Run `agent-illustrator --lint diagram.ail`. The warnings are there to prevent common mistakes, but can occasionally have false positives.
-2. No overlapping elements or labels
-3. Connections don't route through text
-4. Background containers surround their content
-5. All labels readable at rendered size
-6. No excessive whitespace gaps
-7. All connections go to correct elements
-8. Elements are at least 60x35px
+2. Visual check (render the svg to png)
+2.1 No overlapping elements or labels
+2.2 Connections don't route through text
+2.3 Background containers surround their content
+2.4 All labels readable at rendered size
+2.5 No excessive whitespace gaps
+2.6 All connections go to correct elements
+2.7 Elements are at least 60x35px
 
 ### Adversarial Review (MANDATORY before declaring done)
 
-If `--lint` is available, run it first. It catches mechanical defects (overlaps, containment violations, connection crossings) instantly and deterministically. The adversarial review subagent should then focus only on subjective layout quality.
+Adversarial review only works when done by unbiased agents. therefore, subagent is the preferred technique. Note: this is an expensive step. So don't do it before you solved everything else.
 
 **Option A — Subagent review (preferred):** Render to PNG first, then spawn a subagent (haiku model is sufficient) with the PNG file path and the original prompt. The subagent MUST use the Read tool to view the image directly — do NOT describe the diagram to the subagent, that reintroduces your own bias and defeats the purpose.
 
@@ -131,13 +132,9 @@ Use this exact prompt for the subagent:
 > - Only report what you can actually see. Do not speculate about intent.
 > - If no defects found, say "CLEAN".
 
-Fix all CERTAIN defects and verify each POSSIBLE defect before fixing or dismissing. Re-render and re-submit to the subagent until it returns CLEAN or only POSSIBLE items you've confirmed are acceptable.
+Fix all CERTAIN defects and verify each POSSIBLE defect before fixing or dismissing. When you got substantial feedback, do a complete new iteration (including all other steps)
 
-**Option B — Self-review (if subagents unavailable):** Describe every element and its spatial relationships in text. Then compare that description to the actual image. Mismatches are bugs. Go element-by-element: for each one, ask "what's wrong with THIS one?" Look for gaps, detached parts, overlapping labels, misaligned edges.
-
-**Both options MUST include these quantitative checks** (don't eyeball — compute):
-- **Containment arithmetic**: for every background/zone, compute whether all children fit within its pixel boundaries.
-- **Alignment verification**: for every connection that should be straight, verify source and target share the exact same x or y coordinate.
+**Option B — Self-review (ONLY if subagents unavailable):** Describe every element and its spatial relationships in text. Then compare that description to the actual image. Mismatches are bugs. Go element-by-element: for each one, ask "what's wrong with THIS one?" Look for gaps, detached parts, overlapping labels, misaligned edges.
 
 Do NOT declare done until the adversarial review passes clean.
 
