@@ -9,11 +9,9 @@ Implemented. Checks: sibling overlap, contains violation, label overlap, connect
 Heuristics: skips opacity<1.0 zones, contains targets, text-on-shape.
 Exit code 1 on warnings, structured stderr output.
 
-### `stroke_dasharray` fixes
-Already implemented for shapes (`stroke_dasharray: "4,2"`) but has issues:
-- Keyword mapping broken: `"dashed"` outputs literally instead of `"8,4"`
-- Not applied to connections (only shapes)
-Fix both — should be quick.
+### ~~`stroke_dasharray` fixes~~ DONE
+Keyword mapping (`dashed`→`"8,4"`, `dotted`→`"2,2"`) was already working.
+Added `stroke_dasharray` to connection rendering.
 
 ### `label_position` / `label_offset` on connections
 Connection labels always sit at the midpoint, causing collisions when paths cross.

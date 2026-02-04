@@ -940,6 +940,9 @@ fn format_connection_styles(styles: &ResolvedStyles) -> String {
     } else {
         parts.push(r#" stroke-width="2""#.to_string());
     }
+    if let Some(dash) = &styles.stroke_dasharray {
+        parts.push(format!(r#" stroke-dasharray="{}""#, dash));
+    }
     parts.join("")
 }
 
