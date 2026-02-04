@@ -1,6 +1,6 @@
-# Agent Illustrator Skill - Design Process
+# Agent Illustrator Skill
 
-Create diagrams with Agent Illustrator DSL. Output raw AIL code only.
+Create diagrams with Agent Illustrator.
 
 ## When to Use AIL vs Raw SVG
 
@@ -23,11 +23,15 @@ For diagrams with more than 8 elements, you MUST use constraint-based positionin
 (as shown in Example 6 of --examples). Do NOT use nested row/col for the main layout
 of complex diagrams — it creates overlapping elements and bad connection routing.
 
-## Design Process
+---
+
+## Part 1: Process
+
+### Design Phases
 
 Follow these phases IN ORDER. Write each phase as a block comment before proceeding.
 
-### Phase 1: INTENT
+#### Phase 1: INTENT
 ```
 /* INTENT
    What is being communicated?
@@ -36,7 +40,7 @@ Follow these phases IN ORDER. Write each phase as a block comment before proceed
 */
 ```
 
-### Phase 2: GLOBAL DESIGN (Metaphor)
+#### Phase 2: GLOBAL DESIGN (Metaphor)
 ```
 /* GLOBAL DESIGN
    What visual metaphor captures the essence?
@@ -45,7 +49,7 @@ Follow these phases IN ORDER. Write each phase as a block comment before proceed
 */
 ```
 
-### Phase 3: LAYOUT PLAN
+#### Phase 3: LAYOUT PLAN
 ```
 /* LAYOUT PLAN
    What goes where spatially?
@@ -55,7 +59,7 @@ Follow these phases IN ORDER. Write each phase as a block comment before proceed
 */
 ```
 
-### Phase 4: AIL FEATURE MAPPING
+#### Phase 4: AIL FEATURE MAPPING
 ```
 /* AIL FEATURES
    Elements:
@@ -69,7 +73,7 @@ Follow these phases IN ORDER. Write each phase as a block comment before proceed
 */
 ```
 
-### Phase 5: DETAIL NOTES
+#### Phase 5: DETAIL NOTES
 ```
 /* DETAILS
    Edge cases or special considerations
@@ -78,12 +82,10 @@ Follow these phases IN ORDER. Write each phase as a block comment before proceed
 */
 ```
 
-### Phase 6: IMPLEMENTATION
+#### Phase 6: IMPLEMENTATION
 Write the AIL code based on your design.
 
----
-
-## Required Iteration Workflow
+### Iteration Workflow
 
 Every diagram requires multiple iterations. Follow this cycle:
 
@@ -101,111 +103,11 @@ Use a phased approach for complex diagrams:
 
 IMPORTANT: Do NOT use ImageMagick `convert` or `rsvg-convert` — they don't support CSS variables. Chrome headless is required.
 
----
-
-## AIL Syntax Quick Reference
-
-The `--grammar` output is the authoritative syntax reference. Below are the most commonly confused points.
-
-### Key syntax rules
-1. Modifiers go in `[brackets]` AFTER keyword, BEFORE `{`
-2. Group names are identifiers: `group pipeline` NOT `group "pipeline"`
-3. Forbidden element names: `left`, `right`, `top`, `bottom`, `x`, `y`, `width`, `height`
-4. Text syntax: `text "content" name` — content string BEFORE the name
-
-### Constraints
-```
-constrain a.center_x = b.center_x        // align centers
-constrain a.bottom = b.top - 10          // 10px gap
-constrain a.center_x = midpoint(b, c)    // center between two elements
-```
-
-### Shape and routing selection
-
-| Represents | Shape |
-|------------|-------|
-| Process, action, step | rect |
-| Data, storage, document | ellipse |
-| State, event, node | circle |
-
-| Situation | Routing |
-|-----------|---------|
-| Sequential flow | default (orthogonal) |
-| Feedback, loop-back | curved |
-| Crossing another path | curved |
-| Shortcut, skip | direct |
-
----
-
-## Template Best Practices
-
-- **Lead extensions**: Add short rects extending from shape edges as anchor points. See Example 5 in `--examples`.
-- **Constraints over coordinates**: Express spatial relationships as constraints, not hardcoded `x`/`y` values.
-- **Export sparingly**: Use `export` to expose internal elements. Access as `instance_element` (e.g., `c1_body`).
-- **Label placement**: Offset labels above/below elements with constraints to avoid connection overlap. Keep connection labels short (1-2 words).
-- **Template composition**: Templates can instantiate other templates. Internal elements stay with the instance when constrained.
-- **Test in isolation**: Before integrating a template, test it standalone in a minimal file. One component per test image.
-
----
-
-## Layout Strategy
-
-### DEFAULT: Constraint-based positioning
-
-For >8 elements, wrap in a `group` and position everything with `constrain`. `group` uses column layout by default — constrain every element to override. Unconstrained elements fall back to column stacking. See Example 6 in `--examples`.
-
-### ALTERNATIVE: Row/col for simple diagrams (≤8 elements)
-
-WARNING: Nested `row`/`col` breaks down with cross-group connections. Switch to constraints if elements overlap.
-
-### Sizing heuristics
-- Components: ~120-150px wide, ~50px tall
-- Gaps: ~40-60px horizontal, ~60-80px vertical
-- Background containers: add ~60px padding beyond content on each side
-- Minimum readable element: 60x35px, font_size 10
-
-### Via-point routing
-Use invisible elements as curve control points:
-```
-circle via_pt [size: 1, opacity: 0]
-constrain via_pt.center_x = midpoint(source, target)
-constrain via_pt.center_y = source.center_y - 40
-source.anchor -> target.anchor [routing: curved, via: via_pt]
-```
-Keep via-points 30-60px from the connection line. Too far = huge loops.
-
-### Background containers
-
-Use `contains` to auto-size a background rect around its content:
-```
-rect bg [fill: accent-light, stroke: accent-dark, opacity: 0.3]
-constrain bg contains svc1, svc2, svc3 [padding: 30]
-```
-The container grows to fit all listed elements with the specified padding. Declare backgrounds FIRST in a `group` so they render behind foreground elements.
-
----
-
-## Colors
-
-Use semantic palette colors. NEVER use `*-dark` as a fill — it renders near-black.
-
-| Purpose | Use |
-|---------|-----|
-| Fills/backgrounds | `accent-light`, `secondary-light` |
-| Moderate fills | `accent-1`, `accent-2` |
-| Strokes/borders | `accent-dark`, `secondary-dark` |
-| Primary lines/text | `foreground-1` |
-| Secondary lines | `foreground-2`, `foreground-3` |
-
-Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2`, `accent-light`, `accent-dark`, `secondary-light`, `secondary-dark`, `text-1`, `text-2`, `text-3`.
-
----
-
-## Self-Assessment Checklist
+### Self-Assessment Checklist
 
 After each render, verify ALL of these. If any fail, fix and re-render:
 
-1. Run `agent-illustrator --lint diagram.ail` and fix all warnings before proceeding to adversarial review
+1. Run `agent-illustrator --lint diagram.ail`. The warnings are there to prevent common mistakes, but can occasionally have false positives.
 2. No overlapping elements or labels
 3. Connections don't route through text
 4. Background containers surround their content
@@ -241,7 +143,103 @@ Do NOT declare done until the adversarial review passes clean.
 
 ---
 
-## What Does NOT Exist
+## Part 2: Reference
+
+### AIL Syntax Quick Reference
+
+The `--grammar` output is the authoritative syntax reference. Below are the most commonly confused points.
+
+#### Key syntax rules
+1. Modifiers go in `[brackets]` AFTER keyword, BEFORE `{`
+2. Group names are identifiers: `group pipeline` NOT `group "pipeline"`
+3. Forbidden element names: `left`, `right`, `top`, `bottom`, `x`, `y`, `width`, `height`
+4. Text syntax: `text "content" name` — content string BEFORE the name
+
+#### Constraints
+```
+constrain a.center_x = b.center_x        // align centers
+constrain a.bottom = b.top - 10          // 10px gap
+constrain a.center_x = midpoint(b, c)    // center between two elements
+```
+
+#### Shape and routing selection
+
+| Represents | Shape |
+|------------|-------|
+| Process, action, step | rect |
+| Data, storage, document | ellipse |
+| State, event, node | circle |
+
+| Situation | Routing |
+|-----------|---------|
+| Sequential flow | default (orthogonal) |
+| Feedback, loop-back | curved |
+| Crossing another path | curved |
+| Shortcut, skip | direct |
+
+### Layout Strategy
+
+#### DEFAULT: Constraint-based positioning
+
+For >8 elements, wrap in a `group` and position everything with `constrain`. `group` uses column layout by default — constrain every element to override. Unconstrained elements fall back to column stacking. See Example 6 in `--examples`.
+
+#### ALTERNATIVE: Row/col for simple diagrams (≤8 elements)
+
+WARNING: Nested `row`/`col` breaks down with cross-group connections. Switch to constraints if elements overlap.
+
+#### Sizing heuristics
+- Components: ~120-150px wide, ~50px tall
+- Gaps: ~40-60px horizontal, ~60-80px vertical
+- Background containers: add ~60px padding beyond content on each side
+- Minimum readable element: 60x35px, font_size 10
+
+#### Via-point routing
+Use invisible elements as curve control points:
+```
+circle via_pt [size: 1, opacity: 0]
+constrain via_pt.center_x = midpoint(source, target)
+constrain via_pt.center_y = source.center_y - 40
+source.anchor -> target.anchor [routing: curved, via: via_pt]
+```
+Keep via-points 30-60px from the connection line. Too far = huge loops.
+
+#### Background containers
+
+Use `contains` to auto-size a background rect around its content:
+```
+rect bg [fill: accent-light, stroke: accent-dark, opacity: 0.3]
+constrain bg contains svc1, svc2, svc3 [padding: 30]
+```
+The container grows to fit all listed elements with the specified padding. Declare backgrounds FIRST in a `group` so they render behind foreground elements.
+
+### Template Best Practices
+
+- **Lead extensions**: Add short rects extending from shape edges as anchor points. See Example 5 in `--examples`.
+- **Constraints over coordinates**: Express spatial relationships as constraints, not hardcoded `x`/`y` values.
+- **Export sparingly**: Use `export` to expose internal elements. Access as `instance_element` (e.g., `c1_body`).
+- **Label placement**: Offset labels above/below elements with constraints to avoid connection overlap. Keep connection labels short (1-2 words).
+- **Template composition**: Templates can instantiate other templates. Internal elements stay with the instance when constrained.
+- **Test in isolation**: Before integrating a template, test it standalone in a minimal file. One component per test image.
+
+### Colors
+
+Use semantic palette colors. NEVER use `*-dark` as a fill — it renders near-black.
+
+| Purpose | Use |
+|---------|-----|
+| Fills/backgrounds | `accent-light`, `secondary-light` |
+| Moderate fills | `accent-1`, `accent-2` |
+| Strokes/borders | `accent-dark`, `secondary-dark` |
+| Primary lines/text | `foreground-1` |
+| Secondary lines | `foreground-2`, `foreground-3` |
+
+Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2`, `accent-light`, `accent-dark`, `secondary-light`, `secondary-dark`, `text-1`, `text-2`, `text-3`.
+
+---
+
+## Part 3: Gotchas
+
+### What Does NOT Exist
 
 Do not attempt to use these — they will waste iteration cycles:
 
@@ -249,9 +247,7 @@ Do not attempt to use these — they will waste iteration cycles:
 - `label` on `text` elements — use `text "content" name`, not `text name [label: "content"]`
 - Percentage-based sizing — all sizes are in pixels
 
----
-
-## Common Pitfalls
+### Common Pitfalls
 
 1. **Don't guess syntax** — fetch `--grammar` first.
 2. **Don't skip visual verification** — render to PNG and check every time.
