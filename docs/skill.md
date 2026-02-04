@@ -215,7 +215,7 @@ After each render, verify ALL of these. If any fail, fix and re-render:
 6. All connections go to correct elements
 7. Elements are at least 60x35px
 
-Do NOT declare done until all pass.
+Then do an **adversarial review**: for each element, ask "what's wrong with THIS one?" Look for gaps between shapes that should be continuous, detached parts, misaligned edges. Fix and re-render until nothing is found. Do NOT declare done until both passes are clean.
 
 ---
 
