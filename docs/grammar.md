@@ -9,11 +9,26 @@ ellipse [name] [modifiers]   Ellipse
 text "content" [name] [mod]  Text element
 path [name] [mod] { ... }    Custom shape with vertices/arcs
 
+PATH COMMANDS (inside path { ... })
+-----------------------------------
+vertex name [x: N, y: N]               Define point (relative to path origin)
+line_to name [x: N, y: N]              Straight line to point
+arc_to name [x: N, y: N, ...]          Arc to point
+curve_to name [via: ctrl, x: N, y: N]  Quadratic Bezier to point
+close                                   Close path to first vertex
+
+Arc modifiers:
+    radius: <number>              Arc radius (default: auto from bulge)
+    bulge: <number>               Arc curvature factor (default: 0.414)
+    sweep: clockwise|cw           Arc direction (default)
+    sweep: counterclockwise|ccw
+    large_arc: true|false         Use major arc (default: false)
+
 LAYOUTS
 -------
 row [name] [mod] { ... }     Horizontal arrangement
 col [name] [mod] { ... }     Vertical arrangement
-group [name] [mod] { ... }   Semantic grouping (no layout)
+group [name] [mod] { ... }   Grouping (column layout, use constraints to override)
 stack [name] [mod] { ... }   Overlapping elements
 
 CONNECTIONS

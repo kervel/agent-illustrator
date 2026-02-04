@@ -406,7 +406,7 @@ fn get_or_create_vertex(
 fn compute_arc_segment(from: Point, to: Point, params: &ArcParams) -> PathSegment {
     match params {
         ArcParams::Bulge(bulge) => compute_bulge_arc(from, to, *bulge),
-        ArcParams::Radius { radius, sweep } => compute_radius_arc(from, to, *radius, *sweep),
+        ArcParams::Radius { radius, sweep, large_arc } => compute_radius_arc(from, to, *radius, *sweep, *large_arc),
     }
 }
 
@@ -451,7 +451,7 @@ fn compute_bulge_arc(from: Point, to: Point, bulge: f64) -> PathSegment {
 }
 
 /// Compute arc from explicit radius and sweep direction
-fn compute_radius_arc(from: Point, to: Point, radius: f64, sweep: SweepDirection) -> PathSegment {
+fn compute_radius_arc(from: Point, to: Point, radius: f64, sweep: SweepDirection, large_arc: bool) -> PathSegment {
     let dx = to.x - from.x;
     let dy = to.y - from.y;
     let chord = (dx * dx + dy * dy).sqrt();
@@ -469,7 +469,7 @@ fn compute_radius_arc(from: Point, to: Point, radius: f64, sweep: SweepDirection
     PathSegment::ArcTo {
         end: to,
         radius: r,
-        large_arc: false, // Always use the smaller arc
+        large_arc,
         sweep: matches!(sweep, SweepDirection::Clockwise),
     }
 }
@@ -535,7 +535,7 @@ fn compute_arc_apex(
 
     // Compute sagitta (bulge height) based on arc parameters
     let (sagitta, clockwise) = match params {
-        ArcParams::Radius { radius, sweep } => {
+        ArcParams::Radius { radius, sweep, .. } => {
             let r = *radius;
             if chord_len > 2.0 * r {
                 // Radius too small - use semicircle
@@ -761,6 +761,7 @@ mod tests {
                         ArcParams::Radius {
                             radius: 30.0,
                             sweep: SweepDirection::Clockwise,
+                            large_arc: false,
                         },
                     ),
                 ],
@@ -775,6 +776,38 @@ mod tests {
         assert!(
             d.contains(" A30.00 30.00 0 0 1"),
             "Should have correct arc params"
+        );
+    }
+
+    #[test]
+    fn test_arc_with_large_arc() {
+        let decl = PathDecl {
+            name: None,
+            body: PathBody {
+                commands: vec![
+                    make_vertex("a", None, None),
+                    make_arc_to(
+                        "b",
+                        Some(50.0),
+                        Some(0.0),
+                        ArcParams::Radius {
+                            radius: 30.0,
+                            sweep: SweepDirection::Clockwise,
+                            large_arc: true,
+                        },
+                    ),
+                ],
+            },
+            modifiers: vec![],
+        };
+
+        let origin = Point::new(0.0, 0.0);
+        let resolved = resolve_path(&decl, origin);
+        let d = resolved.to_svg_d();
+
+        assert!(
+            d.contains(" A30.00 30.00 0 1 1"),
+            "large_arc should set large-arc-flag to 1, got: {d}"
         );
     }
 

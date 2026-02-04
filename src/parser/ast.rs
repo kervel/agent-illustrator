@@ -569,8 +569,8 @@ pub enum SweepDirection {
 /// Arc curve parameters
 #[derive(Debug, Clone, PartialEq)]
 pub enum ArcParams {
-    /// Radius-based arc: `[radius: 20, sweep: clockwise]`
-    Radius { radius: f64, sweep: SweepDirection },
+    /// Radius-based arc: `[radius: 20, sweep: clockwise, large_arc: true]`
+    Radius { radius: f64, sweep: SweepDirection, large_arc: bool },
     /// Bulge-based arc: `[bulge: 0.3]`
     Bulge(f64),
 }
