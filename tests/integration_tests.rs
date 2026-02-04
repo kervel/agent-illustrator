@@ -871,6 +871,52 @@ fn test_connection_label_at_renders() {
 }
 
 // ============================================================================
+// Connection Label Offset Tests
+// ============================================================================
+
+#[test]
+fn test_connection_label_offset_parses() {
+    let input = r#"
+        rect a
+        rect b
+        a -> b [label: "Data", label_offset: 25]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with label_offset");
+    assert_eq!(doc.statements.len(), 3);
+
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            let conn = &conns[0];
+            assert!(conn.modifiers.iter().any(|m| matches!(
+                m.node.key.node,
+                agent_illustrator::parser::ast::StyleKey::LabelOffset
+            )));
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}
+
+#[test]
+fn test_connection_label_offset_renders() {
+    use agent_illustrator::render;
+
+    let input = r#"
+        rect a [label: "A"]
+        rect b [label: "B"]
+        constrain b.left = a.right + 200
+        constrain b.center_y = a.center_y
+        a -> b [label: "offset label", label_offset: 25]
+    "#;
+
+    let svg = render(input).expect("Should render connection with label_offset");
+    assert!(
+        svg.contains("offset label"),
+        "Label text should appear in SVG output"
+    );
+}
+
+// ============================================================================
 // Symbolic Color Tests
 // ============================================================================
 

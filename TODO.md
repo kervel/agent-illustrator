@@ -13,11 +13,10 @@ Exit code 1 on warnings, structured stderr output.
 Keyword mapping (`dashed`→`"8,4"`, `dotted`→`"2,2"`) was already working.
 Added `stroke_dasharray` to connection rendering.
 
-### `label_position` / `label_offset` on connections
+### ~~`label_position` / `label_offset` on connections~~ DONE
 Connection labels always sit at the midpoint, causing collisions when paths cross.
-- `label_position: 0.3` — fraction along the path (0.0 = start, 1.0 = end)
+- `label_position: 0.3` — implemented as `label_at`
 - `label_offset: 15` — perpendicular offset from the line
-Would eliminate a common iteration sink.
 
 ## Medium Priority
 

@@ -47,6 +47,7 @@ Connection modifiers:
     via: element            Route curve through element's center
     label: "text"           Add label (at midpoint or curve apex)
     label_at: <number>      Label position along path (0.0=start, 1.0=end, default 0.5)
+    label_offset: <number>  Perpendicular distance from path to label (default 10)
 
 STYLE MODIFIERS
 ---------------

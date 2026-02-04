@@ -300,6 +300,8 @@ pub enum StyleKey {
     Rotation,
     /// Label position along connection path (0.0=start, 1.0=end, default 0.5)
     LabelAt,
+    /// Perpendicular offset distance for connection labels (default 10.0)
+    LabelOffset,
     Custom(String),
 }
 

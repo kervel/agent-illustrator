@@ -665,7 +665,7 @@ pub fn route_connection_with_anchors(
             // Build waypoint chain: [start, via0, via1, ..., end]
             let mut waypoints = Vec::with_capacity(via_points.len() + 2);
             waypoints.push(start);
-            waypoints.extend_from_slice(&via_points);
+            waypoints.extend_from_slice(via_points);
             waypoints.push(end);
 
             let n = waypoints.len(); // at least 3
@@ -1101,6 +1101,24 @@ pub enum LabelPosition {
     Center,
 }
 
+/// Compute perpendicular offset position and appropriate text anchor.
+/// `perp_x`/`perp_y` is the unit perpendicular vector (right side of travel direction).
+/// Positive `offset` goes to the right of travel, negative to the left.
+fn perpendicular_label_position(
+    base_x: f64, base_y: f64,
+    perp_x: f64, perp_y: f64,
+    offset: f64,
+) -> (f64, f64, TextAnchor) {
+    let x = base_x + perp_x * offset;
+    let y = base_y + perp_y * offset;
+    let anchor = if perp_x.abs() > perp_y.abs() {
+        if perp_x * offset > 0.0 { TextAnchor::Start } else { TextAnchor::End }
+    } else {
+        TextAnchor::Middle
+    };
+    (x, y, anchor)
+}
+
 /// Extract connection label (wrapper for tests - returns just the label without tracking references)
 #[cfg(test)]
 fn extract_connection_label(
@@ -1127,7 +1145,7 @@ fn extract_connection_label_with_ref(
                 // Support identifier references: [label: my_shape]
                 StyleValue::Identifier(id) => {
                     // Look up the element by name and extract text content
-                    result.get_element_by_name(&id.0).and_then(|element| {
+                    result.get_element_by_name(&id.0).map(|element| {
                         // Mark this element ID for removal from rendering
                         label_ref_id = Some(id.0.clone());
                         // Capture styles from the referenced element
@@ -1135,10 +1153,10 @@ fn extract_connection_label_with_ref(
                         if let ElementType::Shape(ShapeType::Text { content }) =
                             &element.element_type
                         {
-                            Some(content.clone())
+                            content.clone()
                         } else {
                             // If it's not a text shape, use the identifier as the label text
-                            Some(id.0.clone())
+                            id.0.clone()
                         }
                     })
                 }
@@ -1171,6 +1189,18 @@ fn extract_connection_label_with_ref(
         }
     });
 
+    // Extract label_offset modifier (perpendicular distance from path, default 10.0)
+    let label_offset = modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::LabelOffset) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(value.max(0.0)),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }).unwrap_or(10.0);
+
     // Extract label_at modifier (fraction along path, default 0.5)
     let label_at = modifiers.iter().find_map(|m| {
         if matches!(m.node.key.node, StyleKey::LabelAt) {
@@ -1188,45 +1218,35 @@ fn extract_connection_label_with_ref(
         // Cubic Bezier: calculate point at t=label_at
         let t = label_at;
         let mt = 1.0 - t;
-        let start = path[0];
-        let end = path[3];
+        let p0 = path[0];
+        let p1 = path[1];
+        let p2 = path[2];
+        let p3 = path[3];
         let base_mid_x =
-            mt*mt*mt * path[0].x + 3.0*mt*mt*t * path[1].x + 3.0*mt*t*t * path[2].x + t*t*t * path[3].x;
+            mt*mt*mt * p0.x + 3.0*mt*mt*t * p1.x + 3.0*mt*t*t * p2.x + t*t*t * p3.x;
         let base_mid_y =
-            mt*mt*mt * path[0].y + 3.0*mt*mt*t * path[1].y + 3.0*mt*t*t * path[2].y + t*t*t * path[3].y;
+            mt*mt*mt * p0.y + 3.0*mt*mt*t * p1.y + 3.0*mt*t*t * p2.y + t*t*t * p3.y;
 
-        // Position based on explicit label_position or auto-detect
+        // Compute tangent via B'(t) derivative
+        let dt_x = 3.0*mt*mt*(p1.x - p0.x) + 6.0*mt*t*(p2.x - p1.x) + 3.0*t*t*(p3.x - p2.x);
+        let dt_y = 3.0*mt*mt*(p1.y - p0.y) + 6.0*mt*t*(p2.y - p1.y) + 3.0*t*t*(p3.y - p2.y);
+        let tangent_len = (dt_x * dt_x + dt_y * dt_y).sqrt();
+
+        // Right-side perpendicular (clockwise 90°): (ty, -tx) normalized
+        let (perp_x, perp_y) = if tangent_len > 0.001 {
+            (dt_y / tangent_len, -dt_x / tangent_len)
+        } else {
+            (1.0, 0.0) // degenerate fallback: offset to the right in screen space
+        };
+
         match label_position {
-            Some(LabelPosition::Right) => (base_mid_x + 10.0, base_mid_y, TextAnchor::Start),
-            Some(LabelPosition::Left) => (base_mid_x - 10.0, base_mid_y, TextAnchor::End),
+            Some(LabelPosition::Right) => perpendicular_label_position(base_mid_x, base_mid_y, perp_x, perp_y, label_offset),
+            Some(LabelPosition::Left) => perpendicular_label_position(base_mid_x, base_mid_y, perp_x, perp_y, -label_offset),
             Some(LabelPosition::Center) => (base_mid_x, base_mid_y, TextAnchor::Middle),
-            None => {
-                // For curves, offset perpendicular to the curve direction
-                // Use a small offset from the apex
-                let dx = end.x - start.x;
-                let dy = end.y - start.y;
-
-                if dy.abs() > dx.abs() {
-                    // Mostly vertical curve: position label to the side
-                    if base_mid_x < (start.x + end.x) / 2.0 {
-                        (base_mid_x - 10.0, base_mid_y, TextAnchor::End)
-                    } else {
-                        (base_mid_x + 10.0, base_mid_y, TextAnchor::Start)
-                    }
-                } else {
-                    // Mostly horizontal curve: position label above/below the apex
-                    if base_mid_y < (start.y + end.y) / 2.0 {
-                        (base_mid_x, base_mid_y - 10.0, TextAnchor::Middle)
-                    } else {
-                        (base_mid_x, base_mid_y + 15.0, TextAnchor::Middle)
-                    }
-                }
-            }
+            None => perpendicular_label_position(base_mid_x, base_mid_y, perp_x, perp_y, label_offset),
         }
     } else if path.len() >= 2 {
         // Other paths: interpolate along polyline at label_at fraction
-        let start = path[0];
-        let end = path[path.len() - 1];
 
         // Compute total polyline length and find point at label_at fraction
         let mut segment_lengths: Vec<f64> = Vec::with_capacity(path.len() - 1);
@@ -1243,29 +1263,33 @@ fn extract_connection_label_with_ref(
         let mut accumulated = 0.0;
         let mut base_mid_x = path[0].x;
         let mut base_mid_y = path[0].y;
+        let mut seg_dx = 0.0;
+        let mut seg_dy = 0.0;
         for (i, &seg_len) in segment_lengths.iter().enumerate() {
             if accumulated + seg_len >= target_dist {
                 let frac = if seg_len > 0.0 { (target_dist - accumulated) / seg_len } else { 0.0 };
                 base_mid_x = path[i].x + frac * (path[i + 1].x - path[i].x);
                 base_mid_y = path[i].y + frac * (path[i + 1].y - path[i].y);
+                seg_dx = path[i + 1].x - path[i].x;
+                seg_dy = path[i + 1].y - path[i].y;
                 break;
             }
             accumulated += seg_len;
         }
 
+        // Compute right-side perpendicular from segment tangent
+        let tangent_len = (seg_dx * seg_dx + seg_dy * seg_dy).sqrt();
+        let (perp_x, perp_y) = if tangent_len > 0.001 {
+            (seg_dy / tangent_len, -seg_dx / tangent_len)
+        } else {
+            (1.0, 0.0) // degenerate fallback
+        };
+
         match label_position {
-            Some(LabelPosition::Right) => (base_mid_x + 10.0, base_mid_y, TextAnchor::Start),
-            Some(LabelPosition::Left) => (base_mid_x - 10.0, base_mid_y, TextAnchor::End),
+            Some(LabelPosition::Right) => perpendicular_label_position(base_mid_x, base_mid_y, perp_x, perp_y, label_offset),
+            Some(LabelPosition::Left) => perpendicular_label_position(base_mid_x, base_mid_y, perp_x, perp_y, -label_offset),
             Some(LabelPosition::Center) => (base_mid_x, base_mid_y, TextAnchor::Middle),
-            None => {
-                let dx = (end.x - start.x).abs();
-                let dy = (end.y - start.y).abs();
-                if dy > dx {
-                    (base_mid_x + 10.0, base_mid_y, TextAnchor::Start)
-                } else {
-                    (base_mid_x, base_mid_y - 10.0, TextAnchor::Middle)
-                }
-            }
+            None => perpendicular_label_position(base_mid_x, base_mid_y, perp_x, perp_y, label_offset),
         }
     } else if !path.is_empty() {
         (path[0].x, path[0].y, TextAnchor::Middle)
@@ -1687,5 +1711,66 @@ mod tests {
         // Verify the Curved variant exists and is distinct
         assert_ne!(RoutingMode::Curved, RoutingMode::Direct);
         assert_ne!(RoutingMode::Curved, RoutingMode::Orthogonal);
+    }
+
+    fn make_label_modifiers_with_offset(label: &str, offset: f64) -> Vec<Spanned<StyleModifier>> {
+        let mut modifiers = make_label_modifiers(label, None);
+        modifiers.push(Spanned::new(
+            StyleModifier {
+                key: Spanned::new(StyleKey::LabelOffset, 0..12),
+                value: Spanned::new(StyleValue::Number { value: offset, unit: None }, 14..16),
+            },
+            0..16,
+        ));
+        modifiers
+    }
+
+    #[test]
+    fn test_label_offset_custom_value() {
+        // Vertical path with custom label_offset
+        let path = vec![Point::new(50.0, 0.0), Point::new(50.0, 100.0)];
+        let modifiers = make_label_modifiers_with_offset("Test", 25.0);
+
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
+
+        // Auto-detect for vertical: right side, offset should be 25
+        assert_eq!(label.position.x, 75.0, "Custom offset 25 should add 25 to x");
+    }
+
+    #[test]
+    fn test_label_offset_zero() {
+        // Vertical path with zero offset — label on the path
+        let path = vec![Point::new(50.0, 0.0), Point::new(50.0, 100.0)];
+        let modifiers = make_label_modifiers_with_offset("Test", 0.0);
+
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
+
+        assert_eq!(label.position.x, 50.0, "Zero offset should keep label on path");
+    }
+
+    #[test]
+    fn test_label_offset_default() {
+        // Vertical path without label_offset — should default to 10
+        let path = vec![Point::new(50.0, 0.0), Point::new(50.0, 100.0)];
+        let modifiers = make_label_modifiers("Test", None);
+
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
+
+        assert_eq!(label.position.x, 60.0, "Default offset should be 10");
+    }
+
+    #[test]
+    fn test_label_offset_diagonal_path() {
+        // Diagonal path: tangent-relative offset should be perpendicular to the diagonal
+        let path = vec![Point::new(0.0, 0.0), Point::new(100.0, 100.0)];
+        let modifiers = make_label_modifiers("Test", None);
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
+        // Tangent is (1,1)/sqrt(2), right perp is (1,-1)/sqrt(2)
+        // Offset 10 along perp: (50 + 10/sqrt(2), 50 - 10/sqrt(2))
+        let expected_offset = 10.0 / 2.0_f64.sqrt();
+        assert!((label.position.x - (50.0 + expected_offset)).abs() < 0.01,
+            "Diagonal x: expected {}, got {}", 50.0 + expected_offset, label.position.x);
+        assert!((label.position.y - (50.0 - expected_offset)).abs() < 0.01,
+            "Diagonal y: expected {}, got {}", 50.0 - expected_offset, label.position.y);
     }
 }
