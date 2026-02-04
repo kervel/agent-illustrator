@@ -298,6 +298,8 @@ pub enum StyleKey {
     StrokeDasharray,
     /// Rotation angle in degrees (clockwise positive)
     Rotation,
+    /// Label position along connection path (0.0=start, 1.0=end, default 0.5)
+    LabelAt,
     Custom(String),
 }
 

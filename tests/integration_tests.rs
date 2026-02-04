@@ -822,6 +822,55 @@ fn test_connection_label_without_position() {
 }
 
 // ============================================================================
+// Connection Label At Tests
+// ============================================================================
+
+#[test]
+fn test_connection_label_at_parses() {
+    // Feature: label_at modifier parses as a StyleKey
+    let input = r#"
+        rect a
+        rect b
+        a -> b [label: "Near Start", label_at: 0.2]
+    "#;
+
+    let doc = parse(input).expect("Should parse connection with label_at");
+    assert_eq!(doc.statements.len(), 3);
+
+    match &doc.statements[2].node {
+        agent_illustrator::parser::ast::Statement::Connection(conns) => {
+            let conn = &conns[0];
+            assert_eq!(conn.modifiers.len(), 2);
+            assert!(conn.modifiers.iter().any(|m| matches!(
+                m.node.key.node,
+                agent_illustrator::parser::ast::StyleKey::LabelAt
+            )));
+        }
+        _ => panic!("Expected connection statement"),
+    }
+}
+
+#[test]
+fn test_connection_label_at_renders() {
+    use agent_illustrator::render;
+
+    // label_at: 0.2 should place label closer to start than default (0.5)
+    let input = r#"
+        rect a [label: "A"]
+        rect b [label: "B"]
+        constrain b.left = a.right + 200
+        constrain b.center_y = a.center_y
+        a -> b [label: "near start", label_at: 0.2]
+    "#;
+
+    let svg = render(input).expect("Should render connection with label_at");
+    assert!(
+        svg.contains("near start"),
+        "Label text should appear in SVG output"
+    );
+}
+
+// ============================================================================
 // Symbolic Color Tests
 // ============================================================================
 

@@ -1171,16 +1171,29 @@ fn extract_connection_label_with_ref(
         }
     });
 
-    // Calculate label position - for curves, use the actual curve midpoint
+    // Extract label_at modifier (fraction along path, default 0.5)
+    let label_at = modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::LabelAt) {
+            match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(value.clamp(0.0, 1.0)),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }).unwrap_or(0.5);
+
+    // Calculate label position - for curves, use the actual curve point at label_at
     let (mid_x, mid_y, anchor) = if path.len() == 4 {
-        // Cubic Bezier: calculate actual midpoint at t=0.5
-        // B(0.5) = 0.125*P0 + 0.375*P1 + 0.375*P2 + 0.125*P3
+        // Cubic Bezier: calculate point at t=label_at
+        let t = label_at;
+        let mt = 1.0 - t;
         let start = path[0];
         let end = path[3];
         let base_mid_x =
-            0.125 * path[0].x + 0.375 * path[1].x + 0.375 * path[2].x + 0.125 * path[3].x;
+            mt*mt*mt * path[0].x + 3.0*mt*mt*t * path[1].x + 3.0*mt*t*t * path[2].x + t*t*t * path[3].x;
         let base_mid_y =
-            0.125 * path[0].y + 0.375 * path[1].y + 0.375 * path[2].y + 0.125 * path[3].y;
+            mt*mt*mt * path[0].y + 3.0*mt*mt*t * path[1].y + 3.0*mt*t*t * path[2].y + t*t*t * path[3].y;
 
         // Position based on explicit label_position or auto-detect
         match label_position {
@@ -1211,14 +1224,34 @@ fn extract_connection_label_with_ref(
             }
         }
     } else if path.len() >= 2 {
-        // Other paths: use midpoint of path points
+        // Other paths: interpolate along polyline at label_at fraction
         let start = path[0];
         let end = path[path.len() - 1];
-        let mid_idx = path.len() / 2;
-        let p1 = path[mid_idx.saturating_sub(1)];
-        let p2 = path[mid_idx.min(path.len() - 1)];
-        let base_mid_x = (p1.x + p2.x) / 2.0;
-        let base_mid_y = (p1.y + p2.y) / 2.0;
+
+        // Compute total polyline length and find point at label_at fraction
+        let mut segment_lengths: Vec<f64> = Vec::with_capacity(path.len() - 1);
+        let mut total_length = 0.0;
+        for i in 0..path.len() - 1 {
+            let dx = path[i + 1].x - path[i].x;
+            let dy = path[i + 1].y - path[i].y;
+            let len = (dx * dx + dy * dy).sqrt();
+            segment_lengths.push(len);
+            total_length += len;
+        }
+
+        let target_dist = label_at * total_length;
+        let mut accumulated = 0.0;
+        let mut base_mid_x = path[0].x;
+        let mut base_mid_y = path[0].y;
+        for (i, &seg_len) in segment_lengths.iter().enumerate() {
+            if accumulated + seg_len >= target_dist {
+                let frac = if seg_len > 0.0 { (target_dist - accumulated) / seg_len } else { 0.0 };
+                base_mid_x = path[i].x + frac * (path[i + 1].x - path[i].x);
+                base_mid_y = path[i].y + frac * (path[i + 1].y - path[i].y);
+                break;
+            }
+            accumulated += seg_len;
+        }
 
         match label_position {
             Some(LabelPosition::Right) => (base_mid_x + 10.0, base_mid_y, TextAnchor::Start),

@@ -160,6 +160,7 @@ where
                 "y" => StyleKey::Y,
                 "stroke_dasharray" => StyleKey::StrokeDasharray,
                 "rotation" => StyleKey::Rotation,
+                "label_at" => StyleKey::LabelAt,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)

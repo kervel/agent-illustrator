@@ -587,6 +587,7 @@ impl ResolvedStyles {
                 | StyleKey::Role
                 | StyleKey::X
                 | StyleKey::Y
+                | StyleKey::LabelAt
                 | StyleKey::Custom(_) => {
                     // Labels, label position, gap, size, routing, role, and position modifiers
                     // handled separately in layout engine; custom keys ignored for now
