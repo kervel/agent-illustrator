@@ -4,20 +4,28 @@ Collected from real agent usage feedback (2026-02-04 IoT edge architecture exper
 
 ## High Priority
 
-### `--check` mode for machine-verifiable diagram validation
-Instead of unreliable visual adversarial review, report actual defects to stderr:
+### `--lint` mode for machine-verifiable diagram validation
+Deterministic checks that eliminate the need for LLM review of mechanical defects.
+Report defects to stderr as structured warnings, exit non-zero if any found.
+
+Checks to implement:
 - Constraint violations (unsatisfied after solving)
 - Bounding box overlaps between sibling elements
 - Connection lines intersecting non-endpoint elements
 - Labels overlapping other labels or elements
 - Elements outside their declared container
 
+This would make the adversarial review subagent only responsible for subjective
+layout quality (spacing, readability, aesthetic balance) — the mechanical stuff
+becomes free, instant, and zero false positives.
+
 Needs a SpecSwarm spec — touches layout, routing, and renderer.
 
-### `stroke_dash` modifier for connections and shapes
-Allow visually distinguishing connection types (e.g. normal data flow vs alert path).
-Syntax: `a -> b [stroke_dash: 5]` or `rect r [stroke_dash: 5 3]` (dash length, gap).
-Easy parser+renderer change.
+### `stroke_dasharray` fixes
+Already implemented for shapes (`stroke_dasharray: "4,2"`) but has issues:
+- Keyword mapping broken: `"dashed"` outputs literally instead of `"8,4"`
+- Not applied to connections (only shapes)
+Fix both — should be quick.
 
 ### `label_position` / `label_offset` on connections
 Connection labels always sit at the midpoint, causing collisions when paths cross.
