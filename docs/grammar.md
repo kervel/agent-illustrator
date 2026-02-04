@@ -14,7 +14,7 @@ PATH COMMANDS (inside path { ... })
 vertex name [x: N, y: N]               Define point (relative to path origin)
 line_to name [x: N, y: N]              Straight line to point
 arc_to name [x: N, y: N, ...]          Arc to point
-curve_to name [via: ctrl, x: N, y: N]  Quadratic Bezier to point
+curve_to name [via: elem, x: N, y: N]  Quadratic Bezier (via = external element as control point)
 close                                   Close path to first vertex
 
 Arc modifiers:

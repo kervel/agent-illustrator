@@ -275,7 +275,8 @@ template "data_store" (name: "DB") {
 }
 
 // === ELEMENTS ===
-// Wrap everything in a group so elements position freely via constraints.
+// Wrap everything in a group. Group uses column layout by default,
+// but constraining every element overrides it for free positioning.
 // Declare backgrounds FIRST so they render behind foreground elements.
 
 group diagram {

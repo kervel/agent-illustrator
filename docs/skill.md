@@ -2,6 +2,12 @@
 
 Create diagrams with Agent Illustrator DSL. Output raw AIL code only.
 
+## When to Use AIL vs Raw SVG
+
+AIL is for **diagrams** (boxes, arrows, architecture, flows). For **free-form icons or illustrations**
+(a car, a robot, a logo), use **raw SVG** instead — the design phases and iteration workflow
+below still apply, but output `<svg>` with `<path d="...">` for direct coordinate control.
+
 ## BEFORE YOU START (MANDATORY)
 
 You MUST complete these steps before writing any AIL code:
@@ -177,7 +183,7 @@ rect bg [width: 500, height: 350, fill: accent-light, stroke: accent-dark, opaci
 constrain svc.center_x = bg.center_x
 constrain svc.center_y = bg.center_y
 ```
-Declare backgrounds FIRST in a `group` so they render behind foreground elements. After rendering, verify the boundary surrounds all elements.
+Declare backgrounds FIRST in a `group` so they render behind foreground elements. Note: `group` uses column layout by default — constrain every element to override. After rendering, verify the boundary surrounds all elements.
 
 ---
 
@@ -232,9 +238,10 @@ Do not attempt to use these — they will waste iteration cycles:
 4. **Don't over-constrain** — constraining both edges AND size on the same axis conflicts.
 5. **Avoid reserved names** — `left`, `right`, `top`, `bottom`, `x`, `y`, `width`, `height`.
 6. **Constraint coords are local** — property refs use pre-rotation coordinates.
-7. **Use `path` for complex shapes** — not overlapping rectangles.
-8. **Consistent visual style** — decide stroke-only vs filled before creating templates.
-9. **Don't overclaim quality** — compile success ≠ good diagram. Always check visually.
+7. **Path vertices are local** — coordinates start from (0,0). Use `constrain path.left = X` / `constrain path.top = Y` to position the path in the diagram.
+8. **Use `path` for complex shapes** — not overlapping rectangles.
+9. **Consistent visual style** — decide stroke-only vs filled before creating templates.
+10. **Don't overclaim quality** — compile success ≠ good diagram. Always check visually.
 
 ---
 
