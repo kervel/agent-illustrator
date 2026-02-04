@@ -22,10 +22,10 @@
 
         # Hashes for v0.1.12 release binaries
         artifactHash = {
-          "x86_64-linux" = "sha256-n4tBaT8Y+hy/ChnHEjrLTdjus8sDGXxNFRVflA3A0Cs=";
-          "aarch64-linux" = "sha256-FIXME";
-          "x86_64-darwin" = "sha256-FIXME";
-          "aarch64-darwin" = "sha256-FIXME";
+          "x86_64-linux" = "sha256-nUDbD89uhU5G+SdMwpp9YrCnWNvctjNMwABcnyNuMgw=";
+          "aarch64-linux" = "sha256-TTHKKJtdUr6jB0RX6b/5vmgIXEqyIGUmdeowLtEe9g0=";
+          "x86_64-darwin" = "sha256-Bus2g7xHPrP39Nq8uchu5/ctA3U5OzoOZIwJqkrlGS4=";
+          "aarch64-darwin" = "sha256-EIcTePysHCstwwvW6y6oa/i5DEfj6srKtp2wlhKQbyc=";
         }.${system} or (throw "Unsupported system: ${system}");
 
       in
