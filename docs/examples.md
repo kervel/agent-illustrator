@@ -275,9 +275,9 @@ template "data_store" (name: "DB") {
 }
 
 // === ELEMENTS ===
-// Wrap everything in a group. Group uses column layout by default,
-// but constraining every element overrides it for free positioning.
-// Declare backgrounds FIRST so they render behind foreground elements.
+// Wrap everything in a group and constrain every element.
+// Group uses column layout by default — unconstrained elements
+// fall back to column stacking. Declare backgrounds FIRST.
 
 group diagram {
     // Background rects (drawn first = behind everything else)

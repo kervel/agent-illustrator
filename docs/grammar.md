@@ -28,8 +28,8 @@ LAYOUTS
 -------
 row [name] [mod] { ... }     Horizontal arrangement
 col [name] [mod] { ... }     Vertical arrangement
-group [name] [mod] { ... }   Grouping (column layout, use constraints to override)
-stack [name] [mod] { ... }   Overlapping elements
+group [name] [mod] { ... }   Column layout (constrain every element to override)
+stack [name] [mod] { ... }   Overlap children centered within largest child
 
 CONNECTIONS
 -----------
