@@ -215,7 +215,7 @@ After each render, verify ALL of these. If any fail, fix and re-render:
 
 ### Adversarial Review (MANDATORY before declaring done)
 
-**Option A — Subagent review (preferred):** Spawn a separate agent with the rendered PNG and the original prompt. Its only job: "List every visual defect. Be harsh." Fix every issue it finds, re-render, and re-submit until it returns clean.
+**Option A — Subagent review (preferred):** Render to PNG first, then spawn a subagent with the PNG file path and the original prompt. The subagent MUST use the Read tool to view the image directly — do NOT describe the diagram to the subagent, that reintroduces your own bias and defeats the purpose. Its only job: "List every visual defect. Be harsh." Fix every issue it finds, re-render, and re-submit until it returns clean.
 
 **Option B — Self-review (if subagents unavailable):** Describe every element and its spatial relationships in text. Then compare that description to the actual image. Mismatches are bugs. Go element-by-element: for each one, ask "what's wrong with THIS one?" Look for gaps, detached parts, overlapping labels, misaligned edges.
 
