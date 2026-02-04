@@ -89,7 +89,7 @@ Every diagram requires multiple iterations. Follow this cycle:
 
 1. Write initial AIL code
 2. Render: `agent-illustrator file.ail > output.svg`
-3. Convert to PNG: `google-chrome --headless --screenshot=output.png --window-size=1200,900 file://$(pwd)/output.svg`
+3. Convert to PNG: `google-chrome --headless --screenshot=output.png --window-size=2400,1800 file://$(pwd)/output.svg`
 4. Check the PNG visually — look for overlaps, misalignment, routing issues
 5. Fix issues in AIL code
 6. Repeat from step 2
