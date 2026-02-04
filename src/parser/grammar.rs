@@ -83,6 +83,7 @@ struct ParsedArcModifiers {
     radius: Option<f64>,
     bulge: Option<f64>,
     sweep: Option<SweepDirection>,
+    large_arc: Option<bool>,
     via: Option<Spanned<Identifier>>, // Feature 008: steering vertex reference
 }
 
@@ -101,6 +102,7 @@ impl ParsedArcModifiers {
             ArcParams::Radius {
                 radius,
                 sweep: self.sweep.unwrap_or_default(),
+                large_arc: self.large_arc.unwrap_or(false),
             }
         } else if let Some(bulge) = self.bulge {
             ArcParams::Bulge(bulge)
@@ -756,6 +758,13 @@ where
             .ignore_then(just(Token::Colon))
             .ignore_then(sweep_direction.clone())
             .map(|s| ("sweep", ParsedModifierValue::Sweep(s))),
+        just(Token::Ident("large_arc".into()))
+            .ignore_then(just(Token::Colon))
+            .ignore_then(choice((
+                just(Token::Ident("true".into())).to(1.0),
+                just(Token::Ident("false".into())).to(0.0),
+            )))
+            .map(|v| ("large_arc", ParsedModifierValue::Number(v))),
         // Feature 008: via reference for curve steering vertex
         just(Token::Ident("via".into()))
             .ignore_then(just(Token::Colon))
@@ -783,6 +792,7 @@ where
                     ("radius", ParsedModifierValue::Number(n)) => mods.radius = Some(n),
                     ("bulge", ParsedModifierValue::Number(n)) => mods.bulge = Some(n),
                     ("sweep", ParsedModifierValue::Sweep(s)) => mods.sweep = Some(s),
+                    ("large_arc", ParsedModifierValue::Number(n)) => mods.large_arc = Some(n != 0.0),
                     ("via", ParsedModifierValue::Identifier(id)) => mods.via = Some(id),
                     _ => {}
                 }
@@ -2149,7 +2159,7 @@ mod tests {
                             assert_eq!(pos.x, Some(50.0));
                             assert_eq!(pos.y, Some(0.0));
                             match &arc.params {
-                                ArcParams::Radius { radius, sweep } => {
+                                ArcParams::Radius { radius, sweep, .. } => {
                                     assert!((radius - 10.0).abs() < 0.001);
                                     assert!(matches!(sweep, SweepDirection::Clockwise));
                                 }

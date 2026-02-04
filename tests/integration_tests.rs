@@ -1948,3 +1948,18 @@ fn test_path_counterclockwise_sweep() {
         "Counterclockwise arc should have sweep-flag 0"
     );
 }
+
+#[test]
+fn test_path_large_arc() {
+    let input = r#"
+        path p {
+            vertex a
+            arc_to b [x: 50, y: 0, radius: 30, large_arc: true]
+        }
+    "#;
+    let svg = agent_illustrator::render(input).expect("should render");
+    assert!(
+        svg.contains("1 1"),
+        "large_arc should set large-arc-flag to 1"
+    );
+}

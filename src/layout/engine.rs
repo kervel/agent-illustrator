@@ -1183,7 +1183,7 @@ fn compute_arc_bulge_point(
 
     // Compute sagitta (bulge height) based on arc parameters
     let (sagitta, clockwise) = match params {
-        ArcParams::Radius { radius, sweep } => {
+        ArcParams::Radius { radius, sweep, .. } => {
             let r = *radius;
             if chord_len > 2.0 * r {
                 // Radius too small - use semicircle
