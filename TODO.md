@@ -29,10 +29,20 @@ over where it sits. Options:
 ### ~~Crossing detection warnings~~ DONE
 Covered by `--lint` mode.
 
-### `label_side` on connections
-Place connection label above or below the line instead of centered on it.
-Syntax: `a -> b [label: "data", label_side: above]`
-Ties into the label_position work.
+### Lint: warn on steep diagonal direct routing
+`routing: direct` looks fine when nearly axis-aligned but ugly at steep angles
+(30-60°) when mixed with orthogonal/curved connections. Lint could warn when the
+angle exceeds ~15° from horizontal or vertical.
+
+### ~~`label_side` on connections~~ SUPERSEDED
+Tangent-relative label offsets (v0.1.12) make `left`/`right` mean perpendicular-left/right
+for any path geometry. No separate `label_side` needed.
+
+### Skill doc too long for constrained contexts
+Agents with long prior context skip steps in the skill doc. Consider:
+- Splitting into a short "checklist" section and a separate reference
+- Moving examples/grammar to appendix sections the agent can fetch on demand
+- Identifying which steps get skipped most and making them more prominent
 
 ## Low Priority / Won't Do
 

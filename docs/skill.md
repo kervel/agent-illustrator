@@ -121,7 +121,7 @@ After each render, verify ALL of these. If any fail, fix and re-render:
 
 Adversarial review only works when done by unbiased agents. therefore, subagent is the preferred technique. Note: this is an expensive step. So don't do it before you solved everything else.
 
-**Option A — Subagent review (preferred):** Render to PNG first, then spawn a subagent (haiku model is sufficient) with the PNG file path and the original prompt. The subagent MUST use the Read tool to view the image directly — do NOT describe the diagram to the subagent, that reintroduces your own bias and defeats the purpose.
+**Option A — Subagent review (preferred):** Render to PNG first, then spawn a subagent with the PNG file path and the original prompt. The subagent MUST use the Read tool to view the image directly — do NOT describe the diagram to the subagent, that reintroduces your own bias and defeats the purpose.
 
 Use this exact prompt for the subagent:
 
@@ -172,7 +172,9 @@ constrain a.center_x = midpoint(b, c)    // center between two elements
 | Sequential flow | default (orthogonal) |
 | Feedback, loop-back | curved |
 | Crossing another path | curved |
-| Shortcut, skip | direct |
+| Shortcut, skip | direct (only if nearly axis-aligned) |
+
+**Direct routing warning:** `routing: direct` looks good when the connection is nearly horizontal or vertical. Steep diagonals (30-60°) look ugly when mixed with orthogonal/curved connections. Prefer orthogonal or curved for those.
 
 ### Layout Strategy
 
