@@ -521,3 +521,50 @@ constrain c.center_y = 250
         cy + ch / 2.0,
     );
 }
+
+/// Regression test: right-edge alignment must move the element, not resize it.
+/// When `constrain n2.right = b2.right` is used, the solver should adjust X
+/// while keeping Width fixed. Previously, the solver nondeterministically chose
+/// between adjusting X (correct) and adjusting Width (wrong) because both were
+/// SUGGESTED at MEDIUM strength, creating an ambiguous system.
+#[test]
+fn test_right_edge_alignment_moves_not_resizes() {
+    let source = r#"
+col diagram {
+    row top_row [gap: 80] {
+        circle b1 [size: 6]
+        circle b2 [size: 6]
+    }
+    row bottom_row [gap: 40] {
+        circle n1 [size: 50]
+        circle n2 [size: 50]
+    }
+    constrain n1.left = b1.left
+    constrain n2.right = b2.right
+}
+"#;
+
+    // Run 10 times to catch nondeterminism
+    for i in 0..10 {
+        let result = compute_layout(source).unwrap_or_else(|e| panic!("run {}: {}", i, e));
+
+        let (n2_x, _, n2_w, _) = get_bounds(&result, "n2");
+        let (b2_x, _, b2_w, _) = get_bounds(&result, "b2");
+
+        // Width must stay at original size (50), not be resized
+        assert!(
+            (n2_w - 50.0).abs() < TOLERANCE,
+            "run {}: n2.width should be 50, got {} (solver resized instead of moved)",
+            i, n2_w,
+        );
+
+        // Right edges must align: n2.x + n2.w = b2.x + b2.w
+        let n2_right = n2_x + n2_w;
+        let b2_right = b2_x + b2_w;
+        assert!(
+            (n2_right - b2_right).abs() < TOLERANCE,
+            "run {}: n2.right ({}) should equal b2.right ({})",
+            i, n2_right, b2_right,
+        );
+    }
+}

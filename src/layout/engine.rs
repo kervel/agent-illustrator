@@ -658,9 +658,13 @@ pub fn solve_global(
 
     let mut solver = ConstraintSolver::new();
 
+    // Sort referenced elements for deterministic solver input order
+    let mut sorted_refs: Vec<&String> = referenced_elements.iter().collect();
+    sorted_refs.sort();
+
     // Add positions for all elements referenced in constraints
     // For each property: if it's targeted → SUGGESTED (can move), else → FIXED (reference)
-    for element_name in &referenced_elements {
+    for element_name in &sorted_refs {
         add_element_by_name_with_per_property_strength(
             &mut solver,
             result,
@@ -690,8 +694,15 @@ pub fn solve_global(
     }
 
     // Apply solution - but only to explicitly targeted (element, property) pairs
+    // Sort for deterministic application order
+    let mut sorted_solution: Vec<_> = solution.values.iter().collect();
+    sorted_solution.sort_by(|(a, _), (b, _)| {
+        a.element_id
+            .cmp(&b.element_id)
+            .then(a.property.cmp(&b.property))
+    });
     let mut applied_deltas: HashMap<(String, u8), f64> = HashMap::new();
-    for (var, value) in &solution.values {
+    for (var, value) in &sorted_solution {
         let is_targeted = target_vars.contains(&(var.element_id.clone(), var.property))
             || match var.property {
                 LayoutProperty::X => {
@@ -724,7 +735,7 @@ pub fn solve_global(
 
         let current = get_element_property(result, &var.element_id, var.property);
         if let Some(current_value) = current {
-            let delta = value - current_value;
+            let delta = *value - current_value;
             if delta.abs() > 0.001 {
                 match var.property {
                     LayoutProperty::X | LayoutProperty::Y => {
@@ -765,7 +776,7 @@ pub fn solve_global(
                                 var.element_id, var.property, current_value, value
                             );
                         }
-                        resize_element_by_name(result, &var.element_id, var.property, *value)?;
+                        resize_element_by_name(result, &var.element_id, var.property, **value)?;
                     }
                     _ => {}
                 }
@@ -2586,10 +2597,17 @@ pub fn resolve_constrain_statements(
         let internal_solution = internal_solver.solve().map_err(LayoutError::solver_error)?;
 
         // Apply internal solution - shift children within their groups
-        for (var, value) in &internal_solution.values {
+        // Sort for deterministic application order
+        let mut sorted_internal: Vec<_> = internal_solution.values.iter().collect();
+        sorted_internal.sort_by(|(a, _), (b, _)| {
+            a.element_id
+                .cmp(&b.element_id)
+                .then(a.property.cmp(&b.property))
+        });
+        for (var, value) in &sorted_internal {
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
-                let delta = value - current_value;
+                let delta = *value - current_value;
                 if delta.abs() > 0.001
                     && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
                 {
@@ -2645,9 +2663,15 @@ pub fn resolve_constrain_statements(
 
         let mut external_solver = ConstraintSolver::new();
 
+        // Sort referenced elements for deterministic solver input order.
+        // HashSet iteration is nondeterministic; the Cassowary solver can produce
+        // different solutions for under-determined systems depending on addition order.
+        let mut sorted_refs: Vec<&String> = referenced_elements.iter().collect();
+        sorted_refs.sort();
+
         // Add positions for all elements referenced in external constraints
         // For each property: if it's targeted → SUGGESTED (can move), else → FIXED (reference)
-        for element_name in &referenced_elements {
+        for element_name in &sorted_refs {
             add_element_by_name_with_per_property_strength(
                 &mut external_solver,
                 result,
@@ -2677,7 +2701,16 @@ pub fn resolve_constrain_statements(
 
         // Apply external solution - but only to explicitly targeted (element, property) pairs
         // This prevents constraints from affecting properties they don't target
-        for (var, value) in &external_solution.values {
+        // Sort by element ID for deterministic application order (HashMap is unordered).
+        // This ensures parent elements (which sort before children by convention)
+        // are shifted before their children, preventing over-shifting from cascading.
+        let mut sorted_solution: Vec<_> = external_solution.values.iter().collect();
+        sorted_solution.sort_by(|(a, _), (b, _)| {
+            a.element_id
+                .cmp(&b.element_id)
+                .then(a.property.cmp(&b.property))
+        });
+        for (var, value) in &sorted_solution {
             // Only apply to (element, property) pairs that are explicit targets
             // For derived properties (CenterX -> X, CenterY -> Y, Right -> X, Bottom -> Y),
             // check if either the base property OR the derived property is targeted
@@ -2717,7 +2750,7 @@ pub fn resolve_constrain_statements(
 
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
-                let delta = value - current_value;
+                let delta = *value - current_value;
                 if delta.abs() > 0.001 {
                     match var.property {
                         LayoutProperty::X | LayoutProperty::Y => {
@@ -2741,7 +2774,7 @@ pub fn resolve_constrain_statements(
                                     var.element_id, var.property, current_value, value
                                 );
                             }
-                            resize_element_by_name(result, &var.element_id, var.property, *value)?;
+                            resize_element_by_name(result, &var.element_id, var.property, **value)?;
                         }
                         _ => {}
                     }
@@ -3436,12 +3469,17 @@ fn add_element_by_name_with_per_property_strength(
         // means the solver needs to find the tightest fit, so suggest position at a
         // large value (solver pulls it back to the constraint boundary) and size at
         // a small value (solver grows it just enough).
-        let contains_x =
-            target_vars.contains(&(element_name.to_string(), LayoutProperty::X))
-                && target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
-        let contains_y =
-            target_vars.contains(&(element_name.to_string(), LayoutProperty::Y))
-                && target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
+        // Also triggers when CenterX + Right are both targeted (implies sizing).
+        let right_targeted =
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
+        let bottom_targeted =
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
+        let contains_x = right_targeted
+            && (target_vars.contains(&(element_name.to_string(), LayoutProperty::X))
+                || target_vars.contains(&(element_name.to_string(), LayoutProperty::CenterX)));
+        let contains_y = bottom_targeted
+            && (target_vars.contains(&(element_name.to_string(), LayoutProperty::Y))
+                || target_vars.contains(&(element_name.to_string(), LayoutProperty::CenterY)));
 
         // Add X position - SUGGESTED if targeted, FIXED if reference only
         // For contains: suggest at large value so LE constraint pulls it tight
@@ -3485,14 +3523,16 @@ fn add_element_by_name_with_per_property_strength(
                 .map_err(LayoutError::solver_error)?;
         }
 
-        // Size: SUGGESTED if width/height axis is targeted (e.g. contains constraint), else FIXED
-        // For contains: suggest small value so solver grows it just enough
+        // Size: SUGGESTED only when directly targeted OR in a contains scenario.
+        // When Right is targeted alone (simple alignment), Width must be FIXED so the
+        // solver moves the element rather than resizing it (prevents nondeterministic
+        // solutions where the solver could either adjust X or Width).
         let width_is_targeted =
             target_vars.contains(&(element_name.to_string(), LayoutProperty::Width))
-                || target_vars.contains(&(element_name.to_string(), LayoutProperty::Right));
+                || contains_x;
         let height_is_targeted =
             target_vars.contains(&(element_name.to_string(), LayoutProperty::Height))
-                || target_vars.contains(&(element_name.to_string(), LayoutProperty::Bottom));
+                || contains_y;
 
         if width_is_targeted {
             let suggested_w = if contains_x { 1.0 } else { elem.bounds.width };

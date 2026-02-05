@@ -17,7 +17,7 @@ use crate::parser::ast::Span;
 // ============================================================================
 
 /// Properties that can be constrained
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum LayoutProperty {
     X,
     Y,
