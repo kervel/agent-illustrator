@@ -88,6 +88,15 @@ status-error = "#f44336"
 "##;
 
 impl Stylesheet {
+    /// Create an empty stylesheet with no color definitions
+    pub fn empty() -> Self {
+        Stylesheet {
+            name: None,
+            description: None,
+            colors: HashMap::new(),
+        }
+    }
+
     /// Load stylesheet from TOML file
     pub fn from_file(path: &Path) -> Result<Self, StylesheetError> {
         let content = std::fs::read_to_string(path)?;

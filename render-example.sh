@@ -13,20 +13,18 @@ if [[ "$1" == "--debug" ]]; then
     echo "Debug mode enabled"
 fi
 
-echo "Rendering railway-topology with default stylesheet..."
-cargo run -- $DEBUG_FLAG examples/railway-topology.ail > "$OUTPUT_DIR/railway-default.svg"
-echo "  -> $OUTPUT_DIR/railway-default.svg"
+CSS_FLAG="--stylesheet-css stylesheets/kapernikov.css"
 
-echo "Rendering railway-topology with Kapernikov stylesheet..."
-cargo run -- $DEBUG_FLAG --stylesheet examples/stylesheets/kapernikov.toml examples/railway-topology.ail > "$OUTPUT_DIR/railway-kapernikov.svg"
-echo "  -> $OUTPUT_DIR/railway-kapernikov.svg"
+echo "Rendering railway-topology..."
+cargo run -- $DEBUG_FLAG $CSS_FLAG examples/railway-topology.ail > "$OUTPUT_DIR/railway-topology.svg"
+echo "  -> $OUTPUT_DIR/railway-topology.svg"
 
 echo "Rendering railway-junction-direct..."
-cargo run -- $DEBUG_FLAG examples/railway-junction-direct.ail > "$OUTPUT_DIR/railway-junction-direct.svg"
+cargo run -- $DEBUG_FLAG $CSS_FLAG examples/railway-junction-direct.ail > "$OUTPUT_DIR/railway-junction-direct.svg"
 echo "  -> $OUTPUT_DIR/railway-junction-direct.svg"
 
 echo "Rendering label-test..."
-cargo run -- $DEBUG_FLAG examples/label-test.ail > "$OUTPUT_DIR/label-test.svg"
+cargo run -- $DEBUG_FLAG $CSS_FLAG examples/label-test.ail > "$OUTPUT_DIR/label-test.svg"
 echo "  -> $OUTPUT_DIR/label-test.svg"
 
 echo ""

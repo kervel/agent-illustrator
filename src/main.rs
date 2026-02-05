@@ -25,9 +25,13 @@ struct Cli {
     /// Input file (reads from stdin if not provided)
     input: Option<PathBuf>,
 
-    /// Stylesheet file for color palette (TOML format)
+    /// [Deprecated: use --stylesheet-css] TOML color palette file
     #[arg(short, long)]
     stylesheet: Option<PathBuf>,
+
+    /// CSS file to inject into the SVG <style> block
+    #[arg(long)]
+    stylesheet_css: Option<PathBuf>,
 
     /// Debug mode: show container bounds and element IDs
     #[arg(short, long)]
@@ -80,6 +84,11 @@ fn main() {
     }
 
     // Load stylesheet
+    // When --stylesheet-css is provided without --stylesheet, use an empty TOML
+    // stylesheet so the CSS file is the sole source of styling variables.
+    if cli.stylesheet.is_some() {
+        eprintln!("warning: --stylesheet is deprecated, use --stylesheet-css instead");
+    }
     let stylesheet = match &cli.stylesheet {
         Some(path) => match Stylesheet::from_file(path) {
             Ok(s) => s,
@@ -88,7 +97,13 @@ fn main() {
                 std::process::exit(1);
             }
         },
-        None => Stylesheet::default(),
+        None => {
+            if cli.stylesheet_css.is_some() {
+                Stylesheet::empty()
+            } else {
+                Stylesheet::default()
+            }
+        }
     };
 
     // Read input
@@ -112,12 +127,27 @@ fn main() {
         }
     };
 
+    // Load custom CSS
+    let custom_css = match &cli.stylesheet_css {
+        Some(path) => match fs::read_to_string(path) {
+            Ok(css) => Some(css),
+            Err(e) => {
+                eprintln!("Error loading CSS '{}': {}", path.display(), e);
+                std::process::exit(1);
+            }
+        },
+        None => None,
+    };
+
     // Render with stylesheet, debug mode, and trace mode
-    let config = RenderConfig::new()
+    let mut config = RenderConfig::new()
         .with_stylesheet(stylesheet)
         .with_debug(cli.debug)
         .with_trace(cli.trace)
         .with_lint(cli.lint);
+    if let Some(css) = custom_css {
+        config = config.with_custom_css(css);
+    }
 
     if cli.lint {
         match render_with_lint(&source, config) {
@@ -163,7 +193,8 @@ OPTIONS:
     -g, --grammar      Show language grammar reference
     -e, --examples     Show annotated examples
     --skill            Output LLM skill document (for embedding in agent context)
-    -s, --stylesheet   Custom color palette (TOML file)
+    --stylesheet-css   CSS stylesheet for colors and visual styling
+    -s, --stylesheet   [Deprecated] TOML color palette
     -d, --debug        Show element bounds and IDs
     -h, --help         Print help
 

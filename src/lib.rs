@@ -68,6 +68,8 @@ pub struct RenderConfig {
     pub svg: SvgConfig,
     /// Stylesheet for color resolution
     pub stylesheet: Stylesheet,
+    /// Custom CSS to inject into the SVG `<style>` block
+    pub custom_css: Option<String>,
     /// Debug mode: show container bounds and element IDs
     pub debug: bool,
     /// Trace mode: show internal constraint solver and routing debug output
@@ -86,6 +88,7 @@ impl Default for RenderConfig {
             layout: LayoutConfig::default(),
             svg: SvgConfig::default(),
             stylesheet: Stylesheet::default(),
+            custom_css: None,
             debug: false,
             trace: false,
             lint: false,
@@ -116,6 +119,12 @@ impl RenderConfig {
     /// Set the stylesheet for color resolution
     pub fn with_stylesheet(mut self, stylesheet: Stylesheet) -> Self {
         self.stylesheet = stylesheet;
+        self
+    }
+
+    /// Set custom CSS to inject into the SVG `<style>` block
+    pub fn with_custom_css(mut self, css: String) -> Self {
+        self.custom_css = Some(css);
         self
     }
 
@@ -400,7 +409,7 @@ fn render_pipeline(
     };
 
     // Generate SVG with stylesheet
-    let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet, config.debug);
+    let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet, config.custom_css.as_deref(), config.debug);
 
     Ok((svg, lint_warnings))
 }

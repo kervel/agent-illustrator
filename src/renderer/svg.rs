@@ -32,8 +32,16 @@ impl SvgBuilder {
         }
     }
 
+    /// Add raw CSS to the SVG `<style>` block
+    pub fn add_custom_css(&mut self, css: &str) {
+        self.styles.push(css.to_string());
+    }
+
     /// Add CSS custom properties from a stylesheet
     pub fn add_stylesheet(&mut self, stylesheet: &Stylesheet) {
+        if stylesheet.colors.is_empty() {
+            return;
+        }
         let mut css = String::from(":root {\n");
         for (token, value) in &stylesheet.colors {
             css.push_str(&format!("    --{}: {};\n", token, value));
@@ -575,7 +583,7 @@ impl SvgBuilder {
 
 /// Render a LayoutResult to an SVG string (with default stylesheet)
 pub fn render_svg(result: &LayoutResult, config: &SvgConfig) -> String {
-    render_svg_with_stylesheet(result, config, &Stylesheet::default(), false)
+    render_svg_with_stylesheet(result, config, &Stylesheet::default(), None, false)
 }
 
 /// Render a LayoutResult to an SVG string with a custom stylesheet
@@ -583,12 +591,18 @@ pub fn render_svg_with_stylesheet(
     result: &LayoutResult,
     config: &SvgConfig,
     stylesheet: &Stylesheet,
+    custom_css: Option<&str>,
     debug: bool,
 ) -> String {
     let mut builder = SvgBuilder::new(config.clone());
 
     // Add CSS custom properties from the stylesheet
     builder.add_stylesheet(stylesheet);
+
+    // Add custom CSS after stylesheet variables (so it can reference/override them)
+    if let Some(css) = custom_css {
+        builder.add_custom_css(css);
+    }
 
     // Add arrow marker if there are any directed connections
     let has_directed = result.connections.iter().any(|c| {
