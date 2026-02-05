@@ -1,36 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -50 412 406">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -50 428 406">
   <style>
-    :root {
-    --accent-1: #2196f3;
-    --background-2: #f5f5f5;
-    --text-1: #333333;
-    --text-3: #999999;
-    --accent-2: #e3f2fd;
-    --secondary-1: #ff9800;
-    --status-success: #4caf50;
-    --accent-dark: #1565c0;
-    --foreground-light: #e0e0e0;
-    --background-1: #ffffff;
-    --accent-3: #bbdefb;
-    --foreground-3: #999999;
-    --foreground-2: #666666;
-    --background-light: #ffffff;
-    --accent-light: #e3f2fd;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --secondary-2: #fff3e0;
-    --foreground-dark: #1a1a1a;
-    --text-light: #ffffff;
-    --status-warning: #ff9800;
-    --background-3: #eeeeee;
-    --text-2: #666666;
-    --background-dark: #333333;
-    --foreground-1: #333333;
-    --text-dark: #1a1a1a;
-    --status-error: #f44336;
-    --secondary-light: #fff3e0;
-  }
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
 
   </style>
   <defs>
@@ -40,15 +82,15 @@
   </defs>
   <g id="mygroup" class="ai-container">
     <g id="content" class="ai-container">
-      <rect id="a" class="ai-shape ai-rect" x="-6" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <rect id="b" class="ai-shape ai-rect" x="94" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <rect id="a" class="ai-shape ai-rect" x="10" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <rect id="b" class="ai-shape ai-rect" x="110" y="10" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
     </g>
     <text class="ai-shape ai-text" x="-118" y="25" text-anchor="start" dominant-baseline="middle" font-size="18" fill="red">Test Label</text>
   </g>
   <g id="another" class="ai-container">
     <g id="items" class="ai-container">
-      <circle id="c1" class="ai-shape ai-circle" cx="35" cy="89" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <circle id="c2" class="ai-shape ai-circle" cx="35" cy="159" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <circle id="c1" class="ai-shape ai-circle" cx="35" cy="73" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <circle id="c2" class="ai-shape ai-circle" cx="35" cy="143" r="25" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
     </g>
     <text id="mylbl" class="ai-shape ai-text" x="-110.8" y="116" text-anchor="start" dominant-baseline="middle" font-size="14">Inline Label</text>
   </g>

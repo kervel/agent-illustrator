@@ -1,36 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 415 574.5">
   <style>
-    :root {
-    --secondary-dark: #e65100;
-    --secondary-1: #ff9800;
-    --background-light: #ffffff;
-    --text-2: #666666;
-    --background-3: #eeeeee;
-    --foreground-2: #666666;
-    --accent-light: #e3f2fd;
-    --status-warning: #ff9800;
-    --background-2: #f5f5f5;
-    --foreground-1: #333333;
-    --secondary-2: #fff3e0;
-    --accent-2: #e3f2fd;
-    --foreground-dark: #1a1a1a;
-    --background-1: #ffffff;
-    --status-success: #4caf50;
-    --foreground-3: #999999;
-    --foreground-light: #e0e0e0;
-    --background-dark: #333333;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --text-3: #999999;
-    --status-error: #f44336;
-    --secondary-light: #fff3e0;
-    --text-1: #333333;
-    --accent-1: #2196f3;
-    --text-light: #ffffff;
-    --secondary-3: #ffe0b2;
-    --text-dark: #1a1a1a;
-  }
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
 
   </style>
   <defs>
@@ -59,8 +101,8 @@
   </g>
   <circle id="bottom_via" class="ai-shape ai-circle" cx="80" cy="454" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <circle id="top_via" class="ai-shape ai-circle" cx="80" cy="286" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="66.33231711095273" y="444" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
-  <text class="ai-label" x="93.66768288904727" y="276" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <text class="ai-label" x="80" y="444" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
+  <text class="ai-label" x="80" y="296" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
   <path class="ai-connection" d="M80 20 L110 20 L110 64 L132.8 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M40 40 L40 60 L110 60 L110 72.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M180 84 L180 92 L150 92 L150 92.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>

@@ -1,36 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-65 -52 714 813">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-65 -52 714 435">
   <style>
-    :root {
-    --background-dark: #333333;
-    --text-dark: #1a1a1a;
-    --accent-3: #bbdefb;
-    --accent-light: #e3f2fd;
-    --accent-dark: #1565c0;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --background-3: #eeeeee;
-    --secondary-3: #ffe0b2;
-    --secondary-light: #fff3e0;
-    --secondary-dark: #e65100;
-    --status-warning: #ff9800;
-    --text-2: #666666;
-    --status-success: #4caf50;
-    --text-light: #ffffff;
-    --status-error: #f44336;
-    --accent-2: #e3f2fd;
-    --foreground-3: #999999;
-    --text-3: #999999;
-    --accent-1: #2196f3;
-    --background-2: #f5f5f5;
-    --background-1: #ffffff;
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-light: #e0e0e0;
-    --foreground-dark: #1a1a1a;
-    --background-light: #ffffff;
-    --text-1: #333333;
-  }
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
 
   </style>
   <g id="vcc_12v" class="ai-container">
@@ -88,11 +130,11 @@
     <rect id="r_gate_left_lead" class="ai-shape ai-rect" x="238" y="153" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_gate_right_lead" class="ai-shape ai-rect" x="288" y="153" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
-  <g id="r_pulldown" class="ai-container" transform="rotate(90 318 461)">
-    <rect id="r_pulldown_body" class="ai-shape ai-rect" x="298" y="648" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="318" y="643" text-anchor="middle" dominant-baseline="middle" font-size="10">100k</text>
-    <rect id="r_pulldown_left_lead" class="ai-shape ai-rect" x="288" y="655" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="r_pulldown_right_lead" class="ai-shape ai-rect" x="338" y="655" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+  <g id="r_pulldown" class="ai-container" transform="rotate(90 318 266)">
+    <rect id="r_pulldown_body" class="ai-shape ai-rect" x="298" y="258" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <text class="ai-label" x="318" y="253" text-anchor="middle" dominant-baseline="middle" font-size="10">100k</text>
+    <rect id="r_pulldown_left_lead" class="ai-shape ai-rect" x="288" y="265" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="r_pulldown_right_lead" class="ai-shape ai-rect" x="338" y="265" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="q_driver" class="ai-container">
     <circle id="q_driver_body" class="ai-shape ai-circle" cx="212.5" cy="254" r="25" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
@@ -125,9 +167,9 @@
   </g>
   <g id="status_led" class="ai-container">
     <path id="status_led_triangle" class="ai-shape ai-path" d="M15.00 249.00 L35.00 249.00 L25.00 267.00 Z"  fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="13.000000000000004" y="270" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="24.000000000000004" y="234" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="24.000000000000004" y="272" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="13" y="270" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="24" y="234" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="24" y="272" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <path id="status_led_arrow1" class="ai-shape ai-path" d="M39.00 259.00 L49.00 251.00"  fill="none" stroke="green" stroke-width="1.5"/>
     <path id="status_led_head1" class="ai-shape ai-path" d="M49.00 251.00 L45.00 251.00 L49.00 255.00 Z"  fill="green" stroke="none" stroke-width="1.5"/>
     <path id="status_led_arrow2" class="ai-shape ai-path" d="M39.00 269.00 L49.00 261.00"  fill="none" stroke="green" stroke-width="1.5"/>
@@ -144,9 +186,9 @@
     <rect id="gnd_driver_line3" class="ai-shape ai-rect" x="216.5" y="320" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="gnd_led" class="ai-container">
-    <rect id="gnd_led_line1" class="ai-shape ai-rect" x="5.0000000000000036" y="306" width="40" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
-    <rect id="gnd_led_line2" class="ai-shape ai-rect" x="12.000000000000004" y="313" width="26" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
-    <rect id="gnd_led_line3" class="ai-shape ai-rect" x="19.000000000000004" y="320" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_led_line1" class="ai-shape ai-rect" x="5" y="306" width="40" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_led_line2" class="ai-shape ai-rect" x="12" y="313" width="26" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_led_line3" class="ai-shape ai-rect" x="19" y="320" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
   </g>
   <text id="label_12v" class="ai-shape ai-text" x="490" y="22" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--secondary-dark)">12V Load Domain</text>
   <text id="label_5v" class="ai-shape ai-text" x="240" y="22" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-1)">5V Gate Drive</text>
@@ -162,12 +204,12 @@
   <path class="ai-connection" d="M200 114 L200 154 L238 154" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M298 154 L350 154 L350 220 L402 220" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M200 114 L200 165 L222.5 165 L222.5 216" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M298 154 L318 154 L318 626" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M318 686 L318 701 L222.5 701 L222.5 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M298 154 L318 154 L318 236" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M318 296 L318 299 L222.5 299 L222.5 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
   <path class="ai-connection" d="M222.5 292 L222.5 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
   <path class="ai-connection" d="M59 94 L70 94" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M130 94 L158.25 94 L158.25 254 L186.5 254" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M30 28 L30 86 L24.999999999999996 86 L24.999999999999996 144" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M25.000000000000004 204 L25.000000000000004 234" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M25.000000000000004 287 L25.000000000000004 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M25.000000000000004 204 L25 234" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M25 287 L25 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
 </svg>

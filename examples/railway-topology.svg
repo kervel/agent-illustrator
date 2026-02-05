@@ -1,36 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-170.8 -40 542.8 355">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-170.79999999999998 -40 542.8 355">
   <style>
-    :root {
-    --accent-3: #bbdefb;
-    --secondary-2: #fff3e0;
-    --background-light: #ffffff;
-    --foreground-2: #666666;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --accent-light: #e3f2fd;
-    --secondary-3: #ffe0b2;
-    --foreground-dark: #1a1a1a;
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --status-error: #f44336;
-    --text-2: #666666;
-    --text-1: #333333;
-    --background-dark: #333333;
-    --foreground-1: #333333;
-    --secondary-light: #fff3e0;
-    --foreground-light: #e0e0e0;
-    --background-3: #eeeeee;
-    --text-3: #999999;
-    --background-1: #ffffff;
-    --secondary-dark: #e65100;
-    --text-dark: #1a1a1a;
-    --secondary-1: #ff9800;
-    --background-2: #f5f5f5;
-    --accent-dark: #1565c0;
-    --text-light: #ffffff;
-    --foreground-3: #999999;
-  }
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
 
   </style>
   <defs>
@@ -55,8 +97,8 @@
         </g>
       </g>
       <g id="micro_label" class="ai-container">
-        <text id="micro_lbl" class="ai-shape ai-text" x="-103.6" y="38" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Micro</text>
-        <text class="ai-shape ai-text" x="-110.80000000000001" y="58" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Detailed tracks</text>
+        <text id="micro_lbl" class="ai-shape ai-text" x="-96.39999999999998" y="38" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Micro</text>
+        <text class="ai-shape ai-text" x="-110.79999999999998" y="58" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Detailed tracks</text>
       </g>
     </g>
     <g id="meso" class="ai-container">
@@ -81,7 +123,7 @@
         </g>
       </g>
       <g id="meso_label" class="ai-container">
-        <text id="meso_lbl" class="ai-shape ai-text" x="-101.2" y="133" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Meso</text>
+        <text id="meso_lbl" class="ai-shape ai-text" x="-97.6" y="133" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Meso</text>
         <text class="ai-shape ai-text" x="-100" y="153" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">OPs + Tracks</text>
       </g>
     </g>
@@ -99,7 +141,7 @@
     </g>
   </g>
   <text class="ai-label" x="117.5" y="220" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">Section of Line (SoL)</text>
-  <text class="ai-label" x="-46.80000000000001" y="93.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Aggregation</text>
+  <text class="ai-label" x="-46.8" y="93.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Aggregation</text>
   <text class="ai-label" x="-46.8" y="185.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Simplification</text>
   <path class="ai-connection" d="M26 23 L39 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
   <path class="ai-connection" d="M45 23 L259 23" fill="none" stroke="var(--text-1)" stroke-width="2"/>
@@ -118,6 +160,6 @@
   <path class="ai-connection" d="M43.96853614477436 120.26381656649052 L80.03146385522564 161.7361834335095" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M223.96853614477436 161.7361834335095 L260.03146385522564 120.26381656649052" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M70 230 L165 230" fill="none" stroke="var(--accent-1)" stroke-width="3"/>
-  <path class="ai-connection" d="M-56.80000000000001 64 L-56.80000000000001 115.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-56.8 64 L-56.8 115.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M-56.8 159 L-56.8 204.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>
