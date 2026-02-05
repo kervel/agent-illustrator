@@ -62,6 +62,12 @@
   ry: 4;
 }
 
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
 /* White labels on dark fills (adjacent sibling only) */
 [fill="var(--accent-1)"] + .ai-label,
 [fill="var(--accent-dark)"] + .ai-label,

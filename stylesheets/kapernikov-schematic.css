@@ -1,4 +1,4 @@
-/* Kapernikov Brand Stylesheet for Agent Illustrator
+/* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */
 
@@ -51,18 +51,6 @@
 /* Typography */
 .ai-label, .ai-text {
   font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
-}
-
-/* Shape defaults: rounded corners, softer stroke */
-.ai-rect {
-  rx: 4;
-  ry: 4;
-}
-
-/* Opt-out for schematics / electronic symbols */
-.schematic .ai-rect {
-  rx: 0;
-  ry: 0;
 }
 
 /* White labels on dark fills (adjacent sibling only) */

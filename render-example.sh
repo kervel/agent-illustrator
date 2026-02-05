@@ -1,5 +1,5 @@
 #!/bin/bash
-# Render the railway topology example with different stylesheets
+# Render examples with Kapernikov stylesheets
 # Usage: ./render-example.sh [--debug]
 
 set -e

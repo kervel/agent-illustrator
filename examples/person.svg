@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-49 -68 252 223.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -68 252 223.5">
   <style>
     /* Kapernikov Brand Stylesheet for Agent Illustrator
    Colors from kapernikov-theme.css (huisstijlgids v4)
@@ -62,6 +62,12 @@
   ry: 4;
 }
 
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
 /* White labels on dark fills (adjacent sibling only) */
 [fill="var(--accent-1)"] + .ai-label,
 [fill="var(--accent-dark)"] + .ai-label,
@@ -83,27 +89,27 @@
   <g id="alice" class="ai-container">
     <g class="ai-container">
       <g id="alice_head_stack" class="ai-container">
-        <circle id="alice_head" class="ai-shape ai-circle" cx="24" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
-        <path id="alice_hair" class="ai-shape ai-path" d="M15.00 35.00 A9.00 9.00 0 0 1 33.00 35.00 L33.00 35.00 L28.00 33.00 L24.00 35.00 L21.00 34.00 L15.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
+        <circle id="alice_head" class="ai-shape ai-circle" cx="23" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <path id="alice_hair" class="ai-shape ai-path" d="M14.00 35.00 A9.00 9.00 0 0 1 32.00 35.00 L32.00 35.00 L27.00 33.00 L23.00 35.00 L20.00 34.00 L14.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
-      <path id="alice_torso" class="ai-shape ai-path" d="M11.00 57.00 A13.00 13.00 0 0 1 37.00 57.00 L37.00 65.00 L11.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
-      <path id="alice_collar" class="ai-shape ai-path" d="M21.00 44.33 A14.00 14.00 0 0 1 27.00 44.33 L24.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
+      <path id="alice_torso" class="ai-shape ai-path" d="M10.00 57.00 A13.00 13.00 0 0 1 36.00 57.00 L36.00 65.00 L10.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
+      <path id="alice_collar" class="ai-shape ai-path" d="M20.00 44.33 A14.00 14.00 0 0 1 26.00 44.33 L23.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
   <g id="bob" class="ai-container">
     <g class="ai-container">
       <g id="bob_head_stack" class="ai-container">
-        <circle id="bob_head" class="ai-shape ai-circle" cx="130" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
-        <path id="bob_hair" class="ai-shape ai-path" d="M121.00 35.00 A9.00 9.00 0 0 1 139.00 35.00 L139.00 35.00 L134.00 33.00 L130.00 35.00 L127.00 34.00 L121.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
+        <circle id="bob_head" class="ai-shape ai-circle" cx="129" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <path id="bob_hair" class="ai-shape ai-path" d="M120.00 35.00 A9.00 9.00 0 0 1 138.00 35.00 L138.00 35.00 L133.00 33.00 L129.00 35.00 L126.00 34.00 L120.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
-      <path id="bob_torso" class="ai-shape ai-path" d="M117.00 57.00 A13.00 13.00 0 0 1 143.00 57.00 L143.00 65.00 L117.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
-      <path id="bob_collar" class="ai-shape ai-path" d="M127.00 44.33 A14.00 14.00 0 0 1 133.00 44.33 L130.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
+      <path id="bob_torso" class="ai-shape ai-path" d="M116.00 57.00 A13.00 13.00 0 0 1 142.00 57.00 L142.00 65.00 L116.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
+      <path id="bob_collar" class="ai-shape ai-path" d="M126.00 44.33 A14.00 14.00 0 0 1 132.00 44.33 L129.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="77" cy="95" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="top_via" class="ai-shape ai-circle" cx="77" cy="-4" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="77" y="85" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
-  <text class="ai-label" x="77" y="6" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
-  <path class="ai-connection" d="M24 69 C24 88.67796285752726 57.322037142472745 95 77 95 C96.67796285752726 95 130 88.67796285752726 130 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M130 22 C130 2.3220371424727446 96.67796285752726 -4 77 -4 C57.322037142472745 -4 23.999999999999996 2.3220371424727446 24 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="76" cy="95" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="76" cy="-4" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="76" y="85" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
+  <text class="ai-label" x="76" y="6" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <path class="ai-connection" d="M23 69 C23 88.67796285752726 56.322037142472745 95 76 95 C95.67796285752726 95 129 88.67796285752726 129 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129 22 C129 2.3220371424727446 95.67796285752726 -4 76 -4 C56.322037142472745 -4 22.999999999999996 2.3220371424727446 23 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>
