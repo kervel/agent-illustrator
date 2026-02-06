@@ -295,6 +295,38 @@ impl SvgBuilder {
         ));
     }
 
+    /// Add an image element for raster images
+    pub fn add_image(
+        &mut self,
+        id: Option<&str>,
+        href: &str,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        classes: &[String],
+        transform: Option<&str>,
+    ) {
+        let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
+        let class_list = classes.join(" ");
+        let transform_attr = transform
+            .map(|t| format!(r#" transform="{}""#, t))
+            .unwrap_or_default();
+
+        self.elements.push(format!(
+            r#"{}<image{} class="{}" href="{}" x="{}" y="{}" width="{}" height="{}"{}/>"#,
+            self.indent_str(),
+            id_attr,
+            class_list,
+            href,
+            x,
+            y,
+            width,
+            height,
+            transform_attr
+        ));
+    }
+
     /// Add a text element
     pub fn add_text(&mut self, text: &str, x: f64, y: f64, anchor: &TextAnchor, styles: &str) {
         let prefix = self.prefix();
@@ -839,6 +871,39 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
             builder.add_raw(&inner);
 
             builder.end_group();
+        }
+        ElementType::Shape(ShapeType::RasterImage { path }) => {
+            // Render raster image as SVG <image> element
+            let prefix = builder.prefix();
+            let image_classes = std::iter::once(format!("{}raster-image", prefix))
+                .chain(classes.iter().cloned())
+                .collect::<Vec<_>>();
+
+            // Apply rotation transform if specified
+            let transform = if let Some(rotation) = element.styles.rotation {
+                if rotation.abs() > f64::EPSILON {
+                    let center = element.bounds.center();
+                    Some(format!(
+                        "rotate({} {} {})",
+                        rotation, center.x, center.y
+                    ))
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
+            builder.add_image(
+                id,
+                path,
+                element.bounds.x,
+                element.bounds.y,
+                element.bounds.width,
+                element.bounds.height,
+                &image_classes,
+                transform.as_deref(),
+            );
         }
         ElementType::Shape(ShapeType::Path(path_decl)) => {
             // Path shape rendering (Feature 007)

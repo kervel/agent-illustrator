@@ -133,7 +133,7 @@ impl TemplateDefinition {
     pub fn is_file_based(&self) -> bool {
         matches!(
             self.source_type,
-            TemplateSourceType::Svg | TemplateSourceType::Ail
+            TemplateSourceType::Svg | TemplateSourceType::Ail | TemplateSourceType::Raster
         )
     }
 }

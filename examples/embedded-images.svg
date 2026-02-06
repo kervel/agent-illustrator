@@ -1,0 +1,98 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running `target/debug/agent-illustrator examples/embedded-images.ail`
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -40 450 370.2842712474619">
+  <style>
+    :root {
+    --secondary-light: #fff3e0;
+    --foreground-2: #666666;
+    --text-1: #333333;
+    --status-error: #f44336;
+    --secondary-2: #fff3e0;
+    --status-success: #4caf50;
+    --background-dark: #333333;
+    --text-dark: #1a1a1a;
+    --text-3: #999999;
+    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
+    --foreground-1: #333333;
+    --accent-1: #2196f3;
+    --accent-dark: #1565c0;
+    --secondary-1: #ff9800;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-light: #ffffff;
+    --text-light: #ffffff;
+    --background-2: #f5f5f5;
+    --text-2: #666666;
+    --background-3: #eeeeee;
+    --accent-2: #e3f2fd;
+    --foreground-3: #999999;
+    --accent-3: #bbdefb;
+    --secondary-3: #ffe0b2;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g id="team" class="ai-container">
+    <g id="alice" class="ai-container">
+      <g class="ai-container">
+        <g id="alice_photo_stack" class="ai-container">
+          <rect id="alice_photo_bg" class="ai-shape ai-rect" x="20" y="20" width="60" height="60" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+          <circle id="alice_head" class="ai-shape ai-circle" cx="50" cy="45" r="10" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+        </g>
+        <rect id="alice_name_bg" class="ai-shape ai-rect" x="15" y="93" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="50" y="103" text-anchor="middle" dominant-baseline="middle" font-size="12">Alice</text>
+      </g>
+    </g>
+    <g id="bob" class="ai-container">
+      <g class="ai-container">
+        <g id="bob_photo_stack" class="ai-container">
+          <rect id="bob_photo_bg" class="ai-shape ai-rect" x="150" y="25" width="60" height="60" fill="var(--secondary-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+          <circle id="bob_head" class="ai-shape ai-circle" cx="180" cy="50" r="10" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+        </g>
+        <rect id="bob_name_bg" class="ai-shape ai-rect" x="145" y="93" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="180" y="103" text-anchor="middle" dominant-baseline="middle" font-size="12">Bob</text>
+      </g>
+    </g>
+    <g id="charlie" class="ai-container">
+      <g class="ai-container">
+        <g id="charlie_photo_stack" class="ai-container">
+          <rect id="charlie_photo_bg" class="ai-shape ai-rect" x="280" y="25" width="60" height="60" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+          <circle id="charlie_head" class="ai-shape ai-circle" cx="310" cy="50" r="10" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+        </g>
+        <rect id="charlie_name_bg" class="ai-shape ai-rect" x="275" y="93" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="310" y="103" text-anchor="middle" dominant-baseline="middle" font-size="12">Charlie</text>
+      </g>
+    </g>
+  </g>
+  <g id="rotated_icons" class="ai-container">
+    <g id="i0" class="ai-container">
+      <rect id="i0_body" class="ai-shape ai-rect" x="50.85786437626905" y="210.2842712474619" width="40" height="40" fill="var(--accent-1)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <circle id="i0_dot" class="ai-shape ai-circle" cx="70.85786437626905" cy="230.2842712474619" r="5" fill="var(--text-light)" stroke="#333333" stroke-width="1.5"/>
+    </g>
+    <g id="i15" class="ai-container" transform="rotate(15 140.85786437626905 201.2842712474619)">
+      <rect id="i15_body" class="ai-shape ai-rect" x="120.85786437626905" y="181.2842712474619" width="40" height="40" fill="var(--accent-1)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <circle id="i15_dot" class="ai-shape ai-circle" cx="140.85786437626905" cy="201.2842712474619" r="5" fill="var(--text-light)" stroke="#333333" stroke-width="1.5"/>
+    </g>
+    <g id="i30" class="ai-container" transform="rotate(30 210.85786437626905 201.2842712474619)">
+      <rect id="i30_body" class="ai-shape ai-rect" x="190.85786437626905" y="181.2842712474619" width="40" height="40" fill="var(--accent-1)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <circle id="i30_dot" class="ai-shape ai-circle" cx="210.85786437626905" cy="201.2842712474619" r="5" fill="var(--text-light)" stroke="#333333" stroke-width="1.5"/>
+    </g>
+    <g id="i45" class="ai-container" transform="rotate(45 280.85786437626905 201.2842712474619)">
+      <rect id="i45_body" class="ai-shape ai-rect" x="260.85786437626905" y="181.2842712474619" width="40" height="40" fill="var(--accent-1)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <circle id="i45_dot" class="ai-shape ai-circle" cx="280.85786437626905" cy="201.2842712474619" r="5" fill="var(--text-light)" stroke="#333333" stroke-width="1.5"/>
+    </g>
+  </g>
+  <text id="rotation_label" class="ai-shape ai-text" x="87" y="265.2842712474619" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
+  <text class="ai-label" x="116.59232438824621" y="42.627588792873524" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">works with</text>
+  <text class="ai-label" x="245" y="45" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">mentors</text>
+  <path class="ai-connection" d="M84 50 L115 50 L115 55 L138.8 55" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M214 55 L268.8 55" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

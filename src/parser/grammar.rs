@@ -687,8 +687,17 @@ where
         .then_ignore(just(Token::From))
         .then(string_literal.clone())
         .map(|(name, path)| {
-            let source_type = if path.node.ends_with(".svg") {
+            let path_lower = path.node.to_lowercase();
+            let source_type = if path_lower.ends_with(".svg") {
                 TemplateSourceType::Svg
+            } else if path_lower.ends_with(".png")
+                || path_lower.ends_with(".jpg")
+                || path_lower.ends_with(".jpeg")
+                || path_lower.ends_with(".gif")
+                || path_lower.ends_with(".webp")
+                || path_lower.ends_with(".bmp")
+            {
+                TemplateSourceType::Raster
             } else {
                 TemplateSourceType::Ail
             };
@@ -1966,6 +1975,44 @@ mod tests {
                 assert_eq!(t.name.node.as_str(), "component");
                 assert_eq!(t.source_type, TemplateSourceType::Ail);
                 assert_eq!(t.source_path.as_ref().unwrap().node, "lib/component.ail");
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_file_template_raster_png() {
+        let doc = parse(r#"template "photo" from "images/person.png""#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.name.node.as_str(), "photo");
+                assert_eq!(t.source_type, TemplateSourceType::Raster);
+                assert_eq!(t.source_path.as_ref().unwrap().node, "images/person.png");
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_file_template_raster_jpg() {
+        let doc = parse(r#"template "photo" from "images/person.JPG""#).expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.name.node.as_str(), "photo");
+                assert_eq!(t.source_type, TemplateSourceType::Raster);
+            }
+            other => panic!("Expected TemplateDecl, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_file_template_raster_webp() {
+        let doc = parse(r#"template "icon" from "assets/icon.webp""#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::TemplateDecl(t) => {
+                assert_eq!(t.source_type, TemplateSourceType::Raster);
             }
             other => panic!("Expected TemplateDecl, got {:?}", other),
         }

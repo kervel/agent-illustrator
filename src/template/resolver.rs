@@ -4,8 +4,8 @@ use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
     AnchorDecl, AnchorPosition, ConstrainDecl, ConstraintExpr, Document, ElementPath, GroupDecl,
-    Identifier, PropertyRef, ShapeDecl, ShapeType, Spanned, Statement, StyleModifier, StyleValue,
-    TemplateInstance,
+    Identifier, PropertyRef, ShapeDecl, ShapeType, Spanned, Statement, StyleKey, StyleModifier,
+    StyleValue, TemplateInstance,
 };
 
 use super::registry::{TemplateError, TemplateRegistry};
@@ -184,14 +184,22 @@ fn resolve_instance(
 
     ctx.start_resolving(template_name);
 
+    // Convert instance arguments to modifiers (excluding template parameters)
+    let template_param_names: Vec<String> = def.parameters.iter().map(|p| p.name.node.0.clone()).collect();
+    let instance_modifiers = arguments_to_modifiers(&inst.arguments, &template_param_names, span);
+
     let result = match def.source_type {
         crate::parser::ast::TemplateSourceType::Svg => {
             // For SVG templates, create an SvgEmbed shape
-            resolve_svg_template(&def, instance_name, span, registry, &param_values)
+            resolve_svg_template(&def, instance_name, span, registry, &instance_modifiers)
         }
         crate::parser::ast::TemplateSourceType::Ail => {
             // For AIL templates, load and resolve the external file
             resolve_ail_template(&def, instance_name, span, registry, ctx, &param_values)
+        }
+        crate::parser::ast::TemplateSourceType::Raster => {
+            // For raster image templates, create a RasterImage shape
+            resolve_raster_template(&def, instance_name, span, registry, &instance_modifiers)
         }
         crate::parser::ast::TemplateSourceType::Inline => {
             // For inline templates, expand the body
@@ -209,7 +217,7 @@ fn resolve_svg_template(
     instance_name: &str,
     span: &std::ops::Range<usize>,
     registry: &mut TemplateRegistry,
-    _param_values: &HashMap<String, StyleValue>,
+    instance_modifiers: &[Spanned<StyleModifier>],
 ) -> Result<Vec<Spanned<Statement>>, TemplateError> {
     // Ensure the SVG content is loaded
     if def.svg_content.is_none() {
@@ -236,7 +244,40 @@ fn resolve_svg_template(
             span.clone(),
         ),
         name: Some(Spanned::new(Identifier::new(instance_name), span.clone())),
-        modifiers: vec![],
+        modifiers: instance_modifiers.to_vec(),
+    };
+
+    Ok(vec![Spanned::new(Statement::Shape(shape), span.clone())])
+}
+
+/// Resolve a raster image template into a RasterImage shape
+fn resolve_raster_template(
+    def: &super::registry::TemplateDefinition,
+    instance_name: &str,
+    span: &std::ops::Range<usize>,
+    registry: &TemplateRegistry,
+    instance_modifiers: &[Spanned<StyleModifier>],
+) -> Result<Vec<Spanned<Statement>>, TemplateError> {
+    // Get the source path for the raster image
+    let source_path = def
+        .source_path
+        .as_ref()
+        .ok_or_else(|| TemplateError::FileNotFound {
+            path: std::path::PathBuf::from(&def.name),
+        })?;
+
+    // Resolve relative to base path to get the full path
+    let full_path = registry.resolve_path(source_path.to_str().unwrap_or(""));
+
+    let shape = ShapeDecl {
+        shape_type: Spanned::new(
+            ShapeType::RasterImage {
+                path: full_path.to_string_lossy().to_string(),
+            },
+            span.clone(),
+        ),
+        name: Some(Spanned::new(Identifier::new(instance_name), span.clone())),
+        modifiers: instance_modifiers.to_vec(),
     };
 
     Ok(vec![Spanned::new(Statement::Shape(shape), span.clone())])
@@ -634,6 +675,49 @@ fn substitute_modifiers(
                     value: new_value,
                 },
                 m.span.clone(),
+            )
+        })
+        .collect()
+}
+
+/// Convert template instance arguments to style modifiers
+/// Arguments that match template parameters are filtered out (they're used for substitution)
+/// Remaining arguments are converted to modifiers for the resulting shape
+fn arguments_to_modifiers(
+    arguments: &[(Spanned<Identifier>, Spanned<StyleValue>)],
+    template_params: &[String],
+    span: &std::ops::Range<usize>,
+) -> Vec<Spanned<StyleModifier>> {
+    arguments
+        .iter()
+        .filter(|(name, _)| !template_params.contains(&name.node.0))
+        .map(|(name, value)| {
+            let key = match name.node.0.as_str() {
+                "fill" => StyleKey::Fill,
+                "stroke" => StyleKey::Stroke,
+                "stroke_width" => StyleKey::StrokeWidth,
+                "opacity" => StyleKey::Opacity,
+                "label" => StyleKey::Label,
+                "font_size" => StyleKey::FontSize,
+                "class" => StyleKey::Class,
+                "gap" => StyleKey::Gap,
+                "size" => StyleKey::Size,
+                "width" => StyleKey::Width,
+                "height" => StyleKey::Height,
+                "routing" => StyleKey::Routing,
+                "role" => StyleKey::Role,
+                "x" => StyleKey::X,
+                "y" => StyleKey::Y,
+                "stroke_dasharray" => StyleKey::StrokeDasharray,
+                "rotation" | "rotate" => StyleKey::Rotation,
+                other => StyleKey::Custom(other.to_string()),
+            };
+            Spanned::new(
+                StyleModifier {
+                    key: Spanned::new(key, name.span.clone()),
+                    value: value.clone(),
+                },
+                span.clone(),
             )
         })
         .collect()

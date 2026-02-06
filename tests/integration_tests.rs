@@ -1640,6 +1640,127 @@ fn test_svg_template_file_not_found_error() {
 }
 
 // =============================================================================
+// Phase 5b: Raster Image Import Tests
+// =============================================================================
+
+#[test]
+fn test_raster_template_png_basic() {
+    use agent_illustrator::{render_with_config, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_raster");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    // Note: We don't actually need to create the PNG file - the renderer just
+    // outputs a reference to it. The SVG viewer will load it at render time.
+    let input = r#"
+        template "photo" from "person.png"
+        photo p1 [width: 100, height: 150]
+    "#;
+
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
+    let result = render_with_config(input, config);
+
+    // Cleanup
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Raster template should render");
+    assert!(svg.contains("<svg"), "Output should be valid SVG");
+    assert!(svg.contains("<image"), "Should contain image element");
+    assert!(svg.contains("href="), "Should have href attribute");
+    assert!(svg.contains("person.png"), "Should reference the PNG file");
+    assert!(
+        svg.contains("ai-raster-image"),
+        "Should have raster-image class"
+    );
+}
+
+#[test]
+fn test_raster_template_multiple_formats() {
+    use agent_illustrator::{render_with_config, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_raster_formats");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    let input = r#"
+        template "png_img" from "test.png"
+        template "jpg_img" from "test.jpg"
+        template "webp_img" from "test.webp"
+        row {
+            png_img i1 [width: 50, height: 50]
+            jpg_img i2 [width: 50, height: 50]
+            webp_img i3 [width: 50, height: 50]
+        }
+    "#;
+
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
+    let result = render_with_config(input, config);
+
+    // Cleanup
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Multiple raster formats should render");
+    assert!(svg.contains("test.png"), "Should reference PNG");
+    assert!(svg.contains("test.jpg"), "Should reference JPG");
+    assert!(svg.contains("test.webp"), "Should reference WebP");
+
+    // Count image elements
+    let image_count = svg.matches("<image").count();
+    assert_eq!(image_count, 3, "Should have 3 image elements");
+}
+
+#[test]
+fn test_raster_template_with_rotation() {
+    use agent_illustrator::{render_with_config, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_raster_rotate");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    let input = r#"
+        template "photo" from "person.png"
+        photo p1 [width: 100, height: 100, rotate: 45]
+    "#;
+
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
+    let result = render_with_config(input, config);
+
+    // Cleanup
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Rotated raster should render");
+    assert!(svg.contains("<image"), "Should contain image element");
+    assert!(svg.contains("rotate(45"), "Should have rotation transform");
+}
+
+#[test]
+fn test_raster_template_in_layout() {
+    use agent_illustrator::{render_with_config, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_raster_layout");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    // Note: "icon" is a reserved keyword, use "myicon" instead
+    // Note: "col" is the layout keyword, not "column"
+    let input = r#"
+        template "myicon" from "icon.png"
+        col {
+            myicon a [width: 40, height: 40]
+            myicon b [width: 40, height: 40]
+            myicon c [width: 40, height: 40]
+        }
+    "#;
+
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
+    let result = render_with_config(input, config);
+
+    // Cleanup
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Raster in layout should render");
+    let image_count = svg.matches("<image").count();
+    assert_eq!(image_count, 3, "Should have 3 image elements in column");
+}
+
+// =============================================================================
 // Phase 6: AIL Import & Exports Tests (T031-T034)
 // =============================================================================
 

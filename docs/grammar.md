@@ -90,8 +90,31 @@ Properties: left, right, top, bottom, center_x, center_y, width, height
 
 TEMPLATES
 ---------
-template "mytemplate" { ... }        Define reusable group (quoted name)
-mytemplate instance_name [params]    Instantiate template (unquoted)
+Inline templates:
+    template "mytemplate" { ... }        Define reusable group (quoted name)
+    mytemplate instance_name [params]    Instantiate template (unquoted)
+
+File-based templates:
+    template "icon" from "path/to/file.svg"     Import SVG file (embedded)
+    template "photo" from "path/to/file.png"    Import raster image (referenced)
+
+SVG files are embedded directly (content parsed, dimensions from viewBox).
+Raster images (PNG, JPG, JPEG, GIF, WebP, BMP) are referenced by path.
+The SVG viewer loads raster images at render time.
+
+Raster images require explicit dimensions:
+    photo avatar [width: 60, height: 60]
+
+All file-based templates support modifiers like width, height, rotation:
+    icon logo [width: 100, height: 100, rotation: 45]
+
+Wrap file templates in inline templates to add anchors:
+    template "avatar_img" from "avatar.png"
+    template "person_card" (name: "Person") {
+        avatar_img photo [width: 60, height: 60]
+        rect label_bg [fill: none, label: name]
+        anchor top_conn [position: photo.top, direction: up]
+    }
 
 ANCHORS
 -------

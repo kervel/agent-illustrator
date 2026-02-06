@@ -329,22 +329,39 @@ pub fn solve_local(
     element_to_template: &HashMap<String, String>,
     group_anchor_decls: &HashMap<String, Vec<AnchorDecl>>,
 ) -> Result<LocalSolverResult, LayoutError> {
-    use super::solver::ConstraintSolver;
+    use super::solver::{ConstraintSolver, LayoutProperty};
 
     let mut solver = ConstraintSolver::new();
     let mut local_result = LocalSolverResult::new(instance);
 
+    // Collect target variables from constraints to distinguish targets from references.
+    // Target elements can move (SUGGESTED), reference elements stay fixed (REQUIRED).
+    // This prevents nondeterministic pivot choices in the solver.
+    let target_vars: std::collections::HashSet<(String, LayoutProperty)> = constraints
+        .iter()
+        .filter_map(|c| get_constraint_target_var(c))
+        .collect();
+
     // Find all elements belonging to this template instance
-    let elements: Vec<&str> = element_to_template
+    // Sort for deterministic solver input order (HashMap iteration is nondeterministic)
+    let mut elements: Vec<&str> = element_to_template
         .iter()
         .filter(|(_, t)| *t == instance)
         .map(|(e, _)| e.as_str())
         .collect();
+    elements.sort();
 
-    // Add current bounds as suggestions for all template elements
+    // Add current bounds for all template elements
+    // Use target/reference distinction: targets are SUGGESTED, references are FIXED
     for elem_id in &elements {
         if let Some(elem) = result.elements.get(*elem_id) {
-            add_element_suggestions_to_solver(&mut solver, elem)?;
+            add_element_by_name_with_per_property_strength(
+                &mut solver,
+                result,
+                elem_id,
+                &target_vars,
+                false, // no trace
+            )?;
             local_result.add_element_bounds(elem_id.to_string(), elem.bounds);
             local_result.add_anchors(elem_id.to_string(), elem.anchors.clone());
         }
@@ -431,52 +448,6 @@ pub fn solve_local(
     }
 
     Ok(local_result)
-}
-
-/// Add element bounds as suggestions to a constraint solver.
-fn add_element_suggestions_to_solver(
-    solver: &mut super::solver::ConstraintSolver,
-    elem: &ElementLayout,
-) -> Result<(), LayoutError> {
-    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
-
-    let id = elem.id.as_ref().map(|i| i.0.as_str()).unwrap_or("unnamed");
-
-    // Add position suggestions
-    solver
-        .add_constraint(LayoutConstraint::Suggested {
-            variable: LayoutVariable::x(id),
-            value: elem.bounds.x,
-            source: ConstraintSource::intrinsic(format!("{} x suggestion", id)),
-        })
-        .map_err(LayoutError::solver_error)?;
-
-    solver
-        .add_constraint(LayoutConstraint::Suggested {
-            variable: LayoutVariable::y(id),
-            value: elem.bounds.y,
-            source: ConstraintSource::intrinsic(format!("{} y suggestion", id)),
-        })
-        .map_err(LayoutError::solver_error)?;
-
-    // Add size as fixed (elements don't resize)
-    solver
-        .add_constraint(LayoutConstraint::Fixed {
-            variable: LayoutVariable::width(id),
-            value: elem.bounds.width,
-            source: ConstraintSource::intrinsic(format!("{} width", id)),
-        })
-        .map_err(LayoutError::solver_error)?;
-
-    solver
-        .add_constraint(LayoutConstraint::Fixed {
-            variable: LayoutVariable::height(id),
-            value: elem.bounds.height,
-            source: ConstraintSource::intrinsic(format!("{} height", id)),
-        })
-        .map_err(LayoutError::solver_error)?;
-
-    Ok(())
 }
 
 /// Apply rotation transformation to a local solver result (Phase 2).
@@ -1053,6 +1024,10 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
             let w = intrinsic_width.unwrap_or(config.default_rect_size.0);
             let h = intrinsic_height.unwrap_or(config.default_rect_size.1);
             (w, h)
+        }
+        ShapeType::RasterImage { .. } => {
+            // Raster images require explicit dimensions; use default rect size as fallback
+            config.default_rect_size
         }
         ShapeType::Path(path_decl) => {
             // Compute bounds from path vertices
@@ -2354,7 +2329,14 @@ pub fn resolve_constrain_statements_two_phase(
     // Phase 1 & 2: Solve local constraints for each template, then apply rotation
     let mut local_results: HashMap<String, LocalSolverResult> = HashMap::new();
 
-    for (instance, local_constraints) in &local_by_instance {
+    // IMPORTANT: Sort instance names for deterministic constraint solving order.
+    // HashMap iteration order is nondeterministic, which can cause the solver
+    // to produce different solutions depending on which constraints it sees first.
+    let mut sorted_instances: Vec<_> = local_by_instance.keys().cloned().collect();
+    sorted_instances.sort();
+
+    for instance in &sorted_instances {
+        let local_constraints = local_by_instance.get(instance).unwrap();
         // Phase 1: Solve local constraints
         let mut local_result = solve_local(
             instance,
@@ -2571,26 +2553,65 @@ pub fn resolve_constrain_statements(
 
     // Separate constraints into internal (within a template) and external (across templates)
     // using the proper constraint classification based on template instance tracking
-    let (local_by_instance, external_constraints) =
+    let (mut local_by_instance, external_constraints) =
         partition_constraints(&collector.constraints, &element_to_template);
 
     // Flatten all local constraints into a single Vec for solving together
     // (The old approach solved all internal constraints in one pass)
-    let internal_constraints: Vec<_> = local_by_instance.into_values().flatten().collect();
+    // IMPORTANT: Sort by instance name for deterministic constraint order.
+    // HashMap iteration order is nondeterministic, which can cause the solver
+    // to produce different solutions depending on which constraints it sees first.
+    let mut sorted_instances: Vec<_> = local_by_instance.keys().cloned().collect();
+    sorted_instances.sort();
+    let internal_constraints: Vec<_> = sorted_instances
+        .into_iter()
+        .flat_map(|k| local_by_instance.remove(&k).unwrap_or_default())
+        .collect();
 
     // PASS 1: Solve internal constraints first
     // These position children relative to each other within their groups
     if !internal_constraints.is_empty() {
+        // Collect target and referenced elements from constraints
+        // This ensures only target elements can move (SUGGESTED), while reference
+        // elements are fixed (REQUIRED), preventing nondeterministic pivot choices.
+        let target_vars: std::collections::HashSet<(String, LayoutProperty)> =
+            internal_constraints
+                .iter()
+                .filter_map(|c| get_constraint_target_var(c))
+                .collect();
+
+        let referenced_elements: std::collections::HashSet<String> = internal_constraints
+            .iter()
+            .flat_map(|c| get_constraint_referenced_elements(c))
+            .collect();
+
         let mut internal_solver = ConstraintSolver::new();
 
-        // Add child sizes and positions as variables
-        for elem in &result.root_elements {
-            add_all_element_suggestions(&mut internal_solver, elem)?;
+        // Sort referenced elements for deterministic solver input order
+        let mut sorted_refs: Vec<&String> = referenced_elements.iter().collect();
+        sorted_refs.sort();
+
+        // Add positions for all elements referenced in constraints
+        // For each property: if it's targeted → SUGGESTED (can move), else → FIXED (reference)
+        for element_name in &sorted_refs {
+            add_element_by_name_with_per_property_strength(
+                &mut internal_solver,
+                result,
+                element_name,
+                &target_vars,
+                config.trace,
+            )?;
         }
 
-        for constraint in internal_constraints {
+        if config.trace {
+            for (i, c) in internal_constraints.iter().enumerate() {
+                eprintln!("TRACE: internal constraint {}: {:?}", i, c);
+            }
+        }
+
+        for constraint in &internal_constraints {
             internal_solver
-                .add_constraint(constraint)
+                .add_constraint(constraint.clone())
                 .map_err(LayoutError::solver_error)?;
         }
 
@@ -3038,54 +3059,6 @@ fn get_constraint_referenced_elements(constraint: &super::solver::LayoutConstrai
     }
 }
 
-/// Add position and size suggestions for ALL elements (including children)
-/// Used for internal constraint solving
-fn add_all_element_suggestions(
-    solver: &mut super::solver::ConstraintSolver,
-    elem: &ElementLayout,
-) -> Result<(), LayoutError> {
-    use super::solver::{ConstraintSource, LayoutConstraint, LayoutVariable};
-
-    if let Some(id) = &elem.id {
-        let name = id.0.as_str();
-
-        solver
-            .add_constraint(LayoutConstraint::Suggested {
-                variable: LayoutVariable::x(name),
-                value: elem.bounds.x,
-                source: ConstraintSource::layout(0..0, "element x position"),
-            })
-            .map_err(LayoutError::solver_error)?;
-        solver
-            .add_constraint(LayoutConstraint::Suggested {
-                variable: LayoutVariable::y(name),
-                value: elem.bounds.y,
-                source: ConstraintSource::layout(0..0, "element y position"),
-            })
-            .map_err(LayoutError::solver_error)?;
-        solver
-            .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::width(name),
-                value: elem.bounds.width,
-                source: ConstraintSource::intrinsic("fixed width"),
-            })
-            .map_err(LayoutError::solver_error)?;
-        solver
-            .add_constraint(LayoutConstraint::Fixed {
-                variable: LayoutVariable::height(name),
-                value: elem.bounds.height,
-                source: ConstraintSource::intrinsic("fixed height"),
-            })
-            .map_err(LayoutError::solver_error)?;
-    }
-
-    for child in &elem.children {
-        add_all_element_suggestions(solver, child)?;
-    }
-
-    Ok(())
-}
-
 /// Shift only a single element (not its children)
 /// Used for internal constraints where siblings are positioned relative to each other
 fn shift_single_element_by_name(
@@ -3527,6 +3500,8 @@ fn add_element_by_name_with_per_property_strength(
         // When Right is targeted alone (simple alignment), Width must be FIXED so the
         // solver moves the element rather than resizing it (prevents nondeterministic
         // solutions where the solver could either adjust X or Width).
+        // Same logic applies to CenterX/CenterY: when only centering is targeted,
+        // size must be FIXED to prevent the solver from resizing instead of moving.
         let width_is_targeted =
             target_vars.contains(&(element_name.to_string(), LayoutProperty::Width))
                 || contains_x;

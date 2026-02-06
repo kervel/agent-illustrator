@@ -174,6 +174,11 @@ pub enum ShapeType {
         intrinsic_width: Option<f64>,
         intrinsic_height: Option<f64>,
     },
+    /// Raster image reference (png, jpg, gif, webp, bmp)
+    RasterImage {
+        /// Path to the image file (relative to template base path)
+        path: String,
+    },
     /// Custom path shape (Feature 007)
     Path(PathDecl),
 }
@@ -334,6 +339,8 @@ pub enum TemplateSourceType {
     Svg,
     /// AIL file import: `template "name" from "file.ail"`
     Ail,
+    /// Raster image import: `template "name" from "file.png"` (png, jpg, gif, webp, bmp)
+    Raster,
 }
 
 /// Parameter definition with default value
