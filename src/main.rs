@@ -148,6 +148,12 @@ fn main() {
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }
+    // Set template base path to input file's directory for relative imports
+    if let Some(path) = &cli.input {
+        if let Some(parent) = path.parent() {
+            config = config.with_template_base_path(parent.to_path_buf());
+        }
+    }
 
     if cli.lint {
         match render_with_lint(&source, config) {

@@ -1,81 +1,51 @@
 /* INTENT
    Demonstrate embedding external SVG and raster images as templates.
    This example shows:
-   1. SVG file import with scaling and rotation
-   2. Raster image import (PNG/JPG/WebP) with size and rotation
-   3. Wrapping embedded images in templates with custom anchors
+   1. SVG file import with scaling
+   2. Raster image import (PNG) with size
+   3. Wrapping embedded images in groups with labels and anchors
+   4. Rotation support for embedded images
 */
 
 // === EMBEDDED SVG TEMPLATE ===
 // SVG files are loaded and their content is embedded directly.
 // The intrinsic dimensions from viewBox/width/height are used for scaling.
 
-// Simple SVG import (file must exist at this path relative to this .ail file)
-// template "logo" from "assets/logo.svg"
+template "person_svg" from "assets/person.svg"
 
 // === RASTER IMAGE TEMPLATES ===
-// Raster images (PNG, JPG, JPEG, GIF, WebP, BMP) reference the file path.
+// Raster images (PNG, JPG, etc.) reference the file path.
 // The SVG viewer loads the image at render time.
-// Dimensions MUST be specified since we don't read the file.
 
-// Simple raster import
-// template "photo" from "assets/photo.png"
+template "logo" from "assets/logo.png"
 
-// === WRAPPED TEMPLATES WITH ANCHORS ===
-// You can wrap an embedded image in an inline template to add:
-// - Labels
-// - Custom anchors for connections
-// - Additional shapes
+// === TEAM USING SVG IMAGES ===
 
-// Example: Person card with photo and name
-// (Commented out since the image file doesn't exist in this repo)
-/*
-template "avatar" from "assets/avatar.png"
-
-template "person_card" (name: "Person") {
-    col [gap: 8] {
-        avatar photo [width: 60, height: 60]
-        rect name_label [width: 70, height: 20, fill: none, stroke: none, label: name, font_size: 12]
-    }
-    anchor top_conn [position: photo.top - 4, direction: up]
-    anchor bottom_conn [position: name_label.bottom + 4, direction: down]
-    anchor left_conn [position: photo.left - 4, direction: left]
-    anchor right_conn [position: photo.right + 4, direction: right]
-}
-
-row team [gap: 40] {
-    person_card alice [name: "Alice"]
-    person_card bob [name: "Bob"]
-    person_card charlie [name: "Charlie"]
-}
-
-alice.right_conn -> bob.left_conn [label: "works with"]
-bob.right_conn -> charlie.left_conn [label: "mentors"]
-*/
-
-// === LIVE EXAMPLE (no external files needed) ===
-// Using inline shapes to simulate what embedded images would look like
-
-template "mock_avatar" (name: "Person", color: accent-light) {
-    col [gap: 8] {
-        stack photo_stack {
-            rect photo_bg [width: 60, height: 60, fill: color, stroke: accent-dark, stroke_width: 2]
-            circle head [size: 20, fill: foreground-3]
+row team_svg [gap: 40] {
+    group alice {
+        col [gap: 4] {
+            person_svg avatar [width: 60, height: 60]
+            rect label_bg [width: 70, height: 20, fill: none, stroke: none, label: "Alice", font_size: 12]
         }
-        rect name_bg [width: 70, height: 20, fill: none, stroke: none, label: name, font_size: 12]
+        anchor left_conn [position: avatar.left - 4, direction: left]
+        anchor right_conn [position: avatar.right + 4, direction: right]
     }
-    constrain head.center_x = photo_bg.center_x
-    constrain head.center_y = photo_bg.center_y - 5
-    anchor top_conn [position: photo_bg.top - 4, direction: up]
-    anchor bottom_conn [position: name_bg.bottom + 4, direction: down]
-    anchor left_conn [position: photo_bg.left - 4, direction: left]
-    anchor right_conn [position: photo_bg.right + 4, direction: right]
-}
-
-row team [gap: 40] {
-    mock_avatar alice [name: "Alice", color: accent-light]
-    mock_avatar bob [name: "Bob", color: secondary-light]
-    mock_avatar charlie [name: "Charlie", color: accent-light]
+    group bob {
+        col [gap: 4] {
+            person_svg avatar [width: 60, height: 60]
+            rect label_bg [width: 70, height: 20, fill: none, stroke: none, label: "Bob", font_size: 12]
+        }
+        anchor left_conn [position: avatar.left - 4, direction: left]
+        anchor right_conn [position: avatar.right + 4, direction: right]
+    }
+    group charlie {
+        col [gap: 4] {
+            person_svg avatar [width: 60, height: 60]
+            rect label_bg [width: 70, height: 20, fill: none, stroke: none, label: "Charlie", font_size: 12]
+        }
+        anchor left_conn [position: avatar.left - 4, direction: left]
+        anchor right_conn [position: avatar.right + 4, direction: right]
+    }
 }
 
 // Align vertical centers for straight horizontal connections
@@ -85,25 +55,30 @@ constrain charlie.center_y = alice.center_y
 alice.right_conn -> bob.left_conn [label: "works with"]
 bob.right_conn -> charlie.left_conn [label: "mentors"]
 
+// === PNG IMAGE EXAMPLE ===
+
+group logo_section {
+    logo company_logo [width: 200, height: 50]
+    text "PNG raster image" logo_label [font_size: 10, fill: text-3]
+}
+constrain logo_label.top = company_logo.bottom + 8
+constrain logo_label.center_x = company_logo.center_x
+
+constrain logo_section.top = team_svg.bottom + 40
+constrain logo_section.center_x = team_svg.center_x
+
 // === ROTATION EXAMPLE ===
 // Embedded images support rotation just like other shapes
 
-template "mock_icon" {
-    rect body [width: 40, height: 40, fill: accent-1, stroke: accent-dark, stroke_width: 2]
-    circle dot [size: 10, fill: text-light]
-    constrain dot.center_x = body.center_x
-    constrain dot.center_y = body.center_y
-}
-
 row rotated_icons [gap: 20] {
-    mock_icon i0 [rotation: 0]
-    mock_icon i15 [rotation: 15]
-    mock_icon i30 [rotation: 30]
-    mock_icon i45 [rotation: 45]
+    person_svg i0 [width: 40, height: 40, rotation: 0]
+    person_svg i15 [width: 40, height: 40, rotation: 15]
+    person_svg i30 [width: 40, height: 40, rotation: 30]
+    person_svg i45 [width: 40, height: 40, rotation: 45]
 }
 
-constrain rotated_icons.top = team.bottom + 60
-constrain rotated_icons.center_x = team.center_x
+constrain rotated_icons.top = logo_section.bottom + 40
+constrain rotated_icons.center_x = team_svg.center_x
 
 text "Rotation: 0, 15, 30, 45 degrees" rotation_label [font_size: 10, fill: text-3]
 constrain rotation_label.top = rotated_icons.bottom + 10

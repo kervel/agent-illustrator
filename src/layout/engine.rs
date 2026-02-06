@@ -2888,13 +2888,34 @@ fn recompute_group_anchors(
     group_name: &str,
     anchor_decls: &[AnchorDecl],
 ) {
-    // First, collect the children bounds
-    let children_bounds: HashMap<String, BoundingBox> = result
-        .elements
-        .iter()
-        .filter(|(id, _)| id.starts_with(&format!("{}_", group_name)))
-        .map(|(id, elem)| (id.clone(), elem.bounds))
-        .collect();
+    // First, collect the children bounds by recursively traversing the group's children
+    // This works for both template-expanded groups (prefixed names) and user-authored groups
+    fn collect_bounds_recursive(elements: &[ElementLayout], map: &mut HashMap<String, BoundingBox>) {
+        for elem in elements {
+            if let Some(id) = elem.id.as_ref() {
+                map.insert(id.0.clone(), elem.bounds);
+            }
+            if !elem.children.is_empty() {
+                collect_bounds_recursive(&elem.children, map);
+            }
+        }
+    }
+
+    let children_bounds: HashMap<String, BoundingBox> = if let Some(group_elem) =
+        result.elements.get(group_name)
+    {
+        let mut map = HashMap::new();
+        collect_bounds_recursive(&group_elem.children, &mut map);
+        map
+    } else {
+        // Fallback to prefix-based lookup for backwards compatibility
+        result
+            .elements
+            .iter()
+            .filter(|(id, _)| id.starts_with(&format!("{}_", group_name)))
+            .map(|(id, elem)| (id.clone(), elem.bounds))
+            .collect()
+    };
 
     // Resolve each anchor declaration
     let mut new_anchors = AnchorSet::default();

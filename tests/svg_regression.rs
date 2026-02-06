@@ -10,7 +10,7 @@
 use std::fs;
 use std::path::Path;
 
-use agent_illustrator::render;
+use agent_illustrator::{render_with_config, RenderConfig};
 
 /// Normalize an SVG string for comparison by:
 /// 1. Removing the style block (CSS variable order is non-deterministic)
@@ -99,7 +99,14 @@ fn test_svg_regression_all_examples() {
         if path.extension().map_or(false, |ext| ext == "ail") {
             let source = fs::read_to_string(&path).expect(&format!("Failed to read {:?}", path));
 
-            match render(&source) {
+            // Set template base path to the file's directory for relative imports
+            let config = if let Some(parent) = path.parent() {
+                RenderConfig::new().with_template_base_path(parent.to_path_buf())
+            } else {
+                RenderConfig::new()
+            };
+
+            match render_with_config(&source, config) {
                 Ok(svg) => {
                     // Verify it's valid SVG
                     if !svg.contains("<svg") {
@@ -165,7 +172,14 @@ fn generate_baselines() {
         if path.extension().map_or(false, |ext| ext == "ail") {
             let source = fs::read_to_string(&path).expect(&format!("Failed to read {:?}", path));
 
-            match render(&source) {
+            // Set template base path to the file's directory for relative imports
+            let config = if let Some(parent) = path.parent() {
+                RenderConfig::new().with_template_base_path(parent.to_path_buf())
+            } else {
+                RenderConfig::new()
+            };
+
+            match render_with_config(&source, config) {
                 Ok(svg) => {
                     let baseline_path = baseline_dir
                         .join(path.file_stem().unwrap())
@@ -199,7 +213,9 @@ fn generate_baselines() {
 fn test_feedback_loops_example() {
     let source = fs::read_to_string("examples/feedback-loops.ail");
     if let Ok(source) = source {
-        let result = render(&source);
+        let config = RenderConfig::new()
+            .with_template_base_path(std::path::PathBuf::from("examples"));
+        let result = render_with_config(&source, config);
         assert!(
             result.is_ok(),
             "Failed to render feedback-loops.ail: {:?}",

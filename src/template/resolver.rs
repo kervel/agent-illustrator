@@ -458,11 +458,17 @@ fn resolve_statement(
         }
         Statement::Group(mut group) => {
             let mut resolved_children = Vec::new();
+            let mut extracted_anchors = Vec::new();
             for child in group.children {
                 match &child.node {
                     Statement::TemplateInstance(inst) => {
                         let expanded = resolve_instance(inst, &child.span, registry, ctx)?;
                         resolved_children.extend(expanded);
+                    }
+                    Statement::AnchorDecl(anchor) => {
+                        // Extract anchor declarations to group.anchors
+                        // They should not appear in children for layout
+                        extracted_anchors.push(anchor.clone());
                     }
                     _ => {
                         let resolved = resolve_statement(child, registry, ctx)?;
@@ -471,6 +477,8 @@ fn resolve_statement(
                 }
             }
             group.children = resolved_children;
+            // Merge extracted anchors with any existing anchors
+            group.anchors.extend(extracted_anchors);
             Ok(Spanned::new(Statement::Group(group), stmt.span))
         }
         Statement::Label(inner) => {

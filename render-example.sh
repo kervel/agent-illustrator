@@ -17,7 +17,7 @@ CSS="--stylesheet-css stylesheets/kapernikov.css"
 CSS_SCHEMATIC="--stylesheet-css stylesheets/kapernikov-schematic.css"
 
 echo "Rendering railway-topology..."
-cargo run --quiet --quiet -- $DEBUG_FLAG $CSS examples/railway-topology.ail > "$OUTPUT_DIR/railway-topology.svg"
+cargo run --quiet -- $DEBUG_FLAG $CSS examples/railway-topology.ail > "$OUTPUT_DIR/railway-topology.svg"
 echo "  -> $OUTPUT_DIR/railway-topology.svg"
 
 echo "Rendering railway-junction-direct..."
@@ -31,6 +31,10 @@ echo "  -> $OUTPUT_DIR/label-test.svg"
 echo "Rendering mosfet-driver (schematic)..."
 cargo run --quiet -- $DEBUG_FLAG $CSS_SCHEMATIC examples/mosfet-driver.ail > "$OUTPUT_DIR/mosfet-driver.svg"
 echo "  -> $OUTPUT_DIR/mosfet-driver.svg"
+
+echo "Rendering embedded-images..."
+cargo run --quiet -- $DEBUG_FLAG $CSS examples/embedded-images.ail > "$OUTPUT_DIR/embedded-images.svg"
+echo "  -> $OUTPUT_DIR/embedded-images.svg"
 
 echo ""
 echo "Done! SVGs are in $OUTPUT_DIR/"
