@@ -58,6 +58,13 @@ pub fn attachment_point(bounds: &BoundingBox, edge: Edge) -> Point {
 /// For circles (when width ≈ height and small), uses circular boundary.
 /// For rectangles, uses rectangular boundary intersection.
 pub fn boundary_point_toward(bounds: &BoundingBox, target: Point) -> Point {
+    boundary_point_toward_shape(bounds, target, false)
+}
+
+/// Calculate the point on a shape boundary in the direction of a target point.
+/// When `is_ellipse` is true, calculates intersection with ellipse surface.
+/// Otherwise behaves like `boundary_point_toward` (rectangle intersection).
+pub fn boundary_point_toward_shape(bounds: &BoundingBox, target: Point, is_ellipse: bool) -> Point {
     let center = bounds.center();
     let dx = target.x - center.x;
     let dy = target.y - center.y;
@@ -67,14 +74,21 @@ pub fn boundary_point_toward(bounds: &BoundingBox, target: Point) -> Point {
         return center;
     }
 
-    // Check if this is a circle (small, square bounding box)
+    // Check if this is a circle (small, square bounding box) or explicitly an ellipse
     let is_circle = (bounds.width - bounds.height).abs() < 1.0 && bounds.width < 20.0;
 
-    if is_circle {
-        // For circles, use radius-based calculation
-        let radius = bounds.width / 2.0;
-        let dist = (dx * dx + dy * dy).sqrt();
-        Point::new(center.x + dx / dist * radius, center.y + dy / dist * radius)
+    if is_circle || is_ellipse {
+        // For ellipse/circle, find intersection with parametric ellipse:
+        // x = cx + rx*cos(t), y = cy + ry*sin(t)
+        // The point on ellipse in direction (dx, dy) is found by:
+        // t = atan2(dy * rx, dx * ry)
+        let rx = bounds.width / 2.0;
+        let ry = bounds.height / 2.0;
+
+        // Scale direction to ellipse space, find angle
+        let angle = (dy * rx).atan2(dx * ry);
+
+        Point::new(center.x + rx * angle.cos(), center.y + ry * angle.sin())
     } else {
         // For rectangles, find intersection with boundary
         // Calculate t values for each edge intersection
@@ -96,6 +110,14 @@ pub fn boundary_point_toward(bounds: &BoundingBox, target: Point) -> Point {
             Point::new(center.x + dx * t, center.y + dy * t)
         }
     }
+}
+
+/// Check if an ElementType represents an ellipse or circle shape
+fn is_ellipse_type(element_type: &ElementType) -> bool {
+    matches!(
+        element_type,
+        ElementType::Shape(ShapeType::Ellipse) | ElementType::Shape(ShapeType::Circle)
+    )
 }
 
 // ============================================
@@ -533,16 +555,46 @@ pub fn route_connection_with_anchors(
     from_anchor: Option<&ResolvedAnchor>,
     to_anchor: Option<&ResolvedAnchor>,
 ) -> Vec<Point> {
+    // Delegate to full version without element type info (treats all shapes as rectangles)
+    route_connection_with_anchors_and_types(
+        from_bounds,
+        to_bounds,
+        mode,
+        via_points,
+        from_anchor,
+        to_anchor,
+        None,
+        None,
+    )
+}
+
+/// Route a connection between two bounding boxes with optional explicit anchors and element types.
+///
+/// When element types are provided, uses the correct boundary calculation for ellipses.
+pub fn route_connection_with_anchors_and_types(
+    from_bounds: &BoundingBox,
+    to_bounds: &BoundingBox,
+    mode: RoutingMode,
+    via_points: &[Point],
+    from_anchor: Option<&ResolvedAnchor>,
+    to_anchor: Option<&ResolvedAnchor>,
+    from_type: Option<&ElementType>,
+    to_type: Option<&ElementType>,
+) -> Vec<Point> {
     // Feature 009: Use anchor positions if provided, otherwise calculate from bounds
     let from_center = from_bounds.center();
     let to_center = to_bounds.center();
 
+    // Determine if shapes are ellipses for proper boundary calculation
+    let from_is_ellipse = from_type.map(is_ellipse_type).unwrap_or(false);
+    let to_is_ellipse = to_type.map(is_ellipse_type).unwrap_or(false);
+
     let start = from_anchor
         .map(|a| a.position)
-        .unwrap_or_else(|| boundary_point_toward(from_bounds, to_center));
+        .unwrap_or_else(|| boundary_point_toward_shape(from_bounds, to_center, from_is_ellipse));
     let end = to_anchor
         .map(|a| a.position)
-        .unwrap_or_else(|| boundary_point_toward(to_bounds, from_center));
+        .unwrap_or_else(|| boundary_point_toward_shape(to_bounds, from_center, to_is_ellipse));
 
     // For curved routing, use cubic Bezier
     if mode == RoutingMode::Curved {
@@ -962,13 +1014,15 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
                         let via_refs = extract_via_references(&conn.modifiers);
                         let via_points = resolve_via_points(&via_refs, result)?;
-                        let path = route_connection_with_anchors(
+                        let path = route_connection_with_anchors_and_types(
                             &from_bounds,
                             &to_bounds,
                             routing_mode,
                             &via_points,
                             from_anchor_opt,
                             to_anchor_opt,
+                            Some(&from_element.element_type),
+                            Some(&to_element.element_type),
                         );
                         let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
                         let (label, label_ref_id) =
