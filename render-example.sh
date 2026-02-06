@@ -17,19 +17,19 @@ CSS="--stylesheet-css stylesheets/kapernikov.css"
 CSS_SCHEMATIC="--stylesheet-css stylesheets/kapernikov-schematic.css"
 
 echo "Rendering railway-topology..."
-cargo run -- $DEBUG_FLAG $CSS examples/railway-topology.ail > "$OUTPUT_DIR/railway-topology.svg"
+cargo run --quiet --quiet -- $DEBUG_FLAG $CSS examples/railway-topology.ail > "$OUTPUT_DIR/railway-topology.svg"
 echo "  -> $OUTPUT_DIR/railway-topology.svg"
 
 echo "Rendering railway-junction-direct..."
-cargo run -- $DEBUG_FLAG $CSS examples/railway-junction-direct.ail > "$OUTPUT_DIR/railway-junction-direct.svg"
+cargo run --quiet -- $DEBUG_FLAG $CSS examples/railway-junction-direct.ail > "$OUTPUT_DIR/railway-junction-direct.svg"
 echo "  -> $OUTPUT_DIR/railway-junction-direct.svg"
 
 echo "Rendering label-test..."
-cargo run -- $DEBUG_FLAG $CSS examples/label-test.ail > "$OUTPUT_DIR/label-test.svg"
+cargo run --quiet -- $DEBUG_FLAG $CSS examples/label-test.ail > "$OUTPUT_DIR/label-test.svg"
 echo "  -> $OUTPUT_DIR/label-test.svg"
 
 echo "Rendering mosfet-driver (schematic)..."
-cargo run -- $DEBUG_FLAG $CSS_SCHEMATIC examples/mosfet-driver.ail > "$OUTPUT_DIR/mosfet-driver.svg"
+cargo run --quiet -- $DEBUG_FLAG $CSS_SCHEMATIC examples/mosfet-driver.ail > "$OUTPUT_DIR/mosfet-driver.svg"
 echo "  -> $OUTPUT_DIR/mosfet-driver.svg"
 
 echo ""
