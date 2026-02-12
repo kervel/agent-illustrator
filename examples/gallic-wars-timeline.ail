@@ -1,0 +1,160 @@
+/* INTENT
+   Visualise Caesar's Gallic Wars as a horizontal timeline.
+   Five key events (58–50 BC) alternate above and below the axis.
+   The decisive Siege of Alesia (52 BC) is visually highlighted.
+   Demonstrates: custom path shapes, alternating layout, emphasis styling.
+*/
+
+group diagram {
+
+    // === TITLE ===
+    text "Conquest of Gaul" title [font_size: 16, fill: foreground-1]
+
+    // === TIMELINE AXIS ===
+    rect axis [width: 780, height: 3, fill: foreground-2, stroke: none]
+    path arrow_tip [fill: foreground-2, stroke: none] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 14, y: 7]
+        line_to c [x: 0, y: 14]
+        close
+    }
+
+    // === YEAR DOTS ===
+    circle d58 [size: 18, fill: accent-dark, stroke: background-1, stroke_width: 3]
+    circle d57 [size: 18, fill: accent-dark, stroke: background-1, stroke_width: 3]
+    circle d55 [size: 18, fill: accent-dark, stroke: background-1, stroke_width: 3]
+    circle d52 [size: 24, fill: accent-1, stroke: background-1, stroke_width: 3]
+    circle d50 [size: 18, fill: accent-dark, stroke: background-1, stroke_width: 3]
+
+    // === STEMS ===
+    rect stem58 [width: 2, height: 30, fill: foreground-3, stroke: none]
+    rect stem57 [width: 2, height: 30, fill: foreground-3, stroke: none]
+    rect stem55 [width: 2, height: 30, fill: foreground-3, stroke: none]
+    rect stem52 [width: 2, height: 30, fill: accent-1, stroke: none]
+    rect stem50 [width: 2, height: 30, fill: foreground-3, stroke: none]
+
+    // === CARDS ABOVE AXIS (58 BC, 55 BC, 50 BC) ===
+
+    // 58 BC card
+    rect bg58 [width: 140, height: 50, fill: background-2, stroke: foreground-3, stroke_width: 1]
+    text "58 BC" t58 [font_size: 11, fill: accent-dark]
+    text "Defeats Helvetii" t58a [font_size: 11, fill: text-1]
+    text "& Ariovistus" t58b [font_size: 11, fill: text-2]
+
+    // 55 BC card
+    rect bg55 [width: 140, height: 50, fill: background-2, stroke: foreground-3, stroke_width: 1]
+    text "55 BC" t55 [font_size: 11, fill: accent-dark]
+    text "Crosses the Rhine" t55a [font_size: 11, fill: text-1]
+    text "& invades Britain" t55b [font_size: 11, fill: text-2]
+
+    // 50 BC card
+    rect bg50 [width: 140, height: 50, fill: background-2, stroke: foreground-3, stroke_width: 1]
+    text "50 BC" t50 [font_size: 11, fill: accent-dark]
+    text "All of Gaul" t50a [font_size: 11, fill: text-1]
+    text "pacified" t50b [font_size: 11, fill: text-2]
+
+    // === CARDS BELOW AXIS (57 BC, 52 BC) ===
+
+    // 57 BC card
+    rect bg57 [width: 140, height: 50, fill: background-2, stroke: foreground-3, stroke_width: 1]
+    text "57 BC" t57 [font_size: 11, fill: accent-dark]
+    text "Subdues" t57a [font_size: 11, fill: text-1]
+    text "the Belgae" t57b [font_size: 11, fill: text-2]
+
+    // 52 BC card — highlighted
+    rect bg52 [width: 150, height: 62, fill: accent-1, stroke: accent-dark, stroke_width: 2]
+    text "52 BC" t52 [font_size: 12, fill: text-light]
+    text "Siege of Alesia" t52a [font_size: 12, fill: text-light]
+    text "Vercingetorix surrenders" t52b [font_size: 10, fill: accent-light]
+}
+
+// === LAYOUT ===
+
+// Title above the timeline
+constrain title.center_x = 410
+constrain title.bottom = 60
+
+// Axis centered
+constrain axis.center_x = 410
+constrain axis.center_y = 170
+constrain arrow_tip.left = axis.right
+constrain arrow_tip.center_y = axis.center_y
+
+// Dot positions on axis (evenly spaced)
+constrain d58.center_y = axis.center_y
+constrain d57.center_y = axis.center_y
+constrain d55.center_y = axis.center_y
+constrain d52.center_y = axis.center_y
+constrain d50.center_y = axis.center_y
+constrain d58.center_x = axis.left + 70
+constrain d57.center_x = axis.left + 230
+constrain d55.center_x = axis.left + 390
+constrain d52.center_x = axis.left + 550
+constrain d50.center_x = axis.left + 710
+
+// --- ABOVE-AXIS CARDS: 58, 55, 50 ---
+// Stems go up from dot
+constrain stem58.center_x = d58.center_x
+constrain stem58.bottom = d58.top
+constrain stem55.center_x = d55.center_x
+constrain stem55.bottom = d55.top
+constrain stem50.center_x = d50.center_x
+constrain stem50.bottom = d50.top
+
+// Cards above stems
+constrain bg58.center_x = d58.center_x
+constrain bg58.bottom = stem58.top
+constrain bg55.center_x = d55.center_x
+constrain bg55.bottom = stem55.top
+constrain bg50.center_x = d50.center_x
+constrain bg50.bottom = stem50.top
+
+// Text inside above cards
+constrain t58.center_x = bg58.center_x
+constrain t58.top = bg58.top + 5
+constrain t58a.center_x = bg58.center_x
+constrain t58a.top = t58.bottom + 3
+constrain t58b.center_x = bg58.center_x
+constrain t58b.top = t58a.bottom + 1
+
+constrain t55.center_x = bg55.center_x
+constrain t55.top = bg55.top + 5
+constrain t55a.center_x = bg55.center_x
+constrain t55a.top = t55.bottom + 3
+constrain t55b.center_x = bg55.center_x
+constrain t55b.top = t55a.bottom + 1
+
+constrain t50.center_x = bg50.center_x
+constrain t50.top = bg50.top + 5
+constrain t50a.center_x = bg50.center_x
+constrain t50a.top = t50.bottom + 3
+constrain t50b.center_x = bg50.center_x
+constrain t50b.top = t50a.bottom + 1
+
+// --- BELOW-AXIS CARDS: 57, 52 ---
+// Stems go down from dot
+constrain stem57.center_x = d57.center_x
+constrain stem57.top = d57.bottom
+constrain stem52.center_x = d52.center_x
+constrain stem52.top = d52.bottom
+
+// Cards below stems
+constrain bg57.center_x = d57.center_x
+constrain bg57.top = stem57.bottom
+constrain bg52.center_x = d52.center_x
+constrain bg52.top = stem52.bottom
+
+// Text inside below cards
+constrain t57.center_x = bg57.center_x
+constrain t57.top = bg57.top + 5
+constrain t57a.center_x = bg57.center_x
+constrain t57a.top = t57.bottom + 3
+constrain t57b.center_x = bg57.center_x
+constrain t57b.top = t57a.bottom + 1
+
+constrain t52.center_x = bg52.center_x
+constrain t52.top = bg52.top + 6
+constrain t52a.center_x = bg52.center_x
+constrain t52a.top = t52.bottom + 3
+constrain t52b.center_x = bg52.center_x
+constrain t52b.top = t52a.bottom + 1
