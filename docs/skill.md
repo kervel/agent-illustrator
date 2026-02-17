@@ -65,8 +65,8 @@ Follow these phases IN ORDER. Write each phase as a block comment before proceed
    Elements:
      [name] → [shape: rect|circle|ellipse] because [reason]
 
-   Connections:
-     [from → to]: [routing: default|direct|curved] because [reason]
+   Connections (ALWAYS use explicit anchors like .bottom → .top):
+     [from.anchor → to.anchor]: [routing: default|direct|curved] because [reason]
 
    Visual encoding:
      [what] → [color/size/style] because [reason]
@@ -198,7 +198,7 @@ Use invisible elements as curve control points:
 circle via_pt [size: 1, opacity: 0]
 constrain via_pt.center_x = midpoint(source, target)
 constrain via_pt.center_y = source.center_y - 40
-source.anchor -> target.anchor [routing: curved, via: via_pt]
+source.bottom -> target.top [routing: curved, via: via_pt]
 ```
 Keep via-points 30-60px from the connection line. Too far = huge loops.
 
@@ -248,16 +248,17 @@ Do not attempt to use these — they will waste iteration cycles:
 
 ### Common Pitfalls
 
-1. **Don't guess syntax** — fetch `--grammar` first.
-2. **Don't skip visual verification** — render to PNG and check every time.
-3. **Use exact color names** — `foreground-1` not `foreground`.
-4. **Don't over-constrain** — constraining both edges AND size on the same axis conflicts.
-5. **Avoid reserved names** — `left`, `right`, `top`, `bottom`, `x`, `y`, `width`, `height`.
-6. **Constraint coords are local** — property refs use pre-rotation coordinates.
-7. **Path vertices are local** — coordinates start from (0,0). Use `constrain path.left = X` / `constrain path.top = Y` to position the path in the diagram.
-8. **Use `path` for complex shapes** — not overlapping rectangles.
-9. **Consistent visual style** — decide stroke-only vs filled before creating templates.
-10. **Don't overclaim quality** — compile success ≠ good diagram. Always check visually.
+1. **Always specify connection anchors** — write `a.bottom -> b.top`, never `a -> b`. Explicit anchors produce much better routing.
+2. **Don't guess syntax** — fetch `--grammar` first.
+3. **Don't skip visual verification** — render to PNG and check every time.
+4. **Use exact color names** — `foreground-1` not `foreground`.
+5. **Don't over-constrain** — constraining both edges AND size on the same axis conflicts.
+6. **Avoid reserved names** — `left`, `right`, `top`, `bottom`, `x`, `y`, `width`, `height`.
+7. **Constraint coords are local** — property refs use pre-rotation coordinates.
+8. **Path vertices are local** — coordinates start from (0,0). Use `constrain path.left = X` / `constrain path.top = Y` to position the path in the diagram.
+9. **Use `path` for complex shapes** — not overlapping rectangles.
+10. **Consistent visual style** — decide stroke-only vs filled before creating templates.
+11. **Don't overclaim quality** — compile success ≠ good diagram. Always check visually.
 
 ---
 

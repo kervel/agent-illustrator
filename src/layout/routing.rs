@@ -1008,9 +1008,10 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                         let to_anchor =
                             resolve_anchor(&conn.to, &result.elements, Some(&from_bounds))?;
 
-                        // Use anchors only if explicitly specified, otherwise auto-detect
-                        let from_anchor_opt = conn.from.anchor.as_ref().map(|_| &from_anchor);
-                        let to_anchor_opt = conn.to.anchor.as_ref().map(|_| &to_anchor);
+                        // Always pass resolved anchors (auto-picked or explicit) so
+                        // the router can use their direction for routing.
+                        let from_anchor_opt = Some(&from_anchor);
+                        let to_anchor_opt = Some(&to_anchor);
 
                         let via_refs = extract_via_references(&conn.modifiers);
                         let via_points = resolve_via_points(&via_refs, result)?;

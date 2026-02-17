@@ -16,8 +16,8 @@ col main {
         }
     }
 }
-api -> service
-service -> db
+api.right -> service.left
+service.bottom -> db.top
 
 Nested layouts: col contains row contains two cols.
 Connections cross layout boundaries automatically.
@@ -62,11 +62,11 @@ constrain agent_via.center_x = midpoint(task, result)
 constrain agent_via.center_y = result.bottom + 50
 
 // Human flow (right to left)
-evaluate -> spot -> tune -> assign [stroke: accent-dark, stroke_width: 3]
+evaluate.left -> spot.right -> tune.left -> assign.right [stroke: accent-dark, stroke_width: 3]
 assign.top -> evaluate.top [stroke: accent-dark, stroke_width: 3, routing: curved, via: human_via]
 
 // Agent flow (left to right)
-task -> execute -> check -> result [stroke: secondary-dark, stroke_width: 3]
+task.right -> execute.left -> check.right -> result.left [stroke: secondary-dark, stroke_width: 3]
 result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, routing: curved, via: agent_via]
 
 // Cross connections
