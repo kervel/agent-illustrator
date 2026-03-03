@@ -55,6 +55,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_overlaps(result, &contains_ids, &mut warnings);
     check_contains(result, doc, &mut warnings);
     check_labels(result, &mut warnings);
+    check_label_element_overlaps(result, &mut warnings);
     check_connections(result, &mut warnings);
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
@@ -463,6 +464,71 @@ fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     message: format!(
                         "labels on \"{}\" and \"{}\" overlap",
                         a.owner, b.owner
+                    ),
+                });
+            }
+        }
+    }
+}
+
+// ── Label-element edge overlap detection ──────────────────────────
+
+/// Detect labels that straddle the edge of a shape element: the label
+/// bbox intersects the element but is NOT fully contained.  A label
+/// completely inside a box is fine (looks intentional); one that crosses
+/// an edge looks like a placement accident.
+fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    // Collect all labels with owner info
+    let mut labels: Vec<LabelInfo> = Vec::new();
+    for elem in &result.root_elements {
+        collect_labels_recursive(elem, &mut labels);
+    }
+    for conn in &result.connections {
+        if let Some(label) = &conn.label {
+            let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
+            labels.push(LabelInfo {
+                owner,
+                bbox: estimate_label_bbox(label),
+                parent_opacity: None,
+            });
+        }
+    }
+
+    // Collect all opaque, non-text shape elements
+    let mut shapes: Vec<OpaqueElement> = Vec::new();
+    for (i, elem) in result.root_elements.iter().enumerate() {
+        collect_opaque_elements(elem, None, i, &mut shapes);
+    }
+
+    for label in &labels {
+        for shape in &shapes {
+            // Skip if label belongs to this element (own label inside own box)
+            if label.owner == shape.id {
+                continue;
+            }
+
+            // Skip transparent labels
+            if let Some(op) = label.parent_opacity {
+                if op < 1.0 {
+                    continue;
+                }
+            }
+
+            // The key check: intersects the edge but NOT fully inside
+            if label.bbox.intersects(&shape.bounds)
+                && !shape.bounds.contains_bbox(&label.bbox)
+            {
+                let overlap_w = label.bbox.right().min(shape.bounds.right())
+                    - label.bbox.x.max(shape.bounds.x);
+                let overlap_h = label.bbox.bottom().min(shape.bounds.bottom())
+                    - label.bbox.y.max(shape.bounds.y);
+                warnings.push(LintWarning {
+                    category: LintCategory::Label,
+                    message: format!(
+                        "label on \"{}\" straddles the edge of element \"{}\"; \
+                         overlaps by {:.0}x{:.0}px",
+                        label.owner, shape.id,
+                        overlap_w, overlap_h
                     ),
                 });
             }

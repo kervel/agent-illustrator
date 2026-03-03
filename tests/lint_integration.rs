@@ -133,6 +133,45 @@ fn test_shacl_overview_redundant_constants() {
 }
 
 #[test]
+fn test_label_element_straddle_true_positive() {
+    let source = include_str!("lint-fixtures/true-positives.ail");
+    let config = RenderConfig::new().with_lint(true);
+    let (_, warnings) = render_with_lint(source, config).expect("Should render");
+
+    let straddle: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.category.to_string() == "label" && w.message.contains("straddles"))
+        .collect();
+    assert!(
+        !straddle.is_empty(),
+        "Expected label-straddle warnings for true-positives fixture"
+    );
+    // Our test case: straddle_box_a's long label crosses into straddle_box_b
+    assert!(
+        straddle.iter().any(|w| w.message.contains("straddle_box_a") && w.message.contains("straddle_box_b")),
+        "Expected straddle warning for straddle_box_a→straddle_box_b, got: {:?}",
+        straddle.iter().map(|w| &w.message).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn test_label_element_straddle_true_negative() {
+    let source = include_str!("lint-fixtures/true-negatives.ail");
+    let config = RenderConfig::new().with_lint(true);
+    let (_, warnings) = render_with_lint(source, config).expect("Should render");
+
+    let straddle: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.message.contains("straddles"))
+        .collect();
+    assert!(
+        straddle.is_empty(),
+        "Expected no label-straddle warnings for true-negatives, got: {:?}",
+        straddle.iter().map(|w| &w.message).collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn test_shacl_overview_reducible_bends() {
     let source = include_str!("lint-fixtures/shacl-overview.ail");
     let config = RenderConfig::new().with_lint(true);

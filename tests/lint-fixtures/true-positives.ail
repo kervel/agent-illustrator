@@ -104,3 +104,23 @@ constrain target_rb.center_x = 250
 constrain target_rb.center_y = 550
 
 source_rb.left -> target_rb.top
+
+
+// ------------------------------------------------------------
+// TEST 6: Label straddling the edge of another element
+// An element with a long label placed next to another element
+// so the label text extends past its own element and crosses
+// the edge of the neighbouring element. This looks like
+// accidental placement and should be flagged.
+// ------------------------------------------------------------
+
+group label_straddle_test {
+    rect straddle_box_a [width: 100, height: 50, fill: accent-1, stroke: foreground-1, label: "This Label Is Very Long"]
+    rect straddle_box_b [width: 100, height: 50, fill: accent-2, stroke: foreground-1, label: "Neighbour"]
+}
+
+// Place them so box_a's long label text extends into box_b
+constrain straddle_box_a.center_x = 500
+constrain straddle_box_a.center_y = 460
+constrain straddle_box_b.center_x = 610
+constrain straddle_box_b.center_y = 460

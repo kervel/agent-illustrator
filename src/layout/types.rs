@@ -413,6 +413,14 @@ impl BoundingBox {
             && point.y <= self.bottom()
     }
 
+    /// Check if this bounding box fully contains another
+    pub fn contains_bbox(&self, other: &BoundingBox) -> bool {
+        other.x >= self.x
+            && other.right() <= self.right()
+            && other.y >= self.y
+            && other.bottom() <= self.bottom()
+    }
+
     /// Check if this bounding box intersects another
     pub fn intersects(&self, other: &BoundingBox) -> bool {
         self.x < other.right()
