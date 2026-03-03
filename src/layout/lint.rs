@@ -924,11 +924,11 @@ fn is_small_element(result: &LayoutResult, name: &str) -> bool {
     }
 }
 
-/// Look up the routing mode for a connection in the solved layout.
-fn connection_routing_mode(result: &LayoutResult, from: &str, to: &str) -> Option<RoutingMode> {
+/// Look up the solved connection layout for a given from/to pair.
+fn find_connection_layout<'a>(result: &'a LayoutResult, from: &str, to: &str) -> Option<&'a super::types::ConnectionLayout> {
     result.connections.iter().find(|c| {
         c.from_id.0 == from && c.to_id.0 == to
-    }).map(|c| c.routing_mode)
+    })
 }
 
 fn check_missing_anchors(doc: &Document, result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
@@ -953,11 +953,18 @@ fn check_missing_anchors_in_stmts(
                         continue;
                     }
 
-                    // Skip direct-routed connections — auto-detection works fine
-                    // for straight lines. Anchors mainly matter for orthogonal and
-                    // curved routing where the starting normal vector affects the path.
-                    if connection_routing_mode(result, from_name, to_name) == Some(RoutingMode::Direct) {
-                        continue;
+                    // Check the solved connection to decide if anchors would help
+                    if let Some(solved) = find_connection_layout(result, from_name, to_name) {
+                        // Skip direct routing — straight lines don't need anchor guidance
+                        if solved.routing_mode == RoutingMode::Direct {
+                            continue;
+                        }
+                        // Skip if the solved path is a straight line (2 points) — this means
+                        // auto-detection already found the optimal edges. Anchors only help
+                        // when the path has bends (3+ points) that might be avoidable.
+                        if solved.path.len() <= 2 {
+                            continue;
+                        }
                     }
 
                     if conn.from.anchor.is_none() {
