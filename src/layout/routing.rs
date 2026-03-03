@@ -530,7 +530,7 @@ fn forced_stub_path(start: Point, end: Point, from_dir: Point, to_dir: Point) ->
 
 /// Minimum length for the final segment to ensure proper marker orientation.
 /// Short segments can cause browsers to calculate incorrect tangent directions.
-const MIN_FINAL_SEGMENT_LENGTH: f64 = 15.0;
+pub(crate) const MIN_FINAL_SEGMENT_LENGTH: f64 = 15.0;
 /// Route a connection between two bounding boxes with the specified routing mode
 /// Optional via_points are control points for curved routing (Feature 008)
 pub fn route_connection(

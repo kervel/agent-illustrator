@@ -85,3 +85,22 @@ constrain extra.center_y = 280
 // Container should wrap both, but we also pin its right edge too close
 constrain container_box contains escapee, extra [padding: 10]
 constrain container_box.right = 450
+
+
+// ------------------------------------------------------------
+// TEST 5: Reducible bend — short interior segment in orthogonal path
+// A left→top connection where the target's top anchor is just barely
+// to the right of the source's left anchor, forcing an extra stub.
+// ------------------------------------------------------------
+
+group reducible_bend_test {
+    rect source_rb [width: 120, height: 40, fill: accent-1, stroke: foreground-1, label: "Source"]
+    rect target_rb [width: 100, height: 40, fill: accent-2, stroke: foreground-1, label: "Target"]
+}
+
+constrain source_rb.center_x = 300
+constrain source_rb.center_y = 450
+constrain target_rb.center_x = 250
+constrain target_rb.center_y = 550
+
+source_rb.left -> target_rb.top

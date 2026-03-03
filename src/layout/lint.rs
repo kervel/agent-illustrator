@@ -9,6 +9,7 @@ use std::fmt;
 
 use crate::parser::ast::{ConstraintExpr, ConstraintProperty, Document, LayoutType, ShapeType, Statement};
 
+use super::routing::{RoutingMode, MIN_FINAL_SEGMENT_LENGTH};
 use super::types::{
     BoundingBox, ElementLayout, ElementType, LabelLayout, LayoutResult, Point,
     TextAnchor,
@@ -30,6 +31,7 @@ pub enum LintCategory {
     Connection,
     Alignment,
     RedundantConstant,
+    ReducibleBend,
 }
 
 impl fmt::Display for LintCategory {
@@ -41,6 +43,7 @@ impl fmt::Display for LintCategory {
             LintCategory::Connection => write!(f, "connection"),
             LintCategory::Alignment => write!(f, "alignment"),
             LintCategory::RedundantConstant => write!(f, "redundant-constant"),
+            LintCategory::ReducibleBend => write!(f, "reducible-bend"),
         }
     }
 }
@@ -55,6 +58,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_connections(result, &mut warnings);
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
+    check_reducible_bends(result, &mut warnings);
     warnings
 }
 
@@ -772,6 +776,58 @@ fn check_redundant_constants(doc: &Document, warnings: &mut Vec<LintWarning>) {
     }
 }
 
+// ── Reducible bend detection ───────────────────────────────────
+
+/// Maximum length of an interior segment (between two bends) to flag
+/// as a reducible detour.  Derived from the router's stub length so the
+/// two stay in sync.
+const REDUCIBLE_BEND_THRESHOLD: f64 = 2.0 * MIN_FINAL_SEGMENT_LENGTH;
+
+fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    for conn in &result.connections {
+        if conn.routing_mode != RoutingMode::Orthogonal {
+            continue;
+        }
+
+        let path = &conn.path;
+        // Need at least 4 points (3 segments) to have an interior segment
+        if path.len() < 4 {
+            continue;
+        }
+
+        // Interior segments are indices 1..N-2 (skipping first and last segment)
+        let num_segments = path.len() - 1;
+        let mut shortest_len = f64::MAX;
+        let mut shortest_orientation = "";
+
+        for i in 1..(num_segments - 1) {
+            let p1 = &path[i];
+            let p2 = &path[i + 1];
+            let dx = (p2.x - p1.x).abs();
+            let dy = (p2.y - p1.y).abs();
+            let len = dx + dy; // Manhattan length for orthogonal segments
+
+            if len < REDUCIBLE_BEND_THRESHOLD && len < shortest_len {
+                shortest_len = len;
+                shortest_orientation = if dx > dy { "horizontally" } else { "vertically" };
+            }
+        }
+
+        if shortest_len < f64::MAX {
+            warnings.push(LintWarning {
+                category: LintCategory::ReducibleBend,
+                message: format!(
+                    "connection {}→{}: path jogs {:.0}px {} between bends; \
+                     moving elements at least {:.0}px further apart {} would eliminate 2 corners",
+                    conn.from_id.0, conn.to_id.0,
+                    shortest_len, shortest_orientation,
+                    shortest_len, shortest_orientation
+                ),
+            });
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1092,5 +1148,120 @@ mod tests {
         check_redundant_constants(&doc, &mut warnings);
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].message.contains("center_y"));
+    }
+
+    // ── Reducible bend tests ──
+
+    use crate::parser::ast::ConnectionDirection;
+    use super::super::types::ConnectionLayout;
+
+    fn make_connection(
+        from: &str,
+        to: &str,
+        path: Vec<Point>,
+        routing_mode: RoutingMode,
+    ) -> ConnectionLayout {
+        ConnectionLayout {
+            from_id: Identifier(from.to_string()),
+            to_id: Identifier(to.to_string()),
+            direction: ConnectionDirection::Forward,
+            path,
+            styles: super::super::types::ResolvedStyles::default(),
+            label: None,
+            routing_mode,
+        }
+    }
+
+    fn make_layout_with_connections(connections: Vec<ConnectionLayout>) -> LayoutResult {
+        LayoutResult {
+            elements: HashMap::new(),
+            root_elements: vec![],
+            connections,
+            bounds: BoundingBox::zero(),
+        }
+    }
+
+    #[test]
+    fn test_reducible_bend_detected() {
+        // Path with a short (20px) interior horizontal segment:
+        // down 50px, right 20px, down 50px
+        let path = vec![
+            Point::new(100.0, 100.0),
+            Point::new(100.0, 150.0),
+            Point::new(120.0, 150.0), // 20px horizontal interior segment
+            Point::new(120.0, 200.0),
+        ];
+        let conn = make_connection("a", "b", path, RoutingMode::Orthogonal);
+        let result = make_layout_with_connections(vec![conn]);
+        let mut warnings = Vec::new();
+        check_reducible_bends(&result, &mut warnings);
+        assert_eq!(warnings.len(), 1);
+        assert_eq!(warnings[0].category.to_string(), "reducible-bend");
+        assert!(warnings[0].message.contains("20px"), "message: {}", warnings[0].message);
+        assert!(warnings[0].message.contains("horizontally"), "message: {}", warnings[0].message);
+        assert!(warnings[0].message.contains("further apart"), "message: {}", warnings[0].message);
+        assert!(warnings[0].message.contains("at least"), "message: {}", warnings[0].message);
+        assert!(warnings[0].message.contains("eliminate 2 corners"), "message: {}", warnings[0].message);
+    }
+
+    #[test]
+    fn test_long_interior_no_warning() {
+        // Path with a long (100px) interior segment — not reducible
+        let path = vec![
+            Point::new(100.0, 100.0),
+            Point::new(100.0, 150.0),
+            Point::new(200.0, 150.0), // 100px horizontal interior
+            Point::new(200.0, 200.0),
+        ];
+        let conn = make_connection("a", "b", path, RoutingMode::Orthogonal);
+        let result = make_layout_with_connections(vec![conn]);
+        let mut warnings = Vec::new();
+        check_reducible_bends(&result, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn test_straight_path_no_warning() {
+        // 2-point straight line — no interior segments
+        let path = vec![
+            Point::new(100.0, 100.0),
+            Point::new(200.0, 100.0),
+        ];
+        let conn = make_connection("a", "b", path, RoutingMode::Orthogonal);
+        let result = make_layout_with_connections(vec![conn]);
+        let mut warnings = Vec::new();
+        check_reducible_bends(&result, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn test_l_shape_no_warning() {
+        // 3-point L-shape — no interior segment (only first and last)
+        let path = vec![
+            Point::new(100.0, 100.0),
+            Point::new(100.0, 200.0),
+            Point::new(200.0, 200.0),
+        ];
+        let conn = make_connection("a", "b", path, RoutingMode::Orthogonal);
+        let result = make_layout_with_connections(vec![conn]);
+        let mut warnings = Vec::new();
+        check_reducible_bends(&result, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn test_non_orthogonal_skipped() {
+        // Same path shape but with Curved routing — should be skipped
+        let path = vec![
+            Point::new(100.0, 100.0),
+            Point::new(100.0, 150.0),
+            Point::new(120.0, 150.0),
+            Point::new(120.0, 200.0),
+        ];
+        let conn = make_connection("a", "b", path, RoutingMode::Curved);
+        let result = make_layout_with_connections(vec![conn]);
+        let mut warnings = Vec::new();
+        check_reducible_bends(&result, &mut warnings);
+        assert!(warnings.is_empty());
     }
 }

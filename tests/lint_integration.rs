@@ -30,6 +30,11 @@ fn test_true_positives_all_categories() {
         "Expected connection warning, got: {:?}",
         categories
     );
+    assert!(
+        categories.contains(&"reducible-bend".to_string()),
+        "Expected reducible-bend warning, got: {:?}",
+        categories
+    );
 }
 
 #[test]
@@ -78,7 +83,7 @@ fn test_lint_warning_format() {
     for w in &warnings {
         let cat = w.category.to_string();
         assert!(
-            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant"].contains(&cat.as_str()),
+            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant", "reducible-bend"].contains(&cat.as_str()),
             "Unexpected category: {}",
             cat
         );
@@ -124,5 +129,23 @@ fn test_shacl_overview_redundant_constants() {
         redundant.len() >= 5,
         "Expected at least 5 redundant-constant warnings, got {}",
         redundant.len()
+    );
+}
+
+#[test]
+fn test_shacl_overview_reducible_bends() {
+    let source = include_str!("lint-fixtures/shacl-overview.ail");
+    let config = RenderConfig::new().with_lint(true);
+    let (svg, warnings) = render_with_lint(source, config).expect("Should render");
+
+    assert!(svg.contains("<svg"));
+
+    let reducible: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.category.to_string() == "reducible-bend")
+        .collect();
+    assert!(
+        !reducible.is_empty(),
+        "Expected reducible-bend warnings for SHACL overview"
     );
 }
