@@ -70,7 +70,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
-    check_missing_anchors(doc, &mut warnings);
+    check_missing_anchors(doc, result, &mut warnings);
     check_contrast(result, &mut warnings);
     check_steep_direct(result, &mut warnings);
     check_crowded_layouts(doc, &mut warnings);
@@ -911,12 +911,26 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
 
 // ── Missing anchor detection ───────────────────────────────────
 
-fn check_missing_anchors(doc: &Document, warnings: &mut Vec<LintWarning>) {
-    check_missing_anchors_in_stmts(&doc.statements, warnings);
+/// Maximum dimension (width or height) below which an element is considered
+/// too small for explicit anchors to matter — auto-detection works fine.
+const SMALL_ELEMENT_THRESHOLD: f64 = 30.0;
+
+fn is_small_element(result: &LayoutResult, name: &str) -> bool {
+    if let Some(elem) = result.get_element_by_name(name) {
+        elem.bounds.width <= SMALL_ELEMENT_THRESHOLD
+            && elem.bounds.height <= SMALL_ELEMENT_THRESHOLD
+    } else {
+        false
+    }
+}
+
+fn check_missing_anchors(doc: &Document, result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    check_missing_anchors_in_stmts(&doc.statements, result, warnings);
 }
 
 fn check_missing_anchors_in_stmts(
     stmts: &[crate::parser::ast::Spanned<Statement>],
+    result: &LayoutResult,
     warnings: &mut Vec<LintWarning>,
 ) {
     for stmt in stmts {
@@ -925,6 +939,13 @@ fn check_missing_anchors_in_stmts(
                 for conn in connections {
                     let from_name = &conn.from.element.node.0;
                     let to_name = &conn.to.element.node.0;
+
+                    // Skip if either endpoint is a small element — anchors
+                    // don't improve routing when all anchor positions converge
+                    if is_small_element(result, from_name) || is_small_element(result, to_name) {
+                        continue;
+                    }
+
                     if conn.from.anchor.is_none() {
                         warnings.push(LintWarning {
                             category: LintCategory::MissingAnchor,
@@ -948,10 +969,10 @@ fn check_missing_anchors_in_stmts(
                 }
             }
             Statement::Layout(l) => {
-                check_missing_anchors_in_stmts(&l.children, warnings);
+                check_missing_anchors_in_stmts(&l.children, result, warnings);
             }
             Statement::Group(g) => {
-                check_missing_anchors_in_stmts(&g.children, warnings);
+                check_missing_anchors_in_stmts(&g.children, result, warnings);
             }
             _ => {}
         }
