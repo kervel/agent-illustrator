@@ -924,6 +924,13 @@ fn is_small_element(result: &LayoutResult, name: &str) -> bool {
     }
 }
 
+/// Look up the routing mode for a connection in the solved layout.
+fn connection_routing_mode(result: &LayoutResult, from: &str, to: &str) -> Option<RoutingMode> {
+    result.connections.iter().find(|c| {
+        c.from_id.0 == from && c.to_id.0 == to
+    }).map(|c| c.routing_mode)
+}
+
 fn check_missing_anchors(doc: &Document, result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     check_missing_anchors_in_stmts(&doc.statements, result, warnings);
 }
@@ -943,6 +950,13 @@ fn check_missing_anchors_in_stmts(
                     // Skip if either endpoint is a small element — anchors
                     // don't improve routing when all anchor positions converge
                     if is_small_element(result, from_name) || is_small_element(result, to_name) {
+                        continue;
+                    }
+
+                    // Skip direct-routed connections — auto-detection works fine
+                    // for straight lines. Anchors mainly matter for orthogonal and
+                    // curved routing where the starting normal vector affects the path.
+                    if connection_routing_mode(result, from_name, to_name) == Some(RoutingMode::Direct) {
                         continue;
                     }
 
