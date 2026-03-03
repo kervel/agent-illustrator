@@ -1107,6 +1107,11 @@ fn check_steep_direct(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
         if conn.path.len() != 2 {
             continue;
         }
+        // Skip small elements — they're in the schematic/graph domain
+        // where diagonals are normal, not flowchart territory
+        if is_small_element(result, &conn.from_id.0) || is_small_element(result, &conn.to_id.0) {
+            continue;
+        }
         let p1 = &conn.path[0];
         let p2 = &conn.path[1];
         let dy = p2.y - p1.y;
