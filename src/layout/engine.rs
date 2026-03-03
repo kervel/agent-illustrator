@@ -4169,8 +4169,8 @@ mod tests {
         let original_width = original_body.bounds.width;
         let original_height = original_body.bounds.height;
         let original_group = result.elements.get("b1").expect("b1 should exist");
-        let original_group_width = original_group.bounds.width;
-        let original_group_height = original_group.bounds.height;
+        let _original_group_width = original_group.bounds.width;
+        let _original_group_height = original_group.bounds.height;
 
         // Apply 90° rotation to the template
         let mut rotations: HashMap<String, f64> = HashMap::new();

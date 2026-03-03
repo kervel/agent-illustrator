@@ -569,7 +569,7 @@ fn test_rotated_anchor_positions_match_svg_transform() {
     let result = compute_layout(source).expect("Should compute layout");
 
     // Get a's anchor (no rotation - straightforward)
-    let a_right =
+    let _a_right =
         get_anchor_position(&result, "a", "right_conn").expect("a.right_conn should exist");
 
     // Get b's anchors (rotated 90°)

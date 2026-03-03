@@ -16,6 +16,7 @@ use agent_illustrator::{render_with_config, RenderConfig};
 /// 1. Removing the style block (CSS variable order is non-deterministic)
 /// 2. Normalizing whitespace
 /// 3. Rounding viewBox numbers to 1 decimal place
+#[allow(dead_code)]
 fn normalize_svg_for_comparison(svg: &str) -> String {
     let mut result = String::new();
     let mut in_style = false;
@@ -51,6 +52,7 @@ fn normalize_svg_for_comparison(svg: &str) -> String {
 }
 
 /// Round viewBox numbers to avoid floating point comparison issues
+#[allow(dead_code)]
 fn normalize_viewbox(line: &str) -> String {
     // Extract viewBox value and round numbers
     if let Some(start) = line.find("viewBox=\"") {

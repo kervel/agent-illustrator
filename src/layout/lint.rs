@@ -4,10 +4,10 @@
 //! mechanical issues: overlapping elements, containment violations,
 //! label collisions, and connections crossing elements.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
-use crate::parser::ast::{ConstraintExpr, Document, LayoutType, ShapeType, Statement};
+use crate::parser::ast::{ConstraintExpr, ConstraintProperty, Document, LayoutType, ShapeType, Statement};
 
 use super::types::{
     BoundingBox, ElementLayout, ElementType, LabelLayout, LayoutResult, Point,
@@ -29,6 +29,7 @@ pub enum LintCategory {
     Label,
     Connection,
     Alignment,
+    RedundantConstant,
 }
 
 impl fmt::Display for LintCategory {
@@ -39,6 +40,7 @@ impl fmt::Display for LintCategory {
             LintCategory::Label => write!(f, "label"),
             LintCategory::Connection => write!(f, "connection"),
             LintCategory::Alignment => write!(f, "alignment"),
+            LintCategory::RedundantConstant => write!(f, "redundant-constant"),
         }
     }
 }
@@ -52,6 +54,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_labels(result, &mut warnings);
     check_connections(result, &mut warnings);
     check_alignment(result, &mut warnings);
+    check_redundant_constants(doc, &mut warnings);
     warnings
 }
 
@@ -666,6 +669,109 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     }
 }
 
+// ── Redundant constant detection ──────────────────────────────────
+
+/// Display name for a ConstraintProperty (for warning messages).
+fn property_display_name(prop: &ConstraintProperty) -> &str {
+    match prop {
+        ConstraintProperty::X => "x",
+        ConstraintProperty::Y => "y",
+        ConstraintProperty::Width => "width",
+        ConstraintProperty::Height => "height",
+        ConstraintProperty::Left => "left",
+        ConstraintProperty::Right => "right",
+        ConstraintProperty::Top => "top",
+        ConstraintProperty::Bottom => "bottom",
+        ConstraintProperty::CenterX => "center_x",
+        ConstraintProperty::CenterY => "center_y",
+        ConstraintProperty::Center => "center",
+        ConstraintProperty::AnchorX(name) => name,
+        ConstraintProperty::AnchorY(name) => name,
+    }
+}
+
+/// Collect all `Constant { left, value }` constraints from statements, recursing into groups/layouts.
+fn collect_constant_constraints(
+    stmts: &[crate::parser::ast::Spanned<Statement>],
+    out: &mut Vec<(String, String, f64)>, // (element_display, property_display, value)
+) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constrain(c) => {
+                if let ConstraintExpr::Constant { left, value } = &c.expr {
+                    // Skip Center (composite property)
+                    if left.property.node == ConstraintProperty::Center {
+                        continue;
+                    }
+                    let elem_name = left.element.node.to_string();
+                    let prop_name = property_display_name(&left.property.node).to_string();
+                    out.push((elem_name, prop_name, *value));
+                }
+            }
+            Statement::Layout(l) => {
+                collect_constant_constraints(&l.children, out);
+            }
+            Statement::Group(g) => {
+                collect_constant_constraints(&g.children, out);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn check_redundant_constants(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    let mut constants: Vec<(String, String, f64)> = Vec::new();
+    collect_constant_constraints(&doc.statements, &mut constants);
+
+    // Group by (property_name, value_bits) → list of element names
+    let mut groups: HashMap<(String, u64), Vec<String>> = HashMap::new();
+    for (elem, prop, value) in &constants {
+        let key = (prop.clone(), value.to_bits());
+        groups.entry(key).or_default().push(elem.clone());
+    }
+
+    // Emit warnings for groups with 2+ distinct elements
+    for ((prop, value_bits), elements) in &groups {
+        // Deduplicate elements (same element could appear multiple times)
+        let mut unique: Vec<&String> = Vec::new();
+        for e in elements {
+            if !unique.contains(&e) {
+                unique.push(e);
+            }
+        }
+        if unique.len() < 2 {
+            continue;
+        }
+
+        let value = f64::from_bits(*value_bits);
+        let anchor = &unique[0];
+        let rest = &unique[1..];
+
+        let message = if unique.len() == 2 {
+            format!(
+                "consider \"constrain {}.{} = {}.{}\" instead of repeating the constant {}",
+                rest[0], prop, anchor, prop, value
+            )
+        } else {
+            let rest_names: Vec<&str> = rest.iter().map(|s| s.as_str()).collect();
+            format!(
+                "{} elements ({}) set .{} to the same constant {}; consider relating them to {}.{}",
+                unique.len(),
+                rest_names.join(", "),
+                prop,
+                value,
+                anchor,
+                prop
+            )
+        };
+
+        warnings.push(LintWarning {
+            category: LintCategory::RedundantConstant,
+            message,
+        });
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -875,5 +981,116 @@ mod tests {
             element_display_name(&elem, Some("group_a"), 1),
             "<child #2 of group_a>"
         );
+    }
+
+    // ── Redundant constant tests ──
+
+    use crate::parser::ast::{
+        ConstrainDecl, ElementPath, GroupDecl, Span,
+    };
+
+    fn make_constant_constraint(elem: &str, prop: ConstraintProperty, value: f64) -> crate::parser::ast::Spanned<Statement> {
+        let span: Span = 0..0;
+        crate::parser::ast::Spanned::new(
+            Statement::Constrain(ConstrainDecl {
+                expr: ConstraintExpr::Constant {
+                    left: crate::parser::ast::PropertyRef {
+                        element: crate::parser::ast::Spanned::new(
+                            ElementPath::simple(Identifier(elem.to_string()), span.clone()),
+                            span.clone(),
+                        ),
+                        property: crate::parser::ast::Spanned::new(prop, span.clone()),
+                    },
+                    value,
+                },
+            }),
+            span,
+        )
+    }
+
+    fn make_doc(stmts: Vec<crate::parser::ast::Spanned<Statement>>) -> Document {
+        Document { statements: stmts }
+    }
+
+    #[test]
+    fn test_redundant_constants_detected() {
+        let doc = make_doc(vec![
+            make_constant_constraint("a", ConstraintProperty::CenterY, 200.0),
+            make_constant_constraint("b", ConstraintProperty::CenterY, 200.0),
+        ]);
+        let mut warnings = Vec::new();
+        check_redundant_constants(&doc, &mut warnings);
+        assert_eq!(warnings.len(), 1);
+        assert_eq!(warnings[0].category.to_string(), "redundant-constant");
+        assert!(warnings[0].message.contains("center_y"));
+    }
+
+    #[test]
+    fn test_different_values_no_warning() {
+        let doc = make_doc(vec![
+            make_constant_constraint("a", ConstraintProperty::CenterY, 200.0),
+            make_constant_constraint("b", ConstraintProperty::CenterY, 300.0),
+        ]);
+        let mut warnings = Vec::new();
+        check_redundant_constants(&doc, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn test_different_properties_no_warning() {
+        let doc = make_doc(vec![
+            make_constant_constraint("a", ConstraintProperty::CenterX, 200.0),
+            make_constant_constraint("b", ConstraintProperty::CenterY, 200.0),
+        ]);
+        let mut warnings = Vec::new();
+        check_redundant_constants(&doc, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn test_three_elements_one_warning() {
+        let doc = make_doc(vec![
+            make_constant_constraint("a", ConstraintProperty::CenterX, 100.0),
+            make_constant_constraint("b", ConstraintProperty::CenterX, 100.0),
+            make_constant_constraint("c", ConstraintProperty::CenterX, 100.0),
+        ]);
+        let mut warnings = Vec::new();
+        check_redundant_constants(&doc, &mut warnings);
+        assert_eq!(warnings.len(), 1);
+        assert!(warnings[0].message.contains("3 elements"));
+    }
+
+    #[test]
+    fn test_single_element_no_warning() {
+        let doc = make_doc(vec![
+            make_constant_constraint("a", ConstraintProperty::CenterX, 100.0),
+        ]);
+        let mut warnings = Vec::new();
+        check_redundant_constants(&doc, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn test_inside_group() {
+        let span: Span = 0..0;
+        let doc = make_doc(vec![
+            crate::parser::ast::Spanned::new(
+                Statement::Group(GroupDecl {
+                    name: Some(crate::parser::ast::Spanned::new(Identifier("g".to_string()), span.clone())),
+                    children: vec![
+                        make_constant_constraint("a", ConstraintProperty::CenterY, 50.0),
+                        make_constant_constraint("b", ConstraintProperty::CenterY, 50.0),
+                    ],
+                    modifiers: vec![],
+                    anchors: vec![],
+                    is_template_instance: false,
+                }),
+                span,
+            ),
+        ]);
+        let mut warnings = Vec::new();
+        check_redundant_constants(&doc, &mut warnings);
+        assert_eq!(warnings.len(), 1);
+        assert!(warnings[0].message.contains("center_y"));
     }
 }

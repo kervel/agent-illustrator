@@ -1,0 +1,198 @@
+/* INTENT
+   High-level overview of how SHACL business rules flow through the system.
+   Audience: developers and stakeholders.
+   Key message: single SHACL source → parsed → introspectable or not →
+   introspectable: enum (instant local) vs reference (backend SQL) dropdown filtering,
+   non-introspectable: backend-only validation, no dropdown filtering.
+*/
+
+group diagram {
+    // ── TOP: Entry ──
+    rect shacl_src [width: 220, height: 45, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "SHACL Constraint Files"]
+    rect parser [width: 220, height: 45, fill: accent-1, stroke: accent-dark, stroke_width: 2, label: "Rust SHACL Parser"]
+
+    // ── DECISION ──
+    rect decision [width: 240, height: 50, fill: accent-2, stroke: foreground-1, stroke_width: 2, label: "Introspectable?"]
+
+    // Branch labels as explicit text (avoids awkward connection label placement)
+    text "Yes (pure SHACL)" yes_label [font_size: 12, fill: accent-dark]
+    text "No (uses SPARQL)" no_label [font_size: 12, fill: secondary-dark]
+
+    // ── LEFT BRANCH: introspectable ──
+    rect ast_deliver [width: 200, height: 40, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "ASTs sent to frontend"]
+    rect wasm_solver [width: 200, height: 45, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "WASM backward solver"]
+    text "outputs Predicate" pred_note [font_size: 11, fill: text-3]
+    rect field_type [width: 200, height: 50, fill: accent-2, stroke: foreground-1, stroke_width: 2, label: "Field type?"]
+
+    // Enum sub-branch
+    rect enum_eval [width: 190, height: 40, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Evaluate vs enum values"]
+    rect enum_result [width: 190, height: 45, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Filter dropdowns"]
+    text "(instant, no server)" enum_sub [font_size: 11, fill: accent-dark]
+
+    // Reference sub-branch
+    rect ref_inject [width: 190, height: 40, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Inject into FilterQuery"]
+    rect ref_sql [width: 190, height: 40, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Backend SQL filter"]
+    rect ref_result [width: 190, height: 45, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Filter dropdowns"]
+    text "(server-resolved)" ref_sub [font_size: 11, fill: secondary-dark]
+
+    // ── RIGHT BRANCH: non-introspectable ──
+    rect backend_scope [width: 200, height: 40, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Scope data fetch"]
+    rect pysahcl [width: 200, height: 45, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "pySHACL / SPARQL-to-SQL"]
+    rect val_result [width: 200, height: 45, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Validation errors only"]
+    text "(no dropdown filtering)" val_sub [font_size: 11, fill: secondary-dark]
+
+    // ── BOTTOM: shared forward validation ──
+    rect fwd_eval [width: 260, height: 45, fill: accent-1, stroke: accent-dark, stroke_width: 2, label: "Forward validation (Rust)"]
+    rect violations [width: 280, height: 40, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "Structured violations"]
+    text "+ enforcement levels" viol_sub [font_size: 11, fill: foreground-2]
+
+    // ── LEGEND ──
+    rect legend_fe [width: 16, height: 16, fill: accent-light, stroke: accent-dark, stroke_width: 1]
+    text "Frontend (Browser + WASM)" legend_fe_txt [font_size: 11, fill: accent-dark]
+    rect legend_be [width: 16, height: 16, fill: secondary-light, stroke: secondary-dark, stroke_width: 1]
+    text "Backend (Django + PyO3)" legend_be_txt [font_size: 11, fill: secondary-dark]
+    rect legend_shared [width: 16, height: 16, fill: accent-1, stroke: accent-dark, stroke_width: 1]
+    text "Shared (Rust, sans-IO)" legend_sh_txt [font_size: 11, fill: foreground-1]
+    rect legend_io [width: 16, height: 16, fill: foreground-3, stroke: foreground-1, stroke_width: 1]
+    text "Input / Output" legend_io_txt [font_size: 11, fill: foreground-1]
+}
+
+// === POSITIONING ===
+
+// Entry column centered at x=300
+constrain shacl_src.center_x = 300
+constrain shacl_src.center_y = 40
+
+constrain parser.center_x = 300
+constrain parser.center_y = 110
+
+constrain decision.center_x = 300
+constrain decision.center_y = 185
+
+// Branch labels positioned clearly on the arrows
+constrain yes_label.center_x = 160
+constrain yes_label.center_y = 225
+
+constrain no_label.center_x = 460
+constrain no_label.center_y = 225
+
+// Left branch: introspectable (x ~ 175)
+constrain ast_deliver.center_x = 175
+constrain ast_deliver.center_y = 270
+
+constrain wasm_solver.center_x = 175
+constrain wasm_solver.center_y = 335
+
+// Predicate note to the right of the solver-to-field_type arrow
+constrain pred_note.left = wasm_solver.right + 10
+constrain pred_note.center_y = 370
+
+constrain field_type.center_x = 175
+constrain field_type.center_y = 415
+
+// Enum (left-left, x ~ 80)
+constrain enum_eval.center_x = 80
+constrain enum_eval.center_y = 500
+constrain enum_result.center_x = 80
+constrain enum_result.center_y = 565
+constrain enum_sub.center_x = 80
+constrain enum_sub.center_y = 600
+
+// Reference (left-right, x ~ 290)
+constrain ref_inject.center_x = 300
+constrain ref_inject.center_y = 500
+constrain ref_sql.center_x = 300
+constrain ref_sql.center_y = 560
+constrain ref_result.center_x = 300
+constrain ref_result.center_y = 625
+constrain ref_sub.center_x = 300
+constrain ref_sub.center_y = 660
+
+// Right branch: non-introspectable (x ~ 500)
+constrain backend_scope.center_x = 500
+constrain backend_scope.center_y = 270
+
+constrain pysahcl.center_x = 500
+constrain pysahcl.center_y = 340
+
+constrain val_result.center_x = 500
+constrain val_result.center_y = 420
+constrain val_sub.center_x = 500
+constrain val_sub.center_y = 458
+
+// Bottom: shared - below all three branches
+constrain fwd_eval.center_x = 300
+constrain fwd_eval.center_y = 740
+
+constrain violations.center_x = 300
+constrain violations.center_y = 815
+constrain viol_sub.center_x = 300
+constrain viol_sub.center_y = 848
+
+// Legend (top-right)
+constrain legend_fe.center_x = 580
+constrain legend_fe.center_y = 40
+constrain legend_fe_txt.left = legend_fe.right + 6
+constrain legend_fe_txt.center_y = legend_fe.center_y
+
+constrain legend_be.center_x = 580
+constrain legend_be.center_y = 63
+constrain legend_be_txt.left = legend_be.right + 6
+constrain legend_be_txt.center_y = legend_be.center_y
+
+constrain legend_shared.center_x = 580
+constrain legend_shared.center_y = 86
+constrain legend_sh_txt.left = legend_shared.right + 6
+constrain legend_sh_txt.center_y = legend_shared.center_y
+
+constrain legend_io.center_x = 580
+constrain legend_io.center_y = 109
+constrain legend_io_txt.left = legend_io.right + 6
+constrain legend_io_txt.center_y = legend_io.center_y
+
+// === CONNECTIONS ===
+
+// Entry flow
+shacl_src.bottom -> parser.top
+parser.bottom -> decision.top
+
+// Decision branches (no connection labels — using explicit text labels instead)
+decision.bottom -> ast_deliver.top
+decision.right -> backend_scope.top
+
+// Introspectable path
+ast_deliver.bottom -> wasm_solver.top
+wasm_solver.bottom -> field_type.top
+
+// Field type branches
+field_type.left -> enum_eval.top [label: "Enum"]
+field_type.right -> ref_inject.top [label: "Reference"]
+
+// Enum path
+enum_eval.bottom -> enum_result.top
+
+// Reference path
+ref_inject.bottom -> ref_sql.top
+ref_sql.bottom -> ref_result.top
+
+// Non-introspectable path
+backend_scope.bottom -> pysahcl.top
+pysahcl.bottom -> val_result.top
+
+// Via points for bottom curved connections — keep curves tighter
+circle via_enum [size: 1, opacity: 0]
+circle via_val [size: 1, opacity: 0]
+
+constrain via_enum.center_x = 30
+constrain via_enum.center_y = 690
+
+constrain via_val.center_x = 520
+constrain via_val.center_y = 640
+
+// Bottom connections — all three paths feed into forward validation
+enum_result.bottom -> fwd_eval.left [routing: curved, via: via_enum, stroke: accent-dark, stroke_width: 2]
+ref_result.bottom -> fwd_eval.top [stroke: secondary-dark, stroke_width: 2]
+val_result.bottom -> fwd_eval.right [routing: curved, via: via_val, stroke: secondary-dark, stroke_width: 2]
+
+// Final
+fwd_eval.bottom -> violations.top

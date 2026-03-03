@@ -78,10 +78,51 @@ fn test_lint_warning_format() {
     for w in &warnings {
         let cat = w.category.to_string();
         assert!(
-            ["overlap", "containment", "label", "connection", "alignment"].contains(&cat.as_str()),
+            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant"].contains(&cat.as_str()),
             "Unexpected category: {}",
             cat
         );
         assert!(!w.message.is_empty(), "Warning message should not be empty");
     }
+}
+
+#[test]
+fn test_redundant_constant_true_positive() {
+    let source = include_str!("lint-fixtures/true-positives.ail");
+    let config = RenderConfig::new().with_lint(true);
+    let (_, warnings) = render_with_lint(source, config).expect("Should render");
+
+    let redundant: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.category.to_string() == "redundant-constant")
+        .collect();
+    assert!(
+        !redundant.is_empty(),
+        "Expected redundant-constant warnings for true-positives fixture"
+    );
+}
+
+#[test]
+fn test_shacl_overview_redundant_constants() {
+    let source = include_str!("lint-fixtures/shacl-overview.ail");
+    let config = RenderConfig::new().with_lint(true);
+    let (svg, warnings) = render_with_lint(source, config).expect("Should render");
+
+    assert!(svg.contains("<svg"));
+
+    let redundant: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.category.to_string() == "redundant-constant")
+        .collect();
+    assert!(
+        !redundant.is_empty(),
+        "Expected redundant-constant warnings for SHACL overview"
+    );
+
+    // Should have multiple groups (5 center_x columns + center_y groups)
+    assert!(
+        redundant.len() >= 5,
+        "Expected at least 5 redundant-constant warnings, got {}",
+        redundant.len()
+    );
 }

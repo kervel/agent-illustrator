@@ -20,9 +20,9 @@ group zone_with_elements {
 constrain zone_bg.center_x = 200
 constrain zone_bg.center_y = 100
 constrain svc_a.center_x = 140
-constrain svc_a.center_y = 100
+constrain svc_a.center_y = zone_bg.center_y
 constrain svc_b.center_x = 260
-constrain svc_b.center_y = 100
+constrain svc_b.center_y = svc_a.center_y
 
 
 // ------------------------------------------------------------
@@ -37,10 +37,10 @@ group proper_contains {
     rect child_b [width: 80, height: 40, fill: accent-light, stroke: accent-dark, label: "Child B"]
 }
 
-constrain child_a.center_x = 200
+constrain child_a.center_x = zone_bg.center_x
 constrain child_a.center_y = 280
 constrain child_b.center_x = 330
-constrain child_b.center_y = 280
+constrain child_b.center_y = child_a.center_y
 
 // Container auto-sizes to wrap both children
 constrain wrapper contains child_a, child_b [padding: 20]
@@ -59,7 +59,7 @@ group text_on_shape {
 }
 
 constrain info_box.center_x = 500
-constrain info_box.center_y = 100
+constrain info_box.center_y = zone_bg.center_y
 constrain status_title.center_x = info_box.center_x
 constrain status_title.center_y = info_box.center_y - 12
 constrain status_detail.center_x = info_box.center_x
@@ -82,9 +82,9 @@ group conn_crosses_zone {
 constrain sender.center_x = 80
 constrain sender.center_y = 400
 constrain zone_net.center_x = 250
-constrain zone_net.center_y = 400
+constrain zone_net.center_y = sender.center_y
 constrain receiver.center_x = 420
-constrain receiver.center_y = 400
+constrain receiver.center_y = sender.center_y
 
 // Connection routes across the zone — acceptable
 sender -> receiver [label: "data"]
@@ -106,7 +106,7 @@ group layer_back {
 }
 
 // Position both groups so their panels overlap
-constrain front_panel.center_x = 500
-constrain front_panel.center_y = 400
+constrain front_panel.center_x = info_box.center_x
+constrain front_panel.center_y = sender.center_y
 constrain back_panel.center_x = 540
 constrain back_panel.center_y = 420
