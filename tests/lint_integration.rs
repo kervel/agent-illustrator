@@ -35,6 +35,31 @@ fn test_true_positives_all_categories() {
         "Expected reducible-bend warning, got: {:?}",
         categories
     );
+    assert!(
+        categories.contains(&"missing-anchor".to_string()),
+        "Expected missing-anchor warning, got: {:?}",
+        categories
+    );
+    assert!(
+        categories.contains(&"contrast".to_string()),
+        "Expected contrast warning, got: {:?}",
+        categories
+    );
+    assert!(
+        categories.contains(&"steep-direct".to_string()),
+        "Expected steep-direct warning, got: {:?}",
+        categories
+    );
+    assert!(
+        categories.contains(&"crowded-layout".to_string()),
+        "Expected crowded-layout warning, got: {:?}",
+        categories
+    );
+    assert!(
+        categories.contains(&"over-constrained".to_string()),
+        "Expected over-constrained warning, got: {:?}",
+        categories
+    );
 }
 
 #[test]
@@ -83,7 +108,7 @@ fn test_lint_warning_format() {
     for w in &warnings {
         let cat = w.category.to_string();
         assert!(
-            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant", "reducible-bend"].contains(&cat.as_str()),
+            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant", "reducible-bend", "missing-anchor", "contrast", "steep-direct", "crowded-layout", "over-constrained"].contains(&cat.as_str()),
             "Unexpected category: {}",
             cat
         );
