@@ -87,7 +87,7 @@ constrain receiver.center_x = 420
 constrain receiver.center_y = sender.center_y
 
 // Connection routes across the zone — acceptable
-sender -> receiver [label: "data"]
+sender.right -> receiver.left [label: "data"]
 
 
 // ------------------------------------------------------------
@@ -110,3 +110,49 @@ constrain front_panel.center_x = info_box.center_x
 constrain front_panel.center_y = sender.center_y
 constrain back_panel.center_x = 540
 constrain back_panel.center_y = 420
+
+
+// ------------------------------------------------------------
+// TEST 6: Connection WITH explicit anchors (no missing-anchor)
+// Connections with anchors specified should not trigger warnings.
+// ------------------------------------------------------------
+
+group anchored_conn {
+    rect anchor_src [width: 80, height: 40, fill: accent-1, stroke: foreground-1, label: "Src"]
+    rect anchor_dst [width: 80, height: 40, fill: accent-2, stroke: foreground-1, label: "Dst"]
+}
+
+constrain anchor_src.center_x = 670
+constrain anchor_src.center_y = 110
+constrain anchor_dst.center_x = anchor_src.center_x
+constrain anchor_dst.center_y = 210
+
+anchor_src.bottom -> anchor_dst.top
+
+
+// ------------------------------------------------------------
+// TEST 7: Light fill with label (no contrast problem)
+// An element with a light fill and a label — perfectly readable.
+// ------------------------------------------------------------
+
+group light_fill_test {
+    rect light_box [width: 120, height: 60, fill: accent-light, stroke: accent-dark, label: "Readable"]
+}
+
+constrain light_box.center_x = 680
+constrain light_box.center_y = 310
+
+
+// ------------------------------------------------------------
+// TEST 8: Row with 4 children (not crowded)
+// A row with only 4 children — well within the threshold.
+// ------------------------------------------------------------
+
+row small_row {
+    rect sr_1 [width: 30, height: 30, fill: accent-1]
+    rect sr_2 [width: 30, height: 30, fill: accent-1]
+    rect sr_3 [width: 30, height: 30, fill: accent-1]
+    rect sr_4 [width: 30, height: 30, fill: accent-1]
+}
+
+constrain sr_1.center_y = 510

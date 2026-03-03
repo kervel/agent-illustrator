@@ -32,6 +32,11 @@ pub enum LintCategory {
     Alignment,
     RedundantConstant,
     ReducibleBend,
+    MissingAnchor,
+    Contrast,
+    SteepDirect,
+    CrowdedLayout,
+    OverConstrained,
 }
 
 impl fmt::Display for LintCategory {
@@ -44,6 +49,11 @@ impl fmt::Display for LintCategory {
             LintCategory::Alignment => write!(f, "alignment"),
             LintCategory::RedundantConstant => write!(f, "redundant-constant"),
             LintCategory::ReducibleBend => write!(f, "reducible-bend"),
+            LintCategory::MissingAnchor => write!(f, "missing-anchor"),
+            LintCategory::Contrast => write!(f, "contrast"),
+            LintCategory::SteepDirect => write!(f, "steep-direct"),
+            LintCategory::CrowdedLayout => write!(f, "crowded-layout"),
+            LintCategory::OverConstrained => write!(f, "over-constrained"),
         }
     }
 }
@@ -60,6 +70,11 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
+    check_missing_anchors(doc, &mut warnings);
+    check_contrast(result, &mut warnings);
+    check_steep_direct(result, &mut warnings);
+    check_crowded_layouts(doc, &mut warnings);
+    check_over_constrained(result, doc, &mut warnings);
     warnings
 }
 
@@ -890,6 +905,454 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
                     shortest_len, shortest_orientation
                 ),
             });
+        }
+    }
+}
+
+// ── Missing anchor detection ───────────────────────────────────
+
+fn check_missing_anchors(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    check_missing_anchors_in_stmts(&doc.statements, warnings);
+}
+
+fn check_missing_anchors_in_stmts(
+    stmts: &[crate::parser::ast::Spanned<Statement>],
+    warnings: &mut Vec<LintWarning>,
+) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Connection(connections) => {
+                for conn in connections {
+                    let from_name = &conn.from.element.node.0;
+                    let to_name = &conn.to.element.node.0;
+                    if conn.from.anchor.is_none() {
+                        warnings.push(LintWarning {
+                            category: LintCategory::MissingAnchor,
+                            message: format!(
+                                "connection {}\u{2192}{}: no explicit anchor on source; \
+                                 use e.g. {}.bottom -> {}.top for better routing",
+                                from_name, to_name, from_name, to_name
+                            ),
+                        });
+                    }
+                    if conn.to.anchor.is_none() {
+                        warnings.push(LintWarning {
+                            category: LintCategory::MissingAnchor,
+                            message: format!(
+                                "connection {}\u{2192}{}: no explicit anchor on target; \
+                                 use e.g. {}.bottom -> {}.top for better routing",
+                                from_name, to_name, from_name, to_name
+                            ),
+                        });
+                    }
+                }
+            }
+            Statement::Layout(l) => {
+                check_missing_anchors_in_stmts(&l.children, warnings);
+            }
+            Statement::Group(g) => {
+                check_missing_anchors_in_stmts(&g.children, warnings);
+            }
+            _ => {}
+        }
+    }
+}
+
+// ── Contrast detection ─────────────────────────────────────────
+
+/// Check if a CSS variable name refers to a dark fill.
+fn is_dark_css_variable(name: &str) -> bool {
+    // Dark fills: names containing "-dark", or specific foreground/text tokens
+    let dark_patterns = ["-dark", "foreground-1", "foreground-2", "text-dark", "text-1", "text-2"];
+    dark_patterns.iter().any(|p| name.contains(p))
+}
+
+/// Parse a hex color (#rgb or #rrggbb) and return relative luminance.
+fn hex_luminance(hex: &str) -> Option<f64> {
+    let hex = hex.trim_start_matches('#');
+    let (r, g, b) = match hex.len() {
+        3 => {
+            let r = u8::from_str_radix(&hex[0..1], 16).ok()? * 17;
+            let g = u8::from_str_radix(&hex[1..2], 16).ok()? * 17;
+            let b = u8::from_str_radix(&hex[2..3], 16).ok()? * 17;
+            (r, g, b)
+        }
+        6 => {
+            let r = u8::from_str_radix(&hex[0..2], 16).ok()?;
+            let g = u8::from_str_radix(&hex[2..4], 16).ok()?;
+            let b = u8::from_str_radix(&hex[4..6], 16).ok()?;
+            (r, g, b)
+        }
+        _ => return None,
+    };
+    // sRGB linearization
+    fn linearize(c: u8) -> f64 {
+        let s = c as f64 / 255.0;
+        if s <= 0.04045 { s / 12.92 } else { ((s + 0.055) / 1.055).powf(2.4) }
+    }
+    Some(0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b))
+}
+
+/// Check if a fill string represents a dark color.
+/// Returns Some(description) if dark, None otherwise.
+fn is_dark_fill(fill: &str) -> Option<String> {
+    // Check for CSS variable: var(--something) or just the token name
+    if fill.starts_with("var(--") {
+        let var_name = fill.trim_start_matches("var(--").trim_end_matches(')');
+        if is_dark_css_variable(var_name) {
+            return Some(fill.to_string());
+        }
+        return None;
+    }
+    // Check for bare CSS variable token (without var() wrapper)
+    if is_dark_css_variable(fill) {
+        return Some(fill.to_string());
+    }
+    // Check for hex color
+    if fill.starts_with('#') {
+        if let Some(lum) = hex_luminance(fill) {
+            if lum < 0.3 {
+                return Some(fill.to_string());
+            }
+        }
+    }
+    None
+}
+
+fn check_contrast(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    for elem in &result.root_elements {
+        check_contrast_recursive(elem, warnings);
+    }
+}
+
+fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
+    // Check if this element has a label AND a dark fill AND no explicit label color
+    if let Some(label) = &elem.label {
+        let has_label_color = label.styles.as_ref().and_then(|s| s.fill.as_ref()).is_some();
+        if !has_label_color {
+            if let Some(fill) = &elem.styles.fill {
+                if let Some(dark_desc) = is_dark_fill(fill) {
+                    let name = elem
+                        .id
+                        .as_ref()
+                        .map(|id| format!("\"{}\"", id.0))
+                        .unwrap_or_else(|| "<anon>".to_string());
+                    warnings.push(LintWarning {
+                        category: LintCategory::Contrast,
+                        message: format!(
+                            "element {} has dark fill ({}) with a label; \
+                             label text may be unreadable without CSS overrides for light text",
+                            name, dark_desc
+                        ),
+                    });
+                }
+            }
+        }
+    }
+    for child in &elem.children {
+        check_contrast_recursive(child, warnings);
+    }
+}
+
+// ── Steep direct connection detection ──────────────────────────
+
+fn check_steep_direct(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    for conn in &result.connections {
+        if conn.routing_mode != RoutingMode::Direct {
+            continue;
+        }
+        // Only check 2-point (straight line) paths
+        if conn.path.len() != 2 {
+            continue;
+        }
+        let p1 = &conn.path[0];
+        let p2 = &conn.path[1];
+        let dy = p2.y - p1.y;
+        let dx = p2.x - p1.x;
+        let angle = dy.atan2(dx).abs();
+
+        // Steep diagonal: 30°-60° or 120°-150° (in radians: π/6 to π/3 or 2π/3 to 5π/6)
+        let pi_6 = std::f64::consts::FRAC_PI_6;
+        let pi_3 = std::f64::consts::FRAC_PI_3;
+        let two_pi_3 = 2.0 * std::f64::consts::FRAC_PI_3;
+        let five_pi_6 = 5.0 * std::f64::consts::FRAC_PI_6;
+
+        let is_steep = (angle >= pi_6 && angle <= pi_3)
+            || (angle >= two_pi_3 && angle <= five_pi_6);
+
+        if is_steep {
+            let angle_deg = angle.to_degrees().round() as i32;
+            warnings.push(LintWarning {
+                category: LintCategory::SteepDirect,
+                message: format!(
+                    "connection {}\u{2192}{} uses direct routing at {}\u{00b0} angle; \
+                     steep diagonals look poor mixed with orthogonal routes \u{2014} \
+                     consider routing: orthogonal or routing: curved (ignore if intended)",
+                    conn.from_id.0, conn.to_id.0, angle_deg
+                ),
+            });
+        }
+    }
+}
+
+// ── Crowded layout detection ───────────────────────────────────
+
+fn check_crowded_layouts(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    check_crowded_layouts_in_stmts(&doc.statements, warnings);
+}
+
+fn check_crowded_layouts_in_stmts(
+    stmts: &[crate::parser::ast::Spanned<Statement>],
+    warnings: &mut Vec<LintWarning>,
+) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Layout(l) => {
+                let layout_type = &l.layout_type.node;
+                if matches!(layout_type, LayoutType::Row | LayoutType::Column) {
+                    // Count direct children that are shapes or groups (not text labels)
+                    let child_count = l.children.iter().filter(|c| {
+                        matches!(
+                            c.node,
+                            Statement::Shape(_) | Statement::Group(_) | Statement::Layout(_)
+                        )
+                    }).count();
+
+                    if child_count > 8 {
+                        let layout_name = l.name.as_ref()
+                            .map(|n| format!("\"{}\"", n.node.0))
+                            .unwrap_or_else(|| "<anon>".to_string());
+                        let layout_kind = match layout_type {
+                            LayoutType::Row => "row",
+                            LayoutType::Column => "col",
+                            _ => unreachable!(),
+                        };
+                        warnings.push(LintWarning {
+                            category: LintCategory::CrowdedLayout,
+                            message: format!(
+                                "{} {} has {} children; for >8 elements, consider using group with constraints instead",
+                                layout_kind, layout_name, child_count
+                            ),
+                        });
+                    }
+                }
+                // Recurse into children
+                check_crowded_layouts_in_stmts(&l.children, warnings);
+            }
+            Statement::Group(g) => {
+                check_crowded_layouts_in_stmts(&g.children, warnings);
+            }
+            _ => {}
+        }
+    }
+}
+
+// ── Over-constrained detection ─────────────────────────────────
+
+/// Resolve a constraint property to its solved value from an element's bounds.
+fn resolve_property_value(bounds: &BoundingBox, prop: &ConstraintProperty) -> Option<f64> {
+    match prop {
+        ConstraintProperty::Left | ConstraintProperty::X => Some(bounds.x),
+        ConstraintProperty::Right => Some(bounds.x + bounds.width),
+        ConstraintProperty::Top | ConstraintProperty::Y => Some(bounds.y),
+        ConstraintProperty::Bottom => Some(bounds.y + bounds.height),
+        ConstraintProperty::CenterX => Some(bounds.x + bounds.width / 2.0),
+        ConstraintProperty::CenterY => Some(bounds.y + bounds.height / 2.0),
+        ConstraintProperty::Width => Some(bounds.width),
+        ConstraintProperty::Height => Some(bounds.height),
+        ConstraintProperty::Center => None, // composite, skip
+        ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_) => None, // skip custom anchors
+    }
+}
+
+/// Format a constraint expression for display in warning messages.
+fn format_constraint_expr(expr: &ConstraintExpr) -> String {
+    match expr {
+        ConstraintExpr::Equal { left, right } => {
+            format!(
+                "{}.{} = {}.{}",
+                left.element.node,
+                property_display_name(&left.property.node),
+                right.element.node,
+                property_display_name(&right.property.node)
+            )
+        }
+        ConstraintExpr::EqualWithOffset { left, right, offset } => {
+            if *offset >= 0.0 {
+                format!(
+                    "{}.{} = {}.{} + {}",
+                    left.element.node,
+                    property_display_name(&left.property.node),
+                    right.element.node,
+                    property_display_name(&right.property.node),
+                    offset
+                )
+            } else {
+                format!(
+                    "{}.{} = {}.{} - {}",
+                    left.element.node,
+                    property_display_name(&left.property.node),
+                    right.element.node,
+                    property_display_name(&right.property.node),
+                    -offset
+                )
+            }
+        }
+        ConstraintExpr::Constant { left, value } => {
+            format!(
+                "{}.{} = {}",
+                left.element.node,
+                property_display_name(&left.property.node),
+                value
+            )
+        }
+        ConstraintExpr::GreaterOrEqual { left, value } => {
+            format!(
+                "{}.{} >= {}",
+                left.element.node,
+                property_display_name(&left.property.node),
+                value
+            )
+        }
+        ConstraintExpr::LessOrEqual { left, value } => {
+            format!(
+                "{}.{} <= {}",
+                left.element.node,
+                property_display_name(&left.property.node),
+                value
+            )
+        }
+        _ => String::new(), // Contains, Midpoint — skip
+    }
+}
+
+fn check_over_constrained(
+    result: &LayoutResult,
+    doc: &Document,
+    warnings: &mut Vec<LintWarning>,
+) {
+    check_over_constrained_in_stmts(&doc.statements, result, warnings);
+}
+
+fn check_over_constrained_in_stmts(
+    stmts: &[crate::parser::ast::Spanned<Statement>],
+    result: &LayoutResult,
+    warnings: &mut Vec<LintWarning>,
+) {
+    const EPSILON: f64 = 1.0;
+
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constrain(c) => {
+                match &c.expr {
+                    ConstraintExpr::Equal { left, right } => {
+                        let lhs_elem = result.get_element_by_name(&left.element.node.leaf().0);
+                        let rhs_elem = result.get_element_by_name(&right.element.node.leaf().0);
+                        if let (Some(le), Some(re)) = (lhs_elem, rhs_elem) {
+                            if let (Some(lv), Some(rv)) = (
+                                resolve_property_value(&le.bounds, &left.property.node),
+                                resolve_property_value(&re.bounds, &right.property.node),
+                            ) {
+                                let residual = (lv - rv).abs();
+                                if residual > EPSILON {
+                                    let desc = format_constraint_expr(&c.expr);
+                                    warnings.push(LintWarning {
+                                        category: LintCategory::OverConstrained,
+                                        message: format!(
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
+                                            desc, residual
+                                        ),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    ConstraintExpr::EqualWithOffset { left, right, offset } => {
+                        let lhs_elem = result.get_element_by_name(&left.element.node.leaf().0);
+                        let rhs_elem = result.get_element_by_name(&right.element.node.leaf().0);
+                        if let (Some(le), Some(re)) = (lhs_elem, rhs_elem) {
+                            if let (Some(lv), Some(rv)) = (
+                                resolve_property_value(&le.bounds, &left.property.node),
+                                resolve_property_value(&re.bounds, &right.property.node),
+                            ) {
+                                let residual = (lv - (rv + offset)).abs();
+                                if residual > EPSILON {
+                                    let desc = format_constraint_expr(&c.expr);
+                                    warnings.push(LintWarning {
+                                        category: LintCategory::OverConstrained,
+                                        message: format!(
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
+                                            desc, residual
+                                        ),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    ConstraintExpr::Constant { left, value } => {
+                        let elem = result.get_element_by_name(&left.element.node.leaf().0);
+                        if let Some(e) = elem {
+                            if let Some(solved) = resolve_property_value(&e.bounds, &left.property.node) {
+                                let residual = (solved - value).abs();
+                                if residual > EPSILON {
+                                    let desc = format_constraint_expr(&c.expr);
+                                    warnings.push(LintWarning {
+                                        category: LintCategory::OverConstrained,
+                                        message: format!(
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
+                                            desc, residual
+                                        ),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    ConstraintExpr::GreaterOrEqual { left, value } => {
+                        let elem = result.get_element_by_name(&left.element.node.leaf().0);
+                        if let Some(e) = elem {
+                            if let Some(solved) = resolve_property_value(&e.bounds, &left.property.node) {
+                                if solved < value - EPSILON {
+                                    let desc = format_constraint_expr(&c.expr);
+                                    let violation = value - solved;
+                                    warnings.push(LintWarning {
+                                        category: LintCategory::OverConstrained,
+                                        message: format!(
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
+                                            desc, violation
+                                        ),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    ConstraintExpr::LessOrEqual { left, value } => {
+                        let elem = result.get_element_by_name(&left.element.node.leaf().0);
+                        if let Some(e) = elem {
+                            if let Some(solved) = resolve_property_value(&e.bounds, &left.property.node) {
+                                if solved > value + EPSILON {
+                                    let desc = format_constraint_expr(&c.expr);
+                                    let violation = solved - value;
+                                    warnings.push(LintWarning {
+                                        category: LintCategory::OverConstrained,
+                                        message: format!(
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
+                                            desc, violation
+                                        ),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    _ => {} // Contains, Midpoint — skip
+                }
+            }
+            Statement::Layout(l) => {
+                check_over_constrained_in_stmts(&l.children, result, warnings);
+            }
+            Statement::Group(g) => {
+                check_over_constrained_in_stmts(&g.children, result, warnings);
+            }
+            _ => {}
         }
     }
 }

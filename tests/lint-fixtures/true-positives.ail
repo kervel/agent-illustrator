@@ -124,3 +124,91 @@ constrain straddle_box_a.center_x = 500
 constrain straddle_box_a.center_y = 460
 constrain straddle_box_b.center_x = 610
 constrain straddle_box_b.center_y = 460
+
+
+// ------------------------------------------------------------
+// TEST 7: Missing anchors on connections
+// Connections without explicit anchors (src -> dst in TEST 3
+// already covers this, but let's add a dedicated case)
+// The src -> dst connection on line 62 has no anchors.
+// ------------------------------------------------------------
+
+
+// ------------------------------------------------------------
+// TEST 8: Dark fill with label — contrast problem
+// A rect with a dark fill token and a label. The label text
+// will be unreadable against the dark background.
+// ------------------------------------------------------------
+
+group contrast_test {
+    rect dark_box [width: 120, height: 60, fill: foreground-1, stroke: foreground-1, label: "Unreadable"]
+}
+
+constrain dark_box.center_x = 700
+constrain dark_box.center_y = 60
+
+
+// ------------------------------------------------------------
+// TEST 9: Steep diagonal direct connection
+// A direct-routed connection at ~45° angle looks poor when
+// mixed with orthogonal routes.
+// ------------------------------------------------------------
+
+group steep_direct_test {
+    rect steep_src [width: 80, height: 40, fill: accent-1, stroke: foreground-1, label: "From"]
+    rect steep_dst [width: 80, height: 40, fill: accent-2, stroke: foreground-1, label: "To"]
+}
+
+constrain steep_src.center_x = 600
+constrain steep_src.center_y = 200
+constrain steep_dst.center_x = 800
+constrain steep_dst.center_y = 300
+
+steep_src.right -> steep_dst.left [routing: direct]
+
+
+// ------------------------------------------------------------
+// TEST 10: Crowded row layout with >8 children
+// A row with too many children should suggest using constraints.
+// ------------------------------------------------------------
+
+row crowded_row {
+    rect cr_1 [width: 30, height: 30, fill: accent-1]
+    rect cr_2 [width: 30, height: 30, fill: accent-1]
+    rect cr_3 [width: 30, height: 30, fill: accent-1]
+    rect cr_4 [width: 30, height: 30, fill: accent-1]
+    rect cr_5 [width: 30, height: 30, fill: accent-1]
+    rect cr_6 [width: 30, height: 30, fill: accent-1]
+    rect cr_7 [width: 30, height: 30, fill: accent-1]
+    rect cr_8 [width: 30, height: 30, fill: accent-1]
+    rect cr_9 [width: 30, height: 30, fill: accent-1]
+}
+
+constrain cr_1.center_y = 650
+
+
+// ------------------------------------------------------------
+// TEST 11: Over-constrained — the right edge pin from TEST 4
+// conflicts with the contains constraint. The solver satisfies
+// the right = 450 pin, but the containment constraint also implies
+// container_box.right >= extra.right + 10 (padding).
+// extra is at center_x=550, width auto ~60 → right ~580.
+// So the solver cannot satisfy right=450 AND right>=590.
+// The over-constrained check sees the constant 450 is honored,
+// but we add a new equality that will be violated.
+// ------------------------------------------------------------
+
+group over_constrained_test {
+    rect oc_a [width: 80, height: 40, fill: accent-1, stroke: foreground-1, label: "A"]
+    rect oc_b [width: 80, height: 40, fill: accent-2, stroke: foreground-1, label: "B"]
+}
+
+// Pin both elements at known positions
+constrain oc_a.center_x = 100
+constrain oc_a.center_y = 720
+constrain oc_b.center_x = 300
+constrain oc_b.center_y = 720
+
+// This equality can't hold: oc_a.left = oc_a.center_x - 40 = 60
+// oc_b.right = oc_b.center_x + 40 = 340. 60 != 340.
+constrain oc_a.left = oc_b.right
