@@ -57,19 +57,23 @@ struct Cli {
     #[arg(long)]
     lint: bool,
 
-    /// How image href paths are emitted in SVG: verbatim (default), rewrite, absolute
+    /// How raster image paths (from "template X from file.png") appear in SVG output.
+    /// Use 'base64' to embed images directly in the SVG for fully self-contained output.
+    /// Use 'verbatim' (default) to keep paths as written in the AIL source.
     #[arg(long, value_enum, default_value_t = ImageHrefArg::Verbatim)]
     image_href: ImageHrefArg,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
 enum ImageHrefArg {
-    /// Use the path exactly as written in the AIL source
+    /// Keep the image path exactly as written in the AIL source (e.g. "../assets/logo.png")
     Verbatim,
-    /// Normalize the resolved path relative to CWD (removes .. segments)
+    /// Normalize the path relative to the current working directory, removing ".." segments
     Rewrite,
-    /// Use the fully canonicalized absolute path
+    /// Resolve to a fully qualified absolute filesystem path
     Absolute,
+    /// Read the image file and embed its contents directly in the SVG as a data URI, making the SVG fully self-contained with no external file dependencies
+    Base64,
 }
 
 impl From<ImageHrefArg> for ImageHrefMode {
@@ -78,6 +82,7 @@ impl From<ImageHrefArg> for ImageHrefMode {
             ImageHrefArg::Verbatim => ImageHrefMode::Verbatim,
             ImageHrefArg::Rewrite => ImageHrefMode::Rewrite,
             ImageHrefArg::Absolute => ImageHrefMode::Absolute,
+            ImageHrefArg::Base64 => ImageHrefMode::Base64,
         }
     }
 }

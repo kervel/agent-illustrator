@@ -252,6 +252,28 @@ impl TemplateRegistry {
                     Err(_) => normalize_path(&full).to_string_lossy().to_string(),
                 }
             }
+            ImageHrefMode::Base64 => {
+                let full = self.resolve_path(relative);
+                match std::fs::read(&full) {
+                    Ok(bytes) => {
+                        let mime = mime_from_extension(relative);
+                        let encoded = base64::Engine::encode(
+                            &base64::engine::general_purpose::STANDARD,
+                            &bytes,
+                        );
+                        format!("data:{};base64,{}", mime, encoded)
+                    }
+                    Err(e) => {
+                        eprintln!(
+                            "warning: could not read image '{}' for base64 encoding: {}",
+                            full.display(),
+                            e
+                        );
+                        // Fall back to verbatim
+                        relative.to_string()
+                    }
+                }
+            }
         }
     }
 
@@ -309,6 +331,19 @@ impl TemplateRegistry {
             }
         }
         Ok(())
+    }
+}
+
+/// Determine MIME type from a file extension
+fn mime_from_extension(path: &str) -> &'static str {
+    match path.rsplit('.').next().map(|e| e.to_ascii_lowercase()) {
+        Some(ref ext) if ext == "png" => "image/png",
+        Some(ref ext) if ext == "jpg" || ext == "jpeg" => "image/jpeg",
+        Some(ref ext) if ext == "gif" => "image/gif",
+        Some(ref ext) if ext == "webp" => "image/webp",
+        Some(ref ext) if ext == "svg" => "image/svg+xml",
+        Some(ref ext) if ext == "bmp" => "image/bmp",
+        _ => "application/octet-stream",
     }
 }
 

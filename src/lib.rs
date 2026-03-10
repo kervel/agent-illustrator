@@ -39,6 +39,8 @@ pub enum ImageHrefMode {
     Rewrite,
     /// Use the fully canonicalized absolute path
     Absolute,
+    /// Inline the image as a base64 data URI
+    Base64,
 }
 
 /// Errors that can occur during the render pipeline

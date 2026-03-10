@@ -12,6 +12,7 @@ toml = "0.8"
 serde = { version = "1", features = ["derive"] }
 clap = { version = "4", features = ["derive"] }
 kasuari = "0.4"
+base64 = "0.22.1"
 
 [dev-dependencies]
 insta = "1.39"

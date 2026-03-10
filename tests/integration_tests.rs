@@ -1862,6 +1862,55 @@ fn test_image_href_absolute_mode() {
 }
 
 #[test]
+fn test_image_href_base64_mode() {
+    use agent_illustrator::{render_with_config, ImageHrefMode, RenderConfig};
+    use std::io::Write;
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_href_base64");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    // Create a small 1x1 red PNG file (minimal valid PNG)
+    let png_bytes: Vec<u8> = vec![
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+        0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1
+        0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, // 8-bit RGB
+        0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, // IDAT chunk
+        0x08, 0xD7, 0x63, 0xF8, 0xCF, 0xC0, 0x00, 0x00, // compressed data
+        0x00, 0x02, 0x00, 0x01, 0xE2, 0x21, 0xBC, 0x33, // checksum
+        0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, // IEND chunk
+        0xAE, 0x42, 0x60, 0x82,
+    ];
+    let png_path = temp_dir.join("test.png");
+    let mut f = std::fs::File::create(&png_path).expect("Should create PNG");
+    f.write_all(&png_bytes).expect("Should write PNG");
+
+    let input = r#"
+        template "photo" from "test.png"
+        photo p1 [width: 100, height: 100]
+    "#;
+
+    let config = RenderConfig::new()
+        .with_template_base_path(temp_dir.clone())
+        .with_image_href_mode(ImageHrefMode::Base64);
+    let result = render_with_config(input, config);
+
+    let _ = std::fs::remove_dir_all(&temp_dir);
+
+    let svg = result.expect("Base64 mode should render");
+    assert!(
+        svg.contains("href=\"data:image/png;base64,"),
+        "Base64 mode should produce data URI, got: {}",
+        svg
+    );
+    // Should NOT contain the filename
+    assert!(
+        !svg.contains("test.png"),
+        "Base64 mode should not contain filename"
+    );
+}
+
+#[test]
 fn test_image_href_default_is_verbatim() {
     use agent_illustrator::{render_with_config, RenderConfig};
 
