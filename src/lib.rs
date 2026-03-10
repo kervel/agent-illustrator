@@ -29,6 +29,18 @@ use thiserror::Error;
 // Re-export Stylesheet for public API
 pub use stylesheet::Stylesheet;
 
+/// Controls how image href paths are emitted in SVG output
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum ImageHrefMode {
+    /// Use the path exactly as written in the AIL source
+    #[default]
+    Verbatim,
+    /// Normalize the resolved path relative to CWD (removes `..` segments)
+    Rewrite,
+    /// Use the fully canonicalized absolute path
+    Absolute,
+}
+
 /// Errors that can occur during the render pipeline
 #[derive(Debug, Error)]
 pub enum RenderError {
@@ -80,6 +92,8 @@ pub struct RenderConfig {
     pub resolve_templates: bool,
     /// Base path for resolving template file references
     pub template_base_path: Option<std::path::PathBuf>,
+    /// How image href paths are emitted in SVG output
+    pub image_href_mode: ImageHrefMode,
 }
 
 impl Default for RenderConfig {
@@ -94,6 +108,7 @@ impl Default for RenderConfig {
             lint: false,
             resolve_templates: true, // Templates are resolved by default
             template_base_path: None,
+            image_href_mode: ImageHrefMode::default(),
         }
     }
 }
@@ -155,6 +170,12 @@ impl RenderConfig {
     /// Set the base path for template file resolution
     pub fn with_template_base_path(mut self, path: std::path::PathBuf) -> Self {
         self.template_base_path = Some(path);
+        self
+    }
+
+    /// Set the image href mode for SVG output
+    pub fn with_image_href_mode(mut self, mode: ImageHrefMode) -> Self {
+        self.image_href_mode = mode;
         self
     }
 }
@@ -346,6 +367,7 @@ fn render_pipeline(
         } else {
             TemplateRegistry::new()
         };
+        registry.set_image_href_mode(config.image_href_mode);
         resolve_templates(doc, &mut registry)?
     } else {
         doc

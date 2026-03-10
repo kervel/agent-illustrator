@@ -8,6 +8,7 @@ use crate::parser::ast::{
     AnchorDecl, ExportDecl, ParameterDef, Spanned, Statement, StyleValue, TemplateDecl,
     TemplateSourceType,
 };
+use crate::ImageHrefMode;
 
 /// Errors that can occur during template operations
 #[derive(Debug, Error)]
@@ -144,6 +145,8 @@ pub struct TemplateRegistry {
     templates: HashMap<String, TemplateDefinition>,
     /// Base path for resolving relative file paths
     base_path: Option<PathBuf>,
+    /// How image href paths are emitted in SVG output
+    image_href_mode: ImageHrefMode,
 }
 
 impl TemplateRegistry {
@@ -157,6 +160,7 @@ impl TemplateRegistry {
         Self {
             templates: HashMap::new(),
             base_path: Some(base_path),
+            image_href_mode: ImageHrefMode::default(),
         }
     }
 
@@ -213,12 +217,41 @@ impl TemplateRegistry {
         self.base_path = Some(path);
     }
 
+    /// Set the image href mode
+    pub fn set_image_href_mode(&mut self, mode: ImageHrefMode) {
+        self.image_href_mode = mode;
+    }
+
+    /// Get the image href mode
+    pub fn image_href_mode(&self) -> ImageHrefMode {
+        self.image_href_mode
+    }
+
     /// Resolve a relative path to an absolute path
     pub fn resolve_path(&self, relative: &str) -> PathBuf {
         if let Some(base) = &self.base_path {
             base.join(relative)
         } else {
             PathBuf::from(relative)
+        }
+    }
+
+    /// Resolve an image href path according to the configured ImageHrefMode
+    pub fn resolve_image_href(&self, relative: &str) -> String {
+        match self.image_href_mode {
+            ImageHrefMode::Verbatim => relative.to_string(),
+            ImageHrefMode::Rewrite => {
+                let full = self.resolve_path(relative);
+                normalize_path(&full).to_string_lossy().to_string()
+            }
+            ImageHrefMode::Absolute => {
+                let full = self.resolve_path(relative);
+                match full.canonicalize() {
+                    Ok(abs) => abs.to_string_lossy().to_string(),
+                    // Fall back to normalized path if file doesn't exist yet
+                    Err(_) => normalize_path(&full).to_string_lossy().to_string(),
+                }
+            }
         }
     }
 
@@ -277,6 +310,27 @@ impl TemplateRegistry {
         }
         Ok(())
     }
+}
+
+/// Normalize a path by resolving `.` and `..` components without touching the filesystem.
+fn normalize_path(path: &std::path::Path) -> PathBuf {
+    use std::path::Component;
+    let mut components = Vec::new();
+    for component in path.components() {
+        match component {
+            Component::ParentDir => {
+                // Only pop if there's a normal component to pop
+                if matches!(components.last(), Some(Component::Normal(_))) {
+                    components.pop();
+                } else {
+                    components.push(component);
+                }
+            }
+            Component::CurDir => {} // skip
+            _ => components.push(component),
+        }
+    }
+    components.iter().collect()
 }
 
 /// Parse SVG dimensions from content

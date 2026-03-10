@@ -266,13 +266,13 @@ fn resolve_raster_template(
             path: std::path::PathBuf::from(&def.name),
         })?;
 
-    // Resolve relative to base path to get the full path
-    let full_path = registry.resolve_path(source_path.to_str().unwrap_or(""));
+    // Resolve image href according to the configured mode
+    let href = registry.resolve_image_href(source_path.to_str().unwrap_or(""));
 
     let shape = ShapeDecl {
         shape_type: Spanned::new(
             ShapeType::RasterImage {
-                path: full_path.to_string_lossy().to_string(),
+                path: href,
             },
             span.clone(),
         ),

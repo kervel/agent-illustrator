@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use agent_illustrator::{render_with_config, render_with_lint, RenderConfig, Stylesheet};
+use agent_illustrator::{render_with_config, render_with_lint, ImageHrefMode, RenderConfig, Stylesheet};
 
 #[derive(Parser)]
 #[command(name = "agent-illustrator")]
@@ -56,6 +56,30 @@ struct Cli {
     /// Lint mode: check for layout defects (overlaps, containment violations, etc.)
     #[arg(long)]
     lint: bool,
+
+    /// How image href paths are emitted in SVG: verbatim (default), rewrite, absolute
+    #[arg(long, value_enum, default_value_t = ImageHrefArg::Verbatim)]
+    image_href: ImageHrefArg,
+}
+
+#[derive(Clone, Copy, clap::ValueEnum)]
+enum ImageHrefArg {
+    /// Use the path exactly as written in the AIL source
+    Verbatim,
+    /// Normalize the resolved path relative to CWD (removes .. segments)
+    Rewrite,
+    /// Use the fully canonicalized absolute path
+    Absolute,
+}
+
+impl From<ImageHrefArg> for ImageHrefMode {
+    fn from(arg: ImageHrefArg) -> Self {
+        match arg {
+            ImageHrefArg::Verbatim => ImageHrefMode::Verbatim,
+            ImageHrefArg::Rewrite => ImageHrefMode::Rewrite,
+            ImageHrefArg::Absolute => ImageHrefMode::Absolute,
+        }
+    }
 }
 
 fn main() {
@@ -144,7 +168,8 @@ fn main() {
         .with_stylesheet(stylesheet)
         .with_debug(cli.debug)
         .with_trace(cli.trace)
-        .with_lint(cli.lint);
+        .with_lint(cli.lint)
+        .with_image_href_mode(cli.image_href.into());
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }

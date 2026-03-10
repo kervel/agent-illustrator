@@ -1761,6 +1761,133 @@ fn test_raster_template_in_layout() {
 }
 
 // =============================================================================
+// Image href mode tests
+// =============================================================================
+
+#[test]
+fn test_image_href_verbatim_mode() {
+    use agent_illustrator::{render_with_config, ImageHrefMode, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_href_verbatim");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    let input = r#"
+        template "photo" from "../assets/image.png"
+        photo p1 [width: 100, height: 100]
+    "#;
+
+    let config = RenderConfig::new()
+        .with_template_base_path(temp_dir.clone())
+        .with_image_href_mode(ImageHrefMode::Verbatim);
+    let result = render_with_config(input, config);
+
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Verbatim mode should render");
+    // Verbatim keeps the path exactly as written in AIL source
+    assert!(
+        svg.contains("href=\"../assets/image.png\""),
+        "Verbatim mode should keep original path, got: {}",
+        svg
+    );
+}
+
+#[test]
+fn test_image_href_rewrite_mode() {
+    use agent_illustrator::{render_with_config, ImageHrefMode, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_href_rewrite");
+    let sub_dir = temp_dir.join("diagrams");
+    std::fs::create_dir_all(&sub_dir).expect("Should create temp dir");
+
+    let input = r#"
+        template "photo" from "../assets/image.png"
+        photo p1 [width: 100, height: 100]
+    "#;
+
+    // Base path is "diagrams/" subdir, image ref is "../assets/image.png"
+    // Rewrite should normalize to "<temp_dir>/assets/image.png" (no .. segments)
+    let config = RenderConfig::new()
+        .with_template_base_path(sub_dir.clone())
+        .with_image_href_mode(ImageHrefMode::Rewrite);
+    let result = render_with_config(input, config);
+
+    let _ = std::fs::remove_dir_all(&temp_dir);
+
+    let svg = result.expect("Rewrite mode should render");
+    // Should NOT contain ".." segments
+    assert!(
+        !svg.contains(".."),
+        "Rewrite mode should normalize away '..' segments, got: {}",
+        svg
+    );
+    assert!(
+        svg.contains("assets/image.png"),
+        "Rewrite mode should preserve the filename, got: {}",
+        svg
+    );
+}
+
+#[test]
+fn test_image_href_absolute_mode() {
+    use agent_illustrator::{render_with_config, ImageHrefMode, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_href_absolute");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    let input = r#"
+        template "photo" from "image.png"
+        photo p1 [width: 100, height: 100]
+    "#;
+
+    let config = RenderConfig::new()
+        .with_template_base_path(temp_dir.clone())
+        .with_image_href_mode(ImageHrefMode::Absolute);
+    let result = render_with_config(input, config);
+
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Absolute mode should render");
+    // Absolute mode should produce a path starting with /
+    assert!(
+        svg.contains("href=\"/"),
+        "Absolute mode should produce absolute path, got: {}",
+        svg
+    );
+    assert!(
+        svg.contains("image.png"),
+        "Absolute mode should preserve the filename, got: {}",
+        svg
+    );
+}
+
+#[test]
+fn test_image_href_default_is_verbatim() {
+    use agent_illustrator::{render_with_config, RenderConfig};
+
+    let temp_dir = std::env::temp_dir().join("agent_illustrator_test_href_default");
+    std::fs::create_dir_all(&temp_dir).expect("Should create temp dir");
+
+    let input = r#"
+        template "photo" from "../assets/image.png"
+        photo p1 [width: 100, height: 100]
+    "#;
+
+    // No image_href_mode set — should default to verbatim
+    let config = RenderConfig::new().with_template_base_path(temp_dir.clone());
+    let result = render_with_config(input, config);
+
+    let _ = std::fs::remove_dir(&temp_dir);
+
+    let svg = result.expect("Default mode should render");
+    assert!(
+        svg.contains("href=\"../assets/image.png\""),
+        "Default should be verbatim, got: {}",
+        svg
+    );
+}
+
+// =============================================================================
 // Phase 6: AIL Import & Exports Tests (T031-T034)
 // =============================================================================
 
