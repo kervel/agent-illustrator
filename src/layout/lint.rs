@@ -105,6 +105,7 @@ fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
 }
 
+
 // ── Collect contains IDs ──────────────────────────────────────────
 
 /// Scan the document for all element IDs involved in `contains` constraints
@@ -152,8 +153,60 @@ fn check_overlaps(
     contains_ids: &HashSet<String>,
     warnings: &mut Vec<LintWarning>,
 ) {
+    // Check root-level siblings against each other
+    check_overlap_siblings(&result.root_elements, None, contains_ids, warnings);
+
+    // Then recurse into each element's children
     for elem in &result.root_elements {
         check_overlaps_recursive(elem, None, contains_ids, warnings);
+    }
+}
+
+/// Check pairwise overlaps among sibling elements
+fn check_overlap_siblings(
+    siblings: &[ElementLayout],
+    parent_name: Option<&str>,
+    contains_ids: &HashSet<String>,
+    warnings: &mut Vec<LintWarning>,
+) {
+    for i in 0..siblings.len() {
+        for j in (i + 1)..siblings.len() {
+            let a = &siblings[i];
+            let b = &siblings[j];
+
+            if !is_opaque(a) || !is_opaque(b) {
+                continue;
+            }
+
+            if let Some(id) = a.id_str() {
+                if contains_ids.contains(id) {
+                    continue;
+                }
+            }
+            if let Some(id) = b.id_str() {
+                if contains_ids.contains(id) {
+                    continue;
+                }
+            }
+
+            if is_text_shape(a) != is_text_shape(b) {
+                continue;
+            }
+
+            if a.bounds.intersects(&b.bounds) {
+                let overlap_w = a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
+                let overlap_h = a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
+                let name_a = element_display_name(a, parent_name, i);
+                let name_b = element_display_name(b, parent_name, j);
+                warnings.push(LintWarning {
+                    category: LintCategory::Overlap,
+                    message: format!(
+                        "elements {} and {} overlap by {:.0}x{:.0}px",
+                        name_a, name_b, overlap_w, overlap_h
+                    ),
+                });
+            }
+        }
     }
 }
 
