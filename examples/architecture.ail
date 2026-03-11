@@ -35,7 +35,7 @@ template "ext" (name: "External") {
 
 group diagram {
     // Background zones (drawn first = behind)
-    rect app_bg [width: 520, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
+    rect app_bg [width: 580, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
     text "Application Layer" app_label [font_size: 12, fill: accent-dark]
 
     rect async_bg [width: 420, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
@@ -91,13 +91,13 @@ constrain nginx.center_x = diagram_title.center_x
 constrain nginx.center_y = 150
 
 // App layer background centered on title
-constrain app_bg.center_x = diagram_title.center_x
+constrain app_bg.center_x = 280
 constrain app_bg.center_y = 280
-constrain app_label.center_x = diagram_title.center_x
+constrain app_label.center_x = app_bg.center_x
 constrain app_label.top = app_bg.top + 6
 
 // Angular and Django side by side in app layer
-constrain angular.center_x = 160
+constrain angular.center_x = 100
 constrain angular.center_y = 295
 constrain django.center_x = 460
 constrain django.center_y = angular.center_y
@@ -121,7 +121,7 @@ constrain data_label.left = data_bg.left + 10
 constrain data_label.top = data_bg.top + 6
 
 // Data stores spread wider to avoid routing conflicts
-constrain postgres.center_x = 100
+constrain postgres.center_x = angular.center_x
 constrain postgres.center_y = 665
 constrain redis.center_x = diagram_title.center_x
 constrain redis.center_y = postgres.center_y
@@ -139,8 +139,8 @@ constrain sentry.center_x = keycloak.center_x
 constrain sentry.center_y = angular.center_y
 
 // Via points for routing Django → data connections wide around async layer
-constrain via_pg.center_x = -30
-constrain via_pg.center_y = celery.center_y
+constrain via_pg.center_x = -40
+constrain via_pg.center_y = data_bg.center_y
 constrain via_minio.center_x = 670
 constrain via_minio.center_y = 560
 

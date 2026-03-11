@@ -2465,3 +2465,110 @@ fn test_constrain_contains_only_wraps_specified_elements() {
         bg_right
     );
 }
+
+// ============================================================================
+// Regression: unanchored connections must attach at element edges, not centers
+// See commit 612eae3 where auto-picked anchors started using center positions
+// ============================================================================
+
+#[test]
+fn test_unanchored_connections_attach_at_edges() {
+    use agent_illustrator::render;
+
+    // Two adjacent rects in a row — unanchored connection between them
+    // should produce a short line between edges, NOT a long line through both boxes
+    let input = r#"
+        row items [gap: 20] {
+            rect a [width: 120, height: 50, label: "A"]
+            rect b [width: 120, height: 50, label: "B"]
+        }
+        b -> a
+    "#;
+
+    let svg = render(input).expect("Should render");
+
+    // Extract the connection path (the ai-connection path element)
+    // a is at x=0..120, b is at x=140..260
+    // Connection b -> a should go from b.left (140) to a.right (120) — short ~20px gap
+    // NOT from b.center (200) to a.center (60) — long 140px line through both boxes
+    for line in svg.lines() {
+        if line.contains("ai-connection") && line.contains("<path") {
+            // Extract M (start x) from the path
+            if let Some(m_pos) = line.find("M") {
+                let after_m = &line[m_pos + 1..];
+                let start_x: f64 = after_m
+                    .split_whitespace()
+                    .next()
+                    .and_then(|s| s.parse().ok())
+                    .expect("Should parse start x from path");
+
+                // Start x should be near b.left (140), not b.center (200)
+                assert!(
+                    start_x < 160.0,
+                    "Connection start x ({}) should be near element edge (~140), \
+                     not center (~200). Unanchored connections must attach at edges.",
+                    start_x
+                );
+                return; // Test passes
+            }
+        }
+    }
+    panic!("No ai-connection path found in SVG output");
+}
+
+#[test]
+fn test_unanchored_connections_in_feedback_loop_pattern() {
+    use agent_illustrator::render;
+
+    // Reproduces the feedback-loops example pattern: boxes in a row with
+    // right-to-left connections (evaluate -> spot -> tune -> assign)
+    let input = r#"
+        row loop [gap: 20] {
+            rect assign [width: 120, height: 50, label: "Assign"]
+            rect tune [width: 120, height: 50, label: "Tune"]
+            rect spot [width: 120, height: 50, label: "Spot"]
+            rect evaluate [width: 120, height: 50, label: "Evaluate"]
+        }
+        evaluate -> spot
+        spot -> tune
+        tune -> assign
+    "#;
+
+    let svg = render(input).expect("Should render");
+
+    // Count connection paths
+    let connections: Vec<&str> = svg
+        .lines()
+        .filter(|l| l.contains("ai-connection") && l.contains("<path"))
+        .collect();
+    assert_eq!(connections.len(), 3, "Should have 3 connections");
+
+    // Each connection should span at most ~30px (gap + arrowhead), not 130+px (center-to-center)
+    for conn_line in &connections {
+        if let Some(m_pos) = conn_line.find("M") {
+            let after_m = &conn_line[m_pos + 1..];
+            let parts: Vec<&str> = after_m.split_whitespace().collect();
+            let start_x: f64 = parts[0].parse().expect("start x");
+
+            // Find L command for end x
+            if let Some(l_pos) = conn_line.find(" L") {
+                let after_l = &conn_line[l_pos + 2..];
+                let end_x: f64 = after_l
+                    .split_whitespace()
+                    .next()
+                    .and_then(|s| s.parse().ok())
+                    .expect("end x");
+
+                let span = (start_x - end_x).abs();
+                assert!(
+                    span < 40.0,
+                    "Connection span ({:.1}px) is too wide — should be ~20px gap between \
+                     adjacent edges, not {:.1}px (center-to-center). Line: {}",
+                    span,
+                    span,
+                    conn_line.trim()
+                );
+            }
+        }
+    }
+}

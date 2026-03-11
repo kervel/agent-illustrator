@@ -159,19 +159,23 @@ pub fn resolve_anchor(
             Ok(ResolvedAnchor::from_anchor(anchor))
         }
         None => {
-            // Auto-detect - return center with direction toward target
+            // Auto-detect: compute direction toward target, then find the
+            // boundary intersection point so the connection attaches at the
+            // element's edge rather than its center.
             let center = element.bounds.center();
-            let direction = if let Some(target) = target_bounds {
-                let dx = target.center().x - center.x;
-                let dy = target.center().y - center.y;
+            let is_ellipse = is_ellipse_type(&element.element_type);
+            if let Some(target) = target_bounds {
+                let target_center = target.center();
+                let dx = target_center.x - center.x;
+                let dy = target_center.y - center.y;
                 let angle = dy.atan2(dx).to_degrees();
-                // Normalize to 0-360 range
                 let angle = if angle < 0.0 { angle + 360.0 } else { angle };
-                AnchorDirection::Angle(angle)
+                let edge_point =
+                    boundary_point_toward_shape(&element.bounds, target_center, is_ellipse);
+                Ok(ResolvedAnchor::new(edge_point, AnchorDirection::Angle(angle)))
             } else {
-                AnchorDirection::Right // Default direction
-            };
-            Ok(ResolvedAnchor::new(center, direction))
+                Ok(ResolvedAnchor::new(center, AnchorDirection::Right))
+            }
         }
     }
 }

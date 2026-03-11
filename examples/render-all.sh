@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 for ail in "$SCRIPT_DIR"/*.ail; do
     name="$(basename "$ail" .ail)"
     svg="$SCRIPT_DIR/$name.svg"
-    if cargo run -- "$ail" > "$svg" 2>/dev/null; then
+    if cargo run -- "$ail" --stylesheet-css "$SCRIPT_DIR/../stylesheets/kapernikov.css" > "$svg" 2>/dev/null; then
         echo "OK  $name.svg"
     else
         echo "FAIL $name.ail (skipped)"
