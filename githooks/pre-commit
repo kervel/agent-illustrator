@@ -52,6 +52,25 @@ if [ "$CHANGED" -eq 1 ]; then
     echo "pre-commit: auto-staged updated SVGs"
 fi
 
+# Regenerate regression baselines (uses the same render pipeline)
+echo "pre-commit: regenerating regression baselines..."
+for ail in "$SCRIPT_DIR"/examples/*.ail; do
+    name="$(basename "$ail" .ail)"
+    baseline="$SCRIPT_DIR/tests/baseline/$name.svg"
+    css="$(stylesheet_for "$name")"
+    if cargo run --quiet -- "$ail" --stylesheet-css "$css" > "$baseline.tmp" 2>/dev/null; then
+        if ! diff -q "$baseline" "$baseline.tmp" > /dev/null 2>&1; then
+            mv "$baseline.tmp" "$baseline"
+            git add "$baseline"
+            CHANGED=1
+        else
+            rm -f "$baseline.tmp"
+        fi
+    else
+        rm -f "$baseline.tmp"
+    fi
+done
+
 # Run tests
 echo "pre-commit: running tests..."
 cargo test --quiet 2>/dev/null || {
