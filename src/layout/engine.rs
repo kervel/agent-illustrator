@@ -813,6 +813,7 @@ pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<
     // Recompute bounds and anchors after constraint resolution
     result.compute_bounds();
     recompute_builtin_anchors(result, None);
+    recompute_custom_anchors(result, doc, None);
     Ok(())
 }
 
@@ -2888,34 +2889,45 @@ fn recompute_group_anchors(
     group_name: &str,
     anchor_decls: &[AnchorDecl],
 ) {
-    // First, collect the children bounds by recursively traversing the group's children
-    // This works for both template-expanded groups (prefixed names) and user-authored groups
-    fn collect_bounds_recursive(elements: &[ElementLayout], map: &mut HashMap<String, BoundingBox>) {
-        for elem in elements {
-            if let Some(id) = elem.id.as_ref() {
-                map.insert(id.0.clone(), elem.bounds);
+    // Collect children bounds from the flat HashMap, which is kept up-to-date by
+    // shift_element_by_name. The nested children structure (group_elem.children) may be stale
+    // after constraint solving moves parent groups.
+    //
+    // Two naming conventions:
+    // - Template instances: children prefixed as "{group_name}_{child}" (e.g., "nginx_body")
+    // - User-authored groups: children use their own names (e.g., "avatar" inside group "alice")
+    //
+    // Try prefix-based lookup first (template instances), then fall back to tree traversal
+    // (user-authored groups where child names aren't prefixed).
+    let prefix = format!("{}_", group_name);
+    let mut children_bounds: HashMap<String, BoundingBox> = result
+        .elements
+        .iter()
+        .filter(|(id, _)| id.starts_with(&prefix))
+        .map(|(id, elem)| (id.clone(), elem.bounds))
+        .collect();
+
+    // Fallback: for user-authored groups, look up children by their direct names
+    // from the flat HashMap (which has up-to-date bounds)
+    if children_bounds.is_empty() {
+        if let Some(group_elem) = result.elements.get(group_name) {
+            fn collect_child_names(elements: &[ElementLayout], names: &mut Vec<String>) {
+                for elem in elements {
+                    if let Some(id) = elem.id.as_ref() {
+                        names.push(id.0.clone());
+                    }
+                    collect_child_names(&elem.children, names);
+                }
             }
-            if !elem.children.is_empty() {
-                collect_bounds_recursive(&elem.children, map);
+            let mut child_names = Vec::new();
+            collect_child_names(&group_elem.children, &mut child_names);
+            for name in child_names {
+                if let Some(elem) = result.elements.get(&name) {
+                    children_bounds.insert(name, elem.bounds);
+                }
             }
         }
     }
-
-    let children_bounds: HashMap<String, BoundingBox> = if let Some(group_elem) =
-        result.elements.get(group_name)
-    {
-        let mut map = HashMap::new();
-        collect_bounds_recursive(&group_elem.children, &mut map);
-        map
-    } else {
-        // Fallback to prefix-based lookup for backwards compatibility
-        result
-            .elements
-            .iter()
-            .filter(|(id, _)| id.starts_with(&format!("{}_", group_name)))
-            .map(|(id, elem)| (id.clone(), elem.bounds))
-            .collect()
-    };
 
     // Resolve each anchor declaration
     let mut new_anchors = AnchorSet::default();

@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 450 424.5685424949238">
   <style>
     :root {
-    --accent-light: #e3f2fd;
-    --accent-1: #2196f3;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --text-2: #666666;
     --secondary-3: #ffe0b2;
-    --status-success: #4caf50;
-    --foreground-2: #666666;
-    --text-light: #ffffff;
-    --foreground-light: #e0e0e0;
-    --secondary-2: #fff3e0;
-    --background-1: #ffffff;
-    --secondary-dark: #e65100;
-    --status-warning: #ff9800;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
-    --foreground-3: #999999;
-    --text-3: #999999;
     --foreground-dark: #1a1a1a;
-    --text-dark: #1a1a1a;
-    --background-light: #ffffff;
-    --text-1: #333333;
-    --background-2: #f5f5f5;
-    --accent-2: #e3f2fd;
-    --secondary-light: #fff3e0;
-    --foreground-1: #333333;
-    --status-error: #f44336;
+    --text-light: #ffffff;
+    --background-dark: #333333;
+    --status-success: #4caf50;
     --secondary-1: #ff9800;
+    --foreground-1: #333333;
+    --secondary-light: #fff3e0;
+    --status-warning: #ff9800;
+    --foreground-light: #e0e0e0;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --foreground-3: #999999;
+    --foreground-2: #666666;
+    --secondary-dark: #e65100;
+    --text-2: #666666;
+    --accent-1: #2196f3;
+    --accent-light: #e3f2fd;
+    --accent-3: #bbdefb;
+    --text-1: #333333;
+    --accent-dark: #1565c0;
+    --background-1: #ffffff;
+    --background-light: #ffffff;
+    --text-3: #999999;
+    --secondary-2: #fff3e0;
+    --status-error: #f44336;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
   }
 
   </style>
@@ -74,7 +74,7 @@
     </g>
   </g>
   <g id="logo_section" class="ai-container">
-    <image id="company_logo" class="ai-raster-image" href="examples/assets/logo.png" x="80" y="139" width="200" height="50"/>
+    <image id="company_logo" class="ai-raster-image" href="assets/logo.png" x="80" y="139" width="200" height="50"/>
     <text id="logo_label" class="ai-shape ai-text" x="132" y="202" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
   </g>
   <g id="rotated_icons" class="ai-container">
@@ -100,8 +100,8 @@
     </g>
   </g>
   <text id="rotation_label" class="ai-shape ai-text" x="87" y="314.5685424949238" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
-  <text class="ai-label" x="110" y="35" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">works with</text>
-  <text class="ai-label" x="240" y="35" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">mentors</text>
-  <path class="ai-connection" d="M79 45 L133.8 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M209 45 L263.8 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <text class="ai-label" x="305" y="44" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">works with</text>
+  <text class="ai-label" x="305" y="66" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">mentors</text>
+  <path class="ai-connection" d="M339 45 L278.2 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M339 45 L278.2 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

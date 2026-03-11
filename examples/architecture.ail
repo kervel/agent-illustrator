@@ -35,10 +35,10 @@ template "ext" (name: "External") {
 
 group diagram {
     // Background zones (drawn first = behind)
-    rect app_bg [width: 500, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
+    rect app_bg [width: 520, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
     text "Application Layer" app_label [font_size: 12, fill: accent-dark]
 
-    rect async_bg [width: 380, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
+    rect async_bg [width: 420, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
     text "Async / Real-time" async_label [font_size: 12, fill: accent-dark]
 
     rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15]
@@ -77,77 +77,77 @@ group diagram {
 
 // === LAYOUT VIA CONSTRAINTS ===
 
-// Title
+// Anchor: diagram_title sets the horizontal center for the whole diagram
 text "fullstack-sota Architecture" diagram_title [font_size: 18, fill: foreground-1]
 constrain diagram_title.center_x = 310
 constrain diagram_title.center_y = 10
 
-// Browser at top
-constrain browser.center_x = 310
-constrain browser.center_y = 50
+// Browser at top, centered on title
+constrain browser.center_x = diagram_title.center_x
+constrain browser.center_y = 55
 
-// Nginx below browser
-constrain nginx.center_x = 310
-constrain nginx.center_y = 130
+// Nginx below browser — 60px gap for routing room
+constrain nginx.center_x = diagram_title.center_x
+constrain nginx.center_y = 150
 
-// App layer background
-constrain app_bg.center_x = 310
-constrain app_bg.center_y = 235
-constrain app_label.center_x = 310
+// App layer background centered on title
+constrain app_bg.center_x = diagram_title.center_x
+constrain app_bg.center_y = 280
+constrain app_label.center_x = diagram_title.center_x
 constrain app_label.top = app_bg.top + 6
 
-// Angular and Django side by side
-constrain angular.center_x = 180
-constrain angular.center_y = 250
-constrain django.center_x = 440
-constrain django.center_y = 250
+// Angular and Django side by side in app layer
+constrain angular.center_x = 160
+constrain angular.center_y = 295
+constrain django.center_x = 460
+constrain django.center_y = angular.center_y
 
-// Async layer background — more vertical space from app layer
-constrain async_bg.center_x = 310
-constrain async_bg.center_y = 395
+// Async layer background — 80px gap from app layer for routing
+constrain async_bg.center_x = diagram_title.center_x
+constrain async_bg.center_y = 470
 constrain async_label.right = async_bg.right - 10
 constrain async_label.bottom = async_bg.bottom - 4
 
-// Celery and Channels — more space from Django
-constrain celery.center_x = 210
-constrain celery.center_y = 412
-constrain channels.center_x = 410
-constrain channels.center_y = 412
+// Celery and Channels — aligned with data stores to get clean vertical connections
+constrain celery.center_x = 200
+constrain celery.center_y = 480
+constrain channels.center_x = 420
+constrain channels.center_y = celery.center_y
 
-// Data layer background — more vertical space
-constrain data_bg.center_x = 310
-constrain data_bg.center_y = 555
+// Data layer background — 80px gap from async for routing
+constrain data_bg.center_x = diagram_title.center_x
+constrain data_bg.center_y = 650
 constrain data_label.left = data_bg.left + 10
 constrain data_label.top = data_bg.top + 6
 
-// Data stores
-constrain postgres.center_x = 120
-constrain postgres.center_y = 570
-constrain redis.center_x = 310
-constrain redis.center_y = 570
-constrain minio.center_x = 510
-constrain minio.center_y = 570
+// Data stores spread wider to avoid routing conflicts
+constrain postgres.center_x = 100
+constrain postgres.center_y = 665
+constrain redis.center_x = diagram_title.center_x
+constrain redis.center_y = postgres.center_y
+constrain minio.center_x = 540
+constrain minio.center_y = postgres.center_y
 
 // PostGIS label below PostgreSQL
-constrain postgis_label.center_x = 120
-constrain postgis_label.top = 603
+constrain postgis_label.center_x = postgres.center_x
+constrain postgis_label.top = 698
 
-// External services on the right
-constrain keycloak.center_x = 680
-constrain keycloak.center_y = 130
-constrain sentry.center_x = 680
-constrain sentry.center_y = 250
+// External services on the right — enough spacing
+constrain keycloak.center_x = 720
+constrain keycloak.center_y = nginx.center_y
+constrain sentry.center_x = keycloak.center_x
+constrain sentry.center_y = angular.center_y
 
-// Via points for routing Django → data connections around async layer
-constrain via_pg.center_x = 95
-constrain via_pg.center_y = 440
-constrain via_minio.center_x = 545
-constrain via_minio.center_y = 440
+// Via points for routing Django → data connections wide around async layer
+constrain via_pg.center_x = -30
+constrain via_pg.center_y = celery.center_y
+constrain via_minio.center_x = 670
+constrain via_minio.center_y = 560
 
 // === CONNECTIONS ===
 
 // Browser to Nginx
-browser.bottom -> nginx.top_conn [label: "HTTP / WS"]
+browser.bottom -> nginx.top_conn [label: "HTTP / WS", routing: direct]
 
 // Nginx fans out to apps
 nginx.bottom_conn -> angular.top_conn [label: "/web/"]

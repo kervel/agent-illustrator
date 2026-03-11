@@ -1,84 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-119.01994983263192 -93.6994880114859 597.0580081639853 435.0147030019703">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -109 480.94291116568843 466.11668062505873">
   <style>
-    /* Kapernikov Brand Stylesheet for Agent Illustrator
-   Colors from kapernikov-theme.css (huisstijlgids v4)
-*/
-
-:root {
-  /* Foreground colors (lines, primary visual elements) */
-  --foreground-1: #484847;       /* Dark grey */
-  --foreground-2: #818281;       /* Medium grey */
-  --foreground-3: #bfc0c0;       /* Light grey */
-  --foreground-light: #ececec;   /* Very light grey */
-  --foreground-dark: #000000;    /* Black */
-
-  /* Background colors */
-  --background-1: #ffffff;       /* White */
-  --background-2: #ececec;       /* Very light grey */
-  --background-3: #e2d7cd;       /* Beige */
-  --background-light: #ffffff;
-  --background-dark: #484847;    /* Dark grey */
-
-  /* Text colors */
-  --text-1: #484847;
-  --text-2: #818281;
-  --text-3: #bfc0c0;
-  --text-light: #ffffff;
-  --text-dark: #484847;
-
-  /* Accent colors (brand red family) */
-  --accent-1: #ba2415;           /* Primary brand red */
-  --accent-2: #D4734F;           /* Red light */
-  --accent-3: #dd977a;           /* Red lighter */
-  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
-  --accent-dark: #901C1D;        /* Crimson */
-
-  /* Secondary colors (cool teal/petrol) */
-  --secondary-1: #1D6E88;        /* Petrol */
-  --secondary-2: #1F92A6;        /* Cyan */
-  --secondary-3: #36b191;        /* Jade */
-  --secondary-light: #ececec;    /* Very light grey */
-  --secondary-dark: #1D6E88;     /* Petrol */
-
-  /* Extra brand colors (not in standard token set) */
-  --kpv-burgundy: #5a322b;
-  --kpv-amber: #FFB31B;
-
-  /* Status colors */
-  --status-success: #1E9F49;     /* Emerald */
-  --status-warning: #DD8028;     /* Tangerine */
-  --status-error: #ba2415;       /* Brand red */
-}
-
-/* Typography */
-.ai-label, .ai-text {
-  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
-}
-
-/* Shape defaults: rounded corners, softer stroke */
-.ai-rect {
-  rx: 4;
-  ry: 4;
-}
-
-/* Opt-out for schematics / electronic symbols */
-.schematic .ai-rect {
-  rx: 0;
-  ry: 0;
-}
-
-/* White labels on dark fills (adjacent sibling only) */
-[fill="var(--accent-1)"] + .ai-label,
-[fill="var(--accent-dark)"] + .ai-label,
-[fill="var(--secondary-1)"] + .ai-label,
-[fill="var(--secondary-2)"] + .ai-label,
-[fill="var(--secondary-3)"] + .ai-label,
-[fill="var(--secondary-dark)"] + .ai-label,
-[fill="var(--foreground-1)"] + .ai-label,
-[fill="var(--foreground-dark)"] + .ai-label {
-  fill: var(--text-light);
-}
+    :root {
+    --foreground-1: #333333;
+    --background-light: #ffffff;
+    --accent-1: #2196f3;
+    --secondary-3: #ffe0b2;
+    --accent-3: #bbdefb;
+    --background-3: #eeeeee;
+    --status-error: #f44336;
+    --foreground-3: #999999;
+    --foreground-light: #e0e0e0;
+    --text-2: #666666;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --background-2: #f5f5f5;
+    --foreground-dark: #1a1a1a;
+    --background-dark: #333333;
+    --secondary-2: #fff3e0;
+    --status-success: #4caf50;
+    --foreground-2: #666666;
+    --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
+    --secondary-dark: #e65100;
+    --background-1: #ffffff;
+    --text-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --secondary-light: #fff3e0;
+    --text-light: #ffffff;
+    --accent-2: #e3f2fd;
+  }
 
   </style>
   <defs>
@@ -148,20 +100,20 @@
   </g>
   <circle id="top_via" class="ai-shape ai-circle" cx="175.5" cy="-14" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <circle id="bottom_via" class="ai-shape ai-circle" cx="193.72145558284421" cy="271" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="213.72596089144184" y="-19.69948801148589" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">crowns</text>
-  <text class="ai-label" x="137.2740391085581" y="-19.699488011485883" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">feet</text>
-  <text class="ai-label" x="174.71320722985715" y="260.3946259954675" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">crowns</text>
-  <text class="ai-label" x="223.97798578099034" y="260.30317591980634" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">feet</text>
-  <path class="ai-connection" d="M23 22 C22.99999999999999 -30.230525344646672 123.60678139600932 -19.92635138143314 175.5 -14 C233.00086847538174 -7.433239246091436 328 126.87462502878287 328 76.2" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M23 69 C23.000000000000004 126.87462502878287 117.99913152461826 -7.433239246091436 175.5 -14 C227.39321860399068 -19.92635138143314 328 -30.230525344646672 328 14.8" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M6.0000000000000036 218 C-59.01994983263192 218 128.7339150902023 268.94732931155556 193.72145558284421 271 C255.17817921862036 272.94114770706346 418.0380583313534 278.095147165665 379.6510893481155 239.70817818242708" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M53 218 C103.12376688575148 218 143.6108762356384 272.1497148796746 193.72145558284421 271 C248.10649009131077 269.7522139192851 302.85975468731476 162.9168435216264 336.2347329832614 196.29182181757298" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M36 54.5 L51 54.5 L51 17.5 L166.5 17.5 L166.5 25.3" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M166.5 58.5 L166.5 73.5 L356 73.5 L356 36.5 L348.2 36.5" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M38.5 205 L38.5 190 L161.42462120245875 190 L161.42462120245875 215.1715728752538 L169.22462120245876 215.1715728752538" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M194.809397513309 233.55634918610406 L209.809397513309 233.55634918610406 L209.809397513309 187.443650813896 L360.77133829043464 187.443650813896 L360.77133829043464 195.243650813896" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M36 54.5 C88.9365658123003 54.5 166.5 -20.4365658123003 166.5 25.3" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M166.5 58.5 C166.5 128.85254082120986 411.35254082120986 36.5 348.2 36.5" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M38.5 205 C38.49999999999999 149.68032967762974 137.3077071845065 176.05465885730158 171.33345237791562 210.08040405071065" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M194.809397513309 233.55634918610406 C242.56826331768937 281.31521499048444 408.530204094815 154.68478500951562 365.8625071149778 197.35248198935287" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <text class="ai-label" x="175.5" y="-35" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">crowns</text>
+  <text class="ai-label" x="175.50000000000006" y="-13" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">feet</text>
+  <text class="ai-label" x="193.72145558284421" y="250" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">crowns</text>
+  <text class="ai-label" x="193.72145558284424" y="272" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">feet</text>
+  <path class="ai-connection" d="M23 22 C22.99999999999999 -30.230525344646672 123.26947465535332 -14 175.5 -14 C227.73052534464668 -14 328 -30.230525344646672 328 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M23 69 C23.000000000000004 126.87462502878287 117.62537497121713 -14 175.5 -14 C233.37462502878287 -14 328 126.87462502878287 328 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M29.500000000000004 194.5 C29.499999999999993 134.11150176312262 133.33295734596683 271 193.72145558284421 271 C254.1099538197216 271 357.94291116568843 134.11150176312256 357.94291116568843 187.29999999999995" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M29.500000000000004 241.5 C29.500000000000007 297.11668062505873 138.10477495778545 271 193.72145558284421 271 C249.33813620790298 271 357.94291116568843 297.11668062505873 357.94291116568843 248.69999999999993" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M36 54.5 L155.3 54.5" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M188.5 54.5 L307.8 54.5" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M42.5 227 L171.78097038856282 227" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M204.9809703885628 227 L337.74291116568844 226.99999999999994" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M36 54.5 C86.6 54.5 111.9 54.50000000000001 155.3 54.5" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M188.5 54.5 C239.1 54.5 264.4 54.50000000000001 307.8 54.5" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M42.5 227 C97.09238815542513 227 124.38858223313768 227 171.78097038856282 227" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M204.9809703885628 227 C260.96574669941305 227 288.9581348548382 226.99999999999994 337.74291116568844 226.99999999999994" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>
