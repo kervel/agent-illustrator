@@ -37,6 +37,7 @@ pub enum LintCategory {
     SteepDirect,
     CrowdedLayout,
     OverConstrained,
+    LabelOverflow,
 }
 
 impl fmt::Display for LintCategory {
@@ -54,6 +55,7 @@ impl fmt::Display for LintCategory {
             LintCategory::SteepDirect => write!(f, "steep-direct"),
             LintCategory::CrowdedLayout => write!(f, "crowded-layout"),
             LintCategory::OverConstrained => write!(f, "over-constrained"),
+            LintCategory::LabelOverflow => write!(f, "label-overflow"),
         }
     }
 }
@@ -75,6 +77,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_steep_direct(result, &mut warnings);
     check_crowded_layouts(doc, &mut warnings);
     check_over_constrained(result, doc, &mut warnings);
+    check_label_overflow(result, &mut warnings);
     warnings
 }
 
@@ -1404,6 +1407,69 @@ fn check_over_constrained_in_stmts(
     }
 }
 
+// ── Label overflow detection ──────────────────────────────────────
+
+/// Detect labels that are larger than their containing shape.
+/// This catches cases like a "+3.3V" label on a 4px-high power rail,
+/// where the text visibly overflows the element.
+fn check_label_overflow(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    for elem in &result.root_elements {
+        check_label_overflow_recursive(elem, warnings);
+    }
+}
+
+fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
+    if let Some(label) = &elem.label {
+        // Skip text elements — they don't have a "container" to overflow
+        if !is_text_shape(elem) {
+            let label_bbox = estimate_label_bbox(label);
+            let shape_bounds = &elem.bounds;
+
+            // Check if label is wider or taller than the shape
+            let width_overflow = label_bbox.width > shape_bounds.width + 2.0;
+            let height_overflow = label_bbox.height > shape_bounds.height + 2.0;
+
+            if width_overflow || height_overflow {
+                let name = elem
+                    .id
+                    .as_ref()
+                    .map(|id| format!("\"{}\"", id.0))
+                    .unwrap_or_else(|| "<anon>".to_string());
+                let label_text = &label.text;
+
+                let detail = if width_overflow && height_overflow {
+                    format!(
+                        "label \"{}\" on {} overflows both width ({:.0}px label vs {:.0}px shape) and height ({:.0}px vs {:.0}px); consider using a separate text element positioned nearby",
+                        label_text, name,
+                        label_bbox.width, shape_bounds.width,
+                        label_bbox.height, shape_bounds.height,
+                    )
+                } else if width_overflow {
+                    format!(
+                        "label \"{}\" on {} overflows width ({:.0}px label vs {:.0}px shape); consider making the shape wider or using a separate text element",
+                        label_text, name,
+                        label_bbox.width, shape_bounds.width,
+                    )
+                } else {
+                    format!(
+                        "label \"{}\" on {} overflows height ({:.0}px label vs {:.0}px shape); consider making the shape taller or using a separate text element",
+                        label_text, name,
+                        label_bbox.height, shape_bounds.height,
+                    )
+                };
+
+                warnings.push(LintWarning {
+                    category: LintCategory::LabelOverflow,
+                    message: detail,
+                });
+            }
+        }
+    }
+    for child in &elem.children {
+        check_label_overflow_recursive(child, warnings);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1838,6 +1904,74 @@ mod tests {
         let result = make_layout_with_connections(vec![conn]);
         let mut warnings = Vec::new();
         check_reducible_bends(&result, &mut warnings);
+        assert!(warnings.is_empty());
+    }
+
+    // ── Label overflow tests ─────────────────────────────────────
+
+    fn make_rect_with_label(
+        id: &str,
+        x: f64,
+        y: f64,
+        w: f64,
+        h: f64,
+        label_text: &str,
+    ) -> ElementLayout {
+        let mut elem = make_rect(Some(id), x, y, w, h);
+        elem.label = Some(LabelLayout {
+            text: label_text.to_string(),
+            position: Point::new(x + w / 2.0, y + h / 2.0),
+            anchor: TextAnchor::Middle,
+            styles: None,
+        });
+        elem
+    }
+
+    #[test]
+    fn test_label_overflow_height() {
+        // 4px-high rail with a label — should trigger overflow
+        let elem = make_rect_with_label("rail", 0.0, 0.0, 60.0, 4.0, "+3.3V");
+        let result = LayoutResult {
+            root_elements: vec![elem],
+            connections: vec![],
+            elements: HashMap::new(),
+            bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+        };
+        let mut warnings = Vec::new();
+        check_label_overflow(&result, &mut warnings);
+        assert_eq!(warnings.len(), 1);
+        assert!(matches!(warnings[0].category, LintCategory::LabelOverflow));
+        assert!(warnings[0].message.contains("overflows height"));
+    }
+
+    #[test]
+    fn test_label_overflow_width() {
+        // Tiny 10px-wide rect with a long label
+        let elem = make_rect_with_label("small", 0.0, 0.0, 10.0, 30.0, "Very Long Label Text");
+        let result = LayoutResult {
+            root_elements: vec![elem],
+            connections: vec![],
+            elements: HashMap::new(),
+            bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+        };
+        let mut warnings = Vec::new();
+        check_label_overflow(&result, &mut warnings);
+        assert_eq!(warnings.len(), 1);
+        assert!(warnings[0].message.contains("overflows width"));
+    }
+
+    #[test]
+    fn test_label_fits_no_warning() {
+        // Normal-sized rect with a short label — no overflow
+        let elem = make_rect_with_label("box", 0.0, 0.0, 140.0, 50.0, "Service");
+        let result = LayoutResult {
+            root_elements: vec![elem],
+            connections: vec![],
+            elements: HashMap::new(),
+            bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+        };
+        let mut warnings = Vec::new();
+        check_label_overflow(&result, &mut warnings);
         assert!(warnings.is_empty());
     }
 }

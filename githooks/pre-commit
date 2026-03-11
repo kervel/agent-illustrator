@@ -18,12 +18,21 @@ cargo build --quiet 2>/dev/null || {
     exit 0
 }
 
+# Per-example stylesheet selection
+stylesheet_for() {
+    case "$1" in
+        mosfet-driver) echo "$SCRIPT_DIR/stylesheets/kapernikov-schematic.css" ;;
+        *)             echo "$SCRIPT_DIR/stylesheets/kapernikov.css" ;;
+    esac
+}
+
 # Re-render all examples
 CHANGED=0
 for ail in "$SCRIPT_DIR"/examples/*.ail; do
     name="$(basename "$ail" .ail)"
     svg="$SCRIPT_DIR/examples/$name.svg"
-    if cargo run --quiet -- "$ail" --stylesheet-css "$SCRIPT_DIR/stylesheets/kapernikov.css" > "$svg.tmp" 2>/dev/null; then
+    css="$(stylesheet_for "$name")"
+    if cargo run --quiet -- "$ail" --stylesheet-css "$css" > "$svg.tmp" 2>/dev/null; then
         if ! diff -q "$svg" "$svg.tmp" > /dev/null 2>&1; then
             echo "  CHANGED: $name.svg"
             mv "$svg.tmp" "$svg"

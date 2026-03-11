@@ -108,7 +108,7 @@ fn test_lint_warning_format() {
     for w in &warnings {
         let cat = w.category.to_string();
         assert!(
-            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant", "reducible-bend", "missing-anchor", "contrast", "steep-direct", "crowded-layout", "over-constrained"].contains(&cat.as_str()),
+            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant", "reducible-bend", "missing-anchor", "contrast", "steep-direct", "crowded-layout", "over-constrained", "label-overflow"].contains(&cat.as_str()),
             "Unexpected category: {}",
             cat
         );
