@@ -69,6 +69,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_labels(result, &mut warnings);
     check_label_element_overlaps(result, &mut warnings);
     check_connections(result, &mut warnings);
+    check_label_connection_overlaps(result, &mut warnings);
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
@@ -452,7 +453,7 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
         .as_ref()
         .and_then(|s| s.font_size)
         .unwrap_or(14.0);
-    let width = label.text.len() as f64 * (font_size * 0.5);
+    let width = label.text.len() as f64 * (font_size * 0.6);
     let height = font_size;
 
     let x = match label.anchor {
@@ -478,6 +479,19 @@ fn collect_labels_recursive(
         labels.push(LabelInfo {
             owner,
             bbox: estimate_label_bbox(label),
+            parent_opacity: elem.styles.opacity,
+        });
+    }
+    // Standalone text elements act like labels for overlap checking
+    if is_text_shape(elem) {
+        let owner = elem
+            .id
+            .as_ref()
+            .map(|id| id.0.clone())
+            .unwrap_or_else(|| "<anon>".to_string());
+        labels.push(LabelInfo {
+            owner,
+            bbox: elem.bounds,
             parent_opacity: elem.styles.opacity,
         });
     }
@@ -726,6 +740,13 @@ fn check_connections(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             None => continue,
         };
 
+        // Skip curved connections: their path stores Bézier control points,
+        // not the actual curve.  Line-segment intersection on control points
+        // produces false positives.
+        if conn.routing_mode == RoutingMode::Curved {
+            continue;
+        }
+
         // Track which elements this connection crosses (deduplicate)
         let mut crossed: HashSet<String> = HashSet::new();
 
@@ -755,6 +776,93 @@ fn check_connections(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                             from_id, to_id, oe.id
                         ),
                     });
+                }
+            }
+        }
+    }
+}
+
+// ── Label-connection overlap detection ─────────────────────────────
+
+/// Check if any label (element label, connection label, or standalone text)
+/// overlaps with a connection path segment.  This catches labels placed at
+/// bend points or too close to connector lines.
+fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    // Collect user-level labels only (skip template internals).
+    // Template children have IDs like `q_main_g_label`; we skip labels whose
+    // owner shares a prefix with a root-level template group.
+    let template_prefixes: Vec<String> = result
+        .root_elements
+        .iter()
+        .filter(|e| is_template_instance_group(e))
+        .filter_map(|e| e.id.as_ref().map(|id| format!("{}_", id.0)))
+        .collect();
+
+    let is_template_internal = |owner: &str| -> bool {
+        template_prefixes.iter().any(|pfx| owner.starts_with(pfx))
+    };
+
+    // Collect labels from elements + standalone text (skipping template internals)
+    let mut labels: Vec<LabelInfo> = Vec::new();
+    for elem in &result.root_elements {
+        collect_labels_recursive(elem, &mut labels);
+    }
+    labels.retain(|l| !is_template_internal(&l.owner));
+
+    // Collect connection labels
+    for conn in &result.connections {
+        if let Some(label) = &conn.label {
+            let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
+            labels.push(LabelInfo {
+                owner,
+                bbox: estimate_label_bbox(label),
+                parent_opacity: None,
+            });
+        }
+    }
+
+    for label in &labels {
+        // Skip transparent labels
+        if let Some(op) = label.parent_opacity {
+            if op < 1.0 {
+                continue;
+            }
+        }
+
+        for conn in &result.connections {
+            // Skip curved connections (control points ≠ actual curve)
+            if conn.routing_mode == RoutingMode::Curved {
+                continue;
+            }
+
+            let conn_name = format!("{}→{}", conn.from_id.0, conn.to_id.0);
+
+            // Skip: a connection label overlapping its own connection is expected
+            // (the label is placed at the midpoint of the path by design)
+            if label.owner == conn_name {
+                continue;
+            }
+
+            // Skip: label on an element that is an endpoint of this connection
+            // (e.g., junction labels at railway switches, pin labels at transistor leads)
+            if label.owner == conn.from_id.0 || label.owner == conn.to_id.0 {
+                continue;
+            }
+
+            for seg in conn.path.windows(2) {
+                let p1 = &seg[0];
+                let p2 = &seg[1];
+
+                if line_segment_intersects_bbox(p1, p2, &label.bbox) {
+                    warnings.push(LintWarning {
+                        category: LintCategory::Connection,
+                        message: format!(
+                            "label on \"{}\" overlaps connection {}",
+                            label.owner, conn_name
+                        ),
+                    });
+                    // Only report once per label-connection pair
+                    break;
                 }
             }
         }

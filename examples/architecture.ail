@@ -38,7 +38,7 @@ group diagram {
     rect app_bg [width: 580, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
     text "Application Layer" app_label [font_size: 12, fill: accent-dark]
 
-    rect async_bg [width: 420, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
+    rect async_bg [width: 460, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
     text "Async / Real-time" async_label [font_size: 12, fill: accent-dark]
 
     rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15]
@@ -91,38 +91,38 @@ constrain nginx.center_x = diagram_title.center_x
 constrain nginx.center_y = 150
 
 // App layer background centered on title
-constrain app_bg.center_x = 280
+constrain app_bg.center_x = 245
 constrain app_bg.center_y = 280
 constrain app_label.center_x = app_bg.center_x
-constrain app_label.top = app_bg.top + 6
+constrain app_label.bottom = app_bg.bottom - 4
 
 // Angular and Django side by side in app layer
-constrain angular.center_x = 100
+constrain angular.center_x = 30
 constrain angular.center_y = 295
 constrain django.center_x = 460
 constrain django.center_y = angular.center_y
 
-// Async layer background — 80px gap from app layer for routing
+// Async layer background — 100px gap from app layer for routing
 constrain async_bg.center_x = diagram_title.center_x
-constrain async_bg.center_y = 470
-constrain async_label.right = async_bg.right - 10
-constrain async_label.bottom = async_bg.bottom - 4
+constrain async_bg.center_y = 510
+constrain async_label.center_x = async_bg.center_x
+constrain async_label.top = async_bg.top + 6
 
 // Celery and Channels — aligned with data stores to get clean vertical connections
 constrain celery.center_x = 200
-constrain celery.center_y = 480
+constrain celery.center_y = 520
 constrain channels.center_x = 420
 constrain channels.center_y = celery.center_y
 
 // Data layer background — 80px gap from async for routing
 constrain data_bg.center_x = diagram_title.center_x
-constrain data_bg.center_y = 650
-constrain data_label.left = data_bg.left + 10
-constrain data_label.top = data_bg.top + 6
+constrain data_bg.center_y = 700
+constrain data_label.center_x = data_bg.center_x
+constrain data_label.bottom = data_bg.bottom - 4
 
 // Data stores spread wider to avoid routing conflicts
 constrain postgres.center_x = angular.center_x
-constrain postgres.center_y = 665
+constrain postgres.center_y = 715
 constrain redis.center_x = diagram_title.center_x
 constrain redis.center_y = postgres.center_y
 constrain minio.center_x = 540
@@ -130,7 +130,7 @@ constrain minio.center_y = postgres.center_y
 
 // PostGIS label below PostgreSQL
 constrain postgis_label.center_x = postgres.center_x
-constrain postgis_label.top = 698
+constrain postgis_label.top = 748
 
 // External services on the right — enough spacing
 constrain keycloak.center_x = 720
@@ -139,10 +139,10 @@ constrain sentry.center_x = keycloak.center_x
 constrain sentry.center_y = angular.center_y
 
 // Via points for routing Django → data connections wide around async layer
-constrain via_pg.center_x = -40
-constrain via_pg.center_y = data_bg.center_y
+constrain via_pg.center_x = -200
+constrain via_pg.center_y = 550
 constrain via_minio.center_x = 670
-constrain via_minio.center_y = 560
+constrain via_minio.center_y = 580
 
 // === CONNECTIONS ===
 
@@ -158,7 +158,7 @@ angular.right_conn -> django.left_conn [label: "REST API"]
 
 // Django dispatches to async workers
 django.bottom_conn -> celery.top_conn [label: "tasks"]
-django.bottom_conn -> channels.top_conn [label: "WS"]
+django.right_conn -> channels.top_conn [label: "WS"]
 
 // Celery to data stores
 celery.bottom_conn -> postgres.top_conn

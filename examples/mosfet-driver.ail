@@ -309,6 +309,7 @@ template "ground_sym" {
 template "gpio_pin" (name: "GPIO") {
     rect body [width: 50, height: 20, fill: accent-2, stroke: accent-1, stroke_width: 1.5, label: name, font_size: 10]
     anchor output [position: body.right + 4, direction: right]
+    anchor aux [position: body.bottom + 4, direction: down]
 }
 
 // Junction dot (for wire connections)
@@ -323,7 +324,6 @@ template "junction" {
 // Power rails
 power_rail vcc_12v
 power_rail vcc_5v
-power_rail vcc_3v3
 
 // Load section (12V domain)
 motor load_motor
@@ -390,19 +390,16 @@ constrain gnd_driver.top = gnd_main.top
 
 
 // 3.3V control section - left side
-constrain vcc_3v3.center_x = 30
-constrain vcc_3v3.top = 20
-
-constrain gpio.center_x = vcc_3v3.center_x
-constrain gpio.top = vcc_3v3.bottom + 60
+constrain gpio.center_x = 30
+constrain gpio.top = 80
 
 constrain r_base.left = gpio.right + 15
 constrain r_base.center_y = gpio.center_y
 
-constrain r_led.center_x = -40
-constrain r_led.top = gpio.top
+constrain r_led.top = gpio.bottom + 20
+constrain r_led.center_x = gpio.aux_x
 
-constrain status_led.center_x = r_led.right_conn_x
+constrain status_led.center_x = r_led.center_x
 constrain status_led.top = r_led.bottom + 30
 
 constrain gnd_led.conn_x = status_led.center_x
@@ -433,8 +430,8 @@ q_driver.emitter -- gnd_driver.conn [stroke: foreground-2, stroke_width: 1.5]
 gpio.output -- r_base.left_conn [stroke: accent-2, stroke_width: 2]
 r_base.right_conn -- q_driver.base [stroke: accent-2, stroke_width: 2]
 
-// Status LED path (3.3V power indicator)
-vcc_3v3.conn -- r_led.left_conn [stroke: accent-2, stroke_width: 1.5]
+// Status LED path (shows when GPIO is active)
+gpio.aux -- r_led.left_conn [stroke: accent-2, stroke_width: 1.5]
 r_led.right_conn -- status_led.anode [stroke: accent-2, stroke_width: 1.5]
 status_led.cathode -- gnd_led.conn [stroke: foreground-2, stroke_width: 1.5]
 
@@ -444,30 +441,21 @@ status_led.cathode -- gnd_led.conn [stroke: foreground-2, stroke_width: 1.5]
 // Voltage labels above power rails
 text "+12V" label_12v [font_size: 12, fill: secondary-dark]
 text "+5V" label_5v [font_size: 12, fill: secondary-dark]
-text "+3.3V" label_3v [font_size: 12, fill: secondary-dark]
-
 constrain label_12v.center_x = vcc_12v.center_x
 constrain label_12v.bottom = vcc_12v.top - 4
 
 constrain label_5v.center_x = vcc_5v.center_x
 constrain label_5v.bottom = vcc_5v.top - 4
 
-constrain label_3v.center_x = vcc_3v3.center_x
-constrain label_3v.bottom = vcc_3v3.top - 4
-
 // Domain labels beside power rails
 text "Load" domain_12v [font_size: 10, fill: secondary-dark]
 text "Gate Drive" domain_5v [font_size: 10, fill: accent-1]
-text "Control" domain_3v [font_size: 10, fill: accent-2]
 
 constrain domain_12v.left = vcc_12v.right + 10
 constrain domain_12v.center_y = vcc_12v.center_y
 
 constrain domain_5v.left = vcc_5v.right + 10
 constrain domain_5v.center_y = vcc_5v.center_y
-
-constrain domain_3v.left = vcc_3v3.right + 10
-constrain domain_3v.center_y = vcc_3v3.center_y
 
 text "Status" status_label [font_size: 10, fill: green]
 constrain status_label.right = status_led.left - 8
