@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -59 178 199">
   <style>
     :root {
-    --status-error: #f44336;
+    --secondary-2: #fff3e0;
     --text-1: #333333;
-    --accent-2: #e3f2fd;
+    --background-3: #eeeeee;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --text-3: #999999;
+    --status-error: #f44336;
+    --text-2: #666666;
+    --background-light: #ffffff;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --foreground-1: #333333;
+    --text-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
+    --accent-1: #2196f3;
+    --status-success: #4caf50;
+    --foreground-dark: #1a1a1a;
     --background-2: #f5f5f5;
+    --foreground-3: #999999;
+    --foreground-2: #666666;
+    --foreground-light: #e0e0e0;
+    --background-1: #ffffff;
+    --text-light: #ffffff;
+    --background-dark: #333333;
+    --accent-2: #e3f2fd;
     --accent-3: #bbdefb;
     --accent-dark: #1565c0;
-    --foreground-dark: #1a1a1a;
-    --background-3: #eeeeee;
-    --text-dark: #1a1a1a;
-    --accent-1: #2196f3;
-    --foreground-light: #e0e0e0;
-    --foreground-3: #999999;
-    --secondary-1: #ff9800;
-    --foreground-2: #666666;
-    --status-warning: #ff9800;
-    --secondary-2: #fff3e0;
-    --secondary-dark: #e65100;
-    --background-light: #ffffff;
-    --text-2: #666666;
-    --text-3: #999999;
-    --text-light: #ffffff;
-    --background-1: #ffffff;
-    --accent-light: #e3f2fd;
-    --secondary-3: #ffe0b2;
-    --status-success: #4caf50;
-    --background-dark: #333333;
-    --secondary-light: #fff3e0;
-    --foreground-1: #333333;
   }
 
   </style>
@@ -58,11 +58,11 @@
     </g>
   </g>
   <path class="ai-connection" d="M20 15 L23.2 15" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M20 55 L19 55 L19 75 L23.2 75" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M18.84110639798688 58.2009219983224 L27 58.2009219983224 L27 71.7990780016776 L24.358893602013122 71.7990780016776" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M44 15 L50.8 15" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M42.12347523777212 18.90434404721515 L55.37872041983603 35.473400524795025" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M44 45 L50.8 45" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M42.12347523777212 71.09565595278485 L55.37872041983603 54.526599475204975" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M44 75 L50.8 75" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M39 40 L39 30 L63 30 L63 23.6" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M42.12347523777212 41.095655952784846 L42.12347523777212 30 L59.87652476222788 30 L59.87652476222788 22.504344047215152" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ai-arrow)"/>
 </svg>

@@ -789,7 +789,11 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
 /// This includes:
 /// 1. Relational constraints (right-of, left-of, etc.)
 /// 2. Position offsets from x/y modifiers in place statements
-pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
+pub fn resolve_constraints(
+    result: &mut LayoutResult,
+    doc: &Document,
+    skip_anchor_recompute: Option<&HashSet<String>>,
+) -> Result<(), LayoutError> {
     let graph = ConstraintGraph::from_document(doc);
 
     // Check for conflicts before applying
@@ -812,8 +816,8 @@ pub fn resolve_constraints(result: &mut LayoutResult, doc: &Document) -> Result<
 
     // Recompute bounds and anchors after constraint resolution
     result.compute_bounds();
-    recompute_builtin_anchors(result, None);
-    recompute_custom_anchors(result, doc, None);
+    recompute_builtin_anchors(result, skip_anchor_recompute);
+    recompute_custom_anchors(result, doc, skip_anchor_recompute);
     Ok(())
 }
 

@@ -815,3 +815,97 @@ fn test_person_rotation_renders_all_angles() {
         p180_feet.1
     );
 }
+
+// ==============================================================
+// Regression: resolve_constraints must not overwrite rotated anchors
+// ==============================================================
+
+#[test]
+fn test_rotated_anchors_survive_resolve_constraints() {
+    // This test exercises the FULL render pipeline (including resolve_constraints)
+    // to verify that rotated template anchors are not overwritten.
+    //
+    // The bug: resolve_constraints called recompute_custom_anchors with no skip set,
+    // which read pre-rotation children bounds and recomputed anchors from those,
+    // overwriting the correctly-rotated anchors set by the two-phase solver.
+    //
+    // Symptom: connections to a 90°-rotated resistor would go to the unrotated
+    // left/right positions instead of the rotated top/bottom positions.
+    let source = r#"
+        template "resistor" {
+            rect body [width: 40, height: 16, fill: none, stroke: #333]
+            rect left_lead [width: 10, height: 2, fill: #333]
+            rect right_lead [width: 10, height: 2, fill: #333]
+            anchor left_conn [position: left_lead.left, direction: left]
+            anchor right_conn [position: right_lead.right, direction: right]
+        }
+
+        rect top_node [width: 20, height: 20, fill: #ccc]
+        resistor r1 [rotation: 90]
+        rect bottom_node [width: 20, height: 20, fill: #ccc]
+
+        constrain r1.center_x = top_node.center_x
+        constrain r1.center_y = top_node.bottom + 40
+        constrain bottom_node.center_x = r1.center_x
+        constrain bottom_node.top = r1.bottom + 20
+
+        top_node.bottom -> r1.left_conn [label: "to top"]
+        r1.right_conn -> bottom_node.top [label: "to bottom"]
+    "#;
+
+    // Render via full pipeline (parse → resolve → compute → constrain → route → SVG)
+    let svg = agent_illustrator::render(source).expect("Should render");
+
+    // Extract path data from connections
+    // After 90° rotation of a horizontal resistor:
+    // - left_conn (was at left edge) should be at the TOP (lower Y)
+    // - right_conn (was at right edge) should be at the BOTTOM (higher Y)
+    //
+    // The connections should be vertical (same X as the nodes above/below),
+    // NOT horizontal (which would indicate unrotated anchor positions).
+    assert!(svg.contains("<path"), "Should have connection paths");
+
+    // Parse connection paths from SVG to verify they're vertical
+    // A vertical connection from top_node to r1.left_conn should have
+    // the same X coordinate for start and end points
+    let paths: Vec<&str> = svg
+        .split("<path")
+        .skip(1)
+        .filter_map(|s| {
+            let d_start = s.find("d=\"")?;
+            let d_end = s[d_start + 3..].find('"')? + d_start + 3;
+            Some(&s[d_start + 3..d_end])
+        })
+        .collect();
+
+    // We should have at least 2 connection paths
+    assert!(
+        paths.len() >= 2,
+        "Expected at least 2 connection paths, got {}",
+        paths.len()
+    );
+
+    // Check that the first path (top_node -> r1.left_conn) starts and ends
+    // at approximately the same X coordinate (vertical connection)
+    let first_path = paths[0];
+    let coords: Vec<f64> = first_path
+        .split(|c: char| !c.is_ascii_digit() && c != '.' && c != '-')
+        .filter(|s| !s.is_empty())
+        .filter_map(|s| s.parse::<f64>().ok())
+        .collect();
+
+    // For a vertical path "M x1 y1 L x2 y2", x1 ≈ x2
+    if coords.len() >= 4 {
+        let start_x = coords[0];
+        let end_x = coords[coords.len() - 2];
+        assert!(
+            (start_x - end_x).abs() < 5.0,
+            "Connection to rotated left_conn should be vertical (same X), \
+             but start_x={:.1} end_x={:.1} (diff={:.1}). \
+             This suggests anchors were not rotated.",
+            start_x,
+            end_x,
+            (start_x - end_x).abs()
+        );
+    }
+}

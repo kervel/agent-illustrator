@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -35 581 434">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -35 584.5 362">
   <style>
     :root {
+    --status-success: #4caf50;
+    --text-3: #999999;
+    --accent-dark: #1565c0;
     --foreground-3: #999999;
     --text-light: #ffffff;
-    --secondary-2: #fff3e0;
-    --background-1: #ffffff;
-    --background-dark: #333333;
-    --foreground-2: #666666;
-    --text-dark: #1a1a1a;
-    --accent-1: #2196f3;
-    --background-2: #f5f5f5;
-    --accent-dark: #1565c0;
-    --text-3: #999999;
-    --secondary-light: #fff3e0;
-    --background-light: #ffffff;
-    --foreground-1: #333333;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-light: #e3f2fd;
+    --status-warning: #ff9800;
+    --foreground-dark: #1a1a1a;
     --secondary-dark: #e65100;
+    --status-error: #f44336;
+    --accent-light: #e3f2fd;
+    --foreground-1: #333333;
+    --background-2: #f5f5f5;
+    --secondary-light: #fff3e0;
+    --accent-1: #2196f3;
+    --text-dark: #1a1a1a;
+    --secondary-3: #ffe0b2;
     --secondary-1: #ff9800;
     --foreground-light: #e0e0e0;
-    --foreground-dark: #1a1a1a;
+    --background-light: #ffffff;
     --background-3: #eeeeee;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
     --text-2: #666666;
     --text-1: #333333;
-    --secondary-3: #ffe0b2;
-    --status-error: #f44336;
+    --background-dark: #333333;
+    --accent-3: #bbdefb;
+    --foreground-2: #666666;
+    --secondary-2: #fff3e0;
+    --background-1: #ffffff;
+    --accent-2: #e3f2fd;
   }
 
   </style>
@@ -63,16 +63,16 @@
     </g>
     <g id="meso" class="ai-container">
       <g id="meso_content" class="ai-container">
-        <ellipse id="op1" class="ai-shape ai-ellipse" cx="69.5" cy="152" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="69.5" y="152" text-anchor="middle" dominant-baseline="middle">OP 1 (Station)</text>
-        <ellipse id="op2" class="ai-shape ai-ellipse" cx="249.5" cy="152" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="249.5" y="152" text-anchor="middle" dominant-baseline="middle">OP 2 (Station)</text>
+        <ellipse id="op1" class="ai-shape ai-ellipse" cx="96.5" cy="152" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <text class="ai-label" x="96.5" y="152" text-anchor="middle" dominant-baseline="middle">OP 1 (Station)</text>
+        <ellipse id="op2" class="ai-shape ai-ellipse" cx="276.5" cy="152" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <text class="ai-label" x="276.5" y="152" text-anchor="middle" dominant-baseline="middle">OP 2 (Station)</text>
         <g id="meso_tracks" class="ai-container">
           <g id="meso_tracks_content" class="ai-container">
             <g id="meso_tracks_trackA" class="ai-container">
               <circle id="meso_tracks_a1" class="ai-shape ai-circle" cx="28" cy="129" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-              <circle id="meso_tracks_jA1" class="ai-shape ai-circle" cx="25" cy="129" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
-              <circle id="meso_tracks_jA2" class="ai-shape ai-circle" cx="245" cy="129" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+              <circle id="meso_tracks_jA1" class="ai-shape ai-circle" cx="79" cy="129" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
+              <circle id="meso_tracks_jA2" class="ai-shape ai-circle" cx="299" cy="129" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
               <circle id="meso_tracks_a2" class="ai-shape ai-circle" cx="340" cy="129" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
             </g>
             <g id="meso_tracks_trackB" class="ai-container">
@@ -113,14 +113,14 @@
   <path class="ai-connection" d="M257 74 L337 74" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M75.96853614477436 30.263816566490515 L112.03146385522564 71.73618343350948" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M255.96853614477436 71.73618343350948 L292.03146385522564 30.263816566490515" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M25 129 L28 129" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M28 129 L242 129" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M248 129 L337 129" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M31 129 L76 129" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M82 129 L296 129" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M302 129 L337 129" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M31 175 L111 175" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M117 175 L251 175" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M257 175 L337 175" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M27.665074164985278 130.37745406280138 L111.33492583501473 173.62254593719862" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
-  <path class="ai-connection" d="M253.42396518084303 172.05582203541994 L245.57603481915697 131.94417796458006" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M80.81656549744979 131.38748608236259 L112.18343450255021 172.61251391763741" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
+  <path class="ai-connection" d="M256.0978824663912 172.85549792324457 L296.9021175336088 131.14450207675543" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M75 242 L293 242" fill="none" stroke="var(--accent-1)" stroke-width="3"/>
   <path class="ai-connection" d="M-58.599999999999994 69 L-58.599999999999994 126.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M-55 170 L-55 216.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>

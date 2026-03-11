@@ -204,18 +204,18 @@
   <path class="ai-connection" d="M450 28 L450 54" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
   <path class="ai-connection" d="M450 134 L450 190" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
   <path class="ai-connection" d="M450 250 L450 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M510 115 L510 130 L480 130 L480 43 L450 43 L450 28" fill="none" stroke="var(--secondary-dark)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M510 73 L510 58 L480 58 L480 175 L450 175 L450 190" fill="none" stroke="var(--secondary-dark)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M200 28 L200 43 L155 43 L155 84 L170 84" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M230 84 L234 84 L234 154 L238 154" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M510 73 L510 50.5 L450 50.5 L450 28" fill="none" stroke="var(--secondary-dark)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M510 115 L510 152.5 L450 152.5 L450 190" fill="none" stroke="var(--secondary-dark)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M200 28 L200 54" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
+  <path class="ai-connection" d="M200 114 L200 154 L238 154" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M298 154 L350 154 L350 220 L402 220" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
-  <path class="ai-connection" d="M230 84 L245 84 L245 201 L222.5 201 L222.5 216" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M298 154 L273 154 L273 266 L288 266" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M348 266 L363 266 L363 287 L222.5 287 L222.5 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M200 114 L200 165 L222.5 165 L222.5 216" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M298 154 L318 154 L318 236" fill="none" stroke="var(--accent-1)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M318 296 L318 299 L222.5 299 L222.5 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
   <path class="ai-connection" d="M222.5 292 L222.5 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
   <path class="ai-connection" d="M59 94 L70 94" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M130 94 L158.25 94 L158.25 254 L186.5 254" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
-  <path class="ai-connection" d="M30 28 L30 43 L-20 43 L-20 174 L-5 174" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M55 174 L70 174 L70 219 L25.000000000000004 219 L25.000000000000004 234" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M30 28 L30 86 L24.999999999999996 86 L24.999999999999996 144" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M25.000000000000004 204 L25.000000000000004 234" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
   <path class="ai-connection" d="M25.000000000000004 287 L25 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
 </svg>

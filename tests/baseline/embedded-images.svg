@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 450 424.5685424949238">
+  <style>
+    :root {
+    --accent-dark: #1565c0;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-2: #666666;
+    --status-error: #f44336;
+    --foreground-2: #666666;
+    --accent-3: #bbdefb;
+    --foreground-3: #999999;
+    --text-1: #333333;
+    --background-light: #ffffff;
+    --background-dark: #333333;
+    --foreground-light: #e0e0e0;
+    --background-2: #f5f5f5;
+    --text-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --background-3: #eeeeee;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --text-light: #ffffff;
+    --accent-1: #2196f3;
+    --secondary-3: #ffe0b2;
+    --text-3: #999999;
+    --foreground-1: #333333;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --accent-2: #e3f2fd;
+    --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+  }
+
+  </style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g id="team_svg" class="ai-container">
+    <g id="alice" class="ai-container">
+      <g class="ai-container">
+        <g id="avatar" class="ai-svg-embed" transform="translate(15, 15) scale(1, 1)">
+          <!-- Simple person icon: head + shoulders -->
+          <circle cx="30" cy="18" r="12" fill="#666"/>
+          <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+        </g>
+        <rect id="label_bg" class="ai-shape ai-rect" x="15" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="50" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12">Alice</text>
+      </g>
+    </g>
+    <g id="bob" class="ai-container">
+      <g class="ai-container">
+        <g id="avatar" class="ai-svg-embed" transform="translate(145, 15) scale(1, 1)">
+          <!-- Simple person icon: head + shoulders -->
+          <circle cx="30" cy="18" r="12" fill="#666"/>
+          <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+        </g>
+        <rect id="label_bg" class="ai-shape ai-rect" x="145" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="180" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12">Bob</text>
+      </g>
+    </g>
+    <g id="charlie" class="ai-container">
+      <g class="ai-container">
+        <g id="avatar" class="ai-svg-embed" transform="translate(275, 15) scale(1, 1)">
+          <!-- Simple person icon: head + shoulders -->
+          <circle cx="30" cy="18" r="12" fill="#666"/>
+          <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+        </g>
+        <rect id="label_bg" class="ai-shape ai-rect" x="275" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="310" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12">Charlie</text>
+      </g>
+    </g>
+  </g>
+  <g id="logo_section" class="ai-container">
+    <image id="company_logo" class="ai-raster-image" href="assets/logo.png" x="80" y="139" width="200" height="50"/>
+    <text id="logo_label" class="ai-shape ai-text" x="132" y="202" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
+  </g>
+  <g id="rotated_icons" class="ai-container">
+    <g id="i0" class="ai-svg-embed" transform="translate(65.85786437626905, 251.2842712474619) scale(0.6666666666666666, 0.6666666666666666)">
+      <!-- Simple person icon: head + shoulders -->
+      <circle cx="30" cy="18" r="12" fill="#666"/>
+      <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+    </g>
+    <g id="i15" class="ai-svg-embed" transform="translate(121.36296694843728, 246.7893738196301) scale(0.8164965809277258, 0.8164965809277267) rotate(15 30 30)">
+      <!-- Simple person icon: head + shoulders -->
+      <circle cx="30" cy="18" r="12" fill="#666"/>
+      <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+    </g>
+    <g id="i30" class="ai-svg-embed" transform="translate(178.53735630058026, 243.96376317177314) scale(0.910683602522959, 0.9106836025229588) rotate(30 30 30)">
+      <!-- Simple person icon: head + shoulders -->
+      <circle cx="30" cy="18" r="12" fill="#666"/>
+      <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+    </g>
+    <g id="i45" class="ai-svg-embed" transform="translate(237.57359312880715, 243) scale(0.9428090415820634, 0.9428090415820634) rotate(45 30 30)">
+      <!-- Simple person icon: head + shoulders -->
+      <circle cx="30" cy="18" r="12" fill="#666"/>
+      <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
+    </g>
+  </g>
+  <text id="rotation_label" class="ai-shape ai-text" x="87" y="314.5685424949238" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
+  <text class="ai-label" x="305" y="44" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">works with</text>
+  <text class="ai-label" x="305" y="66" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">mentors</text>
+  <path class="ai-connection" d="M339 45 L278.2 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M339 45 L278.2 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+</svg>

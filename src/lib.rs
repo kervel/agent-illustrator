@@ -399,8 +399,31 @@ fn render_pipeline(
         )?;
     }
 
+    // Build skip set for rotated template instances — their anchors were already
+    // correctly transformed by the two-phase solver and must not be overwritten.
+    let rotated_skip: std::collections::HashSet<String> = template_rotations
+        .iter()
+        .filter(|(_, angle)| angle.abs() > f64::EPSILON)
+        .flat_map(|(name, _)| {
+            // Include the template instance name and all its prefixed children
+            let prefix = format!("{}_", name);
+            let mut names = vec![name.clone()];
+            for key in result.elements.keys() {
+                if key.starts_with(&prefix) {
+                    names.push(key.clone());
+                }
+            }
+            names
+        })
+        .collect();
+    let skip_ref = if rotated_skip.is_empty() {
+        None
+    } else {
+        Some(&rotated_skip)
+    };
+
     // Resolve constraints (relational positioning and offsets from `place` statements)
-    layout::resolve_constraints(&mut result, &doc)?;
+    layout::resolve_constraints(&mut result, &doc, skip_ref)?;
 
     // Route connections
     layout::route_connections(&mut result, &doc)?;
