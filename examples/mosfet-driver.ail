@@ -399,7 +399,7 @@ constrain gpio.top = vcc_3v3.bottom + 60
 constrain r_base.left = gpio.right + 15
 constrain r_base.center_y = gpio.center_y
 
-constrain r_led.left_conn_x = vcc_3v3.conn_left_x
+constrain r_led.center_x = -40
 constrain r_led.top = gpio.top
 
 constrain status_led.center_x = r_led.right_conn_x
@@ -434,7 +434,7 @@ gpio.output -- r_base.left_conn [stroke: accent-2, stroke_width: 2]
 r_base.right_conn -- q_driver.base [stroke: accent-2, stroke_width: 2]
 
 // Status LED path (3.3V power indicator)
-vcc_3v3.conn_left -- r_led.left_conn [stroke: accent-2, stroke_width: 1.5]
+vcc_3v3.conn -- r_led.left_conn [stroke: accent-2, stroke_width: 1.5]
 r_led.right_conn -- status_led.anode [stroke: accent-2, stroke_width: 1.5]
 status_led.cathode -- gnd_led.conn [stroke: foreground-2, stroke_width: 1.5]
 
