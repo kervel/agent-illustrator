@@ -32,3 +32,15 @@ An AI agent, given a prompt like "draw a server sending data to three clients, w
 ## Core Principle
 
 **Semantic over geometric.** The language describes meaning and relationships. The renderer decides coordinates.
+
+## Development Setup
+
+After cloning, activate the pre-commit hook:
+
+```
+git config core.hooksPath githooks
+```
+
+This re-renders all example SVGs (with Kapernikov stylesheet) and runs tests before each commit, catching rendering regressions early.
+
+To re-render examples manually: `bash examples/render-all.sh`
