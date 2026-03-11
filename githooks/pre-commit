@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Pre-commit hook: re-render examples and fail if SVGs change
+# This catches rendering regressions before they get committed.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+
+# Only run if source files changed
+if ! git diff --cached --name-only | grep -qE '\.(rs|ail|css)$'; then
+    exit 0
+fi
+
+echo "pre-commit: re-rendering example SVGs..."
+
+# Build first (needed for rendering)
+cargo build --quiet 2>/dev/null || {
+    echo "pre-commit: cargo build failed, skipping SVG check"
+    exit 0
+}
+
+# Re-render all examples
+CHANGED=0
+for ail in "$SCRIPT_DIR"/examples/*.ail; do
+    name="$(basename "$ail" .ail)"
+    svg="$SCRIPT_DIR/examples/$name.svg"
+    if cargo run --quiet -- "$ail" --stylesheet-css "$SCRIPT_DIR/stylesheets/kapernikov.css" > "$svg.tmp" 2>/dev/null; then
+        if ! diff -q "$svg" "$svg.tmp" > /dev/null 2>&1; then
+            echo "  CHANGED: $name.svg"
+            mv "$svg.tmp" "$svg"
+            git add "$svg"
+            CHANGED=1
+        else
+            rm -f "$svg.tmp"
+        fi
+    else
+        echo "  FAIL: $name.ail (render error)"
+        rm -f "$svg.tmp"
+        exit 1
+    fi
+done
+
+if [ "$CHANGED" -eq 1 ]; then
+    echo "pre-commit: auto-staged updated SVGs"
+fi
+
+# Run tests
+echo "pre-commit: running tests..."
+cargo test --quiet 2>/dev/null || {
+    echo "pre-commit: tests failed!"
+    exit 1
+}
+
+echo "pre-commit: all checks passed"
