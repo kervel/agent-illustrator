@@ -13,21 +13,17 @@ Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-fr
 
 ## Examples
 
-**Software Architecture** — Agent-generated from a codebase scan. Constraint-based layout with templates, curved routing via waypoints, and background zones.
-
-[![Architecture](examples/architecture.svg)](examples/architecture.ail)
-
-**Feedback Loops** — Curved connections, stacked layouts, and semantic coloring for a human-agent interaction flow.
-
-[![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail)
-
-**MOSFET Driver Schematic** — Electronics schematic with custom component templates (resistor, LED, MOSFET), anchor-based wiring, and IEEE 315 symbols.
-
-[![MOSFET Driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail)
-
-**Railway Topology** — Three-level abstraction (network / line / station) using nested row/col layouts and connection routing.
-
-[![Railway](examples/railway-topology.svg)](examples/railway-topology.ail)
+| | |
+|:---:|:---:|
+| **Software Architecture** | **Feedback Loops** |
+| Constraint-based layout, templates, curved routing | Curved connections, stacked layouts, semantic coloring |
+| [![Architecture](examples/architecture.svg)](examples/architecture.ail) | [![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail) |
+| **MOSFET Driver Schematic** | **Gallic Wars Timeline** |
+| Custom component templates, anchor-based wiring | Alternating cards, custom path shapes, emphasis styling |
+| [![MOSFET Driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail) | [![Gallic Wars](examples/gallic-wars-timeline.svg)](examples/gallic-wars-timeline.ail) |
+| **Railway Topology** | |
+| Nested row/col layouts, connection routing | |
+| [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | |
 
 Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
 
