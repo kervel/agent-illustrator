@@ -22,10 +22,10 @@
 
         # Hashes for v0.1.18 release binaries
         artifactHash = {
-          "x86_64-linux" = "sha256-qsHSMjbB2742QJcPDXcDpDHlWSAnhRahJ9Ws0YWFVcg=";
-          "aarch64-linux" = "sha256-nDCQserkWzhzhLdmIclvuhcpiQxnxOVYoBP1w3NGFgE=";
-          "x86_64-darwin" = "sha256-y3naE4/89RXCDVtZ6I7hwvq5xNlDvia2APG58kmsM/A=";
-          "aarch64-darwin" = "sha256-STVSuKH8qwMVXf4wMnV79biQb3nq6pKYO42RjN1WBLk=";
+          "x86_64-linux" = "sha256-nE9GYOAVMVKNMfGa7RAtpX/B9SSkuf5fehyvnu43rwE=";
+          "aarch64-linux" = "sha256-1NpnIvk28uYLJnJZDIZZ8vQxhI23sdz3AqWSEhaMXH0=";
+          "x86_64-darwin" = "sha256-7Y200Y3PgQ9HYNVROVg+0LFjNBGpXtSZ9exi3CT/nAQ=";
+          "aarch64-darwin" = "sha256-Ge1XQFjv/hDSUsfXOf/8Jb1GFhO/lFi1g0Z9vXAIjhE=";
         }.${system} or (throw "Unsupported system: ${system}");
 
       in
