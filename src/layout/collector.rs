@@ -9,7 +9,9 @@
 use crate::parser::ast::*;
 
 use super::config::LayoutConfig;
-use super::solver::{ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutProperty, LayoutVariable};
+use super::solver::{
+    ConstraintOrigin, ConstraintSource, LayoutConstraint, LayoutProperty, LayoutVariable,
+};
 use super::types::LayoutResult;
 
 /// A deferred anchor constraint expression, stored during collection
@@ -374,18 +376,20 @@ impl ConstraintCollector {
                 // even when the element moves during global solving.
                 if left_is_anchor && right_is_anchor {
                     // Both anchors: left_elem.X + left_off = right_elem.X + right_off
-                    let (left_off, left_prop) =
-                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
-                    let (right_off, right_prop) =
-                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
-                    let left_var = LayoutVariable::new(
-                        left.element.node.leaf().0.clone(),
-                        left_prop,
-                    );
-                    let right_var = LayoutVariable::new(
-                        right.element.node.leaf().0.clone(),
-                        right_prop,
-                    );
+                    let (left_off, left_prop) = resolve_anchor_offset(
+                        &left.element.node,
+                        &left.property.node,
+                        layout_result,
+                    )?;
+                    let (right_off, right_prop) = resolve_anchor_offset(
+                        &right.element.node,
+                        &right.property.node,
+                        layout_result,
+                    )?;
+                    let left_var =
+                        LayoutVariable::new(left.element.node.leaf().0.clone(), left_prop);
+                    let right_var =
+                        LayoutVariable::new(right.element.node.leaf().0.clone(), right_prop);
                     // left_var + left_off = right_var + right_off
                     // → left_var = right_var + (right_off - left_off)
                     self.constraints.push(LayoutConstraint::Equal {
@@ -397,12 +401,13 @@ impl ConstraintCollector {
                 } else if right_is_anchor {
                     // Right side is anchor: left_var = right_elem.X + anchor_offset
                     let left_var = self.property_to_variable(left);
-                    let (anchor_off, anchor_prop) =
-                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
-                    let right_var = LayoutVariable::new(
-                        right.element.node.leaf().0.clone(),
-                        anchor_prop,
-                    );
+                    let (anchor_off, anchor_prop) = resolve_anchor_offset(
+                        &right.element.node,
+                        &right.property.node,
+                        layout_result,
+                    )?;
+                    let right_var =
+                        LayoutVariable::new(right.element.node.leaf().0.clone(), anchor_prop);
                     self.constraints.push(LayoutConstraint::Equal {
                         left: left_var,
                         right: right_var,
@@ -414,12 +419,13 @@ impl ConstraintCollector {
                     // → left_elem.X + anchor_off = right_var
                     // → right_var = left_elem.X + anchor_off (swap left/right)
                     let right_var = self.property_to_variable(right);
-                    let (anchor_off, anchor_prop) =
-                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
-                    let left_var = LayoutVariable::new(
-                        left.element.node.leaf().0.clone(),
-                        anchor_prop,
-                    );
+                    let (anchor_off, anchor_prop) = resolve_anchor_offset(
+                        &left.element.node,
+                        &left.property.node,
+                        layout_result,
+                    )?;
+                    let left_var =
+                        LayoutVariable::new(left.element.node.leaf().0.clone(), anchor_prop);
                     // left_var + anchor_off = right_var → right_var = left_var + anchor_off
                     // Equal says: left = right + offset → left_var_anchor = right_var + offset
                     // We want: right_var = left_var + anchor_off
@@ -455,54 +461,67 @@ impl ConstraintCollector {
 
                 if left_is_anchor && right_is_anchor {
                     // left_elem.X + left_off = right_elem.X + right_off + user_offset
-                    let (left_off, left_prop) =
-                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
-                    let (right_off, right_prop) =
-                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
-                    let left_var = LayoutVariable::new(
-                        left.element.node.leaf().0.clone(),
-                        left_prop,
-                    );
-                    let right_var = LayoutVariable::new(
-                        right.element.node.leaf().0.clone(),
-                        right_prop,
-                    );
+                    let (left_off, left_prop) = resolve_anchor_offset(
+                        &left.element.node,
+                        &left.property.node,
+                        layout_result,
+                    )?;
+                    let (right_off, right_prop) = resolve_anchor_offset(
+                        &right.element.node,
+                        &right.property.node,
+                        layout_result,
+                    )?;
+                    let left_var =
+                        LayoutVariable::new(left.element.node.leaf().0.clone(), left_prop);
+                    let right_var =
+                        LayoutVariable::new(right.element.node.leaf().0.clone(), right_prop);
                     self.constraints.push(LayoutConstraint::Equal {
                         left: left_var,
                         right: right_var,
                         offset: right_off - left_off + offset,
-                        source: ConstraintSource::user(span.clone(), "constrain anchor to anchor with offset"),
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            "constrain anchor to anchor with offset",
+                        ),
                     });
                 } else if right_is_anchor {
                     // left_var = right_elem.X + anchor_off + user_offset
                     let left_var = self.property_to_variable(left);
-                    let (anchor_off, anchor_prop) =
-                        resolve_anchor_offset(&right.element.node, &right.property.node, layout_result)?;
-                    let right_var = LayoutVariable::new(
-                        right.element.node.leaf().0.clone(),
-                        anchor_prop,
-                    );
+                    let (anchor_off, anchor_prop) = resolve_anchor_offset(
+                        &right.element.node,
+                        &right.property.node,
+                        layout_result,
+                    )?;
+                    let right_var =
+                        LayoutVariable::new(right.element.node.leaf().0.clone(), anchor_prop);
                     self.constraints.push(LayoutConstraint::Equal {
                         left: left_var,
                         right: right_var,
                         offset: anchor_off + offset,
-                        source: ConstraintSource::user(span.clone(), "constrain to anchor with offset"),
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            "constrain to anchor with offset",
+                        ),
                     });
                 } else {
                     // left_elem.X + anchor_off = right_var + user_offset
                     // → right_var = left_elem.X + anchor_off - user_offset
                     let right_var = self.property_to_variable(right);
-                    let (anchor_off, anchor_prop) =
-                        resolve_anchor_offset(&left.element.node, &left.property.node, layout_result)?;
-                    let left_var = LayoutVariable::new(
-                        left.element.node.leaf().0.clone(),
-                        anchor_prop,
-                    );
+                    let (anchor_off, anchor_prop) = resolve_anchor_offset(
+                        &left.element.node,
+                        &left.property.node,
+                        layout_result,
+                    )?;
+                    let left_var =
+                        LayoutVariable::new(left.element.node.leaf().0.clone(), anchor_prop);
                     self.constraints.push(LayoutConstraint::Equal {
                         left: right_var,
                         right: left_var,
                         offset: anchor_off - offset,
-                        source: ConstraintSource::user(span.clone(), "constrain to anchor with offset"),
+                        source: ConstraintSource::user(
+                            span.clone(),
+                            "constrain to anchor with offset",
+                        ),
                     });
                 }
                 Ok(())
@@ -638,48 +657,52 @@ impl ConstraintCollector {
                 // container.y + container.height >= element.y + element.height + padding
                 for elem in elements {
                     // Left: container.x <= element.x - padding
-                    self.constraints.push(LayoutConstraint::LessOrEqualRelational {
-                        left: LayoutVariable::x(&container.node.0),
-                        right: LayoutVariable::x(&elem.node.0),
-                        offset: -pad,
-                        source: ConstraintSource::user(
-                            span.clone(),
-                            format!("{} contains {} (left)", container.node.0, elem.node.0),
-                        ),
-                    });
+                    self.constraints
+                        .push(LayoutConstraint::LessOrEqualRelational {
+                            left: LayoutVariable::x(&container.node.0),
+                            right: LayoutVariable::x(&elem.node.0),
+                            offset: -pad,
+                            source: ConstraintSource::user(
+                                span.clone(),
+                                format!("{} contains {} (left)", container.node.0, elem.node.0),
+                            ),
+                        });
 
                     // Right: container.right >= element.right + padding
-                    self.constraints.push(LayoutConstraint::GreaterOrEqualRelational {
-                        left: LayoutVariable::new(&container.node.0, LayoutProperty::Right),
-                        right: LayoutVariable::new(&elem.node.0, LayoutProperty::Right),
-                        offset: pad,
-                        source: ConstraintSource::user(
-                            span.clone(),
-                            format!("{} contains {} (right)", container.node.0, elem.node.0),
-                        ),
-                    });
+                    self.constraints
+                        .push(LayoutConstraint::GreaterOrEqualRelational {
+                            left: LayoutVariable::new(&container.node.0, LayoutProperty::Right),
+                            right: LayoutVariable::new(&elem.node.0, LayoutProperty::Right),
+                            offset: pad,
+                            source: ConstraintSource::user(
+                                span.clone(),
+                                format!("{} contains {} (right)", container.node.0, elem.node.0),
+                            ),
+                        });
 
                     // Top: container.y <= element.y - padding
-                    self.constraints.push(LayoutConstraint::LessOrEqualRelational {
-                        left: LayoutVariable::y(&container.node.0),
-                        right: LayoutVariable::y(&elem.node.0),
-                        offset: -pad,
-                        source: ConstraintSource::user(
-                            span.clone(),
-                            format!("{} contains {} (top)", container.node.0, elem.node.0),
-                        ),
-                    });
+                    self.constraints
+                        .push(LayoutConstraint::LessOrEqualRelational {
+                            left: LayoutVariable::y(&container.node.0),
+                            right: LayoutVariable::y(&elem.node.0),
+                            offset: -pad,
+                            source: ConstraintSource::user(
+                                span.clone(),
+                                format!("{} contains {} (top)", container.node.0, elem.node.0),
+                            ),
+                        });
 
                     // Bottom: container.bottom >= element.bottom + padding
-                    self.constraints.push(LayoutConstraint::GreaterOrEqualRelational {
-                        left: LayoutVariable::new(&container.node.0, LayoutProperty::Bottom),
-                        right: LayoutVariable::new(&elem.node.0, LayoutProperty::Bottom),
-                        offset: pad,
-                        source: ConstraintSource::user(
-                            span.clone(),
-                            format!("{} contains {} (bottom)", container.node.0, elem.node.0),
-                        ),
-                    });
+                    self.constraints
+                        .push(LayoutConstraint::GreaterOrEqualRelational {
+                            left: LayoutVariable::new(&container.node.0, LayoutProperty::Bottom),
+                            right: LayoutVariable::new(&elem.node.0, LayoutProperty::Bottom),
+                            offset: pad,
+                            source: ConstraintSource::user(
+                                span.clone(),
+                                format!("{} contains {} (bottom)", container.node.0, elem.node.0),
+                            ),
+                        });
                 }
             }
         }

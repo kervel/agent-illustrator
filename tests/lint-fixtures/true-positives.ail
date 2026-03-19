@@ -225,3 +225,20 @@ constrain oc_b.center_y = 720
 // This equality can't hold: oc_a.left = oc_a.center_x - 40 = 60
 // oc_b.right = oc_b.center_x + 40 = 340. 60 != 340.
 constrain oc_a.left = oc_b.right
+
+
+// ------------------------------------------------------------
+// TEST 12: Text straddling the edge of a semi-transparent box
+// with a visible border. The text label is wider than the box,
+// causing it to cross the bordered edge — this looks broken.
+// ------------------------------------------------------------
+
+group text_straddle_border {
+    rect bordered_zone [width: 60, height: 80, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.3]
+    text "This Label Is Too Wide" straddle_text [font_size: 12, fill: foreground-1]
+}
+
+constrain bordered_zone.center_x = 500
+constrain bordered_zone.center_y = 800
+constrain straddle_text.center_x = bordered_zone.center_x
+constrain straddle_text.top = bordered_zone.top + 5

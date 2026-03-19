@@ -803,7 +803,9 @@ where
                     ("radius", ParsedModifierValue::Number(n)) => mods.radius = Some(n),
                     ("bulge", ParsedModifierValue::Number(n)) => mods.bulge = Some(n),
                     ("sweep", ParsedModifierValue::Sweep(s)) => mods.sweep = Some(s),
-                    ("large_arc", ParsedModifierValue::Number(n)) => mods.large_arc = Some(n != 0.0),
+                    ("large_arc", ParsedModifierValue::Number(n)) => {
+                        mods.large_arc = Some(n != 0.0)
+                    }
                     ("via", ParsedModifierValue::Identifier(id)) => mods.via = Some(id),
                     _ => {}
                 }

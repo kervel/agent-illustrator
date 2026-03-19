@@ -312,7 +312,10 @@ constrain d1.left = reference.right + 20
     for _ in 0..5 {
         let result = compute_layout(source).expect("Should succeed");
         let d1 = result.elements.get("d1").expect("d1 should exist");
-        let reference = result.elements.get("reference").expect("reference should exist");
+        let reference = result
+            .elements
+            .get("reference")
+            .expect("reference should exist");
 
         let d1_center_y = d1.bounds.y + d1.bounds.height / 2.0;
         let ref_center_y = reference.bounds.y + reference.bounds.height / 2.0;

@@ -448,8 +448,7 @@ impl SvgBuilder {
                     if chunk.len() == 3 {
                         d.push_str(&format!(
                             " C{} {} {} {} {} {}",
-                            chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y,
-                            chunk[2].x, chunk[2].y
+                            chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y, chunk[2].x, chunk[2].y
                         ));
                     } else if chunk.len() == 2 {
                         // Fallback: 2 points as quadratic Bezier
@@ -883,10 +882,7 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
             let transform = if let Some(rotation) = element.styles.rotation {
                 if rotation.abs() > f64::EPSILON {
                     let center = element.bounds.center();
-                    Some(format!(
-                        "rotate({} {} {})",
-                        rotation, center.x, center.y
-                    ))
+                    Some(format!("rotate({} {} {})", rotation, center.x, center.y))
                 } else {
                     None
                 }

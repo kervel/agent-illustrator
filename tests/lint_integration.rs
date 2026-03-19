@@ -12,7 +12,10 @@ fn test_true_positives_all_categories() {
     assert!(svg.contains("<svg"));
 
     // Should have warnings in multiple categories
-    assert!(!warnings.is_empty(), "Expected lint warnings for true-positives");
+    assert!(
+        !warnings.is_empty(),
+        "Expected lint warnings for true-positives"
+    );
 
     let categories: Vec<String> = warnings.iter().map(|w| w.category.to_string()).collect();
     assert!(
@@ -75,7 +78,10 @@ fn test_true_negatives_clean() {
     assert!(
         warnings.is_empty(),
         "Expected no warnings for true-negatives, got: {:?}",
-        warnings.iter().map(|w| format!("{}: {}", w.category, w.message)).collect::<Vec<_>>()
+        warnings
+            .iter()
+            .map(|w| format!("{}: {}", w.category, w.message))
+            .collect::<Vec<_>>()
     );
 }
 
@@ -87,7 +93,10 @@ fn test_lint_disabled_no_warnings() {
     let (_, warnings) = render_with_lint(source, config).expect("Should render");
 
     // When lint is disabled, no warnings should be computed
-    assert!(warnings.is_empty(), "Lint disabled should produce no warnings");
+    assert!(
+        warnings.is_empty(),
+        "Lint disabled should produce no warnings"
+    );
 }
 
 #[test]
@@ -108,7 +117,22 @@ fn test_lint_warning_format() {
     for w in &warnings {
         let cat = w.category.to_string();
         assert!(
-            ["overlap", "containment", "label", "connection", "alignment", "redundant-constant", "reducible-bend", "missing-anchor", "contrast", "steep-direct", "crowded-layout", "over-constrained", "label-overflow"].contains(&cat.as_str()),
+            [
+                "overlap",
+                "containment",
+                "label",
+                "connection",
+                "alignment",
+                "redundant-constant",
+                "reducible-bend",
+                "missing-anchor",
+                "contrast",
+                "steep-direct",
+                "crowded-layout",
+                "over-constrained",
+                "label-overflow"
+            ]
+            .contains(&cat.as_str()),
             "Unexpected category: {}",
             cat
         );
@@ -173,7 +197,9 @@ fn test_label_element_straddle_true_positive() {
     );
     // Our test case: straddle_box_a's long label crosses into straddle_box_b
     assert!(
-        straddle.iter().any(|w| w.message.contains("straddle_box_a") && w.message.contains("straddle_box_b")),
+        straddle
+            .iter()
+            .any(|w| w.message.contains("straddle_box_a") && w.message.contains("straddle_box_b")),
         "Expected straddle warning for straddle_box_a→straddle_box_b, got: {:?}",
         straddle.iter().map(|w| &w.message).collect::<Vec<_>>()
     );

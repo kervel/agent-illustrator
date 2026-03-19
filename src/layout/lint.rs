@@ -7,12 +7,13 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
-use crate::parser::ast::{ConstraintExpr, ConstraintProperty, Document, LayoutType, ShapeType, Statement};
+use crate::parser::ast::{
+    ConstraintExpr, ConstraintProperty, Document, LayoutType, ShapeType, Statement,
+};
 
 use super::routing::{RoutingMode, MIN_FINAL_SEGMENT_LENGTH};
 use super::types::{
-    BoundingBox, ElementLayout, ElementType, LabelLayout, LayoutResult, Point,
-    TextAnchor,
+    BoundingBox, ElementLayout, ElementType, LabelLayout, LayoutResult, Point, TextAnchor,
 };
 
 /// A lint warning about a layout defect
@@ -99,13 +100,49 @@ fn element_display_name(
 }
 
 fn is_text_shape(elem: &ElementLayout) -> bool {
-    matches!(elem.element_type, ElementType::Shape(ShapeType::Text { .. }))
+    matches!(
+        elem.element_type,
+        ElementType::Shape(ShapeType::Text { .. })
+    )
 }
 
 fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
 }
 
+/// A non-opaque shape is "borderless" if it has no visible stroke
+/// (stroke is "none" or stroke_width is 0).
+fn has_visible_border(elem: &ElementLayout) -> bool {
+    if let Some(ref stroke) = elem.styles.stroke {
+        if stroke.eq_ignore_ascii_case("none") {
+            return false;
+        }
+    }
+    if let Some(sw) = elem.styles.stroke_width {
+        if sw <= 0.0 {
+            return false;
+        }
+    }
+    // Default stroke is visible
+    true
+}
+
+/// Check whether a text-on-shape overlap should be flagged.
+/// Fully inside or fully outside → OK.
+/// Straddling the edge → flag it, UNLESS the shape is semi-transparent
+/// and has no visible border (pure background zone).
+fn is_text_shape_straddle(text: &ElementLayout, shape: &ElementLayout) -> bool {
+    let text_inside = shape.bounds.contains_bbox(&text.bounds);
+    let text_outside = !text.bounds.intersects(&shape.bounds);
+    if text_inside || text_outside {
+        return false; // fully in or fully out → fine
+    }
+    // Straddling. Allow only if the shape is a borderless transparent zone.
+    if !is_opaque(shape) && !has_visible_border(shape) {
+        return false;
+    }
+    true
+}
 
 // ── Collect contains IDs ──────────────────────────────────────────
 
@@ -175,7 +212,13 @@ fn check_overlap_siblings(
             let a = &siblings[i];
             let b = &siblings[j];
 
-            if !is_opaque(a) || !is_opaque(b) {
+            // Skip if both are non-opaque (two transparent zones)
+            if !is_opaque(a) && !is_opaque(b) {
+                continue;
+            }
+
+            // For two non-text shapes, skip if either is non-opaque (zone background)
+            if !is_text_shape(a) && !is_text_shape(b) && (!is_opaque(a) || !is_opaque(b)) {
                 continue;
             }
 
@@ -190,13 +233,18 @@ fn check_overlap_siblings(
                 }
             }
 
+            // Text-on-shape: only flag if the text straddles the edge
             if is_text_shape(a) != is_text_shape(b) {
-                continue;
+                let (text, shape) = if is_text_shape(a) { (a, b) } else { (b, a) };
+                if !is_text_shape_straddle(text, shape) {
+                    continue;
+                }
             }
 
             if a.bounds.intersects(&b.bounds) {
                 let overlap_w = a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
-                let overlap_h = a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
+                let overlap_h =
+                    a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
                 let name_a = element_display_name(a, parent_name, i);
                 let name_b = element_display_name(b, parent_name, j);
                 warnings.push(LintWarning {
@@ -247,17 +295,13 @@ fn is_template_instance_group(parent: &ElementLayout) -> bool {
     false
 }
 
-
 fn check_overlaps_recursive(
     parent: &ElementLayout,
     template_prefix: Option<&str>,
     contains_ids: &HashSet<String>,
     warnings: &mut Vec<LintWarning>,
 ) {
-    let parent_name = parent
-        .id
-        .as_ref()
-        .map(|id| id.0.as_str());
+    let parent_name = parent.id.as_ref().map(|id| id.0.as_str());
 
     // Determine if this group is a template instance or part of one.
     // A template instance has children prefixed with `{parent_id}_`.
@@ -286,72 +330,71 @@ fn check_overlaps_recursive(
 
     let children = &parent.children;
     if !skip_sibling_checks {
-    for i in 0..children.len() {
-        for j in (i + 1)..children.len() {
-            let a = &children[i];
-            let b = &children[j];
+        for i in 0..children.len() {
+            for j in (i + 1)..children.len() {
+                let a = &children[i];
+                let b = &children[j];
 
-            // Skip if either has opacity < 1.0
-            if !is_opaque(a) || !is_opaque(b) {
-                continue;
-            }
-
-            // Skip if either is a contains target/container
-            if let Some(id) = a.id_str() {
-                if contains_ids.contains(id) {
+                // Skip if both are non-opaque (two transparent zones)
+                if !is_opaque(a) && !is_opaque(b) {
                     continue;
                 }
-            }
-            if let Some(id) = b.id_str() {
-                if contains_ids.contains(id) {
+
+                // For two non-text shapes, skip if either is non-opaque (zone background)
+                if !is_text_shape(a) && !is_text_shape(b) && (!is_opaque(a) || !is_opaque(b)) {
                     continue;
                 }
-            }
 
-            // Skip text-on-shape: one is text, the other is not
-            if is_text_shape(a) != is_text_shape(b) {
-                continue;
-            }
+                // Skip if either is a contains target/container
+                if let Some(id) = a.id_str() {
+                    if contains_ids.contains(id) {
+                        continue;
+                    }
+                }
+                if let Some(id) = b.id_str() {
+                    if contains_ids.contains(id) {
+                        continue;
+                    }
+                }
 
-            if a.bounds.intersects(&b.bounds) {
-                let overlap_w = a.bounds.right().min(b.bounds.right())
-                    - a.bounds.x.max(b.bounds.x);
-                let overlap_h = a.bounds.bottom().min(b.bounds.bottom())
-                    - a.bounds.y.max(b.bounds.y);
-                let name_a = element_display_name(a, parent_name, i);
-                let name_b = element_display_name(b, parent_name, j);
-                warnings.push(LintWarning {
-                    category: LintCategory::Overlap,
-                    message: format!(
-                        "elements {} and {} overlap by {:.0}x{:.0}px",
-                        name_a, name_b, overlap_w, overlap_h
-                    ),
-                });
+                // Text-on-shape: only flag if the text straddles the edge
+                if is_text_shape(a) != is_text_shape(b) {
+                    let (text, shape) = if is_text_shape(a) { (a, b) } else { (b, a) };
+                    if !is_text_shape_straddle(text, shape) {
+                        continue;
+                    }
+                }
+
+                if a.bounds.intersects(&b.bounds) {
+                    let overlap_w =
+                        a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
+                    let overlap_h =
+                        a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
+                    let name_a = element_display_name(a, parent_name, i);
+                    let name_b = element_display_name(b, parent_name, j);
+                    warnings.push(LintWarning {
+                        category: LintCategory::Overlap,
+                        message: format!(
+                            "elements {} and {} overlap by {:.0}x{:.0}px",
+                            name_a, name_b, overlap_w, overlap_h
+                        ),
+                    });
+                }
             }
         }
-    }
     } // end skip_sibling_checks
 
     // Recurse into children that have children
     for child in children.iter() {
         if !child.children.is_empty() {
-            check_overlaps_recursive(
-                child,
-                current_prefix.as_deref(),
-                contains_ids,
-                warnings,
-            );
+            check_overlaps_recursive(child, current_prefix.as_deref(), contains_ids, warnings);
         }
     }
 }
 
 // ── FR3: Contains constraint verification ─────────────────────────
 
-fn check_contains(
-    result: &LayoutResult,
-    doc: &Document,
-    warnings: &mut Vec<LintWarning>,
-) {
+fn check_contains(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
     check_contains_in_stmts(&doc.statements, result, warnings);
 }
 
@@ -370,14 +413,10 @@ fn check_contains_in_stmts(
                 } = &c.expr
                 {
                     let pad = padding.unwrap_or(0.0);
-                    if let Some(container_elem) =
-                        result.get_element_by_name(&container.node.0)
-                    {
+                    if let Some(container_elem) = result.get_element_by_name(&container.node.0) {
                         let cb = container_elem.bounds;
                         for elem_id in elements {
-                            if let Some(elem) =
-                                result.get_element_by_name(&elem_id.node.0)
-                            {
+                            if let Some(elem) = result.get_element_by_name(&elem_id.node.0) {
                                 let eb = elem.bounds;
                                 // Check left edge
                                 if cb.x > eb.x - pad {
@@ -466,10 +505,7 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
     BoundingBox::new(x, y, width, height)
 }
 
-fn collect_labels_recursive(
-    elem: &ElementLayout,
-    labels: &mut Vec<LabelInfo>,
-) {
+fn collect_labels_recursive(elem: &ElementLayout, labels: &mut Vec<LabelInfo>) {
     if let Some(label) = &elem.label {
         let owner = elem
             .id
@@ -546,10 +582,7 @@ fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             if a.bbox.intersects(&b.bbox) {
                 warnings.push(LintWarning {
                     category: LintCategory::Label,
-                    message: format!(
-                        "labels on \"{}\" and \"{}\" overlap",
-                        a.owner, b.owner
-                    ),
+                    message: format!("labels on \"{}\" and \"{}\" overlap", a.owner, b.owner),
                 });
             }
         }
@@ -600,11 +633,9 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
             }
 
             // The key check: intersects the edge but NOT fully inside
-            if label.bbox.intersects(&shape.bounds)
-                && !shape.bounds.contains_bbox(&label.bbox)
-            {
-                let overlap_w = label.bbox.right().min(shape.bounds.right())
-                    - label.bbox.x.max(shape.bounds.x);
+            if label.bbox.intersects(&shape.bounds) && !shape.bounds.contains_bbox(&label.bbox) {
+                let overlap_w =
+                    label.bbox.right().min(shape.bounds.right()) - label.bbox.x.max(shape.bounds.x);
                 let overlap_h = label.bbox.bottom().min(shape.bounds.bottom())
                     - label.bbox.y.max(shape.bounds.y);
                 warnings.push(LintWarning {
@@ -612,8 +643,7 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
                     message: format!(
                         "label on \"{}\" straddles the edge of element \"{}\"; \
                          overlaps by {:.0}x{:.0}px",
-                        label.owner, shape.id,
-                        overlap_w, overlap_h
+                        label.owner, shape.id, overlap_w, overlap_h
                     ),
                 });
             }
@@ -633,10 +663,7 @@ fn line_segment_intersects_bbox(p1: &Point, p2: &Point, bbox: &BoundingBox) -> b
     // Check segment against each of the 4 bbox edges
     let edges = [
         // top edge
-        (
-            Point::new(bbox.x, bbox.y),
-            Point::new(bbox.right(), bbox.y),
-        ),
+        (Point::new(bbox.x, bbox.y), Point::new(bbox.right(), bbox.y)),
         // bottom edge
         (
             Point::new(bbox.x, bbox.bottom()),
@@ -798,9 +825,8 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
         .filter_map(|e| e.id.as_ref().map(|id| format!("{}_", id.0)))
         .collect();
 
-    let is_template_internal = |owner: &str| -> bool {
-        template_prefixes.iter().any(|pfx| owner.starts_with(pfx))
-    };
+    let is_template_internal =
+        |owner: &str| -> bool { template_prefixes.iter().any(|pfx| owner.starts_with(pfx)) };
 
     // Collect labels from elements + standalone text (skipping template internals)
     let mut labels: Vec<LabelInfo> = Vec::new();
@@ -1054,7 +1080,11 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
 
             if len < REDUCIBLE_BEND_THRESHOLD && len < shortest_len {
                 shortest_len = len;
-                shortest_orientation = if dx > dy { "horizontally" } else { "vertically" };
+                shortest_orientation = if dx > dy {
+                    "horizontally"
+                } else {
+                    "vertically"
+                };
             }
         }
 
@@ -1064,9 +1094,12 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
                 message: format!(
                     "connection {}→{}: path jogs {:.0}px {} between bends; \
                      moving elements at least {:.0}px further apart {} would eliminate 2 corners",
-                    conn.from_id.0, conn.to_id.0,
-                    shortest_len, shortest_orientation,
-                    shortest_len, shortest_orientation
+                    conn.from_id.0,
+                    conn.to_id.0,
+                    shortest_len,
+                    shortest_orientation,
+                    shortest_len,
+                    shortest_orientation
                 ),
             });
         }
@@ -1089,10 +1122,15 @@ fn is_small_element(result: &LayoutResult, name: &str) -> bool {
 }
 
 /// Look up the solved connection layout for a given from/to pair.
-fn find_connection_layout<'a>(result: &'a LayoutResult, from: &str, to: &str) -> Option<&'a super::types::ConnectionLayout> {
-    result.connections.iter().find(|c| {
-        c.from_id.0 == from && c.to_id.0 == to
-    })
+fn find_connection_layout<'a>(
+    result: &'a LayoutResult,
+    from: &str,
+    to: &str,
+) -> Option<&'a super::types::ConnectionLayout> {
+    result
+        .connections
+        .iter()
+        .find(|c| c.from_id.0 == from && c.to_id.0 == to)
 }
 
 fn check_missing_anchors(doc: &Document, result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
@@ -1169,7 +1207,14 @@ fn check_missing_anchors_in_stmts(
 /// Check if a CSS variable name refers to a dark fill.
 fn is_dark_css_variable(name: &str) -> bool {
     // Dark fills: names containing "-dark", or specific foreground/text tokens
-    let dark_patterns = ["-dark", "foreground-1", "foreground-2", "text-dark", "text-1", "text-2"];
+    let dark_patterns = [
+        "-dark",
+        "foreground-1",
+        "foreground-2",
+        "text-dark",
+        "text-1",
+        "text-2",
+    ];
     dark_patterns.iter().any(|p| name.contains(p))
 }
 
@@ -1194,7 +1239,11 @@ fn hex_luminance(hex: &str) -> Option<f64> {
     // sRGB linearization
     fn linearize(c: u8) -> f64 {
         let s = c as f64 / 255.0;
-        if s <= 0.04045 { s / 12.92 } else { ((s + 0.055) / 1.055).powf(2.4) }
+        if s <= 0.04045 {
+            s / 12.92
+        } else {
+            ((s + 0.055) / 1.055).powf(2.4)
+        }
     }
     Some(0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b))
 }
@@ -1234,7 +1283,11 @@ fn check_contrast(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
 fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
     // Check if this element has a label AND a dark fill AND no explicit label color
     if let Some(label) = &elem.label {
-        let has_label_color = label.styles.as_ref().and_then(|s| s.fill.as_ref()).is_some();
+        let has_label_color = label
+            .styles
+            .as_ref()
+            .and_then(|s| s.fill.as_ref())
+            .is_some();
         if !has_label_color {
             if let Some(fill) = &elem.styles.fill {
                 if let Some(dark_desc) = is_dark_fill(fill) {
@@ -1288,8 +1341,8 @@ fn check_steep_direct(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
         let two_pi_3 = 2.0 * std::f64::consts::FRAC_PI_3;
         let five_pi_6 = 5.0 * std::f64::consts::FRAC_PI_6;
 
-        let is_steep = (angle >= pi_6 && angle <= pi_3)
-            || (angle >= two_pi_3 && angle <= five_pi_6);
+        let is_steep =
+            (angle >= pi_6 && angle <= pi_3) || (angle >= two_pi_3 && angle <= five_pi_6);
 
         if is_steep {
             let angle_deg = angle.to_degrees().round() as i32;
@@ -1322,15 +1375,21 @@ fn check_crowded_layouts_in_stmts(
                 let layout_type = &l.layout_type.node;
                 if matches!(layout_type, LayoutType::Row | LayoutType::Column) {
                     // Count direct children that are shapes or groups (not text labels)
-                    let child_count = l.children.iter().filter(|c| {
-                        matches!(
-                            c.node,
-                            Statement::Shape(_) | Statement::Group(_) | Statement::Layout(_)
-                        )
-                    }).count();
+                    let child_count = l
+                        .children
+                        .iter()
+                        .filter(|c| {
+                            matches!(
+                                c.node,
+                                Statement::Shape(_) | Statement::Group(_) | Statement::Layout(_)
+                            )
+                        })
+                        .count();
 
                     if child_count > 8 {
-                        let layout_name = l.name.as_ref()
+                        let layout_name = l
+                            .name
+                            .as_ref()
                             .map(|n| format!("\"{}\"", n.node.0))
                             .unwrap_or_else(|| "<anon>".to_string());
                         let layout_kind = match layout_type {
@@ -1388,7 +1447,11 @@ fn format_constraint_expr(expr: &ConstraintExpr) -> String {
                 property_display_name(&right.property.node)
             )
         }
-        ConstraintExpr::EqualWithOffset { left, right, offset } => {
+        ConstraintExpr::EqualWithOffset {
+            left,
+            right,
+            offset,
+        } => {
             if *offset >= 0.0 {
                 format!(
                     "{}.{} = {}.{} + {}",
@@ -1437,11 +1500,7 @@ fn format_constraint_expr(expr: &ConstraintExpr) -> String {
     }
 }
 
-fn check_over_constrained(
-    result: &LayoutResult,
-    doc: &Document,
-    warnings: &mut Vec<LintWarning>,
-) {
+fn check_over_constrained(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
     check_over_constrained_in_stmts(&doc.statements, result, warnings);
 }
 
@@ -1478,7 +1537,11 @@ fn check_over_constrained_in_stmts(
                             }
                         }
                     }
-                    ConstraintExpr::EqualWithOffset { left, right, offset } => {
+                    ConstraintExpr::EqualWithOffset {
+                        left,
+                        right,
+                        offset,
+                    } => {
                         let lhs_elem = result.get_element_by_name(&left.element.node.leaf().0);
                         let rhs_elem = result.get_element_by_name(&right.element.node.leaf().0);
                         if let (Some(le), Some(re)) = (lhs_elem, rhs_elem) {
@@ -1503,7 +1566,9 @@ fn check_over_constrained_in_stmts(
                     ConstraintExpr::Constant { left, value } => {
                         let elem = result.get_element_by_name(&left.element.node.leaf().0);
                         if let Some(e) = elem {
-                            if let Some(solved) = resolve_property_value(&e.bounds, &left.property.node) {
+                            if let Some(solved) =
+                                resolve_property_value(&e.bounds, &left.property.node)
+                            {
                                 let residual = (solved - value).abs();
                                 if residual > EPSILON {
                                     let desc = format_constraint_expr(&c.expr);
@@ -1521,7 +1586,9 @@ fn check_over_constrained_in_stmts(
                     ConstraintExpr::GreaterOrEqual { left, value } => {
                         let elem = result.get_element_by_name(&left.element.node.leaf().0);
                         if let Some(e) = elem {
-                            if let Some(solved) = resolve_property_value(&e.bounds, &left.property.node) {
+                            if let Some(solved) =
+                                resolve_property_value(&e.bounds, &left.property.node)
+                            {
                                 if solved < value - EPSILON {
                                     let desc = format_constraint_expr(&c.expr);
                                     let violation = value - solved;
@@ -1539,7 +1606,9 @@ fn check_over_constrained_in_stmts(
                     ConstraintExpr::LessOrEqual { left, value } => {
                         let elem = result.get_element_by_name(&left.element.node.leaf().0);
                         if let Some(e) = elem {
-                            if let Some(solved) = resolve_property_value(&e.bounds, &left.property.node) {
+                            if let Some(solved) =
+                                resolve_property_value(&e.bounds, &left.property.node)
+                            {
                                 if solved > value + EPSILON {
                                     let desc = format_constraint_expr(&c.expr);
                                     let violation = solved - value;
@@ -1636,13 +1705,7 @@ mod tests {
     use super::*;
     use crate::parser::ast::Identifier;
 
-    fn make_rect(
-        id: Option<&str>,
-        x: f64,
-        y: f64,
-        w: f64,
-        h: f64,
-    ) -> ElementLayout {
+    fn make_rect(id: Option<&str>, x: f64, y: f64, w: f64, h: f64) -> ElementLayout {
         ElementLayout {
             id: id.map(|s| Identifier(s.to_string())),
             element_type: ElementType::Shape(ShapeType::Rectangle),
@@ -1668,13 +1731,7 @@ mod tests {
         elem
     }
 
-    fn make_text(
-        id: Option<&str>,
-        x: f64,
-        y: f64,
-        w: f64,
-        h: f64,
-    ) -> ElementLayout {
+    fn make_text(id: Option<&str>, x: f64, y: f64, w: f64, h: f64) -> ElementLayout {
         ElementLayout {
             id: id.map(|s| Identifier(s.to_string())),
             element_type: ElementType::Shape(ShapeType::Text {
@@ -1689,10 +1746,7 @@ mod tests {
         }
     }
 
-    fn make_group(
-        id: Option<&str>,
-        children: Vec<ElementLayout>,
-    ) -> ElementLayout {
+    fn make_group(id: Option<&str>, children: Vec<ElementLayout>) -> ElementLayout {
         // Compute bounds from children
         let mut bounds = BoundingBox::zero();
         for child in &children {
@@ -1827,10 +1881,7 @@ mod tests {
     #[test]
     fn test_named_element_display() {
         let elem = make_rect(Some("foo"), 0.0, 0.0, 10.0, 10.0);
-        assert_eq!(
-            element_display_name(&elem, Some("parent"), 0),
-            "\"foo\""
-        );
+        assert_eq!(element_display_name(&elem, Some("parent"), 0), "\"foo\"");
     }
 
     #[test]
@@ -1844,11 +1895,13 @@ mod tests {
 
     // ── Redundant constant tests ──
 
-    use crate::parser::ast::{
-        ConstrainDecl, ElementPath, GroupDecl, Span,
-    };
+    use crate::parser::ast::{ConstrainDecl, ElementPath, GroupDecl, Span};
 
-    fn make_constant_constraint(elem: &str, prop: ConstraintProperty, value: f64) -> crate::parser::ast::Spanned<Statement> {
+    fn make_constant_constraint(
+        elem: &str,
+        prop: ConstraintProperty,
+        value: f64,
+    ) -> crate::parser::ast::Spanned<Statement> {
         let span: Span = 0..0;
         crate::parser::ast::Spanned::new(
             Statement::Constrain(ConstrainDecl {
@@ -1921,9 +1974,11 @@ mod tests {
 
     #[test]
     fn test_single_element_no_warning() {
-        let doc = make_doc(vec![
-            make_constant_constraint("a", ConstraintProperty::CenterX, 100.0),
-        ]);
+        let doc = make_doc(vec![make_constant_constraint(
+            "a",
+            ConstraintProperty::CenterX,
+            100.0,
+        )]);
         let mut warnings = Vec::new();
         check_redundant_constants(&doc, &mut warnings);
         assert!(warnings.is_empty());
@@ -1932,21 +1987,22 @@ mod tests {
     #[test]
     fn test_inside_group() {
         let span: Span = 0..0;
-        let doc = make_doc(vec![
-            crate::parser::ast::Spanned::new(
-                Statement::Group(GroupDecl {
-                    name: Some(crate::parser::ast::Spanned::new(Identifier("g".to_string()), span.clone())),
-                    children: vec![
-                        make_constant_constraint("a", ConstraintProperty::CenterY, 50.0),
-                        make_constant_constraint("b", ConstraintProperty::CenterY, 50.0),
-                    ],
-                    modifiers: vec![],
-                    anchors: vec![],
-                    is_template_instance: false,
-                }),
-                span,
-            ),
-        ]);
+        let doc = make_doc(vec![crate::parser::ast::Spanned::new(
+            Statement::Group(GroupDecl {
+                name: Some(crate::parser::ast::Spanned::new(
+                    Identifier("g".to_string()),
+                    span.clone(),
+                )),
+                children: vec![
+                    make_constant_constraint("a", ConstraintProperty::CenterY, 50.0),
+                    make_constant_constraint("b", ConstraintProperty::CenterY, 50.0),
+                ],
+                modifiers: vec![],
+                anchors: vec![],
+                is_template_instance: false,
+            }),
+            span,
+        )]);
         let mut warnings = Vec::new();
         check_redundant_constants(&doc, &mut warnings);
         assert_eq!(warnings.len(), 1);
@@ -1955,8 +2011,8 @@ mod tests {
 
     // ── Reducible bend tests ──
 
-    use crate::parser::ast::ConnectionDirection;
     use super::super::types::ConnectionLayout;
+    use crate::parser::ast::ConnectionDirection;
 
     fn make_connection(
         from: &str,
@@ -2000,11 +2056,31 @@ mod tests {
         check_reducible_bends(&result, &mut warnings);
         assert_eq!(warnings.len(), 1);
         assert_eq!(warnings[0].category.to_string(), "reducible-bend");
-        assert!(warnings[0].message.contains("20px"), "message: {}", warnings[0].message);
-        assert!(warnings[0].message.contains("horizontally"), "message: {}", warnings[0].message);
-        assert!(warnings[0].message.contains("further apart"), "message: {}", warnings[0].message);
-        assert!(warnings[0].message.contains("at least"), "message: {}", warnings[0].message);
-        assert!(warnings[0].message.contains("eliminate 2 corners"), "message: {}", warnings[0].message);
+        assert!(
+            warnings[0].message.contains("20px"),
+            "message: {}",
+            warnings[0].message
+        );
+        assert!(
+            warnings[0].message.contains("horizontally"),
+            "message: {}",
+            warnings[0].message
+        );
+        assert!(
+            warnings[0].message.contains("further apart"),
+            "message: {}",
+            warnings[0].message
+        );
+        assert!(
+            warnings[0].message.contains("at least"),
+            "message: {}",
+            warnings[0].message
+        );
+        assert!(
+            warnings[0].message.contains("eliminate 2 corners"),
+            "message: {}",
+            warnings[0].message
+        );
     }
 
     #[test]
@@ -2026,10 +2102,7 @@ mod tests {
     #[test]
     fn test_straight_path_no_warning() {
         // 2-point straight line — no interior segments
-        let path = vec![
-            Point::new(100.0, 100.0),
-            Point::new(200.0, 100.0),
-        ];
+        let path = vec![Point::new(100.0, 100.0), Point::new(200.0, 100.0)];
         let conn = make_connection("a", "b", path, RoutingMode::Orthogonal);
         let result = make_layout_with_connections(vec![conn]);
         let mut warnings = Vec::new();

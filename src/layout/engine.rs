@@ -2579,11 +2579,10 @@ pub fn resolve_constrain_statements(
         // Collect target and referenced elements from constraints
         // This ensures only target elements can move (SUGGESTED), while reference
         // elements are fixed (REQUIRED), preventing nondeterministic pivot choices.
-        let target_vars: std::collections::HashSet<(String, LayoutProperty)> =
-            internal_constraints
-                .iter()
-                .filter_map(|c| get_constraint_target_var(c))
-                .collect();
+        let target_vars: std::collections::HashSet<(String, LayoutProperty)> = internal_constraints
+            .iter()
+            .filter_map(|c| get_constraint_target_var(c))
+            .collect();
 
         let referenced_elements: std::collections::HashSet<String> = internal_constraints
             .iter()
@@ -2753,12 +2752,10 @@ pub fn resolve_constrain_statements(
                                 .contains(&(var.element_id.clone(), LayoutProperty::Bottom))
                     }
                     LayoutProperty::Width => {
-                        target_vars
-                            .contains(&(var.element_id.clone(), LayoutProperty::Right))
+                        target_vars.contains(&(var.element_id.clone(), LayoutProperty::Right))
                     }
                     LayoutProperty::Height => {
-                        target_vars
-                            .contains(&(var.element_id.clone(), LayoutProperty::Bottom))
+                        target_vars.contains(&(var.element_id.clone(), LayoutProperty::Bottom))
                     }
                     _ => false,
                 };
@@ -3540,11 +3537,9 @@ fn add_element_by_name_with_per_property_strength(
         // Same logic applies to CenterX/CenterY: when only centering is targeted,
         // size must be FIXED to prevent the solver from resizing instead of moving.
         let width_is_targeted =
-            target_vars.contains(&(element_name.to_string(), LayoutProperty::Width))
-                || contains_x;
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Width)) || contains_x;
         let height_is_targeted =
-            target_vars.contains(&(element_name.to_string(), LayoutProperty::Height))
-                || contains_y;
+            target_vars.contains(&(element_name.to_string(), LayoutProperty::Height)) || contains_y;
 
         if width_is_targeted {
             let suggested_w = if contains_x { 1.0 } else { elem.bounds.width };

@@ -156,3 +156,36 @@ row small_row {
 }
 
 constrain sr_1.center_y = 510
+
+
+// ------------------------------------------------------------
+// TEST 9: Text fully inside a semi-transparent bordered zone
+// The text fits entirely within the box — no straddling.
+// ------------------------------------------------------------
+
+group text_inside_zone {
+    rect zone_box [width: 200, height: 80, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.3]
+    text "Fits Inside" inside_text [font_size: 12, fill: foreground-1]
+}
+
+constrain zone_box.center_x = zone_bg.center_x
+constrain zone_box.center_y = 597
+constrain inside_text.center_x = zone_box.center_x
+constrain inside_text.center_y = zone_box.center_y
+
+
+// ------------------------------------------------------------
+// TEST 10: Text straddling a borderless transparent zone (no stroke)
+// The zone has no visible border, so the text crossing its edge
+// is fine — it's just a background wash.
+// ------------------------------------------------------------
+
+group text_on_borderless_zone {
+    rect bg_wash [width: 60, height: 80, fill: accent-light, stroke: none, opacity: 0.2]
+    text "Overflows OK" overflow_text [font_size: 12, fill: foreground-1]
+}
+
+constrain bg_wash.center_x = info_box.center_x
+constrain bg_wash.center_y = zone_box.center_y
+constrain overflow_text.center_x = bg_wash.center_x
+constrain overflow_text.top = bg_wash.top + 5

@@ -456,7 +456,13 @@ fn render_pipeline(
     };
 
     // Generate SVG with stylesheet
-    let svg = render_svg_with_stylesheet(&result, &config.svg, &config.stylesheet, config.custom_css.as_deref(), config.debug);
+    let svg = render_svg_with_stylesheet(
+        &result,
+        &config.svg,
+        &config.stylesheet,
+        config.custom_css.as_deref(),
+        config.debug,
+    );
 
     Ok((svg, lint_warnings))
 }

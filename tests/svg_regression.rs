@@ -215,8 +215,8 @@ fn generate_baselines() {
 fn test_feedback_loops_example() {
     let source = fs::read_to_string("examples/feedback-loops.ail");
     if let Ok(source) = source {
-        let config = RenderConfig::new()
-            .with_template_base_path(std::path::PathBuf::from("examples"));
+        let config =
+            RenderConfig::new().with_template_base_path(std::path::PathBuf::from("examples"));
         let result = render_with_config(&source, config);
         assert!(
             result.is_ok(),

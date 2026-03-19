@@ -16,7 +16,9 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use agent_illustrator::{render_with_config, render_with_lint, ImageHrefMode, RenderConfig, Stylesheet};
+use agent_illustrator::{
+    render_with_config, render_with_lint, ImageHrefMode, RenderConfig, Stylesheet,
+};
 
 #[derive(Parser)]
 #[command(name = "agent-illustrator")]

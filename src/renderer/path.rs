@@ -406,7 +406,11 @@ fn get_or_create_vertex(
 fn compute_arc_segment(from: Point, to: Point, params: &ArcParams) -> PathSegment {
     match params {
         ArcParams::Bulge(bulge) => compute_bulge_arc(from, to, *bulge),
-        ArcParams::Radius { radius, sweep, large_arc } => compute_radius_arc(from, to, *radius, *sweep, *large_arc),
+        ArcParams::Radius {
+            radius,
+            sweep,
+            large_arc,
+        } => compute_radius_arc(from, to, *radius, *sweep, *large_arc),
     }
 }
 
@@ -451,7 +455,13 @@ fn compute_bulge_arc(from: Point, to: Point, bulge: f64) -> PathSegment {
 }
 
 /// Compute arc from explicit radius and sweep direction
-fn compute_radius_arc(from: Point, to: Point, radius: f64, sweep: SweepDirection, large_arc: bool) -> PathSegment {
+fn compute_radius_arc(
+    from: Point,
+    to: Point,
+    radius: f64,
+    sweep: SweepDirection,
+    large_arc: bool,
+) -> PathSegment {
     let dx = to.x - from.x;
     let dy = to.y - from.y;
     let chord = (dx * dx + dy * dy).sqrt();

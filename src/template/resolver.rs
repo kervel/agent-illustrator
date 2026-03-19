@@ -185,7 +185,11 @@ fn resolve_instance(
     ctx.start_resolving(template_name);
 
     // Convert instance arguments to modifiers (excluding template parameters)
-    let template_param_names: Vec<String> = def.parameters.iter().map(|p| p.name.node.0.clone()).collect();
+    let template_param_names: Vec<String> = def
+        .parameters
+        .iter()
+        .map(|p| p.name.node.0.clone())
+        .collect();
     let instance_modifiers = arguments_to_modifiers(&inst.arguments, &template_param_names, span);
 
     let result = match def.source_type {
@@ -270,12 +274,7 @@ fn resolve_raster_template(
     let href = registry.resolve_image_href(source_path.to_str().unwrap_or(""));
 
     let shape = ShapeDecl {
-        shape_type: Spanned::new(
-            ShapeType::RasterImage {
-                path: href,
-            },
-            span.clone(),
-        ),
+        shape_type: Spanned::new(ShapeType::RasterImage { path: href }, span.clone()),
         name: Some(Spanned::new(Identifier::new(instance_name), span.clone())),
         modifiers: instance_modifiers.to_vec(),
     };

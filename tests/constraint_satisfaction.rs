@@ -27,7 +27,12 @@ fn get_bounds(result: &LayoutResult, id: &str) -> (f64, f64, f64, f64) {
         .elements
         .get(id)
         .unwrap_or_else(|| panic!("element '{}' not found", id));
-    (elem.bounds.x, elem.bounds.y, elem.bounds.width, elem.bounds.height)
+    (
+        elem.bounds.x,
+        elem.bounds.y,
+        elem.bounds.width,
+        elem.bounds.height,
+    )
 }
 
 const TOLERANCE: f64 = 1.0;
@@ -77,7 +82,10 @@ constrain a1.left = b1.left
             && (a2_y - a3_y).abs() < TOLERANCE
             && (a3_y - a4_y).abs() < TOLERANCE,
         "top_row items should be at the same Y: a1={}, a2={}, a3={}, a4={}",
-        a1_y, a2_y, a3_y, a4_y,
+        a1_y,
+        a2_y,
+        a3_y,
+        a4_y,
     );
 
     // Row invariant: all items in bot_row should have the same Y
@@ -90,7 +98,10 @@ constrain a1.left = b1.left
             && (b2_y - b3_y).abs() < TOLERANCE
             && (b3_y - b4_y).abs() < TOLERANCE,
         "bot_row items should be at the same Y: b1={}, b2={}, b3={}, b4={}",
-        b1_y, b2_y, b3_y, b4_y,
+        b1_y,
+        b2_y,
+        b3_y,
+        b4_y,
     );
 }
 
@@ -133,7 +144,10 @@ col diagram {
     let result = compute_layout(source).expect("layout should succeed");
 
     let get_cx = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.x + elem.bounds.width / 2.0
     };
 
@@ -147,17 +161,20 @@ col diagram {
     assert!(
         (ma1_cx - a1_cx).abs() < TOLERANCE,
         "ma1.center_x should equal a1.center_x: ma1={}, a1={}",
-        ma1_cx, a1_cx,
+        ma1_cx,
+        a1_cx,
     );
     assert!(
         (mj1_cx - j1_cx).abs() < TOLERANCE,
         "mj1.center_x should equal j1.center_x: mj1={}, j1={}",
-        mj1_cx, j1_cx,
+        mj1_cx,
+        j1_cx,
     );
     assert!(
         (ma2_cx - a2_cx).abs() < TOLERANCE,
         "ma2.center_x should equal a2.center_x: ma2={}, a2={}",
-        ma2_cx, a2_cx,
+        ma2_cx,
+        a2_cx,
     );
 }
 
@@ -170,7 +187,10 @@ fn test_railway_topology_cross_level_alignment() {
     let result = compute_layout(&source).expect("layout should succeed");
 
     let get_cx = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.x + elem.bounds.width / 2.0
     };
 
@@ -186,14 +206,16 @@ fn test_railway_topology_cross_level_alignment() {
     assert!(
         (mjb1_cx - jb1_cx).abs() < TOLERANCE,
         "mjB1.center_x should equal jB1.center_x: mjB1={}, jB1={}",
-        mjb1_cx, jb1_cx,
+        mjb1_cx,
+        jb1_cx,
     );
 
     // constrain mjB2.center_x = jB2.center_x
     assert!(
         (mjb2_cx - jb2_cx).abs() < TOLERANCE,
         "mjB2.center_x should equal jB2.center_x: mjB2={}, jB2={}",
-        mjb2_cx, jb2_cx,
+        mjb2_cx,
+        jb2_cx,
     );
 
     // Endpoint alignment: constrain ma1.center_x = a1.center_x
@@ -202,7 +224,8 @@ fn test_railway_topology_cross_level_alignment() {
     assert!(
         (ma1_cx - a1_cx).abs() < TOLERANCE,
         "ma1.center_x should equal a1.center_x: ma1={}, a1={}",
-        ma1_cx, a1_cx,
+        ma1_cx,
+        a1_cx,
     );
 }
 
@@ -237,14 +260,25 @@ constrain p180.vertical_center = p0.vertical_center
     let result = compute_layout(source).expect("layout should succeed");
 
     let get_cy = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.y + elem.bounds.height / 2.0
     };
     let get_left = |id: &str| -> f64 {
-        result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id)).bounds.x
+        result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id))
+            .bounds
+            .x
     };
     let get_right = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.x + elem.bounds.width
     };
 
@@ -254,7 +288,8 @@ constrain p180.vertical_center = p0.vertical_center
     assert!(
         (p90_left - (p0_right + 80.0)).abs() < TOLERANCE,
         "p90.left should be p0.right + 80: p90.left={}, p0.right+80={}",
-        p90_left, p0_right + 80.0,
+        p90_left,
+        p0_right + 80.0,
     );
 
     // p180.left = p90.right + 80
@@ -263,7 +298,8 @@ constrain p180.vertical_center = p0.vertical_center
     assert!(
         (p180_left - (p90_right + 80.0)).abs() < TOLERANCE,
         "p180.left should be p90.right + 80: p180.left={}, p90.right+80={}",
-        p180_left, p90_right + 80.0,
+        p180_left,
+        p90_right + 80.0,
     );
 
     // Vertical center alignment
@@ -273,12 +309,14 @@ constrain p180.vertical_center = p0.vertical_center
     assert!(
         (p90_cy - p0_cy).abs() < TOLERANCE,
         "p90.vertical_center should equal p0.vertical_center: p90={}, p0={}",
-        p90_cy, p0_cy,
+        p90_cy,
+        p0_cy,
     );
     assert!(
         (p180_cy - p0_cy).abs() < TOLERANCE,
         "p180.vertical_center should equal p0.vertical_center: p180={}, p0={}",
-        p180_cy, p0_cy,
+        p180_cy,
+        p0_cy,
     );
 }
 
@@ -293,14 +331,25 @@ fn test_person_rotation_cross_instance_alignment() {
     let result = compute_layout(&source).expect("layout should succeed");
 
     let get_cy = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.y + elem.bounds.height / 2.0
     };
     let get_left = |id: &str| -> f64 {
-        result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id)).bounds.x
+        result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id))
+            .bounds
+            .x
     };
     let get_right = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.x + elem.bounds.width
     };
 
@@ -311,12 +360,14 @@ fn test_person_rotation_cross_instance_alignment() {
     assert!(
         (p90_cy - p0_cy).abs() < TOLERANCE,
         "p90.vertical_center should equal p0: p90={}, p0={}",
-        p90_cy, p0_cy,
+        p90_cy,
+        p0_cy,
     );
     assert!(
         (p180_cy - p0_cy).abs() < TOLERANCE,
         "p180.vertical_center should equal p0: p180={}, p0={}",
-        p180_cy, p0_cy,
+        p180_cy,
+        p0_cy,
     );
 
     // constrain p90.left = p0.right + 120
@@ -325,7 +376,8 @@ fn test_person_rotation_cross_instance_alignment() {
     assert!(
         (p90_left - (p0_right + 120.0)).abs() < TOLERANCE,
         "p90.left should be p0.right + 120: p90.left={}, expected={}",
-        p90_left, p0_right + 120.0,
+        p90_left,
+        p0_right + 120.0,
     );
 
     // constrain p180.left = p90.right + 120
@@ -334,7 +386,8 @@ fn test_person_rotation_cross_instance_alignment() {
     assert!(
         (p180_left - (p90_right + 120.0)).abs() < TOLERANCE,
         "p180.left should be p90.right + 120: p180.left={}, expected={}",
-        p180_left, p90_right + 120.0,
+        p180_left,
+        p90_right + 120.0,
     );
 
     // Row 2: constrain p45.vertical_center = p270.vertical_center
@@ -344,12 +397,14 @@ fn test_person_rotation_cross_instance_alignment() {
     assert!(
         (p45_cy - p270_cy).abs() < TOLERANCE,
         "p45.vertical_center should equal p270: p45={}, p270={}",
-        p45_cy, p270_cy,
+        p45_cy,
+        p270_cy,
     );
     assert!(
         (p135_cy - p270_cy).abs() < TOLERANCE,
         "p135.vertical_center should equal p270: p135={}, p270={}",
-        p135_cy, p270_cy,
+        p135_cy,
+        p270_cy,
     );
 
     // Row 2 should be below Row 1: constrain p270.top = p0.bottom + 140
@@ -361,7 +416,8 @@ fn test_person_rotation_cross_instance_alignment() {
     assert!(
         (p270_top - (p0_bottom + 140.0)).abs() < TOLERANCE,
         "p270.top should be p0.bottom + 140: p270.top={}, expected={}",
-        p270_top, p0_bottom + 140.0,
+        p270_top,
+        p0_bottom + 140.0,
     );
 }
 
@@ -386,7 +442,10 @@ fn test_feedback_loops_row_alignment_and_constraints() {
             && (tune_y - spot_y).abs() < TOLERANCE
             && (spot_y - evaluate_y).abs() < TOLERANCE,
         "human_loop items should share Y: assign={}, tune={}, spot={}, evaluate={}",
-        assign_y, tune_y, spot_y, evaluate_y,
+        assign_y,
+        tune_y,
+        spot_y,
+        evaluate_y,
     );
 
     // Agent loop row: task, execute, check, result should share Y
@@ -399,7 +458,10 @@ fn test_feedback_loops_row_alignment_and_constraints() {
             && (execute_y - check_y).abs() < TOLERANCE
             && (check_y - result_y).abs() < TOLERANCE,
         "agent_loop items should share Y: task={}, execute={}, check={}, result={}",
-        task_y, execute_y, check_y, result_y,
+        task_y,
+        execute_y,
+        check_y,
+        result_y,
     );
 
     // Cross-row constraint: constrain assign.left = task.left
@@ -408,14 +470,16 @@ fn test_feedback_loops_row_alignment_and_constraints() {
     assert!(
         (assign_x - task_x).abs() < TOLERANCE,
         "assign.left should equal task.left: assign={}, task={}",
-        assign_x, task_x,
+        assign_x,
+        task_x,
     );
 
     // Agent loop should be below human loop
     assert!(
         task_y > assign_y + 40.0,
         "agent_loop should be below human_loop: task.y={}, assign.y={}",
-        task_y, assign_y,
+        task_y,
+        assign_y,
     );
 }
 
@@ -429,7 +493,10 @@ fn test_railway_topology_ellipse_positioning() {
     let result = compute_layout(&source).expect("layout should succeed");
 
     let get_cx = |id: &str| -> f64 {
-        let elem = result.elements.get(id).unwrap_or_else(|| panic!("{} not found", id));
+        let elem = result
+            .elements
+            .get(id)
+            .unwrap_or_else(|| panic!("{} not found", id));
         elem.bounds.x + elem.bounds.width / 2.0
     };
 
@@ -441,7 +508,8 @@ fn test_railway_topology_ellipse_positioning() {
     assert!(
         (op1_cx - expected_op1_cx).abs() < TOLERANCE,
         "op1.center_x should be midpoint(mjA1, mjB1): op1={}, expected={}",
-        op1_cx, expected_op1_cx,
+        op1_cx,
+        expected_op1_cx,
     );
 
     // op2.center_x = midpoint(mjA2, mjB2)
@@ -452,7 +520,8 @@ fn test_railway_topology_ellipse_positioning() {
     assert!(
         (op2_cx - expected_op2_cx).abs() < TOLERANCE,
         "op2.center_x should be midpoint(mjA2, mjB2): op2={}, expected={}",
-        op2_cx, expected_op2_cx,
+        op2_cx,
+        expected_op2_cx,
     );
 
     // The ellipses should NOT overlap significantly (positive separation)
@@ -462,7 +531,8 @@ fn test_railway_topology_ellipse_positioning() {
     assert!(
         op2_left > op1_right - TOLERANCE,
         "op1 and op2 should not overlap: op1_right={}, op2_left={}",
-        op1_right, op2_left,
+        op1_right,
+        op2_left,
     );
 }
 
@@ -555,7 +625,8 @@ col diagram {
         assert!(
             (n2_w - 50.0).abs() < TOLERANCE,
             "run {}: n2.width should be 50, got {} (solver resized instead of moved)",
-            i, n2_w,
+            i,
+            n2_w,
         );
 
         // Right edges must align: n2.x + n2.w = b2.x + b2.w
@@ -564,7 +635,9 @@ col diagram {
         assert!(
             (n2_right - b2_right).abs() < TOLERANCE,
             "run {}: n2.right ({}) should equal b2.right ({})",
-            i, n2_right, b2_right,
+            i,
+            n2_right,
+            b2_right,
         );
     }
 }
