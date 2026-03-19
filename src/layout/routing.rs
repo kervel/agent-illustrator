@@ -578,6 +578,7 @@ pub fn route_connection_with_anchors(
 /// Route a connection between two bounding boxes with optional explicit anchors and element types.
 ///
 /// When element types are provided, uses the correct boundary calculation for ellipses.
+#[allow(clippy::too_many_arguments)]
 pub fn route_connection_with_anchors_and_types(
     from_bounds: &BoundingBox,
     to_bounds: &BoundingBox,

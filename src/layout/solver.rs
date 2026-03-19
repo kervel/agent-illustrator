@@ -508,7 +508,7 @@ impl ConstraintSolver {
                     )
                 };
                 self.solver
-                    .add_constraint(left_expr | EQ(strength) | right_expr + *offset)
+                    .add_constraint(left_expr | EQ(strength) | (right_expr + *offset))
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -560,7 +560,7 @@ impl ConstraintSolver {
                     left.element_id, left.property, right.element_id, right.property, offset
                 );
                 self.solver
-                    .add_constraint(left_expr | LE(Strength::STRONG) | right_expr + *offset)
+                    .add_constraint(left_expr | LE(Strength::STRONG) | (right_expr + *offset))
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -578,7 +578,7 @@ impl ConstraintSolver {
                     left.element_id, left.property, right.element_id, right.property, offset
                 );
                 self.solver
-                    .add_constraint(left_expr | GE(Strength::STRONG) | right_expr + *offset)
+                    .add_constraint(left_expr | GE(Strength::STRONG) | (right_expr + *offset))
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -620,7 +620,9 @@ impl ConstraintSolver {
                 // Which is equivalent to: target = (a + b) / 2 + offset
                 self.solver
                     .add_constraint(
-                        2.0 * target_expr | EQ(Strength::STRONG) | a_expr + b_expr + 2.0 * offset,
+                        (2.0 * target_expr)
+                            | EQ(Strength::STRONG)
+                            | (a_expr + b_expr + 2.0 * offset),
                     )
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());

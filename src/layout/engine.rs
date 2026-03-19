@@ -299,8 +299,7 @@ fn collect_element_template_mapping(
     }
 }
 
-/// Extract the template prefix from an element ID.
-///
+// Extract the template prefix from an element ID.
 
 // ============================================
 // Two-Phase Solver Functions (Feature 010)
@@ -339,7 +338,7 @@ pub fn solve_local(
     // This prevents nondeterministic pivot choices in the solver.
     let target_vars: std::collections::HashSet<(String, LayoutProperty)> = constraints
         .iter()
-        .filter_map(|c| get_constraint_target_var(c))
+        .filter_map(get_constraint_target_var)
         .collect();
 
     // Find all elements belonging to this template instance
@@ -618,13 +617,13 @@ pub fn solve_global(
     // We only want to move the specific property that is targeted
     let target_vars: std::collections::HashSet<(String, LayoutProperty)> = constraints
         .iter()
-        .filter_map(|c| get_constraint_target_var(c))
+        .filter_map(get_constraint_target_var)
         .collect();
 
     // Collect all elements referenced in constraints
     let referenced_elements: std::collections::HashSet<String> = constraints
         .iter()
-        .flat_map(|c| get_constraint_referenced_elements(c))
+        .flat_map(get_constraint_referenced_elements)
         .collect();
 
     let mut solver = ConstraintSolver::new();
@@ -1762,7 +1761,7 @@ fn layout_grid(
 
     let n = filtered.len();
     let cols = (n as f64).sqrt().ceil() as usize;
-    let rows = (n + cols - 1) / cols;
+    let rows = n.div_ceil(cols);
 
     // First pass: compute max cell size
     let mut max_cell_width = 0.0f64;
@@ -2487,7 +2486,7 @@ pub fn resolve_constrain_statements_two_phase(
         let pre_count = collector.constraints.len();
         collector
             .resolve_deferred_anchors(result)
-            .map_err(|e| LayoutError::ValidationError(e))?;
+            .map_err(LayoutError::ValidationError)?;
 
         // All newly resolved anchor constraints are treated as global
         // (they reference template instance anchor positions which are cross-template)
@@ -2581,12 +2580,12 @@ pub fn resolve_constrain_statements(
         // elements are fixed (REQUIRED), preventing nondeterministic pivot choices.
         let target_vars: std::collections::HashSet<(String, LayoutProperty)> = internal_constraints
             .iter()
-            .filter_map(|c| get_constraint_target_var(c))
+            .filter_map(get_constraint_target_var)
             .collect();
 
         let referenced_elements: std::collections::HashSet<String> = internal_constraints
             .iter()
-            .flat_map(|c| get_constraint_referenced_elements(c))
+            .flat_map(get_constraint_referenced_elements)
             .collect();
 
         let mut internal_solver = ConstraintSolver::new();
@@ -2663,7 +2662,7 @@ pub fn resolve_constrain_statements(
         let pre_count = collector.constraints.len();
         collector
             .resolve_deferred_anchors(result)
-            .map_err(|e| LayoutError::ValidationError(e))?;
+            .map_err(LayoutError::ValidationError)?;
 
         // Resolved anchor constraints are global (cross-template)
         external_constraints.extend(collector.constraints[pre_count..].iter().cloned());
@@ -2676,14 +2675,14 @@ pub fn resolve_constrain_statements(
         // We only want to move the specific property that is targeted
         let target_vars: std::collections::HashSet<(String, LayoutProperty)> = external_constraints
             .iter()
-            .filter_map(|c| get_constraint_target_var(c))
+            .filter_map(get_constraint_target_var)
             .collect();
 
         // Collect all elements referenced in external constraints
         // We need position variables for ALL of them, not just root elements
         let referenced_elements: std::collections::HashSet<String> = external_constraints
             .iter()
-            .flat_map(|c| get_constraint_referenced_elements(c))
+            .flat_map(get_constraint_referenced_elements)
             .collect();
 
         let mut external_solver = ConstraintSolver::new();
@@ -2824,7 +2823,7 @@ fn recompute_builtin_anchors(result: &mut LayoutResult, skip: Option<&HashSet<St
 
     // Update anchors in the HashMap (used for connection routing)
     for (id, elem) in result.elements.iter_mut() {
-        if skip.map_or(false, |s| s.contains(id)) {
+        if skip.is_some_and(|s| s.contains(id)) {
             continue;
         }
         elem.anchors
@@ -2837,7 +2836,7 @@ fn recompute_builtin_anchors_recursive(elem: &mut ElementLayout, skip: Option<&H
     let should_skip = elem
         .id
         .as_ref()
-        .map(|id| skip.map_or(false, |s| s.contains(id.as_str())))
+        .map(|id| skip.is_some_and(|s| s.contains(id.as_str())))
         .unwrap_or(false);
     if !should_skip {
         elem.anchors
@@ -2870,7 +2869,7 @@ fn recompute_anchors_in_statements(
             Statement::Group(g) => {
                 if !g.anchors.is_empty() {
                     if let Some(group_name) = g.name.as_ref().map(|n| n.node.as_str()) {
-                        if !skip.map_or(false, |s| s.contains(group_name)) {
+                        if !skip.is_some_and(|s| s.contains(group_name)) {
                             recompute_group_anchors(result, group_name, &g.anchors);
                         }
                     }

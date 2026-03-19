@@ -94,6 +94,7 @@ impl SvgBuilder {
     }
 
     /// Add a rectangle element
+    #[allow(clippy::too_many_arguments)]
     pub fn add_rect(
         &mut self,
         id: Option<&str>,
@@ -176,6 +177,7 @@ impl SvgBuilder {
     }
 
     /// Add an ellipse element
+    #[allow(clippy::too_many_arguments)]
     pub fn add_ellipse(
         &mut self,
         id: Option<&str>,
@@ -264,6 +266,7 @@ impl SvgBuilder {
     }
 
     /// Add a line element
+    #[allow(clippy::too_many_arguments)]
     pub fn add_line(
         &mut self,
         id: Option<&str>,
@@ -296,6 +299,7 @@ impl SvgBuilder {
     }
 
     /// Add an image element for raster images
+    #[allow(clippy::too_many_arguments)]
     pub fn add_image(
         &mut self,
         id: Option<&str>,
@@ -349,6 +353,7 @@ impl SvgBuilder {
     }
 
     /// Add a text shape element (with id, classes, and dominant-baseline for vertical centering)
+    #[allow(clippy::too_many_arguments)]
     pub fn add_text_element(
         &mut self,
         id: Option<&str>,

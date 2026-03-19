@@ -174,14 +174,14 @@ where
         just(Token::Text)
             .map_with(|_, e| Spanned::new(Identifier::new("text"), span_range(&e.span()))),
         // Regular identifier
-        identifier.clone(),
+        identifier,
     ));
 
     // Parse a symbolic color: category(-variant)?(-lightness)?
     // e.g., foreground, foreground-1, text-dark, accent-2-light
     let symbolic_color = color_category
-        .then(just(Token::Minus).ignore_then(number.clone()).or_not())
-        .then(just(Token::Minus).ignore_then(identifier.clone()).or_not())
+        .then(just(Token::Minus).ignore_then(number).or_not())
+        .then(just(Token::Minus).ignore_then(identifier).or_not())
         .try_map(|((cat_id, variant_num), lightness_id), span| {
             // Check if this is a valid symbolic color category
             if let Some(category) = is_color_category(&cat_id.node.0) {
@@ -327,7 +327,7 @@ where
         just(Token::Polygon).to(ShapeType::Polygon),
         just(Token::Line).to(ShapeType::Line),
         just(Token::Icon)
-            .ignore_then(string_literal.clone())
+            .ignore_then(string_literal)
             .map(|s| ShapeType::Icon { icon_name: s.node }),
         just(Token::Text)
             .ignore_then(string_literal)
@@ -372,7 +372,6 @@ where
     //   - `element` -> AnchorReference with anchor=None
     //   - `element.anchor_name` -> AnchorReference with anchor=Some
     let anchor_reference = identifier
-        .clone()
         .then(just(Token::Dot).ignore_then(anchor_name).or_not())
         .map(|(element, anchor_opt)| match anchor_opt {
             Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
@@ -435,8 +434,8 @@ where
     // - `place a [x: 10]` - position offset only
     // - `place a right-of b [x: 10]` - relational with offset
     let constraint_decl = just(Token::Place)
-        .ignore_then(identifier.clone())
-        .then(position_relation.then(identifier.clone()).or_not())
+        .ignore_then(identifier)
+        .then(position_relation.then(identifier).or_not())
         .then(modifier_block.clone().or_not())
         .map(|((subject, rel_anchor), mods)| {
             let (relation, anchor) = match rel_anchor {
@@ -455,7 +454,6 @@ where
     // Element path parser: identifier { "." identifier }
     // e.g., "a", "group1.item", "outer.inner.shape"
     let _element_path = identifier
-        .clone()
         .separated_by(just(Token::Dot))
         .at_least(1)
         .collect::<Vec<_>>()
@@ -491,7 +489,7 @@ where
             Spanned::new(Identifier::new("vertical_center"), span_range(&e.span()))
         }),
         // Regular identifier
-        identifier.clone(),
+        identifier,
     ));
 
     let property_ref = path_or_prop_segment
@@ -519,12 +517,8 @@ where
 
     // Parse offset: + number or - number
     let offset = choice((
-        just(Token::Plus)
-            .ignore_then(number.clone())
-            .map(|n| n.node),
-        just(Token::Minus)
-            .ignore_then(number.clone())
-            .map(|n| -n.node),
+        just(Token::Plus).ignore_then(number).map(|n| n.node),
+        just(Token::Minus).ignore_then(number).map(|n| -n.node),
     ));
 
     // Constraint expression parsers
@@ -535,9 +529,9 @@ where
         .then_ignore(just(Token::Equals))
         .then_ignore(just(Token::Midpoint))
         .then_ignore(just(Token::ParenOpen))
-        .then(identifier.clone())
+        .then(identifier)
         .then_ignore(just(Token::Comma))
-        .then(identifier.clone())
+        .then(identifier)
         .then_ignore(just(Token::ParenClose))
         .then(offset.clone().or_not())
         .map(|(((target, a), b), off)| ConstraintExpr::Midpoint {
@@ -549,11 +543,9 @@ where
 
     // Contains: container contains a, b, c [padding: N]
     let contains_expr = identifier
-        .clone()
         .then_ignore(just(Token::Contains))
         .then(
             identifier
-                .clone()
                 .separated_by(just(Token::Comma))
                 .at_least(1)
                 .collect::<Vec<_>>(),
@@ -584,7 +576,7 @@ where
     let ge_expr = property_ref
         .clone()
         .then_ignore(just(Token::GreaterOrEqual))
-        .then(just(Token::Minus).or_not().then(number.clone()))
+        .then(just(Token::Minus).or_not().then(number))
         .map(|(left, (neg, n))| {
             let value = if neg.is_some() { -n.node } else { n.node };
             ConstraintExpr::GreaterOrEqual { left, value }
@@ -593,7 +585,7 @@ where
     let le_expr = property_ref
         .clone()
         .then_ignore(just(Token::LessOrEqual))
-        .then(just(Token::Minus).or_not().then(number.clone()))
+        .then(just(Token::Minus).or_not().then(number))
         .map(|(left, (neg, n))| {
             let value = if neg.is_some() { -n.node } else { n.node };
             ConstraintExpr::LessOrEqual { left, value }
@@ -614,13 +606,10 @@ where
                 }
             })
             // Or just a constant number
-            .or(just(Token::Minus)
-                .or_not()
-                .then(number.clone())
-                .map(|(neg, n)| {
-                    let value = if neg.is_some() { -n.node } else { n.node };
-                    ConstraintExprKind::Constant(value)
-                })),
+            .or(just(Token::Minus).or_not().then(number).map(|(neg, n)| {
+                let value = if neg.is_some() { -n.node } else { n.node };
+                ConstraintExprKind::Constant(value)
+            })),
     );
 
     // Build the final constraint expression from equality
@@ -655,7 +644,6 @@ where
     let export_decl = just(Token::Export)
         .ignore_then(
             identifier
-                .clone()
                 .separated_by(just(Token::Comma))
                 .at_least(1)
                 .collect::<Vec<_>>(),
@@ -664,7 +652,6 @@ where
 
     // Parameter definition: name: default_value
     let param_def = identifier
-        .clone()
         .then_ignore(just(Token::Colon))
         .then(style_value.clone())
         .map(|(name, default_value)| ParameterDef {
@@ -683,9 +670,9 @@ where
 
     // File template: template "name" from "path"
     let file_template = just(Token::Template)
-        .ignore_then(string_literal.clone())
+        .ignore_then(string_literal)
         .then_ignore(just(Token::From))
-        .then(string_literal.clone())
+        .then(string_literal)
         .map(|(name, path)| {
             let path_lower = path.node.to_lowercase();
             let source_type = if path_lower.ends_with(".svg") {
@@ -725,42 +712,42 @@ where
         // Position specs
         just(Token::Ident("x".into()))
             .ignore_then(just(Token::Colon))
-            .ignore_then(just(Token::Minus).or_not().then(number.clone()))
+            .ignore_then(just(Token::Minus).or_not().then(number))
             .map(|(neg, n)| {
                 let val = if neg.is_some() { -n.node } else { n.node };
                 ("x", ParsedModifierValue::Number(val))
             }),
         just(Token::Ident("y".into()))
             .ignore_then(just(Token::Colon))
-            .ignore_then(just(Token::Minus).or_not().then(number.clone()))
+            .ignore_then(just(Token::Minus).or_not().then(number))
             .map(|(neg, n)| {
                 let val = if neg.is_some() { -n.node } else { n.node };
                 ("y", ParsedModifierValue::Number(val))
             }),
         just(Token::Right)
             .ignore_then(just(Token::Colon))
-            .ignore_then(number.clone())
+            .ignore_then(number)
             .map(|n| ("right", ParsedModifierValue::Number(n.node))),
         just(Token::Left)
             .ignore_then(just(Token::Colon))
-            .ignore_then(number.clone())
+            .ignore_then(number)
             .map(|n| ("left", ParsedModifierValue::Number(n.node))),
         just(Token::Up)
             .ignore_then(just(Token::Colon))
-            .ignore_then(number.clone())
+            .ignore_then(number)
             .map(|n| ("up", ParsedModifierValue::Number(n.node))),
         just(Token::Down)
             .ignore_then(just(Token::Colon))
-            .ignore_then(number.clone())
+            .ignore_then(number)
             .map(|n| ("down", ParsedModifierValue::Number(n.node))),
         // Arc specs
         just(Token::Ident("radius".into()))
             .ignore_then(just(Token::Colon))
-            .ignore_then(number.clone())
+            .ignore_then(number)
             .map(|n| ("radius", ParsedModifierValue::Number(n.node))),
         just(Token::Ident("bulge".into()))
             .ignore_then(just(Token::Colon))
-            .ignore_then(just(Token::Minus).or_not().then(number.clone()))
+            .ignore_then(just(Token::Minus).or_not().then(number))
             .map(|(neg, n)| {
                 let val = if neg.is_some() { -n.node } else { n.node };
                 ("bulge", ParsedModifierValue::Number(val))
@@ -779,7 +766,7 @@ where
         // Feature 008: via reference for curve steering vertex
         just(Token::Ident("via".into()))
             .ignore_then(just(Token::Colon))
-            .ignore_then(identifier.clone())
+            .ignore_then(identifier)
             .map(|id| ("via", ParsedModifierValue::Identifier(id))),
     ))
     .boxed(); // boxed() for faster compilation (chumsky trait solving)
@@ -815,7 +802,7 @@ where
 
     // Parse: vertex name [position]?
     let vertex_decl = just(Token::Vertex)
-        .ignore_then(identifier.clone())
+        .ignore_then(identifier)
         .then(path_modifier_block.clone().or_not())
         .map_with(|(name, mods), e| {
             let position = mods.and_then(|m| {
@@ -833,7 +820,7 @@ where
 
     // Parse: line_to target [position]?
     let line_to_decl = just(Token::LineTo)
-        .ignore_then(identifier.clone())
+        .ignore_then(identifier)
         .then(path_modifier_block.clone().or_not())
         .map_with(|(target, mods), e| {
             let position = mods.and_then(|m| {
@@ -851,7 +838,7 @@ where
 
     // Parse: arc_to target [position, radius/bulge, sweep]?
     let arc_to_decl = just(Token::ArcTo)
-        .ignore_then(identifier.clone())
+        .ignore_then(identifier)
         .then(path_modifier_block.clone().or_not())
         .map_with(|(target, mods), e| {
             let (position, params) = mods
@@ -869,7 +856,7 @@ where
 
     // Parse: curve_to target [via: control, x: 100, y: 50]? (Feature 008)
     let curve_to_decl = just(Token::CurveTo)
-        .ignore_then(identifier.clone())
+        .ignore_then(identifier)
         .then(path_modifier_block.clone().or_not())
         .map_with(|(target, mods), e| {
             let (position, via) = mods
@@ -919,7 +906,7 @@ where
                 .map_with(|s, e| Spanned::new(Identifier::new(s), span_range(&e.span())))
                 .or_not(),
         )
-        .then(identifier.clone().or_not())
+        .then(identifier.or_not())
         .then(modifier_block.clone().or_not())
         .then(path_body)
         .map(|(((label, name), mods), body)| {
@@ -992,7 +979,7 @@ where
 
         // Inline template: template "name" (params) { body }
         let inline_template = just(Token::Template)
-            .ignore_then(string_literal.clone())
+            .ignore_then(string_literal)
             .then(param_list.clone())
             .then(
                 stmt.clone()
@@ -1018,8 +1005,7 @@ where
         // where the first identifier is the template name and second is instance name.
         // Template instances will be distinguished from connections by not having ->/<- operators.
         let template_instance = identifier
-            .clone()
-            .then(identifier.clone())
+            .then(identifier)
             .then(modifier_block.clone().or_not())
             .try_map(|((template_name, instance_name), mods), _span| {
                 // Convert modifiers to argument list
@@ -1066,7 +1052,7 @@ where
             just(Token::Top).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Up)),
             just(Token::Bottom).map(|_| AnchorDirectionSpec::Cardinal(CardinalDirection::Down)),
             // Numeric angle
-            number.clone().map(|n| AnchorDirectionSpec::Angle(n.node)),
+            number.map(|n| AnchorDirectionSpec::Angle(n.node)),
         ));
 
         // Parse anchor position: element.property or element.property +/- offset
@@ -1074,12 +1060,8 @@ where
             .clone()
             .then(
                 choice((
-                    just(Token::Plus)
-                        .ignore_then(number.clone())
-                        .map(|n| n.node),
-                    just(Token::Minus)
-                        .ignore_then(number.clone())
-                        .map(|n| -n.node),
+                    just(Token::Plus).ignore_then(number).map(|n| n.node),
+                    just(Token::Minus).ignore_then(number).map(|n| -n.node),
                 ))
                 .or_not(),
             )
@@ -1107,7 +1089,7 @@ where
         ));
 
         let anchor_decl = just(Token::Anchor)
-            .ignore_then(identifier.clone())
+            .ignore_then(identifier)
             .then(
                 anchor_modifier
                     .separated_by(just(Token::Comma))
