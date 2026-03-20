@@ -21,7 +21,7 @@ pub mod template;
 pub use error::ParseError;
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
-pub use renderer::{render_svg, render_svg_with_stylesheet, SvgConfig};
+pub use renderer::{render_svg, render_svg_with_keyframes, render_svg_with_stylesheet, SvgConfig};
 pub use template::{resolve_templates, TemplateError, TemplateRegistry};
 
 use thiserror::Error;
@@ -96,6 +96,10 @@ pub struct RenderConfig {
     pub template_base_path: Option<std::path::PathBuf>,
     /// How image href paths are emitted in SVG output
     pub image_href_mode: ImageHrefMode,
+    /// Render a single keyframe as static SVG (by index or name)
+    pub frame: Option<String>,
+    /// Embed minimal JS for animated playback
+    pub animate: bool,
 }
 
 impl Default for RenderConfig {
@@ -111,6 +115,8 @@ impl Default for RenderConfig {
             resolve_templates: true, // Templates are resolved by default
             template_base_path: None,
             image_href_mode: ImageHrefMode::default(),
+            frame: None,
+            animate: false,
         }
     }
 }
@@ -448,6 +454,11 @@ fn render_pipeline(
         eprintln!("====================");
     }
 
+    // Keyframe processing (Feature 011)
+    let keyframes = layout::keyframe::extract_keyframes(&doc);
+    let frame_states = layout::keyframe::compute_frame_states(&keyframes);
+    let frame_diffs = layout::keyframe::compute_frame_diffs(&result, &frame_states, &doc, &config.layout);
+
     // Lint pass
     let lint_warnings = if config.lint {
         layout::lint::check(&result, &doc)
@@ -455,16 +466,148 @@ fn render_pipeline(
         Vec::new()
     };
 
+    // Mutual exclusion check (Feature 011)
+    if config.frame.is_some() && config.animate {
+        return Err(RenderError::Layout(layout::LayoutError::validation_error(
+            "--frame and --animate are mutually exclusive",
+        )));
+    }
+
     // Generate SVG with stylesheet
-    let svg = render_svg_with_stylesheet(
-        &result,
-        &config.svg,
-        &config.stylesheet,
-        config.custom_css.as_deref(),
-        config.debug,
-    );
+    let svg = if let Some(frame_selector) = &config.frame {
+        // Single frame rendering: find the frame, render as static SVG
+        if frame_states.is_empty() {
+            return Err(RenderError::Layout(layout::LayoutError::validation_error(
+                "--frame requires keyframes in the input",
+            )));
+        }
+        let frame_idx = resolve_frame_index(frame_selector, &frame_states)?;
+        let state = &frame_states[frame_idx];
+
+        // Apply transforms if present, then remove hidden elements
+        let mut frame_result = if !state.transforms.is_empty() {
+            layout::keyframe::resolve_frame_for_static(
+                &result, state, &doc, &config.layout,
+            ).unwrap_or_else(|| result.clone())
+        } else {
+            result.clone()
+        };
+        frame_result.root_elements = filter_visible_elements(&frame_result.root_elements, &state.hidden_elements);
+        frame_result.connections.retain(|c| {
+            c.name.as_ref().map_or(true, |n| !state.hidden_connections.contains(&n.0))
+        });
+
+        render_svg_with_stylesheet(
+            &frame_result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+        )
+    } else if !frame_diffs.is_empty() {
+        let mut svg = render_svg_with_keyframes(
+            &result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+            &frame_states,
+            &frame_diffs,
+        );
+
+        // Inject animate JS before closing </svg> tag
+        if config.animate {
+            let js = generate_animate_js(&frame_states);
+            if let Some(pos) = svg.rfind("</svg>") {
+                svg.insert_str(pos, &js);
+            }
+        }
+
+        svg
+    } else {
+        render_svg_with_stylesheet(
+            &result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+        )
+    };
 
     Ok((svg, lint_warnings))
+}
+
+/// Resolve a frame selector (index or name) to an index
+fn resolve_frame_index(
+    selector: &str,
+    frame_states: &[layout::keyframe::FrameState],
+) -> Result<usize, RenderError> {
+    // Try as index first
+    if let Ok(idx) = selector.parse::<usize>() {
+        if idx < frame_states.len() {
+            return Ok(idx);
+        }
+        return Err(RenderError::Layout(layout::LayoutError::validation_error(
+            &format!("frame index {} out of range (0-{})", idx, frame_states.len() - 1),
+        )));
+    }
+    // Try as name
+    for (i, state) in frame_states.iter().enumerate() {
+        if state.name == selector {
+            return Ok(i);
+        }
+    }
+    Err(RenderError::Layout(layout::LayoutError::validation_error(
+        &format!("unknown frame '{}'. Available: {}", selector,
+            frame_states.iter().map(|s| s.name.as_str()).collect::<Vec<_>>().join(", ")),
+    )))
+}
+
+/// Remove hidden elements from layout for static frame rendering.
+/// Removes matching elements entirely (including labels) for clean single-frame output.
+fn filter_visible_elements(
+    elements: &[layout::ElementLayout],
+    hidden: &std::collections::HashSet<String>,
+) -> Vec<layout::ElementLayout> {
+    elements
+        .iter()
+        .filter(|e| {
+            e.id.as_ref().map_or(true, |id| !hidden.contains(&id.0))
+        })
+        .cloned()
+        .map(|mut e| {
+            e.children = filter_visible_elements(&e.children, hidden);
+            e
+        })
+        .collect()
+}
+
+/// Generate minimal JS for animated playback
+fn generate_animate_js(frame_states: &[layout::keyframe::FrameState]) -> String {
+    let frame_names: Vec<&str> = frame_states.iter().map(|s| s.name.as_str()).collect();
+    format!(
+        r#"<script>
+(function() {{
+  var frames = {:?};
+  var current = 0;
+  var svg = document.querySelector('svg[data-frames]');
+  function showFrame(i) {{
+    frames.forEach(function(f) {{ svg.classList.remove('frame-' + f); }});
+    svg.classList.add('frame-' + frames[i]);
+  }}
+  showFrame(0);
+  svg.addEventListener('click', function() {{
+    current = (current + 1) % frames.length;
+    showFrame(current);
+  }});
+  setInterval(function() {{
+    current = (current + 1) % frames.length;
+    showFrame(current);
+  }}, 2000);
+}})();
+</script>"#,
+        frame_names
+    )
 }
 
 #[cfg(test)]

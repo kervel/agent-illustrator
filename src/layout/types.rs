@@ -613,7 +613,7 @@ impl ResolvedStyles {
     /// - Hex colors: pass through (e.g., `#ff0000`)
     /// - Named colors: pass through (e.g., `red`)
     /// - Symbolic colors: convert to CSS variable reference (e.g., `var(--foreground-1)`)
-    fn color_to_css(value: &StyleValue) -> Option<String> {
+    pub fn color_to_css(value: &StyleValue) -> Option<String> {
         match value {
             StyleValue::Color(color_value) => match color_value {
                 // Hex and named colors pass through unchanged
@@ -716,6 +716,8 @@ pub struct ConnectionLayout {
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,
     pub routing_mode: RoutingMode, // Feature 008: track routing mode for rendering
+    /// Optional name for referencing in keyframes (Feature 011)
+    pub name: Option<Identifier>,
 }
 
 /// The complete result of layout computation
@@ -751,6 +753,19 @@ impl LayoutResult {
         // Also index children recursively
         self.index_children(&element);
         self.root_elements.push(element);
+    }
+
+    /// Rebuild the elements index from root_elements tree.
+    /// Call after modifying root_elements directly (e.g., keyframe transforms).
+    pub fn rebuild_index(&mut self) {
+        self.elements.clear();
+        let roots = self.root_elements.clone();
+        for elem in &roots {
+            if let Some(id) = &elem.id {
+                self.elements.insert(id.0.clone(), elem.clone());
+            }
+            self.index_children(elem);
+        }
     }
 
     fn index_children(&mut self, element: &ElementLayout) {

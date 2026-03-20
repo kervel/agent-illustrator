@@ -381,6 +381,9 @@ where
 
     // Connection declaration (supports chained: a -> b -> c [modifiers])
     // Feature 009: Now supports anchor syntax (a.right -> b.left)
+    // Feature 011: Now supports named connections (a -> b as name [modifiers])
+    let connection_name = just(Token::As).ignore_then(identifier.clone());
+
     let connection_decl = anchor_reference
         .clone()
         .then(
@@ -390,8 +393,9 @@ where
                 .at_least(1)
                 .collect::<Vec<_>>(),
         )
+        .then(connection_name.or_not())
         .then(modifier_block.clone().or_not())
-        .map(|((first, segments), modifiers)| {
+        .map(|(((first, segments), name), modifiers)| {
             let modifiers = modifiers.unwrap_or_default();
             let len = segments.len();
             let mut result = Vec::with_capacity(len);
@@ -402,8 +406,9 @@ where
                     from: from.clone(),
                     to: to.clone(),
                     direction,
-                    // Only the last segment gets modifiers
+                    // Only the last segment gets modifiers and name
                     modifiers: if is_last { modifiers.clone() } else { vec![] },
+                    name: if is_last { name.clone() } else { None },
                 });
                 from = to;
             }
@@ -1122,6 +1127,68 @@ where
                 }))
             });
 
+        // Keyframe operations (Feature 011)
+        let show_op = just(Token::Show)
+            .ignore_then(
+                identifier
+                    .clone()
+                    .separated_by(just(Token::Comma))
+                    .at_least(1)
+                    .collect::<Vec<_>>(),
+            )
+            .map_with(|targets, e| Spanned::new(KeyframeOp::Show(targets), span_range(&e.span())));
+
+        let hide_op = just(Token::Hide)
+            .ignore_then(
+                identifier
+                    .clone()
+                    .separated_by(just(Token::Comma))
+                    .at_least(1)
+                    .collect::<Vec<_>>(),
+            )
+            .map_with(|targets, e| Spanned::new(KeyframeOp::Hide(targets), span_range(&e.span())));
+
+        let transform_op = just(Token::Transform)
+            .ignore_then(identifier.clone())
+            .then(modifier_block.clone())
+            .map_with(|(target, modifiers), e| {
+                Spanned::new(
+                    KeyframeOp::Transform {
+                        target,
+                        modifiers,
+                    },
+                    span_range(&e.span()),
+                )
+            });
+
+        let keyframe_op = choice((show_op, hide_op, transform_op));
+
+        // Parse optional [no_resolve] modifier on keyframes
+        let no_resolve_flag = just(Token::BracketOpen)
+            .ignore_then(identifier.clone().try_map(|id, span| {
+                if id.node.0 == "no_resolve" {
+                    Ok(true)
+                } else {
+                    Err(chumsky::error::Rich::custom(span, format!("expected 'no_resolve', got '{}'", id.node.0)))
+                }
+            }))
+            .then_ignore(just(Token::BracketClose));
+
+        let keyframe_decl = just(Token::Keyframe)
+            .ignore_then(string_literal.clone())
+            .then(no_resolve_flag.or_not())
+            .then(
+                keyframe_op
+                    .repeated()
+                    .collect::<Vec<_>>()
+                    .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
+            )
+            .map(|((name, no_resolve), operations)| KeyframeDecl {
+                name,
+                operations,
+                no_resolve: no_resolve.unwrap_or(false),
+            });
+
         // All statements
         // Note: Order matters! More specific patterns should come first.
         // - constrain_decl before others (starts with 'constrain')
@@ -1136,6 +1203,7 @@ where
         choice((
             constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
+            keyframe_decl.map(Statement::Keyframe), // Feature 011: before templates
             file_template.clone(),
             inline_template,
             export_decl.clone().map(Statement::Export),

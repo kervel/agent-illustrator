@@ -1042,6 +1042,7 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                             styles,
                             label,
                             routing_mode,
+                            name: conn.name.as_ref().map(|n| n.node.clone()),
                         });
                     }
                 }

@@ -295,7 +295,8 @@ fn collect_element_template_mapping(
         | Statement::TemplateDecl(_)
         | Statement::TemplateInstance(_)
         | Statement::Export(_)
-        | Statement::AnchorDecl(_) => {}
+        | Statement::AnchorDecl(_)
+        | Statement::Keyframe(_) => {}
     }
 }
 
@@ -771,7 +772,8 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
             Statement::Connection(_)
             | Statement::Constraint(_)
             | Statement::Constrain(_)
-            | Statement::Label(_) => continue,
+            | Statement::Label(_)
+            | Statement::Keyframe(_) => continue,
             _ => {
                 let element = layout_statement(&stmt.node, position, config);
                 position.y += element.bounds.height + config.element_spacing;
@@ -908,6 +910,10 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // Template instances should be expanded before layout
             // After template resolution, instances are replaced with their expanded content
             unreachable!("Template instances should be expanded before layout")
+        }
+        Statement::Keyframe(_) => {
+            // Keyframes are handled after layout, not during layout
+            unreachable!("Keyframes should be filtered out before layout")
         }
     }
 }

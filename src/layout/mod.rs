@@ -7,6 +7,7 @@ pub mod collector;
 pub mod config;
 pub mod engine;
 pub mod error;
+pub mod keyframe;
 pub mod lint;
 pub mod routing;
 pub mod solver;
@@ -84,8 +85,16 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Labels can contain elements that define identifiers
             collect_ids_from_statement(inner, ids);
         }
-        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) => {
-            // Connections and constraints don't define new identifiers
+        Statement::Connection(conns) => {
+            // Named connections define identifiers (Feature 011)
+            for conn in conns {
+                if let Some(name) = &conn.name {
+                    ids.insert(name.node.0.clone());
+                }
+            }
+        }
+        Statement::Constraint(_) | Statement::Constrain(_) => {
+            // Constraints don't define new identifiers
         }
         Statement::TemplateDecl(t) => {
             // Template declarations define new template names (not element identifiers)
@@ -96,8 +105,8 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Template instances define new element identifiers
             ids.insert(inst.instance_name.node.0.clone());
         }
-        Statement::Export(_) | Statement::AnchorDecl(_) => {
-            // Exports and anchor declarations don't define new element identifiers
+        Statement::Export(_) | Statement::AnchorDecl(_) | Statement::Keyframe(_) => {
+            // Exports, anchor declarations, and keyframes don't define new element identifiers
         }
     }
 }
@@ -179,6 +188,34 @@ fn validate_refs_in_statement(
         }
         Statement::Export(_) | Statement::AnchorDecl(_) => {
             // Exports and anchor declarations are validated during template resolution
+        }
+        Statement::Keyframe(kf) => {
+            // Validate that all element/connection references in keyframe ops exist
+            for op in &kf.operations {
+                match &op.node {
+                    crate::parser::ast::KeyframeOp::Show(targets)
+                    | crate::parser::ast::KeyframeOp::Hide(targets) => {
+                        for target in targets {
+                            if !defined.contains(&target.node.0) {
+                                return Err(LayoutError::UndefinedIdentifier {
+                                    name: target.node.0.clone(),
+                                    span: target.span.clone(),
+                                    suggestions: find_similar(defined, &target.node.0, 2),
+                                });
+                            }
+                        }
+                    }
+                    crate::parser::ast::KeyframeOp::Transform { target, .. } => {
+                        if !defined.contains(&target.node.0) {
+                            return Err(LayoutError::UndefinedIdentifier {
+                                name: target.node.0.clone(),
+                                span: target.span.clone(),
+                                suggestions: find_similar(defined, &target.node.0, 2),
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
     Ok(())
