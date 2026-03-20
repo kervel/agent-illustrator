@@ -62,10 +62,26 @@ impl fmt::Display for LintCategory {
 }
 
 /// Run all lint checks on a completed layout.
+/// If the document contains keyframes, overlap checks run per-frame
+/// with hidden elements excluded.
 pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     let mut warnings = Vec::new();
     let contains_ids = collect_contains_ids(doc);
-    check_overlaps(result, &contains_ids, &mut warnings);
+
+    // Keyframe-aware overlap detection (Feature 011)
+    let keyframes = super::keyframe::extract_keyframes(doc);
+    let frame_states = super::keyframe::compute_frame_states(&keyframes);
+
+    if frame_states.is_empty() {
+        // No keyframes — run overlap checks globally as before
+        check_overlaps(result, &contains_ids, &HashSet::new(), &mut warnings);
+    } else {
+        // Run overlap checks per frame, excluding hidden elements
+        for state in &frame_states {
+            check_overlaps(result, &contains_ids, &state.hidden_elements, &mut warnings);
+        }
+    }
+
     check_contains(result, doc, &mut warnings);
     check_labels(result, &mut warnings);
     check_label_element_overlaps(result, &mut warnings);
@@ -189,13 +205,25 @@ fn collect_contains_ids_from_stmts(
 fn check_overlaps(
     result: &LayoutResult,
     contains_ids: &HashSet<String>,
+    hidden_ids: &HashSet<String>,
     warnings: &mut Vec<LintWarning>,
 ) {
-    // Check root-level siblings against each other
-    check_overlap_siblings(&result.root_elements, None, contains_ids, warnings);
+    // Filter out hidden elements for keyframe-aware overlap detection
+    let visible_roots: Vec<&ElementLayout> = result
+        .root_elements
+        .iter()
+        .filter(|e| {
+            e.id.as_ref()
+                .map_or(true, |id| !hidden_ids.contains(&id.0))
+        })
+        .collect();
 
-    // Then recurse into each element's children
-    for elem in &result.root_elements {
+    // Collect references for sibling check
+    let visible_refs: Vec<ElementLayout> = visible_roots.iter().map(|e| (*e).clone()).collect();
+    check_overlap_siblings(&visible_refs, None, contains_ids, warnings);
+
+    // Then recurse into each visible element's children
+    for elem in &visible_roots {
         check_overlaps_recursive(elem, None, contains_ids, warnings);
     }
 }
