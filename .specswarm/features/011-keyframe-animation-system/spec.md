@@ -15,6 +15,14 @@ The keyframe system adds a declarative animation primitive to the language. All 
 
 This design ensures: (1) agents can verify each frame as a static snapshot, (2) the linter can check per-frame visibility to avoid false positive overlap warnings, and (3) smooth CSS transitions eliminate jarring jumps between frames.
 
+## Clarifications
+
+### Session 2026-03-20
+- Q: Should connections to transformed elements auto-reroute, or only if explicitly mentioned? → A: Auto-reroute always. Any connection touching a transformed element gets rerouted, even if the connection isn't mentioned in the keyframe.
+- Q: What happens when a keyframe references a nonexistent element? → A: Hard error. Parse/compile error, refuse to render.
+- Q: Can transform and hide be combined on the same element in one keyframe? → A: Yes, both apply. Transform sets position/style, hide sets opacity to 0. Both participate in the solver. CSS transitions can animate slide-then-fade.
+- Q: Should the SVG include a built-in frame-switching mechanism? → A: Opt-in embedded JS. A `--animate` flag embeds a minimal inline script for click/timer playback. Without the flag, bare SVG with frame classes only.
+
 ## Design Decisions from Brainstorming
 
 These decisions were made during the initial design conversation and should be treated as requirements:
@@ -79,6 +87,8 @@ A user with existing AIL files (no keyframes) sees no change in behavior. All el
 - `transform <element_name> [modifier: value, ...]` — apply per-frame style/position overrides
 - Transform modifiers: any existing style modifier (rotation, fill, opacity, x, y, etc.)
 - Show/hide accept comma-separated lists: `hide a, b, c`
+- Transform and hide may be combined on the same element in one keyframe: transform sets position/style, hide sets opacity to 0. Both participate in the solver. This enables CSS-animated "slide out then disappear" effects.
+- Referencing a nonexistent element or connection name in any keyframe operation is a hard error (parse/compile failure, no SVG output)
 
 ### FR4: Cumulative state model
 
@@ -92,8 +102,8 @@ A user with existing AIL files (no keyframes) sees no change in behavior. All el
 - Each keyframe gets a full constraint resolution pass
 - Transform operations that affect position (x, y) or geometry (rotation, width, height) participate in the solver
 - Elements not mentioned in the keyframe are pinned to their position from the previous frame
-- Connection routing runs per-frame using each frame's solved positions
-- This ensures arrows re-route correctly when elements move or rotate
+- All connections (named and unnamed) are rerouted per-frame using each frame's solved positions, regardless of whether the connection is mentioned in the keyframe
+- This ensures arrows always point correctly when any connected element moves or rotates
 
 ### FR6: Diff-based SVG output
 
@@ -118,6 +128,13 @@ A user with existing AIL files (no keyframes) sees no change in behavior. All el
 - Lint output identifies which frame(s) each warning applies to
 - `--lint --frame N` checks only frame N
 
+### FR9: Opt-in embedded playback
+
+- `--animate` CLI flag embeds a minimal inline `<script>` in the SVG for self-contained playback
+- The script cycles through frames on a timer (default ~2s per frame) and/or on click
+- Without `--animate`, the SVG contains only frame classes and data attributes — no JS
+- `--animate` and `--frame` are mutually exclusive (error if both specified)
+
 ## Key Entities
 
 - **Keyframe** — A named temporal state with show/hide/transform operations
@@ -136,7 +153,7 @@ A user with existing AIL files (no keyframes) sees no change in behavior. All el
 ## Assumptions
 
 - Five to ten keyframes per diagram is the typical range; performance of N solver passes is acceptable for N < 50
-- CSS transitions (user-authored) are sufficient for smooth inter-frame animation; no built-in transition system is needed
-- Frame switching mechanism (JS timer, CSS animation, button) is external to the generated SVG
+- CSS transitions (user-authored) are sufficient for smooth inter-frame animation; the built-in `--animate` JS is a convenience, not a requirement
+- Frame switching is external by default; `--animate` provides an opt-in embedded alternative
 - The `as` keyword for naming connections does not conflict with existing syntax
 - Per-keyframe constraint solving reuses the existing solver infrastructure with minimal modification (pinning unchanged elements)
