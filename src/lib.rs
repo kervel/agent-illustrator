@@ -484,11 +484,9 @@ fn render_pipeline(
         let frame_idx = resolve_frame_index(frame_selector, &frame_states)?;
         let state = &frame_states[frame_idx];
 
-        // Apply frame visibility: hide elements that are hidden in this frame
+        // Remove hidden elements and connections for clean static frame output
         let mut frame_result = result.clone();
-        for elem in &mut frame_result.root_elements {
-            apply_frame_visibility(elem, &state.hidden_elements);
-        }
+        frame_result.root_elements = filter_visible_elements(&frame_result.root_elements, &state.hidden_elements);
         frame_result.connections.retain(|c| {
             c.name.as_ref().map_or(true, |n| !state.hidden_connections.contains(&n.0))
         });
@@ -559,19 +557,23 @@ fn resolve_frame_index(
     )))
 }
 
-/// Apply frame visibility to an element tree (set opacity: 0 on hidden elements)
-fn apply_frame_visibility(
-    elem: &mut layout::ElementLayout,
+/// Remove hidden elements from layout for static frame rendering.
+/// Removes matching elements entirely (including labels) for clean single-frame output.
+fn filter_visible_elements(
+    elements: &[layout::ElementLayout],
     hidden: &std::collections::HashSet<String>,
-) {
-    if let Some(id) = &elem.id {
-        if hidden.contains(&id.0) {
-            elem.styles.opacity = Some(0.0);
-        }
-    }
-    for child in &mut elem.children {
-        apply_frame_visibility(child, hidden);
-    }
+) -> Vec<layout::ElementLayout> {
+    elements
+        .iter()
+        .filter(|e| {
+            e.id.as_ref().map_or(true, |id| !hidden.contains(&id.0))
+        })
+        .cloned()
+        .map(|mut e| {
+            e.children = filter_visible_elements(&e.children, hidden);
+            e
+        })
+        .collect()
 }
 
 /// Generate minimal JS for animated playback

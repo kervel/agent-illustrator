@@ -510,6 +510,16 @@ impl SvgBuilder {
         self.elements.push(format!("{}</g>", self.indent_str()));
     }
 
+    /// Add a group element with opacity (for hiding keyframe elements)
+    pub fn start_opacity_group(&mut self, opacity: f64) {
+        self.elements.push(format!(
+            r#"{}<g opacity="{}">"#,
+            self.indent_str(),
+            opacity
+        ));
+        self.indent += 1;
+    }
+
     /// Add a group element with optional ID, classes, and transform
     pub fn start_group_with_transform(
         &mut self,
@@ -713,7 +723,8 @@ pub fn render_svg_with_keyframes(
     builder.build(result.bounds)
 }
 
-/// Render an element, marking hidden elements with opacity: 0
+/// Render an element, marking hidden elements with opacity: 0.
+/// Wraps hidden elements in `<g opacity="0">` so shape + label are hidden together.
 fn render_element_with_visibility(
     element: &ElementLayout,
     builder: &mut SvgBuilder,
@@ -721,10 +732,9 @@ fn render_element_with_visibility(
 ) {
     if let Some(id) = &element.id {
         if hidden.contains(&id.0) {
-            // Clone element with opacity: 0
-            let mut hidden_elem = element.clone();
-            hidden_elem.styles.opacity = Some(0.0);
-            render_element(&hidden_elem, builder);
+            builder.start_opacity_group(0.0);
+            render_element(element, builder);
+            builder.end_group();
             return;
         }
     }

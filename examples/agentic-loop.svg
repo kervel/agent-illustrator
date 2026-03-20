@@ -118,16 +118,26 @@
   <text class="ai-label" x="520" y="380" text-anchor="middle" dominant-baseline="middle">Tool (bash)</text>
   <rect id="user" class="ai-shape ai-rect" x="30" y="345" width="180" height="70" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2.5"/>
   <text class="ai-label" x="120" y="380" text-anchor="middle" dominant-baseline="middle">User</text>
-  <rect id="req1_env" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0"/>
-  <text class="ai-label" x="320" y="60" text-anchor="middle" dominant-baseline="middle">system + user msg</text>
-  <rect id="resp1_env" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0"/>
-  <text class="ai-label" x="320" y="60" text-anchor="middle" dominant-baseline="middle">tool_call: bash</text>
-  <rect id="exec_env" class="ai-shape ai-rect" x="420" y="170" width="200" height="100" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="2" opacity="0"/>
-  <text class="ai-label" x="520" y="220" text-anchor="middle" dominant-baseline="middle">$ ls -la</text>
-  <rect id="req2_env" class="ai-shape ai-rect" x="220" y="340" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0"/>
-  <text class="ai-label" x="320" y="380" text-anchor="middle" dominant-baseline="middle">history + result</text>
-  <rect id="resp2_env" class="ai-shape ai-rect" x="20" y="180" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0"/>
-  <text class="ai-label" x="120" y="220" text-anchor="middle" dominant-baseline="middle">text response</text>
+  <g opacity="0">
+    <rect id="req1_env" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0.3"/>
+    <text class="ai-label" x="320" y="60" text-anchor="middle" dominant-baseline="middle">system + user msg</text>
+  </g>
+  <g opacity="0">
+    <rect id="resp1_env" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0.3"/>
+    <text class="ai-label" x="320" y="60" text-anchor="middle" dominant-baseline="middle">tool_call: bash</text>
+  </g>
+  <g opacity="0">
+    <rect id="exec_env" class="ai-shape ai-rect" x="420" y="170" width="200" height="100" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="2" opacity="0.2"/>
+    <text class="ai-label" x="520" y="220" text-anchor="middle" dominant-baseline="middle">$ ls -la</text>
+  </g>
+  <g opacity="0">
+    <rect id="req2_env" class="ai-shape ai-rect" x="220" y="340" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0.3"/>
+    <text class="ai-label" x="320" y="380" text-anchor="middle" dominant-baseline="middle">history + result</text>
+  </g>
+  <g opacity="0">
+    <rect id="resp2_env" class="ai-shape ai-rect" x="20" y="180" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0.3"/>
+    <text class="ai-label" x="120" y="220" text-anchor="middle" dominant-baseline="middle">text response</text>
+  </g>
   <path class="ai-connection conn-send_req1" d="M210 60 L419.2 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-recv_resp1" d="M430 60 L220.8 60" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-exec_tool" d="M120 95 L120 220 L520 220 L520 334.2" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
