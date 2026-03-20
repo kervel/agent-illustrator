@@ -2031,6 +2031,7 @@ mod tests {
             styles: super::super::types::ResolvedStyles::default(),
             label: None,
             routing_mode,
+            name: None,
         }
     }
 

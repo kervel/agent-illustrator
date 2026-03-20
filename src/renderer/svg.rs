@@ -1232,6 +1232,7 @@ mod tests {
             styles: ResolvedStyles::default(),
             label: None,
             routing_mode: RoutingMode::default(),
+            name: None,
         });
         result.compute_bounds();
 

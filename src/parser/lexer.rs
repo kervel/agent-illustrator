@@ -113,6 +113,20 @@ pub enum Token {
     #[token("role")]
     Role,
 
+    // Connection naming keyword
+    #[token("as")]
+    As,
+
+    // Keyframe keywords (Feature 011)
+    #[token("keyframe")]
+    Keyframe,
+    #[token("show")]
+    Show,
+    #[token("hide")]
+    Hide,
+    #[token("transform")]
+    Transform,
+
     // Constraint keywords
     #[token("constrain")]
     Constrain,

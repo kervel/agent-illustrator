@@ -144,6 +144,8 @@ pub enum Statement {
     Export(ExportDecl),
     /// Anchor declaration: `anchor name [position: element.property]` (Feature 009)
     AnchorDecl(AnchorDecl),
+    /// Keyframe declaration: `keyframe "name" { show/hide/transform ... }` (Feature 011)
+    Keyframe(KeyframeDecl),
 }
 
 /// Shape declaration
@@ -185,6 +187,7 @@ pub enum ShapeType {
 
 /// Connection between shapes
 /// Updated in Feature 009 to support anchor references
+/// Updated in Feature 011 to support named connections via `as` syntax
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConnectionDecl {
     /// Source element with optional anchor (e.g., `box_a.right`)
@@ -193,6 +196,8 @@ pub struct ConnectionDecl {
     pub to: AnchorReference,
     pub direction: ConnectionDirection,
     pub modifiers: Vec<Spanned<StyleModifier>>,
+    /// Optional name for referencing in keyframes (e.g., `a -> b as req_arrow`)
+    pub name: Option<Spanned<Identifier>>,
 }
 
 /// Connection directionality
@@ -236,6 +241,28 @@ pub struct GroupDecl {
     pub anchors: Vec<AnchorDecl>,
     /// Whether this group was created by template expansion (vs user-authored)
     pub is_template_instance: bool,
+}
+
+/// Keyframe declaration (Feature 011)
+/// `keyframe "name" { show a, b; hide c; transform d [rotation: 45] }`
+#[derive(Debug, Clone, PartialEq)]
+pub struct KeyframeDecl {
+    pub name: Spanned<String>,
+    pub operations: Vec<Spanned<KeyframeOp>>,
+}
+
+/// Keyframe operation (Feature 011)
+#[derive(Debug, Clone, PartialEq)]
+pub enum KeyframeOp {
+    /// Make elements/connections visible
+    Show(Vec<Spanned<Identifier>>),
+    /// Make elements/connections invisible
+    Hide(Vec<Spanned<Identifier>>),
+    /// Apply per-frame style/position overrides
+    Transform {
+        target: Spanned<Identifier>,
+        modifiers: Vec<Spanned<StyleModifier>>,
+    },
 }
 
 /// Position constraint

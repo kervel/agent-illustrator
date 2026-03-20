@@ -716,6 +716,8 @@ pub struct ConnectionLayout {
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,
     pub routing_mode: RoutingMode, // Feature 008: track routing mode for rendering
+    /// Optional name for referencing in keyframes (Feature 011)
+    pub name: Option<Identifier>,
 }
 
 /// The complete result of layout computation
