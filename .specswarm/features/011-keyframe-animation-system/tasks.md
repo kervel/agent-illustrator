@@ -2,48 +2,48 @@
 
 ## Phase 1: Named Connections
 
-- [ ] 1.1 Add `Token::As` to lexer.rs
-- [ ] 1.2 Add `name: Option<Identifier>` to `ConnectionDecl` in ast.rs
-- [ ] 1.3 Extend connection parser in grammar.rs for `a -> b as name` syntax
-- [ ] 1.4 Propagate connection name through layout engine to `ConnectionLayout`
+- [x] 1.1 Add `Token::As` to lexer.rs
+- [x] 1.2 Add `name: Option<Identifier>` to `ConnectionDecl` in ast.rs
+- [x] 1.3 Extend connection parser in grammar.rs for `a -> b as name` syntax
+- [x] 1.4 Propagate connection name through layout engine to `ConnectionLayout`
 - [ ] 1.5 Add tests for named connection parsing
 - [ ] 1.6 Update grammar.ebnf
 
 ## Phase 2: Keyframe Parsing
 
-- [ ] 2.1 Add tokens: `Keyframe`, `Show`, `Hide`, `Transform` to lexer.rs
-- [ ] 2.2 Add AST types: `KeyframeDecl`, `KeyframeOp` enum (Show/Hide/Transform) to ast.rs
-- [ ] 2.3 Add `Statement::Keyframe(KeyframeDecl)` variant
-- [ ] 2.4 Implement keyframe block parser in grammar.rs
-- [ ] 2.5 Validate references: hard error on nonexistent element/connection names
+- [x] 2.1 Add tokens: `Keyframe`, `Show`, `Hide`, `Transform` to lexer.rs
+- [x] 2.2 Add AST types: `KeyframeDecl`, `KeyframeOp` enum (Show/Hide/Transform) to ast.rs
+- [x] 2.3 Add `Statement::Keyframe(KeyframeDecl)` variant
+- [x] 2.4 Implement keyframe block parser in grammar.rs
+- [x] 2.5 Validate references: hard error on nonexistent element/connection names
 - [ ] 2.6 Add parser tests for keyframe syntax
 - [ ] 2.7 Update grammar.ebnf
 
 ## Phase 3: Frame State Computation
 
-- [ ] 3.1 Add `FrameState` struct (visibility map + transform overrides per element)
-- [ ] 3.2 Implement cumulative state replay (fold keyframes into sequence of FrameStates)
+- [x] 3.1 Add `FrameState` struct (visibility map + transform overrides per element)
+- [x] 3.2 Implement cumulative state replay (fold keyframes into sequence of FrameStates)
 - [ ] 3.3 Implement per-frame constraint solving with pinning (clone layout, apply transforms, re-solve)
 - [ ] 3.4 Implement per-frame connection rerouting
 - [ ] 3.5 Store per-frame LayoutResult snapshots
-- [ ] 3.6 Add tests for cumulative state and per-frame solving
+- [x] 3.6 Add tests for cumulative state and per-frame solving
 
 ## Phase 4: Diff Engine & SVG Output
 
-- [ ] 4.1 Implement diff engine: compare per-frame LayoutResult against frame 0
-- [ ] 4.2 Generate `.frame-<name>` CSS classes with property diffs (x, y, width, height, rotation, opacity, fill, stroke)
-- [ ] 4.3 Render elements at frame-0 positions in SVG body
-- [ ] 4.4 Handle hidden-in-frame-0 elements (inline opacity: 0)
-- [ ] 4.5 Add `data-frames` attribute to SVG root
+- [x] 4.1 Implement diff engine: compare per-frame LayoutResult against frame 0
+- [x] 4.2 Generate `.frame-<name>` CSS classes with property diffs
+- [x] 4.3 Render elements at frame-0 positions in SVG body
+- [x] 4.4 Handle hidden-in-frame-0 elements (inline opacity: 0)
+- [x] 4.5 Add `data-frames` attribute to SVG root
 - [ ] 4.6 Add tests for diff output and CSS generation
 
 ## Phase 5: CLI Integration
 
-- [ ] 5.1 Add `--frame` flag to clap CLI (accepts index or name)
-- [ ] 5.2 Add `--animate` flag to clap CLI
-- [ ] 5.3 Implement single-frame rendering (--frame)
-- [ ] 5.4 Implement embedded JS playback (--animate)
-- [ ] 5.5 Mutual exclusion check (--frame + --animate = error)
+- [x] 5.1 Add `--frame` flag to clap CLI (accepts index or name)
+- [x] 5.2 Add `--animate` flag to clap CLI
+- [x] 5.3 Implement single-frame rendering (--frame)
+- [x] 5.4 Implement embedded JS playback (--animate)
+- [x] 5.5 Mutual exclusion check (--frame + --animate = error)
 - [ ] 5.6 Add CLI integration tests
 
 ## Phase 6: Linter Awareness
