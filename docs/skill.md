@@ -262,6 +262,38 @@ Do not attempt to use these — they will waste iteration cycles:
 
 ---
 
+## Keyframe Animations
+
+Create animated sequences where elements appear/disappear across frames.
+
+### Workflow
+1. Layout all elements globally with constraints
+2. Add `keyframe` blocks to control visibility per frame
+3. Use `--frame N` to verify each frame as a static image
+4. Use `--animate` for self-contained playback, or add external CSS transitions
+
+### Syntax
+```
+a -> b as req_arrow [stroke: red]    // Named connection
+
+keyframe "startup" {
+    hide envelope, req_arrow          // Hide in this frame
+}
+keyframe "request" {
+    show envelope, req_arrow          // Show in this frame
+    transform server [rotation: 10]   // Per-frame overrides
+}
+```
+
+### Key Rules
+- Keyframes are **cumulative**: each builds on the previous
+- Without keyframes, everything is visible (backward compatible)
+- References to nonexistent elements are hard errors
+- The linter checks overlaps per-frame (no false positives from hidden elements)
+- Use `--frame "name"` to render and verify individual frames
+
+---
+
 ## More Information
 
 Run `agent-illustrator --examples` for annotated examples.

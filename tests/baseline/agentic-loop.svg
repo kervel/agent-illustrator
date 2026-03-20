@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100.5 -57 841 547">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 725 520" data-frames="startup,request,tool_call,execute,return,respond">
   <style>
+    /* Keyframe animation CSS (auto-generated) */
+.frame-startup {
+}
+.frame-request {
+  #req1_env { opacity: 1; }
+  .ai-connection.conn-send_req1 { opacity: 1; }
+}
+.frame-tool_call {
+  #resp1_env { opacity: 1; }
+  .ai-connection.conn-recv_resp1 { opacity: 1; }
+}
+.frame-execute {
+  #exec_env { opacity: 1; }
+  .ai-connection.conn-exec_tool { opacity: 1; }
+}
+.frame-return {
+  #req2_env { opacity: 1; }
+  .ai-connection.conn-send_req2 { opacity: 1; }
+}
+.frame-respond {
+  #resp2_env { opacity: 1; }
+  .ai-connection.conn-recv_resp2 { opacity: 1; }
+}
+
     /* Kapernikov Brand Stylesheet for Agent Illustrator
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */
@@ -94,43 +118,19 @@
   <text class="ai-label" x="520" y="380" text-anchor="middle" dominant-baseline="middle">Tool (bash)</text>
   <rect id="user" class="ai-shape ai-rect" x="30" y="345" width="180" height="70" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2.5"/>
   <text class="ai-label" x="120" y="380" text-anchor="middle" dominant-baseline="middle">User</text>
-  <circle id="via_right" class="ai-shape ai-circle" cx="680" cy="220" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="via_left" class="ai-shape ai-circle" cx="-40" cy="220" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <g id="phase1" class="ai-container phase1">
-    <rect id="p1_envelope" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0.3"/>
-    <text id="p1_line1" class="ai-shape ai-text" x="269.3" y="48" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--text-3)">system prompt</text>
-    <text id="p1_line2" class="ai-shape ai-text" x="231.8" y="72" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--accent-dark)">user: &apos;list my files&apos;</text>
-    <text id="p1_title" class="ai-shape ai-text" x="290.3" y="8.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-1)">REQUEST 1</text>
-  </g>
-  <g id="phase2" class="ai-container phase2">
-    <rect id="p2_envelope" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0.3"/>
-    <text id="p2_line1" class="ai-shape ai-text" x="281" y="48" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--text-3)">tool_call:</text>
-    <text id="p2_line2" class="ai-shape ai-text" x="261.2" y="72" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--secondary-dark)">bash(&apos;ls -la&apos;)</text>
-    <text id="p2_title" class="ai-shape ai-text" x="287" y="111.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--secondary-dark)">RESPONSE 1</text>
-  </g>
-  <g id="phase3" class="ai-container phase3">
-    <rect id="p3_envelope" class="ai-shape ai-rect" x="420" y="170" width="200" height="100" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="2" opacity="0.2"/>
-    <text id="p3_cmd" class="ai-shape ai-text" x="486.4" y="196" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--foreground-1)">$ ls -la</text>
-    <text id="p3_out1" class="ai-shape ai-text" x="462.4" y="224" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-3)">drwxr-xr-x  src/</text>
-    <text id="p3_out2" class="ai-shape ai-text" x="451.6" y="244" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-3)">-rw-r--r--  main.rs</text>
-    <text id="p3_title" class="ai-shape ai-text" x="496.9" y="158.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">EXECUTE</text>
-  </g>
-  <g id="phase4" class="ai-container phase4">
-    <rect id="p4_envelope" class="ai-shape ai-rect" x="220" y="330" width="200" height="100" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0.3"/>
-    <text id="p4_line1" class="ai-shape ai-text" x="273.2" y="356" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-3)">system prompt</text>
-    <text id="p4_line2" class="ai-shape ai-text" x="244.4" y="380" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-3)">user: &apos;list my files&apos;</text>
-    <text id="p4_line3" class="ai-shape ai-text" x="230.3" y="404" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--accent-dark)">tool_result: &apos;src/ ...&apos;</text>
-    <text id="p4_title" class="ai-shape ai-text" x="290.3" y="318.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-1)">REQUEST 2</text>
-  </g>
-  <g id="phase5" class="ai-container phase5">
-    <rect id="p5_envelope" class="ai-shape ai-rect" x="20" y="180" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0.3"/>
-    <text id="p5_line1" class="ai-shape ai-text" x="42" y="208" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--secondary-dark)">Here are your files:</text>
-    <text id="p5_line2" class="ai-shape ai-text" x="65.4" y="232" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--text-1)">src/, main.rs</text>
-    <text id="p5_title" class="ai-shape ai-text" x="87" y="168.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--secondary-dark)">RESPONSE 2</text>
-  </g>
-  <path class="ai-connection phase1" d="M210 60 L419.2 60" fill="none" stroke="var(--accent-1)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection phase2" d="M430 60 L220.8 60" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection phase3" d="M120 95 L120 220 L520 220 L520 334.2" fill="none" stroke="var(--foreground-1)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection phase4" d="M610 380 C668.2141639885766 380 680 278.2141639885766 680 220 C680 161.78583601142338 668.2141639885766 60 620.8 60" fill="none" stroke="var(--accent-1)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection phase5" d="M430 60 L120 60 L120 334.2" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <rect id="req1_env" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0"/>
+  <text class="ai-label" x="320" y="60" text-anchor="middle" dominant-baseline="middle">system + user msg</text>
+  <rect id="resp1_env" class="ai-shape ai-rect" x="220" y="20" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0"/>
+  <text class="ai-label" x="320" y="60" text-anchor="middle" dominant-baseline="middle">tool_call: bash</text>
+  <rect id="exec_env" class="ai-shape ai-rect" x="420" y="170" width="200" height="100" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="2" opacity="0"/>
+  <text class="ai-label" x="520" y="220" text-anchor="middle" dominant-baseline="middle">$ ls -la</text>
+  <rect id="req2_env" class="ai-shape ai-rect" x="220" y="340" width="200" height="80" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2" opacity="0"/>
+  <text class="ai-label" x="320" y="380" text-anchor="middle" dominant-baseline="middle">history + result</text>
+  <rect id="resp2_env" class="ai-shape ai-rect" x="20" y="180" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0"/>
+  <text class="ai-label" x="120" y="220" text-anchor="middle" dominant-baseline="middle">text response</text>
+  <path class="ai-connection conn-send_req1" d="M210 60 L419.2 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-recv_resp1" d="M430 60 L220.8 60" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-exec_tool" d="M120 95 L120 220 L520 220 L520 334.2" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-send_req2" d="M610 380 L625 380 L625 60 L620.8 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-recv_resp2" d="M520 95 L520 220 L120 220 L120 334.2" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>

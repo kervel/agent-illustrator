@@ -33,12 +33,13 @@ stack [name] [mod] { ... }   Overlap children centered within largest child
 
 CONNECTIONS
 -----------
-a -> b [mod]           Directed arrow from a to b
-a -> b -> c [mod]      Chained connections (modifiers apply to last segment)
-a <- b [mod]           Directed arrow from b to a
-a <-> b [mod]          Bidirectional arrow
-a -- b [mod]           Undirected line
-a.anchor -> b.anchor   Connect via custom anchors (see ANCHORS)
+a -> b [mod]                Directed arrow from a to b
+a -> b -> c [mod]           Chained connections (modifiers apply to last segment)
+a <- b [mod]                Directed arrow from b to a
+a <-> b [mod]               Bidirectional arrow
+a -- b [mod]                Undirected line
+a.anchor -> b.anchor        Connect via custom anchors (see ANCHORS)
+a -> b as my_conn [mod]     Named connection (referenceable in keyframes)
 
 Connection modifiers:
     routing: orthogonal     Right-angle path (default)
@@ -136,6 +137,31 @@ Connect using dot notation:
     alice.crown -> bob.crown [routing: curved]
 
 Built-in anchors on all shapes: top, bottom, left, right, center
+
+KEYFRAMES
+---------
+Declarative animation: control visibility and transforms across frames.
+Elements are laid out globally; keyframes describe temporal changes.
+
+keyframe "name" {
+    show element1, element2          Make elements visible
+    hide element3, connection_name   Make elements/connections invisible
+    transform element4 [rotation: 45, fill: red]   Per-frame overrides
+}
+
+Keyframes are cumulative: each frame builds on the previous frame's state.
+Without keyframes, all elements are visible (backward compatible).
+Named connections (a -> b as name) can be referenced in show/hide.
+Referencing nonexistent elements is a hard error.
+
+CLI flags:
+    --frame N          Render single frame as static SVG (by index or name)
+    --animate          Embed minimal JS for self-contained animated playback
+
+SVG output:
+    data-frames="frame1,frame2,..."    Frame names on SVG root
+    .frame-<name> { ... }              CSS classes with per-frame diffs
+    Elements hidden in frame 0 get inline opacity="0"
 
 RESERVED IDENTIFIERS
 --------------------
