@@ -964,6 +964,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 
     ElementLayout {
         id,
+        z_order: 0,
         element_type: ElementType::Shape(shape.shape_type.node.clone()),
         bounds,
         styles,
@@ -1454,6 +1455,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         label,
         anchors,
         path_normalize: true,
+        z_order: 0,
     }
 }
 
@@ -1507,6 +1509,19 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         resolve_custom_anchors(&group.anchors, &children, &mut anchors);
     }
 
+    // Extract z_order from group modifiers
+    let z_order = group.modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::ZOrder) {
+            if let StyleValue::Number { value, .. } = &m.node.value.node {
+                Some(*value as i32)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }).unwrap_or(0);
+
     ElementLayout {
         id: group.name.as_ref().map(|n| n.node.clone()),
         element_type: ElementType::Group,
@@ -1516,6 +1531,7 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         label,
         anchors,
         path_normalize: true,
+        z_order,
     }
 }
 

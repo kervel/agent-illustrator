@@ -64,6 +64,8 @@ Common modifiers:
     gap: <number>           Space between children (layouts)
     label: "text"           Add label to shape
     rotation: <degrees>     Rotate element (clockwise)
+    class: <name>           Custom CSS class (for external styling)
+    z_order: <number>       Render order for groups (higher = on top)
     routing: direct         Diagonal line (vs default orthogonal)
     routing: curved         Smooth curve (for loops, crossings)
 

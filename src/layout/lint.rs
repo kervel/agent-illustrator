@@ -1715,6 +1715,7 @@ mod tests {
             label: None,
             anchors: super::super::types::AnchorSet::default(),
             path_normalize: false,
+            z_order: 0,
         }
     }
 
@@ -1743,6 +1744,7 @@ mod tests {
             label: None,
             anchors: super::super::types::AnchorSet::default(),
             path_normalize: false,
+            z_order: 0,
         }
     }
 
@@ -1761,6 +1763,7 @@ mod tests {
             label: None,
             anchors: super::super::types::AnchorSet::default(),
             path_normalize: false,
+            z_order: 0,
         }
     }
 

@@ -717,6 +717,7 @@ fn arguments_to_modifiers(
                 "y" => StyleKey::Y,
                 "stroke_dasharray" => StyleKey::StrokeDasharray,
                 "rotation" | "rotate" => StyleKey::Rotation,
+                "z_order" => StyleKey::ZOrder,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(

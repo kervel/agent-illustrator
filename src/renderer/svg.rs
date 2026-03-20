@@ -651,8 +651,10 @@ pub fn render_svg_with_stylesheet(
         builder.add_arrow_marker();
     }
 
-    // Render all root elements
-    for element in &result.root_elements {
+    // Render all root elements, sorted by z_order (stable sort preserves document order)
+    let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
+    sorted_elements.sort_by_key(|e| e.z_order);
+    for element in &sorted_elements {
         render_element(element, &mut builder);
     }
 
@@ -1184,6 +1186,7 @@ mod tests {
             label: None,
             anchors: AnchorSet::default(),
             path_normalize: true,
+            z_order: 0,
         });
         result.compute_bounds();
 
@@ -1208,6 +1211,7 @@ mod tests {
             label: None,
             anchors: AnchorSet::default(),
             path_normalize: true,
+            z_order: 0,
         });
         result.add_element(ElementLayout {
             id: Some(Identifier::new("b")),
@@ -1218,6 +1222,7 @@ mod tests {
             label: None,
             anchors: AnchorSet::default(),
             path_normalize: true,
+            z_order: 0,
         });
         result.connections.push(ConnectionLayout {
             from_id: Identifier::new("a"),
@@ -1257,6 +1262,7 @@ mod tests {
                     label: None,
                     anchors: AnchorSet::default(),
                     path_normalize: true,
+                    z_order: 0,
                 },
                 ElementLayout {
                     id: Some(Identifier::new("b")),
@@ -1267,11 +1273,13 @@ mod tests {
                     label: None,
                     anchors: AnchorSet::default(),
                     path_normalize: true,
+                    z_order: 0,
                 },
             ],
             label: None,
             anchors: AnchorSet::default(),
             path_normalize: true,
+            z_order: 0,
         });
         result.compute_bounds();
 

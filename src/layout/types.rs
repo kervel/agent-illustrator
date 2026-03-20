@@ -597,6 +597,7 @@ impl ResolvedStyles {
                 | StyleKey::Y
                 | StyleKey::LabelAt
                 | StyleKey::LabelOffset
+                | StyleKey::ZOrder
                 | StyleKey::Custom(_) => {
                     // Labels, label position, gap, size, routing, role, and position modifiers
                     // handled separately in layout engine; custom keys ignored for now
@@ -693,6 +694,9 @@ pub struct ElementLayout {
     /// Whether to normalize path geometry to the element origin when rendering.
     /// Paths that have already been rotated in layout should skip normalization.
     pub path_normalize: bool,
+    /// Z-order for controlling render order (higher values render on top).
+    /// Only meaningful on root-level groups. Default is 0.
+    pub z_order: i32,
 }
 
 impl ElementLayout {
@@ -1088,6 +1092,7 @@ mod tests {
             label: None,
             anchors: AnchorSet::default(),
             path_normalize: true,
+            z_order: 0,
         };
 
         result.add_element(element);

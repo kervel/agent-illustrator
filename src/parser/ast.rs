@@ -307,6 +307,8 @@ pub enum StyleKey {
     LabelAt,
     /// Perpendicular offset distance for connection labels (default 10.0)
     LabelOffset,
+    /// Z-order for controlling render order (higher = on top, groups only)
+    ZOrder,
     Custom(String),
 }
 
