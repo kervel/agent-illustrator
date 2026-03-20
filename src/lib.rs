@@ -457,7 +457,7 @@ fn render_pipeline(
     // Keyframe processing (Feature 011)
     let keyframes = layout::keyframe::extract_keyframes(&doc);
     let frame_states = layout::keyframe::compute_frame_states(&keyframes);
-    let frame_diffs = layout::keyframe::compute_frame_diffs(&result, &frame_states);
+    let frame_diffs = layout::keyframe::compute_frame_diffs(&result, &frame_states, &doc, &config.layout);
 
     // Lint pass
     let lint_warnings = if config.lint {
@@ -484,8 +484,14 @@ fn render_pipeline(
         let frame_idx = resolve_frame_index(frame_selector, &frame_states)?;
         let state = &frame_states[frame_idx];
 
-        // Remove hidden elements and connections for clean static frame output
-        let mut frame_result = result.clone();
+        // Apply transforms if present, then remove hidden elements
+        let mut frame_result = if !state.transforms.is_empty() {
+            layout::keyframe::resolve_frame_for_static(
+                &result, state, &doc, &config.layout,
+            ).unwrap_or_else(|| result.clone())
+        } else {
+            result.clone()
+        };
         frame_result.root_elements = filter_visible_elements(&frame_result.root_elements, &state.hidden_elements);
         frame_result.connections.retain(|c| {
             c.name.as_ref().map_or(true, |n| !state.hidden_connections.contains(&n.0))

@@ -753,16 +753,39 @@ fn generate_keyframe_css(
         let class_name = format!("frame-{}", frame.name);
         css.push_str(&format!(".{} {{\n", class_name));
 
-        // Element visibility diffs
+        // Element diffs (visibility, position, style)
         for (elem_id, diff) in &frame.element_diffs {
+            let mut props = Vec::new();
             if let Some(opacity) = diff.opacity {
-                css.push_str(&format!("  #{} {{ opacity: {}; }}\n", elem_id, opacity));
+                props.push(format!("opacity: {}", opacity));
             }
             if let Some(x) = diff.x {
-                css.push_str(&format!("  #{} {{ x: {}px; }}\n", elem_id, x));
+                props.push(format!("x: {}px", x));
             }
             if let Some(y) = diff.y {
-                css.push_str(&format!("  #{} {{ y: {}px; }}\n", elem_id, y));
+                props.push(format!("y: {}px", y));
+            }
+            if let Some(w) = diff.width {
+                props.push(format!("width: {}px", w));
+            }
+            if let Some(h) = diff.height {
+                props.push(format!("height: {}px", h));
+            }
+            if let Some(rot) = diff.rotation {
+                props.push(format!("rotate: {}deg", rot));
+            }
+            if let Some(ref fill) = diff.fill {
+                props.push(format!("fill: {}", fill));
+            }
+            if let Some(ref stroke) = diff.stroke {
+                props.push(format!("stroke: {}", stroke));
+            }
+            if !props.is_empty() {
+                css.push_str(&format!(
+                    "  #{} {{ {}; }}\n",
+                    elem_id,
+                    props.join("; ")
+                ));
             }
         }
 

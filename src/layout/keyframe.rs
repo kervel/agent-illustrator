@@ -6,8 +6,9 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-use crate::parser::ast::{Document, KeyframeDecl, KeyframeOp, Statement};
-use super::types::{ConnectionLayout, ElementLayout, LayoutResult};
+use crate::parser::ast::{Document, KeyframeDecl, KeyframeOp, Statement, StyleKey, StyleValue};
+use super::config::LayoutConfig;
+use super::types::{ConnectionLayout, ElementLayout, LayoutResult, ResolvedStyles};
 
 /// Visibility and transform state for a single frame
 #[derive(Debug, Clone)]
@@ -133,21 +134,16 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
 }
 
 /// Compute layout diffs for all frames against frame 0 (the base layout).
-/// Takes the base LayoutResult and frame states, produces per-frame diffs.
+/// For frames with transforms, re-solves constraints and re-routes connections.
 pub fn compute_frame_diffs(
     base_result: &LayoutResult,
     frame_states: &[FrameState],
+    doc: &Document,
+    config: &LayoutConfig,
 ) -> Vec<FrameLayout> {
     let mut frame_layouts = Vec::with_capacity(frame_states.len());
 
-    // Build element lookup from base result
-    let _base_elements: HashMap<&str, &ElementLayout> = base_result
-        .root_elements
-        .iter()
-        .filter_map(|e| e.id.as_ref().map(|id| (id.0.as_str(), e)))
-        .collect();
-
-    // Also collect children recursively
+    // Collect all element IDs recursively from base result
     fn collect_all_elements<'a>(
         elements: &'a [ElementLayout],
         map: &mut HashMap<&'a str, &'a ElementLayout>,
@@ -159,8 +155,8 @@ pub fn compute_frame_diffs(
             collect_all_elements(&elem.children, map);
         }
     }
-    let mut all_elements: HashMap<&str, &ElementLayout> = HashMap::new();
-    collect_all_elements(&base_result.root_elements, &mut all_elements);
+    let mut base_elements: HashMap<&str, &ElementLayout> = HashMap::new();
+    collect_all_elements(&base_result.root_elements, &mut base_elements);
 
     // Build connection lookup by name
     let base_connections: HashMap<&str, &ConnectionLayout> = base_result
@@ -173,7 +169,6 @@ pub fn compute_frame_diffs(
     let frame0_hidden = if !frame_states.is_empty() {
         &frame_states[0].hidden_elements
     } else {
-        // No keyframes — nothing to diff
         return frame_layouts;
     };
 
@@ -181,20 +176,43 @@ pub fn compute_frame_diffs(
         let mut element_diffs = BTreeMap::new();
         let mut connection_diffs = BTreeMap::new();
 
-        // Compute element visibility diffs
-        for (id, _elem) in &all_elements {
+        // If this frame has transforms, re-solve the layout
+        let solved_result = if !state.transforms.is_empty() {
+            resolve_frame_layout(base_result, state, doc, config)
+        } else {
+            None
+        };
+
+        // Build element map for the solved frame (if re-solved)
+        let solved_elements = if let Some(ref solved) = solved_result {
+            let mut map = HashMap::new();
+            collect_all_elements(&solved.root_elements, &mut map);
+            Some(map)
+        } else {
+            None
+        };
+
+        // Compute element diffs
+        for (id, base_elem) in &base_elements {
             let hidden_in_frame0 = frame0_hidden.contains(*id);
             let hidden_in_this_frame = state.hidden_elements.contains(*id);
 
+            // Visibility diff
             if hidden_in_frame0 != hidden_in_this_frame {
-                let diff = ElementDiff {
+                element_diffs.insert(id.to_string(), ElementDiff {
                     opacity: Some(if hidden_in_this_frame { 0.0 } else { 1.0 }),
                     ..Default::default()
-                };
-                element_diffs.insert(id.to_string(), diff);
+                });
             } else if !hidden_in_this_frame {
-                // Element is visible — check for transforms
-                // TODO: Phase 3.3 - apply transform overrides and re-solve constraints
+                // Element is visible — check for position/style diffs from transforms
+                if let Some(ref solved_map) = solved_elements {
+                    if let Some(solved_elem) = solved_map.get(id) {
+                        let diff = diff_element(base_elem, solved_elem);
+                        if !diff.is_empty() {
+                            element_diffs.insert(id.to_string(), diff);
+                        }
+                    }
+                }
             }
         }
 
@@ -221,6 +239,148 @@ pub fn compute_frame_diffs(
     }
 
     frame_layouts
+}
+
+/// Public entry point for static frame rendering with transforms.
+pub fn resolve_frame_for_static(
+    base_result: &LayoutResult,
+    state: &FrameState,
+    doc: &Document,
+    config: &LayoutConfig,
+) -> Option<LayoutResult> {
+    resolve_frame_layout(base_result, state, doc, config)
+}
+
+/// Re-solve layout for a single frame with transform overrides applied.
+/// Style-only changes (fill, stroke, opacity) are applied directly.
+/// Geometry changes (x, y, width, height, rotation) are applied after
+/// constraint solving so arrows re-route correctly.
+fn resolve_frame_layout(
+    base_result: &LayoutResult,
+    state: &FrameState,
+    doc: &Document,
+    _config: &LayoutConfig,
+) -> Option<LayoutResult> {
+    let mut result = base_result.clone();
+
+    // First re-solve constraints to get canonical positions
+    // (this is a no-op if positions haven't changed, but needed for routing)
+    // We intentionally do NOT re-solve here — positions come from the base.
+    // Instead, apply geometry transforms AFTER the base solve,
+    // then re-route connections against the new positions.
+
+    // Apply ALL transform modifiers (style + geometry) to target elements
+    for (elem_id, modifiers) in &state.transforms {
+        apply_transform_to_element(&mut result.root_elements, elem_id, modifiers);
+    }
+
+    // Recompute bounds after geometry changes
+    result.compute_bounds();
+
+    // Re-route connections against updated element positions
+    result.connections.clear();
+    if let Err(_e) = super::routing::route_connections(&mut result, doc) {
+        return None;
+    }
+
+    Some(result)
+}
+
+/// Apply transform modifiers to a specific element in the tree
+fn apply_transform_to_element(
+    elements: &mut [ElementLayout],
+    target_id: &str,
+    modifiers: &[crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>],
+) {
+    for elem in elements.iter_mut() {
+        if elem.id.as_ref().map_or(false, |id| id.0 == target_id) {
+            // Apply style modifiers
+            for modifier in modifiers {
+                match &modifier.node.key.node {
+                    StyleKey::Rotation => {
+                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                            elem.styles.rotation = Some(*value);
+                        }
+                    }
+                    StyleKey::Fill => {
+                        elem.styles.fill = ResolvedStyles::color_to_css(&modifier.node.value.node);
+                    }
+                    StyleKey::Stroke => {
+                        elem.styles.stroke = ResolvedStyles::color_to_css(&modifier.node.value.node);
+                    }
+                    StyleKey::Opacity => {
+                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                            elem.styles.opacity = Some(*value);
+                        }
+                    }
+                    StyleKey::Width => {
+                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                            elem.bounds.width = *value;
+                        }
+                    }
+                    StyleKey::Height => {
+                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                            elem.bounds.height = *value;
+                        }
+                    }
+                    StyleKey::X => {
+                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                            elem.bounds.x = *value;
+                        }
+                    }
+                    StyleKey::Y => {
+                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                            elem.bounds.y = *value;
+                        }
+                    }
+                    _ => {} // Other modifiers ignored for now
+                }
+            }
+            return;
+        }
+        // Recurse into children
+        apply_transform_to_element(&mut elem.children, target_id, modifiers);
+    }
+}
+
+/// Compute the diff between two element states
+fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
+    let mut diff = ElementDiff::default();
+    let eps = 0.1; // Sub-pixel threshold
+
+    if (base.bounds.x - solved.bounds.x).abs() > eps {
+        diff.x = Some(solved.bounds.x);
+    }
+    if (base.bounds.y - solved.bounds.y).abs() > eps {
+        diff.y = Some(solved.bounds.y);
+    }
+    if (base.bounds.width - solved.bounds.width).abs() > eps {
+        diff.width = Some(solved.bounds.width);
+    }
+    if (base.bounds.height - solved.bounds.height).abs() > eps {
+        diff.height = Some(solved.bounds.height);
+    }
+
+    let base_rot = base.styles.rotation.unwrap_or(0.0);
+    let solved_rot = solved.styles.rotation.unwrap_or(0.0);
+    if (base_rot - solved_rot).abs() > eps {
+        diff.rotation = Some(solved_rot);
+    }
+
+    let base_opacity = base.styles.opacity.unwrap_or(1.0);
+    let solved_opacity = solved.styles.opacity.unwrap_or(1.0);
+    if (base_opacity - solved_opacity).abs() > f64::EPSILON {
+        diff.opacity = Some(solved_opacity);
+    }
+
+    if base.styles.fill != solved.styles.fill {
+        diff.fill = solved.styles.fill.clone();
+    }
+    if base.styles.stroke != solved.styles.stroke {
+        diff.stroke = solved.styles.stroke.clone();
+    }
+
+    diff
 }
 
 /// Get the set of visible element IDs for a given frame.

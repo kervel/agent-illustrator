@@ -613,7 +613,7 @@ impl ResolvedStyles {
     /// - Hex colors: pass through (e.g., `#ff0000`)
     /// - Named colors: pass through (e.g., `red`)
     /// - Symbolic colors: convert to CSS variable reference (e.g., `var(--foreground-1)`)
-    fn color_to_css(value: &StyleValue) -> Option<String> {
+    pub fn color_to_css(value: &StyleValue) -> Option<String> {
         match value {
             StyleValue::Color(color_value) => match color_value {
                 // Hex and named colors pass through unchanged
