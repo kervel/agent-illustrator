@@ -245,10 +245,13 @@ pub struct GroupDecl {
 
 /// Keyframe declaration (Feature 011)
 /// `keyframe "name" { show a, b; hide c; transform d [rotation: 45] }`
+/// `keyframe "name" [no_resolve] { ... }` skips constraint re-solving
 #[derive(Debug, Clone, PartialEq)]
 pub struct KeyframeDecl {
     pub name: Spanned<String>,
     pub operations: Vec<Spanned<KeyframeOp>>,
+    /// If true, skip constraint re-solving for this keyframe
+    pub no_resolve: bool,
 }
 
 /// Keyframe operation (Feature 011)

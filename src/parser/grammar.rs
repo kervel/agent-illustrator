@@ -1163,17 +1163,30 @@ where
 
         let keyframe_op = choice((show_op, hide_op, transform_op));
 
+        // Parse optional [no_resolve] modifier on keyframes
+        let no_resolve_flag = just(Token::BracketOpen)
+            .ignore_then(identifier.clone().try_map(|id, span| {
+                if id.node.0 == "no_resolve" {
+                    Ok(true)
+                } else {
+                    Err(chumsky::error::Rich::custom(span, format!("expected 'no_resolve', got '{}'", id.node.0)))
+                }
+            }))
+            .then_ignore(just(Token::BracketClose));
+
         let keyframe_decl = just(Token::Keyframe)
             .ignore_then(string_literal.clone())
+            .then(no_resolve_flag.or_not())
             .then(
                 keyframe_op
                     .repeated()
                     .collect::<Vec<_>>()
                     .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
             )
-            .map(|(name, operations)| KeyframeDecl {
+            .map(|((name, no_resolve), operations)| KeyframeDecl {
                 name,
                 operations,
+                no_resolve: no_resolve.unwrap_or(false),
             });
 
         // All statements

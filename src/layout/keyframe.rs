@@ -21,6 +21,8 @@ pub struct FrameState {
     pub hidden_connections: HashSet<String>,
     /// Per-element transform overrides (element_id -> style modifiers)
     pub transforms: HashMap<String, Vec<crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>>>,
+    /// If true, skip constraint re-solving for this frame
+    pub no_resolve: bool,
 }
 
 /// Complete keyframe processing result
@@ -127,6 +129,7 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
             hidden_elements: hidden_elements.clone(),
             hidden_connections: hidden_connections.clone(),
             transforms,
+            no_resolve: kf.no_resolve,
         });
     }
 
@@ -176,7 +179,7 @@ pub fn compute_frame_diffs(
         let mut element_diffs = BTreeMap::new();
         let mut connection_diffs = BTreeMap::new();
 
-        // If this frame has transforms, re-solve the layout
+        // Re-solve layout for this frame (transforms + constraint cascading)
         let solved_result = if !state.transforms.is_empty() {
             resolve_frame_layout(base_result, state, doc, config)
         } else {
@@ -252,29 +255,43 @@ pub fn resolve_frame_for_static(
 }
 
 /// Re-solve layout for a single frame with transform overrides applied.
-/// Style-only changes (fill, stroke, opacity) are applied directly.
-/// Geometry changes (x, y, width, height, rotation) are applied after
-/// constraint solving so arrows re-route correctly.
+/// By default, re-solves constraints so dependents follow moved elements.
+/// Constraints targeting transformed element properties are replaced with
+/// the transform values, so the solver moves dependents correctly.
+/// With `no_resolve`, just applies transforms directly (style-only use case).
 fn resolve_frame_layout(
     base_result: &LayoutResult,
     state: &FrameState,
     doc: &Document,
-    _config: &LayoutConfig,
+    config: &LayoutConfig,
 ) -> Option<LayoutResult> {
     let mut result = base_result.clone();
 
-    // First re-solve constraints to get canonical positions
-    // (this is a no-op if positions haven't changed, but needed for routing)
-    // We intentionally do NOT re-solve here — positions come from the base.
-    // Instead, apply geometry transforms AFTER the base solve,
-    // then re-route connections against the new positions.
-
-    // Apply ALL transform modifiers (style + geometry) to target elements
+    // Apply transform modifiers to target elements
     for (elem_id, modifiers) in &state.transforms {
         apply_transform_to_element(&mut result.root_elements, elem_id, modifiers);
     }
 
-    // Recompute bounds after geometry changes
+    // Rebuild the element index so the solver sees updated positions
+    result.rebuild_index();
+
+    if !state.no_resolve {
+        // Build a modified document where constraints on transformed elements'
+        // geometry properties are replaced with the transform values.
+        let modified_doc = rewrite_constraints_for_transforms(doc, state);
+
+        // Re-solve constraints using modified document.
+        // Transformed positions are now baked into constraints,
+        // so dependents cascade correctly.
+        if let Err(_e) = super::engine::resolve_constrain_statements(&mut result, &modified_doc, config) {
+            // If solving fails, fall back to direct transform (no cascading)
+        }
+        if let Err(_e) = super::engine::resolve_constraints(&mut result, &modified_doc, None) {
+            // Same fallback
+        }
+    }
+
+    // Recompute bounds after all position changes
     result.compute_bounds();
 
     // Re-route connections against updated element positions
@@ -284,6 +301,66 @@ fn resolve_frame_layout(
     }
 
     Some(result)
+}
+
+/// Remove constraints that directly position transformed elements,
+/// so the solver uses the transformed positions (from element bounds)
+/// as SUGGESTED values and cascades to dependents.
+fn rewrite_constraints_for_transforms(doc: &Document, state: &FrameState) -> Document {
+    use crate::parser::ast::*;
+
+    // Collect element IDs that have geometry transforms (x, y, width, height)
+    let mut geometry_transformed: HashSet<&str> = HashSet::new();
+    for (elem_id, modifiers) in &state.transforms {
+        let has_geometry = modifiers.iter().any(|m| matches!(
+            m.node.key.node,
+            StyleKey::X | StyleKey::Y | StyleKey::Width | StyleKey::Height
+        ));
+        if has_geometry {
+            geometry_transformed.insert(elem_id.as_str());
+        }
+    }
+
+    if geometry_transformed.is_empty() {
+        return doc.clone();
+    }
+
+    // Clone document and remove constrain statements whose LHS
+    // directly targets a geometry-transformed element
+    let mut new_doc = doc.clone();
+    new_doc.statements.retain(|stmt| {
+        if let Statement::Constrain(constrain) = &stmt.node {
+            // Check if the LHS references a transformed element
+            if let Some(elem_name) = get_constraint_lhs_element(&constrain.expr) {
+                if geometry_transformed.contains(elem_name.as_str()) {
+                    return false; // Drop this constraint
+                }
+            }
+        }
+        true
+    });
+
+    new_doc
+}
+
+/// Extract the element name from the LHS of a constraint expression.
+fn get_constraint_lhs_element(expr: &crate::parser::ast::ConstraintExpr) -> Option<String> {
+    use crate::parser::ast::ConstraintExpr;
+    match expr {
+        ConstraintExpr::Equal { left, .. }
+        | ConstraintExpr::EqualWithOffset { left, .. }
+        | ConstraintExpr::Constant { left, .. }
+        | ConstraintExpr::GreaterOrEqual { left, .. }
+        | ConstraintExpr::LessOrEqual { left, .. } => {
+            Some(left.element.node.leaf().0.clone())
+        }
+        ConstraintExpr::Midpoint { target, .. } => {
+            Some(target.element.node.leaf().0.clone())
+        }
+        ConstraintExpr::Contains { container, .. } => {
+            Some(container.node.0.clone())
+        }
+    }
 }
 
 /// Apply transform modifiers to a specific element in the tree
@@ -412,6 +489,7 @@ mod tests {
                 .into_iter()
                 .map(|op| Spanned::new(op, 0..0))
                 .collect(),
+            no_resolve: false,
         }
     }
 

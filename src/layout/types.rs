@@ -755,6 +755,19 @@ impl LayoutResult {
         self.root_elements.push(element);
     }
 
+    /// Rebuild the elements index from root_elements tree.
+    /// Call after modifying root_elements directly (e.g., keyframe transforms).
+    pub fn rebuild_index(&mut self) {
+        self.elements.clear();
+        let roots = self.root_elements.clone();
+        for elem in &roots {
+            if let Some(id) = &elem.id {
+                self.elements.insert(id.0.clone(), elem.clone());
+            }
+            self.index_children(elem);
+        }
+    }
+
     fn index_children(&mut self, element: &ElementLayout) {
         for child in &element.children {
             if let Some(id) = &child.id {
