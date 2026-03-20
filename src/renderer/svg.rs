@@ -17,6 +17,8 @@ pub struct SvgBuilder {
     elements: Vec<String>,
     connections: Vec<String>,
     indent: usize,
+    /// Frame names for data-frames attribute (Feature 011)
+    data_frames: Option<String>,
 }
 
 impl SvgBuilder {
@@ -29,6 +31,7 @@ impl SvgBuilder {
             elements: vec![],
             connections: vec![],
             indent: 1,
+            data_frames: None,
         }
     }
 
@@ -567,9 +570,14 @@ impl SvgBuilder {
         }
 
         // SVG root element
+        let data_frames_attr = self
+            .data_frames
+            .as_ref()
+            .map(|f| format!(r#" data-frames="{}""#, f))
+            .unwrap_or_default();
         svg.push_str(&format!(
-            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{} {} {} {}">"#,
-            vb_x, vb_y, vb_w, vb_h
+            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{} {} {} {}"{}>"#,
+            vb_x, vb_y, vb_w, vb_h, data_frames_attr
         ));
         svg.push_str(nl);
 
@@ -620,6 +628,148 @@ impl SvgBuilder {
 /// Render a LayoutResult to an SVG string (with default stylesheet)
 pub fn render_svg(result: &LayoutResult, config: &SvgConfig) -> String {
     render_svg_with_stylesheet(result, config, &Stylesheet::default(), None, false)
+}
+
+/// Render a LayoutResult with keyframe animation CSS (Feature 011)
+pub fn render_svg_with_keyframes(
+    result: &LayoutResult,
+    config: &SvgConfig,
+    stylesheet: &Stylesheet,
+    custom_css: Option<&str>,
+    debug: bool,
+    frame_states: &[crate::layout::keyframe::FrameState],
+    frame_diffs: &[crate::layout::keyframe::FrameLayout],
+) -> String {
+    let mut builder = SvgBuilder::new(config.clone());
+
+    // Add CSS custom properties from the stylesheet
+    builder.add_stylesheet(stylesheet);
+
+    // Set data-frames attribute
+    let frame_names: Vec<&str> = frame_diffs.iter().map(|f| f.name.as_str()).collect();
+    builder.data_frames = Some(frame_names.join(","));
+
+    // Generate keyframe CSS
+    let keyframe_css = generate_keyframe_css(frame_states, frame_diffs);
+    builder.add_custom_css(&keyframe_css);
+
+    // Add custom CSS after keyframe CSS
+    if let Some(css) = custom_css {
+        builder.add_custom_css(css);
+    }
+
+    // Add arrow marker if there are any directed connections
+    let has_directed = result.connections.iter().any(|c| {
+        matches!(
+            c.direction,
+            ConnectionDirection::Forward | ConnectionDirection::Backward
+        )
+    });
+    if has_directed {
+        builder.add_arrow_marker();
+    }
+
+    // Render elements at frame-0 positions, with hidden elements getting opacity: 0
+    let empty_set = std::collections::HashSet::new();
+    let frame0_hidden = if !frame_states.is_empty() {
+        &frame_states[0].hidden_elements
+    } else {
+        &empty_set
+    };
+
+    let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
+    sorted_elements.sort_by_key(|e| e.z_order);
+    for element in &sorted_elements {
+        render_element_with_visibility(element, &mut builder, frame0_hidden);
+    }
+
+    // Render connections, with hidden connections getting opacity: 0
+    let frame0_hidden_conns = if !frame_states.is_empty() {
+        &frame_states[0].hidden_connections
+    } else {
+        &empty_set
+    };
+
+    for conn in &result.connections {
+        if let Some(name) = &conn.name {
+            if frame0_hidden_conns.contains(&name.0) {
+                // Render with opacity 0 for hidden connections
+                let mut hidden_conn = conn.clone();
+                hidden_conn.styles.opacity = Some(0.0);
+                render_connection(&hidden_conn, &mut builder);
+                continue;
+            }
+        }
+        render_connection(conn, &mut builder);
+    }
+
+    // Render debug overlays
+    if debug {
+        for element in &result.root_elements {
+            render_debug_bounds(element, &mut builder);
+        }
+    }
+
+    builder.build(result.bounds)
+}
+
+/// Render an element, marking hidden elements with opacity: 0
+fn render_element_with_visibility(
+    element: &ElementLayout,
+    builder: &mut SvgBuilder,
+    hidden: &std::collections::HashSet<String>,
+) {
+    if let Some(id) = &element.id {
+        if hidden.contains(&id.0) {
+            // Clone element with opacity: 0
+            let mut hidden_elem = element.clone();
+            hidden_elem.styles.opacity = Some(0.0);
+            render_element(&hidden_elem, builder);
+            return;
+        }
+    }
+    render_element(element, builder);
+}
+
+/// Generate CSS for keyframe frame switching
+fn generate_keyframe_css(
+    _frame_states: &[crate::layout::keyframe::FrameState],
+    frame_diffs: &[crate::layout::keyframe::FrameLayout],
+) -> String {
+    let mut css = String::new();
+    css.push_str("/* Keyframe animation CSS (auto-generated) */\n");
+
+    for frame in frame_diffs {
+        let class_name = format!("frame-{}", frame.name);
+        css.push_str(&format!(".{} {{\n", class_name));
+
+        // Element visibility diffs
+        for (elem_id, diff) in &frame.element_diffs {
+            if let Some(opacity) = diff.opacity {
+                css.push_str(&format!("  #{} {{ opacity: {}; }}\n", elem_id, opacity));
+            }
+            if let Some(x) = diff.x {
+                css.push_str(&format!("  #{} {{ x: {}px; }}\n", elem_id, x));
+            }
+            if let Some(y) = diff.y {
+                css.push_str(&format!("  #{} {{ y: {}px; }}\n", elem_id, y));
+            }
+        }
+
+        // Connection visibility diffs
+        for (conn_name, diff) in &frame.connection_diffs {
+            if let Some(opacity) = diff.opacity {
+                css.push_str(&format!(
+                    "  .ai-connection.conn-{} {{ opacity: {}; }}\n",
+                    conn_name, opacity
+                ));
+            }
+        }
+
+        css.push_str("}\n");
+    }
+
+    css
 }
 
 /// Render a LayoutResult to an SVG string with a custom stylesheet
@@ -970,7 +1120,11 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
 
 /// Render a connection to the builder
 fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
-    let classes = conn.styles.css_classes.clone();
+    let mut classes = conn.styles.css_classes.clone();
+    // Add connection name as CSS class for keyframe targeting (Feature 011)
+    if let Some(name) = &conn.name {
+        classes.push(format!("conn-{}", name.0));
+    }
     let styles = format_connection_styles(&conn.styles);
 
     // Get stroke width for arrow pullback calculation (default: 2.0)
@@ -1024,6 +1178,11 @@ fn format_connection_styles(styles: &ResolvedStyles) -> String {
     }
     if let Some(dash) = &styles.stroke_dasharray {
         parts.push(format!(r#" stroke-dasharray="{}""#, dash));
+    }
+    if let Some(opacity) = styles.opacity {
+        if (opacity - 1.0).abs() > f64::EPSILON {
+            parts.push(format!(r#" opacity="{}""#, opacity));
+        }
     }
     parts.join("")
 }

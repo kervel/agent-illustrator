@@ -9,4 +9,4 @@ pub mod svg;
 
 pub use config::SvgConfig;
 pub use path::{resolve_path, ResolvedPath};
-pub use svg::{render_svg, render_svg_with_stylesheet};
+pub use svg::{render_svg, render_svg_with_keyframes, render_svg_with_stylesheet};

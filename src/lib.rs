@@ -21,7 +21,7 @@ pub mod template;
 pub use error::ParseError;
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
-pub use renderer::{render_svg, render_svg_with_stylesheet, SvgConfig};
+pub use renderer::{render_svg, render_svg_with_keyframes, render_svg_with_stylesheet, SvgConfig};
 pub use template::{resolve_templates, TemplateError, TemplateRegistry};
 
 use thiserror::Error;
@@ -448,6 +448,11 @@ fn render_pipeline(
         eprintln!("====================");
     }
 
+    // Keyframe processing (Feature 011)
+    let keyframes = layout::keyframe::extract_keyframes(&doc);
+    let frame_states = layout::keyframe::compute_frame_states(&keyframes);
+    let frame_diffs = layout::keyframe::compute_frame_diffs(&result, &frame_states);
+
     // Lint pass
     let lint_warnings = if config.lint {
         layout::lint::check(&result, &doc)
@@ -456,13 +461,25 @@ fn render_pipeline(
     };
 
     // Generate SVG with stylesheet
-    let svg = render_svg_with_stylesheet(
-        &result,
-        &config.svg,
-        &config.stylesheet,
-        config.custom_css.as_deref(),
-        config.debug,
-    );
+    let svg = if !frame_diffs.is_empty() {
+        render_svg_with_keyframes(
+            &result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+            &frame_states,
+            &frame_diffs,
+        )
+    } else {
+        render_svg_with_stylesheet(
+            &result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+        )
+    };
 
     Ok((svg, lint_warnings))
 }

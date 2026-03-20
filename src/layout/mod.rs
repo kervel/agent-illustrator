@@ -7,6 +7,7 @@ pub mod collector;
 pub mod config;
 pub mod engine;
 pub mod error;
+pub mod keyframe;
 pub mod lint;
 pub mod routing;
 pub mod solver;
