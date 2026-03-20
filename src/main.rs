@@ -64,6 +64,14 @@ struct Cli {
     /// Use 'verbatim' (default) to keep paths as written in the AIL source.
     #[arg(long, value_enum, default_value_t = ImageHrefArg::Verbatim)]
     image_href: ImageHrefArg,
+
+    /// Render a single keyframe as a static SVG (by index or name)
+    #[arg(long)]
+    frame: Option<String>,
+
+    /// Embed minimal JS for self-contained animated playback
+    #[arg(long)]
+    animate: bool,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -177,6 +185,8 @@ fn main() {
         .with_trace(cli.trace)
         .with_lint(cli.lint)
         .with_image_href_mode(cli.image_href.into());
+    config.frame = cli.frame;
+    config.animate = cli.animate;
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }
