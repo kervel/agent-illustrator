@@ -1,0 +1,40 @@
+/* Agentic Loop Animation
+   Apply with: --stylesheet-css examples/agentic-loop.css
+
+   Cinematic sequence: each phase fades in, holds, then fades out
+   before the next phase appears. Actors stay visible throughout.
+   Total cycle: ~12s, then loops.
+*/
+
+@keyframes appear-hold-disappear {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    25%  { opacity: 1; }
+    33%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* 5 phases, each gets ~20% of the 12s cycle = 2.4s per phase.
+   Phase timing: 0.8s fade-in, 1.2s hold, 0.4s fade-out */
+
+.phase1, .phase2, .phase3, .phase4, .phase5 {
+    opacity: 0;
+    animation: appear-hold-disappear 12s ease-in-out infinite;
+}
+
+/* Connection lines follow same animation as their phase */
+.phase1.ai-connection,
+.phase2.ai-connection,
+.phase3.ai-connection,
+.phase4.ai-connection,
+.phase5.ai-connection {
+    opacity: 0;
+    animation: appear-hold-disappear 12s ease-in-out infinite;
+}
+
+/* Stagger each phase: 12s / 5 phases = ~2.4s offset */
+.phase1, .phase1.ai-connection { animation-delay: 0s; }
+.phase2, .phase2.ai-connection { animation-delay: 2.4s; }
+.phase3, .phase3.ai-connection { animation-delay: 4.8s; }
+.phase4, .phase4.ai-connection { animation-delay: 7.2s; }
+.phase5, .phase5.ai-connection { animation-delay: 9.6s; }

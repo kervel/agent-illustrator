@@ -1,0 +1,138 @@
+/* INTENT
+   Animate the agentic loop as a cinematic sequence.
+   Each phase appears and disappears, so every step gets full visual space.
+   Usage: agent-illustrator examples/agentic-loop.ail --stylesheet-css examples/agentic-loop.css
+*/
+
+// === ACTORS: always visible, spread wide ===
+
+rect cli [width: 180, height: 70, fill: accent-light, stroke: accent-dark, stroke_width: 2.5, label: "CLI Agent"]
+rect llm [width: 180, height: 70, fill: secondary-light, stroke: secondary-dark, stroke_width: 2.5, label: "LLM API"]
+rect tool [width: 180, height: 70, fill: foreground-3, stroke: foreground-1, stroke_width: 2.5, label: "Tool (bash)"]
+rect user [width: 180, height: 70, fill: accent-light, stroke: accent-dark, stroke_width: 2.5, label: "User"]
+
+// Wide horizontal spread, tall vertical
+constrain cli.center_x = 120
+constrain cli.center_y = 60
+constrain llm.center_x = 520
+constrain llm.center_y = 60
+constrain tool.center_x = 520
+constrain tool.center_y = 380
+constrain user.center_x = 120
+constrain user.center_y = 380
+
+// === PHASE 1: CLI sends system prompt + user message to LLM ===
+
+group phase1 [z_order: 1, class: "phase1"] {
+    rect p1_envelope [width: 200, height: 80, fill: accent-light, stroke: accent-1, stroke_width: 2, opacity: 0.3]
+    text "system prompt" p1_line1 [font_size: 13, fill: text-3]
+    text "user: 'list my files'" p1_line2 [font_size: 14, fill: accent-dark]
+    text "REQUEST 1" p1_title [font_size: 11, fill: accent-1]
+}
+
+constrain p1_envelope.center_x = 320
+constrain p1_envelope.center_y = 60
+constrain p1_title.center_x = p1_envelope.center_x
+constrain p1_title.bottom = p1_envelope.top - 6
+constrain p1_line1.center_x = p1_envelope.center_x
+constrain p1_line1.center_y = p1_envelope.center_y - 12
+constrain p1_line2.center_x = p1_envelope.center_x
+constrain p1_line2.center_y = p1_envelope.center_y + 12
+
+cli.right -> llm.left [stroke: accent-1, stroke_width: 3, class: "phase1"]
+
+// === PHASE 2: LLM responds with tool_call ===
+
+group phase2 [z_order: 2, class: "phase2"] {
+    rect p2_envelope [width: 200, height: 80, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.3]
+    text "tool_call:" p2_line1 [font_size: 13, fill: text-3]
+    text "bash('ls -la')" p2_line2 [font_size: 14, fill: secondary-dark]
+    text "RESPONSE 1" p2_title [font_size: 11, fill: secondary-dark]
+}
+
+constrain p2_envelope.center_x = 320
+constrain p2_envelope.center_y = 60
+constrain p2_title.center_x = p2_envelope.center_x
+constrain p2_title.top = p2_envelope.bottom + 6
+constrain p2_line1.center_x = p2_envelope.center_x
+constrain p2_line1.center_y = p2_envelope.center_y - 12
+constrain p2_line2.center_x = p2_envelope.center_x
+constrain p2_line2.center_y = p2_envelope.center_y + 12
+
+llm.left -> cli.right [stroke: secondary-dark, stroke_width: 3, class: "phase2"]
+
+// === PHASE 3: CLI executes tool ===
+
+group phase3 [z_order: 3, class: "phase3"] {
+    rect p3_envelope [width: 200, height: 100, fill: foreground-3, stroke: foreground-1, stroke_width: 2, opacity: 0.2]
+    text "$ ls -la" p3_cmd [font_size: 14, fill: foreground-1]
+    text "drwxr-xr-x  src/" p3_out1 [font_size: 12, fill: text-3]
+    text "-rw-r--r--  main.rs" p3_out2 [font_size: 12, fill: text-3]
+    text "EXECUTE" p3_title [font_size: 11, fill: foreground-1]
+}
+
+constrain p3_envelope.center_x = 520
+constrain p3_envelope.center_y = 220
+constrain p3_title.center_x = p3_envelope.center_x
+constrain p3_title.bottom = p3_envelope.top - 6
+constrain p3_cmd.center_x = p3_envelope.center_x
+constrain p3_cmd.center_y = p3_envelope.center_y - 24
+constrain p3_out1.center_x = p3_envelope.center_x
+constrain p3_out1.center_y = p3_envelope.center_y + 4
+constrain p3_out2.center_x = p3_envelope.center_x
+constrain p3_out2.center_y = p3_envelope.center_y + 24
+
+cli.bottom -> tool.top [stroke: foreground-1, stroke_width: 3, class: "phase3"]
+
+// === PHASE 4: Tool result sent back to LLM with full history ===
+
+group phase4 [z_order: 4, class: "phase4"] {
+    rect p4_envelope [width: 200, height: 100, fill: accent-light, stroke: accent-1, stroke_width: 2, opacity: 0.3]
+    text "system prompt" p4_line1 [font_size: 12, fill: text-3]
+    text "user: 'list my files'" p4_line2 [font_size: 12, fill: text-3]
+    text "tool_result: 'src/ ...'" p4_line3 [font_size: 13, fill: accent-dark]
+    text "REQUEST 2" p4_title [font_size: 11, fill: accent-1]
+}
+
+constrain p4_envelope.center_x = 320
+constrain p4_envelope.center_y = 380
+constrain p4_title.center_x = p4_envelope.center_x
+constrain p4_title.bottom = p4_envelope.top - 6
+constrain p4_line1.center_x = p4_envelope.center_x
+constrain p4_line1.center_y = p4_envelope.center_y - 24
+constrain p4_line2.center_x = p4_envelope.center_x
+constrain p4_line2.center_y = p4_envelope.center_y
+constrain p4_line3.center_x = p4_envelope.center_x
+constrain p4_line3.center_y = p4_envelope.center_y + 24
+
+// Route from tool back up to LLM via the right side
+circle via_right [size: 1, fill: none, stroke: none]
+constrain via_right.center_x = 680
+constrain via_right.center_y = 220
+
+tool.right -> llm.right [stroke: accent-1, stroke_width: 3, routing: curved, via: via_right, class: "phase4"]
+
+// === PHASE 5: LLM sends final text response to user ===
+
+group phase5 [z_order: 5, class: "phase5"] {
+    rect p5_envelope [width: 200, height: 80, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.3]
+    text "Here are your files:" p5_line1 [font_size: 13, fill: secondary-dark]
+    text "src/, main.rs" p5_line2 [font_size: 14, fill: text-1]
+    text "RESPONSE 2" p5_title [font_size: 11, fill: secondary-dark]
+}
+
+constrain p5_envelope.center_x = 120
+constrain p5_envelope.center_y = 220
+constrain p5_title.center_x = p5_envelope.center_x
+constrain p5_title.bottom = p5_envelope.top - 6
+constrain p5_line1.center_x = p5_envelope.center_x
+constrain p5_line1.center_y = p5_envelope.center_y - 12
+constrain p5_line2.center_x = p5_envelope.center_x
+constrain p5_line2.center_y = p5_envelope.center_y + 12
+
+// Route from LLM down to user via the left side
+circle via_left [size: 1, fill: none, stroke: none]
+constrain via_left.center_x = -40
+constrain via_left.center_y = 220
+
+llm.left -> user.top [stroke: secondary-dark, stroke_width: 3, class: "phase5"]
