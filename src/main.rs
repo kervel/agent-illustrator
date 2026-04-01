@@ -55,6 +55,18 @@ struct Cli {
     #[arg(long)]
     skill: bool,
 
+    /// Output animation sub-skill document
+    #[arg(long)]
+    skill_animation: bool,
+
+    /// Output clipart search sub-skill document
+    #[arg(long)]
+    skill_find_clipart: bool,
+
+    /// Output styling and CSS sub-skill document
+    #[arg(long)]
+    skill_styling: bool,
+
     /// Lint mode: check for layout defects (overlaps, containment violations, etc.)
     #[arg(long)]
     lint: bool,
@@ -116,6 +128,21 @@ fn main() {
         return;
     }
 
+    if cli.skill_animation {
+        print_skill_animation();
+        return;
+    }
+
+    if cli.skill_find_clipart {
+        print_skill_find_clipart();
+        return;
+    }
+
+    if cli.skill_styling {
+        print_skill_styling();
+        return;
+    }
+
     // If no input file and stdin is a terminal (interactive), show intro help
     if cli.input.is_none() && io::stdin().is_terminal() {
         print_intro();
@@ -137,11 +164,9 @@ fn main() {
             }
         },
         None => {
-            if cli.stylesheet_css.is_some() {
-                Stylesheet::empty()
-            } else {
-                Stylesheet::default()
-            }
+            // Always use default palette for CSS variable definitions.
+            // --stylesheet-css adds custom CSS rules on top, not replacements.
+            Stylesheet::default()
         }
     };
 
@@ -264,4 +289,16 @@ fn print_examples() {
 
 fn print_skill() {
     print!("{}", include_str!("../docs/skill.md"));
+}
+
+fn print_skill_animation() {
+    print!("{}", include_str!("../docs/skill-animation.md"));
+}
+
+fn print_skill_find_clipart() {
+    print!("{}", include_str!("../docs/skill-find-clipart.md"));
+}
+
+fn print_skill_styling() {
+    print!("{}", include_str!("../docs/skill-styling.md"));
 }

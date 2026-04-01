@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Cloud/API icon - public domain -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 52" width="80" height="52">
+  <path d="M64,40 L20,40 C12.268,40 6,33.732 6,26 C6,18.268 12.268,12 20,12 C20.69,12 21.37,12.048 22.036,12.14 C25.268,5.192 32.456,1 40.5,1 C51.27,1 60,9.506 60,20 C60,20.34 59.986,20.676 59.96,21.01 C67.626,22.222 73.5,28.86 73.5,36.5 C73.5,38.433 70,40 64,40 Z"
+        fill="none" stroke="#555" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>

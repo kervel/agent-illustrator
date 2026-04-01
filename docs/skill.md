@@ -2,6 +2,18 @@
 
 Create diagrams with Agent Illustrator.
 
+## Sub-Skills
+
+For specialized tasks, read the relevant sub-skill BEFORE starting:
+
+- **`agent-illustrator --skill-animation`** — Keyframe animations with storyboarding,
+  frame-by-frame verification, and mandatory evaluator rounds. Use when creating
+  multi-frame animated sequences.
+- **`agent-illustrator --skill-find-clipart`** — Finding and integrating open-source
+  SVG clipart from the web. Use when diagrams need visual richness beyond basic shapes.
+- **`agent-illustrator --skill-styling`** — CSS styling, color tokens, modern visual
+  patterns (borderless cards, shadows, transitions). Use when diagrams need polish.
+
 ## When to Use AIL vs Raw SVG
 
 AIL is for **diagrams** (boxes, arrows, architecture, flows). For **free-form icons or illustrations**

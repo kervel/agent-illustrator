@@ -1,0 +1,31 @@
+/* Modern styling for agentic-loop animation */
+
+/* Smooth transitions between frames */
+svg * {
+    transition: opacity 0.4s ease-in-out;
+}
+
+/* Subtle drop shadow on message envelopes */
+#speech_bubble,
+#sys_envelope,
+#tool_call_envelope,
+#exec_envelope,
+#result_envelope,
+#answer_envelope {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+
+/* Softer text rendering */
+text {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Monospace for code-like content */
+#exec_line1, #exec_line2, #tc_line2, #result_line2 {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+}
+
+/* Connection arrows: smooth transitions */
+.ai-connection {
+    transition: opacity 0.4s ease-in-out;
+}

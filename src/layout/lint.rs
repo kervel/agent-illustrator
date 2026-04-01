@@ -85,7 +85,16 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_contains(result, doc, &mut warnings);
     check_labels(result, &mut warnings);
     check_label_element_overlaps(result, &mut warnings);
-    check_connections(result, &mut warnings);
+
+    // Connection crossing checks — keyframe-aware
+    if frame_states.is_empty() {
+        check_connections(result, &HashSet::new(), &HashSet::new(), &mut warnings);
+    } else {
+        for state in &frame_states {
+            check_connections(result, &state.hidden_elements, &state.hidden_connections, &mut warnings);
+        }
+    }
+
     check_label_connection_overlaps(result, &mut warnings);
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
@@ -124,6 +133,16 @@ fn is_text_shape(elem: &ElementLayout) -> bool {
 
 fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
+}
+
+/// More lenient visibility check for connection-crossing detection:
+/// elements with opacity >= 0.5 are visible enough to cause visual overlap
+/// with connections passing through them.
+fn is_substantially_visible(elem: &ElementLayout) -> bool {
+    match elem.styles.opacity {
+        None => true,
+        Some(o) => o >= 0.5,
+    }
 }
 
 /// A non-opaque shape is "borderless" if it has no visible stroke
@@ -679,6 +698,41 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
     }
 }
 
+/// Sample N points along a cubic Bézier curve defined by (p0, p1, p2, p3).
+fn sample_cubic_bezier(p0: &Point, p1: &Point, p2: &Point, p3: &Point, n: usize) -> Vec<Point> {
+    (0..=n)
+        .map(|i| {
+            let t = i as f64 / n as f64;
+            let u = 1.0 - t;
+            Point {
+                x: u * u * u * p0.x + 3.0 * u * u * t * p1.x + 3.0 * u * t * t * p2.x + t * t * t * p3.x,
+                y: u * u * u * p0.y + 3.0 * u * u * t * p1.y + 3.0 * u * t * t * p2.y + t * t * t * p3.y,
+            }
+        })
+        .collect()
+}
+
+/// Compute the axis-aligned bounding box of a connection path (works for both
+/// straight segments and Bézier control-point lists).
+fn path_bounding_box(path: &[Point]) -> BoundingBox {
+    let mut min_x = f64::INFINITY;
+    let mut min_y = f64::INFINITY;
+    let mut max_x = f64::NEG_INFINITY;
+    let mut max_y = f64::NEG_INFINITY;
+    for p in path {
+        min_x = min_x.min(p.x);
+        min_y = min_y.min(p.y);
+        max_x = max_x.max(p.x);
+        max_y = max_y.max(p.y);
+    }
+    BoundingBox {
+        x: min_x,
+        y: min_y,
+        width: max_x - min_x,
+        height: max_y - min_y,
+    }
+}
+
 // ── FR5: Connection-element intersection ──────────────────────────
 
 /// Check if a line segment intersects an axis-aligned bounding box.
@@ -775,14 +829,52 @@ fn collect_opaque_elements(
     }
 }
 
-fn check_connections(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
-    // Collect all opaque, non-text elements
-    let mut opaque_elements = Vec::new();
-    for (i, elem) in result.root_elements.iter().enumerate() {
-        collect_opaque_elements(elem, None, i, &mut opaque_elements);
+fn collect_visible_elements(
+    elem: &ElementLayout,
+    parent_name: Option<&str>,
+    child_index: usize,
+    elements: &mut Vec<OpaqueElement>,
+) {
+    // Collect visual shapes that are substantially visible (opacity >= 0.5)
+    if is_visual_shape(elem) && !is_text_shape(elem) && is_substantially_visible(elem) {
+        let id = if let Some(name) = &elem.id {
+            name.0.clone()
+        } else {
+            element_display_name(elem, parent_name, child_index)
+        };
+        elements.push(OpaqueElement {
+            id,
+            bounds: elem.bounds,
+        });
     }
 
+    let name = elem.id.as_ref().map(|id| id.0.as_str());
+    for (i, child) in elem.children.iter().enumerate() {
+        collect_visible_elements(child, name, i, elements);
+    }
+}
+
+fn check_connections(
+    result: &LayoutResult,
+    hidden_elements: &HashSet<String>,
+    hidden_connections: &HashSet<String>,
+    warnings: &mut Vec<LintWarning>,
+) {
+    // Collect all substantially visible, non-text elements in this frame
+    let mut opaque_elements = Vec::new();
+    for (i, elem) in result.root_elements.iter().enumerate() {
+        collect_visible_elements(elem, None, i, &mut opaque_elements);
+    }
+    opaque_elements.retain(|oe| !hidden_elements.contains(&oe.id));
+
     for conn in &result.connections {
+        // Skip connections that are hidden in this frame
+        if let Some(name) = &conn.name {
+            if hidden_connections.contains(&name.0) {
+                continue;
+            }
+        }
+
         let from_id = &conn.from_id.0;
         let to_id = &conn.to_id.0;
 
@@ -795,42 +887,66 @@ fn check_connections(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             None => continue,
         };
 
-        // Skip curved connections: their path stores Bézier control points,
-        // not the actual curve.  Line-segment intersection on control points
-        // produces false positives.
-        if conn.routing_mode == RoutingMode::Curved {
-            continue;
-        }
-
         // Track which elements this connection crosses (deduplicate)
         let mut crossed: HashSet<String> = HashSet::new();
 
-        // Check each path segment
-        for seg in conn.path.windows(2) {
-            let p1 = &seg[0];
-            let p2 = &seg[1];
+        if conn.routing_mode == RoutingMode::Curved {
+            // For curved connections, sample points along the Bézier curve and
+            // check if any sample falls inside an element's bounds.
+            // The path has 4 points for a cubic Bézier: start, cp1, cp2, end.
+            let samples = if conn.path.len() == 4 {
+                sample_cubic_bezier(&conn.path[0], &conn.path[1], &conn.path[2], &conn.path[3], 20)
+            } else {
+                // Fallback: treat as polyline
+                conn.path.clone()
+            };
 
             for oe in &opaque_elements {
-                // Skip if already reported for this connection
                 if crossed.contains(&oe.id) {
                     continue;
                 }
-
-                if line_segment_intersects_bbox(p1, p2, &oe.bounds) {
-                    // Skip if the connection starts or ends inside this element —
-                    // the connection originates/terminates there, so crossing is expected
-                    if oe.bounds.contains(*path_start) || oe.bounds.contains(*path_end) {
-                        continue;
-                    }
-
+                if oe.bounds.contains(*path_start) || oe.bounds.contains(*path_end) {
+                    continue;
+                }
+                if samples.iter().any(|p| oe.bounds.contains(*p)) {
                     crossed.insert(oe.id.clone());
                     warnings.push(LintWarning {
                         category: LintCategory::Connection,
                         message: format!(
-                            "connection {}→{} crosses element \"{}\"",
+                            "connection {}→{} overlaps element \"{}\"",
                             from_id, to_id, oe.id
                         ),
                     });
+                }
+            }
+        } else {
+            // For straight/orthogonal connections, check each path segment
+            for seg in conn.path.windows(2) {
+                let p1 = &seg[0];
+                let p2 = &seg[1];
+
+                for oe in &opaque_elements {
+                    // Skip if already reported for this connection
+                    if crossed.contains(&oe.id) {
+                        continue;
+                    }
+
+                    if line_segment_intersects_bbox(p1, p2, &oe.bounds) {
+                        // Skip if the connection starts or ends inside this element —
+                        // the connection originates/terminates there, so crossing is expected
+                        if oe.bounds.contains(*path_start) || oe.bounds.contains(*path_end) {
+                            continue;
+                        }
+
+                        crossed.insert(oe.id.clone());
+                        warnings.push(LintWarning {
+                            category: LintCategory::Connection,
+                            message: format!(
+                                "connection {}→{} crosses element \"{}\"",
+                                from_id, to_id, oe.id
+                            ),
+                        });
+                    }
                 }
             }
         }

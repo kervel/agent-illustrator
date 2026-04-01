@@ -520,6 +520,17 @@ impl SvgBuilder {
         self.indent += 1;
     }
 
+    /// Add a visibility group for keyframe-hidden elements.
+    /// Uses a CSS class so frame CSS rules can override visibility.
+    pub fn start_visibility_group(&mut self, element_id: &str) {
+        self.elements.push(format!(
+            r#"{}<g class="kf-hidden kf-{}">"#,
+            self.indent_str(),
+            element_id
+        ));
+        self.indent += 1;
+    }
+
     /// Add a group element with optional ID, classes, and transform
     pub fn start_group_with_transform(
         &mut self,
@@ -732,13 +743,14 @@ fn render_element_with_visibility(
 ) {
     if let Some(id) = &element.id {
         if hidden.contains(&id.0) {
-            builder.start_opacity_group(0.0);
-            render_element(element, builder);
+            // Use CSS class for hiding so frame CSS can override it
+            builder.start_visibility_group(&id.0);
+            render_element_inner(element, builder, hidden);
             builder.end_group();
             return;
         }
     }
-    render_element(element, builder);
+    render_element_inner(element, builder, hidden);
 }
 
 /// Generate CSS for keyframe frame switching
@@ -748,6 +760,7 @@ fn generate_keyframe_css(
 ) -> String {
     let mut css = String::new();
     css.push_str("/* Keyframe animation CSS (auto-generated) */\n");
+    css.push_str(".kf-hidden { opacity: 0; }\n");
 
     for frame in frame_diffs {
         let class_name = format!("frame-{}", frame.name);
@@ -755,10 +768,15 @@ fn generate_keyframe_css(
 
         // Element diffs (visibility, position, style)
         for (elem_id, diff) in &frame.element_diffs {
-            let mut props = Vec::new();
+            // Separate visibility (opacity) from other property changes.
+            // Visibility targets the wrapper group (.kf-{id}), other props target the element (#id).
             if let Some(opacity) = diff.opacity {
-                props.push(format!("opacity: {}", opacity));
+                css.push_str(&format!(
+                    "  .kf-{} {{ opacity: {}; }}\n",
+                    elem_id, opacity
+                ));
             }
+            let mut props = Vec::new();
             if let Some(x) = diff.x {
                 props.push(format!("x: {}px", x));
             }
@@ -890,8 +908,13 @@ where
     }
 }
 
-/// Render a single element to the builder
+/// Render a single element to the builder (no-keyframe path, no visibility checks)
 fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
+    render_element_inner(element, builder, &std::collections::HashSet::new());
+}
+
+/// Render a single element to the builder with visibility checks for children
+fn render_element_inner(element: &ElementLayout, builder: &mut SvgBuilder, hidden: &std::collections::HashSet<String>) {
     let id = element.id.as_ref().map(|i| i.0.as_str());
     let styles = format_styles(&element.styles);
     let classes = element.styles.css_classes.clone();
@@ -1125,9 +1148,9 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
                 builder.start_group(id, &container_classes);
             }
 
-            // Render children
+            // Render children (with visibility checks for keyframe animations)
             for child in &element.children {
-                render_element(child, builder);
+                render_element_with_visibility(child, builder, hidden);
             }
 
             builder.end_group();

@@ -21,9 +21,9 @@ Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-fr
 | **MOSFET Driver Schematic** | **Gallic Wars Timeline** |
 | Custom component templates, anchor-based wiring | Alternating cards, custom path shapes, emphasis styling |
 | [![MOSFET Driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail) | [![Gallic Wars](examples/gallic-wars-timeline.svg)](examples/gallic-wars-timeline.ail) |
-| **Railway Topology** | |
-| Nested row/col layouts, connection routing | |
-| [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | |
+| **Railway Topology** | **Agentic Loop (animated)** |
+| Nested row/col layouts, connection routing | Keyframe animation, SVG clipart, custom CSS |
+| [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | [![Agentic Loop](examples/agentic-loop-story.svg)](examples/agentic-loop-story.ail) |
 
 Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
 

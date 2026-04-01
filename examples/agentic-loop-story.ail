@@ -1,0 +1,248 @@
+/* STORYBOARD
+   Frame 1 "idle":         User sits at terminal. Everything quiet.
+   Frame 2 "user_prompt":  User types "list my Python files". Speech bubble appears.
+                           Arrow: User -> CLI.
+   Frame 3 "system_prompt": CLI adds system prompt and sends to API. Arrow: CLI -> Cloud.
+                            Envelope shows "[system] You are Claude..." + user message.
+   Frame 4 "tool_response": API responds with a tool_call: bash("find . -name '*.py'").
+                            Arrow: Cloud -> CLI. Response envelope between them.
+   Frame 6 "tool_exec":    CLI executes the bash command via tool. Arrow: CLI -> Gear.
+                           Exec envelope between CLI and gear.
+   Frame 7 "result_return": Tool result sent back via CLI to API. Arrows: Gear -> CLI -> Cloud.
+                           Result envelope between CLI and cloud.
+   Frame 8 "final_answer": API responds via CLI to user. Arrows: Cloud -> CLI -> User.
+                           Answer envelope between CLI and User.
+
+   STORY ARC: Follow a real prompt through every hop of the agentic loop,
+   showing what ACTUALLY happens at each step — not abstract boxes.
+   PACING: Frames 3 (system prompt injection) and 6 (tool execution) are the
+   "aha" moments — give them visual emphasis.
+*/
+
+/* ELEMENT CENSUS
+   PERSISTENT (always visible):
+     user_icon, cli_icon, cloud_icon, gear_icon — the four actors
+     user_label, cli_label, cloud_label, gear_label — actor names
+     title — diagram title
+
+   TRANSIENT (appear/disappear per frame):
+     speech_bubble — user's prompt (frame 2-3)
+     prompt_arrow — User -> CLI (frame 2)
+     sys_envelope, sys_line1, sys_line2 — system prompt bundle (frame 3-4)
+     req_arrow — CLI -> Cloud (frame 4)
+     tool_call_envelope, tc_line1, tc_line2 — API tool_call response (frame 5)
+     resp_arrow — Cloud -> CLI (frame 5)
+     exec_envelope, exec_line1, exec_line2 — bash execution (frame 6)
+     exec_arrow — CLI -> Gear (frame 6)
+     result_envelope, result_line1, result_line2 — tool result (frame 7)
+     return_arrow — Gear -> Cloud (frame 7)
+     answer_envelope, ans_line1, ans_line2 — final answer (frame 8)
+     final_to_cli, final_to_user — Cloud -> CLI -> User (frame 8)
+
+   CONNECTIONS (all named for keyframe control):
+     user_icon -> cli_icon as prompt_arrow
+     cli_icon -> cloud_icon as req_arrow
+     cloud_icon -> cli_icon as resp_arrow
+     cli_icon -> gear_icon as exec_arrow
+     gear_icon -> cloud_icon as return_arrow
+     cloud_icon -> cli_icon as final_to_cli
+     cli_icon -> user_icon as final_to_user
+*/
+
+// === TEMPLATES ===
+
+template "user_img" from "clipart/person.svg"
+template "cli_img" from "clipart/terminal.svg"
+template "cloud_img" from "clipart/cloud.svg"
+template "gear_img" from "clipart/gear.svg"
+
+// === ACTORS (persistent) ===
+
+group diagram {
+
+    // Canvas background to lock the viewBox across all frames
+    rect canvas [width: 740, height: 420, fill: white, stroke: none, opacity: 0.01]
+
+    // Actor icons — laid out left to right: User, CLI, Cloud; Gear below Cloud
+    user_img user_icon [width: 56, height: 70]
+    cli_img cli_icon [width: 72, height: 58]
+    cloud_img cloud_icon [width: 72, height: 47]
+    gear_img gear_icon [width: 64, height: 64]
+
+    // Actor labels
+    text "User" user_label [font_size: 13, fill: foreground-2]
+    text "CLI Harness" cli_label [font_size: 13, fill: foreground-2]
+    text "Claude API" cloud_label [font_size: 13, fill: foreground-2]
+    text "Tool (bash)" gear_label [font_size: 13, fill: foreground-2]
+
+    // === SPEECH BUBBLE (frame 2): near user ===
+    rect speech_bubble [width: 200, height: 44, fill: accent-light, stroke: none,
+                        corner_radius: 16, label: "list my Python files"]
+
+    // === SYSTEM PROMPT ENVELOPE (frame 3-4): between CLI and Cloud ===
+    rect sys_envelope [width: 250, height: 70, fill: accent-light, stroke: none,
+                       corner_radius: 10, opacity: 0.9]
+    text "[system] You are Claude Code..." sys_line1 [font_size: 11, fill: foreground-2]
+    text "[user] list my Python files" sys_line2 [font_size: 11, fill: accent-dark]
+
+    // === TOOL CALL RESPONSE (frame 5): between Cloud and CLI ===
+    rect tool_call_envelope [width: 230, height: 52, fill: secondary-light, stroke: none,
+                             corner_radius: 10, opacity: 0.9]
+    text "tool_call: bash" tc_line1 [font_size: 11, fill: foreground-2]
+    text "find . -name '*.py'" tc_line2 [font_size: 11, fill: secondary-dark]
+
+    // === EXEC RESULT (frame 6): between CLI and Gear ===
+    rect exec_envelope [width: 210, height: 60, fill: accent-light, stroke: none,
+                        corner_radius: 10, opacity: 0.9]
+    text "$ find . -name '*.py'" exec_line1 [font_size: 11, fill: accent-dark]
+    text "./main.py  ./test_api.py" exec_line2 [font_size: 11, fill: foreground-1]
+
+    // === RESULT RETURN (frame 7): between Gear and Cloud ===
+    rect result_envelope [width: 210, height: 52, fill: accent-light, stroke: none,
+                          corner_radius: 10, opacity: 0.9]
+    text "tool_result + conversation" result_line1 [font_size: 11, fill: foreground-2]
+    text "./main.py  ./test_api.py" result_line2 [font_size: 11, fill: accent-dark]
+
+    // === FINAL ANSWER (frame 8): between CLI and User ===
+    rect answer_envelope [width: 210, height: 52, fill: secondary-light, stroke: none,
+                          corner_radius: 10, opacity: 0.9]
+    text "I found 2 Python files:" ans_line1 [font_size: 11, fill: foreground-1]
+    text "main.py and test_api.py" ans_line2 [font_size: 11, fill: secondary-dark]
+}
+
+// === LAYOUT VIA CONSTRAINTS ===
+
+// Canvas anchors the viewBox
+constrain canvas.center_x = 370
+constrain canvas.center_y = 210
+
+// Actors — horizontal row: User (left), CLI (center), Cloud (right); Gear below Cloud
+constrain user_icon.center_x = 80
+constrain user_icon.center_y = 115
+constrain user_label.center_x = user_icon.center_x
+constrain user_label.top = user_icon.bottom + 6
+
+constrain cli_icon.center_x = 320
+constrain cli_icon.center_y = user_icon.center_y
+constrain cli_label.center_x = cli_icon.center_x
+constrain cli_label.top = cli_icon.bottom + 6
+
+constrain cloud_icon.center_x = 600
+constrain cloud_icon.center_y = user_icon.center_y
+constrain cloud_label.right = cloud_icon.left - 8
+constrain cloud_label.center_y = cloud_icon.center_y + 10
+
+constrain gear_icon.center_x = cloud_icon.center_x
+constrain gear_icon.center_y = 330
+constrain gear_label.center_x = gear_icon.center_x
+constrain gear_label.top = gear_icon.bottom + 6
+
+// === TRANSIENT ELEMENT POSITIONS ===
+// Each envelope is positioned along the path of the arrow it represents.
+
+// Speech bubble: above user, pointing right
+constrain speech_bubble.center_x = 180
+constrain speech_bubble.center_y = 55
+
+// System prompt envelope: midway between CLI and Cloud, below the actor row
+constrain sys_envelope.center_x = 460
+constrain sys_envelope.center_y = 200
+constrain sys_line1.center_x = sys_envelope.center_x
+constrain sys_line1.center_y = sys_envelope.center_y - 14
+constrain sys_line2.center_x = sys_envelope.center_x
+constrain sys_line2.center_y = sys_envelope.center_y + 8
+
+// Tool call response: midway between Cloud and CLI, below actor row
+constrain tool_call_envelope.center_x = sys_envelope.center_x
+constrain tool_call_envelope.center_y = sys_envelope.center_y
+constrain tc_line1.center_x = tool_call_envelope.center_x
+constrain tc_line1.center_y = tool_call_envelope.center_y - 10
+constrain tc_line2.center_x = tool_call_envelope.center_x
+constrain tc_line2.center_y = tool_call_envelope.center_y + 8
+
+// Exec envelope: left of the curved arrow path, between CLI and Gear
+constrain exec_envelope.center_x = 160
+constrain exec_envelope.center_y = 300
+constrain exec_line1.center_x = exec_envelope.center_x
+constrain exec_line1.center_y = exec_envelope.center_y - 14
+constrain exec_line2.center_x = exec_envelope.center_x
+constrain exec_line2.center_y = exec_envelope.center_y + 8
+
+// Result return: between CLI and Cloud, above the curved return arrow path
+constrain result_envelope.center_x = sys_envelope.center_x
+constrain result_envelope.center_y = sys_envelope.center_y
+constrain result_line1.center_x = result_envelope.center_x
+constrain result_line1.center_y = result_envelope.center_y - 10
+constrain result_line2.center_x = result_envelope.center_x
+constrain result_line2.center_y = result_envelope.center_y + 10
+
+// Final answer: between CLI and User
+constrain answer_envelope.center_x = 200
+constrain answer_envelope.center_y = 200
+constrain ans_line1.center_x = answer_envelope.center_x
+constrain ans_line1.center_y = answer_envelope.center_y - 10
+constrain ans_line2.center_x = answer_envelope.center_x
+constrain ans_line2.center_y = answer_envelope.center_y + 8
+
+// === CONNECTIONS (named for keyframe control) ===
+
+user_icon.right -> cli_icon.left as prompt_arrow [stroke: accent-dark, stroke_width: 3]
+cli_icon.right -> cloud_icon.left as req_arrow [stroke: accent-1, stroke_width: 3]
+cloud_icon.left -> cli_icon.right as resp_arrow [stroke: secondary-dark, stroke_width: 3]
+cli_icon.bottom -> gear_icon.left as exec_arrow [stroke: foreground-1, stroke_width: 3, routing: curved]
+gear_icon.left -> cli_icon.bottom as return_to_cli [stroke: accent-1, stroke_width: 3, routing: curved]
+cli_icon.right -> cloud_icon.left as return_to_cloud [stroke: accent-1, stroke_width: 3]
+cloud_icon.left -> cli_icon.right as final_to_cli [stroke: secondary-dark, stroke_width: 3]
+cli_icon.left -> user_icon.right as final_to_user [stroke: secondary-dark, stroke_width: 3]
+
+// === KEYFRAMES ===
+
+keyframe "idle" {
+    hide speech_bubble
+    hide sys_envelope, sys_line1, sys_line2
+    hide tool_call_envelope, tc_line1, tc_line2
+    hide exec_envelope, exec_line1, exec_line2
+    hide result_envelope, result_line1, result_line2
+    hide answer_envelope, ans_line1, ans_line2
+    hide prompt_arrow, req_arrow, resp_arrow, exec_arrow, return_to_cli, return_to_cloud, final_to_cli, final_to_user
+}
+
+keyframe "user_prompt" {
+    show speech_bubble
+    show prompt_arrow
+}
+
+keyframe "system_prompt" {
+    hide prompt_arrow
+    hide speech_bubble
+    show req_arrow
+    show sys_envelope, sys_line1, sys_line2
+}
+
+keyframe "tool_response" {
+    hide sys_envelope, sys_line1, sys_line2
+    hide req_arrow
+    show resp_arrow
+    show tool_call_envelope, tc_line1, tc_line2
+}
+
+keyframe "tool_exec" {
+    hide resp_arrow
+    hide tool_call_envelope, tc_line1, tc_line2
+    show exec_arrow
+    show exec_envelope, exec_line1, exec_line2
+}
+
+keyframe "result_return" {
+    hide exec_arrow
+    hide exec_envelope, exec_line1, exec_line2
+    show return_to_cli, return_to_cloud
+    show result_envelope, result_line1, result_line2
+}
+
+keyframe "final_answer" {
+    hide return_to_cli, return_to_cloud
+    hide result_envelope, result_line1, result_line2
+    show final_to_cli, final_to_user
+    show answer_envelope, ans_line1, ans_line2
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Person/user icon - public domain -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" width="64" height="80">
+  <!-- Head -->
+  <circle cx="32" cy="20" r="14" fill="#444" stroke="#333" stroke-width="1.5"/>
+  <!-- Body/torso -->
+  <path d="M10,72 C10,52 18,44 32,44 C46,44 54,52 54,72"
+        fill="#444" stroke="#333" stroke-width="1.5"/>
+  <!-- Base line -->
+  <line x1="6" y1="72" x2="58" y2="72" stroke="#333" stroke-width="1.5"/>
+</svg>

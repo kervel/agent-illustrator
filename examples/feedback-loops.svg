@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -74.95677714974302 660 455.913554299486">
   <style>
+    :root {
+    --background-1: #ffffff;
+    --text-2: #666666;
+    --accent-1: #2196f3;
+    --foreground-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
+    --text-light: #ffffff;
+    --secondary-2: #fff3e0;
+    --background-light: #ffffff;
+    --text-3: #999999;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --text-1: #333333;
+    --secondary-dark: #e65100;
+    --background-2: #f5f5f5;
+    --foreground-1: #333333;
+    --status-success: #4caf50;
+    --text-dark: #1a1a1a;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --foreground-2: #666666;
+    --accent-dark: #1565c0;
+    --accent-3: #bbdefb;
+    --foreground-3: #999999;
+    --foreground-light: #e0e0e0;
+  }
+
     /* Kapernikov Brand Stylesheet for Agent Illustrator
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */
