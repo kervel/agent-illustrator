@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pre-commit hook: re-render examples and fail if SVGs change
+# Pre-commit hook: re-render examples and run tests.
 # This catches rendering regressions before they get committed.
 set -euo pipefail
 
@@ -18,68 +18,38 @@ cargo build --quiet 2>/dev/null || {
     exit 0
 }
 
-# Per-example stylesheet selection
-stylesheet_for() {
-    case "$1" in
-        mosfet-driver)        echo "$SCRIPT_DIR/stylesheets/kapernikov-schematic.css" ;;
-        agentic-loop-story)   echo "$SCRIPT_DIR/stylesheets/agentic-loop-story.css" ;;
-        *)                    echo "$SCRIPT_DIR/stylesheets/kapernikov.css" ;;
-    esac
-}
-
-extra_flags_for() {
-    case "$1" in
-        agentic-loop-story)   echo "--animate-css" ;;
-        *)                    echo "" ;;
-    esac
-}
-
-# Re-render all examples
+# Re-render all examples using the shared render script
 CHANGED=0
-for ail in "$SCRIPT_DIR"/examples/*.ail; do
-    name="$(basename "$ail" .ail)"
-    svg="$SCRIPT_DIR/examples/$name.svg"
-    css="$(stylesheet_for "$name")"
-    flags="$(extra_flags_for "$name")"
-    # shellcheck disable=SC2086
-    if cargo run --quiet -- "$ail" --stylesheet-css "$css" $flags > "$svg.tmp" 2>/dev/null; then
-        if ! diff -q "$svg" "$svg.tmp" > /dev/null 2>&1; then
-            echo "  CHANGED: $name.svg"
-            mv "$svg.tmp" "$svg"
+while IFS= read -r line; do
+    if [[ "$line" == OK* ]]; then
+        name="${line#OK  }"
+        svg="$SCRIPT_DIR/examples/$name"
+        if ! git diff --quiet -- "$svg" 2>/dev/null; then
+            echo "  CHANGED: $name"
             git add "$svg"
             CHANGED=1
-        else
-            rm -f "$svg.tmp"
         fi
-    else
-        echo "  FAIL: $name.ail (render error)"
-        rm -f "$svg.tmp"
+    elif [[ "$line" == FAIL* ]]; then
+        echo "  $line"
         exit 1
     fi
-done
+done < <(bash "$SCRIPT_DIR/examples/render-all.sh" 2>/dev/null)
 
 if [ "$CHANGED" -eq 1 ]; then
     echo "pre-commit: auto-staged updated SVGs"
 fi
 
-# Regenerate regression baselines (uses the same render pipeline)
+# Regenerate regression baselines
 echo "pre-commit: regenerating regression baselines..."
-for ail in "$SCRIPT_DIR"/examples/*.ail; do
-    name="$(basename "$ail" .ail)"
-    baseline="$SCRIPT_DIR/tests/baseline/$name.svg"
-    css="$(stylesheet_for "$name")"
-    flags="$(extra_flags_for "$name")"
-    # shellcheck disable=SC2086
-    if cargo run --quiet -- "$ail" --stylesheet-css "$css" $flags > "$baseline.tmp" 2>/dev/null; then
-        if ! diff -q "$baseline" "$baseline.tmp" > /dev/null 2>&1; then
-            mv "$baseline.tmp" "$baseline"
+for svg in "$SCRIPT_DIR"/examples/*.svg; do
+    name="$(basename "$svg")"
+    baseline="$SCRIPT_DIR/tests/baseline/$name"
+    if [ -f "$baseline" ]; then
+        if ! diff -q "$svg" "$baseline" > /dev/null 2>&1; then
+            cp "$svg" "$baseline"
             git add "$baseline"
             CHANGED=1
-        else
-            rm -f "$baseline.tmp"
         fi
-    else
-        rm -f "$baseline.tmp"
     fi
 done
 
