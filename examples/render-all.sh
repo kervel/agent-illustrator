@@ -15,7 +15,7 @@ stylesheet_for() {
 
 extra_flags_for() {
     case "$1" in
-        agentic-loop-story)   echo "--animate" ;;
+        agentic-loop-story)   echo "--animate-css" ;;
         *)                    echo "" ;;
     esac
 }

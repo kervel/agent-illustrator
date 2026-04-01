@@ -712,26 +712,6 @@ fn sample_cubic_bezier(p0: &Point, p1: &Point, p2: &Point, p3: &Point, n: usize)
         .collect()
 }
 
-/// Compute the axis-aligned bounding box of a connection path (works for both
-/// straight segments and Bézier control-point lists).
-fn path_bounding_box(path: &[Point]) -> BoundingBox {
-    let mut min_x = f64::INFINITY;
-    let mut min_y = f64::INFINITY;
-    let mut max_x = f64::NEG_INFINITY;
-    let mut max_y = f64::NEG_INFINITY;
-    for p in path {
-        min_x = min_x.min(p.x);
-        min_y = min_y.min(p.y);
-        max_x = max_x.max(p.x);
-        max_y = max_y.max(p.y);
-    }
-    BoundingBox {
-        x: min_x,
-        y: min_y,
-        width: max_x - min_x,
-        height: max_y - min_y,
-    }
-}
 
 // ── FR5: Connection-element intersection ──────────────────────────
 

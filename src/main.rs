@@ -84,6 +84,10 @@ struct Cli {
     /// Embed minimal JS for self-contained animated playback
     #[arg(long)]
     animate: bool,
+
+    /// Use pure CSS animation (no JS, works in GitLab/GitHub READMEs)
+    #[arg(long)]
+    animate_css: bool,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -212,6 +216,7 @@ fn main() {
         .with_image_href_mode(cli.image_href.into());
     config.frame = cli.frame;
     config.animate = cli.animate;
+    config.animate_css = cli.animate_css;
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }

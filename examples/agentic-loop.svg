@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 725 520" data-frames="startup,request,tool_call,execute,return,respond">
   <style>
     :root {
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
+    --background-1: #ffffff;
+    --text-light: #ffffff;
     --accent-2: #e3f2fd;
-    --accent-light: #e3f2fd;
-    --background-light: #ffffff;
-    --secondary-3: #ffe0b2;
-    --text-3: #999999;
-    --background-dark: #333333;
-    --text-dark: #1a1a1a;
-    --foreground-light: #e0e0e0;
-    --foreground-dark: #1a1a1a;
-    --status-error: #f44336;
-    --foreground-3: #999999;
-    --text-2: #666666;
-    --secondary-dark: #e65100;
     --text-1: #333333;
     --background-2: #f5f5f5;
-    --background-1: #ffffff;
-    --foreground-2: #666666;
+    --background-dark: #333333;
+    --secondary-3: #ffe0b2;
+    --text-3: #999999;
     --foreground-1: #333333;
-    --text-light: #ffffff;
-    --accent-1: #2196f3;
-    --background-3: #eeeeee;
     --accent-3: #bbdefb;
-    --secondary-1: #ff9800;
+    --foreground-2: #666666;
     --accent-dark: #1565c0;
-    --secondary-2: #fff3e0;
+    --status-error: #f44336;
+    --text-dark: #1a1a1a;
+    --foreground-dark: #1a1a1a;
+    --accent-1: #2196f3;
+    --foreground-3: #999999;
+    --accent-light: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --background-3: #eeeeee;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
     --secondary-light: #fff3e0;
+    --secondary-2: #fff3e0;
+    --secondary-1: #ff9800;
+    --secondary-dark: #e65100;
+    --text-2: #666666;
+    --background-light: #ffffff;
   }
 
     /* Keyframe animation CSS (auto-generated) */

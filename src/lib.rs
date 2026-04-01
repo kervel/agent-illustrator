@@ -100,6 +100,8 @@ pub struct RenderConfig {
     pub frame: Option<String>,
     /// Embed minimal JS for animated playback
     pub animate: bool,
+    /// Use pure CSS animation (no JS, works in GitLab/GitHub READMEs)
+    pub animate_css: bool,
 }
 
 impl Default for RenderConfig {
@@ -117,6 +119,7 @@ impl Default for RenderConfig {
             image_href_mode: ImageHrefMode::default(),
             frame: None,
             animate: false,
+            animate_css: false,
         }
     }
 }
@@ -515,11 +518,16 @@ fn render_pipeline(
             &frame_diffs,
         );
 
-        // Inject animate JS before closing </svg> tag
+        // Inject animation: JS (--animate) or CSS-only (--animate-css)
         if config.animate {
             let js = generate_animate_js(&frame_states);
             if let Some(pos) = svg.rfind("</svg>") {
                 svg.insert_str(pos, &js);
+            }
+        } else if config.animate_css {
+            let css = generate_animate_css(&frame_states, &frame_diffs);
+            if let Some(pos) = svg.rfind("</style>") {
+                svg.insert_str(pos, &css);
             }
         }
 
@@ -580,6 +588,126 @@ fn filter_visible_elements(
             e
         })
         .collect()
+}
+
+/// Generate pure CSS animation (no JS required).
+/// Each element/connection gets its own @keyframes animation that toggles
+/// opacity at the right frame percentages.
+fn generate_animate_css(
+    frame_states: &[layout::keyframe::FrameState],
+    frame_diffs: &[layout::keyframe::FrameLayout],
+) -> String {
+    let n = frame_diffs.len();
+    if n == 0 {
+        return String::new();
+    }
+
+    let frame_duration = 2.0; // seconds per frame
+    let total_duration = n as f64 * frame_duration;
+    let pct_per_frame = 100.0 / n as f64;
+
+    let mut css = String::new();
+    css.push_str("\n/* CSS-only animation (auto-generated) */\n");
+
+    // Collect all elements that need animation: track their opacity per frame
+    let mut elem_timelines: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
+    let mut conn_timelines: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
+
+    // Build per-frame visibility state for each element
+    for (i, state) in frame_states.iter().enumerate() {
+        // Elements: hidden = 0, visible = 1 (check if element is in hidden set)
+        // We need to know ALL element IDs that are ever hidden
+        for elem_id in &state.hidden_elements {
+            elem_timelines.entry(elem_id.clone()).or_insert_with(|| vec![1.0; n]);
+            elem_timelines.get_mut(elem_id).unwrap()[i] = 0.0;
+        }
+        for conn_id in &state.hidden_connections {
+            conn_timelines.entry(conn_id.clone()).or_insert_with(|| vec![1.0; n]);
+            conn_timelines.get_mut(conn_id).unwrap()[i] = 0.0;
+        }
+    }
+
+    // Also check frame diffs for opacity overrides (transforms with explicit opacity)
+    for (i, diff) in frame_diffs.iter().enumerate() {
+        for (elem_id, d) in &diff.element_diffs {
+            if let Some(opacity) = d.opacity {
+                let timeline = elem_timelines.entry(elem_id.clone()).or_insert_with(|| vec![0.0; n]);
+                timeline[i] = opacity;
+            }
+        }
+        for (conn_id, d) in &diff.connection_diffs {
+            if let Some(opacity) = d.opacity {
+                let timeline = conn_timelines.entry(conn_id.clone()).or_insert_with(|| vec![0.0; n]);
+                timeline[i] = opacity;
+            }
+        }
+    }
+
+    // Generate @keyframes for each element
+    for (elem_id, timeline) in &elem_timelines {
+        // Skip elements that never change (always hidden or always visible)
+        if timeline.windows(2).all(|w| (w[0] - w[1]).abs() < f64::EPSILON) {
+            continue;
+        }
+
+        let anim_name = format!("kf-anim-{}", elem_id);
+        css.push_str(&format!("@keyframes {} {{\n", anim_name));
+
+        for (i, &opacity) in timeline.iter().enumerate() {
+            let start_pct = i as f64 * pct_per_frame;
+            let end_pct = (i + 1) as f64 * pct_per_frame;
+            // Use step timing: element should have this opacity for the entire frame
+            if i == n - 1 {
+                css.push_str(&format!("  {:.1}% {{ opacity: {}; }}\n", start_pct, opacity));
+            } else {
+                css.push_str(&format!(
+                    "  {:.1}%, {:.1}% {{ opacity: {}; }}\n",
+                    start_pct,
+                    end_pct - 0.01,
+                    opacity
+                ));
+            }
+        }
+        css.push_str("}\n");
+
+        css.push_str(&format!(
+            ".kf-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
+            elem_id, anim_name, total_duration
+        ));
+    }
+
+    // Generate @keyframes for each connection
+    for (conn_id, timeline) in &conn_timelines {
+        if timeline.windows(2).all(|w| (w[0] - w[1]).abs() < f64::EPSILON) {
+            continue;
+        }
+
+        let anim_name = format!("kf-anim-conn-{}", conn_id);
+        css.push_str(&format!("@keyframes {} {{\n", anim_name));
+
+        for (i, &opacity) in timeline.iter().enumerate() {
+            let start_pct = i as f64 * pct_per_frame;
+            let end_pct = (i + 1) as f64 * pct_per_frame;
+            if i == n - 1 {
+                css.push_str(&format!("  {:.1}% {{ opacity: {}; }}\n", start_pct, opacity));
+            } else {
+                css.push_str(&format!(
+                    "  {:.1}%, {:.1}% {{ opacity: {}; }}\n",
+                    start_pct,
+                    end_pct - 0.01,
+                    opacity
+                ));
+            }
+        }
+        css.push_str("}\n");
+
+        css.push_str(&format!(
+            ".ai-connection.conn-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
+            conn_id, anim_name, total_duration
+        ));
+    }
+
+    css
 }
 
 /// Generate minimal JS for animated playback
