@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-97 -56 724 439">
   <style>
     :root {
-    --text-1: #333333;
-    --foreground-2: #666666;
-    --foreground-1: #333333;
-    --background-dark: #333333;
-    --text-light: #ffffff;
-    --accent-3: #bbdefb;
-    --secondary-2: #fff3e0;
-    --secondary-light: #fff3e0;
-    --text-dark: #1a1a1a;
     --status-success: #4caf50;
+    --text-3: #999999;
+    --secondary-2: #fff3e0;
+    --background-1: #ffffff;
+    --status-warning: #ff9800;
+    --foreground-3: #999999;
+    --status-error: #f44336;
+    --accent-1: #2196f3;
+    --secondary-3: #ffe0b2;
+    --text-light: #ffffff;
+    --text-dark: #1a1a1a;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --accent-2: #e3f2fd;
     --accent-light: #e3f2fd;
     --secondary-1: #ff9800;
-    --foreground-dark: #1a1a1a;
-    --status-warning: #ff9800;
-    --status-error: #f44336;
     --foreground-light: #e0e0e0;
-    --secondary-3: #ffe0b2;
-    --text-3: #999999;
-    --accent-1: #2196f3;
-    --foreground-3: #999999;
-    --background-3: #eeeeee;
-    --text-2: #666666;
-    --background-1: #ffffff;
+    --foreground-dark: #1a1a1a;
     --background-light: #ffffff;
     --background-2: #f5f5f5;
-    --accent-2: #e3f2fd;
+    --background-dark: #333333;
     --accent-dark: #1565c0;
+    --text-1: #333333;
     --secondary-dark: #e65100;
+    --text-2: #666666;
+    --background-3: #eeeeee;
+    --accent-3: #bbdefb;
+    --secondary-light: #fff3e0;
   }
 
     /* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)

@@ -1,0 +1,932 @@
+// 1525 Kessel-Lo - EL-02 - Eendraadschema
+// Source: 1525 Kessel-Lo - EL-02 - versie A.pdf
+// Contents only (no legend, no title block)
+
+// ============================================================
+// ATOMIC TEMPLATES
+// ============================================================
+
+template "brk2p" (spec: "2P C20") {
+    rect body [width: 36, height: 22, fill: none, stroke: foreground-1, stroke_width: 1.5, label: spec, font_size: 8]
+    rect top_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+template "brk4p" (spec: "4P C20") {
+    rect body [width: 42, height: 22, fill: none, stroke: foreground-1, stroke_width: 1.5, label: spec, font_size: 8]
+    rect top_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+template "diff" (spec: "4P 63A 300mA") {
+    rect body [width: 74, height: 26, fill: none, stroke: foreground-1, stroke_width: 1.5, label: spec, font_size: 8]
+    rect tbtn [width: 5, height: 5, fill: foreground-1, stroke: none]
+    constrain tbtn.right = body.right - 3
+    constrain tbtn.top = body.top + 3
+    rect top_lead [width: 2, height: 10, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 2, height: 10, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+template "mainsw" (spec: "4P 63A") {
+    rect body [width: 54, height: 22, fill: none, stroke: foreground-1, stroke_width: 1.5, label: spec, font_size: 8]
+    rect top_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+template "kwh" (id: "kWh") {
+    circle body [size: 34, fill: none, stroke: foreground-1, stroke_width: 1.5, label: id, font_size: 8]
+    rect top_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+// stopcontact (socket) - red
+template "leaf" (id: "A1") {
+    circle dot [size: 14, fill: background-1, stroke: #c0392b, stroke_width: 1.5, label: id, font_size: 7]
+    anchor top_conn [position: dot.top, direction: up]
+    anchor bot_conn [position: dot.bottom, direction: down]
+}
+
+// lampenpunt (light) - green
+template "leaf_lp" (id: "B1") {
+    circle dot [size: 14, fill: background-1, stroke: #27ae60, stroke_width: 1.5, label: id, font_size: 7]
+    anchor top_conn [position: dot.top, direction: up]
+    anchor bot_conn [position: dot.bottom, direction: down]
+}
+
+template "pv_panel" {
+    rect body [width: 50, height: 28, fill: none, stroke: foreground-1, stroke_width: 1.5, label: "PV", font_size: 10]
+    rect top_lead [width: 2, height: 10, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    anchor top_conn [position: top_lead.top, direction: up]
+}
+
+template "inverter" {
+    rect body [width: 40, height: 28, fill: none, stroke: foreground-1, stroke_width: 1.5, label: "ac/dc", font_size: 8]
+    rect top_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 2, height: 8, fill: foreground-1, stroke: none]
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+// ============================================================
+// CIRCUIT COLUMN TEMPLATES (breaker + header + cable)
+// ============================================================
+
+template "circ2p" (letter: "A", spec: "2P C20", cable: "VOB 2x2.5 + PE") {
+    rect hdr [width: 26, height: 14, fill: none, stroke: none, label: letter, font_size: 11]
+    rect drop [width: 2, height: 30, fill: foreground-1, stroke: none]
+    rect brk [width: 36, height: 22, fill: none, stroke: foreground-1, stroke_width: 1.5, label: spec, font_size: 8]
+    rect brk_bot [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect cab [width: 50, height: 10, fill: none, stroke: none, label: cable, font_size: 6]
+
+    constrain drop.center_x = brk.center_x
+    constrain drop.bottom = brk.top
+    constrain brk_bot.center_x = brk.center_x
+    constrain brk_bot.top = brk.bottom
+    constrain hdr.center_x = brk.center_x
+    constrain hdr.bottom = drop.top - 4
+    constrain cab.center_x = brk.center_x
+    constrain cab.top = brk_bot.bottom + 2
+
+    anchor bus_conn [position: drop.top - 2, direction: up]
+    anchor trunk_top [position: cab.bottom + 4, direction: down]
+}
+
+template "circ4p" (letter: "L2", spec: "4P C20", cable: "VOB 4x2.5 + PE") {
+    rect hdr [width: 26, height: 14, fill: none, stroke: none, label: letter, font_size: 11]
+    rect drop [width: 2, height: 30, fill: foreground-1, stroke: none]
+    rect brk [width: 42, height: 22, fill: none, stroke: foreground-1, stroke_width: 1.5, label: spec, font_size: 8]
+    rect brk_bot [width: 2, height: 8, fill: foreground-1, stroke: none]
+    rect cab [width: 50, height: 10, fill: none, stroke: none, label: cable, font_size: 6]
+
+    constrain drop.center_x = brk.center_x
+    constrain drop.bottom = brk.top
+    constrain brk_bot.center_x = brk.center_x
+    constrain brk_bot.top = brk.bottom
+    constrain hdr.center_x = brk.center_x
+    constrain hdr.bottom = drop.top - 4
+    constrain cab.center_x = brk.center_x
+    constrain cab.top = brk_bot.bottom + 2
+
+    anchor bus_conn [position: drop.top - 2, direction: up]
+    anchor trunk_top [position: cab.bottom + 4, direction: down]
+}
+
+// ============================================================
+// DIAGRAM
+// ============================================================
+
+group diagram {
+    // bus
+    rect bus [width: 1920, height: 3, fill: foreground-1, stroke: none]
+
+    // ---- main feed cluster (above bus) ----
+    mainsw main_sw [spec: "4P 63A"]
+    text "hoofdschakelaar" main_sw_lbl [font_size: 7, fill: foreground-1]
+    kwh main_kwh [id: "kWh"]
+    diff main_diff_300 [spec: "4P 63A 300mA"]
+    diff main_diff_30 [spec: "4P 63A 30mA"]
+    rect main_drop1 [width: 2, height: 70, fill: foreground-1, stroke: none]
+    rect main_drop2 [width: 2, height: 70, fill: foreground-1, stroke: none]
+
+    // ---- PV subgroup (leftmost circuit column, below bus) ----
+    diff pv_main [spec: "4P 32A 300mA"]
+    kwh pv_kwh [id: "kWh 001"]
+    diff pv_30 [spec: "2P(L1-L2) 63A 30mA"]
+    brk4p pv_brk [spec: "4P 25A"]
+    text "XVB 4x6 + PE" pv_cable1 [font_size: 6, fill: foreground-1]
+    inverter pv_inv
+    text "solarkabel 4mm²" pv_cable2 [font_size: 6, fill: foreground-1]
+    pv_panel pv_panels
+    text "0. VOEDING PV" pv_title [font_size: 8, fill: foreground-1]
+    rect pv_drop [width: 2, height: 22, fill: foreground-1, stroke: none]
+
+    // ---- Circuit columns A..AC ----
+    circ2p cA [letter: "A", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cB [letter: "B", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cC [letter: "C", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cD [letter: "D", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cE [letter: "E", spec: "2P C20", cable: "XVB 2x2.5+PE"]
+    circ2p cF [letter: "F", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cG [letter: "G", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cH [letter: "H", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cI [letter: "I", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cJ [letter: "J", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cK [letter: "K", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cL1 [letter: "L1", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ4p cL2 [letter: "L2", spec: "4P C20", cable: "VOB 4x2.5+PE"]
+    circ2p cM [letter: "M", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cN [letter: "N", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cO [letter: "O", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cP [letter: "P", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cQ [letter: "Q", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cR [letter: "R", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cS [letter: "S", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cT [letter: "T", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cU [letter: "U", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cV [letter: "V", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cW [letter: "W", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cX [letter: "X", spec: "2P C32", cable: "VOB 2x6+PE"]
+    circ2p cY [letter: "Y", spec: "2P 20A", cable: "XVB 2x2.5+PE"]
+    circ2p cZ [letter: "Z", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cAA [letter: "AA", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+    circ2p cAB [letter: "AB", spec: "2P C20", cable: "VOB 2x2.5+PE"]
+    circ2p cAC [letter: "AC", spec: "2P C16", cable: "VOB 2x1.5+PE"]
+
+    // ---- Trunk wires per circuit (drawn after breakers so they appear behind leaves) ----
+    rect trkA [width: 2, height: 70, fill: foreground-1, stroke: none]
+    rect trkB [width: 2, height: 135, fill: foreground-1, stroke: none]
+    rect trkC [width: 2, height: 135, fill: foreground-1, stroke: none]
+    rect trkD [width: 2, height: 200, fill: foreground-1, stroke: none]
+    rect trkE [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkF [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkG [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkH [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkI [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkJ [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkK [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkL1 [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkL2 [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkM [width: 2, height: 135, fill: foreground-1, stroke: none]
+    rect trkN [width: 2, height: 200, fill: foreground-1, stroke: none]
+    rect trkO [width: 2, height: 310, fill: foreground-1, stroke: none]
+    rect trkP [width: 2, height: 290, fill: foreground-1, stroke: none]
+    rect trkQ [width: 2, height: 200, fill: foreground-1, stroke: none]
+    rect trkR [width: 2, height: 200, fill: foreground-1, stroke: none]
+    rect trkS [width: 2, height: 180, fill: foreground-1, stroke: none]
+    rect trkT [width: 2, height: 155, fill: foreground-1, stroke: none]
+    rect trkU [width: 2, height: 180, fill: foreground-1, stroke: none]
+    rect trkV [width: 2, height: 180, fill: foreground-1, stroke: none]
+    rect trkW [width: 2, height: 155, fill: foreground-1, stroke: none]
+    rect trkX [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkY [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkZ [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkAA [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkAB [width: 2, height: 40, fill: foreground-1, stroke: none]
+    rect trkAC [width: 2, height: 40, fill: foreground-1, stroke: none]
+
+    // ---- Leaves ----
+    leaf A1 [id: "A1"]
+    leaf A2 [id: "A2"]
+    leaf_lp B1 [id: "B1"]
+    leaf_lp B2 [id: "B2"]
+    leaf_lp B3 [id: "B3"]
+    leaf_lp B4 [id: "B4"]
+    leaf_lp B5 [id: "B5"]
+    leaf_lp C1 [id: "C1"]
+    leaf_lp C2 [id: "C2"]
+    leaf_lp C3 [id: "C3"]
+    leaf_lp C4 [id: "C4"]
+    leaf_lp C5 [id: "C5"]
+    leaf D1 [id: "D1"]
+    leaf D2 [id: "D2"]
+    leaf D3 [id: "D3"]
+    leaf D4 [id: "D4"]
+    leaf D5 [id: "D5"]
+    leaf D6 [id: "D6"]
+    leaf D7 [id: "D7"]
+    leaf D8 [id: "D8"]
+    leaf E1 [id: "E1"]
+    leaf F1 [id: "F1"]
+    leaf G1 [id: "G1"]
+    leaf H1 [id: "H1"]
+    leaf I1 [id: "I1"]
+    leaf J1 [id: "J1"]
+    leaf K1 [id: "K1"]
+    leaf L1L [id: "L1"]
+    leaf L2L [id: "L2"]
+    leaf M1 [id: "M1"]
+    leaf M2 [id: "M2"]
+    leaf M3 [id: "M3"]
+    leaf M4 [id: "M4"]
+    leaf M5 [id: "M5"]
+    leaf_lp N1 [id: "N1"]
+    leaf_lp N2 [id: "N2"]
+    leaf_lp N3 [id: "N3"]
+    leaf_lp N4 [id: "N4"]
+    leaf_lp N5 [id: "N5"]
+    leaf_lp N6 [id: "N6"]
+    leaf_lp N7 [id: "N7"]
+    leaf_lp N8 [id: "N8"]
+    leaf_lp O1 [id: "O1"]
+    leaf_lp O2 [id: "O2"]
+    leaf_lp O3 [id: "O3"]
+    leaf_lp O4 [id: "O4"]
+    leaf_lp O5 [id: "O5"]
+    leaf_lp O6 [id: "O6"]
+    leaf_lp O7 [id: "O7"]
+    leaf_lp O8 [id: "O8"]
+    leaf_lp O9 [id: "O9"]
+    leaf_lp O10 [id: "O10"]
+    leaf_lp O11 [id: "O11"]
+    leaf_lp O12 [id: "O12"]
+    leaf_lp O13 [id: "O13"]
+    leaf_lp P1 [id: "P1"]
+    leaf_lp P2 [id: "P2"]
+    leaf_lp P3 [id: "P3"]
+    leaf_lp P4 [id: "P4"]
+    leaf_lp P5 [id: "P5"]
+    leaf_lp P6 [id: "P6"]
+    leaf_lp P7 [id: "P7"]
+    leaf_lp P8 [id: "P8"]
+    leaf_lp P9 [id: "P9"]
+    leaf_lp P10 [id: "P10"]
+    leaf_lp P11 [id: "P11"]
+    leaf_lp P12 [id: "P12"]
+    leaf Q1 [id: "Q1"]
+    leaf Q2 [id: "Q2"]
+    leaf Q3 [id: "Q3"]
+    leaf Q4 [id: "Q4"]
+    leaf Q5 [id: "Q5"]
+    leaf Q6 [id: "Q6"]
+    leaf Q7 [id: "Q7"]
+    leaf Q8 [id: "Q8"]
+    leaf R1 [id: "R1"]
+    leaf R2 [id: "R2"]
+    leaf R3 [id: "R3"]
+    leaf R4 [id: "R4"]
+    leaf R5 [id: "R5"]
+    leaf R6 [id: "R6"]
+    leaf R7 [id: "R7"]
+    leaf R8 [id: "R8"]
+    leaf S1 [id: "S1"]
+    leaf S2 [id: "S2"]
+    leaf S3 [id: "S3"]
+    leaf S4 [id: "S4"]
+    leaf S5 [id: "S5"]
+    leaf S6 [id: "S6"]
+    leaf S7 [id: "S7"]
+    leaf T1 [id: "T1"]
+    leaf T2 [id: "T2"]
+    leaf T3 [id: "T3"]
+    leaf T4 [id: "T4"]
+    leaf T5 [id: "T5"]
+    leaf T6 [id: "T6"]
+    leaf U1 [id: "U1"]
+    leaf U2 [id: "U2"]
+    leaf U3 [id: "U3"]
+    leaf U4 [id: "U4"]
+    leaf U5 [id: "U5"]
+    leaf U6 [id: "U6"]
+    leaf U7 [id: "U7"]
+    leaf V1 [id: "V1"]
+    leaf V2 [id: "V2"]
+    leaf V3 [id: "V3"]
+    leaf V4 [id: "V4"]
+    leaf V5 [id: "V5"]
+    leaf V6 [id: "V6"]
+    leaf V7 [id: "V7"]
+    leaf W1 [id: "W1"]
+    leaf W2 [id: "W2"]
+    leaf W3 [id: "W3"]
+    leaf W4 [id: "W4"]
+    leaf W5 [id: "W5"]
+    leaf W6 [id: "W6"]
+    leaf X1 [id: "X1"]
+    leaf Y1 [id: "Y1"]
+    leaf Z1 [id: "Z1"]
+    leaf AA1 [id: "AA1"]
+    leaf AB1 [id: "AB1"]
+    leaf AC1 [id: "AC1"]
+
+    // ---- circuit descriptions (below leaves, one line each) ----
+    text "A  buitenstopcontacten" descA [font_size: 8, fill: foreground-1, rotation: 270]
+    text "B  buitenverlichting" descB [font_size: 8, fill: foreground-1, rotation: 270]
+    text "C  verlichting natte ruimte" descC [font_size: 8, fill: foreground-1, rotation: 270]
+    text "D  stopcontacten natte ruimtes" descD [font_size: 8, fill: foreground-1, rotation: 270]
+    text "E  stc. wasmachine" descE [font_size: 8, fill: foreground-1, rotation: 270]
+    text "F  stc. wasmachine" descF [font_size: 8, fill: foreground-1, rotation: 270]
+    text "G  stc. droogkast" descG [font_size: 8, fill: foreground-1, rotation: 270]
+    text "H  stc. vaatwasmachine" descH [font_size: 8, fill: foreground-1, rotation: 270]
+    text "I  stc. elektr. radiator" descI [font_size: 8, fill: foreground-1, rotation: 270]
+    text "J  stc. elektr. radiator" descJ [font_size: 8, fill: foreground-1, rotation: 270]
+    text "K  voedingen screens" descK [font_size: 8, fill: foreground-1, rotation: 270]
+    text "L1  stc. koelkasten" descL1 [font_size: 8, fill: foreground-1, rotation: 270]
+    text "L2  diepvries" descL2 [font_size: 8, fill: foreground-1, rotation: 270]
+    text "M  stc. warmtepomp" descM [font_size: 8, fill: foreground-1, rotation: 270]
+    text "N  verlichting -01" descN [font_size: 8, fill: foreground-1, rotation: 270]
+    text "O  verlichting +00" descO [font_size: 8, fill: foreground-1, rotation: 270]
+    text "P  verlichting +01" descP [font_size: 8, fill: foreground-1, rotation: 270]
+    text "Q  stopcontacten -01" descQ [font_size: 8, fill: foreground-1, rotation: 270]
+    text "R  stc. +00 eetzone/zit" descR [font_size: 8, fill: foreground-1, rotation: 270]
+    text "S  stc. +00 inkom/garage" descS [font_size: 8, fill: foreground-1, rotation: 270]
+    text "T  stc. +00 keuken" descT [font_size: 8, fill: foreground-1, rotation: 270]
+    text "U  stc. +01 nachthal/ouders" descU [font_size: 8, fill: foreground-1, rotation: 270]
+    text "V  stc. +01 kinderkamers" descV [font_size: 8, fill: foreground-1, rotation: 270]
+    text "W  stc. +01 buro" descW [font_size: 8, fill: foreground-1, rotation: 270]
+    text "X  voeding kookplaat" descX [font_size: 8, fill: foreground-1, rotation: 270]
+    text "Y  stc. oven" descY [font_size: 8, fill: foreground-1, rotation: 270]
+    text "Z  stc. regenwater" descZ [font_size: 8, fill: foreground-1, rotation: 270]
+    text "AA  stc. ventilatie unit" descAA [font_size: 8, fill: foreground-1, rotation: 270]
+    text "AB  stc. alarmcentrale" descAB [font_size: 8, fill: foreground-1, rotation: 270]
+    text "AC  voeding reserve" descAC [font_size: 8, fill: foreground-1, rotation: 270]
+}
+
+// ============================================================
+// LAYOUT (positional)
+// ============================================================
+
+// Bus: horizontal rail at y=240
+constrain bus.left = 10
+constrain bus.top = 240
+
+// ---- Main feed cluster (ABOVE bus, x=140) ----
+constrain main_sw.center_x = 140
+constrain main_sw.top = 20
+constrain main_sw_lbl.left = main_sw.right + 4
+constrain main_sw_lbl.center_y = main_sw.center_y
+
+constrain main_kwh.center_x = 140
+constrain main_kwh.top = main_sw.bottom + 18
+
+constrain main_diff_300.center_x = 100
+constrain main_diff_300.top = main_kwh.bottom + 18
+constrain main_diff_30.center_x = 190
+constrain main_diff_30.top = main_kwh.bottom + 18
+
+// drops from diffs down to bus
+constrain main_drop1.center_x = main_diff_300.center_x
+constrain main_drop1.top = main_diff_300.bottom
+constrain main_drop2.center_x = main_diff_30.center_x
+constrain main_drop2.top = main_diff_30.bottom
+
+// ---- PV subgroup (below bus, x=50) ----
+constrain pv_drop.center_x = 50
+constrain pv_drop.top = 244
+constrain pv_main.center_x = 50
+constrain pv_main.top = 270
+constrain pv_kwh.center_x = 50
+constrain pv_kwh.top = pv_main.bottom + 14
+constrain pv_30.center_x = 50
+constrain pv_30.top = pv_kwh.bottom + 14
+constrain pv_brk.center_x = 50
+constrain pv_brk.top = pv_30.bottom + 14
+constrain pv_cable1.center_x = 50
+constrain pv_cable1.top = pv_brk.bottom + 6
+constrain pv_inv.center_x = 50
+constrain pv_inv.top = pv_cable1.bottom + 6
+constrain pv_cable2.center_x = 50
+constrain pv_cable2.top = pv_inv.bottom + 6
+constrain pv_panels.center_x = 50
+constrain pv_panels.top = pv_cable2.bottom + 6
+constrain pv_title.center_x = 50
+constrain pv_title.bottom = pv_drop.top - 4
+
+// ---- Circuit column positions (col_x = 260 + i*55) ----
+constrain cA.center_x =260
+constrain cB.center_x =315
+constrain cC.center_x =370
+constrain cD.center_x =425
+constrain cE.center_x =480
+constrain cF.center_x =535
+constrain cG.center_x =590
+constrain cH.center_x =645
+constrain cI.center_x =700
+constrain cJ.center_x =755
+constrain cK.center_x =810
+constrain cL1.center_x =865
+constrain cL2.center_x =920
+constrain cM.center_x =975
+constrain cN.center_x =1030
+constrain cO.center_x =1085
+constrain cP.center_x =1140
+constrain cQ.center_x =1195
+constrain cR.center_x =1250
+constrain cS.center_x =1305
+constrain cT.center_x =1360
+constrain cU.center_x =1415
+constrain cV.center_x =1470
+constrain cW.center_x =1525
+constrain cX.center_x =1580
+constrain cY.center_x =1635
+constrain cZ.center_x =1690
+constrain cAA.center_x =1745
+constrain cAB.center_x =1800
+constrain cAC.center_x =1855
+
+constrain cA.bus_conn_y = 244
+constrain cB.bus_conn_y = 244
+constrain cC.bus_conn_y = 244
+constrain cD.bus_conn_y = 244
+constrain cE.bus_conn_y = 244
+constrain cF.bus_conn_y = 244
+constrain cG.bus_conn_y = 244
+constrain cH.bus_conn_y = 244
+constrain cI.bus_conn_y = 244
+constrain cJ.bus_conn_y = 244
+constrain cK.bus_conn_y = 244
+constrain cL1.bus_conn_y = 244
+constrain cL2.bus_conn_y = 244
+constrain cM.bus_conn_y = 244
+constrain cN.bus_conn_y = 244
+constrain cO.bus_conn_y = 244
+constrain cP.bus_conn_y = 244
+constrain cQ.bus_conn_y = 244
+constrain cR.bus_conn_y = 244
+constrain cS.bus_conn_y = 244
+constrain cT.bus_conn_y = 244
+constrain cU.bus_conn_y = 244
+constrain cV.bus_conn_y = 244
+constrain cW.bus_conn_y = 244
+constrain cX.bus_conn_y = 244
+constrain cY.bus_conn_y = 244
+constrain cZ.bus_conn_y = 244
+constrain cAA.bus_conn_y = 244
+constrain cAB.bus_conn_y = 244
+constrain cAC.bus_conn_y = 244
+
+// ---- Trunk rects (positioned at each column, top = just below cable label) ----
+constrain trkA.center_x = 260
+constrain trkA.top = cA.trunk_top_y
+constrain trkB.center_x = 315
+constrain trkB.top = cB.trunk_top_y
+constrain trkC.center_x = 370
+constrain trkC.top = cC.trunk_top_y
+constrain trkD.center_x = 425
+constrain trkD.top = cD.trunk_top_y
+constrain trkE.center_x = 480
+constrain trkE.top = cE.trunk_top_y
+constrain trkF.center_x = 535
+constrain trkF.top = cF.trunk_top_y
+constrain trkG.center_x = 590
+constrain trkG.top = cG.trunk_top_y
+constrain trkH.center_x = 645
+constrain trkH.top = cH.trunk_top_y
+constrain trkI.center_x = 700
+constrain trkI.top = cI.trunk_top_y
+constrain trkJ.center_x = 755
+constrain trkJ.top = cJ.trunk_top_y
+constrain trkK.center_x = 810
+constrain trkK.top = cK.trunk_top_y
+constrain trkL1.center_x = 865
+constrain trkL1.top = cL1.trunk_top_y
+constrain trkL2.center_x = 920
+constrain trkL2.top = cL2.trunk_top_y
+constrain trkM.center_x = 975
+constrain trkM.top = cM.trunk_top_y
+constrain trkN.center_x = 1030
+constrain trkN.top = cN.trunk_top_y
+constrain trkO.center_x = 1085
+constrain trkO.top = cO.trunk_top_y
+constrain trkP.center_x = 1140
+constrain trkP.top = cP.trunk_top_y
+constrain trkQ.center_x = 1195
+constrain trkQ.top = cQ.trunk_top_y
+constrain trkR.center_x = 1250
+constrain trkR.top = cR.trunk_top_y
+constrain trkS.center_x = 1305
+constrain trkS.top = cS.trunk_top_y
+constrain trkT.center_x = 1360
+constrain trkT.top = cT.trunk_top_y
+constrain trkU.center_x = 1415
+constrain trkU.top = cU.trunk_top_y
+constrain trkV.center_x = 1470
+constrain trkV.top = cV.trunk_top_y
+constrain trkW.center_x = 1525
+constrain trkW.top = cW.trunk_top_y
+constrain trkX.center_x = 1580
+constrain trkX.top = cX.trunk_top_y
+constrain trkY.center_x = 1635
+constrain trkY.top = cY.trunk_top_y
+constrain trkZ.center_x = 1690
+constrain trkZ.top = cZ.trunk_top_y
+constrain trkAA.center_x = 1745
+constrain trkAA.top = cAA.trunk_top_y
+constrain trkAB.center_x = 1800
+constrain trkAB.top = cAB.trunk_top_y
+constrain trkAC.center_x = 1855
+constrain trkAC.top = cAC.trunk_top_y
+
+// ---- Leaves: first leaf at y=325, spacing 22 ----
+// Circuit A
+constrain A1.center_x =260
+constrain A1.top_conn_y = 355
+constrain A2.center_x =260
+constrain A2.top_conn_y = 377
+
+// Circuit B (5 leaves)
+constrain B1.center_x =315
+constrain B1.top_conn_y = 355
+constrain B2.center_x =315
+constrain B2.top_conn_y = 377
+constrain B3.center_x =315
+constrain B3.top_conn_y = 399
+constrain B4.center_x =315
+constrain B4.top_conn_y = 421
+constrain B5.center_x =315
+constrain B5.top_conn_y = 443
+
+// Circuit C (5 leaves)
+constrain C1.center_x =370
+constrain C1.top_conn_y = 355
+constrain C2.center_x =370
+constrain C2.top_conn_y = 377
+constrain C3.center_x =370
+constrain C3.top_conn_y = 399
+constrain C4.center_x =370
+constrain C4.top_conn_y = 421
+constrain C5.center_x =370
+constrain C5.top_conn_y = 443
+
+// Circuit D (8 leaves)
+constrain D1.center_x =425
+constrain D1.top_conn_y = 355
+constrain D2.center_x =425
+constrain D2.top_conn_y = 377
+constrain D3.center_x =425
+constrain D3.top_conn_y = 399
+constrain D4.center_x =425
+constrain D4.top_conn_y = 421
+constrain D5.center_x =425
+constrain D5.top_conn_y = 443
+constrain D6.center_x =425
+constrain D6.top_conn_y = 465
+constrain D7.center_x =425
+constrain D7.top_conn_y = 487
+constrain D8.center_x =425
+constrain D8.top_conn_y = 509
+
+// E..K 1 leaf each
+constrain E1.center_x =480
+constrain E1.top_conn_y = 355
+constrain F1.center_x =535
+constrain F1.top_conn_y = 355
+constrain G1.center_x =590
+constrain G1.top_conn_y = 355
+constrain H1.center_x =645
+constrain H1.top_conn_y = 355
+constrain I1.center_x =700
+constrain I1.top_conn_y = 355
+constrain J1.center_x =755
+constrain J1.top_conn_y = 355
+constrain K1.center_x =810
+constrain K1.top_conn_y = 355
+
+// L1, L2
+constrain L1L.center_x =865
+constrain L1L.top_conn_y = 355
+constrain L2L.center_x =920
+constrain L2L.top_conn_y = 355
+
+// M (5 leaves)
+constrain M1.center_x =975
+constrain M1.top_conn_y = 355
+constrain M2.center_x =975
+constrain M2.top_conn_y = 377
+constrain M3.center_x =975
+constrain M3.top_conn_y = 399
+constrain M4.center_x =975
+constrain M4.top_conn_y = 421
+constrain M5.center_x =975
+constrain M5.top_conn_y = 443
+
+// N (8 leaves)
+constrain N1.center_x =1030
+constrain N1.top_conn_y = 355
+constrain N2.center_x =1030
+constrain N2.top_conn_y = 377
+constrain N3.center_x =1030
+constrain N3.top_conn_y = 399
+constrain N4.center_x =1030
+constrain N4.top_conn_y = 421
+constrain N5.center_x =1030
+constrain N5.top_conn_y = 443
+constrain N6.center_x =1030
+constrain N6.top_conn_y = 465
+constrain N7.center_x =1030
+constrain N7.top_conn_y = 487
+constrain N8.center_x =1030
+constrain N8.top_conn_y = 509
+
+// O (13 leaves)
+constrain O1.center_x =1085
+constrain O1.top_conn_y = 355
+constrain O2.center_x =1085
+constrain O2.top_conn_y = 377
+constrain O3.center_x =1085
+constrain O3.top_conn_y = 399
+constrain O4.center_x =1085
+constrain O4.top_conn_y = 421
+constrain O5.center_x =1085
+constrain O5.top_conn_y = 443
+constrain O6.center_x =1085
+constrain O6.top_conn_y = 465
+constrain O7.center_x =1085
+constrain O7.top_conn_y = 487
+constrain O8.center_x =1085
+constrain O8.top_conn_y = 509
+constrain O9.center_x =1085
+constrain O9.top_conn_y = 531
+constrain O10.center_x =1085
+constrain O10.top_conn_y = 553
+constrain O11.center_x =1085
+constrain O11.top_conn_y = 575
+constrain O12.center_x =1085
+constrain O12.top_conn_y = 597
+constrain O13.center_x =1085
+constrain O13.top_conn_y = 619
+
+// P (12 leaves)
+constrain P1.center_x =1140
+constrain P1.top_conn_y = 355
+constrain P2.center_x =1140
+constrain P2.top_conn_y = 377
+constrain P3.center_x =1140
+constrain P3.top_conn_y = 399
+constrain P4.center_x =1140
+constrain P4.top_conn_y = 421
+constrain P5.center_x =1140
+constrain P5.top_conn_y = 443
+constrain P6.center_x =1140
+constrain P6.top_conn_y = 465
+constrain P7.center_x =1140
+constrain P7.top_conn_y = 487
+constrain P8.center_x =1140
+constrain P8.top_conn_y = 509
+constrain P9.center_x =1140
+constrain P9.top_conn_y = 531
+constrain P10.center_x =1140
+constrain P10.top_conn_y = 553
+constrain P11.center_x =1140
+constrain P11.top_conn_y = 575
+constrain P12.center_x =1140
+constrain P12.top_conn_y = 597
+
+// Q (8 leaves)
+constrain Q1.center_x =1195
+constrain Q1.top_conn_y = 355
+constrain Q2.center_x =1195
+constrain Q2.top_conn_y = 377
+constrain Q3.center_x =1195
+constrain Q3.top_conn_y = 399
+constrain Q4.center_x =1195
+constrain Q4.top_conn_y = 421
+constrain Q5.center_x =1195
+constrain Q5.top_conn_y = 443
+constrain Q6.center_x =1195
+constrain Q6.top_conn_y = 465
+constrain Q7.center_x =1195
+constrain Q7.top_conn_y = 487
+constrain Q8.center_x =1195
+constrain Q8.top_conn_y = 509
+
+// R (8 leaves)
+constrain R1.center_x =1250
+constrain R1.top_conn_y = 355
+constrain R2.center_x =1250
+constrain R2.top_conn_y = 377
+constrain R3.center_x =1250
+constrain R3.top_conn_y = 399
+constrain R4.center_x =1250
+constrain R4.top_conn_y = 421
+constrain R5.center_x =1250
+constrain R5.top_conn_y = 443
+constrain R6.center_x =1250
+constrain R6.top_conn_y = 465
+constrain R7.center_x =1250
+constrain R7.top_conn_y = 487
+constrain R8.center_x =1250
+constrain R8.top_conn_y = 509
+
+// S (7 leaves)
+constrain S1.center_x =1305
+constrain S1.top_conn_y = 355
+constrain S2.center_x =1305
+constrain S2.top_conn_y = 377
+constrain S3.center_x =1305
+constrain S3.top_conn_y = 399
+constrain S4.center_x =1305
+constrain S4.top_conn_y = 421
+constrain S5.center_x =1305
+constrain S5.top_conn_y = 443
+constrain S6.center_x =1305
+constrain S6.top_conn_y = 465
+constrain S7.center_x =1305
+constrain S7.top_conn_y = 487
+
+// T (6 leaves)
+constrain T1.center_x =1360
+constrain T1.top_conn_y = 355
+constrain T2.center_x =1360
+constrain T2.top_conn_y = 377
+constrain T3.center_x =1360
+constrain T3.top_conn_y = 399
+constrain T4.center_x =1360
+constrain T4.top_conn_y = 421
+constrain T5.center_x =1360
+constrain T5.top_conn_y = 443
+constrain T6.center_x =1360
+constrain T6.top_conn_y = 465
+
+// U (7 leaves)
+constrain U1.center_x =1415
+constrain U1.top_conn_y = 355
+constrain U2.center_x =1415
+constrain U2.top_conn_y = 377
+constrain U3.center_x =1415
+constrain U3.top_conn_y = 399
+constrain U4.center_x =1415
+constrain U4.top_conn_y = 421
+constrain U5.center_x =1415
+constrain U5.top_conn_y = 443
+constrain U6.center_x =1415
+constrain U6.top_conn_y = 465
+constrain U7.center_x =1415
+constrain U7.top_conn_y = 487
+
+// V (7 leaves)
+constrain V1.center_x =1470
+constrain V1.top_conn_y = 355
+constrain V2.center_x =1470
+constrain V2.top_conn_y = 377
+constrain V3.center_x =1470
+constrain V3.top_conn_y = 399
+constrain V4.center_x =1470
+constrain V4.top_conn_y = 421
+constrain V5.center_x =1470
+constrain V5.top_conn_y = 443
+constrain V6.center_x =1470
+constrain V6.top_conn_y = 465
+constrain V7.center_x =1470
+constrain V7.top_conn_y = 487
+
+// W (6 leaves)
+constrain W1.center_x =1525
+constrain W1.top_conn_y = 355
+constrain W2.center_x =1525
+constrain W2.top_conn_y = 377
+constrain W3.center_x =1525
+constrain W3.top_conn_y = 399
+constrain W4.center_x =1525
+constrain W4.top_conn_y = 421
+constrain W5.center_x =1525
+constrain W5.top_conn_y = 443
+constrain W6.center_x =1525
+constrain W6.top_conn_y = 465
+
+// X..AC 1 leaf each
+constrain X1.center_x =1580
+constrain X1.top_conn_y = 355
+constrain Y1.center_x =1635
+constrain Y1.top_conn_y = 355
+constrain Z1.center_x =1690
+constrain Z1.top_conn_y = 355
+constrain AA1.center_x =1745
+constrain AA1.top_conn_y = 355
+constrain AB1.center_x =1800
+constrain AB1.top_conn_y = 355
+constrain AC1.center_x =1855
+constrain AC1.top_conn_y = 355
+
+// ---- Circuit descriptions at y=720 (below all leaves) ----
+constrain descA.center_x = 260
+constrain descA.top = 720
+constrain descB.center_x = 315
+constrain descB.top = 720
+constrain descC.center_x = 370
+constrain descC.top = 720
+constrain descD.center_x = 425
+constrain descD.top = 720
+constrain descE.center_x = 480
+constrain descE.top = 720
+constrain descF.center_x = 535
+constrain descF.top = 720
+constrain descG.center_x = 590
+constrain descG.top = 720
+constrain descH.center_x = 645
+constrain descH.top = 720
+constrain descI.center_x = 700
+constrain descI.top = 720
+constrain descJ.center_x = 755
+constrain descJ.top = 720
+constrain descK.center_x = 810
+constrain descK.top = 720
+constrain descL1.center_x = 865
+constrain descL1.top = 720
+constrain descL2.center_x = 920
+constrain descL2.top = 720
+constrain descM.center_x = 975
+constrain descM.top = 720
+constrain descN.center_x = 1030
+constrain descN.top = 720
+constrain descO.center_x = 1085
+constrain descO.top = 720
+constrain descP.center_x = 1140
+constrain descP.top = 720
+constrain descQ.center_x = 1195
+constrain descQ.top = 720
+constrain descR.center_x = 1250
+constrain descR.top = 720
+constrain descS.center_x = 1305
+constrain descS.top = 720
+constrain descT.center_x = 1360
+constrain descT.top = 720
+constrain descU.center_x = 1415
+constrain descU.top = 720
+constrain descV.center_x = 1470
+constrain descV.top = 720
+constrain descW.center_x = 1525
+constrain descW.top = 720
+constrain descX.center_x = 1580
+constrain descX.top = 720
+constrain descY.center_x = 1635
+constrain descY.top = 720
+constrain descZ.center_x = 1690
+constrain descZ.top = 720
+constrain descAA.center_x = 1745
+constrain descAA.top = 720
+constrain descAB.center_x = 1800
+constrain descAB.top = 720
+constrain descAC.center_x = 1855
+constrain descAC.top = 720
+
+// ============================================================
+// CONNECTIONS
+// ============================================================
+
+// Main chain
+main_sw.bot_conn -- main_kwh.top_conn
+main_kwh.bot_conn -- main_diff_300.top_conn [routing: curved]
+main_kwh.bot_conn -- main_diff_30.top_conn [routing: curved]
+
+// PV chain (bottom-up conceptually)
+pv_main.bot_conn -- pv_kwh.top_conn
+pv_kwh.bot_conn -- pv_30.top_conn
+pv_30.bot_conn -- pv_brk.top_conn
+pv_brk.bot_conn -- pv_inv.top_conn
+pv_inv.bot_conn -- pv_panels.top_conn

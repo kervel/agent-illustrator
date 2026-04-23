@@ -1,0 +1,1104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-73 -40 2063 828">
+  <style>
+    :root {
+    --background-2: #f5f5f5;
+    --text-1: #333333;
+    --foreground-3: #999999;
+    --text-2: #666666;
+    --text-light: #ffffff;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --foreground-1: #333333;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --background-light: #ffffff;
+    --status-error: #f44336;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --status-success: #4caf50;
+    --background-1: #ffffff;
+    --foreground-2: #666666;
+    --foreground-dark: #1a1a1a;
+    --background-3: #eeeeee;
+    --accent-1: #2196f3;
+    --background-dark: #333333;
+    --foreground-light: #e0e0e0;
+  }
+
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+
+  </style>
+  <g id="diagram" class="ai-container">
+    <rect id="bus" class="ai-shape ai-rect" x="10" y="240" width="1920" height="3" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <g id="main_sw" class="ai-container">
+      <rect id="main_sw_body" class="ai-shape ai-rect" x="113" y="28" width="54" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="140" y="39" text-anchor="middle" dominant-baseline="middle" font-size="8">4P 63A</text>
+      <rect id="main_sw_top_lead" class="ai-shape ai-rect" x="139" y="20" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="main_sw_bot_lead" class="ai-shape ai-rect" x="139" y="50" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <text id="main_sw_lbl" class="ai-shape ai-text" x="171" y="39" text-anchor="start" dominant-baseline="middle" font-size="7" fill="var(--foreground-1)">hoofdschakelaar</text>
+    <g id="main_kwh" class="ai-container">
+      <circle id="main_kwh_body" class="ai-shape ai-circle" cx="140" cy="101" r="17" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="140" y="101" text-anchor="middle" dominant-baseline="middle" font-size="8">kWh</text>
+      <rect id="main_kwh_top_lead" class="ai-shape ai-rect" x="139" y="76" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="main_kwh_bot_lead" class="ai-shape ai-rect" x="139" y="118" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <g id="main_diff_300" class="ai-container">
+      <rect id="main_diff_300_body" class="ai-shape ai-rect" x="63" y="154" width="74" height="26" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="100" y="167" text-anchor="middle" dominant-baseline="middle" font-size="8">4P 63A 300mA</text>
+      <rect id="main_diff_300_tbtn" class="ai-shape ai-rect" x="129" y="157" width="5" height="5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="main_diff_300_top_lead" class="ai-shape ai-rect" x="99" y="144" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="main_diff_300_bot_lead" class="ai-shape ai-rect" x="99" y="180" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <g id="main_diff_30" class="ai-container">
+      <rect id="main_diff_30_body" class="ai-shape ai-rect" x="153" y="154" width="74" height="26" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="190" y="167" text-anchor="middle" dominant-baseline="middle" font-size="8">4P 63A 30mA</text>
+      <rect id="main_diff_30_tbtn" class="ai-shape ai-rect" x="219" y="157" width="5" height="5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="main_diff_30_top_lead" class="ai-shape ai-rect" x="189" y="144" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="main_diff_30_bot_lead" class="ai-shape ai-rect" x="189" y="180" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <rect id="main_drop1" class="ai-shape ai-rect" x="99" y="190" width="2" height="70" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="main_drop2" class="ai-shape ai-rect" x="189" y="190" width="2" height="70" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <g id="pv_main" class="ai-container">
+      <rect id="pv_main_body" class="ai-shape ai-rect" x="13" y="280" width="74" height="26" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="293" text-anchor="middle" dominant-baseline="middle" font-size="8">4P 32A 300mA</text>
+      <rect id="pv_main_tbtn" class="ai-shape ai-rect" x="79" y="283" width="5" height="5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_main_top_lead" class="ai-shape ai-rect" x="49" y="270" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_main_bot_lead" class="ai-shape ai-rect" x="49" y="306" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <g id="pv_kwh" class="ai-container">
+      <circle id="pv_kwh_body" class="ai-shape ai-circle" cx="50" cy="355" r="17" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="355" text-anchor="middle" dominant-baseline="middle" font-size="8">kWh 001</text>
+      <rect id="pv_kwh_top_lead" class="ai-shape ai-rect" x="49" y="330" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_kwh_bot_lead" class="ai-shape ai-rect" x="49" y="372" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <g id="pv_30" class="ai-container">
+      <rect id="pv_30_body" class="ai-shape ai-rect" x="13" y="404" width="74" height="26" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="417" text-anchor="middle" dominant-baseline="middle" font-size="8">2P(L1-L2) 63A 30mA</text>
+      <rect id="pv_30_tbtn" class="ai-shape ai-rect" x="79" y="407" width="5" height="5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_30_top_lead" class="ai-shape ai-rect" x="49" y="394" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_30_bot_lead" class="ai-shape ai-rect" x="49" y="430" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <g id="pv_brk" class="ai-container">
+      <rect id="pv_brk_body" class="ai-shape ai-rect" x="29" y="462" width="42" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="473" text-anchor="middle" dominant-baseline="middle" font-size="8">4P 25A</text>
+      <rect id="pv_brk_top_lead" class="ai-shape ai-rect" x="49" y="454" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_brk_bot_lead" class="ai-shape ai-rect" x="49" y="484" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <text id="pv_cable1" class="ai-shape ai-text" x="28.400000000000002" y="501" text-anchor="start" dominant-baseline="middle" font-size="6" fill="var(--foreground-1)">XVB 4x6 + PE</text>
+    <g id="pv_inv" class="ai-container">
+      <rect id="pv_inv_body" class="ai-shape ai-rect" x="30" y="518" width="40" height="28" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="532" text-anchor="middle" dominant-baseline="middle" font-size="8">ac/dc</text>
+      <rect id="pv_inv_top_lead" class="ai-shape ai-rect" x="49" y="510" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="pv_inv_bot_lead" class="ai-shape ai-rect" x="49" y="546" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <text id="pv_cable2" class="ai-shape ai-text" x="21.200000000000003" y="563" text-anchor="start" dominant-baseline="middle" font-size="6" fill="var(--foreground-1)">solarkabel 4mm²</text>
+    <g id="pv_panels" class="ai-container">
+      <rect id="pv_panels_body" class="ai-shape ai-rect" x="25" y="582" width="50" height="28" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="596" text-anchor="middle" dominant-baseline="middle" font-size="10">PV</text>
+      <rect id="pv_panels_top_lead" class="ai-shape ai-rect" x="49" y="572" width="2" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    </g>
+    <text id="pv_title" class="ai-shape ai-text" x="18.8" y="236" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">0. VOEDING PV</text>
+    <rect id="pv_drop" class="ai-shape ai-rect" x="49" y="244" width="2" height="22" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <g id="cA" class="ai-container">
+      <rect id="cA_hdr" class="ai-shape ai-rect" x="247" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="260" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">A</text>
+      <rect id="cA_drop" class="ai-shape ai-rect" x="259" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cA_brk" class="ai-shape ai-rect" x="242" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="260" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cA_brk_bot" class="ai-shape ai-rect" x="259" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cA_cab" class="ai-shape ai-rect" x="235" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="260" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cB" class="ai-container">
+      <rect id="cB_hdr" class="ai-shape ai-rect" x="302" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">B</text>
+      <rect id="cB_drop" class="ai-shape ai-rect" x="314" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cB_brk" class="ai-shape ai-rect" x="297" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cB_brk_bot" class="ai-shape ai-rect" x="314" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cB_cab" class="ai-shape ai-rect" x="290" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cC" class="ai-container">
+      <rect id="cC_hdr" class="ai-shape ai-rect" x="357" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">C</text>
+      <rect id="cC_drop" class="ai-shape ai-rect" x="369" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cC_brk" class="ai-shape ai-rect" x="352" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cC_brk_bot" class="ai-shape ai-rect" x="369" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cC_cab" class="ai-shape ai-rect" x="345" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cD" class="ai-container">
+      <rect id="cD_hdr" class="ai-shape ai-rect" x="412" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">D</text>
+      <rect id="cD_drop" class="ai-shape ai-rect" x="424" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cD_brk" class="ai-shape ai-rect" x="407" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cD_brk_bot" class="ai-shape ai-rect" x="424" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cD_cab" class="ai-shape ai-rect" x="400" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cE" class="ai-container">
+      <rect id="cE_hdr" class="ai-shape ai-rect" x="467" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="480" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">E</text>
+      <rect id="cE_drop" class="ai-shape ai-rect" x="479" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cE_brk" class="ai-shape ai-rect" x="462" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="480" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cE_brk_bot" class="ai-shape ai-rect" x="479" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cE_cab" class="ai-shape ai-rect" x="455" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="480" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">XVB 2x2.5+PE</text>
+    </g>
+    <g id="cF" class="ai-container">
+      <rect id="cF_hdr" class="ai-shape ai-rect" x="522" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="535" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">F</text>
+      <rect id="cF_drop" class="ai-shape ai-rect" x="534" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cF_brk" class="ai-shape ai-rect" x="517" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="535" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cF_brk_bot" class="ai-shape ai-rect" x="534" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cF_cab" class="ai-shape ai-rect" x="510" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="535" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cG" class="ai-container">
+      <rect id="cG_hdr" class="ai-shape ai-rect" x="577" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="590" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">G</text>
+      <rect id="cG_drop" class="ai-shape ai-rect" x="589" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cG_brk" class="ai-shape ai-rect" x="572" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="590" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cG_brk_bot" class="ai-shape ai-rect" x="589" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cG_cab" class="ai-shape ai-rect" x="565" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="590" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cH" class="ai-container">
+      <rect id="cH_hdr" class="ai-shape ai-rect" x="632" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="645" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">H</text>
+      <rect id="cH_drop" class="ai-shape ai-rect" x="644" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cH_brk" class="ai-shape ai-rect" x="627" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="645" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cH_brk_bot" class="ai-shape ai-rect" x="644" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cH_cab" class="ai-shape ai-rect" x="620" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="645" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cI" class="ai-container">
+      <rect id="cI_hdr" class="ai-shape ai-rect" x="687" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="700" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">I</text>
+      <rect id="cI_drop" class="ai-shape ai-rect" x="699" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cI_brk" class="ai-shape ai-rect" x="682" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="700" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cI_brk_bot" class="ai-shape ai-rect" x="699" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cI_cab" class="ai-shape ai-rect" x="675" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="700" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cJ" class="ai-container">
+      <rect id="cJ_hdr" class="ai-shape ai-rect" x="742" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="755" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">J</text>
+      <rect id="cJ_drop" class="ai-shape ai-rect" x="754" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cJ_brk" class="ai-shape ai-rect" x="737" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="755" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cJ_brk_bot" class="ai-shape ai-rect" x="754" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cJ_cab" class="ai-shape ai-rect" x="730" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="755" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cK" class="ai-container">
+      <rect id="cK_hdr" class="ai-shape ai-rect" x="797" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="810" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">K</text>
+      <rect id="cK_drop" class="ai-shape ai-rect" x="809" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cK_brk" class="ai-shape ai-rect" x="792" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="810" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cK_brk_bot" class="ai-shape ai-rect" x="809" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cK_cab" class="ai-shape ai-rect" x="785" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="810" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cL1" class="ai-container">
+      <rect id="cL1_hdr" class="ai-shape ai-rect" x="852" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="865" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">L1</text>
+      <rect id="cL1_drop" class="ai-shape ai-rect" x="864" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cL1_brk" class="ai-shape ai-rect" x="847" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="865" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cL1_brk_bot" class="ai-shape ai-rect" x="864" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cL1_cab" class="ai-shape ai-rect" x="840" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="865" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cL2" class="ai-container">
+      <rect id="cL2_hdr" class="ai-shape ai-rect" x="907" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="920" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">L2</text>
+      <rect id="cL2_drop" class="ai-shape ai-rect" x="919" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cL2_brk" class="ai-shape ai-rect" x="899" y="292" width="42" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="920" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">4P C20</text>
+      <rect id="cL2_brk_bot" class="ai-shape ai-rect" x="919" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cL2_cab" class="ai-shape ai-rect" x="895" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="920" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 4x2.5+PE</text>
+    </g>
+    <g id="cM" class="ai-container">
+      <rect id="cM_hdr" class="ai-shape ai-rect" x="962" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">M</text>
+      <rect id="cM_drop" class="ai-shape ai-rect" x="974" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cM_brk" class="ai-shape ai-rect" x="957" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cM_brk_bot" class="ai-shape ai-rect" x="974" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cM_cab" class="ai-shape ai-rect" x="950" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cN" class="ai-container">
+      <rect id="cN_hdr" class="ai-shape ai-rect" x="1017" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">N</text>
+      <rect id="cN_drop" class="ai-shape ai-rect" x="1029" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cN_brk" class="ai-shape ai-rect" x="1012" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cN_brk_bot" class="ai-shape ai-rect" x="1029" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cN_cab" class="ai-shape ai-rect" x="1005" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cO" class="ai-container">
+      <rect id="cO_hdr" class="ai-shape ai-rect" x="1072" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">O</text>
+      <rect id="cO_drop" class="ai-shape ai-rect" x="1084" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cO_brk" class="ai-shape ai-rect" x="1067" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cO_brk_bot" class="ai-shape ai-rect" x="1084" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cO_cab" class="ai-shape ai-rect" x="1060" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cP" class="ai-container">
+      <rect id="cP_hdr" class="ai-shape ai-rect" x="1127" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">P</text>
+      <rect id="cP_drop" class="ai-shape ai-rect" x="1139" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cP_brk" class="ai-shape ai-rect" x="1122" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cP_brk_bot" class="ai-shape ai-rect" x="1139" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cP_cab" class="ai-shape ai-rect" x="1115" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cQ" class="ai-container">
+      <rect id="cQ_hdr" class="ai-shape ai-rect" x="1182" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">Q</text>
+      <rect id="cQ_drop" class="ai-shape ai-rect" x="1194" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cQ_brk" class="ai-shape ai-rect" x="1177" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cQ_brk_bot" class="ai-shape ai-rect" x="1194" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cQ_cab" class="ai-shape ai-rect" x="1170" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cR" class="ai-container">
+      <rect id="cR_hdr" class="ai-shape ai-rect" x="1237" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">R</text>
+      <rect id="cR_drop" class="ai-shape ai-rect" x="1249" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cR_brk" class="ai-shape ai-rect" x="1232" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cR_brk_bot" class="ai-shape ai-rect" x="1249" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cR_cab" class="ai-shape ai-rect" x="1225" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cS" class="ai-container">
+      <rect id="cS_hdr" class="ai-shape ai-rect" x="1292" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">S</text>
+      <rect id="cS_drop" class="ai-shape ai-rect" x="1304" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cS_brk" class="ai-shape ai-rect" x="1287" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cS_brk_bot" class="ai-shape ai-rect" x="1304" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cS_cab" class="ai-shape ai-rect" x="1280" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cT" class="ai-container">
+      <rect id="cT_hdr" class="ai-shape ai-rect" x="1347" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">T</text>
+      <rect id="cT_drop" class="ai-shape ai-rect" x="1359" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cT_brk" class="ai-shape ai-rect" x="1342" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cT_brk_bot" class="ai-shape ai-rect" x="1359" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cT_cab" class="ai-shape ai-rect" x="1335" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cU" class="ai-container">
+      <rect id="cU_hdr" class="ai-shape ai-rect" x="1402" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">U</text>
+      <rect id="cU_drop" class="ai-shape ai-rect" x="1414" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cU_brk" class="ai-shape ai-rect" x="1397" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cU_brk_bot" class="ai-shape ai-rect" x="1414" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cU_cab" class="ai-shape ai-rect" x="1390" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cV" class="ai-container">
+      <rect id="cV_hdr" class="ai-shape ai-rect" x="1457" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">V</text>
+      <rect id="cV_drop" class="ai-shape ai-rect" x="1469" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cV_brk" class="ai-shape ai-rect" x="1452" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cV_brk_bot" class="ai-shape ai-rect" x="1469" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cV_cab" class="ai-shape ai-rect" x="1445" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cW" class="ai-container">
+      <rect id="cW_hdr" class="ai-shape ai-rect" x="1512" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">W</text>
+      <rect id="cW_drop" class="ai-shape ai-rect" x="1524" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cW_brk" class="ai-shape ai-rect" x="1507" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cW_brk_bot" class="ai-shape ai-rect" x="1524" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cW_cab" class="ai-shape ai-rect" x="1500" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cX" class="ai-container">
+      <rect id="cX_hdr" class="ai-shape ai-rect" x="1567" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1580" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">X</text>
+      <rect id="cX_drop" class="ai-shape ai-rect" x="1579" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cX_brk" class="ai-shape ai-rect" x="1562" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1580" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C32</text>
+      <rect id="cX_brk_bot" class="ai-shape ai-rect" x="1579" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cX_cab" class="ai-shape ai-rect" x="1555" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1580" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x6+PE</text>
+    </g>
+    <g id="cY" class="ai-container">
+      <rect id="cY_hdr" class="ai-shape ai-rect" x="1622" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1635" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">Y</text>
+      <rect id="cY_drop" class="ai-shape ai-rect" x="1634" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cY_brk" class="ai-shape ai-rect" x="1617" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1635" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P 20A</text>
+      <rect id="cY_brk_bot" class="ai-shape ai-rect" x="1634" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cY_cab" class="ai-shape ai-rect" x="1610" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1635" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">XVB 2x2.5+PE</text>
+    </g>
+    <g id="cZ" class="ai-container">
+      <rect id="cZ_hdr" class="ai-shape ai-rect" x="1677" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1690" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">Z</text>
+      <rect id="cZ_drop" class="ai-shape ai-rect" x="1689" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cZ_brk" class="ai-shape ai-rect" x="1672" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1690" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cZ_brk_bot" class="ai-shape ai-rect" x="1689" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cZ_cab" class="ai-shape ai-rect" x="1665" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1690" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cAA" class="ai-container">
+      <rect id="cAA_hdr" class="ai-shape ai-rect" x="1732" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1745" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">AA</text>
+      <rect id="cAA_drop" class="ai-shape ai-rect" x="1744" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cAA_brk" class="ai-shape ai-rect" x="1727" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1745" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cAA_brk_bot" class="ai-shape ai-rect" x="1744" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cAA_cab" class="ai-shape ai-rect" x="1720" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1745" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <g id="cAB" class="ai-container">
+      <rect id="cAB_hdr" class="ai-shape ai-rect" x="1787" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1800" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">AB</text>
+      <rect id="cAB_drop" class="ai-shape ai-rect" x="1799" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cAB_brk" class="ai-shape ai-rect" x="1782" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1800" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C20</text>
+      <rect id="cAB_brk_bot" class="ai-shape ai-rect" x="1799" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cAB_cab" class="ai-shape ai-rect" x="1775" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1800" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x2.5+PE</text>
+    </g>
+    <g id="cAC" class="ai-container">
+      <rect id="cAC_hdr" class="ai-shape ai-rect" x="1842" y="244" width="26" height="14" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1855" y="251" text-anchor="middle" dominant-baseline="middle" font-size="11">AC</text>
+      <rect id="cAC_drop" class="ai-shape ai-rect" x="1854" y="262" width="2" height="30" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cAC_brk" class="ai-shape ai-rect" x="1837" y="292" width="36" height="22" fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <text class="ai-label" x="1855" y="303" text-anchor="middle" dominant-baseline="middle" font-size="8">2P C16</text>
+      <rect id="cAC_brk_bot" class="ai-shape ai-rect" x="1854" y="314" width="2" height="8" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="cAC_cab" class="ai-shape ai-rect" x="1830" y="324" width="50" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1855" y="329" text-anchor="middle" dominant-baseline="middle" font-size="6">VOB 2x1.5+PE</text>
+    </g>
+    <rect id="trkA" class="ai-shape ai-rect" x="259" y="338" width="2" height="70" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkB" class="ai-shape ai-rect" x="314" y="338" width="2" height="135" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkC" class="ai-shape ai-rect" x="369" y="338" width="2" height="135" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkD" class="ai-shape ai-rect" x="424" y="338" width="2" height="200" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkE" class="ai-shape ai-rect" x="479" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkF" class="ai-shape ai-rect" x="534" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkG" class="ai-shape ai-rect" x="589" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkH" class="ai-shape ai-rect" x="644" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkI" class="ai-shape ai-rect" x="699" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkJ" class="ai-shape ai-rect" x="754" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkK" class="ai-shape ai-rect" x="809" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkL1" class="ai-shape ai-rect" x="864" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkL2" class="ai-shape ai-rect" x="919" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkM" class="ai-shape ai-rect" x="974" y="338" width="2" height="135" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkN" class="ai-shape ai-rect" x="1029" y="338" width="2" height="200" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkO" class="ai-shape ai-rect" x="1084" y="338" width="2" height="310" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkP" class="ai-shape ai-rect" x="1139" y="338" width="2" height="290" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkQ" class="ai-shape ai-rect" x="1194" y="338" width="2" height="200" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkR" class="ai-shape ai-rect" x="1249" y="338" width="2" height="200" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkS" class="ai-shape ai-rect" x="1304" y="338" width="2" height="180" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkT" class="ai-shape ai-rect" x="1359" y="338" width="2" height="155" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkU" class="ai-shape ai-rect" x="1414" y="338" width="2" height="180" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkV" class="ai-shape ai-rect" x="1469" y="338" width="2" height="180" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkW" class="ai-shape ai-rect" x="1524" y="338" width="2" height="155" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkX" class="ai-shape ai-rect" x="1579" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkY" class="ai-shape ai-rect" x="1634" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkZ" class="ai-shape ai-rect" x="1689" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkAA" class="ai-shape ai-rect" x="1744" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkAB" class="ai-shape ai-rect" x="1799" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="trkAC" class="ai-shape ai-rect" x="1854" y="338" width="2" height="40" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <g id="A1" class="ai-container">
+      <circle id="A1_dot" class="ai-shape ai-circle" cx="260" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="260" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">A1</text>
+    </g>
+    <g id="A2" class="ai-container">
+      <circle id="A2_dot" class="ai-shape ai-circle" cx="260" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="260" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">A2</text>
+    </g>
+    <g id="B1" class="ai-container">
+      <circle id="B1_dot" class="ai-shape ai-circle" cx="315" cy="362" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">B1</text>
+    </g>
+    <g id="B2" class="ai-container">
+      <circle id="B2_dot" class="ai-shape ai-circle" cx="315" cy="384" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">B2</text>
+    </g>
+    <g id="B3" class="ai-container">
+      <circle id="B3_dot" class="ai-shape ai-circle" cx="315" cy="406" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">B3</text>
+    </g>
+    <g id="B4" class="ai-container">
+      <circle id="B4_dot" class="ai-shape ai-circle" cx="315" cy="428" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">B4</text>
+    </g>
+    <g id="B5" class="ai-container">
+      <circle id="B5_dot" class="ai-shape ai-circle" cx="315" cy="450" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="315" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">B5</text>
+    </g>
+    <g id="C1" class="ai-container">
+      <circle id="C1_dot" class="ai-shape ai-circle" cx="370" cy="362" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">C1</text>
+    </g>
+    <g id="C2" class="ai-container">
+      <circle id="C2_dot" class="ai-shape ai-circle" cx="370" cy="384" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">C2</text>
+    </g>
+    <g id="C3" class="ai-container">
+      <circle id="C3_dot" class="ai-shape ai-circle" cx="370" cy="406" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">C3</text>
+    </g>
+    <g id="C4" class="ai-container">
+      <circle id="C4_dot" class="ai-shape ai-circle" cx="370" cy="428" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">C4</text>
+    </g>
+    <g id="C5" class="ai-container">
+      <circle id="C5_dot" class="ai-shape ai-circle" cx="370" cy="450" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="370" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">C5</text>
+    </g>
+    <g id="D1" class="ai-container">
+      <circle id="D1_dot" class="ai-shape ai-circle" cx="425" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">D1</text>
+    </g>
+    <g id="D2" class="ai-container">
+      <circle id="D2_dot" class="ai-shape ai-circle" cx="425" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">D2</text>
+    </g>
+    <g id="D3" class="ai-container">
+      <circle id="D3_dot" class="ai-shape ai-circle" cx="425" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">D3</text>
+    </g>
+    <g id="D4" class="ai-container">
+      <circle id="D4_dot" class="ai-shape ai-circle" cx="425" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">D4</text>
+    </g>
+    <g id="D5" class="ai-container">
+      <circle id="D5_dot" class="ai-shape ai-circle" cx="425" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">D5</text>
+    </g>
+    <g id="D6" class="ai-container">
+      <circle id="D6_dot" class="ai-shape ai-circle" cx="425" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">D6</text>
+    </g>
+    <g id="D7" class="ai-container">
+      <circle id="D7_dot" class="ai-shape ai-circle" cx="425" cy="494" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">D7</text>
+    </g>
+    <g id="D8" class="ai-container">
+      <circle id="D8_dot" class="ai-shape ai-circle" cx="425" cy="516" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="425" y="516" text-anchor="middle" dominant-baseline="middle" font-size="7">D8</text>
+    </g>
+    <g id="E1" class="ai-container">
+      <circle id="E1_dot" class="ai-shape ai-circle" cx="480" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="480" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">E1</text>
+    </g>
+    <g id="F1" class="ai-container">
+      <circle id="F1_dot" class="ai-shape ai-circle" cx="535" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="535" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">F1</text>
+    </g>
+    <g id="G1" class="ai-container">
+      <circle id="G1_dot" class="ai-shape ai-circle" cx="590" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="590" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">G1</text>
+    </g>
+    <g id="H1" class="ai-container">
+      <circle id="H1_dot" class="ai-shape ai-circle" cx="645" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="645" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">H1</text>
+    </g>
+    <g id="I1" class="ai-container">
+      <circle id="I1_dot" class="ai-shape ai-circle" cx="700" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="700" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">I1</text>
+    </g>
+    <g id="J1" class="ai-container">
+      <circle id="J1_dot" class="ai-shape ai-circle" cx="755" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="755" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">J1</text>
+    </g>
+    <g id="K1" class="ai-container">
+      <circle id="K1_dot" class="ai-shape ai-circle" cx="810" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="810" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">K1</text>
+    </g>
+    <g id="L1L" class="ai-container">
+      <circle id="L1L_dot" class="ai-shape ai-circle" cx="865" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="865" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">L1</text>
+    </g>
+    <g id="L2L" class="ai-container">
+      <circle id="L2L_dot" class="ai-shape ai-circle" cx="920" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="920" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">L2</text>
+    </g>
+    <g id="M1" class="ai-container">
+      <circle id="M1_dot" class="ai-shape ai-circle" cx="975" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">M1</text>
+    </g>
+    <g id="M2" class="ai-container">
+      <circle id="M2_dot" class="ai-shape ai-circle" cx="975" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">M2</text>
+    </g>
+    <g id="M3" class="ai-container">
+      <circle id="M3_dot" class="ai-shape ai-circle" cx="975" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">M3</text>
+    </g>
+    <g id="M4" class="ai-container">
+      <circle id="M4_dot" class="ai-shape ai-circle" cx="975" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">M4</text>
+    </g>
+    <g id="M5" class="ai-container">
+      <circle id="M5_dot" class="ai-shape ai-circle" cx="975" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="975" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">M5</text>
+    </g>
+    <g id="N1" class="ai-container">
+      <circle id="N1_dot" class="ai-shape ai-circle" cx="1030" cy="362" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">N1</text>
+    </g>
+    <g id="N2" class="ai-container">
+      <circle id="N2_dot" class="ai-shape ai-circle" cx="1030" cy="384" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">N2</text>
+    </g>
+    <g id="N3" class="ai-container">
+      <circle id="N3_dot" class="ai-shape ai-circle" cx="1030" cy="406" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">N3</text>
+    </g>
+    <g id="N4" class="ai-container">
+      <circle id="N4_dot" class="ai-shape ai-circle" cx="1030" cy="428" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">N4</text>
+    </g>
+    <g id="N5" class="ai-container">
+      <circle id="N5_dot" class="ai-shape ai-circle" cx="1030" cy="450" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">N5</text>
+    </g>
+    <g id="N6" class="ai-container">
+      <circle id="N6_dot" class="ai-shape ai-circle" cx="1030" cy="472" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">N6</text>
+    </g>
+    <g id="N7" class="ai-container">
+      <circle id="N7_dot" class="ai-shape ai-circle" cx="1030" cy="494" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">N7</text>
+    </g>
+    <g id="N8" class="ai-container">
+      <circle id="N8_dot" class="ai-shape ai-circle" cx="1030" cy="516" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1030" y="516" text-anchor="middle" dominant-baseline="middle" font-size="7">N8</text>
+    </g>
+    <g id="O1" class="ai-container">
+      <circle id="O1_dot" class="ai-shape ai-circle" cx="1085" cy="362" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">O1</text>
+    </g>
+    <g id="O2" class="ai-container">
+      <circle id="O2_dot" class="ai-shape ai-circle" cx="1085" cy="384" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">O2</text>
+    </g>
+    <g id="O3" class="ai-container">
+      <circle id="O3_dot" class="ai-shape ai-circle" cx="1085" cy="406" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">O3</text>
+    </g>
+    <g id="O4" class="ai-container">
+      <circle id="O4_dot" class="ai-shape ai-circle" cx="1085" cy="428" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">O4</text>
+    </g>
+    <g id="O5" class="ai-container">
+      <circle id="O5_dot" class="ai-shape ai-circle" cx="1085" cy="450" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">O5</text>
+    </g>
+    <g id="O6" class="ai-container">
+      <circle id="O6_dot" class="ai-shape ai-circle" cx="1085" cy="472" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">O6</text>
+    </g>
+    <g id="O7" class="ai-container">
+      <circle id="O7_dot" class="ai-shape ai-circle" cx="1085" cy="494" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">O7</text>
+    </g>
+    <g id="O8" class="ai-container">
+      <circle id="O8_dot" class="ai-shape ai-circle" cx="1085" cy="516" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="516" text-anchor="middle" dominant-baseline="middle" font-size="7">O8</text>
+    </g>
+    <g id="O9" class="ai-container">
+      <circle id="O9_dot" class="ai-shape ai-circle" cx="1085" cy="538" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="538" text-anchor="middle" dominant-baseline="middle" font-size="7">O9</text>
+    </g>
+    <g id="O10" class="ai-container">
+      <circle id="O10_dot" class="ai-shape ai-circle" cx="1085" cy="560" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="560" text-anchor="middle" dominant-baseline="middle" font-size="7">O10</text>
+    </g>
+    <g id="O11" class="ai-container">
+      <circle id="O11_dot" class="ai-shape ai-circle" cx="1085" cy="582" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="582" text-anchor="middle" dominant-baseline="middle" font-size="7">O11</text>
+    </g>
+    <g id="O12" class="ai-container">
+      <circle id="O12_dot" class="ai-shape ai-circle" cx="1085" cy="604" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="604" text-anchor="middle" dominant-baseline="middle" font-size="7">O12</text>
+    </g>
+    <g id="O13" class="ai-container">
+      <circle id="O13_dot" class="ai-shape ai-circle" cx="1085" cy="626" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1085" y="626" text-anchor="middle" dominant-baseline="middle" font-size="7">O13</text>
+    </g>
+    <g id="P1" class="ai-container">
+      <circle id="P1_dot" class="ai-shape ai-circle" cx="1140" cy="362" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">P1</text>
+    </g>
+    <g id="P2" class="ai-container">
+      <circle id="P2_dot" class="ai-shape ai-circle" cx="1140" cy="384" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">P2</text>
+    </g>
+    <g id="P3" class="ai-container">
+      <circle id="P3_dot" class="ai-shape ai-circle" cx="1140" cy="406" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">P3</text>
+    </g>
+    <g id="P4" class="ai-container">
+      <circle id="P4_dot" class="ai-shape ai-circle" cx="1140" cy="428" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">P4</text>
+    </g>
+    <g id="P5" class="ai-container">
+      <circle id="P5_dot" class="ai-shape ai-circle" cx="1140" cy="450" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">P5</text>
+    </g>
+    <g id="P6" class="ai-container">
+      <circle id="P6_dot" class="ai-shape ai-circle" cx="1140" cy="472" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">P6</text>
+    </g>
+    <g id="P7" class="ai-container">
+      <circle id="P7_dot" class="ai-shape ai-circle" cx="1140" cy="494" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">P7</text>
+    </g>
+    <g id="P8" class="ai-container">
+      <circle id="P8_dot" class="ai-shape ai-circle" cx="1140" cy="516" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="516" text-anchor="middle" dominant-baseline="middle" font-size="7">P8</text>
+    </g>
+    <g id="P9" class="ai-container">
+      <circle id="P9_dot" class="ai-shape ai-circle" cx="1140" cy="538" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="538" text-anchor="middle" dominant-baseline="middle" font-size="7">P9</text>
+    </g>
+    <g id="P10" class="ai-container">
+      <circle id="P10_dot" class="ai-shape ai-circle" cx="1140" cy="560" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="560" text-anchor="middle" dominant-baseline="middle" font-size="7">P10</text>
+    </g>
+    <g id="P11" class="ai-container">
+      <circle id="P11_dot" class="ai-shape ai-circle" cx="1140" cy="582" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="582" text-anchor="middle" dominant-baseline="middle" font-size="7">P11</text>
+    </g>
+    <g id="P12" class="ai-container">
+      <circle id="P12_dot" class="ai-shape ai-circle" cx="1140" cy="604" r="7" fill="var(--background-1)" stroke="#27ae60" stroke-width="1.5"/>
+      <text class="ai-label" x="1140" y="604" text-anchor="middle" dominant-baseline="middle" font-size="7">P12</text>
+    </g>
+    <g id="Q1" class="ai-container">
+      <circle id="Q1_dot" class="ai-shape ai-circle" cx="1195" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">Q1</text>
+    </g>
+    <g id="Q2" class="ai-container">
+      <circle id="Q2_dot" class="ai-shape ai-circle" cx="1195" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">Q2</text>
+    </g>
+    <g id="Q3" class="ai-container">
+      <circle id="Q3_dot" class="ai-shape ai-circle" cx="1195" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">Q3</text>
+    </g>
+    <g id="Q4" class="ai-container">
+      <circle id="Q4_dot" class="ai-shape ai-circle" cx="1195" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">Q4</text>
+    </g>
+    <g id="Q5" class="ai-container">
+      <circle id="Q5_dot" class="ai-shape ai-circle" cx="1195" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">Q5</text>
+    </g>
+    <g id="Q6" class="ai-container">
+      <circle id="Q6_dot" class="ai-shape ai-circle" cx="1195" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">Q6</text>
+    </g>
+    <g id="Q7" class="ai-container">
+      <circle id="Q7_dot" class="ai-shape ai-circle" cx="1195" cy="494" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">Q7</text>
+    </g>
+    <g id="Q8" class="ai-container">
+      <circle id="Q8_dot" class="ai-shape ai-circle" cx="1195" cy="516" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1195" y="516" text-anchor="middle" dominant-baseline="middle" font-size="7">Q8</text>
+    </g>
+    <g id="R1" class="ai-container">
+      <circle id="R1_dot" class="ai-shape ai-circle" cx="1250" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">R1</text>
+    </g>
+    <g id="R2" class="ai-container">
+      <circle id="R2_dot" class="ai-shape ai-circle" cx="1250" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">R2</text>
+    </g>
+    <g id="R3" class="ai-container">
+      <circle id="R3_dot" class="ai-shape ai-circle" cx="1250" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">R3</text>
+    </g>
+    <g id="R4" class="ai-container">
+      <circle id="R4_dot" class="ai-shape ai-circle" cx="1250" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">R4</text>
+    </g>
+    <g id="R5" class="ai-container">
+      <circle id="R5_dot" class="ai-shape ai-circle" cx="1250" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">R5</text>
+    </g>
+    <g id="R6" class="ai-container">
+      <circle id="R6_dot" class="ai-shape ai-circle" cx="1250" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">R6</text>
+    </g>
+    <g id="R7" class="ai-container">
+      <circle id="R7_dot" class="ai-shape ai-circle" cx="1250" cy="494" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">R7</text>
+    </g>
+    <g id="R8" class="ai-container">
+      <circle id="R8_dot" class="ai-shape ai-circle" cx="1250" cy="516" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1250" y="516" text-anchor="middle" dominant-baseline="middle" font-size="7">R8</text>
+    </g>
+    <g id="S1" class="ai-container">
+      <circle id="S1_dot" class="ai-shape ai-circle" cx="1305" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">S1</text>
+    </g>
+    <g id="S2" class="ai-container">
+      <circle id="S2_dot" class="ai-shape ai-circle" cx="1305" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">S2</text>
+    </g>
+    <g id="S3" class="ai-container">
+      <circle id="S3_dot" class="ai-shape ai-circle" cx="1305" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">S3</text>
+    </g>
+    <g id="S4" class="ai-container">
+      <circle id="S4_dot" class="ai-shape ai-circle" cx="1305" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">S4</text>
+    </g>
+    <g id="S5" class="ai-container">
+      <circle id="S5_dot" class="ai-shape ai-circle" cx="1305" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">S5</text>
+    </g>
+    <g id="S6" class="ai-container">
+      <circle id="S6_dot" class="ai-shape ai-circle" cx="1305" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">S6</text>
+    </g>
+    <g id="S7" class="ai-container">
+      <circle id="S7_dot" class="ai-shape ai-circle" cx="1305" cy="494" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1305" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">S7</text>
+    </g>
+    <g id="T1" class="ai-container">
+      <circle id="T1_dot" class="ai-shape ai-circle" cx="1360" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">T1</text>
+    </g>
+    <g id="T2" class="ai-container">
+      <circle id="T2_dot" class="ai-shape ai-circle" cx="1360" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">T2</text>
+    </g>
+    <g id="T3" class="ai-container">
+      <circle id="T3_dot" class="ai-shape ai-circle" cx="1360" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">T3</text>
+    </g>
+    <g id="T4" class="ai-container">
+      <circle id="T4_dot" class="ai-shape ai-circle" cx="1360" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">T4</text>
+    </g>
+    <g id="T5" class="ai-container">
+      <circle id="T5_dot" class="ai-shape ai-circle" cx="1360" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">T5</text>
+    </g>
+    <g id="T6" class="ai-container">
+      <circle id="T6_dot" class="ai-shape ai-circle" cx="1360" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1360" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">T6</text>
+    </g>
+    <g id="U1" class="ai-container">
+      <circle id="U1_dot" class="ai-shape ai-circle" cx="1415" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">U1</text>
+    </g>
+    <g id="U2" class="ai-container">
+      <circle id="U2_dot" class="ai-shape ai-circle" cx="1415" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">U2</text>
+    </g>
+    <g id="U3" class="ai-container">
+      <circle id="U3_dot" class="ai-shape ai-circle" cx="1415" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">U3</text>
+    </g>
+    <g id="U4" class="ai-container">
+      <circle id="U4_dot" class="ai-shape ai-circle" cx="1415" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">U4</text>
+    </g>
+    <g id="U5" class="ai-container">
+      <circle id="U5_dot" class="ai-shape ai-circle" cx="1415" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">U5</text>
+    </g>
+    <g id="U6" class="ai-container">
+      <circle id="U6_dot" class="ai-shape ai-circle" cx="1415" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">U6</text>
+    </g>
+    <g id="U7" class="ai-container">
+      <circle id="U7_dot" class="ai-shape ai-circle" cx="1415" cy="494" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1415" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">U7</text>
+    </g>
+    <g id="V1" class="ai-container">
+      <circle id="V1_dot" class="ai-shape ai-circle" cx="1470" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">V1</text>
+    </g>
+    <g id="V2" class="ai-container">
+      <circle id="V2_dot" class="ai-shape ai-circle" cx="1470" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">V2</text>
+    </g>
+    <g id="V3" class="ai-container">
+      <circle id="V3_dot" class="ai-shape ai-circle" cx="1470" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">V3</text>
+    </g>
+    <g id="V4" class="ai-container">
+      <circle id="V4_dot" class="ai-shape ai-circle" cx="1470" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">V4</text>
+    </g>
+    <g id="V5" class="ai-container">
+      <circle id="V5_dot" class="ai-shape ai-circle" cx="1470" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">V5</text>
+    </g>
+    <g id="V6" class="ai-container">
+      <circle id="V6_dot" class="ai-shape ai-circle" cx="1470" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">V6</text>
+    </g>
+    <g id="V7" class="ai-container">
+      <circle id="V7_dot" class="ai-shape ai-circle" cx="1470" cy="494" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1470" y="494" text-anchor="middle" dominant-baseline="middle" font-size="7">V7</text>
+    </g>
+    <g id="W1" class="ai-container">
+      <circle id="W1_dot" class="ai-shape ai-circle" cx="1525" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">W1</text>
+    </g>
+    <g id="W2" class="ai-container">
+      <circle id="W2_dot" class="ai-shape ai-circle" cx="1525" cy="384" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="384" text-anchor="middle" dominant-baseline="middle" font-size="7">W2</text>
+    </g>
+    <g id="W3" class="ai-container">
+      <circle id="W3_dot" class="ai-shape ai-circle" cx="1525" cy="406" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="406" text-anchor="middle" dominant-baseline="middle" font-size="7">W3</text>
+    </g>
+    <g id="W4" class="ai-container">
+      <circle id="W4_dot" class="ai-shape ai-circle" cx="1525" cy="428" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="428" text-anchor="middle" dominant-baseline="middle" font-size="7">W4</text>
+    </g>
+    <g id="W5" class="ai-container">
+      <circle id="W5_dot" class="ai-shape ai-circle" cx="1525" cy="450" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="450" text-anchor="middle" dominant-baseline="middle" font-size="7">W5</text>
+    </g>
+    <g id="W6" class="ai-container">
+      <circle id="W6_dot" class="ai-shape ai-circle" cx="1525" cy="472" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1525" y="472" text-anchor="middle" dominant-baseline="middle" font-size="7">W6</text>
+    </g>
+    <g id="X1" class="ai-container">
+      <circle id="X1_dot" class="ai-shape ai-circle" cx="1580" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1580" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">X1</text>
+    </g>
+    <g id="Y1" class="ai-container">
+      <circle id="Y1_dot" class="ai-shape ai-circle" cx="1635" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1635" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">Y1</text>
+    </g>
+    <g id="Z1" class="ai-container">
+      <circle id="Z1_dot" class="ai-shape ai-circle" cx="1690" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1690" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">Z1</text>
+    </g>
+    <g id="AA1" class="ai-container">
+      <circle id="AA1_dot" class="ai-shape ai-circle" cx="1745" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1745" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">AA1</text>
+    </g>
+    <g id="AB1" class="ai-container">
+      <circle id="AB1_dot" class="ai-shape ai-circle" cx="1800" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1800" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">AB1</text>
+    </g>
+    <g id="AC1" class="ai-container">
+      <circle id="AC1_dot" class="ai-shape ai-circle" cx="1855" cy="362" r="7" fill="var(--background-1)" stroke="#c0392b" stroke-width="1.5"/>
+      <text class="ai-label" x="1855" y="362" text-anchor="middle" dominant-baseline="middle" font-size="7">AC1</text>
+    </g>
+    <g transform="rotate(270 260 724)">
+      <text id="descA" class="ai-shape ai-text" x="207.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">A  buitenstopcontacten</text>
+    </g>
+    <g transform="rotate(270 315 724)">
+      <text id="descB" class="ai-shape ai-text" x="267" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">B  buitenverlichting</text>
+    </g>
+    <g transform="rotate(270 370 724)">
+      <text id="descC" class="ai-shape ai-text" x="305.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">C  verlichting natte ruimte</text>
+    </g>
+    <g transform="rotate(270 425 724)">
+      <text id="descD" class="ai-shape ai-text" x="353" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">D  stopcontacten natte ruimtes</text>
+    </g>
+    <g transform="rotate(270 480 724)">
+      <text id="descE" class="ai-shape ai-text" x="436.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">E  stc. wasmachine</text>
+    </g>
+    <g transform="rotate(270 535 724)">
+      <text id="descF" class="ai-shape ai-text" x="491.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">F  stc. wasmachine</text>
+    </g>
+    <g transform="rotate(270 590 724)">
+      <text id="descG" class="ai-shape ai-text" x="549.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">G  stc. droogkast</text>
+    </g>
+    <g transform="rotate(270 645 724)">
+      <text id="descH" class="ai-shape ai-text" x="592.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">H  stc. vaatwasmachine</text>
+    </g>
+    <g transform="rotate(270 700 724)">
+      <text id="descI" class="ai-shape ai-text" x="642.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">I  stc. elektr. radiator</text>
+    </g>
+    <g transform="rotate(270 755 724)">
+      <text id="descJ" class="ai-shape ai-text" x="697.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">J  stc. elektr. radiator</text>
+    </g>
+    <g transform="rotate(270 810 724)">
+      <text id="descK" class="ai-shape ai-text" x="762" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">K  voedingen screens</text>
+    </g>
+    <g transform="rotate(270 865 724)">
+      <text id="descL1" class="ai-shape ai-text" x="819.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">L1  stc. koelkasten</text>
+    </g>
+    <g transform="rotate(270 920 724)">
+      <text id="descL2" class="ai-shape ai-text" x="888.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">L2  diepvries</text>
+    </g>
+    <g transform="rotate(270 975 724)">
+      <text id="descM" class="ai-shape ai-text" x="931.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">M  stc. warmtepomp</text>
+    </g>
+    <g transform="rotate(270 1030 724)">
+      <text id="descN" class="ai-shape ai-text" x="986.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">N  verlichting -01</text>
+    </g>
+    <g transform="rotate(270 1085 724)">
+      <text id="descO" class="ai-shape ai-text" x="1041.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">O  verlichting +00</text>
+    </g>
+    <g transform="rotate(270 1140 724)">
+      <text id="descP" class="ai-shape ai-text" x="1096.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">P  verlichting +01</text>
+    </g>
+    <g transform="rotate(270 1195 724)">
+      <text id="descQ" class="ai-shape ai-text" x="1147" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">Q  stopcontacten -01</text>
+    </g>
+    <g transform="rotate(270 1250 724)">
+      <text id="descR" class="ai-shape ai-text" x="1194.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">R  stc. +00 eetzone/zit</text>
+    </g>
+    <g transform="rotate(270 1305 724)">
+      <text id="descS" class="ai-shape ai-text" x="1247.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">S  stc. +00 inkom/garage</text>
+    </g>
+    <g transform="rotate(270 1360 724)">
+      <text id="descT" class="ai-shape ai-text" x="1316.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">T  stc. +00 keuken</text>
+    </g>
+    <g transform="rotate(270 1415 724)">
+      <text id="descU" class="ai-shape ai-text" x="1350.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">U  stc. +01 nachthal/ouders</text>
+    </g>
+    <g transform="rotate(270 1470 724)">
+      <text id="descV" class="ai-shape ai-text" x="1412.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">V  stc. +01 kinderkamers</text>
+    </g>
+    <g transform="rotate(270 1525 724)">
+      <text id="descW" class="ai-shape ai-text" x="1486.6" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">W  stc. +01 buro</text>
+    </g>
+    <g transform="rotate(270 1580 724)">
+      <text id="descX" class="ai-shape ai-text" x="1532" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">X  voeding kookplaat</text>
+    </g>
+    <g transform="rotate(270 1635 724)">
+      <text id="descY" class="ai-shape ai-text" x="1606.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">Y  stc. oven</text>
+    </g>
+    <g transform="rotate(270 1690 724)">
+      <text id="descZ" class="ai-shape ai-text" x="1646.8" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">Z  stc. regenwater</text>
+    </g>
+    <g transform="rotate(270 1745 724)">
+      <text id="descAA" class="ai-shape ai-text" x="1687.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">AA  stc. ventilatie unit</text>
+    </g>
+    <g transform="rotate(270 1800 724)">
+      <text id="descAB" class="ai-shape ai-text" x="1747.2" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">AB  stc. alarmcentrale</text>
+    </g>
+    <g transform="rotate(270 1855 724)">
+      <text id="descAC" class="ai-shape ai-text" x="1809.4" y="724" text-anchor="start" dominant-baseline="middle" font-size="8" fill="var(--foreground-1)">AC  voeding reserve</text>
+    </g>
+  </g>
+  <path class="ai-connection" d="M140 58 L140 76" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M140 126 C140 143.54536975956904 100 126.45463024043096 100 144" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M140 126 C140 147.25652840893827 190 122.74347159106172 190 144" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M50 316 L50 330" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M50 380 L50 394" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M50 440 L50 454" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M50 492 L50 510" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M50 554 L50 572" fill="none" stroke="#333" stroke-width="2"/>
+</svg>

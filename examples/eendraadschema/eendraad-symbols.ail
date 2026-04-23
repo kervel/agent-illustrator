@@ -1,0 +1,644 @@
+// Belgian eendraadschema symbol library
+// Reference: AREI / FGOV "Symbolen één-draadschema" (Boek 1, Hoofdstuk 2.13)
+//
+// Conventions:
+//  * Leaf symbols (sockets, lights, switches) expose anchor `wire` on LEFT
+//    (connect to branch-stub wire coming from the main trunk).
+//  * Inline symbols (breaker, diff, kWh) expose `top_conn` and `bot_conn`
+//    for pass-through vertical trunk wiring.
+//  * Symbols are drawn with left = 0, top = 0 in their local coordinate space.
+//    To position an instance, constrain `.left` (and `.center_y`) OR `.center_x`.
+//  * Color parameter: hex with no quotes, e.g. `color: #c0392b`.
+//  * Default colors: sockets red, lights green, switches orange, protection
+//    devices use foreground-1 (theme-default).
+
+// ============================================================
+// A. SOCKETS (Contactdozen) — arc `(` shape, bulging LEFT (CCW),
+//    wire connects to belly; earth bar at flat/endpoints side (right)
+// ============================================================
+
+// A.1 Stopcontact basic (no earth)
+template "stopcontact_basic" (color: #c0392b) {
+    rect stem [width: 12, height: 1.5, fill: color, stroke: none]
+    path arc [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        arc_to b [x: 0, y: 14, radius: 7, sweep: counterclockwise]
+    }
+    constrain stem.right = arc.left
+    constrain stem.center_y = arc.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// A.2 Stopcontact met aarding: wire → earth bar → arc (bar LEFT of arc)
+template "stopcontact_aa" (color: #c0392b) {
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    rect earth [width: 1.5, height: 18, fill: color, stroke: none]
+    path arc [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        arc_to b [x: 0, y: 14, radius: 7, sweep: counterclockwise]
+    }
+    constrain stem.right = earth.left
+    constrain stem.center_y = earth.center_y
+    constrain earth.right = arc.left
+    constrain earth.center_y = arc.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// A.3 Stopcontact met aarding + kinderbescherming
+// Like aa, plus small outward vertical stubs at each arc endpoint
+template "stopcontact_ka" (color: #c0392b) {
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    rect earth [width: 1.5, height: 18, fill: color, stroke: none]
+    path arc [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        arc_to b [x: 0, y: 14, radius: 7, sweep: counterclockwise]
+    }
+    // small vertical stubs at top and bottom arc endpoints, pointing outward
+    rect kb_top [width: 1.5, height: 4, fill: color, stroke: none]
+    rect kb_bot [width: 1.5, height: 4, fill: color, stroke: none]
+    constrain stem.right = earth.left
+    constrain stem.center_y = earth.center_y
+    constrain earth.right = arc.left
+    constrain earth.center_y = arc.center_y
+    constrain kb_top.center_x = arc.right
+    constrain kb_top.bottom = arc.top
+    constrain kb_bot.center_x = arc.right
+    constrain kb_bot.top = arc.bottom
+    anchor wire [position: stem.left, direction: left]
+}
+
+// A.4 Waterdicht stopcontact (with 'h' marker)
+template "stopcontact_wd" (color: #c0392b) {
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    rect earth [width: 1.5, height: 18, fill: color, stroke: none]
+    path arc [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        arc_to b [x: 0, y: 14, radius: 7, sweep: counterclockwise]
+    }
+    rect hlabel [width: 6, height: 6, fill: none, stroke: none, label: "h", font_size: 6]
+    constrain stem.right = earth.left
+    constrain stem.center_y = earth.center_y
+    constrain earth.right = arc.left
+    constrain earth.center_y = arc.center_y
+    constrain hlabel.left = arc.right + 1
+    constrain hlabel.center_y = arc.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// A.5 Driefasig stopcontact (3-phase)
+template "stopcontact_3f" (color: #c0392b) {
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    rect earth [width: 1.5, height: 18, fill: color, stroke: none]
+    path arc [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        arc_to b [x: 0, y: 14, radius: 7, sweep: counterclockwise]
+    }
+    rect label3 [width: 8, height: 6, fill: none, stroke: none, label: "3f", font_size: 6]
+    constrain stem.right = earth.left
+    constrain stem.center_y = earth.center_y
+    constrain earth.right = arc.left
+    constrain earth.center_y = arc.center_y
+    constrain label3.left = arc.right + 1
+    constrain label3.center_y = arc.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// ============================================================
+// B. LIGHTS (Gebruikstoestellen — verlichting)
+// ============================================================
+
+// B.1 Lichtpunt (basic light point, X)
+template "lichtpunt" (color: #27ae60) {
+    path d1 [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 10, y: 10]
+    }
+    path d2 [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 10, y: 0]
+        line_to b [x: 0, y: 10]
+    }
+    rect stem [width: 12, height: 1.5, fill: color, stroke: none]
+    constrain d2.left = d1.left
+    constrain d2.top = d1.top
+    constrain stem.right = d1.left
+    constrain stem.center_y = d1.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// B.2 Inbouwspot (recessed ceiling light: circle with X inside)
+template "inbouwspot" (color: #27ae60) {
+    circle ring [size: 14, fill: none, stroke: color, stroke_width: 1.2]
+    path d1 [fill: none, stroke: color, stroke_width: 1] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 10, y: 10]
+    }
+    path d2 [fill: none, stroke: color, stroke_width: 1] {
+        vertex a [x: 10, y: 0]
+        line_to b [x: 0, y: 10]
+    }
+    rect stem [width: 12, height: 1.5, fill: color, stroke: none]
+    constrain d1.center_x = ring.center_x
+    constrain d1.center_y = ring.center_y
+    constrain d2.center_x = ring.center_x
+    constrain d2.center_y = ring.center_y
+    constrain stem.right = ring.left
+    constrain stem.center_y = ring.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// B.3 LED strip met behuizing (LED strip with housing)
+template "ledstrip" (color: #27ae60) {
+    rect body [width: 22, height: 6, fill: none, stroke: color, stroke_width: 1.2]
+    // internal tick marks (short vertical lines inside body)
+    rect t1 [width: 1, height: 4, fill: color, stroke: none]
+    rect t2 [width: 1, height: 4, fill: color, stroke: none]
+    rect t3 [width: 1, height: 4, fill: color, stroke: none]
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain t1.center_x = body.left + 6
+    constrain t1.center_y = body.center_y
+    constrain t2.center_x = body.center_x
+    constrain t2.center_y = body.center_y
+    constrain t3.center_x = body.right - 6
+    constrain t3.center_y = body.center_y
+    constrain stem.right = body.left
+    constrain stem.center_y = body.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// ============================================================
+// C. SWITCHES (Schakelaars)
+// ============================================================
+
+// C.1 Enkelpolige schakelaar (single-pole switch)
+// Small circle + steep lever going up-right (~75°)
+template "schakelaar_ep" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    path lever [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 10]
+        line_to b [x: 10, y: 0]
+    }
+    path endtick [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain lever.left = dot.center_x + 2.1
+    constrain lever.bottom = dot.center_y - 2.1
+    constrain endtick.left = lever.right
+    constrain endtick.top = lever.top
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// C.2 Dubbelpolige schakelaar (double-pole switch)
+// ep (without endtick) + hash mark midway on lever
+template "schakelaar_dubbelpolig" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    path lever [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 10]
+        line_to b [x: 10, y: 0]
+    }
+    path hash [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain lever.left = dot.center_x + 2.1
+    constrain lever.bottom = dot.center_y - 2.1
+    constrain hash.center_x = lever.center_x
+    constrain hash.center_y = lever.center_y
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// C.3 Enkelpolige wisselschakelaar (alternating switch, two-way)
+// ep + longer perpendicular bar at TIP of lever
+template "schakelaar_wissel" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    path lever [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 10]
+        line_to b [x: 10, y: 0]
+    }
+    path tipbar [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 5, y: 5]
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain lever.left = dot.center_x + 2.1
+    constrain lever.bottom = dot.center_y - 2.1
+    constrain tipbar.center_x = lever.right
+    constrain tipbar.center_y = lever.top
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// C.3b Dubbelpolige wisselschakelaar: wissel + hash mark
+template "schakelaar_dubbelpolig_wissel" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    path lever [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 10]
+        line_to b [x: 10, y: 0]
+    }
+    path hash [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    path tipbar [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 5, y: 5]
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain lever.left = dot.center_x + 2.1
+    constrain lever.bottom = dot.center_y - 2.1
+    constrain hash.center_x = lever.center_x
+    constrain hash.center_y = lever.center_y
+    constrain tipbar.center_x = lever.right
+    constrain tipbar.center_y = lever.top
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// C.4 Kruisschakelaar (cross/four-way switch)
+// Circle + 4 diagonal arms, each with a `\` tick at its tip.
+// All ticks share the same orientation (deliberately NOT rotating — not swastika-style).
+template "schakelaar_kruis" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    path arm_ne [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 10]
+        line_to b [x: 10, y: 0]
+    }
+    path arm_se [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 10, y: 10]
+    }
+    path arm_sw [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 10, y: 0]
+        line_to b [x: 0, y: 10]
+    }
+    path arm_nw [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 10, y: 10]
+        line_to b [x: 0, y: 0]
+    }
+    path t_ne [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    path t_se [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    path t_sw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    path t_nw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 3]
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain arm_ne.left = dot.center_x + 2.1
+    constrain arm_ne.bottom = dot.center_y - 2.1
+    constrain arm_se.left = dot.center_x + 2.1
+    constrain arm_se.top = dot.center_y + 2.1
+    constrain arm_sw.right = dot.center_x - 2.1
+    constrain arm_sw.top = dot.center_y + 2.1
+    constrain arm_nw.right = dot.center_x - 2.1
+    constrain arm_nw.bottom = dot.center_y - 2.1
+    constrain t_ne.left = arm_ne.right
+    constrain t_ne.top = arm_ne.top
+    constrain t_se.left = arm_se.right
+    constrain t_se.top = arm_se.bottom
+    constrain t_sw.left = arm_sw.left
+    constrain t_sw.top = arm_sw.bottom
+    constrain t_nw.left = arm_nw.left
+    constrain t_nw.top = arm_nw.top
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// C.5 Dimmer (single-pole switch with dimmer marker)
+// ep + triangle marker at tip
+template "dimmer" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    path lever [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 10]
+        line_to b [x: 10, y: 0]
+    }
+    path tri [fill: color, stroke: none] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 5, y: 0]
+        line_to c [x: 2.5, y: 4]
+        close
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    constrain lever.left = dot.center_x + 2.1
+    constrain lever.bottom = dot.center_y - 2.1
+    constrain tri.center_x = lever.right
+    constrain tri.bottom = lever.top
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// ============================================================
+// D. SENSORS / OTHER LOADS
+// ============================================================
+
+// D.1 Bewegingssensor (motion sensor: rect with waves + *)
+template "bewegingssensor" (color: #c0392b) {
+    rect body [width: 14, height: 14, fill: none, stroke: color, stroke_width: 1.2]
+    rect lbl [width: 12, height: 8, fill: none, stroke: none, label: "))", font_size: 7]
+    rect star [width: 6, height: 6, fill: none, stroke: none, label: "*", font_size: 7]
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    constrain lbl.center_x = body.center_x
+    constrain lbl.top = body.top + 1
+    constrain star.center_x = body.center_x
+    constrain star.bottom = body.bottom - 1
+    constrain stem.right = body.left
+    constrain stem.center_y = body.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// D.2 Rookmelder (smoke detector: circle with RM)
+template "rookmelder" (color: #c0392b) {
+    circle ring [size: 14, fill: none, stroke: color, stroke_width: 1.2]
+    rect lbl [width: 12, height: 8, fill: none, stroke: none, label: "RM", font_size: 7]
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    constrain lbl.center_x = ring.center_x
+    constrain lbl.center_y = ring.center_y
+    constrain stem.right = ring.left
+    constrain stem.center_y = ring.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// D.3 Thermostaat (rect with circle + arrow inside)
+template "thermostaat" (color: #c0392b) {
+    rect body [width: 16, height: 10, fill: none, stroke: color, stroke_width: 1.2]
+    circle inner [size: 5, fill: none, stroke: color, stroke_width: 1]
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    constrain inner.center_x = body.center_x
+    constrain inner.center_y = body.center_y
+    constrain stem.right = body.left
+    constrain stem.center_y = body.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// D.4 Magneetcontact (door/window contact, small square)
+template "magneetcontact" (color: #c0392b) {
+    rect body [width: 10, height: 8, fill: none, stroke: color, stroke_width: 1.2]
+    rect stem [width: 10, height: 1.5, fill: color, stroke: none]
+    constrain stem.right = body.left
+    constrain stem.center_y = body.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// ============================================================
+// E. INLINE PROTECTION / METERING (pass-through vertical trunk)
+// ============================================================
+
+// E.1 Automatische zekering (circuit breaker, with rating + poles labels)
+template "auto_zekering" (spec: "C20", poles: "2P") {
+    circle pivot [size: 3, fill: foreground-1, stroke: none]
+    path lever [fill: none, stroke: foreground-1, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 8, y: 10]
+    }
+    rect top_lead [width: 1.5, height: 10, fill: foreground-1, stroke: none]
+    rect contact [width: 5, height: 1.5, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 1.5, height: 10, fill: foreground-1, stroke: none]
+    rect label_box [width: 22, height: 10, fill: none, stroke: none, label: spec, font_size: 8]
+    rect poles_box [width: 18, height: 8, fill: none, stroke: none, label: poles, font_size: 7]
+    constrain lever.top = pivot.center_y
+    constrain lever.left = pivot.center_x
+    constrain top_lead.center_x = pivot.center_x
+    constrain top_lead.bottom = pivot.top
+    constrain contact.center_x = pivot.center_x
+    constrain contact.top = lever.bottom + 2
+    constrain bot_lead.center_x = pivot.center_x
+    constrain bot_lead.top = contact.bottom
+    constrain label_box.left = lever.right + 2
+    constrain label_box.center_y = lever.center_y
+    constrain poles_box.left = lever.right + 2
+    constrain poles_box.bottom = label_box.top - 1
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+// E.2 Differentieel (residual current device / RCD)
+template "diff_rcd" (spec: "40/0.3A", ptype: "type A") {
+    circle pivot [size: 3, fill: foreground-1, stroke: none]
+    path lever [fill: none, stroke: foreground-1, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 8, y: 10]
+    }
+    rect top_lead [width: 1.5, height: 10, fill: foreground-1, stroke: none]
+    ellipse torus [width: 16, height: 10, fill: none, stroke: foreground-1, stroke_width: 1.2]
+    rect bot_lead [width: 1.5, height: 10, fill: foreground-1, stroke: none]
+    rect label_box [width: 32, height: 10, fill: none, stroke: none, label: spec, font_size: 8]
+    rect type_box [width: 28, height: 8, fill: none, stroke: none, label: ptype, font_size: 7]
+    constrain lever.top = pivot.center_y
+    constrain lever.left = pivot.center_x
+    constrain top_lead.center_x = pivot.center_x
+    constrain top_lead.bottom = pivot.top
+    constrain torus.center_x = pivot.center_x
+    constrain torus.top = lever.bottom + 4
+    constrain bot_lead.center_x = pivot.center_x
+    constrain bot_lead.top = torus.bottom
+    constrain label_box.left = torus.right + 2
+    constrain label_box.center_y = torus.center_y
+    constrain type_box.left = torus.right + 2
+    constrain type_box.top = label_box.bottom + 1
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+// E.3 kWh-teller (energy meter)
+template "kwh_teller" (id: "") {
+    rect body [width: 26, height: 16, fill: none, stroke: foreground-1, stroke_width: 1.2, label: "kWh", font_size: 9]
+    rect idlbl [width: 20, height: 7, fill: none, stroke: none, label: id, font_size: 6]
+    rect top_lead [width: 1.5, height: 8, fill: foreground-1, stroke: none]
+    rect bot_lead [width: 1.5, height: 8, fill: foreground-1, stroke: none]
+    constrain idlbl.center_x = body.center_x
+    constrain idlbl.bottom = body.bottom - 1
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    constrain bot_lead.center_x = body.center_x
+    constrain bot_lead.top = body.bottom
+    anchor top_conn [position: top_lead.top, direction: up]
+    anchor bot_conn [position: bot_lead.bottom, direction: down]
+}
+
+// E.4 PV-paneel (photovoltaic panel: square with diagonal rays)
+template "pv_paneel" (color: foreground-1) {
+    rect body [width: 20, height: 20, fill: none, stroke: color, stroke_width: 1.2]
+    path arrow1 [fill: none, stroke: color, stroke_width: 1] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 6, y: 2]
+    }
+    path arrow2 [fill: none, stroke: color, stroke_width: 1] {
+        vertex a [x: 0, y: 12]
+        line_to b [x: 6, y: 6]
+    }
+    rect top_lead [width: 1.5, height: 8, fill: color, stroke: none]
+    constrain arrow1.left = body.left + 4
+    constrain arrow1.top = body.top + 3
+    constrain arrow2.left = body.left + 4
+    constrain arrow2.top = body.top + 9
+    constrain top_lead.center_x = body.center_x
+    constrain top_lead.bottom = body.top
+    anchor top_conn [position: top_lead.top, direction: up]
+}
+
+// ============================================================
+// DEMO LAYOUT (renders one of each symbol with a label)
+// ============================================================
+
+group demo {
+    rect trunk [width: 2, height: 600, fill: foreground-1, stroke: none]
+
+    // leaf symbols on trunk
+    stopcontact_ka sym_ka
+    stopcontact_wd sym_wd
+    stopcontact_3f sym_3f
+    lichtpunt sym_lp
+    inbouwspot sym_spot
+    ledstrip sym_led
+    schakelaar_ep sym_sw1
+    schakelaar_dubbelpolig sym_sw1b
+    schakelaar_wissel sym_sw2
+    schakelaar_dubbelpolig_wissel sym_sw3
+    schakelaar_kruis sym_sw4
+    dimmer sym_dim
+    bewegingssensor sym_bew
+    rookmelder sym_rm
+    thermostaat sym_th
+    magneetcontact sym_mc
+
+    // inline symbols (separate mini-trunks)
+    auto_zekering sym_brk [spec: "C20", poles: "2P"]
+    diff_rcd sym_diff [spec: "40/0.3A", ptype: "type A"]
+    kwh_teller sym_kwh [id: "kWh"]
+    pv_paneel sym_pv
+
+    // labels
+    text "Stopcontact + aarding + kinder" t1 [font_size: 9, fill: foreground-1]
+    text "Waterdicht stopcontact (h)" t2 [font_size: 9, fill: foreground-1]
+    text "Driefasig stopcontact (3f)" t3 [font_size: 9, fill: foreground-1]
+    text "Lichtpunt" t4 [font_size: 9, fill: foreground-1]
+    text "Inbouwspot" t5 [font_size: 9, fill: foreground-1]
+    text "LED-strip" t6 [font_size: 9, fill: foreground-1]
+    text "Enkelpolige schakelaar" t7 [font_size: 9, fill: foreground-1]
+    text "Dubbelpolige schakelaar" t7b [font_size: 9, fill: foreground-1]
+    text "Wisselschakelaar" t8 [font_size: 9, fill: foreground-1]
+    text "Dubbelpolige wisselschakelaar" t8b [font_size: 9, fill: foreground-1]
+    text "Kruisschakelaar" t9 [font_size: 9, fill: foreground-1]
+    text "Dimmer" t10 [font_size: 9, fill: foreground-1]
+    text "Bewegingssensor" t11 [font_size: 9, fill: foreground-1]
+    text "Rookmelder" t12 [font_size: 9, fill: foreground-1]
+    text "Thermostaat" t13 [font_size: 9, fill: foreground-1]
+    text "Magneetcontact" t14 [font_size: 9, fill: foreground-1]
+
+    text "Automatische zekering" tB [font_size: 9, fill: foreground-1]
+    text "Differentieel" tD [font_size: 9, fill: foreground-1]
+    text "kWh-teller" tK [font_size: 9, fill: foreground-1]
+    text "PV-paneel" tP [font_size: 9, fill: foreground-1]
+
+}
+
+// layout
+constrain trunk.center_x = 100
+constrain trunk.top = 20
+
+constrain sym_ka.left = 100
+constrain sym_ka.center_y = 40
+constrain sym_wd.left = 100
+constrain sym_wd.center_y = 70
+constrain sym_3f.left = 100
+constrain sym_3f.center_y = 100
+constrain sym_lp.left = 100
+constrain sym_lp.center_y = 130
+constrain sym_spot.left = 100
+constrain sym_spot.center_y = 160
+constrain sym_led.left = 100
+constrain sym_led.center_y = 190
+constrain sym_sw1.left = 100
+constrain sym_sw1.center_y = 220
+constrain sym_sw1b.left = 100
+constrain sym_sw1b.center_y = 250
+constrain sym_sw2.left = 100
+constrain sym_sw2.center_y = 280
+constrain sym_sw3.left = 100
+constrain sym_sw3.center_y = 310
+constrain sym_sw4.left = 100
+constrain sym_sw4.center_y = 340
+constrain sym_dim.left = 100
+constrain sym_dim.center_y = 370
+constrain sym_bew.left = 100
+constrain sym_bew.center_y = 405
+constrain sym_rm.left = 100
+constrain sym_rm.center_y = 440
+constrain sym_th.left = 100
+constrain sym_th.center_y = 475
+constrain sym_mc.left = 100
+constrain sym_mc.center_y = 510
+
+// labels right of symbols
+constrain t1.left = 170
+constrain t1.center_y = 40
+constrain t2.left = 170
+constrain t2.center_y = 70
+constrain t3.left = 170
+constrain t3.center_y = 100
+constrain t4.left = 170
+constrain t4.center_y = 130
+constrain t5.left = 170
+constrain t5.center_y = 160
+constrain t6.left = 170
+constrain t6.center_y = 190
+constrain t7.left = 170
+constrain t7.center_y = 220
+constrain t7b.left = 170
+constrain t7b.center_y = 250
+constrain t8.left = 170
+constrain t8.center_y = 280
+constrain t8b.left = 170
+constrain t8b.center_y = 310
+constrain t9.left = 170
+constrain t9.center_y = 340
+constrain t10.left = 170
+constrain t10.center_y = 370
+constrain t11.left = 170
+constrain t11.center_y = 405
+constrain t12.left = 170
+constrain t12.center_y = 440
+constrain t13.left = 170
+constrain t13.center_y = 475
+constrain t14.left = 170
+constrain t14.center_y = 510
+
+// inline symbols, right column
+constrain sym_brk.center_x = 380
+constrain sym_brk.center_y = 50
+constrain tB.center_x = 380
+constrain tB.top = 95
+
+constrain sym_diff.center_x = 380
+constrain sym_diff.center_y = 140
+constrain tD.center_x = 380
+constrain tD.top = 195
+
+constrain sym_kwh.center_x = 380
+constrain sym_kwh.center_y = 240
+constrain tK.center_x = 380
+constrain tK.top = 270
+
+constrain sym_pv.center_x = 380
+constrain sym_pv.center_y = 310
+constrain tP.center_x = 380
+constrain tP.top = 340
+
