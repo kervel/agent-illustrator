@@ -108,6 +108,7 @@ template "stopcontact_3f" (color: #c0392b) {
 // ============================================================
 
 // B.1 Lichtpunt (basic light point, X)
+// Wire extends all the way to the CENTER of the cross
 template "lichtpunt" (color: #27ae60) {
     path d1 [fill: none, stroke: color, stroke_width: 1.5] {
         vertex a [x: 0, y: 0]
@@ -120,7 +121,7 @@ template "lichtpunt" (color: #27ae60) {
     rect stem [width: 12, height: 1.5, fill: color, stroke: none]
     constrain d2.left = d1.left
     constrain d2.top = d1.top
-    constrain stem.right = d1.left
+    constrain stem.right = d1.center_x
     constrain stem.center_y = d1.center_y
     anchor wire [position: stem.left, direction: left]
 }
@@ -174,16 +175,16 @@ template "ledstrip" (color: #27ae60) {
 template "schakelaar_ep" (color: #e67e22) {
     circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
     path lever [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 0, y: 10]
-        line_to b [x: 10, y: 0]
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
     path endtick [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+        line_to b [x: 2.81, y: 1.05]
     }
     rect stem [width: 8, height: 1.5, fill: color, stroke: none]
-    constrain lever.left = dot.center_x + 2.1
-    constrain lever.bottom = dot.center_y - 2.1
+    constrain lever.left = dot.center_x + 1
+    constrain lever.bottom = dot.center_y - 3
     constrain endtick.left = lever.right
     constrain endtick.top = lever.top
     constrain stem.right = dot.left
@@ -192,130 +193,269 @@ template "schakelaar_ep" (color: #e67e22) {
 }
 
 // C.2 Dubbelpolige schakelaar (double-pole switch)
-// ep (without endtick) + hash mark midway on lever
+// ep geometry with the end-tick DUPLICATED: two parallel `\` ticks near lever tip
+// (indicating 2 switched poles)
 template "schakelaar_dubbelpolig" (color: #e67e22) {
     circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
     path lever [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 0, y: 10]
-        line_to b [x: 10, y: 0]
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
-    path hash [fill: none, stroke: color, stroke_width: 1.2] {
+    path endtick1 [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    path endtick2 [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
     }
     rect stem [width: 8, height: 1.5, fill: color, stroke: none]
-    constrain lever.left = dot.center_x + 2.1
-    constrain lever.bottom = dot.center_y - 2.1
-    constrain hash.center_x = lever.center_x
-    constrain hash.center_y = lever.center_y
+    constrain lever.left = dot.center_x + 1
+    constrain lever.bottom = dot.center_y - 3
+    constrain endtick1.left = lever.right
+    constrain endtick1.top = lever.top
+    constrain endtick2.left = lever.right - 1.05
+    constrain endtick2.top = lever.top + 2.81
     constrain stem.right = dot.left
     constrain stem.center_y = dot.center_y
     anchor wire [position: stem.left, direction: left]
 }
 
 // C.3 Enkelpolige wisselschakelaar (alternating switch, two-way)
-// ep + longer perpendicular bar at TIP of lever
+// enkelpolig geometry (lever + endtick) duplicated and rotated 180° around dot center,
+// so there is an identical lever+endtick on the opposite side of the circle.
 template "schakelaar_wissel" (color: #e67e22) {
     circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
     path lever [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 0, y: 10]
-        line_to b [x: 10, y: 0]
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
-    path tipbar [fill: none, stroke: color, stroke_width: 1.5] {
+    path endtick [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 5, y: 5]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    // Mirrored copies (point reflection through dot center)
+    path lever_m [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
+    }
+    path endtick_m [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
     }
     rect stem [width: 8, height: 1.5, fill: color, stroke: none]
-    constrain lever.left = dot.center_x + 2.1
-    constrain lever.bottom = dot.center_y - 2.1
-    constrain tipbar.center_x = lever.right
-    constrain tipbar.center_y = lever.top
+    constrain lever.left = dot.center_x + 1
+    constrain lever.bottom = dot.center_y - 3
+    constrain endtick.left = lever.right
+    constrain endtick.top = lever.top
+    constrain lever_m.right = dot.center_x - 1
+    constrain lever_m.top = dot.center_y + 3
+    constrain endtick_m.right = lever_m.left
+    constrain endtick_m.bottom = lever_m.bottom
     constrain stem.right = dot.left
     constrain stem.center_y = dot.center_y
     anchor wire [position: stem.left, direction: left]
 }
 
-// C.3b Dubbelpolige wisselschakelaar: wissel + hash mark
+// C.3b Dubbelpolige wisselschakelaar: wissel geometry with DOUBLED endticks on each side
 template "schakelaar_dubbelpolig_wissel" (color: #e67e22) {
     circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
     path lever [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 0, y: 10]
-        line_to b [x: 10, y: 0]
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
-    path hash [fill: none, stroke: color, stroke_width: 1.2] {
+    path endtick1 [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+        line_to b [x: 2.81, y: 1.05]
     }
-    path tipbar [fill: none, stroke: color, stroke_width: 1.5] {
+    path endtick2 [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 5, y: 5]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    path lever_m [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
+    }
+    path endtick1_m [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    path endtick2_m [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
     }
     rect stem [width: 8, height: 1.5, fill: color, stroke: none]
-    constrain lever.left = dot.center_x + 2.1
-    constrain lever.bottom = dot.center_y - 2.1
-    constrain hash.center_x = lever.center_x
-    constrain hash.center_y = lever.center_y
-    constrain tipbar.center_x = lever.right
-    constrain tipbar.center_y = lever.top
+    constrain lever.left = dot.center_x + 1
+    constrain lever.bottom = dot.center_y - 3
+    constrain endtick1.left = lever.right
+    constrain endtick1.top = lever.top
+    constrain endtick2.left = lever.right - 1.05
+    constrain endtick2.top = lever.top + 2.81
+    constrain lever_m.right = dot.center_x - 1
+    constrain lever_m.top = dot.center_y + 3
+    constrain endtick1_m.right = lever_m.left
+    constrain endtick1_m.bottom = lever_m.bottom
+    constrain endtick2_m.right = lever_m.left + 1.05
+    constrain endtick2_m.bottom = lever_m.bottom - 2.81
     constrain stem.right = dot.left
     constrain stem.center_y = dot.center_y
     anchor wire [position: stem.left, direction: left]
 }
 
-// C.4 Kruisschakelaar (cross/four-way switch)
-// Circle + 4 diagonal arms, each with a `\` tick at its tip.
-// All ticks share the same orientation (deliberately NOT rotating — not swastika-style).
+// C.4 Enkelpolige kruisschakelaar (cross / four-way switch)
+// wisselschakelaar (enkelpolig + 180° point mirror) PLUS a Y-axis mirror
+// of both. Result: 4 levers in the 4 quadrants around the dot (NE, SW, NW, SE),
+// each with its own perpendicular endtick obtained by the same mirror chain.
 template "schakelaar_kruis" (color: #e67e22) {
     circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
-    path arm_ne [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 0, y: 10]
-        line_to b [x: 10, y: 0]
+    // NE arm (wissel original)
+    path lever_ne [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
-    path arm_se [fill: none, stroke: color, stroke_width: 1.5] {
+    path tick_ne [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 10, y: 10]
+        line_to b [x: 2.81, y: 1.05]
     }
-    path arm_sw [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 10, y: 0]
-        line_to b [x: 0, y: 10]
+    // SW arm (wissel point mirror — 180° through dot center)
+    path lever_sw [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
-    path arm_nw [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 10, y: 10]
-        line_to b [x: 0, y: 0]
-    }
-    path t_ne [fill: none, stroke: color, stroke_width: 1.2] {
+    path tick_sw [fill: none, stroke: color, stroke_width: 1.2] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+        line_to b [x: 2.81, y: 1.05]
     }
-    path t_se [fill: none, stroke: color, stroke_width: 1.2] {
+    // NW arm (Y-axis mirror of NE — chirality flip)
+    path lever_nw [fill: none, stroke: color, stroke_width: 1.5] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+        line_to b [x: 3, y: 8]
     }
-    path t_sw [fill: none, stroke: color, stroke_width: 1.2] {
-        vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+    path tick_nw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 2.81, y: 0]
+        line_to b [x: 0, y: 1.05]
     }
-    path t_nw [fill: none, stroke: color, stroke_width: 1.2] {
+    // SE arm (Y-axis mirror of SW == X-axis mirror of NE)
+    path lever_se [fill: none, stroke: color, stroke_width: 1.5] {
         vertex a [x: 0, y: 0]
-        line_to b [x: 3, y: 3]
+        line_to b [x: 3, y: 8]
+    }
+    path tick_se [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 2.81, y: 0]
+        line_to b [x: 0, y: 1.05]
     }
     rect stem [width: 8, height: 1.5, fill: color, stroke: none]
-    constrain arm_ne.left = dot.center_x + 2.1
-    constrain arm_ne.bottom = dot.center_y - 2.1
-    constrain arm_se.left = dot.center_x + 2.1
-    constrain arm_se.top = dot.center_y + 2.1
-    constrain arm_sw.right = dot.center_x - 2.1
-    constrain arm_sw.top = dot.center_y + 2.1
-    constrain arm_nw.right = dot.center_x - 2.1
-    constrain arm_nw.bottom = dot.center_y - 2.1
-    constrain t_ne.left = arm_ne.right
-    constrain t_ne.top = arm_ne.top
-    constrain t_se.left = arm_se.right
-    constrain t_se.top = arm_se.bottom
-    constrain t_sw.left = arm_sw.left
-    constrain t_sw.top = arm_sw.bottom
-    constrain t_nw.left = arm_nw.left
-    constrain t_nw.top = arm_nw.top
+    // NE
+    constrain lever_ne.left = dot.center_x + 1
+    constrain lever_ne.bottom = dot.center_y - 3
+    constrain tick_ne.left = lever_ne.right
+    constrain tick_ne.top = lever_ne.top
+    // SW (point mirror of NE)
+    constrain lever_sw.right = dot.center_x - 1
+    constrain lever_sw.top = dot.center_y + 3
+    constrain tick_sw.right = lever_sw.left
+    constrain tick_sw.bottom = lever_sw.bottom
+    // NW (Y-mirror of NE)
+    constrain lever_nw.right = dot.center_x - 1
+    constrain lever_nw.bottom = dot.center_y - 3
+    constrain tick_nw.right = lever_nw.left
+    constrain tick_nw.top = lever_nw.top
+    // SE (X-mirror of NE)
+    constrain lever_se.left = dot.center_x + 1
+    constrain lever_se.top = dot.center_y + 3
+    constrain tick_se.left = lever_se.right
+    constrain tick_se.bottom = lever_se.bottom
+    constrain stem.right = dot.left
+    constrain stem.center_y = dot.center_y
+    anchor wire [position: stem.left, direction: left]
+}
+
+// C.4b Dubbelpolige kruisschakelaar
+// dubbelpolig wisselschakelaar (2 levers × 2 endticks) PLUS Y-axis mirror.
+// = 4 arms in 4 quadrants, each with 2 parallel endticks (double-pole indicator)
+template "schakelaar_dubbelpolig_kruis" (color: #e67e22) {
+    circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
+    // NE arm
+    path lever_ne [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
+    }
+    path t1_ne [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    path t2_ne [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    // SW arm (point mirror)
+    path lever_sw [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
+    }
+    path t1_sw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    path t2_sw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 2.81, y: 1.05]
+    }
+    // NW arm (Y-mirror)
+    path lever_nw [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 8]
+    }
+    path t1_nw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 2.81, y: 0]
+        line_to b [x: 0, y: 1.05]
+    }
+    path t2_nw [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 2.81, y: 0]
+        line_to b [x: 0, y: 1.05]
+    }
+    // SE arm (X-mirror of NE)
+    path lever_se [fill: none, stroke: color, stroke_width: 1.5] {
+        vertex a [x: 0, y: 0]
+        line_to b [x: 3, y: 8]
+    }
+    path t1_se [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 2.81, y: 0]
+        line_to b [x: 0, y: 1.05]
+    }
+    path t2_se [fill: none, stroke: color, stroke_width: 1.2] {
+        vertex a [x: 2.81, y: 0]
+        line_to b [x: 0, y: 1.05]
+    }
+    rect stem [width: 8, height: 1.5, fill: color, stroke: none]
+    // NE
+    constrain lever_ne.left = dot.center_x + 1
+    constrain lever_ne.bottom = dot.center_y - 3
+    constrain t1_ne.left = lever_ne.right
+    constrain t1_ne.top = lever_ne.top
+    constrain t2_ne.left = lever_ne.right - 1.05
+    constrain t2_ne.top = lever_ne.top + 2.81
+    // SW
+    constrain lever_sw.right = dot.center_x - 1
+    constrain lever_sw.top = dot.center_y + 3
+    constrain t1_sw.right = lever_sw.left
+    constrain t1_sw.bottom = lever_sw.bottom
+    constrain t2_sw.right = lever_sw.left + 1.05
+    constrain t2_sw.bottom = lever_sw.bottom - 2.81
+    // NW
+    constrain lever_nw.right = dot.center_x - 1
+    constrain lever_nw.bottom = dot.center_y - 3
+    constrain t1_nw.right = lever_nw.left
+    constrain t1_nw.top = lever_nw.top
+    constrain t2_nw.right = lever_nw.left + 1.05
+    constrain t2_nw.top = lever_nw.top + 2.81
+    // SE
+    constrain lever_se.left = dot.center_x + 1
+    constrain lever_se.top = dot.center_y + 3
+    constrain t1_se.left = lever_se.right
+    constrain t1_se.bottom = lever_se.bottom
+    constrain t2_se.left = lever_se.right - 1.05
+    constrain t2_se.bottom = lever_se.bottom - 2.81
     constrain stem.right = dot.left
     constrain stem.center_y = dot.center_y
     anchor wire [position: stem.left, direction: left]
@@ -326,8 +466,8 @@ template "schakelaar_kruis" (color: #e67e22) {
 template "dimmer" (color: #e67e22) {
     circle dot [size: 6, fill: none, stroke: color, stroke_width: 1.2]
     path lever [fill: none, stroke: color, stroke_width: 1.5] {
-        vertex a [x: 0, y: 10]
-        line_to b [x: 10, y: 0]
+        vertex a [x: 0, y: 8]
+        line_to b [x: 3, y: 0]
     }
     path tri [fill: color, stroke: none] {
         vertex a [x: 0, y: 0]
@@ -336,8 +476,8 @@ template "dimmer" (color: #e67e22) {
         close
     }
     rect stem [width: 8, height: 1.5, fill: color, stroke: none]
-    constrain lever.left = dot.center_x + 2.1
-    constrain lever.bottom = dot.center_y - 2.1
+    constrain lever.left = dot.center_x + 1
+    constrain lever.bottom = dot.center_y - 3
     constrain tri.center_x = lever.right
     constrain tri.bottom = lever.top
     constrain stem.right = dot.left
@@ -513,6 +653,7 @@ group demo {
     schakelaar_wissel sym_sw2
     schakelaar_dubbelpolig_wissel sym_sw3
     schakelaar_kruis sym_sw4
+    schakelaar_dubbelpolig_kruis sym_sw4b
     dimmer sym_dim
     bewegingssensor sym_bew
     rookmelder sym_rm
@@ -537,6 +678,7 @@ group demo {
     text "Wisselschakelaar" t8 [font_size: 9, fill: foreground-1]
     text "Dubbelpolige wisselschakelaar" t8b [font_size: 9, fill: foreground-1]
     text "Kruisschakelaar" t9 [font_size: 9, fill: foreground-1]
+    text "Dubbelpolige kruisschakelaar" t9b [font_size: 9, fill: foreground-1]
     text "Dimmer" t10 [font_size: 9, fill: foreground-1]
     text "Bewegingssensor" t11 [font_size: 9, fill: foreground-1]
     text "Rookmelder" t12 [font_size: 9, fill: foreground-1]
@@ -576,16 +718,18 @@ constrain sym_sw3.left = 100
 constrain sym_sw3.center_y = 310
 constrain sym_sw4.left = 100
 constrain sym_sw4.center_y = 340
+constrain sym_sw4b.left = 100
+constrain sym_sw4b.center_y = 370
 constrain sym_dim.left = 100
-constrain sym_dim.center_y = 370
+constrain sym_dim.center_y = 400
 constrain sym_bew.left = 100
-constrain sym_bew.center_y = 405
+constrain sym_bew.center_y = 435
 constrain sym_rm.left = 100
-constrain sym_rm.center_y = 440
+constrain sym_rm.center_y = 470
 constrain sym_th.left = 100
-constrain sym_th.center_y = 475
+constrain sym_th.center_y = 505
 constrain sym_mc.left = 100
-constrain sym_mc.center_y = 510
+constrain sym_mc.center_y = 540
 
 // labels right of symbols
 constrain t1.left = 170
@@ -610,16 +754,18 @@ constrain t8b.left = 170
 constrain t8b.center_y = 310
 constrain t9.left = 170
 constrain t9.center_y = 340
+constrain t9b.left = 170
+constrain t9b.center_y = 370
 constrain t10.left = 170
-constrain t10.center_y = 370
+constrain t10.center_y = 400
 constrain t11.left = 170
-constrain t11.center_y = 405
+constrain t11.center_y = 435
 constrain t12.left = 170
-constrain t12.center_y = 440
+constrain t12.center_y = 470
 constrain t13.left = 170
-constrain t13.center_y = 475
+constrain t13.center_y = 505
 constrain t14.left = 170
-constrain t14.center_y = 510
+constrain t14.center_y = 540
 
 // inline symbols, right column
 constrain sym_brk.center_x = 380
