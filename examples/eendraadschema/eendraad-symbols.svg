@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="39 -40 457.7 720">
   <style>
     :root {
-    --status-success: #4caf50;
-    --text-3: #999999;
-    --status-warning: #ff9800;
-    --foreground-dark: #1a1a1a;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --status-error: #f44336;
-    --accent-1: #2196f3;
-    --accent-3: #bbdefb;
-    --foreground-2: #666666;
-    --accent-2: #e3f2fd;
-    --foreground-3: #999999;
-    --text-1: #333333;
-    --secondary-dark: #e65100;
-    --text-2: #666666;
-    --secondary-3: #ffe0b2;
-    --foreground-1: #333333;
-    --background-2: #f5f5f5;
-    --foreground-light: #e0e0e0;
-    --background-light: #ffffff;
     --accent-light: #e3f2fd;
-    --secondary-light: #fff3e0;
-    --background-dark: #333333;
-    --background-1: #ffffff;
-    --background-3: #eeeeee;
-    --text-dark: #1a1a1a;
-    --text-light: #ffffff;
     --accent-dark: #1565c0;
+    --secondary-dark: #e65100;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --secondary-3: #ffe0b2;
+    --foreground-2: #666666;
+    --text-light: #ffffff;
+    --background-dark: #333333;
+    --secondary-2: #fff3e0;
+    --text-dark: #1a1a1a;
+    --foreground-dark: #1a1a1a;
+    --accent-1: #2196f3;
+    --secondary-1: #ff9800;
+    --background-1: #ffffff;
+    --text-3: #999999;
+    --secondary-light: #fff3e0;
+    --status-warning: #ff9800;
+    --foreground-3: #999999;
+    --foreground-1: #333333;
+    --background-light: #ffffff;
+    --background-2: #f5f5f5;
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --background-3: #eeeeee;
+    --text-1: #333333;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
   }
 
     /* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
@@ -201,10 +201,10 @@
       <rect id="sym_sw4b_stem" class="ai-shape ai-rect" x="100" y="369.25" width="8" height="1.5" fill="#e67e22" stroke="none" stroke-width="1.5"/>
     </g>
     <g id="sym_dim" class="ai-container">
-      <circle id="sym_dim_dot" class="ai-shape ai-circle" cx="111" cy="406" r="3" fill="none" stroke="#e67e22" stroke-width="1.2"/>
-      <path id="sym_dim_lever" class="ai-shape ai-path" d="M112.00 403.00 L115.00 395.00"  fill="none" stroke="#e67e22" stroke-width="1.5"/>
-      <path id="sym_dim_tri" class="ai-shape ai-path" d="M112.50 391.00 L117.50 391.00 L115.00 395.00 Z"  fill="#e67e22" stroke="none" stroke-width="1.5"/>
-      <rect id="sym_dim_stem" class="ai-shape ai-rect" x="100" y="405.25" width="8" height="1.5" fill="#e67e22" stroke="none" stroke-width="1.5"/>
+      <circle id="sym_dim_dot" class="ai-shape ai-circle" cx="111" cy="404" r="3" fill="none" stroke="#e67e22" stroke-width="1.2"/>
+      <path id="sym_dim_lever" class="ai-shape ai-path" d="M112.00 401.00 L115.00 393.00"  fill="none" stroke="#e67e22" stroke-width="1.5"/>
+      <path id="sym_dim_tri" class="ai-shape ai-path" d="M111.00 397.00 L116.00 395.50 L116.00 398.50 Z"  fill="var(--background-1)" stroke="#e67e22" stroke-width="1.2"/>
+      <rect id="sym_dim_stem" class="ai-shape ai-rect" x="100" y="403.25" width="8" height="1.5" fill="#e67e22" stroke="none" stroke-width="1.5"/>
     </g>
     <g id="sym_bew" class="ai-container">
       <rect id="sym_bew_body" class="ai-shape ai-rect" x="110" y="428" width="14" height="14" fill="none" stroke="#c0392b" stroke-width="1.2"/>
@@ -230,15 +230,16 @@
       <rect id="sym_mc_stem" class="ai-shape ai-rect" x="100" y="539.25" width="10" height="1.5" fill="#c0392b" stroke="none" stroke-width="1.5"/>
     </g>
     <g id="sym_brk" class="ai-container">
-      <circle id="sym_brk_pivot" class="ai-shape ai-circle" cx="365.25" cy="44" r="1.5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-      <path id="sym_brk_lever" class="ai-shape ai-path" d="M365.25 44.00 L373.25 54.00"  fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
-      <rect id="sym_brk_top_lead" class="ai-shape ai-rect" x="364.5" y="32.5" width="1.5" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-      <rect id="sym_brk_contact" class="ai-shape ai-rect" x="362.75" y="56" width="5" height="1.5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-      <rect id="sym_brk_bot_lead" class="ai-shape ai-rect" x="364.5" y="57.5" width="1.5" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-      <rect id="sym_brk_label_box" class="ai-shape ai-rect" x="375.25" y="44" width="22" height="10" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="386.25" y="49" text-anchor="middle" dominant-baseline="middle" font-size="8">C20</text>
-      <rect id="sym_brk_poles_box" class="ai-shape ai-rect" x="375.25" y="35" width="18" height="8" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="384.25" y="39" text-anchor="middle" dominant-baseline="middle" font-size="7">2P</text>
+      <rect id="sym_brk_top_lead" class="ai-shape ai-rect" x="370.625" y="34" width="1.5" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <rect id="sym_brk_bot_lead" class="ai-shape ai-rect" x="370.625" y="56" width="1.5" height="10" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      <path id="sym_brk_lever" class="ai-shape ai-path" d="M365.38 46.00 L371.38 56.00"  fill="none" stroke="var(--foreground-1)" stroke-width="1.5"/>
+      <g transform="rotate(59 365.375 48.92000000000007)">
+        <rect id="sym_brk_block" class="ai-shape ai-rect" x="362.875" y="47.42000000000007" width="5" height="3" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <rect id="sym_brk_label_box" class="ai-shape ai-rect" x="375.125" y="46" width="22" height="10" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="386.125" y="51" text-anchor="middle" dominant-baseline="middle" font-size="8">C20</text>
+      <rect id="sym_brk_poles_box" class="ai-shape ai-rect" x="375.125" y="37" width="18" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="384.125" y="41" text-anchor="middle" dominant-baseline="middle" font-size="7">2P</text>
     </g>
     <g id="sym_diff" class="ai-container">
       <circle id="sym_diff_pivot" class="ai-shape ai-circle" cx="363" cy="128.75" r="1.5" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
