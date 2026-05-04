@@ -61,53 +61,53 @@ template "gear_img" from "clipart/gear.svg"
 group diagram {
 
     // Canvas background to lock the viewBox across all frames
-    rect canvas [width: 1080, height: 420, fill: white, stroke: none, opacity: 0.01]
+    rect canvas [width: 1080, height: 460, fill: white, stroke: none, opacity: 0.01]
 
     // Actor icons — laid out left to right: User, CLI, Cloud; Gear below Cloud
-    user_img user_icon [width: 56, height: 70]
-    cli_img cli_icon [width: 72, height: 58]
-    cloud_img cloud_icon [width: 72, height: 47]
-    gear_img gear_icon [width: 64, height: 64]
+    user_img user_icon [width: 96, height: 120]
+    cli_img cli_icon [width: 124, height: 100]
+    cloud_img cloud_icon [width: 124, height: 81]
+    gear_img gear_icon [width: 110, height: 110]
 
     // Actor labels
-    text "User" user_label [font_size: 13, fill: foreground-2]
-    text "CLI Harness" cli_label [font_size: 13, fill: foreground-2]
-    text "Claude API" cloud_label [font_size: 13, fill: foreground-2]
-    text "Tool (bash)" gear_label [font_size: 13, fill: foreground-2]
+    text "User" user_label [font_size: 20, fill: foreground-2]
+    text "CLI Harness" cli_label [font_size: 20, fill: foreground-2]
+    text "Claude API" cloud_label [font_size: 20, fill: foreground-2]
+    text "Tool (bash)" gear_label [font_size: 20, fill: foreground-2]
 
     // === SPEECH BUBBLE (frame 2): near user ===
-    rect speech_bubble [width: 200, height: 44, fill: accent-light, stroke: none,
-                        corner_radius: 16, label: "list my Python files", font_size: 11]
+    rect speech_bubble [width: 280, height: 56, fill: accent-light, stroke: none,
+                        corner_radius: 18, label: "list my Python files", font_size: 16]
 
     // === SYSTEM PROMPT ENVELOPE (frame 3-4): between CLI and Cloud ===
-    rect sys_envelope [width: 250, height: 70, fill: accent-light, stroke: none,
-                       corner_radius: 10, opacity: 0.9]
-    text "[system] You are Claude Code..." sys_line1 [font_size: 11, fill: foreground-2]
-    text "[user] list my Python files" sys_line2 [font_size: 11, fill: accent-dark]
+    rect sys_envelope [width: 340, height: 88, fill: accent-light, stroke: none,
+                       corner_radius: 12, opacity: 0.9]
+    text "[system] You are Claude Code..." sys_line1 [font_size: 16, fill: foreground-2]
+    text "[user] list my Python files" sys_line2 [font_size: 16, fill: accent-dark]
 
     // === TOOL CALL RESPONSE (frame 5): between Cloud and CLI ===
-    rect tool_call_envelope [width: 230, height: 52, fill: secondary-light, stroke: none,
-                             corner_radius: 10, opacity: 0.9]
-    text "tool_call: bash" tc_line1 [font_size: 11, fill: foreground-2]
-    text "find . -name '*.py'" tc_line2 [font_size: 11, fill: secondary-dark]
+    rect tool_call_envelope [width: 310, height: 70, fill: secondary-light, stroke: none,
+                             corner_radius: 12, opacity: 0.9]
+    text "tool_call: bash" tc_line1 [font_size: 16, fill: foreground-2]
+    text "find . -name '*.py'" tc_line2 [font_size: 16, fill: secondary-dark]
 
     // === EXEC RESULT (frame 6): between CLI and Gear ===
-    rect exec_envelope [width: 210, height: 60, fill: accent-light, stroke: none,
-                        corner_radius: 10, opacity: 0.9]
-    text "$ find . -name '*.py'" exec_line1 [font_size: 11, fill: accent-dark]
-    text "./main.py  ./test_api.py" exec_line2 [font_size: 11, fill: foreground-1]
+    rect exec_envelope [width: 290, height: 80, fill: accent-light, stroke: none,
+                        corner_radius: 12, opacity: 0.9]
+    text "$ find . -name '*.py'" exec_line1 [font_size: 16, fill: accent-dark]
+    text "./main.py  ./test_api.py" exec_line2 [font_size: 16, fill: foreground-1]
 
     // === RESULT RETURN (frame 7): between Gear and Cloud ===
-    rect result_envelope [width: 210, height: 52, fill: accent-light, stroke: none,
-                          corner_radius: 10, opacity: 0.9]
-    text "tool_result + conversation" result_line1 [font_size: 11, fill: foreground-2]
-    text "./main.py  ./test_api.py" result_line2 [font_size: 11, fill: accent-dark]
+    rect result_envelope [width: 290, height: 70, fill: accent-light, stroke: none,
+                          corner_radius: 12, opacity: 0.9]
+    text "tool_result + conversation" result_line1 [font_size: 16, fill: foreground-2]
+    text "./main.py  ./test_api.py" result_line2 [font_size: 16, fill: accent-dark]
 
     // === FINAL ANSWER (frame 8): between CLI and User ===
-    rect answer_envelope [width: 210, height: 52, fill: secondary-light, stroke: none,
-                          corner_radius: 10, opacity: 0.9]
-    text "I found 2 Python files:" ans_line1 [font_size: 11, fill: foreground-1]
-    text "main.py and test_api.py" ans_line2 [font_size: 11, fill: secondary-dark]
+    rect answer_envelope [width: 290, height: 70, fill: secondary-light, stroke: none,
+                          corner_radius: 12, opacity: 0.9]
+    text "I found 2 Python files:" ans_line1 [font_size: 16, fill: foreground-1]
+    text "main.py and test_api.py" ans_line2 [font_size: 16, fill: secondary-dark]
 }
 
 // === LAYOUT VIA CONSTRAINTS ===
@@ -146,43 +146,43 @@ constrain speech_bubble.center_y = 55
 
 // System prompt envelope: midway between CLI and Cloud, below the actor row
 constrain sys_envelope.center_x = 680
-constrain sys_envelope.center_y = 200
+constrain sys_envelope.center_y = 215
 constrain sys_line1.center_x = sys_envelope.center_x
-constrain sys_line1.center_y = sys_envelope.center_y - 14
+constrain sys_line1.center_y = sys_envelope.center_y - 18
 constrain sys_line2.center_x = sys_envelope.center_x
-constrain sys_line2.center_y = sys_envelope.center_y + 8
+constrain sys_line2.center_y = sys_envelope.center_y + 12
 
 // Tool call response: midway between Cloud and CLI, below actor row
 constrain tool_call_envelope.center_x = sys_envelope.center_x
 constrain tool_call_envelope.center_y = sys_envelope.center_y
 constrain tc_line1.center_x = tool_call_envelope.center_x
-constrain tc_line1.center_y = tool_call_envelope.center_y - 10
+constrain tc_line1.center_y = tool_call_envelope.center_y - 14
 constrain tc_line2.center_x = tool_call_envelope.center_x
-constrain tc_line2.center_y = tool_call_envelope.center_y + 8
+constrain tc_line2.center_y = tool_call_envelope.center_y + 12
 
 // Exec envelope: left of the curved arrow path, between CLI and Gear
 constrain exec_envelope.center_x = 260
-constrain exec_envelope.center_y = 300
+constrain exec_envelope.center_y = 320
 constrain exec_line1.center_x = exec_envelope.center_x
-constrain exec_line1.center_y = exec_envelope.center_y - 14
+constrain exec_line1.center_y = exec_envelope.center_y - 18
 constrain exec_line2.center_x = exec_envelope.center_x
-constrain exec_line2.center_y = exec_envelope.center_y + 8
+constrain exec_line2.center_y = exec_envelope.center_y + 12
 
 // Result return: between CLI and Cloud, above the curved return arrow path
 constrain result_envelope.center_x = sys_envelope.center_x
 constrain result_envelope.center_y = sys_envelope.center_y
 constrain result_line1.center_x = result_envelope.center_x
-constrain result_line1.center_y = result_envelope.center_y - 10
+constrain result_line1.center_y = result_envelope.center_y - 14
 constrain result_line2.center_x = result_envelope.center_x
-constrain result_line2.center_y = result_envelope.center_y + 10
+constrain result_line2.center_y = result_envelope.center_y + 14
 
 // Final answer: between CLI and User
 constrain answer_envelope.center_x = 300
-constrain answer_envelope.center_y = 200
+constrain answer_envelope.center_y = 215
 constrain ans_line1.center_x = answer_envelope.center_x
-constrain ans_line1.center_y = answer_envelope.center_y - 10
+constrain ans_line1.center_y = answer_envelope.center_y - 14
 constrain ans_line2.center_x = answer_envelope.center_x
-constrain ans_line2.center_y = answer_envelope.center_y + 8
+constrain ans_line2.center_y = answer_envelope.center_y + 12
 
 // === CONNECTIONS (named for keyframe control) ===
 
