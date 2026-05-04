@@ -102,6 +102,10 @@ pub struct RenderConfig {
     pub animate: bool,
     /// Use pure CSS animation (no JS, works in GitLab/GitHub READMEs)
     pub animate_css: bool,
+    /// Skip the auto-generated `.frame-X` CSS rules. Element/connection
+    /// `kf-*` / `conn-*` classes and `data-frames` are still emitted; an
+    /// external runtime drives transitions by toggling the SVG's class.
+    pub no_frame_css: bool,
 }
 
 impl Default for RenderConfig {
@@ -120,6 +124,7 @@ impl Default for RenderConfig {
             frame: None,
             animate: false,
             animate_css: false,
+            no_frame_css: false,
         }
     }
 }
@@ -516,6 +521,7 @@ fn render_pipeline(
             config.debug,
             &frame_states,
             &frame_diffs,
+            config.no_frame_css,
         );
 
         // Inject animation: JS (--animate) or CSS-only (--animate-css)

@@ -660,6 +660,7 @@ pub fn render_svg_with_keyframes(
     debug: bool,
     frame_states: &[crate::layout::keyframe::FrameState],
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
+    no_frame_css: bool,
 ) -> String {
     let mut builder = SvgBuilder::new(config.clone());
 
@@ -670,8 +671,14 @@ pub fn render_svg_with_keyframes(
     let frame_names: Vec<&str> = frame_diffs.iter().map(|f| f.name.as_str()).collect();
     builder.data_frames = Some(frame_names.join(","));
 
-    // Generate keyframe CSS
-    let keyframe_css = generate_keyframe_css(frame_states, frame_diffs);
+    // Generate keyframe CSS. With `no_frame_css`, only emit the base hidden
+    // rule — element/connection class hooks remain so an external runtime
+    // can supply per-frame visibility rules.
+    let keyframe_css = if no_frame_css {
+        String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n")
+    } else {
+        generate_keyframe_css(frame_states, frame_diffs)
+    };
     builder.add_custom_css(&keyframe_css);
 
     // Add custom CSS after keyframe CSS

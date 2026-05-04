@@ -88,6 +88,13 @@ struct Cli {
     /// Use pure CSS animation (no JS, works in GitLab/GitHub READMEs)
     #[arg(long)]
     animate_css: bool,
+
+    /// Skip the auto-generated `.frame-X` CSS rules. Element/connection
+    /// `kf-*` / `conn-*` classes and `data-frames` are still emitted, so an
+    /// external runtime (e.g. reveal.js) can drive frame transitions by
+    /// toggling a `frame-<name>` class on the SVG root.
+    #[arg(long)]
+    no_frame_css: bool,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -217,6 +224,7 @@ fn main() {
     config.frame = cli.frame;
     config.animate = cli.animate;
     config.animate_css = cli.animate_css;
+    config.no_frame_css = cli.no_frame_css;
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }
