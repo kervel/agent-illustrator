@@ -61,7 +61,7 @@ template "gear_img" from "clipart/gear.svg"
 group diagram {
 
     // Canvas background to lock the viewBox across all frames
-    rect canvas [width: 740, height: 420, fill: white, stroke: none, opacity: 0.01]
+    rect canvas [width: 1080, height: 420, fill: white, stroke: none, opacity: 0.01]
 
     // Actor icons — laid out left to right: User, CLI, Cloud; Gear below Cloud
     user_img user_icon [width: 56, height: 70]
@@ -77,7 +77,7 @@ group diagram {
 
     // === SPEECH BUBBLE (frame 2): near user ===
     rect speech_bubble [width: 200, height: 44, fill: accent-light, stroke: none,
-                        corner_radius: 16, label: "list my Python files"]
+                        corner_radius: 16, label: "list my Python files", font_size: 11]
 
     // === SYSTEM PROMPT ENVELOPE (frame 3-4): between CLI and Cloud ===
     rect sys_envelope [width: 250, height: 70, fill: accent-light, stroke: none,
@@ -113,21 +113,21 @@ group diagram {
 // === LAYOUT VIA CONSTRAINTS ===
 
 // Canvas anchors the viewBox
-constrain canvas.center_x = 370
+constrain canvas.center_x = 540
 constrain canvas.center_y = 210
 
 // Actors — horizontal row: User (left), CLI (center), Cloud (right); Gear below Cloud
-constrain user_icon.center_x = 80
+constrain user_icon.center_x = 120
 constrain user_icon.center_y = 115
 constrain user_label.center_x = user_icon.center_x
 constrain user_label.top = user_icon.bottom + 6
 
-constrain cli_icon.center_x = 320
+constrain cli_icon.center_x = 480
 constrain cli_icon.center_y = user_icon.center_y
 constrain cli_label.center_x = cli_icon.center_x
 constrain cli_label.top = cli_icon.bottom + 6
 
-constrain cloud_icon.center_x = 600
+constrain cloud_icon.center_x = 880
 constrain cloud_icon.center_y = user_icon.center_y
 constrain cloud_label.right = cloud_icon.left - 8
 constrain cloud_label.center_y = cloud_icon.center_y + 10
@@ -141,11 +141,11 @@ constrain gear_label.top = gear_icon.bottom + 6
 // Each envelope is positioned along the path of the arrow it represents.
 
 // Speech bubble: above user, pointing right
-constrain speech_bubble.center_x = 180
+constrain speech_bubble.center_x = 240
 constrain speech_bubble.center_y = 55
 
 // System prompt envelope: midway between CLI and Cloud, below the actor row
-constrain sys_envelope.center_x = 460
+constrain sys_envelope.center_x = 680
 constrain sys_envelope.center_y = 200
 constrain sys_line1.center_x = sys_envelope.center_x
 constrain sys_line1.center_y = sys_envelope.center_y - 14
@@ -161,7 +161,7 @@ constrain tc_line2.center_x = tool_call_envelope.center_x
 constrain tc_line2.center_y = tool_call_envelope.center_y + 8
 
 // Exec envelope: left of the curved arrow path, between CLI and Gear
-constrain exec_envelope.center_x = 160
+constrain exec_envelope.center_x = 260
 constrain exec_envelope.center_y = 300
 constrain exec_line1.center_x = exec_envelope.center_x
 constrain exec_line1.center_y = exec_envelope.center_y - 14
@@ -177,7 +177,7 @@ constrain result_line2.center_x = result_envelope.center_x
 constrain result_line2.center_y = result_envelope.center_y + 10
 
 // Final answer: between CLI and User
-constrain answer_envelope.center_x = 200
+constrain answer_envelope.center_x = 300
 constrain answer_envelope.center_y = 200
 constrain ans_line1.center_x = answer_envelope.center_x
 constrain ans_line1.center_y = answer_envelope.center_y - 10
