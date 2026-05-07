@@ -72,7 +72,7 @@ group diagram {
     // Actor labels
     text "User" user_label [font_size: 20, fill: foreground-2]
     text "CLI Harness" cli_label [font_size: 20, fill: foreground-2]
-    text "Claude API" cloud_label [font_size: 20, fill: foreground-2]
+    text "LLM" cloud_label [font_size: 20, fill: foreground-2]
     text "Tool (bash)" gear_label [font_size: 20, fill: foreground-2]
 
     // === SPEECH BUBBLE (frame 2): near user ===
@@ -129,8 +129,10 @@ constrain cli_label.top = cli_icon.bottom + 6
 
 constrain cloud_icon.center_x = 880
 constrain cloud_icon.center_y = user_icon.center_y
-constrain cloud_label.right = cloud_icon.left - 8
-constrain cloud_label.center_y = cloud_icon.center_y + 10
+// Label sits ABOVE the cloud — to its left it overlapped the
+// horizontal CLI → LLM arrow that runs through the cloud's center.
+constrain cloud_label.center_x = cloud_icon.center_x
+constrain cloud_label.bottom = cloud_icon.top - 6
 
 constrain gear_icon.center_x = cloud_icon.center_x
 constrain gear_icon.center_y = 330
