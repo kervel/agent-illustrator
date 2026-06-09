@@ -934,6 +934,14 @@ mod tests {
     }
 
     #[test]
+    fn test_render_escaped_quotes_in_text_are_unescaped() {
+        // `\"` in a label must render as a real quote (XML-escaped), not a literal backslash.
+        let svg = render(r#"text "what does \"it\" refer to?" cap"#).unwrap();
+        assert!(svg.contains("&quot;it&quot;"), "got: {svg}");
+        assert!(!svg.contains(r#"\"#), "backslash leaked into output: {svg}");
+    }
+
+    #[test]
     fn test_render_contains_accepts_grid_cells() {
         // `contains` must accept grid.cell(r,c) refs (e.g. a highlight box around a row).
         let svg = render(
