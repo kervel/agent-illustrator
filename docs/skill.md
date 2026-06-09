@@ -188,6 +188,17 @@ constrain a.center_x = midpoint(b, c)    // center between two elements
 
 **Direct routing warning:** `routing: direct` looks good when the connection is nearly horizontal or vertical. Steep diagonals (30-60°) look ugly when mixed with orthogonal/curved connections. Prefer orthogonal or curved for those.
 
+#### Opacity modifiers
+
+Three alpha modifiers, all `0..1` (clamped):
+- `fill_opacity` — fades the fill only, **keeping the color**. Use for heatmaps: one hue, varying `fill_opacity` per cell, instead of pre-computing a blended hex per cell.
+- `stroke_opacity` — fades the stroke only.
+- `opacity` — fades the whole element.
+
+```
+rect cell [fill: secondary-1, fill_opacity: 0.7]
+```
+
 ### Layout Strategy
 
 #### DEFAULT: Constraint-based positioning

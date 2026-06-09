@@ -704,6 +704,8 @@ fn arguments_to_modifiers(
                 "stroke" => StyleKey::Stroke,
                 "stroke_width" => StyleKey::StrokeWidth,
                 "opacity" => StyleKey::Opacity,
+                "fill_opacity" => StyleKey::FillOpacity,
+                "stroke_opacity" => StyleKey::StrokeOpacity,
                 "label" => StyleKey::Label,
                 "font_size" => StyleKey::FontSize,
                 "class" => StyleKey::Class,

@@ -797,6 +797,73 @@ mod tests {
     }
 
     #[test]
+    fn test_render_fill_opacity() {
+        let svg = render(r#"rect cell [fill: #ff0000, fill_opacity: 0.7]"#).unwrap();
+        assert!(svg.contains(r##"fill="#ff0000""##));
+        assert!(svg.contains(r#"fill-opacity="0.7""#));
+    }
+
+    #[test]
+    fn test_render_stroke_opacity() {
+        let svg = render(r#"rect cell [stroke: #333333, stroke_opacity: 0.5]"#).unwrap();
+        assert!(svg.contains(r#"stroke-opacity="0.5""#));
+    }
+
+    #[test]
+    fn test_render_opacity_whole_element() {
+        let svg = render(r#"rect cell [opacity: 0.3]"#).unwrap();
+        assert!(svg.contains(r#"opacity="0.3""#));
+    }
+
+    #[test]
+    fn test_render_fill_opacity_composes_with_symbolic_color() {
+        // fill_opacity must keep the symbolic/CSS-token color, not flatten it to a blended hex
+        let svg = render(r#"rect cell [fill: secondary-1, fill_opacity: 0.5]"#).unwrap();
+        assert!(svg.contains(r#"fill="var(--secondary-1)""#));
+        assert!(svg.contains(r#"fill-opacity="0.5""#));
+    }
+
+    #[test]
+    fn test_render_fill_opacity_clamped_low() {
+        // Values below 0 clamp to 0
+        let svg = render(r#"rect cell [fill: #ff0000, fill_opacity: -0.5]"#).unwrap();
+        assert!(svg.contains(r#"fill-opacity="0""#));
+    }
+
+    #[test]
+    fn test_render_fill_opacity_clamped_high() {
+        // Values above 1 clamp to 1
+        let svg = render(r#"rect cell [fill: #ff0000, fill_opacity: 1.5]"#).unwrap();
+        assert!(svg.contains(r#"fill-opacity="1""#));
+    }
+
+    #[test]
+    fn test_render_heatmap_fill_opacity_gradient() {
+        // Triangular heatmap: same hue, descending fill_opacity, renders and round-trips
+        let svg = render(
+            r#"
+            col {
+                row { rect c1 [fill: secondary-1, fill_opacity: 0.9] }
+                row {
+                    rect c2 [fill: secondary-1, fill_opacity: 0.6]
+                    rect c3 [fill: secondary-1, fill_opacity: 0.6]
+                }
+                row {
+                    rect c4 [fill: secondary-1, fill_opacity: 0.3]
+                    rect c5 [fill: secondary-1, fill_opacity: 0.3]
+                    rect c6 [fill: secondary-1, fill_opacity: 0.3]
+                }
+            }
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains(r#"fill="var(--secondary-1)""#));
+        assert!(svg.contains(r#"fill-opacity="0.9""#));
+        assert!(svg.contains(r#"fill-opacity="0.6""#));
+        assert!(svg.contains(r#"fill-opacity="0.3""#));
+    }
+
+    #[test]
     fn test_render_undefined_reference_error() {
         let result = render("a -> b");
         assert!(result.is_err());

@@ -308,6 +308,10 @@ pub enum StyleKey {
     Stroke,
     StrokeWidth,
     Opacity,
+    /// Alpha for the fill only (emits SVG fill-opacity)
+    FillOpacity,
+    /// Alpha for the stroke only (emits SVG stroke-opacity)
+    StrokeOpacity,
     Label,
     /// Position of a connection label (left, right, or center)
     LabelPosition,

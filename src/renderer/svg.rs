@@ -1242,6 +1242,9 @@ fn format_connection_styles(styles: &ResolvedStyles) -> String {
     if let Some(dash) = &styles.stroke_dasharray {
         parts.push(format!(r#" stroke-dasharray="{}""#, dash));
     }
+    if let Some(so) = styles.stroke_opacity {
+        parts.push(format!(r#" stroke-opacity="{}""#, so));
+    }
     if let Some(opacity) = styles.opacity {
         if (opacity - 1.0).abs() > f64::EPSILON {
             parts.push(format!(r#" opacity="{}""#, opacity));
@@ -1255,6 +1258,9 @@ fn format_text_styles(styles: &ResolvedStyles) -> String {
     let mut parts = vec![];
     if let Some(fill) = &styles.fill {
         parts.push(format!(r#"fill="{}""#, fill));
+    }
+    if let Some(fo) = styles.fill_opacity {
+        parts.push(format!(r#"fill-opacity="{}""#, fo));
     }
     if let Some(font_size) = styles.font_size {
         parts.push(format!(r#"font-size="{}""#, font_size));
@@ -1285,6 +1291,12 @@ fn format_styles(styles: &ResolvedStyles) -> String {
     parts.push(format!(r#" stroke-width="{}""#, sw));
     if let Some(dash) = &styles.stroke_dasharray {
         parts.push(format!(r#" stroke-dasharray="{}""#, dash));
+    }
+    if let Some(fo) = styles.fill_opacity {
+        parts.push(format!(r#" fill-opacity="{}""#, fo));
+    }
+    if let Some(so) = styles.stroke_opacity {
+        parts.push(format!(r#" stroke-opacity="{}""#, so));
     }
     if let Some(op) = styles.opacity {
         if op < 1.0 {
@@ -1384,6 +1396,8 @@ mod tests {
             stroke_width: Some(2.0),
             stroke_dasharray: Some("4,2".to_string()),
             opacity: Some(0.5),
+            fill_opacity: None,
+            stroke_opacity: None,
             font_size: None,
             css_classes: vec![],
             rotation: None,
@@ -1394,6 +1408,27 @@ mod tests {
         assert!(result.contains(r#"stroke-width="2""#));
         assert!(result.contains(r#"stroke-dasharray="4,2""#));
         assert!(result.contains(r#"opacity="0.5""#));
+    }
+
+    #[test]
+    fn test_format_styles_with_opacities() {
+        let styles = ResolvedStyles {
+            fill: Some("var(--secondary-1)".to_string()),
+            stroke: Some("#000000".to_string()),
+            stroke_width: Some(2.0),
+            stroke_dasharray: None,
+            opacity: None,
+            fill_opacity: Some(0.7),
+            stroke_opacity: Some(0.4),
+            font_size: None,
+            css_classes: vec![],
+            rotation: None,
+        };
+        let result = format_styles(&styles);
+        // Symbolic color is preserved, not flattened
+        assert!(result.contains(r#"fill="var(--secondary-1)""#));
+        assert!(result.contains(r#"fill-opacity="0.7""#));
+        assert!(result.contains(r#"stroke-opacity="0.4""#));
     }
 
     #[test]

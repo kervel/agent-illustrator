@@ -354,3 +354,23 @@ gives full control over spacing, alignment, and grouping. Background
 rects with opacity create visual zones. Use `midpoint()` to center
 between elements. Templates with lead extensions provide clean anchors.
 This is the RECOMMENDED approach for complex diagrams.
+
+EXAMPLE 7: Heatmap with fill_opacity
+------------------------------------
+// One hue, varying fill_opacity per cell — no need to pre-compute a
+// blended hex per cell. Intensity reads as alpha over the same color.
+grid heat [columns: 3] {
+    rect a1 [fill: secondary-1, fill_opacity: 0.2]
+    rect a2 [fill: secondary-1, fill_opacity: 0.4]
+    rect a3 [fill: secondary-1, fill_opacity: 0.6]
+    rect b1 [fill: secondary-1, fill_opacity: 0.4]
+    rect b2 [fill: secondary-1, fill_opacity: 0.6]
+    rect b3 [fill: secondary-1, fill_opacity: 0.8]
+    rect c1 [fill: secondary-1, fill_opacity: 0.6]
+    rect c2 [fill: secondary-1, fill_opacity: 0.8]
+    rect c3 [fill: secondary-1, fill_opacity: 1.0]
+}
+
+`fill_opacity` keeps the color token and emits an SVG `fill-opacity`
+attribute. `stroke_opacity` and `opacity` (whole element) work the same
+way. All three are clamped to the 0..1 range.

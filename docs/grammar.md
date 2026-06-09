@@ -57,8 +57,11 @@ Modifiers go in brackets after the element name:
 
 Common modifiers:
     fill: <color>           Fill color
+    fill_opacity: <0..1>    Alpha for the fill only (keeps the fill color)
     stroke: <color>         Border color
     stroke_width: <number>  Border thickness
+    stroke_opacity: <0..1>  Alpha for the stroke only
+    opacity: <0..1>         Alpha for the whole element
     size: <number>          Width and height (square/circle)
     width: <number>         Explicit width
     height: <number>        Explicit height

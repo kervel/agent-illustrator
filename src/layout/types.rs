@@ -506,10 +506,19 @@ pub struct ResolvedStyles {
     pub stroke_width: Option<f64>,
     pub stroke_dasharray: Option<String>,
     pub opacity: Option<f64>,
+    /// Alpha for the fill only (SVG fill-opacity), clamped to [0, 1]
+    pub fill_opacity: Option<f64>,
+    /// Alpha for the stroke only (SVG stroke-opacity), clamped to [0, 1]
+    pub stroke_opacity: Option<f64>,
     pub font_size: Option<f64>,
     pub css_classes: Vec<String>,
     /// Rotation angle in degrees (clockwise positive, 0 = no rotation)
     pub rotation: Option<f64>,
+}
+
+/// Clamp an alpha/opacity value into the valid [0.0, 1.0] range
+fn clamp_unit(value: f64) -> f64 {
+    value.clamp(0.0, 1.0)
 }
 
 impl ResolvedStyles {
@@ -521,6 +530,8 @@ impl ResolvedStyles {
             stroke_width: Some(2.0),
             stroke_dasharray: None,
             opacity: Some(1.0),
+            fill_opacity: None,
+            stroke_opacity: None,
             font_size: Some(14.0),
             css_classes: vec![],
             rotation: None,
@@ -563,7 +574,17 @@ impl ResolvedStyles {
                 }
                 StyleKey::Opacity => {
                     if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                        styles.opacity = Some(*value);
+                        styles.opacity = Some(clamp_unit(*value));
+                    }
+                }
+                StyleKey::FillOpacity => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.fill_opacity = Some(clamp_unit(*value));
+                    }
+                }
+                StyleKey::StrokeOpacity => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.stroke_opacity = Some(clamp_unit(*value));
                     }
                 }
                 StyleKey::FontSize => {
@@ -643,6 +664,8 @@ impl ResolvedStyles {
                 .clone()
                 .or_else(|| self.stroke_dasharray.clone()),
             opacity: other.opacity.or(self.opacity),
+            fill_opacity: other.fill_opacity.or(self.fill_opacity),
+            stroke_opacity: other.stroke_opacity.or(self.stroke_opacity),
             font_size: other.font_size.or(self.font_size),
             css_classes: {
                 let mut classes = self.css_classes.clone();
