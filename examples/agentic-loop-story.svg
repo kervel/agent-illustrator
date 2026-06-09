@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 860 540" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -80 1200 580" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
   <style>
     :root {
-    --secondary-3: #ffe0b2;
-    --foreground-2: #666666;
-    --background-2: #f5f5f5;
-    --background-light: #ffffff;
-    --text-3: #999999;
-    --text-light: #ffffff;
-    --accent-1: #2196f3;
-    --foreground-dark: #1a1a1a;
-    --secondary-light: #fff3e0;
-    --status-warning: #ff9800;
-    --background-3: #eeeeee;
-    --foreground-3: #999999;
-    --foreground-1: #333333;
-    --accent-light: #e3f2fd;
-    --status-error: #f44336;
-    --text-dark: #1a1a1a;
-    --text-1: #333333;
-    --secondary-1: #ff9800;
     --foreground-light: #e0e0e0;
-    --background-1: #ffffff;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --secondary-2: #fff3e0;
-    --background-dark: #333333;
+    --text-1: #333333;
     --text-2: #666666;
+    --background-2: #f5f5f5;
+    --foreground-3: #999999;
+    --text-3: #999999;
+    --background-dark: #333333;
+    --text-light: #ffffff;
+    --background-3: #eeeeee;
+    --text-dark: #1a1a1a;
+    --accent-3: #bbdefb;
+    --secondary-2: #fff3e0;
+    --accent-1: #2196f3;
+    --accent-light: #e3f2fd;
+    --secondary-light: #fff3e0;
     --secondary-dark: #e65100;
+    --accent-2: #e3f2fd;
+    --secondary-1: #ff9800;
     --status-success: #4caf50;
+    --foreground-2: #666666;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --accent-dark: #1565c0;
+    --foreground-1: #333333;
+    --secondary-3: #ffe0b2;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --background-light: #ffffff;
   }
 
     /* Keyframe animation CSS (auto-generated) */
@@ -594,8 +594,8 @@ text {
     </marker>
   </defs>
   <g id="diagram" class="ai-container">
-    <rect id="canvas" class="ai-shape ai-rect" x="0" y="0" width="740" height="420" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
-    <g id="user_icon" class="ai-svg-embed" transform="translate(52, 80) scale(0.875, 0.875)">
+    <rect id="canvas" class="ai-shape ai-rect" x="0" y="-20" width="1080" height="460" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
+    <g id="user_icon" class="ai-svg-embed" transform="translate(72, 55) scale(1.5, 1.5)">
       <!-- Head -->
       <circle cx="32" cy="20" r="14" fill="#444" stroke="#333" stroke-width="1.5"/>
       <!-- Body/torso -->
@@ -604,7 +604,7 @@ text {
       <!-- Base line -->
       <line x1="6" y1="72" x2="58" y2="72" stroke="#333" stroke-width="1.5"/>
     </g>
-    <g id="cli_icon" class="ai-svg-embed" transform="translate(284, 86) scale(0.9, 0.90625)">
+    <g id="cli_icon" class="ai-svg-embed" transform="translate(418, 65) scale(1.55, 1.5625)">
       <!-- Monitor body -->
       <rect x="2" y="2" width="76" height="50" rx="4" ry="4"
       fill="#2d2d2d" stroke="#333" stroke-width="2"/>
@@ -623,76 +623,76 @@ text {
       <!-- Base -->
       <rect x="24" y="58" width="32" height="4" rx="1" ry="1" fill="#555"/>
     </g>
-    <g id="cloud_icon" class="ai-svg-embed" transform="translate(564, 91.5) scale(0.9, 0.9038461538461539)">
+    <g id="cloud_icon" class="ai-svg-embed" transform="translate(818, 74.5) scale(1.55, 1.5576923076923077)">
       <path d="M64,40 L20,40 C12.268,40 6,33.732 6,26 C6,18.268 12.268,12 20,12 C20.69,12 21.37,12.048 22.036,12.14 C25.268,5.192 32.456,1 40.5,1 C51.27,1 60,9.506 60,20 C60,20.34 59.986,20.676 59.96,21.01 C67.626,22.222 73.5,28.86 73.5,36.5 C73.5,38.433 70,40 64,40 Z"
       fill="none" stroke="#555" stroke-width="2.5" stroke-linejoin="round"/>
     </g>
-    <g id="gear_icon" class="ai-svg-embed" transform="translate(568, 298) scale(0.8, 0.8)">
+    <g id="gear_icon" class="ai-svg-embed" transform="translate(825, 275) scale(1.375, 1.375)">
       <path d="M44.5,8 L44.5,16.2 C47.2,17 49.7,18.2 51.8,19.9 L58.4,13.3 C60.1,14.8 61.6,16.5 62.9,18.3 L56.3,24.9 C58,27 59.2,29.5 60,32.2 L68.2,32.2 C68.7,34.1 69,36 69,38 C69,40 68.7,41.9 68.2,43.8 L60,43.8 C59.2,46.5 58,49 56.3,51.1 L62.9,57.7 C61.6,59.5 60.1,61.2 58.4,62.7 L51.8,56.1 C49.7,57.8 47.2,59 44.5,59.8 L44.5,68 C42.6,68.5 40.7,68.8 38.7,68.8 C36.7,68.8 34.8,68.5 32.9,68 L32.9,59.8 C30.2,59 27.7,57.8 25.6,56.1 L19,62.7 C17.3,61.2 15.8,59.5 14.5,57.7 L21.1,51.1 C19.4,49 18.2,46.5 17.4,43.8 L9.2,43.8 C8.7,41.9 8.4,40 8.4,38 C8.4,36 8.7,34.1 9.2,32.2 L17.4,32.2 C18.2,29.5 19.4,27 21.1,24.9 L14.5,18.3 C15.8,16.5 17.3,14.8 19,13.3 L25.6,19.9 C27.7,18.2 30.2,17 32.9,16.2 L32.9,8 C34.8,7.5 36.7,7.2 38.7,7.2 C40.7,7.2 42.6,7.5 44.5,8 Z"
       fill="#888" stroke="#555" stroke-width="2" stroke-linejoin="round"/>
       <!-- Center hole -->
       <circle cx="38.7" cy="38" r="12" fill="#fff" stroke="#555" stroke-width="2"/>
     </g>
-    <text id="user_label" class="ai-shape ai-text" x="64.4" y="162.5" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--foreground-2)">User</text>
-    <text id="cli_label" class="ai-shape ai-text" x="277.1" y="156.5" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--foreground-2)">CLI Harness</text>
-    <text id="cloud_label" class="ai-shape ai-text" x="478" y="125" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--foreground-2)">Claude API</text>
-    <text id="gear_label" class="ai-shape ai-text" x="557.1" y="374.5" text-anchor="start" dominant-baseline="middle" font-size="13" fill="var(--foreground-2)">Tool (bash)</text>
+    <text id="user_label" class="ai-shape ai-text" x="96" y="191" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">User</text>
+    <text id="cli_label" class="ai-shape ai-text" x="414" y="181" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">CLI Harness</text>
+    <text id="cloud_label" class="ai-shape ai-text" x="862" y="58.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">LLM</text>
+    <text id="gear_label" class="ai-shape ai-text" x="814" y="401" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">Tool (bash)</text>
     <g class="kf-hidden kf-speech_bubble">
-      <rect id="speech_bubble" class="ai-shape ai-rect" x="80" y="33" width="200" height="44" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="180" y="55" text-anchor="middle" dominant-baseline="middle">list my Python files</text>
+      <rect id="speech_bubble" class="ai-shape ai-rect" x="100" y="27" width="280" height="56" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16">list my Python files</text>
     </g>
     <g class="kf-hidden kf-sys_envelope">
-      <rect id="sys_envelope" class="ai-shape ai-rect" x="335" y="165" width="250" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="sys_envelope" class="ai-shape ai-rect" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-sys_line1">
-      <text id="sys_line1" class="ai-shape ai-text" x="357.7" y="186" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-2)">[system] You are Claude Code...</text>
+      <text id="sys_line1" class="ai-shape ai-text" x="531.2" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
     </g>
     <g class="kf-hidden kf-sys_line2">
-      <text id="sys_line2" class="ai-shape ai-text" x="370.9" y="208" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">[user] list my Python files</text>
+      <text id="sys_line2" class="ai-shape ai-text" x="550.4" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
     </g>
     <g class="kf-hidden kf-tool_call_envelope">
-      <rect id="tool_call_envelope" class="ai-shape ai-rect" x="345" y="174" width="230" height="52" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="tool_call_envelope" class="ai-shape ai-rect" x="525" y="180" width="310" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-tc_line1">
-      <text id="tc_line1" class="ai-shape ai-text" x="410.5" y="190" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-2)">tool_call: bash</text>
+      <text id="tc_line1" class="ai-shape ai-text" x="608" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_call: bash</text>
     </g>
     <g class="kf-hidden kf-tc_line2">
-      <text id="tc_line2" class="ai-shape ai-text" x="397.3" y="208" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
+      <text id="tc_line2" class="ai-shape ai-text" x="588.8" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
     </g>
     <g class="kf-hidden kf-exec_envelope">
-      <rect id="exec_envelope" class="ai-shape ai-rect" x="55" y="270" width="210" height="60" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="exec_envelope" class="ai-shape ai-rect" x="115" y="280" width="290" height="80" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-exec_line1">
-      <text id="exec_line1" class="ai-shape ai-text" x="90.7" y="286" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
+      <text id="exec_line1" class="ai-shape ai-text" x="159.2" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
     </g>
     <g class="kf-hidden kf-exec_line2">
-      <text id="exec_line2" class="ai-shape ai-text" x="80.8" y="308" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
+      <text id="exec_line2" class="ai-shape ai-text" x="144.8" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
     </g>
     <g class="kf-hidden kf-result_envelope">
-      <rect id="result_envelope" class="ai-shape ai-rect" x="355" y="174" width="210" height="52" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="result_envelope" class="ai-shape ai-rect" x="535" y="180" width="290" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-result_line1">
-      <text id="result_line1" class="ai-shape ai-text" x="374.2" y="190" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-2)">tool_result + conversation</text>
+      <text id="result_line1" class="ai-shape ai-text" x="555.2" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_result + conversation</text>
     </g>
     <g class="kf-hidden kf-result_line2">
-      <text id="result_line2" class="ai-shape ai-text" x="380.8" y="210" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
+      <text id="result_line2" class="ai-shape ai-text" x="564.8" y="229" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
     </g>
     <g class="kf-hidden kf-answer_envelope">
-      <rect id="answer_envelope" class="ai-shape ai-rect" x="95" y="174" width="210" height="52" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="answer_envelope" class="ai-shape ai-rect" x="155" y="180" width="290" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-ans_line1">
-      <text id="ans_line1" class="ai-shape ai-text" x="124.10000000000001" y="190" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">I found 2 Python files:</text>
+      <text id="ans_line1" class="ai-shape ai-text" x="189.60000000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
     </g>
     <g class="kf-hidden kf-ans_line2">
-      <text id="ans_line2" class="ai-shape ai-text" x="124.10000000000001" y="208" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--secondary-dark)">main.py and test_api.py</text>
+      <text id="ans_line2" class="ai-shape ai-text" x="189.60000000000002" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
     </g>
   </g>
-  <path class="ai-connection conn-prompt_arrow" d="M108 115 L273.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-req_arrow" d="M356 115 L553.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-resp_arrow" d="M564 115 L366.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-exec_arrow" d="M320 144 C320 268 444 330 557.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-return_to_cli" d="M568 330 C444 330 320 268 320 154.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-return_to_cloud" d="M356 115 L553.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-final_to_cli" d="M564 115 L366.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-final_to_user" d="M284 115 L118.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-prompt_arrow" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-req_arrow" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-resp_arrow" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-exec_arrow" d="M480 165 C480 317.9705854077836 672.0294145922164 330 814.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-return_to_cli" d="M825 330 C672.0294145922164 330 480 317.9705854077836 480 175.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-return_to_cloud" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-final_to_cli" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-final_to_user" d="M418 115 L178.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>
