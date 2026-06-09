@@ -630,11 +630,28 @@ where
             offset: off.unwrap_or(0.0),
         });
 
+    // A `contains` element may be a plain identifier or a grid cell reference
+    // `grid.cell(row, col)` (desugared to the cell's synthetic id). The plain
+    // identifier parser stops at the dot, so the cell form is tried first.
+    let cell_as_identifier = identifier
+        .then_ignore(just(Token::Dot))
+        .then_ignore(just(Token::Ident("cell".to_string())))
+        .then_ignore(just(Token::ParenOpen))
+        .then(number)
+        .then_ignore(just(Token::Comma))
+        .then(number)
+        .then_ignore(just(Token::ParenClose))
+        .map(|((grid, row), col)| {
+            let cell_id = grid_cell_id(&grid.node.0, row.node as usize, col.node as usize);
+            Spanned::new(Identifier::new(cell_id), grid.span.clone())
+        });
+    let contains_element = choice((cell_as_identifier, identifier));
+
     // Contains: container contains a, b, c [padding: N]
     let contains_expr = identifier
         .then_ignore(just(Token::Contains))
         .then(
-            identifier
+            contains_element
                 .separated_by(just(Token::Comma))
                 .at_least(1)
                 .collect::<Vec<_>>(),

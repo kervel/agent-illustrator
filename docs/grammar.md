@@ -49,9 +49,10 @@ Grid children:
     rect [at: [row, col], ...]    Place a child in a cell (0-indexed). Children
                                   without `at:` fill row-major. Unoccupied cells
                                   stay empty (transparent) — sparse/triangular ok.
-Grid cell addressing (in constrain / connections):
+Grid cell addressing (in constrain / connections / contains):
     grid.cell(row, col)           Resolves to that cell's box, e.g.
                                   constrain tag.tip = heat.cell(1,1).top - 4
+                                  constrain hl contains g.cell(1,0), g.cell(1,5)  // highlight a row
 
 CONNECTIONS
 -----------

@@ -934,6 +934,23 @@ mod tests {
     }
 
     #[test]
+    fn test_render_contains_accepts_grid_cells() {
+        // `contains` must accept grid.cell(r,c) refs (e.g. a highlight box around a row).
+        let svg = render(
+            r#"
+            grid g [cols: 3, rows: 3, cell_width: 40, cell_height: 40] {
+                rect [at: [1,0]]
+                rect [at: [1,2]]
+            }
+            rect hl [fill: accent-1, fill_opacity: 0.2]
+            constrain hl contains g.cell(1,0), g.cell(1,2) [padding: 4]
+        "#,
+        )
+        .unwrap();
+        assert!(svg.contains(r#"id="hl""#));
+    }
+
+    #[test]
     fn test_render_callout_point_constraint_aims_tip_at_cell() {
         // tag.tip = g.cell(1,1).top - 4 must move the callout (not the cell).
         let svg = render(
