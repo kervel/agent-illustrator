@@ -148,6 +148,8 @@ where
                 "stroke" => StyleKey::Stroke,
                 "stroke_width" => StyleKey::StrokeWidth,
                 "opacity" => StyleKey::Opacity,
+                "fill_opacity" => StyleKey::FillOpacity,
+                "stroke_opacity" => StyleKey::StrokeOpacity,
                 "font_size" => StyleKey::FontSize,
                 "class" => StyleKey::Class,
                 "gap" => StyleKey::Gap,
@@ -163,6 +165,7 @@ where
                 "label_at" => StyleKey::LabelAt,
                 "label_offset" => StyleKey::LabelOffset,
                 "z_order" => StyleKey::ZOrder,
+                "pointer" => StyleKey::Pointer,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)
@@ -201,7 +204,7 @@ where
             }
         });
 
-    let style_value = choice((
+    let value_atom = choice((
         // Hex colors like #ff0000 or #f00
         select! { Token::HexColor(c) => StyleValue::Color(ColorValue::Hex(c)) }
             .map_with(|v, e| Spanned::new(v, span_range(&e.span()))),
@@ -237,6 +240,16 @@ where
         just(Token::Right).map_with(|_, e| {
             Spanned::new(
                 StyleValue::Keyword("right".to_string()),
+                span_range(&e.span()),
+            )
+        }),
+        // up / down keyword values (used by `pointer: up|down` on callouts)
+        just(Token::Up).map_with(|_, e| {
+            Spanned::new(StyleValue::Keyword("up".to_string()), span_range(&e.span()))
+        }),
+        just(Token::Down).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("down".to_string()),
                 span_range(&e.span()),
             )
         }),
@@ -306,6 +319,19 @@ where
     ))
     .boxed(); // Feature 008: boxed() for faster compilation (chumsky trait solving)
 
+    // Bracketed list value: `[a, b, c]` (numbers or strings), e.g. at: [1,0],
+    // col_labels: ["a","b"]. Lists contain atoms only (no nested lists).
+    let value_list = value_atom
+        .clone()
+        .separated_by(just(Token::Comma))
+        .allow_trailing()
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
+        .map_with(|items, e| Spanned::new(StyleValue::List(items), span_range(&e.span())))
+        .boxed();
+
+    let style_value = choice((value_list, value_atom)).boxed();
+
     let modifier = style_key
         .then_ignore(just(Token::Colon))
         .then(style_value.clone())
@@ -333,6 +359,10 @@ where
         just(Token::Text)
             .ignore_then(string_literal)
             .map(|s| ShapeType::Text { content: s.node }),
+        // Callout: pointer direction comes from the `pointer:` modifier (default down)
+        just(Token::Callout).to(ShapeType::Callout {
+            pointer: PointerDir::Down,
+        }),
     ))
     .map_with(|st, e| Spanned::new(st, span_range(&e.span())));
 
@@ -368,16 +398,37 @@ where
     ))
     .map_with(|name, e| Spanned::new(name, span_range(&e.span())));
 
+    // Grid cell as a connection endpoint: `grid.cell(row, col)[.anchor]`.
+    let cell_anchor_reference = identifier
+        .then_ignore(just(Token::Dot))
+        .then_ignore(just(Token::Ident("cell".to_string())))
+        .then_ignore(just(Token::ParenOpen))
+        .then(number)
+        .then_ignore(just(Token::Comma))
+        .then(number)
+        .then_ignore(just(Token::ParenClose))
+        .then(just(Token::Dot).ignore_then(anchor_name.clone()).or_not())
+        .map(|(((grid, row), col), anch)| {
+            let cell_id = grid_cell_id(&grid.node.0, row.node as usize, col.node as usize);
+            let id = Spanned::new(Identifier::new(cell_id), grid.span.clone());
+            match anch {
+                Some(a) => AnchorReference::with_anchor(id, a),
+                None => AnchorReference::element_only(id),
+            }
+        });
+
     // Anchor reference parser: identifier { "." anchor_name }?
     // Parses either:
     //   - `element` -> AnchorReference with anchor=None
     //   - `element.anchor_name` -> AnchorReference with anchor=Some
-    let anchor_reference = identifier
-        .then(just(Token::Dot).ignore_then(anchor_name).or_not())
+    let plain_anchor_reference = identifier
+        .then(just(Token::Dot).ignore_then(anchor_name.clone()).or_not())
         .map(|(element, anchor_opt)| match anchor_opt {
             Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
             None => AnchorReference::element_only(element),
         });
+
+    let anchor_reference = choice((cell_anchor_reference, plain_anchor_reference)).boxed();
 
     // Connection declaration (supports chained: a -> b -> c [modifiers])
     // Feature 009: Now supports anchor syntax (a.right -> b.left)
@@ -498,7 +549,36 @@ where
         identifier,
     ));
 
-    let property_ref = path_or_prop_segment
+    // Grid cell reference in a constraint: `grid.cell(row, col)[.property]`.
+    // Desugars to a property ref on the reference-only cell element.
+    let cell_property_ref = identifier
+        .then_ignore(just(Token::Dot))
+        .then_ignore(just(Token::Ident("cell".to_string())))
+        .then_ignore(just(Token::ParenOpen))
+        .then(number)
+        .then_ignore(just(Token::Comma))
+        .then(number)
+        .then_ignore(just(Token::ParenClose))
+        .then(just(Token::Dot).ignore_then(path_or_prop_segment.clone()).or_not())
+        .try_map(|(((grid, row), col), prop_seg), span: SimpleSpan| {
+            let cell_id = grid_cell_id(&grid.node.0, row.node as usize, col.node as usize);
+            let property = match prop_seg {
+                Some(seg) => ConstraintProperty::from_str(seg.node.as_str())
+                    .ok_or_else(|| Rich::custom(span, "invalid grid cell property"))?,
+                None => ConstraintProperty::Center,
+            };
+            Ok(PropertyRef {
+                element: Spanned::new(
+                    ElementPath {
+                        segments: vec![Spanned::new(Identifier::new(cell_id), span_range(&span))],
+                    },
+                    span_range(&span),
+                ),
+                property: Spanned::new(property, span_range(&span)),
+            })
+        });
+
+    let plain_property_ref = path_or_prop_segment
         .clone()
         .separated_by(just(Token::Dot))
         .at_least(2)
@@ -520,6 +600,9 @@ where
                 None => Err(Rich::custom(span, format!("'{}' is not a valid constraint property. Expected one of: x, y, width, height, left, right, top, bottom, center, center_x, center_y", last.node.as_str()))),
             }
         });
+
+    // Cell references must be tried first (the plain ref would choke on `cell(`).
+    let property_ref = choice((cell_property_ref, plain_property_ref)).boxed();
 
     // Parse offset: + number or - number
     let offset = choice((
@@ -547,11 +630,28 @@ where
             offset: off.unwrap_or(0.0),
         });
 
+    // A `contains` element may be a plain identifier or a grid cell reference
+    // `grid.cell(row, col)` (desugared to the cell's synthetic id). The plain
+    // identifier parser stops at the dot, so the cell form is tried first.
+    let cell_as_identifier = identifier
+        .then_ignore(just(Token::Dot))
+        .then_ignore(just(Token::Ident("cell".to_string())))
+        .then_ignore(just(Token::ParenOpen))
+        .then(number)
+        .then_ignore(just(Token::Comma))
+        .then(number)
+        .then_ignore(just(Token::ParenClose))
+        .map(|((grid, row), col)| {
+            let cell_id = grid_cell_id(&grid.node.0, row.node as usize, col.node as usize);
+            Spanned::new(Identifier::new(cell_id), grid.span.clone())
+        });
+    let contains_element = choice((cell_as_identifier, identifier));
+
     // Contains: container contains a, b, c [padding: N]
     let contains_expr = identifier
         .then_ignore(just(Token::Contains))
         .then(
-            identifier
+            contains_element
                 .separated_by(just(Token::Comma))
                 .at_least(1)
                 .collect::<Vec<_>>(),

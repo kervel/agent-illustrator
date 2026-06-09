@@ -729,6 +729,8 @@ impl ConstraintCollector {
             // Anchor coordinates map to X/Y — actual value resolved in engine
             ConstraintProperty::AnchorX(_) => super::solver::LayoutProperty::X,
             ConstraintProperty::AnchorY(_) => super::solver::LayoutProperty::Y,
+            // Whole-anchor points are desugared before solving; fall back to X.
+            ConstraintProperty::Anchor(_) => super::solver::LayoutProperty::X,
         };
 
         LayoutVariable::new(id, property)

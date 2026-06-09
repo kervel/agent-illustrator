@@ -23,6 +23,8 @@ pub enum Token {
     Icon,
     #[token("text")]
     Text,
+    #[token("callout")]
+    Callout,
 
     // Path shape keywords (Feature 007)
     #[token("path")]
@@ -194,7 +196,7 @@ pub enum Token {
 
     #[regex(r#""([^"\\]|\\.)*""#, |lex| {
         let s = lex.slice();
-        s[1..s.len()-1].to_string()
+        unescape_string(&s[1..s.len()-1])
     })]
     String(String),
 
@@ -210,6 +212,27 @@ pub enum Token {
 
     #[regex(r"/\*([^*]|\*[^/])*\*/", logos::skip)]
     BlockComment,
+}
+
+/// Unescape the body of a quoted string literal. Recognizes `\"`, `\\`, `\n`,
+/// and `\t`; any other escaped character is kept literally (the backslash is
+/// dropped). The lexer regex only admits valid `\.` sequences.
+fn unescape_string(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            match chars.next() {
+                Some('n') => out.push('\n'),
+                Some('t') => out.push('\t'),
+                Some(other) => out.push(other), // \" -> ", \\ -> \, etc.
+                None => out.push('\\'),
+            }
+        } else {
+            out.push(c);
+        }
+    }
+    out
 }
 
 /// Lex input string into tokens with spans

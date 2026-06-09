@@ -156,6 +156,23 @@ pub struct ShapeDecl {
     pub modifiers: Vec<Spanned<StyleModifier>>,
 }
 
+/// Internal element id for a grid cell, addressable via `grid.cell(row, col)`.
+/// Shared between the parser (which desugars `cell(r,c)`) and the layout engine
+/// (which emits the reference-only cell elements) so the names always agree.
+pub fn grid_cell_id(grid: &str, row: usize, col: usize) -> String {
+    format!("{}__cell_{}_{}", grid, row, col)
+}
+
+/// Direction a callout's pointer (tail) faces; also where its `tip` anchor sits.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum PointerDir {
+    Up,
+    #[default]
+    Down,
+    Left,
+    Right,
+}
+
 /// Built-in shape types
 #[derive(Debug, Clone, PartialEq)]
 pub enum ShapeType {
@@ -164,6 +181,11 @@ pub enum ShapeType {
     Ellipse,
     Line,
     Polygon,
+    /// Annotation pill with a triangular pointer; exposes a `tip` anchor at the
+    /// pointer apex (the pointer-side edge center).
+    Callout {
+        pointer: PointerDir,
+    },
     Icon {
         icon_name: String,
     },
@@ -308,6 +330,10 @@ pub enum StyleKey {
     Stroke,
     StrokeWidth,
     Opacity,
+    /// Alpha for the fill only (emits SVG fill-opacity)
+    FillOpacity,
+    /// Alpha for the stroke only (emits SVG stroke-opacity)
+    StrokeOpacity,
     Label,
     /// Position of a connection label (left, right, or center)
     LabelPosition,
@@ -339,6 +365,8 @@ pub enum StyleKey {
     LabelOffset,
     /// Z-order for controlling render order (higher = on top, groups only)
     ZOrder,
+    /// Pointer (tail) direction for callout shapes
+    Pointer,
     Custom(String),
 }
 
@@ -356,6 +384,8 @@ pub enum StyleValue {
     Identifier(Identifier),
     /// List of identifiers (for `[via: c1, c2, c3]` syntax - Feature 008)
     IdentifierList(Vec<Identifier>),
+    /// Bracketed list of values (e.g. `at: [1, 0]`, `col_labels: ["a", "b"]`)
+    List(Vec<Spanned<StyleValue>>),
 }
 
 // ============================================
@@ -516,6 +546,9 @@ pub enum ConstraintProperty {
     AnchorX(String),
     /// Y-coordinate of a named anchor (e.g., "gate" from "gate_y")
     AnchorY(String),
+    /// A whole named anchor used as a point (e.g. `tag.tip`). Only meaningful in
+    /// point-constraints, which desugar it into AnchorX/AnchorY before solving.
+    Anchor(String),
 }
 
 impl ConstraintProperty {
@@ -544,8 +577,41 @@ impl ConstraintProperty {
                 let anchor_name = &s[..s.len() - 2];
                 Some(Self::AnchorY(anchor_name.to_string()))
             }
-            _ => None,
+            // Any other bare name is a whole-anchor reference (e.g. `tip`),
+            // valid only in point-constraints; resolution errors if it doesn't exist.
+            _ => Some(Self::Anchor(s.to_string())),
         }
+    }
+
+    /// Whether this property denotes a point (both axes) rather than a scalar.
+    pub fn is_point(&self) -> bool {
+        matches!(self, Self::Anchor(_))
+    }
+
+    /// The horizontal-coordinate property of the point this reference denotes.
+    pub fn x_component(&self) -> ConstraintProperty {
+        match self {
+            Self::Left | Self::X => Self::Left,
+            Self::Right => Self::Right,
+            Self::Anchor(n) | Self::AnchorX(n) | Self::AnchorY(n) => Self::AnchorX(n.clone()),
+            _ => Self::CenterX,
+        }
+    }
+
+    /// The vertical-coordinate property of the point this reference denotes.
+    pub fn y_component(&self) -> ConstraintProperty {
+        match self {
+            Self::Top | Self::Y => Self::Top,
+            Self::Bottom => Self::Bottom,
+            Self::Anchor(n) | Self::AnchorX(n) | Self::AnchorY(n) => Self::AnchorY(n.clone()),
+            _ => Self::CenterY,
+        }
+    }
+
+    /// Which axis an offset on this reference applies to in a point-constraint.
+    /// Horizontal edges → Y; vertical edges → X; otherwise Y by default.
+    pub fn offset_is_horizontal(&self) -> bool {
+        matches!(self, Self::Left | Self::Right | Self::X | Self::CenterX)
     }
 }
 
@@ -596,6 +662,192 @@ pub enum ConstraintExpr {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConstrainDecl {
     pub expr: ConstraintExpr,
+}
+
+/// Build a copy of a property reference with a different property.
+fn property_ref_with(pr: &PropertyRef, prop: ConstraintProperty) -> PropertyRef {
+    PropertyRef {
+        element: pr.element.clone(),
+        property: Spanned::new(prop, pr.property.span.clone()),
+    }
+}
+
+/// Read a callout's `pointer:` direction from its modifiers (default down).
+fn pointer_from_modifiers(modifiers: &[Spanned<StyleModifier>]) -> PointerDir {
+    modifiers
+        .iter()
+        .find_map(|m| {
+            if matches!(m.node.key.node, StyleKey::Pointer) {
+                if let StyleValue::Keyword(k) = &m.node.value.node {
+                    return match k.as_str() {
+                        "up" => Some(PointerDir::Up),
+                        "down" => Some(PointerDir::Down),
+                        "left" => Some(PointerDir::Left),
+                        "right" => Some(PointerDir::Right),
+                        _ => None,
+                    };
+                }
+            }
+            None
+        })
+        .unwrap_or_default()
+}
+
+/// For a callout's `tip` point, the (x, y) box-edge properties that coincide
+/// with the pointer apex. Using the callout's own box edges (rather than the
+/// `tip` anchor) keeps the callout the target that moves.
+fn callout_tip_components(pointer: PointerDir) -> (ConstraintProperty, ConstraintProperty) {
+    match pointer {
+        PointerDir::Down => (ConstraintProperty::CenterX, ConstraintProperty::Bottom),
+        PointerDir::Up => (ConstraintProperty::CenterX, ConstraintProperty::Top),
+        PointerDir::Left => (ConstraintProperty::Left, ConstraintProperty::CenterY),
+        PointerDir::Right => (ConstraintProperty::Right, ConstraintProperty::CenterY),
+    }
+}
+
+/// Collect `name -> pointer` for every callout shape in the document.
+fn collect_callout_pointers(stmts: &[Spanned<Statement>], map: &mut std::collections::HashMap<String, PointerDir>) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Shape(s) => {
+                if matches!(s.shape_type.node, ShapeType::Callout { .. }) {
+                    if let Some(name) = &s.name {
+                        map.insert(name.node.0.clone(), pointer_from_modifiers(&s.modifiers));
+                    }
+                }
+            }
+            Statement::Layout(l) => collect_callout_pointers(&l.children, map),
+            Statement::Group(g) => collect_callout_pointers(&g.children, map),
+            _ => {}
+        }
+    }
+}
+
+/// The (x, y) component properties of the left side of a point-constraint.
+/// A callout `tip` resolves to the callout's box edges; any other anchor falls
+/// back to its AnchorX/AnchorY scalars.
+fn left_components(
+    left: &PropertyRef,
+    callouts: &std::collections::HashMap<String, PointerDir>,
+) -> (ConstraintProperty, ConstraintProperty) {
+    if let ConstraintProperty::Anchor(name) = &left.property.node {
+        if name == "tip" {
+            let elem = left.element.node.leaf().0.as_str();
+            if let Some(pointer) = callouts.get(elem) {
+                return callout_tip_components(*pointer);
+            }
+        }
+    }
+    (
+        left.property.node.x_component(),
+        left.property.node.y_component(),
+    )
+}
+
+/// Expand a point-constraint (`A.tip = B.top [± off]`, where the left side is a
+/// whole-anchor point) into its two scalar component constraints. Returns the
+/// original expression unchanged when it is not a point-constraint.
+fn expand_point_expr(
+    expr: &ConstraintExpr,
+    callouts: &std::collections::HashMap<String, PointerDir>,
+) -> Vec<ConstraintExpr> {
+    match expr {
+        ConstraintExpr::Equal { left, right } if left.property.node.is_point() => {
+            let (lxp, lyp) = left_components(left, callouts);
+            let lx = property_ref_with(left, lxp);
+            let rx = property_ref_with(right, right.property.node.x_component());
+            let ly = property_ref_with(left, lyp);
+            let ry = property_ref_with(right, right.property.node.y_component());
+            vec![
+                ConstraintExpr::Equal {
+                    left: lx,
+                    right: rx,
+                },
+                ConstraintExpr::Equal {
+                    left: ly,
+                    right: ry,
+                },
+            ]
+        }
+        ConstraintExpr::EqualWithOffset {
+            left,
+            right,
+            offset,
+        } if left.property.node.is_point() => {
+            let horizontal = right.property.node.offset_is_horizontal();
+            let (lxp, lyp) = left_components(left, callouts);
+            let lx = property_ref_with(left, lxp);
+            let rx = property_ref_with(right, right.property.node.x_component());
+            let ly = property_ref_with(left, lyp);
+            let ry = property_ref_with(right, right.property.node.y_component());
+            let x_expr = if horizontal {
+                ConstraintExpr::EqualWithOffset {
+                    left: lx,
+                    right: rx,
+                    offset: *offset,
+                }
+            } else {
+                ConstraintExpr::Equal {
+                    left: lx,
+                    right: rx,
+                }
+            };
+            let y_expr = if horizontal {
+                ConstraintExpr::Equal {
+                    left: ly,
+                    right: ry,
+                }
+            } else {
+                ConstraintExpr::EqualWithOffset {
+                    left: ly,
+                    right: ry,
+                    offset: *offset,
+                }
+            };
+            vec![x_expr, y_expr]
+        }
+        other => vec![other.clone()],
+    }
+}
+
+/// Rewrite a document so every point-constraint becomes two scalar constraints.
+/// Run after template resolution and before layout/constraint solving.
+pub fn expand_point_constraints(mut doc: Document) -> Document {
+    let mut callouts = std::collections::HashMap::new();
+    collect_callout_pointers(&doc.statements, &mut callouts);
+    doc.statements = expand_point_constraints_in(doc.statements, &callouts);
+    doc
+}
+
+fn expand_point_constraints_in(
+    stmts: Vec<Spanned<Statement>>,
+    callouts: &std::collections::HashMap<String, PointerDir>,
+) -> Vec<Spanned<Statement>> {
+    let mut out = Vec::with_capacity(stmts.len());
+    for stmt in stmts {
+        let span = stmt.span.clone();
+        match stmt.node {
+            Statement::Constrain(decl) => {
+                let exprs = expand_point_expr(&decl.expr, callouts);
+                for expr in exprs {
+                    out.push(Spanned::new(
+                        Statement::Constrain(ConstrainDecl { expr }),
+                        span.clone(),
+                    ));
+                }
+            }
+            Statement::Layout(mut l) => {
+                l.children = expand_point_constraints_in(l.children, callouts);
+                out.push(Spanned::new(Statement::Layout(l), span));
+            }
+            Statement::Group(mut g) => {
+                g.children = expand_point_constraints_in(g.children, callouts);
+                out.push(Spanned::new(Statement::Group(g), span));
+            }
+            other => out.push(Spanned::new(other, span)),
+        }
+    }
+    out
 }
 
 // ============================================
@@ -867,7 +1119,11 @@ mod tests {
             ConstraintProperty::from_str("height"),
             Some(ConstraintProperty::Height)
         );
-        assert_eq!(ConstraintProperty::from_str("unknown"), None);
+        // Bare non-builtin names are whole-anchor references (point-constraints).
+        assert_eq!(
+            ConstraintProperty::from_str("unknown"),
+            Some(ConstraintProperty::Anchor("unknown".to_string()))
+        );
     }
 
     #[test]

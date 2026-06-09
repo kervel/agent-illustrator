@@ -3,8 +3,8 @@
 use std::collections::HashMap;
 
 use crate::parser::ast::{
-    ColorValue, ConnectionDirection, ConstraintProperty, Identifier, LayoutType, ShapeType, Span,
-    Spanned, StyleKey, StyleModifier, StyleValue,
+    ColorValue, ConnectionDirection, ConstraintProperty, Identifier, LayoutType, PointerDir,
+    ShapeType, Span, Spanned, StyleKey, StyleModifier, StyleValue,
 };
 
 use super::routing::RoutingMode;
@@ -93,6 +93,17 @@ impl AnchorDirection {
             AnchorDirection::Angle(normalized)
         }
     }
+}
+
+/// The `tip` anchor for a callout: the pointer-side edge center, pointing outward.
+fn callout_tip(pointer: PointerDir, bounds: &BoundingBox) -> Anchor {
+    let (pos, dir) = match pointer {
+        PointerDir::Up => (bounds.top_center(), AnchorDirection::Up),
+        PointerDir::Down => (bounds.bottom_center(), AnchorDirection::Down),
+        PointerDir::Left => (bounds.left_center(), AnchorDirection::Left),
+        PointerDir::Right => (bounds.right_center(), AnchorDirection::Right),
+    };
+    Anchor::new("tip", pos, dir)
 }
 
 /// A named attachment point on a shape (T002)
@@ -204,6 +215,11 @@ impl AnchorSet {
     pub fn for_element_type(element_type: &ElementType, bounds: &BoundingBox) -> Self {
         match element_type {
             ElementType::Shape(ShapeType::Path(_)) => Self::path_shape(bounds),
+            ElementType::Shape(ShapeType::Callout { pointer }) => {
+                let mut set = Self::simple_shape(bounds);
+                set.insert(callout_tip(*pointer, bounds));
+                set
+            }
             _ => Self::simple_shape(bounds),
         }
     }
@@ -229,6 +245,11 @@ impl AnchorSet {
             bounds.right_center(),
             AnchorDirection::Right,
         ));
+
+        // For callouts, keep the `tip` anchor on the pointer-side edge.
+        if let ElementType::Shape(ShapeType::Callout { pointer }) = element_type {
+            self.insert(callout_tip(*pointer, bounds));
+        }
 
         // For path shapes, also update corner anchors
         if matches!(element_type, ElementType::Shape(ShapeType::Path(_))) {
@@ -506,10 +527,19 @@ pub struct ResolvedStyles {
     pub stroke_width: Option<f64>,
     pub stroke_dasharray: Option<String>,
     pub opacity: Option<f64>,
+    /// Alpha for the fill only (SVG fill-opacity), clamped to [0, 1]
+    pub fill_opacity: Option<f64>,
+    /// Alpha for the stroke only (SVG stroke-opacity), clamped to [0, 1]
+    pub stroke_opacity: Option<f64>,
     pub font_size: Option<f64>,
     pub css_classes: Vec<String>,
     /// Rotation angle in degrees (clockwise positive, 0 = no rotation)
     pub rotation: Option<f64>,
+}
+
+/// Clamp an alpha/opacity value into the valid [0.0, 1.0] range
+fn clamp_unit(value: f64) -> f64 {
+    value.clamp(0.0, 1.0)
 }
 
 impl ResolvedStyles {
@@ -521,6 +551,8 @@ impl ResolvedStyles {
             stroke_width: Some(2.0),
             stroke_dasharray: None,
             opacity: Some(1.0),
+            fill_opacity: None,
+            stroke_opacity: None,
             font_size: Some(14.0),
             css_classes: vec![],
             rotation: None,
@@ -563,7 +595,17 @@ impl ResolvedStyles {
                 }
                 StyleKey::Opacity => {
                     if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                        styles.opacity = Some(*value);
+                        styles.opacity = Some(clamp_unit(*value));
+                    }
+                }
+                StyleKey::FillOpacity => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.fill_opacity = Some(clamp_unit(*value));
+                    }
+                }
+                StyleKey::StrokeOpacity => {
+                    if let StyleValue::Number { value, .. } = &modifier.node.value.node {
+                        styles.stroke_opacity = Some(clamp_unit(*value));
                     }
                 }
                 StyleKey::FontSize => {
@@ -598,6 +640,7 @@ impl ResolvedStyles {
                 | StyleKey::LabelAt
                 | StyleKey::LabelOffset
                 | StyleKey::ZOrder
+                | StyleKey::Pointer
                 | StyleKey::Custom(_) => {
                     // Labels, label position, gap, size, routing, role, and position modifiers
                     // handled separately in layout engine; custom keys ignored for now
@@ -643,6 +686,8 @@ impl ResolvedStyles {
                 .clone()
                 .or_else(|| self.stroke_dasharray.clone()),
             opacity: other.opacity.or(self.opacity),
+            fill_opacity: other.fill_opacity.or(self.fill_opacity),
+            stroke_opacity: other.stroke_opacity.or(self.stroke_opacity),
             font_size: other.font_size.or(self.font_size),
             css_classes: {
                 let mut classes = self.css_classes.clone();
@@ -660,6 +705,9 @@ pub enum ElementType {
     Shape(ShapeType),
     Layout(LayoutType),
     Group,
+    /// A reference-only grid cell: indexed for `g.cell(r,c)` addressing, but
+    /// never rendered and ignored by the linter.
+    GridCell,
 }
 
 /// Text anchor position for labels

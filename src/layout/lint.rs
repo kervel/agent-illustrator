@@ -131,6 +131,15 @@ fn is_text_shape(elem: &ElementLayout) -> bool {
     )
 }
 
+/// Callouts are annotation pins: they are meant to overlap the content they
+/// point at, so they are exempt from overlap/label-straddle checks.
+fn is_callout(elem: &ElementLayout) -> bool {
+    matches!(
+        elem.element_type,
+        ElementType::Shape(ShapeType::Callout { .. })
+    )
+}
+
 fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
 }
@@ -258,6 +267,18 @@ fn check_overlap_siblings(
         for j in (i + 1)..siblings.len() {
             let a = &siblings[i];
             let b = &siblings[j];
+
+            // Reference-only grid cells are never drawn; ignore them.
+            if matches!(a.element_type, ElementType::GridCell)
+                || matches!(b.element_type, ElementType::GridCell)
+            {
+                continue;
+            }
+
+            // Callouts are annotation pins; overlapping their target is intended.
+            if is_callout(a) || is_callout(b) {
+                continue;
+            }
 
             // Skip if both are non-opaque (two transparent zones)
             if !is_opaque(a) && !is_opaque(b) {
@@ -669,6 +690,14 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
         for shape in &shapes {
             // Skip if label belongs to this element (own label inside own box)
             if label.owner == shape.id {
+                continue;
+            }
+
+            // Skip labels owned by a callout (annotation pins overlap on purpose).
+            if result
+                .get_element_by_name(&label.owner)
+                .is_some_and(is_callout)
+            {
                 continue;
             }
 
@@ -1086,6 +1115,7 @@ fn property_display_name(prop: &ConstraintProperty) -> &str {
         ConstraintProperty::Center => "center",
         ConstraintProperty::AnchorX(name) => name,
         ConstraintProperty::AnchorY(name) => name,
+        ConstraintProperty::Anchor(name) => name,
     }
 }
 
@@ -1556,6 +1586,7 @@ fn resolve_property_value(bounds: &BoundingBox, prop: &ConstraintProperty) -> Op
         ConstraintProperty::Height => Some(bounds.height),
         ConstraintProperty::Center => None, // composite, skip
         ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_) => None, // skip custom anchors
+        ConstraintProperty::Anchor(_) => None, // composite point, skip
     }
 }
 

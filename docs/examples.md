@@ -354,3 +354,48 @@ gives full control over spacing, alignment, and grouping. Background
 rects with opacity create visual zones. Use `midpoint()` to center
 between elements. Templates with lead extensions provide clean anchors.
 This is the RECOMMENDED approach for complex diagrams.
+
+EXAMPLE 7: Heatmap with fill_opacity
+------------------------------------
+// One hue, varying fill_opacity per cell — no need to pre-compute a
+// blended hex per cell. Intensity reads as alpha over the same color.
+grid heat [columns: 3] {
+    rect a1 [fill: secondary-1, fill_opacity: 0.2]
+    rect a2 [fill: secondary-1, fill_opacity: 0.4]
+    rect a3 [fill: secondary-1, fill_opacity: 0.6]
+    rect b1 [fill: secondary-1, fill_opacity: 0.4]
+    rect b2 [fill: secondary-1, fill_opacity: 0.6]
+    rect b3 [fill: secondary-1, fill_opacity: 0.8]
+    rect c1 [fill: secondary-1, fill_opacity: 0.6]
+    rect c2 [fill: secondary-1, fill_opacity: 0.8]
+    rect c3 [fill: secondary-1, fill_opacity: 1.0]
+}
+
+`fill_opacity` keeps the color token and emits an SVG `fill-opacity`
+attribute. `stroke_opacity` and `opacity` (whole element) work the same
+way. All three are clamped to the 0..1 range.
+
+EXAMPLE 8: Attention heatmap with labels and a callout
+------------------------------------------------------
+// A labelled lower-triangular attention matrix: one hue, per-cell
+// fill_opacity for intensity, row/col labels in gutters, and a callout
+// pinned to a cell. Declare only the cells you want — the rest stay empty.
+grid heat [cols: 6, rows: 6, gap: 5, cell_width: 56, cell_height: 56,
+           col_labels: ["The","cat","sat","because","it","was"],
+           row_labels: ["The","cat","sat","because","it","was"]] {
+    rect [at: [0,0], fill: secondary-1, fill_opacity: 1.00]
+    rect [at: [1,0], fill: secondary-1, fill_opacity: 0.30]
+    rect [at: [1,1], fill: secondary-1, fill_opacity: 0.70]
+    rect [at: [2,0], fill: secondary-1, fill_opacity: 0.20]
+    rect [at: [2,1], fill: secondary-1, fill_opacity: 0.40]
+    rect [at: [2,2], fill: secondary-1, fill_opacity: 0.90]
+    // ... only the lower-triangular cells ...
+}
+callout tag [label: "= subject", pointer: down, stroke: accent-1, fill: background-1]
+constrain tag.tip = heat.cell(1,1).top - 4
+
+The grid lays cells on a regular lattice; `[at: [row, col]]` places each
+cell (0-indexed, sparse). `grid.cell(row, col)` addresses a cell's box in
+constraints, and a callout's `tip` anchor (the pointer apex) is aimed at it
+with a point-constraint. Callouts auto-size to their label and may overlap
+the content they annotate.

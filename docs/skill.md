@@ -188,6 +188,43 @@ constrain a.center_x = midpoint(b, c)    // center between two elements
 
 **Direct routing warning:** `routing: direct` looks good when the connection is nearly horizontal or vertical. Steep diagonals (30-60°) look ugly when mixed with orthogonal/curved connections. Prefer orthogonal or curved for those.
 
+#### Opacity modifiers
+
+Three alpha modifiers, all `0..1` (clamped):
+- `fill_opacity` — fades the fill only, **keeping the color**. Use for heatmaps: one hue, varying `fill_opacity` per cell, instead of pre-computing a blended hex per cell.
+- `stroke_opacity` — fades the stroke only.
+- `opacity` — fades the whole element.
+
+```
+rect cell [fill: secondary-1, fill_opacity: 0.7]
+```
+
+#### Callout (annotation pin)
+
+`callout tag [label: "= subject", pointer: down]` draws a rounded pill with a
+triangular pointer. `pointer:` is `up|down|left|right`. It auto-sizes to the
+label and exposes a `tip` anchor at the pointer apex. Aim it at a target:
+
+```
+callout tag [label: "= subject", pointer: down, stroke: accent-1, fill: background-1]
+constrain tag.tip = box.top - 4        // point-constraint: moves the callout
+tag.tip -> box [routing: direct]       // or aim with a connection
+```
+
+Callouts are exempt from overlap lint — they are meant to sit over what they annotate.
+
+#### Grid (lattice / matrix / heatmap)
+
+`grid g [cols: 6, rows: 6, gap: 5, cell_width: 56, cell_height: 56]` lays a
+regular lattice. Place children by coordinate with `[at: [row, col]]` (0-indexed);
+unplaced children fill row-major; unoccupied cells stay empty — so sparse or
+triangular grids are trivial. Children without a size inherit the cell size.
+
+`col_labels: [...]` / `row_labels: [...]` add aligned text gutters. Address any
+cell as `g.cell(row, col)` in `constrain`/connections (e.g. to aim a callout).
+For an attention-heatmap, use one hue with per-cell `fill_opacity`. See the
+attention-heatmap example in `--examples`.
+
 ### Layout Strategy
 
 #### DEFAULT: Constraint-based positioning
