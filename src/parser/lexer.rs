@@ -23,6 +23,8 @@ pub enum Token {
     Icon,
     #[token("text")]
     Text,
+    #[token("callout")]
+    Callout,
 
     // Path shape keywords (Feature 007)
     #[token("path")]

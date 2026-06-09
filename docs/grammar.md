@@ -8,6 +8,12 @@ circle [name] [modifiers]    Circle
 ellipse [name] [modifiers]   Ellipse
 text "content" [name] [mod]  Text element
 path [name] [mod] { ... }    Custom shape with vertices/arcs
+callout [name] [mod]         Annotation pill with a triangular pointer
+                             [pointer: up|down|left|right] (default down)
+                             auto-sizes to its label; exposes a `tip` anchor at
+                             the pointer apex. Aim it:
+                                 constrain tag.tip = box.top - 4
+                                 tag.tip -> box [routing: direct]
 
 PATH COMMANDS (inside path { ... })
 -----------------------------------
@@ -30,6 +36,22 @@ row [name] [mod] { ... }     Horizontal arrangement
 col [name] [mod] { ... }     Vertical arrangement
 group [name] [mod] { ... }   Column layout (constrain every element to override)
 stack [name] [mod] { ... }   Overlap children centered within largest child
+grid [name] [mod] { ... }    Regular lattice of cells
+
+Grid modifiers:
+    cols: <n>, rows: <n>          Lattice size (rows optional; inferred otherwise)
+    gap: <n>                      Space between cells
+    cell_width: <n>, cell_height: <n>   Cell size (children without an explicit
+                                  size inherit it; explicit size centers in cell)
+    col_labels: ["a","b",...]     Text labels above each column
+    row_labels: ["a","b",...]     Text labels in a left gutter for each row
+Grid children:
+    rect [at: [row, col], ...]    Place a child in a cell (0-indexed). Children
+                                  without `at:` fill row-major. Unoccupied cells
+                                  stay empty (transparent) — sparse/triangular ok.
+Grid cell addressing (in constrain / connections):
+    grid.cell(row, col)           Resolves to that cell's box, e.g.
+                                  constrain tag.tip = heat.cell(1,1).top - 4
 
 CONNECTIONS
 -----------

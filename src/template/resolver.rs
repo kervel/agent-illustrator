@@ -720,6 +720,7 @@ fn arguments_to_modifiers(
                 "stroke_dasharray" => StyleKey::StrokeDasharray,
                 "rotation" | "rotate" => StyleKey::Rotation,
                 "z_order" => StyleKey::ZOrder,
+                "pointer" => StyleKey::Pointer,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(

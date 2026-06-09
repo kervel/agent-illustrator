@@ -68,6 +68,15 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
         Statement::Layout(l) => {
             if let Some(name) = &l.name {
                 ids.insert(name.node.0.clone());
+                // A named grid also defines addressable cells: `grid.cell(r,c)`.
+                if matches!(l.layout_type.node, crate::parser::ast::LayoutType::Grid) {
+                    let (rows, cols, _) = crate::layout::engine::plan_grid(l);
+                    for r in 0..rows {
+                        for c in 0..cols {
+                            ids.insert(crate::parser::ast::grid_cell_id(&name.node.0, r, c));
+                        }
+                    }
+                }
             }
             for child in &l.children {
                 collect_ids_from_statement(&child.node, ids);

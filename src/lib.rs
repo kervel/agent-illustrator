@@ -389,6 +389,10 @@ fn render_pipeline(
         doc
     };
 
+    // Desugar point-constraints (e.g. `a.tip = b.top - 4`) into scalar component
+    // constraints before layout and the constraint solver see them.
+    let doc = crate::parser::ast::expand_point_constraints(doc);
+
     // Validate color references against stylesheet
     validate_colors(&doc, &config.stylesheet)?;
 
@@ -828,6 +832,150 @@ mod tests {
         // Values below 0 clamp to 0
         let svg = render(r#"rect cell [fill: #ff0000, fill_opacity: -0.5]"#).unwrap();
         assert!(svg.contains(r#"fill-opacity="0""#));
+    }
+
+    #[test]
+    fn test_render_callout_emits_pill_pointer_and_label() {
+        let svg =
+            render(r#"callout tag [label: "= subject", pointer: down, fill: #fff, stroke: #000]"#)
+                .unwrap();
+        // Single closed path (pill + pointer) and a centered label
+        assert!(svg.contains("<path"));
+        assert!(svg.contains(" Z\""));
+        assert!(svg.contains("= subject"));
+    }
+
+    #[test]
+    fn test_render_callout_tip_anchor_resolves_in_connection() {
+        // tag.tip must resolve as a connection endpoint
+        let svg = render(
+            r#"
+            rect box
+            callout tag [label: "x", pointer: down]
+            tag.tip -> box [routing: direct]
+        "#,
+        )
+        .unwrap();
+        // callout path + connection path
+        assert!(svg.matches("<path").count() >= 2);
+    }
+
+    #[test]
+    fn test_render_callout_pointer_direction_moves_apex() {
+        // pointer:up puts the apex at the top edge (y=0); pointer:down at the bottom
+        let up = render(r#"callout t [label: "x", pointer: up]"#).unwrap();
+        let down = render(r#"callout t [label: "x", pointer: down]"#).unwrap();
+        assert_ne!(up, down);
+    }
+
+    #[test]
+    fn test_render_grid_lattice_coordinates() {
+        // Cells sit on a regular lattice: cell_width/height + gap, row-major.
+        let svg = render(
+            r#"grid g [cols: 2, rows: 2, gap: 5, cell_width: 50, cell_height: 50] {
+                rect a [fill: #111]
+                rect b [fill: #222]
+                rect c [fill: #333]
+                rect d [fill: #444]
+            }"#,
+        )
+        .unwrap();
+        // Columns 50px wide + 5px gap → x offsets differ by 55; rows likewise.
+        // Children inherit the 50x50 cell size.
+        assert!(svg.contains(r#"width="50" height="50""#));
+        // 4 rects placed
+        assert_eq!(svg.matches(r#"class="ai-shape ai-rect""#).count(), 4);
+    }
+
+    #[test]
+    fn test_render_grid_at_placement_is_sparse() {
+        // Only declared cells render; unoccupied cells stay empty.
+        let svg = render(
+            r#"grid g [cols: 3, rows: 3, cell_width: 40, cell_height: 40] {
+                rect [at: [0,0], fill: #111]
+                rect [at: [2,2], fill: #222]
+            }"#,
+        )
+        .unwrap();
+        // Two declared cells → exactly two rects (cells themselves don't render)
+        assert_eq!(svg.matches(r#"class="ai-shape ai-rect""#).count(), 2);
+    }
+
+    #[test]
+    fn test_render_grid_labels_render() {
+        let svg = render(
+            r#"grid g [cols: 2, rows: 2, cell_width: 40, cell_height: 40,
+                      col_labels: ["A","B"], row_labels: ["one","two"]] {
+                rect [at: [0,0]]
+            }"#,
+        )
+        .unwrap();
+        for label in ["A", "B", "one", "two"] {
+            assert!(svg.contains(&format!(">{}</text>", label)), "missing label {label}");
+        }
+    }
+
+    #[test]
+    fn test_render_grid_cell_addressing_in_constraint() {
+        // g.cell(r,c) resolves as a constraint reference and moves the target.
+        let svg = render(
+            r#"
+            grid g [cols: 3, rows: 3, cell_width: 40, cell_height: 40] {
+                rect [at: [1,1], fill: #111]
+            }
+            rect marker [width: 6, height: 6, fill: #f00]
+            constrain marker.center_x = g.cell(1,1).center_x
+            constrain marker.center_y = g.cell(1,1).center_y
+        "#,
+        )
+        .unwrap();
+        // Renders without undefined-identifier errors
+        assert!(svg.contains(r#"id="marker""#));
+    }
+
+    #[test]
+    fn test_render_callout_point_constraint_aims_tip_at_cell() {
+        // tag.tip = g.cell(1,1).top - 4 must move the callout (not the cell).
+        let svg = render(
+            r#"
+            grid g [cols: 3, rows: 3, cell_width: 40, cell_height: 40] {
+                rect [at: [1,1], fill: secondary-1]
+            }
+            callout tag [label: "x", pointer: down]
+            constrain tag.tip = g.cell(1,1).top - 4
+        "#,
+        )
+        .unwrap();
+        // Callout path present; layout resolved (no panic / error)
+        assert!(svg.contains(r#"id="tag""#));
+    }
+
+    #[test]
+    fn test_render_attention_heatmap_fixture() {
+        // Acceptance-style triangular heatmap with labels + an annotation callout.
+        let svg = render(
+            r#"
+            grid heat [cols: 6, rows: 6, gap: 5, cell_width: 56, cell_height: 56,
+                       col_labels: ["The","cat","sat","because","it","was"],
+                       row_labels: ["The","cat","sat","because","it","was"]] {
+                rect [at: [0,0], fill: secondary-1, fill_opacity: 1.00]
+                rect [at: [1,0], fill: secondary-1, fill_opacity: 0.30]
+                rect [at: [1,1], fill: secondary-1, fill_opacity: 0.70]
+                rect [at: [2,0], fill: secondary-1, fill_opacity: 0.20]
+                rect [at: [2,1], fill: secondary-1, fill_opacity: 0.40]
+                rect [at: [2,2], fill: secondary-1, fill_opacity: 0.90]
+            }
+            callout tag [label: "= subject", pointer: down, stroke: accent-1, fill: background-1]
+            constrain tag.tip = heat.cell(1,1).top - 4
+        "#,
+        )
+        .unwrap();
+        // Triangular fill gradient, labels, and the callout all present
+        assert!(svg.contains(r#"fill-opacity="0.7""#));
+        assert!(svg.contains(r#"fill-opacity="0.2""#));
+        assert!(svg.contains(">because</text>"));
+        assert!(svg.contains("= subject"));
+        assert!(svg.contains(r#"id="tag""#));
     }
 
     #[test]

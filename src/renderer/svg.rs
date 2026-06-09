@@ -4,7 +4,7 @@ use crate::layout::{
     BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point, ResolvedStyles,
     RoutingMode, TextAnchor,
 };
-use crate::parser::ast::{ConnectionDirection, ShapeType};
+use crate::parser::ast::{ConnectionDirection, PointerDir, ShapeType};
 use crate::stylesheet::Stylesheet;
 
 use super::SvgConfig;
@@ -1121,6 +1121,13 @@ fn render_element_inner(element: &ElementLayout, builder: &mut SvgBuilder, hidde
                 transform.as_deref(),
             );
         }
+        ElementType::Shape(ShapeType::Callout { pointer }) => {
+            // Rounded pill + triangular pointer as a single closed path
+            let d = callout_path_d(&element.bounds, *pointer);
+            render_shape_with_rotation(element, builder, |b| {
+                b.add_path(id, &d, &classes, &styles);
+            });
+        }
         ElementType::Shape(ShapeType::Path(path_decl)) => {
             // Path shape rendering (Feature 007)
             let origin = Point::new(element.bounds.x, element.bounds.y);
@@ -1136,6 +1143,10 @@ fn render_element_inner(element: &ElementLayout, builder: &mut SvgBuilder, hidde
             render_shape_with_rotation(element, builder, |b| {
                 b.add_path(id, &d, &classes, &styles);
             });
+        }
+        ElementType::GridCell => {
+            // Reference-only cell: addressable via g.cell(r,c) but never drawn.
+            return;
         }
         ElementType::Layout(_) | ElementType::Group => {
             // Start a group for containers (with optional rotation)
@@ -1304,6 +1315,90 @@ fn format_styles(styles: &ResolvedStyles) -> String {
         }
     }
     parts.join("")
+}
+
+/// Build the SVG path `d` for a callout: a rounded-rect pill (inset on the
+/// pointer side) with a triangular pointer whose apex sits at the bounds edge.
+/// The `tip` anchor coincides with that apex.
+fn callout_path_d(b: &BoundingBox, pointer: PointerDir) -> String {
+    let ps = crate::layout::engine::CALLOUT_POINTER_SIZE;
+    // Pill rectangle, inset by the pointer depth on the pointer side.
+    let (px, py, pw, ph) = match pointer {
+        PointerDir::Up => (b.x, b.y + ps, b.width, b.height - ps),
+        PointerDir::Down => (b.x, b.y, b.width, b.height - ps),
+        PointerDir::Left => (b.x + ps, b.y, b.width - ps, b.height),
+        PointerDir::Right => (b.x, b.y, b.width - ps, b.height),
+    };
+    let rr = 6.0_f64.min(pw / 2.0).min(ph / 2.0).max(0.0);
+    let cx = px + pw / 2.0;
+    let cy = py + ph / 2.0;
+    // Half-width of the triangle base along the pointer-side edge.
+    let tb = (ps).min((pw / 2.0 - rr).max(2.0)).min((ph / 2.0 - rr).max(2.0));
+    let (l, r, t, bot) = (px, px + pw, py, py + ph);
+    // Clockwise arc helper.
+    let arc = |ex: f64, ey: f64| format!("A{:.2} {:.2} 0 0 1 {:.2} {:.2}", rr, rr, ex, ey);
+    let m = |x: f64, y: f64| format!("M{:.2} {:.2}", x, y);
+    let line = |x: f64, y: f64| format!("L{:.2} {:.2}", x, y);
+    let mut seg: Vec<String> = Vec::new();
+    match pointer {
+        PointerDir::Down => {
+            seg.push(m(l + rr, t));
+            seg.push(line(r - rr, t));
+            seg.push(arc(r, t + rr));
+            seg.push(line(r, bot - rr));
+            seg.push(arc(r - rr, bot));
+            seg.push(line(cx + tb, bot));
+            seg.push(line(cx, b.bottom())); // apex (tip)
+            seg.push(line(cx - tb, bot));
+            seg.push(line(l + rr, bot));
+            seg.push(arc(l, bot - rr));
+            seg.push(line(l, t + rr));
+            seg.push(arc(l + rr, t));
+        }
+        PointerDir::Up => {
+            seg.push(m(l + rr, t));
+            seg.push(line(cx - tb, t));
+            seg.push(line(cx, b.y)); // apex (tip)
+            seg.push(line(cx + tb, t));
+            seg.push(line(r - rr, t));
+            seg.push(arc(r, t + rr));
+            seg.push(line(r, bot - rr));
+            seg.push(arc(r - rr, bot));
+            seg.push(line(l + rr, bot));
+            seg.push(arc(l, bot - rr));
+            seg.push(line(l, t + rr));
+            seg.push(arc(l + rr, t));
+        }
+        PointerDir::Left => {
+            seg.push(m(l + rr, t));
+            seg.push(line(r - rr, t));
+            seg.push(arc(r, t + rr));
+            seg.push(line(r, bot - rr));
+            seg.push(arc(r - rr, bot));
+            seg.push(line(l + rr, bot));
+            seg.push(arc(l, bot - rr));
+            seg.push(line(l, cy + tb));
+            seg.push(line(b.x, cy)); // apex (tip)
+            seg.push(line(l, cy - tb));
+            seg.push(line(l, t + rr));
+            seg.push(arc(l + rr, t));
+        }
+        PointerDir::Right => {
+            seg.push(m(l + rr, t));
+            seg.push(line(r - rr, t));
+            seg.push(arc(r, t + rr));
+            seg.push(line(r, cy - tb));
+            seg.push(line(b.right(), cy)); // apex (tip)
+            seg.push(line(r, cy + tb));
+            seg.push(line(r, bot - rr));
+            seg.push(arc(r - rr, bot));
+            seg.push(line(l + rr, bot));
+            seg.push(arc(l, bot - rr));
+            seg.push(line(l, t + rr));
+            seg.push(arc(l + rr, t));
+        }
+    }
+    format!("{} Z", seg.join(" "))
 }
 
 /// Convert a path of points to an SVG path d attribute

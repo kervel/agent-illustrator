@@ -935,6 +935,21 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
                     TextAnchor::Middle,
                 )
             }
+            ShapeType::Callout { .. } => {
+                // Center within the pill body (offset away from the pointer side)
+                let ps = CALLOUT_POINTER_SIZE;
+                let (dx, dy) = match extract_pointer(&shape.modifiers) {
+                    PointerDir::Up => (0.0, ps / 2.0),
+                    PointerDir::Down => (0.0, -ps / 2.0),
+                    PointerDir::Left => (ps / 2.0, 0.0),
+                    PointerDir::Right => (-ps / 2.0, 0.0),
+                };
+                (
+                    position.x + width / 2.0 + dx,
+                    position.y + height / 2.0 + dy,
+                    TextAnchor::Middle,
+                )
+            }
             _ => {
                 // Default: center within the shape bounds
                 (
@@ -962,16 +977,22 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     });
 
     let bounds = BoundingBox::new(position.x, position.y, width, height);
-    // Feature 009: Compute anchors based on shape type
-    let anchors = match &shape.shape_type.node {
-        ShapeType::Path(_) => AnchorSet::path_shape(&bounds),
-        _ => AnchorSet::simple_shape(&bounds),
+    // Resolve the effective shape type: callouts fold their `pointer:` modifier
+    // into the type so the renderer and anchor logic can read it directly.
+    let effective_shape_type = match &shape.shape_type.node {
+        ShapeType::Callout { .. } => ShapeType::Callout {
+            pointer: extract_pointer(&shape.modifiers),
+        },
+        other => other.clone(),
     };
+    let element_type = ElementType::Shape(effective_shape_type);
+    // Feature 009: Compute anchors based on shape type (callouts also get `tip`)
+    let anchors = AnchorSet::for_element_type(&element_type, &bounds);
 
     ElementLayout {
         id,
         z_order: 0,
-        element_type: ElementType::Shape(shape.shape_type.node.clone()),
+        element_type,
         bounds,
         styles,
         children: vec![],
@@ -1015,6 +1036,7 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         }
         ShapeType::Ellipse => config.default_ellipse_size,
         ShapeType::Polygon => config.default_rect_size,
+        ShapeType::Callout { .. } => config.default_rect_size,
         ShapeType::Icon { .. } => config.default_rect_size,
         ShapeType::Line => (config.default_line_width, 4.0),
         ShapeType::Text { content } => {
@@ -1056,7 +1078,22 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         base_width
     };
 
-    let final_height = height.unwrap_or(default_height);
+    let mut final_height = height.unwrap_or(default_height);
+    let mut final_width = final_width;
+
+    // Callouts need room for the triangular pointer along its axis (only when
+    // auto-sizing; explicit width/height are treated as the full bounds).
+    if let ShapeType::Callout { .. } = &shape.shape_type.node {
+        match extract_pointer(&shape.modifiers) {
+            PointerDir::Up | PointerDir::Down if height.is_none() => {
+                final_height += CALLOUT_POINTER_SIZE;
+            }
+            PointerDir::Left | PointerDir::Right if width.is_none() => {
+                final_width += CALLOUT_POINTER_SIZE;
+            }
+            _ => {}
+        }
+    }
 
     (final_width, final_height)
 }
@@ -1402,6 +1439,32 @@ fn extract_gap(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
     })
 }
 
+/// Depth of a callout's triangular pointer (added to the pointer-side axis).
+pub(crate) const CALLOUT_POINTER_SIZE: f64 = 10.0;
+
+/// Read the `pointer:` modifier on a callout shape (default: down).
+fn extract_pointer(modifiers: &[Spanned<StyleModifier>]) -> PointerDir {
+    modifiers
+        .iter()
+        .find_map(|m| {
+            if matches!(m.node.key.node, StyleKey::Pointer) {
+                match &m.node.value.node {
+                    StyleValue::Keyword(k) => match k.as_str() {
+                        "up" => Some(PointerDir::Up),
+                        "down" => Some(PointerDir::Down),
+                        "left" => Some(PointerDir::Left),
+                        "right" => Some(PointerDir::Right),
+                        _ => None,
+                    },
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or_default()
+}
+
 fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
     // Check for a child with [role: label] modifier (preferred)
     // Falls back to Label statement (deprecated) if not found
@@ -1414,7 +1477,7 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
     let (mut children, bounds) = match layout.layout_type.node {
         LayoutType::Row => layout_row(&layout.children, position, config, gap),
         LayoutType::Column => layout_column(&layout.children, position, config, gap),
-        LayoutType::Grid => layout_grid(&layout.children, position, config),
+        LayoutType::Grid => layout_grid(layout, position, config, gap),
         LayoutType::Stack => layout_stack(&layout.children, position, config),
     };
 
@@ -1749,14 +1812,111 @@ fn layout_column(
     )
 }
 
-fn layout_grid(
-    children: &[Spanned<Statement>],
-    position: Point,
-    config: &LayoutConfig,
-) -> (Vec<ElementLayout>, BoundingBox) {
-    // Filter out connections, constraints, and labels (labels are handled separately by parent)
-    // Labels include both Statement::Label and elements with [role: label] modifier
-    let filtered: Vec<_> = children
+/// Font size used for grid row/column labels.
+const GRID_LABEL_FONT: f64 = 12.0;
+
+/// Read a child statement's style modifiers (empty for non-shape/layout statements).
+fn stmt_modifiers(stmt: &Statement) -> &[Spanned<StyleModifier>] {
+    match stmt {
+        Statement::Shape(s) => &s.modifiers,
+        Statement::Layout(l) => &l.modifiers,
+        Statement::Group(g) => &g.modifiers,
+        _ => &[],
+    }
+}
+
+/// Read `at: [row, col]` placement off a grid child (0-indexed).
+fn extract_at(modifiers: &[Spanned<StyleModifier>]) -> Option<(usize, usize)> {
+    modifiers.iter().find_map(|m| {
+        if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "at") {
+            if let StyleValue::List(items) = &m.node.value.node {
+                if let [r, c] = items.as_slice() {
+                    if let (
+                        StyleValue::Number { value: rv, .. },
+                        StyleValue::Number { value: cv, .. },
+                    ) = (&r.node, &c.node)
+                    {
+                        return Some((*rv as usize, *cv as usize));
+                    }
+                }
+            }
+        }
+        None
+    })
+}
+
+/// Read a numeric custom modifier (e.g. `cols: 6`) as usize.
+fn extract_usize_param(modifiers: &[Spanned<StyleModifier>], name: &str) -> Option<usize> {
+    modifiers.iter().find_map(|m| {
+        if matches!(&m.node.key.node, StyleKey::Custom(k) if k == name) {
+            if let StyleValue::Number { value, .. } = &m.node.value.node {
+                return Some(*value as usize);
+            }
+        }
+        None
+    })
+}
+
+/// Read a numeric custom modifier (e.g. `cell_width: 56`) as f64.
+fn extract_f64_param(modifiers: &[Spanned<StyleModifier>], name: &str) -> Option<f64> {
+    modifiers.iter().find_map(|m| {
+        if matches!(&m.node.key.node, StyleKey::Custom(k) if k == name) {
+            if let StyleValue::Number { value, .. } = &m.node.value.node {
+                return Some(*value);
+            }
+        }
+        None
+    })
+}
+
+/// Read a string-list custom modifier (e.g. `col_labels: ["a", "b"]`).
+fn extract_string_list(modifiers: &[Spanned<StyleModifier>], name: &str) -> Option<Vec<String>> {
+    modifiers.iter().find_map(|m| {
+        if matches!(&m.node.key.node, StyleKey::Custom(k) if k == name) {
+            if let StyleValue::List(items) = &m.node.value.node {
+                return Some(
+                    items
+                        .iter()
+                        .map(|it| match &it.node {
+                            StyleValue::String(s) => s.clone(),
+                            StyleValue::Keyword(s) => s.clone(),
+                            StyleValue::Identifier(id) => id.0.clone(),
+                            StyleValue::Number { value, .. } => format!("{}", value),
+                            _ => String::new(),
+                        })
+                        .collect(),
+                );
+            }
+        }
+        None
+    })
+}
+
+/// Build a left-aligned text element for a grid gutter label.
+fn grid_label_element(text: &str, x: f64, y: f64) -> ElementLayout {
+    let w = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+    let bounds = BoundingBox::new(x, y, w.max(1.0), GRID_LABEL_FONT);
+    let mut styles = ResolvedStyles::default();
+    styles.font_size = Some(GRID_LABEL_FONT);
+    ElementLayout {
+        id: None,
+        element_type: ElementType::Shape(ShapeType::Text {
+            content: text.to_string(),
+        }),
+        bounds,
+        styles,
+        children: vec![],
+        label: None,
+        anchors: AnchorSet::simple_shape(&bounds),
+        path_normalize: true,
+        z_order: 0,
+    }
+}
+
+/// Placeable grid children (excludes connections/constraints/labels/role-labels).
+fn grid_filtered_children(layout: &LayoutDecl) -> Vec<&Spanned<Statement>> {
+    layout
+        .children
         .iter()
         .filter(|c| {
             !matches!(
@@ -1767,58 +1927,193 @@ fn layout_grid(
                     | Statement::Label(_)
             ) && !has_role_label(&c.node)
         })
+        .collect()
+}
+
+/// Determine a grid's (rows, cols) and the (row, col) placement of each placeable
+/// child (in document order). Shared by the layout engine and reference validation
+/// so `grid.cell(r,c)` ids always line up with the cells actually produced.
+pub(crate) fn plan_grid(layout: &LayoutDecl) -> (usize, usize, Vec<(usize, usize)>) {
+    let mods = &layout.modifiers;
+    let filtered = grid_filtered_children(layout);
+    let n = filtered.len();
+    let col_labels = extract_string_list(mods, "col_labels");
+    let row_labels = extract_string_list(mods, "row_labels");
+
+    let cols = extract_usize_param(mods, "cols")
+        .or_else(|| col_labels.as_ref().map(|l| l.len()))
+        .unwrap_or_else(|| (n as f64).sqrt().ceil() as usize)
+        .max(1);
+
+    let mut occupied: std::collections::HashSet<(usize, usize)> = std::collections::HashSet::new();
+    let mut placement: Vec<Option<(usize, usize)>> = vec![None; n];
+    for (i, child) in filtered.iter().enumerate() {
+        if let Some((r, c)) = extract_at(stmt_modifiers(&child.node)) {
+            occupied.insert((r, c));
+            placement[i] = Some((r, c));
+        }
+    }
+    let mut cursor = 0usize;
+    for slot in placement.iter_mut() {
+        if slot.is_none() {
+            loop {
+                let (r, c) = (cursor / cols, cursor % cols);
+                cursor += 1;
+                if occupied.insert((r, c)) {
+                    *slot = Some((r, c));
+                    break;
+                }
+            }
+        }
+    }
+    let placements: Vec<(usize, usize)> = placement.into_iter().map(|p| p.unwrap()).collect();
+
+    let max_row = placements.iter().map(|(r, _)| *r + 1).max().unwrap_or(0);
+    let rows = extract_usize_param(mods, "rows")
+        .or_else(|| row_labels.as_ref().map(|l| l.len()))
+        .unwrap_or(0)
+        .max(max_row)
+        .max(if cols > 0 { n.div_ceil(cols) } else { 0 });
+
+    (rows, cols, placements)
+}
+
+fn layout_grid(
+    layout: &LayoutDecl,
+    position: Point,
+    config: &LayoutConfig,
+    gap_override: Option<f64>,
+) -> (Vec<ElementLayout>, BoundingBox) {
+    let mods = &layout.modifiers;
+    let grid_name = layout.name.as_ref().map(|n| n.node.0.clone());
+    let gap = gap_override.unwrap_or(config.element_spacing);
+    let pad = config.container_padding;
+
+    let filtered = grid_filtered_children(layout);
+    let col_labels = extract_string_list(mods, "col_labels");
+    let row_labels = extract_string_list(mods, "row_labels");
+
+    let (rows, cols, placements) = plan_grid(layout);
+    let placed: Vec<(usize, usize, &Spanned<Statement>)> = filtered
+        .iter()
+        .enumerate()
+        .map(|(i, c)| {
+            let (r, col) = placements[i];
+            (r, col, *c)
+        })
         .collect();
 
-    if filtered.is_empty() {
-        return (
-            vec![],
-            BoundingBox::new(
-                position.x,
-                position.y,
-                config.container_padding * 2.0,
-                config.container_padding * 2.0,
-            ),
-        );
+    // Cell size: explicit, else max natural child size, else default rect.
+    let (mut nat_w, mut nat_h) = (0.0f64, 0.0f64);
+    for (_, _, child) in &placed {
+        let t = layout_statement(&child.node, Point::new(0.0, 0.0), config);
+        nat_w = nat_w.max(t.bounds.width);
+        nat_h = nat_h.max(t.bounds.height);
+    }
+    let cell_w = extract_f64_param(mods, "cell_width").unwrap_or(if nat_w > 0.0 {
+        nat_w
+    } else {
+        config.default_rect_size.0
+    });
+    let cell_h = extract_f64_param(mods, "cell_height").unwrap_or(if nat_h > 0.0 {
+        nat_h
+    } else {
+        config.default_rect_size.1
+    });
+
+    // Gutters for labels.
+    let col_gutter = if col_labels.is_some() {
+        GRID_LABEL_FONT + 6.0
+    } else {
+        0.0
+    };
+    let row_gutter = row_labels
+        .as_ref()
+        .map(|rl| {
+            rl.iter()
+                .map(|s| s.len() as f64 * GRID_LABEL_FONT * 0.6)
+                .fold(0.0_f64, f64::max)
+                + 6.0
+        })
+        .unwrap_or(0.0);
+
+    let origin_x = position.x + pad + row_gutter;
+    let origin_y = position.y + pad + col_gutter;
+    let cell_x = |c: usize| origin_x + c as f64 * (cell_w + gap);
+    let cell_y = |r: usize| origin_y + r as f64 * (cell_h + gap);
+
+    let mut out: Vec<ElementLayout> = Vec::new();
+
+    // Place user children into their cells.
+    for (r, c, child) in &placed {
+        let (cx, cy) = (cell_x(*c), cell_y(*r));
+        let mut elem = layout_statement(&child.node, Point::new(cx, cy), config);
+        let m = stmt_modifiers(&child.node);
+        let has_size = extract_size_modifier(m).is_some()
+            || extract_width_modifier(m).is_some()
+            || extract_height_modifier(m).is_some();
+        if has_size {
+            // Keep explicit size; center within the cell.
+            let dx = cx + (cell_w - elem.bounds.width) / 2.0 - elem.bounds.x;
+            let dy = cy + (cell_h - elem.bounds.height) / 2.0 - elem.bounds.y;
+            offset_element(&mut elem, dx, dy);
+        } else {
+            // Inherit the cell size.
+            elem.bounds = BoundingBox::new(cx, cy, cell_w, cell_h);
+            if let Some(lbl) = &mut elem.label {
+                lbl.position = Point::new(cx + cell_w / 2.0, cy + cell_h / 2.0);
+            }
+        }
+        elem.anchors
+            .update_builtin_from_bounds(&elem.element_type, &elem.bounds);
+        out.push(elem);
     }
 
-    let n = filtered.len();
-    let cols = (n as f64).sqrt().ceil() as usize;
-    let rows = n.div_ceil(cols);
-
-    // First pass: compute max cell size
-    let mut max_cell_width = 0.0f64;
-    let mut max_cell_height = 0.0f64;
-
-    for child in &filtered {
-        let temp = layout_statement(&child.node, Point::new(0.0, 0.0), config);
-        max_cell_width = max_cell_width.max(temp.bounds.width);
-        max_cell_height = max_cell_height.max(temp.bounds.height);
+    // Reference-only cell elements for `grid.cell(r,c)` addressing (named grids only).
+    if let Some(name) = &grid_name {
+        for r in 0..rows {
+            for c in 0..cols {
+                let b = BoundingBox::new(cell_x(c), cell_y(r), cell_w, cell_h);
+                out.push(ElementLayout {
+                    id: Some(Identifier::new(grid_cell_id(name, r, c))),
+                    element_type: ElementType::GridCell,
+                    bounds: b,
+                    styles: ResolvedStyles::default(),
+                    children: vec![],
+                    label: None,
+                    anchors: AnchorSet::for_element_type(&ElementType::GridCell, &b),
+                    path_normalize: true,
+                    z_order: 0,
+                });
+            }
+        }
     }
 
-    // Second pass: place in grid
-    let mut layouts = vec![];
-    for (i, child) in filtered.iter().enumerate() {
-        let row = i / cols;
-        let col = i % cols;
-        let x = position.x
-            + config.container_padding
-            + col as f64 * (max_cell_width + config.element_spacing);
-        let y = position.y
-            + config.container_padding
-            + row as f64 * (max_cell_height + config.element_spacing);
-        layouts.push(layout_statement(&child.node, Point::new(x, y), config));
+    // Column labels (centered above each column), row labels (right-aligned left of each row).
+    if let Some(cl) = &col_labels {
+        for (c, text) in cl.iter().enumerate().take(cols) {
+            let tw = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+            let bx = cell_x(c) + (cell_w - tw) / 2.0;
+            out.push(grid_label_element(text, bx, position.y + pad));
+        }
+    }
+    if let Some(rl) = &row_labels {
+        for (r, text) in rl.iter().enumerate().take(rows) {
+            let tw = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+            let bx = origin_x - 6.0 - tw;
+            let by = cell_y(r) + (cell_h - GRID_LABEL_FONT) / 2.0;
+            out.push(grid_label_element(text, bx, by));
+        }
     }
 
-    let total_width = cols as f64 * (max_cell_width + config.element_spacing)
-        - config.element_spacing
-        + 2.0 * config.container_padding;
-    let total_height = rows as f64 * (max_cell_height + config.element_spacing)
-        - config.element_spacing
-        + 2.0 * config.container_padding;
+    let content_w = cols as f64 * cell_w + cols.saturating_sub(1) as f64 * gap;
+    let content_h = rows as f64 * cell_h + rows.saturating_sub(1) as f64 * gap;
+    let total_width = row_gutter + content_w + 2.0 * pad;
+    let total_height = col_gutter + content_h + 2.0 * pad;
 
     (
-        layouts,
-        BoundingBox::new(position.x, position.y, total_width, total_height),
+        out,
+        BoundingBox::new(position.x, position.y, total_width.max(0.0), total_height.max(0.0)),
     )
 }
 
