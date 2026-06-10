@@ -668,6 +668,8 @@ pub enum ConstraintExpr {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConstrainDecl {
     pub expr: ConstraintExpr,
+    /// Optional name (`constrain <expr> as <name>`) — handle for keyframe disable/enable.
+    pub name: Option<Spanned<Identifier>>,
 }
 
 /// Build a copy of a property reference with a different property.
@@ -837,7 +839,7 @@ fn expand_point_constraints_in(
                 let exprs = expand_point_expr(&decl.expr, callouts);
                 for expr in exprs {
                     out.push(Spanned::new(
-                        Statement::Constrain(ConstrainDecl { expr }),
+                        Statement::Constrain(ConstrainDecl { expr, name: decl.name.clone() }),
                         span.clone(),
                     ));
                 }

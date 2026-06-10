@@ -2073,6 +2073,7 @@ mod tests {
                     },
                     value,
                 },
+                name: None,
             }),
             span,
         )

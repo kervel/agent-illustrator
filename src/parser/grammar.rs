@@ -745,7 +745,8 @@ where
     // Constrain declaration: constrain <expr>
     let constrain_decl = just(Token::Constrain)
         .ignore_then(constraint_expr)
-        .map(|expr| ConstrainDecl { expr });
+        .then(just(Token::As).ignore_then(identifier.clone()).or_not())
+        .map(|(expr, name)| ConstrainDecl { expr, name });
 
     // ==================== Template Parsing (Feature 005) ====================
 
@@ -2664,6 +2665,20 @@ mod tests {
             }
             other => panic!("Expected TemplateDecl, got {:?}", other),
         }
+    }
+
+    #[test]
+    fn parses_named_constraint() {
+        use crate::parser::ast::Statement;
+        let src = r#"
+rect a [width: 10, height: 10]
+constrain a.center_x = 50 as a_home
+"#;
+        let doc = parse(src).expect("parse ok");
+        let named = doc.statements.iter().any(|s| matches!(
+            &s.node, Statement::Constrain(c) if c.name.as_ref().map(|n| n.node.0.as_str()) == Some("a_home")
+        ));
+        assert!(named, "constraint should be named a_home");
     }
 
     #[test]

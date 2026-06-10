@@ -559,7 +559,7 @@ fn substitute_parameters(
             // Prefix all element references in the constraint expression
             let new_expr = prefix_constraint_expr(&decl.expr, prefix);
             Spanned::new(
-                Statement::Constrain(ConstrainDecl { expr: new_expr }),
+                Statement::Constrain(ConstrainDecl { expr: new_expr, name: decl.name.clone() }),
                 stmt.span,
             )
         }
