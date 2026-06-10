@@ -73,12 +73,22 @@ endpoint follows, with no naming required by the author.
   in `add_connection_path`) into a shared `connection_path_d(path, routing_mode,
   marker_end, stroke_width) -> String`. `add_connection_path` calls it; so does the CSS
   emitter, so the per-frame target shape matches the rendered shape exactly.
-- For each later frame where a connection's path changed, emit:
-  `.frame-<name> .conn-<id> { d: path("<d-string>"); }`
+- For each later frame where a connection's path changed, the emitter picks one of two
+  mechanisms based on whether the path is **morphable** (same segment count / `d`
+  structure as frame 0):
+  - **Morphable → `d:` morph (preferred, "slides").** Emit
+    `.frame-<name> .conn-<id> { d: path("<d-string>"); }` and rely on the base
+    `transition: d`. The line visibly slides to follow its endpoint.
+  - **Not morphable (segment count changed) → crossfade fallback.** A `d:` morph here
+    would hard-snap, so instead render the alternate path as a sibling variant
+    `<path class="ai-connection conn-<id> conn-<id>-f<frame>">` and toggle the two via
+    opacity per frame (`.frame-X .conn-<id>-fK { opacity: 1 }`, the base path 0), with
+    the existing `transition: opacity`. This crossfades (dissolve) rather than snapping —
+    "not great but better than nothing", and it also works in Firefox.
 - Add one default base rule in `generate_keyframe_css` (and the `--no-frame-css` branch):
   `.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }`
 - The arrowhead marker rides the path end automatically (markers attach to the path),
-  so it follows for free.
+  so it follows for free (each path variant carries its own marker-end).
 
 ### 5. Determinism / anti-flicker (the other reason it was static)
 
@@ -106,12 +116,12 @@ all connections — freezing is what broke endpoint-following in the first place
 
 ### 6. Behavior & caveats
 
-- **Chrome/Safari:** the path morphs smoothly when segment counts match across frames
-  (e.g. a straight or fixed-shape connector); snaps-but-correct when the route's *shape*
-  changes (different segment count — CSS can't interpolate those).
-- **Firefox:** lacks CSS `d` as an animatable property, so the path holds at its frame-0
-  attribute route (degraded, accepted). All other browsers honoring CSS `d` are correct
-  at each keyframe.
+- **Chrome/Safari, morphable transition:** the line slides smoothly (`d:` morph).
+- **Any browser, non-morphable transition (shape change):** crossfade between old/new
+  path variants (dissolve) — correct at each keyframe everywhere, including Firefox.
+- **Firefox, morphable transition:** Firefox lacks CSS `d`, so a morphable connector
+  holds its frame-0 attribute route (degraded — accepted). The crossfade fallback path
+  (shape-change case) works in Firefox because it is opacity-only.
 - Endpoints already re-anchor at routing time (`resolve_anchor` reads live bounds) — no
   routing change needed.
 
@@ -141,15 +151,21 @@ New tests (`tests/connection_animation.rs` + unit where useful):
 6. **No flicker** — a connection between two *static* elements, in a keyframe that moves
    an unrelated element, emits **no** `d` diff for that connection (epsilon gate holds it
    on its frame-0 path). Guards against solver-noise jitter.
+7. **Crossfade fallback** — a connection whose route changes segment count between frames
+   (morph impossible) emits an alternate path variant toggled by opacity rather than a
+   `d:` rule. (Morphable connections must NOT emit a variant — assert they use `d:`.)
 
 ## Docs
 
 - `--skill-animation` / `--grammar`: a short note that connections automatically follow
-  moving/resized endpoints and tween (Chrome/Safari smooth, Firefox snaps to the
-  end-state route); name a connection only if you also show/hide it.
+  moving/resized endpoints and animate — sliding when the route keeps its shape
+  (Chrome/Safari), crossfading when the route reshapes — landing correct at each
+  keyframe; name a connection only if you also show/hide it.
 
 ## Non-goals
 
-- Smooth path morphing across route-shape changes (different segment counts) — snaps.
-- Firefox smooth path tween (no CSS `d`); correctness there is best-effort frame-0 hold.
+- A true sliding *morph* across route-shape changes (different segment counts) — we
+  crossfade (dissolve) those instead; correct at each keyframe, not a slide.
+- Firefox smooth slide for morphable connectors (no CSS `d`); best-effort frame-0 hold
+  there. (Shape-change crossfades do work in Firefox.)
 - Animating connection `stroke`/`marker` geometry beyond what `d` + existing styles give.
