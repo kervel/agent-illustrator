@@ -67,6 +67,9 @@ pub struct TemplateDefinition {
     pub svg_content: Option<String>,
     /// SVG viewBox dimensions (width, height)
     pub svg_dimensions: Option<(f64, f64)>,
+    /// Content bbox (min_x, min_y, w, h) for trimming the viewBox margin; None if not
+    /// computed or trimming would degrade (caller falls back to svg_dimensions).
+    pub svg_trimmed: Option<(f64, f64, f64, f64)>,
     /// Exported identifiers for connection points
     pub exports: Vec<String>,
     /// Anchor declarations for custom connection points (Feature 009)
@@ -104,6 +107,7 @@ impl TemplateDefinition {
             body: decl.body.clone(),
             svg_content: None,
             svg_dimensions: None,
+            svg_trimmed: None,
             exports,
             anchors,
         }
@@ -311,11 +315,15 @@ impl TemplateRegistry {
 
         // Parse SVG dimensions from viewBox or width/height attributes
         let dimensions = parse_svg_dimensions(&content);
+        // Compute the artwork's content bbox (for trimming the viewBox margin). Uses the
+        // raw viewBox dims as the clamp reference; None when trimming would degrade.
+        let trimmed = dimensions.and_then(|(w, h)| svg_content_bbox(&content, w, h));
 
         // Update the template with loaded content
         let def = self.templates.get_mut(name).unwrap();
         def.svg_content = Some(content);
         def.svg_dimensions = dimensions;
+        def.svg_trimmed = trimmed;
 
         Ok(())
     }
@@ -478,6 +486,33 @@ mod tests {
 
     fn make_spanned<T>(node: T) -> Spanned<T> {
         Spanned::new(node, make_span())
+    }
+
+    #[test]
+    fn load_svg_template_caches_trimmed_bbox() {
+        let dir = std::env::temp_dir().join("ail_trim_cache_test");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("icon.svg"),
+            r#"<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="30" width="40" height="40"/></svg>"#,
+        )
+        .unwrap();
+
+        let mut reg = TemplateRegistry::with_base_path(dir.clone());
+        let decl = TemplateDecl {
+            name: make_spanned(Identifier::new("icon")),
+            source_type: TemplateSourceType::Svg,
+            source_path: Some(make_spanned("icon.svg".to_string())),
+            parameters: vec![],
+            body: None,
+        };
+        reg.register(&decl).expect("register");
+        reg.load_svg_template("icon").expect("load");
+
+        let def = reg.get("icon").unwrap();
+        let (x, y, w, h) = def.svg_trimmed.expect("trimmed bbox cached");
+        assert!((x - 30.0).abs() < 1.0 && (y - 30.0).abs() < 1.0, "origin ~(30,30): ({},{})", x, y);
+        assert!((w - 40.0).abs() < 1.0 && (h - 40.0).abs() < 1.0, "size ~40x40: {}x{}", w, h);
     }
 
     #[test]
