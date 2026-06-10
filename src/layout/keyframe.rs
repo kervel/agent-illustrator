@@ -67,6 +67,11 @@ pub struct ElementDiff {
 #[derive(Debug, Clone)]
 pub struct ConnectionDiff {
     pub opacity: Option<f64>,
+    /// Re-routed path when it differs from frame 0 (epsilon-gated).
+    pub path: Option<Vec<crate::layout::types::Point>>,
+    /// True when the re-routed path has the same segment count / routing as frame 0
+    /// (so a CSS `d:` morph can interpolate it); false → crossfade fallback.
+    pub morphable: bool,
 }
 
 impl ElementDiff {
@@ -180,13 +185,6 @@ pub fn compute_frame_diffs(
     let mut base_elements: HashMap<&str, &ElementLayout> = HashMap::new();
     collect_all_elements(&base_result.root_elements, &mut base_elements);
 
-    // Build connection lookup by name
-    let base_connections: HashMap<&str, &ConnectionLayout> = base_result
-        .connections
-        .iter()
-        .filter_map(|c| c.name.as_ref().map(|n| (n.0.as_str(), c)))
-        .collect();
-
     // Frame 0 state determines which elements start hidden
     let frame0_hidden = if !frame_states.is_empty() {
         &frame_states[0].hidden_elements
@@ -251,18 +249,43 @@ pub fn compute_frame_diffs(
             }
         }
 
-        // Compute connection visibility diffs
-        for name in base_connections.keys() {
-            let hidden_in_frame0 = frame_states[0].hidden_connections.contains(*name);
-            let hidden_in_this_frame = state.hidden_connections.contains(*name);
+        // Connection diffs: visibility (opacity) + geometry (re-routed path).
+        // Identity = name if present, else idx<routing-order index>. base.connections[i]
+        // and solved.connections[i] are the same connection (deterministic routing).
+        let conn_identity = |i: usize, c: &ConnectionLayout| -> String {
+            c.name.as_ref().map(|n| n.0.clone()).unwrap_or_else(|| format!("idx{}", i))
+        };
+        let solved_conns: Option<&Vec<ConnectionLayout>> =
+            solved_result.as_ref().map(|s| &s.connections);
 
-            if hidden_in_frame0 != hidden_in_this_frame {
-                connection_diffs.insert(
-                    name.to_string(),
-                    ConnectionDiff {
-                        opacity: Some(if hidden_in_this_frame { 0.0 } else { 1.0 }),
-                    },
-                );
+        for (i, base_conn) in base_result.connections.iter().enumerate() {
+            let id = conn_identity(i, base_conn);
+
+            // Visibility (named connections only carry hidden state).
+            let mut opacity = None;
+            if let Some(name) = &base_conn.name {
+                let hidden0 = frame_states[0].hidden_connections.contains(&name.0);
+                let hidden_now = state.hidden_connections.contains(&name.0);
+                if hidden0 != hidden_now {
+                    opacity = Some(if hidden_now { 0.0 } else { 1.0 });
+                }
+            }
+
+            // Geometry: compare the solved (re-routed) path to the base path.
+            let mut path = None;
+            let mut morphable = true;
+            if let Some(solved) = solved_conns {
+                if let Some(sc) = solved.get(i) {
+                    if paths_differ(&base_conn.path, &sc.path) {
+                        morphable = base_conn.path.len() == sc.path.len()
+                            && base_conn.routing_mode == sc.routing_mode;
+                        path = Some(sc.path.clone());
+                    }
+                }
+            }
+
+            if opacity.is_some() || path.is_some() {
+                connection_diffs.insert(id, ConnectionDiff { opacity, path, morphable });
             }
         }
 
@@ -491,6 +514,16 @@ fn apply_modifiers_ordered(
     }
 }
 
+/// True if any corresponding point differs by more than the sub-pixel threshold, or the
+/// point counts differ. Sub-pixel solver noise produces no diff (anti-flicker guard).
+fn paths_differ(a: &[crate::layout::types::Point], b: &[crate::layout::types::Point]) -> bool {
+    let eps = 0.1;
+    if a.len() != b.len() {
+        return true;
+    }
+    a.iter().zip(b.iter()).any(|(p, q)| (p.x - q.x).abs() > eps || (p.y - q.y).abs() > eps)
+}
+
 /// Compute the diff between two element states
 fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
     let mut diff = ElementDiff::default();
@@ -595,6 +628,39 @@ mod tests {
         let mods = vec![modi(StyleKey::Dx, 5.0), modi(StyleKey::X, 100.0)];
         apply_transform_to_element(std::slice::from_mut(&mut elem), "e", &mods);
         assert!((elem.bounds.x - 105.0).abs() < 0.001, "x {}", elem.bounds.x);
+    }
+
+    /// Build a fully routed LayoutResult from source, mirroring the render pipeline's
+    /// layout steps (no rotation handling — fine for these fixtures).
+    fn build_result(src: &str) -> (crate::parser::ast::Document, LayoutResult, crate::layout::LayoutConfig) {
+        let doc = crate::parser::parse(src).expect("parse");
+        let config = crate::layout::LayoutConfig::default();
+        let mut result = crate::layout::compute(&doc, &config).expect("compute");
+        crate::layout::resolve_constrain_statements(&mut result, &doc, &config).expect("constrain");
+        crate::layout::resolve_constraints(&mut result, &doc, None).expect("constraints");
+        crate::layout::route_connections(&mut result, &doc).expect("route");
+        result.compute_bounds();
+        (doc, result, config)
+    }
+
+    #[test]
+    fn connection_path_diff_recorded_when_endpoint_moves() {
+        let (doc, result, cfg) = build_result(r#"
+rect box [width: 100, height: 50]
+rect other [width: 100, height: 50]
+constrain box.center_x = 150
+constrain box.center_y = 100
+constrain other.center_x = 450
+constrain other.center_y = 100
+box.right -> other.left as feed
+keyframe "idle" {}
+keyframe "grow" { transform box [width: 260] }
+"#);
+        let states = compute_frame_states(&extract_keyframes(&doc));
+        let diffs = compute_frame_diffs(&result, &states, &doc, &cfg);
+        let grow = diffs.iter().find(|f| f.name == "grow").expect("grow frame");
+        let cd = grow.connection_diffs.get("feed").expect("feed conn diff in grow");
+        assert!(cd.path.is_some(), "feed should have a re-routed path diff, got {:?}", cd);
     }
 
     #[test]
