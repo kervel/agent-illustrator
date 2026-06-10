@@ -18,6 +18,11 @@ frames as a *smooth animation*. Two gaps:
    *all* transform overrides (visual and geometry) snap back the moment a later frame
    doesn't restate them. Documented behavior ≠ implemented behavior.
 
+3. **Constraints fight motion.** "Constraints always solved" is an invariant, so the
+   solver re-runs every frame and pulls elements back to their frame-0 constraint
+   positions — blocking most intended animation. There is no way to change the active
+   constraint set per frame, and constraints cannot even be named to be referenced.
+
 We also lack ergonomic geometry keys (`dx`, `dy`, `scale`).
 
 ## Goal
@@ -112,28 +117,75 @@ frame) alongside the existing `kf_referenced` set, thread it to the element rend
 and add the `kf-animatable` class to those shapes. Add `kf-fade` to wrapper groups in
 `start_visibility_group` / `start_kf_class_group`.
 
-### 6. Groups carry contents via the solver cascade
+### 6. Named constraints & per-keyframe constraint control (the unblock)
 
-No new group machinery. A keyframe with transforms re-solves constraints
-(`resolve_frame_layout` already does this, dropping the transformed element's own
-positioning constraints so the transform wins). Chips constrained relative to the box
-re-position to their new solved spots; each cascaded child gets its own geometry diff
-→ `kf-animatable` → tweens independently. "Constraints always solved" remains the
-invariant; per-frame constraint hiding/showing is explicitly deferred to future work.
+**Why this is required, not deferrable.** With "constraints always solved" as the
+invariant, the solver re-runs every frame and yanks elements back to their frame-0
+constraint positions — actively *fighting* any transform or intended motion. The only
+way to change where the solver places something in a later frame is to change the
+active constraint set for that frame. Without this, most animations are blocked by
+constraints. (Hand-computing absolute coordinates against a box that itself just moved
+is the anti-pattern we reject — it breaks semantic-over-geometric.)
 
-Note: this works for constraint-positioned children. Children must be constrained to
-follow the parent (e.g. relative constraints or `contains` plus row/relative
-positioning). Auto-layout containers are out of scope for this iteration.
+**Named constraints.** `ConstrainDecl` gains an optional name:
+`constrain <expr> as <name>` (grammar + AST; today `ConstrainDecl { expr }` has no
+name). Names are the handle for releasing/toggling — you can't release what you can't
+name.
 
-### 7. Acceptance scenario, realized
+**Keyframe constraint ops.** A `keyframe { }` block may now contain, alongside
+`show`/`hide`/`transform`:
+
+- `constrain <expr> [as <name>]` — activate a constraint from this frame forward
+  (cumulative). If it targets the same `(element, target-property)` as an
+  earlier-active constraint, it **overrides** that one (per-property last-wins, like
+  transform merge) — so re-pinning "just works" without an explicit release.
+- `disable <name>` — deactivate a named constraint from this frame forward (the
+  "release" / free-without-repin case).
+- `enable <name>` — reactivate a previously disabled named constraint.
+
+**State + solve.** `FrameState` gains cumulative `added_constraints` and a
+`disabled_constraints: HashSet<String>` set (carried forward like `hidden_elements`).
+`resolve_frame_layout` builds the per-frame active constraint set:
+
+```
+active = (base_constraints ∪ added_constraints)
+         minus those named in disabled_constraints
+         minus those overridden by a later constraint on the same (element, property)
+```
+
+then re-solves with it. The existing `rewrite_constraints_for_transforms` (which drops
+a geometry-transformed element's own positioning constraints so the transform wins) is
+retained as the implicit override path for `transform`; explicit
+`constrain`/`disable`/`enable` is the general path. Both feed the same active-set
+computation. Target-property identity uses the existing `get_constraint_lhs_element` /
+`get_constraint_target_var` helpers.
+
+### 7. Groups carry contents via the solver cascade
+
+No new group machinery. A keyframe re-solves constraints (§6), so chips constrained
+relative to the box re-position to their new solved spots; each cascaded child gets its
+own geometry diff → `kf-animatable` → tweens independently. Children must be
+constrained to follow the parent (relative constraints, or `contains` plus
+row/relative positioning). Auto-layout containers are out of scope for this iteration.
+
+### 8. Acceptance scenario, realized
 
 - `transform box [width: 360, x: 120]` — same rect grows + recenters, tweening via
-  geometry-prop transition.
-- Chips inside follow via the constraint cascade.
-- The separate predicted-token chip moves via its own `transform tok [dx, dy]` (or a
-  constraint into the box's new slot), tweening.
+  geometry-prop transition. Its own frame-0 positioning constraint is overridden by the
+  transform (existing rewrite path).
+- Chips inside follow via the constraint cascade (§7).
+- The separate predicted-token chip — constrained `below LLM` (named, e.g.
+  `as chip_home`) in frame 0 — moves into the box's new right slot *semantically*:
+  ```
+  keyframe "merge" {
+      disable chip_home
+      constrain chip.center_x = box.right - 30
+      constrain chip.center_y = box.center_y
+  }
+  ```
+  Re-solve places it relative to the moved box; it tweens. No hand-typed coordinates.
 - Static reset: a later keyframe (or `--frame` on an earlier one) restates base
-  geometry; with cumulative transforms, reset is explicit.
+  geometry/constraints; with cumulative state, reset is explicit.
 
 ## Testing
 
@@ -150,14 +202,23 @@ New tests (likely `tests/keyframe_geometry_animation.rs` + unit tests in
    frame 2 doesn't restate it; a per-property override in frame 2 merges correctly.
 6. **Group cascade** — a child constrained to a transformed parent gets its own
    geometry diff (follows the parent), and carries `kf-animatable`.
+7. **Named constraints parse** — `constrain <expr> as <name>` parses and the name is
+   captured on `ConstrainDecl`.
+8. **Per-keyframe constraint control** — `disable <name>` in a keyframe removes that
+   constraint from the active set for that frame forward; a keyframe `constrain` on the
+   same `(element, property)` overrides the earlier one; `enable <name>` restores it.
+   The chip scenario (disable home constraint, add box-slot constraint) produces the
+   chip's new solved position as a geometry diff.
 
 Full suite + `examples/render-all.sh` must stay green (CSS-var-ordering diffs aside).
 
 ## Docs
 
-- `docs/grammar.md` (`--grammar`): document `dx`, `dy`, `scale` transform keys.
+- `docs/grammar.md` (`--grammar`): document `dx`, `dy`, `scale` transform keys;
+  `constrain <expr> as <name>` naming; and keyframe `constrain`/`disable`/`enable` ops.
 - `docs/skill-animation.md` (`--skill-animation`): document geometry transform
-  options, the transition mechanism (and CSS override), and that persistence is now
+  options, the transition mechanism (and CSS override), per-keyframe constraint control
+  (named constraints + disable/enable + override), and that persistence is now
   actually implemented (update/clarify gotcha #3).
 
 ## Non-goals (this iteration)
@@ -165,5 +226,4 @@ Full suite + `examples/render-all.sh` must stay green (CSS-var-ordering diffs as
 - Group `transform: translate/scale` on the `<g>` itself (rejected: scale distorts;
   cascade is the chosen path).
 - Per-keyframe transition duration in the grammar (control via CSS instead).
-- Per-frame constraint hide/show (deferred; noted as the future escape hatch).
 - Auto-layout container animation.
