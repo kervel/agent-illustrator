@@ -664,23 +664,7 @@ pub fn render_svg_with_keyframes(
 
     // Per-connection rendering meta keyed by the same stable identity used for diffs,
     // so the CSS emitter can rebuild a connection's `d` string for `d:` morph rules.
-    let conn_meta: std::collections::HashMap<String, (RoutingMode, bool, f64)> = result
-        .connections
-        .iter()
-        .enumerate()
-        .map(|(i, c)| {
-            let id = c
-                .name
-                .as_ref()
-                .map(|n| n.0.clone())
-                .unwrap_or_else(|| format!("idx{}", i));
-            let marker = matches!(
-                c.direction,
-                ConnectionDirection::Forward | ConnectionDirection::Bidirectional
-            );
-            (id, (c.routing_mode, marker, c.styles.stroke_width.unwrap_or(2.0)))
-        })
-        .collect();
+    let conn_meta = build_conn_meta(result);
 
     // Generate keyframe CSS. With `no_frame_css`, only emit the base hidden
     // rule — element/connection class hooks remain so an external runtime
@@ -841,19 +825,8 @@ fn generate_keyframe_css(
                 ));
             }
             // Position + rotation → transform on the wrapper group (label rides along).
-            let mut xf = Vec::new();
-            if diff.tx.is_some() || diff.ty.is_some() {
-                xf.push(format!(
-                    "translate({}px, {}px)",
-                    diff.tx.unwrap_or(0.0),
-                    diff.ty.unwrap_or(0.0)
-                ));
-            }
-            if let Some(rot) = diff.rotation {
-                xf.push(format!("rotate({}deg)", rot));
-            }
-            if !xf.is_empty() {
-                css.push_str(&format!("  .kf-{} {{ transform: {}; }}\n", elem_id, xf.join(" ")));
+            if let Some(t) = frame_transform_css(diff.tx, diff.ty, diff.rotation) {
+                css.push_str(&format!("  .kf-{} {{ transform: {}; }}\n", elem_id, t));
             }
             // Size + color → inner shape.
             let mut props = Vec::new();
@@ -1526,10 +1499,51 @@ fn callout_path_d(b: &BoundingBox, pointer: PointerDir) -> String {
 }
 
 /// Convert a path of points to an SVG path d attribute
+/// The `transform` value (translate + rotate) for an element diff's position/rotation,
+/// shared by the frame-class CSS and the `@keyframes` animator. None when neither changes.
+pub(crate) fn frame_transform_css(tx: Option<f64>, ty: Option<f64>, rotation: Option<f64>) -> Option<String> {
+    let mut parts = Vec::new();
+    if tx.is_some() || ty.is_some() {
+        parts.push(format!("translate({}px, {}px)", tx.unwrap_or(0.0), ty.unwrap_or(0.0)));
+    }
+    if let Some(rot) = rotation {
+        parts.push(format!("rotate({}deg)", rot));
+    }
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts.join(" "))
+    }
+}
+
+/// Per-connection rendering meta keyed by the stable connection identity (name, or
+/// `idx<N>` for unnamed), so CSS emitters can rebuild a connection's `d` string.
+pub(crate) fn build_conn_meta(
+    result: &LayoutResult,
+) -> std::collections::HashMap<String, (RoutingMode, bool, f64)> {
+    result
+        .connections
+        .iter()
+        .enumerate()
+        .map(|(i, c)| {
+            let id = c
+                .name
+                .as_ref()
+                .map(|n| n.0.clone())
+                .unwrap_or_else(|| format!("idx{}", i));
+            let marker = matches!(
+                c.direction,
+                ConnectionDirection::Forward | ConnectionDirection::Bidirectional
+            );
+            (id, (c.routing_mode, marker, c.styles.stroke_width.unwrap_or(2.0)))
+        })
+        .collect()
+}
+
 /// Build the SVG path `d` string for a connection, including the arrow-marker pullback,
 /// matching exactly what `add_connection_path` renders. Shared so per-frame keyframe CSS
 /// (`d: path(...)`) targets the same geometry the base path uses.
-fn connection_path_d(path: &[Point], routing_mode: RoutingMode, marker_end: bool, stroke_width: f64) -> String {
+pub(crate) fn connection_path_d(path: &[Point], routing_mode: RoutingMode, marker_end: bool, stroke_width: f64) -> String {
     // Shorten the endpoint when a marker is present so the arrow tip lands on the anchor.
     // pullback = 9 * (markerWidth=4 / 10) * strokeWidth = 3.6 * strokeWidth.
     let path = if marker_end && path.len() >= 2 {
