@@ -1,2 +1,0 @@
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
-     Running `target/debug/agent-illustrator test-ellipse-connector.ai`
