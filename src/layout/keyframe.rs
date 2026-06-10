@@ -200,22 +200,31 @@ pub fn compute_frame_diffs(
             let hidden_in_frame0 = frame0_hidden.contains(*id);
             let hidden_in_this_frame = state.hidden_elements.contains(*id);
 
-            // Visibility diff
+            // Position/style diff from transforms. Computed whenever the
+            // element is visible in this frame — including when it is being
+            // shown this frame (so show + transform keeps the transform).
+            let mut diff = if !hidden_in_this_frame {
+                solved_elements
+                    .as_ref()
+                    .and_then(|m| m.get(id))
+                    .map(|solved_elem| diff_element(base_elem, solved_elem))
+                    .unwrap_or_default()
+            } else {
+                ElementDiff::default()
+            };
+
+            // Visibility diff. Hide always forces opacity 0; show forces
+            // opacity 1 unless a transform in this frame set opacity explicitly.
             if hidden_in_frame0 != hidden_in_this_frame {
-                element_diffs.insert(id.to_string(), ElementDiff {
-                    opacity: Some(if hidden_in_this_frame { 0.0 } else { 1.0 }),
-                    ..Default::default()
-                });
-            } else if !hidden_in_this_frame {
-                // Element is visible — check for position/style diffs from transforms
-                if let Some(ref solved_map) = solved_elements {
-                    if let Some(solved_elem) = solved_map.get(id) {
-                        let diff = diff_element(base_elem, solved_elem);
-                        if !diff.is_empty() {
-                            element_diffs.insert(id.to_string(), diff);
-                        }
-                    }
+                if hidden_in_this_frame {
+                    diff.opacity = Some(0.0);
+                } else if diff.opacity.is_none() {
+                    diff.opacity = Some(1.0);
                 }
+            }
+
+            if !diff.is_empty() {
+                element_diffs.insert(id.to_string(), diff);
             }
         }
 

@@ -531,6 +531,18 @@ impl SvgBuilder {
         self.indent += 1;
     }
 
+    /// Add a keyframe class group for elements that start visible but are
+    /// toggled by a later keyframe. Carries `kf-{id}` (without `kf-hidden`)
+    /// so a later frame's `.kf-{id} { opacity: 0 }` rule has a node to bind to.
+    pub fn start_kf_class_group(&mut self, element_id: &str) {
+        self.elements.push(format!(
+            r#"{}<g class="kf-{}">"#,
+            self.indent_str(),
+            element_id
+        ));
+        self.indent += 1;
+    }
+
     /// Add a group element with optional ID, classes, and transform
     pub fn start_group_with_transform(
         &mut self,
@@ -705,10 +717,21 @@ pub fn render_svg_with_keyframes(
         &empty_set
     };
 
+    // Elements that start visible but are toggled (opacity diff) by a later
+    // keyframe need a `kf-{id}` class hook so their hide/show rules bind.
+    // Elements hidden in frame 0 already get the class via start_visibility_group.
+    let kf_referenced: std::collections::HashSet<String> = frame_diffs
+        .iter()
+        .flat_map(|f| f.element_diffs.iter())
+        .filter(|(_, diff)| diff.opacity.is_some())
+        .map(|(id, _)| id.clone())
+        .filter(|id| !frame0_hidden.contains(id))
+        .collect();
+
     let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
     sorted_elements.sort_by_key(|e| e.z_order);
     for element in &sorted_elements {
-        render_element_with_visibility(element, &mut builder, frame0_hidden);
+        render_element_with_visibility(element, &mut builder, frame0_hidden, &kf_referenced);
     }
 
     // Render connections, with hidden connections getting opacity: 0
@@ -747,17 +770,26 @@ fn render_element_with_visibility(
     element: &ElementLayout,
     builder: &mut SvgBuilder,
     hidden: &std::collections::HashSet<String>,
+    kf_referenced: &std::collections::HashSet<String>,
 ) {
     if let Some(id) = &element.id {
         if hidden.contains(&id.0) {
             // Use CSS class for hiding so frame CSS can override it
             builder.start_visibility_group(&id.0);
-            render_element_inner(element, builder, hidden);
+            render_element_inner(element, builder, hidden, kf_referenced);
+            builder.end_group();
+            return;
+        }
+        if kf_referenced.contains(&id.0) {
+            // Visible at frame 0 but toggled by a later keyframe: wrap in a
+            // kf-{id} class group so the later `.kf-{id} { opacity: 0 }` binds.
+            builder.start_kf_class_group(&id.0);
+            render_element_inner(element, builder, hidden, kf_referenced);
             builder.end_group();
             return;
         }
     }
-    render_element_inner(element, builder, hidden);
+    render_element_inner(element, builder, hidden, kf_referenced);
 }
 
 /// Generate CSS for keyframe frame switching
@@ -917,11 +949,21 @@ where
 
 /// Render a single element to the builder (no-keyframe path, no visibility checks)
 fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
-    render_element_inner(element, builder, &std::collections::HashSet::new());
+    render_element_inner(
+        element,
+        builder,
+        &std::collections::HashSet::new(),
+        &std::collections::HashSet::new(),
+    );
 }
 
 /// Render a single element to the builder with visibility checks for children
-fn render_element_inner(element: &ElementLayout, builder: &mut SvgBuilder, hidden: &std::collections::HashSet<String>) {
+fn render_element_inner(
+    element: &ElementLayout,
+    builder: &mut SvgBuilder,
+    hidden: &std::collections::HashSet<String>,
+    kf_referenced: &std::collections::HashSet<String>,
+) {
     let id = element.id.as_ref().map(|i| i.0.as_str());
     let styles = format_styles(&element.styles);
     let classes = element.styles.css_classes.clone();
@@ -1168,7 +1210,7 @@ fn render_element_inner(element: &ElementLayout, builder: &mut SvgBuilder, hidde
 
             // Render children (with visibility checks for keyframe animations)
             for child in &element.children {
-                render_element_with_visibility(child, builder, hidden);
+                render_element_with_visibility(child, builder, hidden, kf_referenced);
             }
 
             builder.end_group();
