@@ -2,38 +2,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -80 1200 580" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
   <style>
     :root {
-    --status-error: #f44336;
-    --text-light: #ffffff;
-    --accent-dark: #1565c0;
-    --secondary-3: #ffe0b2;
-    --foreground-light: #e0e0e0;
-    --text-dark: #1a1a1a;
+    --foreground-1: #333333;
     --background-1: #ffffff;
-    --status-warning: #ff9800;
-    --accent-light: #e3f2fd;
-    --status-success: #4caf50;
-    --secondary-2: #fff3e0;
-    --accent-1: #2196f3;
-    --background-light: #ffffff;
+    --background-3: #eeeeee;
+    --foreground-2: #666666;
     --text-1: #333333;
     --foreground-dark: #1a1a1a;
-    --background-dark: #333333;
-    --background-2: #f5f5f5;
-    --background-3: #eeeeee;
-    --secondary-1: #ff9800;
-    --foreground-2: #666666;
-    --foreground-1: #333333;
     --accent-2: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --text-dark: #1a1a1a;
     --accent-3: #bbdefb;
-    --foreground-3: #999999;
-    --secondary-light: #fff3e0;
-    --text-2: #666666;
-    --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
     --secondary-dark: #e65100;
+    --background-dark: #333333;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --secondary-light: #fff3e0;
+    --accent-1: #2196f3;
+    --background-light: #ffffff;
+    --accent-dark: #1565c0;
+    --text-light: #ffffff;
+    --text-3: #999999;
+    --status-warning: #ff9800;
+    --text-2: #666666;
+    --background-2: #f5f5f5;
+    --foreground-3: #999999;
+    --secondary-3: #ffe0b2;
+    --secondary-2: #fff3e0;
   }
 
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
 .frame-idle {
 }
 .frame-user_prompt {
@@ -637,53 +639,53 @@ text {
     <text id="cli_label" class="ai-shape ai-text" x="414" y="181" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">CLI Harness</text>
     <text id="cloud_label" class="ai-shape ai-text" x="862" y="58.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">LLM</text>
     <text id="gear_label" class="ai-shape ai-text" x="814" y="401" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">Tool (bash)</text>
-    <g class="kf-hidden kf-speech_bubble">
+    <g class="kf-hidden kf-speech_bubble kf-anim">
       <rect id="speech_bubble" class="ai-shape ai-rect" x="100" y="27" width="280" height="56" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
       <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16">list my Python files</text>
     </g>
-    <g class="kf-hidden kf-sys_envelope">
+    <g class="kf-hidden kf-sys_envelope kf-anim">
       <rect id="sys_envelope" class="ai-shape ai-rect" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
-    <g class="kf-hidden kf-sys_line1">
+    <g class="kf-hidden kf-sys_line1 kf-anim">
       <text id="sys_line1" class="ai-shape ai-text" x="531.2" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
     </g>
-    <g class="kf-hidden kf-sys_line2">
+    <g class="kf-hidden kf-sys_line2 kf-anim">
       <text id="sys_line2" class="ai-shape ai-text" x="550.4" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
     </g>
-    <g class="kf-hidden kf-tool_call_envelope">
+    <g class="kf-hidden kf-tool_call_envelope kf-anim">
       <rect id="tool_call_envelope" class="ai-shape ai-rect" x="525" y="180" width="310" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
-    <g class="kf-hidden kf-tc_line1">
+    <g class="kf-hidden kf-tc_line1 kf-anim">
       <text id="tc_line1" class="ai-shape ai-text" x="608" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_call: bash</text>
     </g>
-    <g class="kf-hidden kf-tc_line2">
+    <g class="kf-hidden kf-tc_line2 kf-anim">
       <text id="tc_line2" class="ai-shape ai-text" x="588.8" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
     </g>
-    <g class="kf-hidden kf-exec_envelope">
+    <g class="kf-hidden kf-exec_envelope kf-anim">
       <rect id="exec_envelope" class="ai-shape ai-rect" x="115" y="280" width="290" height="80" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
-    <g class="kf-hidden kf-exec_line1">
+    <g class="kf-hidden kf-exec_line1 kf-anim">
       <text id="exec_line1" class="ai-shape ai-text" x="159.2" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
     </g>
-    <g class="kf-hidden kf-exec_line2">
+    <g class="kf-hidden kf-exec_line2 kf-anim">
       <text id="exec_line2" class="ai-shape ai-text" x="144.8" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
     </g>
-    <g class="kf-hidden kf-result_envelope">
+    <g class="kf-hidden kf-result_envelope kf-anim">
       <rect id="result_envelope" class="ai-shape ai-rect" x="535" y="180" width="290" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
-    <g class="kf-hidden kf-result_line1">
+    <g class="kf-hidden kf-result_line1 kf-anim">
       <text id="result_line1" class="ai-shape ai-text" x="555.2" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_result + conversation</text>
     </g>
-    <g class="kf-hidden kf-result_line2">
+    <g class="kf-hidden kf-result_line2 kf-anim">
       <text id="result_line2" class="ai-shape ai-text" x="564.8" y="229" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
     </g>
-    <g class="kf-hidden kf-answer_envelope">
+    <g class="kf-hidden kf-answer_envelope kf-anim">
       <rect id="answer_envelope" class="ai-shape ai-rect" x="155" y="180" width="290" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
-    <g class="kf-hidden kf-ans_line1">
+    <g class="kf-hidden kf-ans_line1 kf-anim">
       <text id="ans_line1" class="ai-shape ai-text" x="189.60000000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
     </g>
-    <g class="kf-hidden kf-ans_line2">
+    <g class="kf-hidden kf-ans_line2 kf-anim">
       <text id="ans_line2" class="ai-shape ai-text" x="189.60000000000002" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
     </g>
   </g>

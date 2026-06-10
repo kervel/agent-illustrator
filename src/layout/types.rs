@@ -1491,7 +1491,7 @@ mod tests {
         result.add_anchors("head", anchors.clone());
 
         assert_eq!(result.anchors.len(), 1);
-        assert!(result.anchors.get("head").is_some());
+        assert!(result.anchors.contains_key("head"));
     }
 
     #[test]

@@ -932,7 +932,7 @@ mod tests {
             .collect();
 
         // Should have one fixed constraint for width=150
-        assert!(fixed_constraints.len() >= 1);
+        assert!(!fixed_constraints.is_empty());
         let user_constraint = fixed_constraints.iter().find(|c| {
             if let LayoutConstraint::Fixed { value, source, .. } = c {
                 (*value - 150.0).abs() < 0.001 && source.origin == ConstraintOrigin::UserDefined

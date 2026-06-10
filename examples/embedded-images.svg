@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 450 424.5685424949238">
   <style>
     :root {
-    --background-3: #eeeeee;
-    --background-dark: #333333;
-    --background-light: #ffffff;
-    --text-dark: #1a1a1a;
-    --secondary-light: #fff3e0;
-    --status-warning: #ff9800;
-    --foreground-light: #e0e0e0;
-    --accent-3: #bbdefb;
-    --secondary-3: #ffe0b2;
-    --secondary-2: #fff3e0;
-    --secondary-dark: #e65100;
-    --background-2: #f5f5f5;
-    --accent-dark: #1565c0;
-    --text-2: #666666;
-    --status-error: #f44336;
-    --foreground-1: #333333;
-    --status-success: #4caf50;
-    --foreground-3: #999999;
-    --background-1: #ffffff;
-    --accent-1: #2196f3;
-    --foreground-dark: #1a1a1a;
-    --text-light: #ffffff;
     --accent-2: #e3f2fd;
-    --text-1: #333333;
-    --secondary-1: #ff9800;
-    --foreground-2: #666666;
-    --accent-light: #e3f2fd;
     --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --status-error: #f44336;
+    --text-dark: #1a1a1a;
+    --secondary-1: #ff9800;
+    --status-success: #4caf50;
+    --foreground-1: #333333;
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --status-warning: #ff9800;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --secondary-dark: #e65100;
+    --secondary-3: #ffe0b2;
+    --foreground-2: #666666;
+    --background-light: #ffffff;
+    --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --text-1: #333333;
+    --text-light: #ffffff;
+    --accent-1: #2196f3;
+    --foreground-3: #999999;
+    --accent-dark: #1565c0;
+    --accent-3: #bbdefb;
+    --secondary-2: #fff3e0;
+    --background-3: #eeeeee;
+    --secondary-light: #fff3e0;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator

@@ -1896,8 +1896,10 @@ fn extract_string_list(modifiers: &[Spanned<StyleModifier>], name: &str) -> Opti
 fn grid_label_element(text: &str, x: f64, y: f64) -> ElementLayout {
     let w = text.len() as f64 * GRID_LABEL_FONT * 0.6;
     let bounds = BoundingBox::new(x, y, w.max(1.0), GRID_LABEL_FONT);
-    let mut styles = ResolvedStyles::default();
-    styles.font_size = Some(GRID_LABEL_FONT);
+    let styles = ResolvedStyles {
+        font_size: Some(GRID_LABEL_FONT),
+        ..Default::default()
+    };
     ElementLayout {
         id: None,
         element_type: ElementType::Shape(ShapeType::Text {
@@ -4149,7 +4151,7 @@ mod tests {
         assert_eq!(map.get("bob_body"), Some(&"bob".to_string()));
 
         // Top-level elements should not be in the map
-        assert!(map.get("server").is_none());
+        assert!(!map.contains_key("server"));
     }
 
     #[test]

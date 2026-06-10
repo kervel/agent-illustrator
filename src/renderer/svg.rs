@@ -664,6 +664,7 @@ pub fn render_svg(result: &LayoutResult, config: &SvgConfig) -> String {
 }
 
 /// Render a LayoutResult with keyframe animation CSS (Feature 011)
+#[allow(clippy::too_many_arguments)]
 pub fn render_svg_with_keyframes(
     result: &LayoutResult,
     config: &SvgConfig,

@@ -242,7 +242,7 @@ fn check_overlaps(
         .iter()
         .filter(|e| {
             e.id.as_ref()
-                .map_or(true, |id| !hidden_ids.contains(&id.0))
+                .is_none_or(|id| !hidden_ids.contains(&id.0))
         })
         .collect();
 

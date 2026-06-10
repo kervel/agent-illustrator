@@ -98,8 +98,8 @@ fn test_svg_regression_all_examples() {
     for entry in fs::read_dir(examples_dir).expect("Failed to read examples directory") {
         let path = entry.expect("Failed to read entry").path();
 
-        if path.extension().map_or(false, |ext| ext == "ail") {
-            let source = fs::read_to_string(&path).expect(&format!("Failed to read {:?}", path));
+        if path.extension().is_some_and(|ext| ext == "ail") {
+            let source = fs::read_to_string(&path).unwrap_or_else(|_| panic!("Failed to read {:?}", path));
 
             // Set template base path to the file's directory for relative imports
             let config = if let Some(parent) = path.parent() {
@@ -171,8 +171,8 @@ fn generate_baselines() {
     for entry in fs::read_dir(examples_dir).expect("Failed to read examples directory") {
         let path = entry.expect("Failed to read entry").path();
 
-        if path.extension().map_or(false, |ext| ext == "ail") {
-            let source = fs::read_to_string(&path).expect(&format!("Failed to read {:?}", path));
+        if path.extension().is_some_and(|ext| ext == "ail") {
+            let source = fs::read_to_string(&path).unwrap_or_else(|_| panic!("Failed to read {:?}", path));
 
             // Set template base path to the file's directory for relative imports
             let config = if let Some(parent) = path.parent() {
@@ -188,7 +188,7 @@ fn generate_baselines() {
                         .with_extension("svg");
 
                     fs::write(&baseline_path, &svg)
-                        .expect(&format!("Failed to write {:?}", baseline_path));
+                        .unwrap_or_else(|_| panic!("Failed to write {:?}", baseline_path));
 
                     println!("Generated baseline: {:?}", baseline_path);
                     generated += 1;

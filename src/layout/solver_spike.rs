@@ -37,7 +37,7 @@ mod tests {
         // 3. Add offset constraint: c.left = b.right + 20
         // b.right = b.x + b.width
         solver
-            .add_constraint(c_x | EQ(Strength::REQUIRED) | b_x + b_width + 20.0)
+            .add_constraint(c_x | EQ(Strength::REQUIRED) | (b_x + b_width + 20.0))
             .unwrap();
 
         // 4. Add midpoint constraint: d.center_x = midpoint(a.center_x, c.center_x)
@@ -51,7 +51,7 @@ mod tests {
         // => 2*d.x + 100 = a.x + c.x + 100
         // => 2*d.x = a.x + c.x
         solver
-            .add_constraint(2.0 * d_x | EQ(Strength::REQUIRED) | a_x + c_x)
+            .add_constraint((2.0 * d_x) | EQ(Strength::REQUIRED) | (a_x + c_x))
             .unwrap();
 
         // 5. Add inequality constraint: e.width >= 50
@@ -62,7 +62,7 @@ mod tests {
         // 6. Add containment inequality: container.left <= child.left - padding
         // (tested implicitly via LE constraint)
         solver
-            .add_constraint(a_x | LE(Strength::REQUIRED) | b_x + 10.0)
+            .add_constraint(a_x | LE(Strength::REQUIRED) | (b_x + 10.0))
             .unwrap();
 
         // Set some edit variables to anchor the system
@@ -123,7 +123,7 @@ mod tests {
         // b.left = a.right + gap
         // b.x = a.x + a.width + 20
         solver
-            .add_constraint(b_x | EQ(Strength::REQUIRED) | a_x + a_width + 20.0)
+            .add_constraint(b_x | EQ(Strength::REQUIRED) | (a_x + a_width + 20.0))
             .unwrap();
 
         solver.add_edit_variable(a_x, Strength::STRONG).unwrap();

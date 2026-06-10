@@ -436,7 +436,7 @@ where
     // Connection declaration (supports chained: a -> b -> c [modifiers])
     // Feature 009: Now supports anchor syntax (a.right -> b.left)
     // Feature 011: Now supports named connections (a -> b as name [modifiers])
-    let connection_name = just(Token::As).ignore_then(identifier.clone());
+    let connection_name = just(Token::As).ignore_then(identifier);
 
     let connection_decl = anchor_reference
         .clone()
@@ -745,7 +745,7 @@ where
     // Constrain declaration: constrain <expr>
     let constrain_decl = just(Token::Constrain)
         .ignore_then(constraint_expr)
-        .then(just(Token::As).ignore_then(identifier.clone()).or_not())
+        .then(just(Token::As).ignore_then(identifier).or_not())
         .map(|(expr, name)| ConstrainDecl { expr, name });
 
     // ==================== Template Parsing (Feature 005) ====================
@@ -1235,7 +1235,6 @@ where
         let show_op = just(Token::Show)
             .ignore_then(
                 identifier
-                    .clone()
                     .separated_by(just(Token::Comma))
                     .at_least(1)
                     .collect::<Vec<_>>(),
@@ -1245,7 +1244,6 @@ where
         let hide_op = just(Token::Hide)
             .ignore_then(
                 identifier
-                    .clone()
                     .separated_by(just(Token::Comma))
                     .at_least(1)
                     .collect::<Vec<_>>(),
@@ -1253,7 +1251,7 @@ where
             .map_with(|targets, e| Spanned::new(KeyframeOp::Hide(targets), span_range(&e.span())));
 
         let transform_op = just(Token::Transform)
-            .ignore_then(identifier.clone())
+            .ignore_then(identifier)
             .then(modifier_block.clone())
             .map_with(|(target, modifiers), e| {
                 Spanned::new(
@@ -1269,18 +1267,18 @@ where
             .map_with(|decl, e| Spanned::new(KeyframeOp::Constrain(decl), span_range(&e.span())));
 
         let disable_op = just(Token::Disable)
-            .ignore_then(identifier.clone().separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
+            .ignore_then(identifier.separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
             .map_with(|names, e| Spanned::new(KeyframeOp::Disable(names), span_range(&e.span())));
 
         let enable_op = just(Token::Enable)
-            .ignore_then(identifier.clone().separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
+            .ignore_then(identifier.separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
             .map_with(|names, e| Spanned::new(KeyframeOp::Enable(names), span_range(&e.span())));
 
         let keyframe_op = choice((show_op, hide_op, transform_op, kf_constrain_op, disable_op, enable_op));
 
         // Parse optional [no_resolve] modifier on keyframes
         let no_resolve_flag = just(Token::BracketOpen)
-            .ignore_then(identifier.clone().try_map(|id, span| {
+            .ignore_then(identifier.try_map(|id, span| {
                 if id.node.0 == "no_resolve" {
                     Ok(true)
                 } else {
@@ -1290,7 +1288,7 @@ where
             .then_ignore(just(Token::BracketClose));
 
         let keyframe_decl = just(Token::Keyframe)
-            .ignore_then(string_literal.clone())
+            .ignore_then(string_literal)
             .then(no_resolve_flag.or_not())
             .then(
                 keyframe_op

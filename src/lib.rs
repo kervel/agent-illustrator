@@ -506,7 +506,7 @@ fn render_pipeline(
         };
         frame_result.root_elements = filter_visible_elements(&frame_result.root_elements, &state.hidden_elements);
         frame_result.connections.retain(|c| {
-            c.name.as_ref().map_or(true, |n| !state.hidden_connections.contains(&n.0))
+            c.name.as_ref().is_none_or(|n| !state.hidden_connections.contains(&n.0))
         });
 
         render_svg_with_stylesheet(
@@ -566,7 +566,7 @@ fn resolve_frame_index(
             return Ok(idx);
         }
         return Err(RenderError::Layout(layout::LayoutError::validation_error(
-            &format!("frame index {} out of range (0-{})", idx, frame_states.len() - 1),
+            format!("frame index {} out of range (0-{})", idx, frame_states.len() - 1),
         )));
     }
     // Try as name
@@ -576,7 +576,7 @@ fn resolve_frame_index(
         }
     }
     Err(RenderError::Layout(layout::LayoutError::validation_error(
-        &format!("unknown frame '{}'. Available: {}", selector,
+        format!("unknown frame '{}'. Available: {}", selector,
             frame_states.iter().map(|s| s.name.as_str()).collect::<Vec<_>>().join(", ")),
     )))
 }
@@ -590,7 +590,7 @@ fn filter_visible_elements(
     elements
         .iter()
         .filter(|e| {
-            e.id.as_ref().map_or(true, |id| !hidden.contains(&id.0))
+            e.id.as_ref().is_none_or(|id| !hidden.contains(&id.0))
         })
         .cloned()
         .map(|mut e| {

@@ -252,7 +252,7 @@ pub fn compute_frame_diffs(
         }
 
         // Compute connection visibility diffs
-        for (name, _conn) in &base_connections {
+        for name in base_connections.keys() {
             let hidden_in_frame0 = frame_states[0].hidden_connections.contains(*name);
             let hidden_in_this_frame = state.hidden_connections.contains(*name);
 
@@ -435,7 +435,7 @@ fn apply_transform_to_element(
     modifiers: &[crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>],
 ) {
     for elem in elements.iter_mut() {
-        if elem.id.as_ref().map_or(false, |id| id.0 == target_id) {
+        if elem.id.as_ref().is_some_and(|id| id.0 == target_id) {
             apply_modifiers_ordered(elem, modifiers);
             return;
         }
