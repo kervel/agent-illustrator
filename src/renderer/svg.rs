@@ -641,13 +641,33 @@ pub fn render_svg_with_keyframes(
     let frame_names: Vec<&str> = frame_diffs.iter().map(|f| f.name.as_str()).collect();
     builder.data_frames = Some(frame_names.join(","));
 
+    // Per-connection rendering meta keyed by the same stable identity used for diffs,
+    // so the CSS emitter can rebuild a connection's `d` string for `d:` morph rules.
+    let conn_meta: std::collections::HashMap<String, (RoutingMode, bool, f64)> = result
+        .connections
+        .iter()
+        .enumerate()
+        .map(|(i, c)| {
+            let id = c
+                .name
+                .as_ref()
+                .map(|n| n.0.clone())
+                .unwrap_or_else(|| format!("idx{}", i));
+            let marker = matches!(
+                c.direction,
+                ConnectionDirection::Forward | ConnectionDirection::Bidirectional
+            );
+            (id, (c.routing_mode, marker, c.styles.stroke_width.unwrap_or(2.0)))
+        })
+        .collect();
+
     // Generate keyframe CSS. With `no_frame_css`, only emit the base hidden
     // rule — element/connection class hooks remain so an external runtime
     // can supply per-frame visibility rules.
     let keyframe_css = if no_frame_css {
-        String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n")
+        String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }\n")
     } else {
-        generate_keyframe_css(frame_states, frame_diffs)
+        generate_keyframe_css(frame_states, frame_diffs, &conn_meta)
     };
     builder.add_custom_css(&keyframe_css);
 
@@ -708,7 +728,7 @@ pub fn render_svg_with_keyframes(
         let hidden0 = conn
             .name
             .as_ref()
-            .map_or(false, |n| frame0_hidden_conns.contains(&n.0));
+            .is_some_and(|n| frame0_hidden_conns.contains(&n.0));
         if hidden0 {
             // Render with opacity 0 for hidden connections
             let mut hidden_conn = conn.clone();
@@ -761,12 +781,14 @@ fn render_element_with_visibility(
 fn generate_keyframe_css(
     _frame_states: &[crate::layout::keyframe::FrameState],
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
+    conn_meta: &std::collections::HashMap<String, (RoutingMode, bool, f64)>,
 ) -> String {
     let mut css = String::new();
     css.push_str("/* Keyframe animation CSS (auto-generated) */\n");
     css.push_str(".kf-hidden { opacity: 0; }\n");
     css.push_str(".kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n");
     css.push_str(".ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n");
+    css.push_str(".ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }\n");
 
     for frame in frame_diffs {
         let class_name = format!("frame-{}", frame.name);
@@ -820,15 +842,20 @@ fn generate_keyframe_css(
             }
         }
 
-        // Connection visibility diffs. Target `.conn-<name>` (not
-        // `.ai-connection.conn-<name>`) so the rule matches both the path and its
-        // label (the label carries `conn-<name>` but not the `ai-connection` class).
-        for (conn_name, diff) in &frame.connection_diffs {
+        // Connection diffs. Visibility targets `.conn-<id>` (matches both path and
+        // label). Geometry: morphable paths get a per-frame `d:` morph; non-morphable
+        // (reshaped) routes are handled by the crossfade variants (Task 4).
+        for (conn_id, diff) in &frame.connection_diffs {
             if let Some(opacity) = diff.opacity {
-                css.push_str(&format!(
-                    "  .conn-{} {{ opacity: {}; }}\n",
-                    conn_name, opacity
-                ));
+                css.push_str(&format!("  .conn-{} {{ opacity: {}; }}\n", conn_id, opacity));
+            }
+            if let Some(pts) = &diff.path {
+                if diff.morphable {
+                    if let Some((routing, marker, sw)) = conn_meta.get(conn_id) {
+                        let d = connection_path_d(pts, *routing, *marker, *sw);
+                        css.push_str(&format!("  .conn-{} {{ d: path(\"{}\"); }}\n", conn_id, d));
+                    }
+                }
             }
         }
 
