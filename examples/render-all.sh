@@ -16,6 +16,7 @@ stylesheet_for() {
 extra_flags_for() {
     case "$1" in
         agentic-loop-story)   echo "--animate-css" ;;
+        token-prediction)     echo "--animate-css" ;;
         *)                    echo "" ;;
     esac
 }
