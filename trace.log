@@ -1,0 +1,267 @@
+TRACE: Two-phase constraint solver
+TRACE: 13 template instances with local constraints
+TRACE:   r_led: 4 local constraints
+TRACE:   status_led: 14 local constraints
+TRACE:   r_gate: 4 local constraints
+TRACE:   gnd_driver: 4 local constraints
+TRACE:   gnd_led: 4 local constraints
+TRACE:   gnd_main: 4 local constraints
+TRACE:   q_main: 24 local constraints
+TRACE:   q_driver: 18 local constraints
+TRACE:   r_pullup: 4 local constraints
+TRACE:   r_base: 4 local constraints
+TRACE:   d_flyback: 6 local constraints
+TRACE:   r_pulldown: 4 local constraints
+TRACE:   load_motor: 6 local constraints
+TRACE: 44 global constraints
+TRACE: Applying 90° rotation to template 'r_pullup'
+TRACE: Applying 180° rotation to template 'd_flyback'
+TRACE: Applying 90° rotation to template 'r_pulldown'
+TRACE: Phase 2b - Processing 3 templates with rotation
+TRACE: Checking template 'r_pulldown' angle=90
+TRACE: Skipping 'r_pulldown' - already processed
+TRACE: Checking template 'r_pullup' angle=90
+TRACE: Skipping 'r_pullup' - already processed
+TRACE: Checking template 'd_flyback' angle=180
+TRACE: Skipping 'd_flyback' - already processed
+TRACE: adding vcc_5v x_targeted=true y_targeted=true at (5, 23)
+TRACE: adding r_pullup x_targeted=true y_targeted=true at (6, 528)
+TRACE: adding r_pulldown x_targeted=true y_targeted=true at (6, 612)
+TRACE: adding status_label x_targeted=true y_targeted=true at (0, 1235)
+TRACE: adding vcc_3v3 x_targeted=true y_targeted=true at (5, 41)
+TRACE: adding gpio x_targeted=true y_targeted=true at (5, 868)
+TRACE: adding gnd_led x_targeted=true y_targeted=true at (-2, 1164)
+TRACE: adding d_flyback x_targeted=true y_targeted=true at (-0.000000000000003796405077356795, 180)
+TRACE: adding load_motor x_targeted=true y_targeted=true at (-10, 83)
+TRACE: adding r_led x_targeted=true y_targeted=true at (-5, 957)
+TRACE: adding vcc_12v x_targeted=true y_targeted=true at (5, 5)
+TRACE: adding r_gate x_targeted=true y_targeted=true at (-5, 594)
+TRACE: adding label_12v x_targeted=true y_targeted=true at (0, 1190)
+TRACE: adding gnd_driver x_targeted=true y_targeted=true at (-2, 1133)
+TRACE: adding status_led x_targeted=true y_targeted=true at (-21, 1035)
+TRACE: adding q_main x_targeted=true y_targeted=true at (-48, 363)
+TRACE: adding label_3v x_targeted=true y_targeted=true at (0, 1220)
+TRACE: adding gnd_main x_targeted=true y_targeted=true at (-2, 1102)
+TRACE: adding r_base x_targeted=true y_targeted=true at (-5, 915)
+TRACE: adding q_driver x_targeted=true y_targeted=true at (-41, 739)
+TRACE: adding label_5v x_targeted=true y_targeted=true at (0, 1205)
+TRACE: adding flyback_label x_targeted=true y_targeted=true at (0, 1249)
+TRACE: global solution r_led X = 0
+TRACE: global solution d_flyback Y = 63
+TRACE: global solution r_base Height = 16
+TRACE: global solution load_motor Height = 80
+TRACE: global solution vcc_12v Y = 20
+TRACE: global solution vcc_12v Height = 4
+TRACE: global solution flyback_label Y = 89
+TRACE: global solution vcc_3v3 Y = 20
+TRACE: global solution q_driver Height = 98
+TRACE: global solution r_pullup Height = 50
+TRACE: global solution flyback_label X = 430
+TRACE: global solution gpio Width = 50
+TRACE: global solution status_label X = -32
+TRACE: global solution d_flyback X = 395
+TRACE: global solution vcc_12v Width = 60
+TRACE: global solution label_12v X = 390
+TRACE: global solution vcc_3v3 Width = 60
+TRACE: global solution r_pullup X = 161
+TRACE: global solution status_led X = 12
+TRACE: global solution q_driver Y = 184
+TRACE: global solution gnd_main Y = 310
+TRACE: global solution r_pulldown Y = 154
+TRACE: global solution r_pulldown Width = 38
+TRACE: global solution q_driver Width = 76
+TRACE: global solution d_flyback Width = 30.000000000000007
+TRACE: global solution q_main X = 304.5
+TRACE: global solution gpio Y = 84
+TRACE: global solution gnd_main Width = 40
+TRACE: global solution status_led Y = 190
+TRACE: global solution r_led Y = 144
+TRACE: global solution label_12v Y = 16.5
+TRACE: global solution r_gate Height = 16
+TRACE: global solution label_5v Height = 11
+TRACE: global solution label_3v Y = 16.5
+TRACE: global solution label_3v Width = 79.2
+TRACE: global solution label_5v X = 220
+TRACE: global solution status_label Y = 211.5
+TRACE: global solution label_5v Y = 16.5
+TRACE: global solution label_3v X = 70
+TRACE: global solution r_pulldown Height = 50
+TRACE: global solution q_main Height = 106
+TRACE: global solution r_led Width = 60
+TRACE: global solution r_pullup Y = 54
+TRACE: global solution status_label Height = 10
+TRACE: global solution load_motor Y = 54
+TRACE: global solution load_motor X = 325
+TRACE: global solution r_base Width = 60
+TRACE: global solution load_motor Width = 50
+TRACE: global solution r_led Height = 16
+TRACE: global solution vcc_12v X = 320
+TRACE: global solution label_12v Height = 11
+TRACE: global solution gnd_led Y = 273
+TRACE: global solution vcc_5v Y = 20
+TRACE: global solution gnd_driver Width = 40
+TRACE: global solution gpio Height = 20
+TRACE: global solution r_base Y = 86
+TRACE: global solution vcc_5v Height = 4
+TRACE: global solution flyback_label Height = 10
+TRACE: global solution r_gate X = 219
+TRACE: global solution vcc_5v X = 150
+TRACE: global solution gpio X = 5
+TRACE: global solution q_main Y = 174
+TRACE: global solution gnd_main Height = 17
+TRACE: global solution status_led Height = 53
+TRACE: global solution q_main Width = 91
+TRACE: global solution q_driver X = 142
+TRACE: global solution r_gate Y = 126
+TRACE: global solution r_gate Width = 60
+TRACE: global solution label_5v Width = 85.8
+TRACE: global solution gnd_driver Height = 17
+TRACE: global solution flyback_label Width = 42
+TRACE: global solution d_flyback Height = 62
+TRACE: global solution label_12v Width = 99
+TRACE: global solution gnd_led Height = 17
+TRACE: global solution gnd_led Width = 40
+TRACE: global solution label_3v Height = 11
+TRACE: global solution vcc_3v3 X = 0
+TRACE: global solution gnd_main X = 330
+TRACE: global solution vcc_3v3 Height = 4
+TRACE: global solution r_base X = 70
+TRACE: global solution r_pulldown X = 270
+TRACE: global solution gnd_led X = 10
+TRACE: global solution status_label Width = 36
+TRACE: global solution gnd_driver X = 160
+TRACE: global solution gnd_driver Y = 312
+TRACE: global solution vcc_5v Width = 60
+TRACE: global solution status_led Width = 36
+TRACE: global solution r_pullup Width = 38
+TRACE: global r_led X is_targeted=true
+TRACE: global shifting r_led by 5 on Horizontal
+TRACE: global d_flyback Y is_targeted=true
+TRACE: global shifting d_flyback by -117 on Vertical
+TRACE: global r_base Height is_targeted=false
+TRACE: global load_motor Height is_targeted=false
+TRACE: global vcc_12v Y is_targeted=true
+TRACE: global shifting vcc_12v by 15 on Vertical
+TRACE: global vcc_12v Height is_targeted=false
+TRACE: global flyback_label Y is_targeted=true
+TRACE: global shifting flyback_label by -1160 on Vertical
+TRACE: global vcc_3v3 Y is_targeted=true
+TRACE: global shifting vcc_3v3 by -21 on Vertical
+TRACE: global q_driver Height is_targeted=false
+TRACE: global r_pullup Height is_targeted=false
+TRACE: global flyback_label X is_targeted=true
+TRACE: global shifting flyback_label by 430 on Horizontal
+TRACE: global gpio Width is_targeted=false
+TRACE: global status_label X is_targeted=true
+TRACE: global shifting status_label by -32 on Horizontal
+TRACE: global d_flyback X is_targeted=true
+TRACE: global shifting d_flyback by 395 on Horizontal
+TRACE: global vcc_12v Width is_targeted=false
+TRACE: global label_12v X is_targeted=true
+TRACE: global shifting label_12v by 390 on Horizontal
+TRACE: global vcc_3v3 Width is_targeted=false
+TRACE: global r_pullup X is_targeted=true
+TRACE: global shifting r_pullup by 155 on Horizontal
+TRACE: global status_led X is_targeted=true
+TRACE: global shifting status_led by 33 on Horizontal
+TRACE: global q_driver Y is_targeted=true
+TRACE: global shifting q_driver by -555 on Vertical
+TRACE: global gnd_main Y is_targeted=true
+TRACE: global shifting gnd_main by -792 on Vertical
+TRACE: global r_pulldown Y is_targeted=true
+TRACE: global shifting r_pulldown by -458 on Vertical
+TRACE: global r_pulldown Width is_targeted=false
+TRACE: global q_driver Width is_targeted=false
+TRACE: global d_flyback Width is_targeted=false
+TRACE: global q_main X is_targeted=true
+TRACE: global shifting q_main by 352.5 on Horizontal
+TRACE: global gpio Y is_targeted=true
+TRACE: global shifting gpio by -784 on Vertical
+TRACE: global gnd_main Width is_targeted=false
+TRACE: global status_led Y is_targeted=true
+TRACE: global shifting status_led by -845 on Vertical
+TRACE: global r_led Y is_targeted=true
+TRACE: global shifting r_led by -813 on Vertical
+TRACE: global label_12v Y is_targeted=true
+TRACE: global shifting label_12v by -1173.5 on Vertical
+TRACE: global r_gate Height is_targeted=false
+TRACE: global label_5v Height is_targeted=false
+TRACE: global label_3v Y is_targeted=true
+TRACE: global shifting label_3v by -1203.5 on Vertical
+TRACE: global label_3v Width is_targeted=false
+TRACE: global label_5v X is_targeted=true
+TRACE: global shifting label_5v by 220 on Horizontal
+TRACE: global status_label Y is_targeted=true
+TRACE: global shifting status_label by -1023.5 on Vertical
+TRACE: global label_5v Y is_targeted=true
+TRACE: global shifting label_5v by -1188.5 on Vertical
+TRACE: global label_3v X is_targeted=true
+TRACE: global shifting label_3v by 70 on Horizontal
+TRACE: global r_pulldown Height is_targeted=false
+TRACE: global q_main Height is_targeted=false
+TRACE: global r_led Width is_targeted=false
+TRACE: global r_pullup Y is_targeted=true
+TRACE: global shifting r_pullup by -474 on Vertical
+TRACE: global status_label Height is_targeted=false
+TRACE: global load_motor Y is_targeted=true
+TRACE: global shifting load_motor by -29 on Vertical
+TRACE: global load_motor X is_targeted=true
+TRACE: global shifting load_motor by 335 on Horizontal
+TRACE: global r_base Width is_targeted=false
+TRACE: global load_motor Width is_targeted=false
+TRACE: global r_led Height is_targeted=false
+TRACE: global vcc_12v X is_targeted=true
+TRACE: global shifting vcc_12v by 315 on Horizontal
+TRACE: global label_12v Height is_targeted=false
+TRACE: global gnd_led Y is_targeted=true
+TRACE: global shifting gnd_led by -891 on Vertical
+TRACE: global vcc_5v Y is_targeted=true
+TRACE: global shifting vcc_5v by -3 on Vertical
+TRACE: global gnd_driver Width is_targeted=false
+TRACE: global gpio Height is_targeted=false
+TRACE: global r_base Y is_targeted=true
+TRACE: global shifting r_base by -829 on Vertical
+TRACE: global vcc_5v Height is_targeted=false
+TRACE: global flyback_label Height is_targeted=false
+TRACE: global r_gate X is_targeted=true
+TRACE: global shifting r_gate by 224 on Horizontal
+TRACE: global vcc_5v X is_targeted=true
+TRACE: global shifting vcc_5v by 145 on Horizontal
+TRACE: global gpio X is_targeted=true
+TRACE: global q_main Y is_targeted=true
+TRACE: global shifting q_main by -189 on Vertical
+TRACE: global gnd_main Height is_targeted=false
+TRACE: global status_led Height is_targeted=false
+TRACE: global q_main Width is_targeted=false
+TRACE: global q_driver X is_targeted=true
+TRACE: global shifting q_driver by 183 on Horizontal
+TRACE: global r_gate Y is_targeted=true
+TRACE: global shifting r_gate by -468 on Vertical
+TRACE: global r_gate Width is_targeted=false
+TRACE: global label_5v Width is_targeted=false
+TRACE: global gnd_driver Height is_targeted=false
+TRACE: global flyback_label Width is_targeted=false
+TRACE: global d_flyback Height is_targeted=false
+TRACE: global label_12v Width is_targeted=false
+TRACE: global gnd_led Height is_targeted=false
+TRACE: global gnd_led Width is_targeted=false
+TRACE: global label_3v Height is_targeted=false
+TRACE: global vcc_3v3 X is_targeted=true
+TRACE: global shifting vcc_3v3 by -5 on Horizontal
+TRACE: global gnd_main X is_targeted=true
+TRACE: global shifting gnd_main by 332 on Horizontal
+TRACE: global vcc_3v3 Height is_targeted=false
+TRACE: global r_base X is_targeted=true
+TRACE: global shifting r_base by 75 on Horizontal
+TRACE: global r_pulldown X is_targeted=true
+TRACE: global shifting r_pulldown by 264 on Horizontal
+TRACE: global gnd_led X is_targeted=true
+TRACE: global shifting gnd_led by 12 on Horizontal
+TRACE: global status_label Width is_targeted=false
+TRACE: global gnd_driver X is_targeted=true
+TRACE: global shifting gnd_driver by 162 on Horizontal
+TRACE: global gnd_driver Y is_targeted=true
+TRACE: global shifting gnd_driver by -821 on Vertical
+TRACE: global vcc_5v Width is_targeted=false
+TRACE: global status_led Width is_targeted=false
+TRACE: global r_pullup Width is_targeted=false

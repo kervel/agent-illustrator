@@ -1,0 +1,217 @@
+/* INTENT
+   Communicate the high-level software architecture of the Arabel port management platform.
+   Audience: developers, architects, stakeholders.
+   They should understand: the main components, how they connect, data flow, and deployment topology.
+*/
+
+/* GLOBAL DESIGN
+   Butterfly layout with Django as center hub.
+   Row 1: Daphne, Frontend, Nginx, Celery (all feed into Django)
+   Row 2: Django alone (center)
+   Left wing: Data stores (PostgreSQL, Redis, MinIO)
+   Right wing: External services (Zitadel, Mollie, SendGrid)
+   Bottom spine: NATS broker → Physical devices
+   Use direct routing for fan-in/fan-out connections to avoid orthogonal clutter.
+*/
+
+// === TEMPLATES ===
+
+template "service_box" (name: "Service") {
+    rect body [width: 160, height: 45, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: name, font_size: 11]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+template "data_store" (name: "DB") {
+    ellipse body [width: 160, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: name, font_size: 11]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+template "external_box" (name: "External") {
+    rect body [width: 160, height: 45, fill: accent-light, stroke: accent-1, stroke_width: 2, label: name, font_size: 11]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+template "device_box" (name: "Device") {
+    rect body [width: 140, height: 42, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: name, font_size: 11]
+    anchor top_conn [position: body.top - 4, direction: up]
+    anchor bottom_conn [position: body.bottom + 4, direction: down]
+    anchor left_conn [position: body.left - 4, direction: left]
+    anchor right_conn [position: body.right + 4, direction: right]
+}
+
+// === ELEMENTS ===
+
+group diagram {
+    // Background zones
+    rect data_bg [fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15]
+    rect ext_bg [fill: accent-light, stroke: accent-1, stroke_width: 1, opacity: 0.15]
+    rect iot_bg [fill: accent-2, stroke: accent-dark, stroke_width: 1, opacity: 0.12]
+    rect device_bg [fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.12]
+
+    // Zone labels
+    text "Data Stores" data_label [font_size: 12, fill: secondary-dark]
+    text "External Services" ext_label [font_size: 12, fill: accent-dark]
+    text "IoT / Messaging" iot_label [font_size: 11, fill: accent-dark]
+    text "Physical Devices" device_label [font_size: 11, fill: secondary-dark]
+
+    // Title
+    text "Arabel — Port Management Platform" diagram_title [font_size: 22, fill: foreground-1]
+
+    // Row 1: User-facing + workers
+    service_box daphne [name: "Daphne (ASGI/WS)"]
+    service_box frontend [name: "Angular 17 Frontend"]
+    service_box nginx_svc [name: "Nginx Static Assets"]
+    service_box celery [name: "Celery Workers"]
+
+    // Row 2: Django hub
+    rect django_body [width: 240, height: 60, fill: accent-1, stroke: accent-dark, stroke_width: 3, label: "Django 5.2 REST API", font_size: 14]
+
+    // Left wing: Data stores
+    data_store postgres [name: "PostgreSQL 15 + PostGIS"]
+    data_store redis [name: "Redis 7 Cache"]
+    data_store minio [name: "MinIO S3 Storage"]
+
+    // Right wing: External services
+    external_box zitadel [name: "Zitadel OAuth2/OIDC"]
+    external_box mollie [name: "Mollie Payments"]
+    external_box sendgrid [name: "SendGrid Email"]
+
+    // Bottom: IoT messaging
+    service_box nats_worker [name: "NATS/SB1 Worker"]
+    rect nats_body [width: 180, height: 50, fill: accent-2, stroke: accent-dark, stroke_width: 2, label: "NATS IoT Broker", font_size: 12]
+    service_box nats_bridge [name: "Rust HTTP-NATS Bridge"]
+
+    // Bottom: Physical devices
+    device_box kc80 [name: "KC80 Access Points"]
+    device_box sb1 [name: "SB1 Meters"]
+    device_box unipi [name: "UniPi Controllers"]
+}
+
+// === LAYOUT ===
+
+constrain diagram_title.center_x = 500
+constrain diagram_title.center_y = 28
+
+// --- Row 1 (y=85): Daphne, Frontend, Nginx, Celery ---
+constrain daphne.center_x = 240
+constrain daphne.center_y = 85
+
+constrain frontend.center_x = 420
+constrain frontend.center_y = 85
+
+constrain nginx_svc.center_x = 600
+constrain nginx_svc.center_y = 85
+
+constrain celery.center_x = 780
+constrain celery.center_y = 85
+
+// --- Row 2 (y=200): Django center ---
+constrain django_body.center_x = 500
+constrain django_body.center_y = 200
+
+// --- Left wing: Data stores (x=150, y=300..450) ---
+constrain data_bg.center_x = 150
+constrain data_bg.center_y = 365
+constrain data_bg.width = 210
+constrain data_bg.height = 260
+constrain data_label.center_x = 150
+constrain data_label.center_y = 250
+
+constrain postgres.center_x = 150
+constrain postgres.center_y = 305
+
+constrain redis.center_x = 150
+constrain redis.center_y = 380
+
+constrain minio.center_x = 150
+constrain minio.center_y = 455
+
+// --- Right wing: External services (x=850, y=300..450) ---
+constrain ext_bg.center_x = 850
+constrain ext_bg.center_y = 365
+constrain ext_bg.width = 210
+constrain ext_bg.height = 260
+constrain ext_label.center_x = 850
+constrain ext_label.center_y = 250
+
+constrain zitadel.center_x = 850
+constrain zitadel.center_y = 305
+
+constrain mollie.center_x = 850
+constrain mollie.center_y = 380
+
+constrain sendgrid.center_x = 850
+constrain sendgrid.center_y = 455
+
+// --- Bottom: IoT Messaging (y=540) ---
+constrain iot_bg.center_x = 500
+constrain iot_bg.center_y = 540
+constrain iot_bg.width = 620
+constrain iot_bg.height = 90
+constrain iot_label.left = 210
+constrain iot_label.center_y = 502
+
+constrain nats_worker.center_x = 310
+constrain nats_worker.center_y = 540
+
+constrain nats_body.center_x = 500
+constrain nats_body.center_y = 540
+
+constrain nats_bridge.center_x = 700
+constrain nats_bridge.center_y = 540
+
+// --- Bottom: Physical devices (y=650) ---
+constrain device_bg.center_x = 500
+constrain device_bg.center_y = 650
+constrain device_bg.width = 620
+constrain device_bg.height = 80
+constrain device_label.left = 210
+constrain device_label.center_y = 618
+
+constrain kc80.center_x = 345
+constrain kc80.center_y = 650
+
+constrain sb1.center_x = 500
+constrain sb1.center_y = 650
+
+constrain unipi.center_x = 655
+constrain unipi.center_y = 650
+
+// === CONNECTIONS ===
+
+// Row 1 → Django: direct routing for clean fan-in
+daphne.bottom_conn -> django_body.top [routing: orthogonal, label: "WS"]
+frontend.bottom_conn -> django_body.top [label: "REST"]
+nginx_svc.bottom_conn -> django_body.top [label: "static"]
+celery.bottom_conn -> django_body.top [routing: orthogonal, label: "tasks"]
+
+// Django → Data stores: direct routing for clean fan-out left
+django_body.left -> postgres.right_conn [routing: orthogonal, label: "ORM"]
+django_body.left -> redis.right_conn [routing: orthogonal, label: "cache"]
+django_body.left -> minio.right_conn [routing: orthogonal, label: "S3"]
+
+// Django → External services: direct routing for clean fan-out right
+django_body.right -> zitadel.left_conn [routing: orthogonal, label: "OAuth2"]
+django_body.right -> mollie.left_conn [routing: orthogonal, label: "payments"]
+django_body.right -> sendgrid.left_conn [routing: orthogonal, label: "email"]
+
+// Django → NATS: vertical center spine (keep orthogonal - it's axis-aligned)
+django_body.bottom -> nats_body.top [label: "pub/sub"]
+
+// NATS horizontal (keep orthogonal - axis-aligned)
+nats_worker.right_conn -> nats_body.left
+nats_bridge.left_conn -> nats_body.right
+
+// NATS → Devices: direct routing for fan-out
+nats_body.bottom -> kc80.top_conn [routing: orthogonal, label: "whitelist"]
+nats_body.bottom -> sb1.top_conn [label: "polling"]
+nats_body.bottom -> unipi.top_conn [routing: orthogonal, label: "control"]

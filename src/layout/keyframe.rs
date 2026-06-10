@@ -47,8 +47,10 @@ pub struct FrameLayout {
 /// Diff for a single element between frame N and frame 0
 #[derive(Debug, Clone, Default)]
 pub struct ElementDiff {
-    pub x: Option<f64>,
-    pub y: Option<f64>,
+    /// Translate delta X (solved.x - base.x), emitted as transform on the wrapper group
+    pub tx: Option<f64>,
+    /// Translate delta Y (solved.y - base.y)
+    pub ty: Option<f64>,
     pub width: Option<f64>,
     pub height: Option<f64>,
     pub rotation: Option<f64>,
@@ -65,8 +67,8 @@ pub struct ConnectionDiff {
 
 impl ElementDiff {
     pub fn is_empty(&self) -> bool {
-        self.x.is_none()
-            && self.y.is_none()
+        self.tx.is_none()
+            && self.ty.is_none()
             && self.width.is_none()
             && self.height.is_none()
             && self.rotation.is_none()
@@ -323,6 +325,7 @@ fn rewrite_constraints_for_transforms(doc: &Document, state: &FrameState) -> Doc
         let has_geometry = modifiers.iter().any(|m| matches!(
             m.node.key.node,
             StyleKey::X | StyleKey::Y | StyleKey::Width | StyleKey::Height
+                | StyleKey::Dx | StyleKey::Dy | StyleKey::Scale
         ));
         if has_geometry {
             geometry_transformed.insert(elem_id.as_str());
@@ -440,10 +443,10 @@ fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
     let eps = 0.1; // Sub-pixel threshold
 
     if (base.bounds.x - solved.bounds.x).abs() > eps {
-        diff.x = Some(solved.bounds.x);
+        diff.tx = Some(solved.bounds.x - base.bounds.x);
     }
     if (base.bounds.y - solved.bounds.y).abs() > eps {
-        diff.y = Some(solved.bounds.y);
+        diff.ty = Some(solved.bounds.y - base.bounds.y);
     }
     if (base.bounds.width - solved.bounds.width).abs() > eps {
         diff.width = Some(solved.bounds.width);

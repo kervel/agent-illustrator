@@ -524,7 +524,7 @@ impl SvgBuilder {
     /// Uses a CSS class so frame CSS rules can override visibility.
     pub fn start_visibility_group(&mut self, element_id: &str) {
         self.elements.push(format!(
-            r#"{}<g class="kf-hidden kf-{}">"#,
+            r#"{}<g class="kf-hidden kf-{} kf-anim">"#,
             self.indent_str(),
             element_id
         ));
@@ -536,7 +536,7 @@ impl SvgBuilder {
     /// so a later frame's `.kf-{id} { opacity: 0 }` rule has a node to bind to.
     pub fn start_kf_class_group(&mut self, element_id: &str) {
         self.elements.push(format!(
-            r#"{}<g class="kf-{}">"#,
+            r#"{}<g class="kf-{} kf-anim">"#,
             self.indent_str(),
             element_id
         ));
@@ -687,7 +687,7 @@ pub fn render_svg_with_keyframes(
     // rule — element/connection class hooks remain so an external runtime
     // can supply per-frame visibility rules.
     let keyframe_css = if no_frame_css {
-        String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n")
+        String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n")
     } else {
         generate_keyframe_css(frame_states, frame_diffs)
     };
@@ -723,7 +723,7 @@ pub fn render_svg_with_keyframes(
     let kf_referenced: std::collections::HashSet<String> = frame_diffs
         .iter()
         .flat_map(|f| f.element_diffs.iter())
-        .filter(|(_, diff)| diff.opacity.is_some())
+        .filter(|(_, diff)| !diff.is_empty())
         .map(|(id, _)| id.clone())
         .filter(|id| !frame0_hidden.contains(id))
         .collect();
@@ -800,36 +800,45 @@ fn generate_keyframe_css(
     let mut css = String::new();
     css.push_str("/* Keyframe animation CSS (auto-generated) */\n");
     css.push_str(".kf-hidden { opacity: 0; }\n");
+    css.push_str(".kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n");
+    css.push_str(".ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n");
 
     for frame in frame_diffs {
         let class_name = format!("frame-{}", frame.name);
         css.push_str(&format!(".{} {{\n", class_name));
 
-        // Element diffs (visibility, position, style)
+        // Element diffs. Position + rotation + opacity animate on the wrapper group
+        // (.kf-{id}, which contains shape + label, so the label rides along); size +
+        // color animate on the inner shape (#{id}).
         for (elem_id, diff) in &frame.element_diffs {
-            // Separate visibility (opacity) from other property changes.
-            // Visibility targets the wrapper group (.kf-{id}), other props target the element (#id).
             if let Some(opacity) = diff.opacity {
                 css.push_str(&format!(
                     "  .kf-{} {{ opacity: {}; }}\n",
                     elem_id, opacity
                 ));
             }
+            // Position + rotation → transform on the wrapper group (label rides along).
+            let mut xf = Vec::new();
+            if diff.tx.is_some() || diff.ty.is_some() {
+                xf.push(format!(
+                    "translate({}px, {}px)",
+                    diff.tx.unwrap_or(0.0),
+                    diff.ty.unwrap_or(0.0)
+                ));
+            }
+            if let Some(rot) = diff.rotation {
+                xf.push(format!("rotate({}deg)", rot));
+            }
+            if !xf.is_empty() {
+                css.push_str(&format!("  .kf-{} {{ transform: {}; }}\n", elem_id, xf.join(" ")));
+            }
+            // Size + color → inner shape.
             let mut props = Vec::new();
-            if let Some(x) = diff.x {
-                props.push(format!("x: {}px", x));
-            }
-            if let Some(y) = diff.y {
-                props.push(format!("y: {}px", y));
-            }
             if let Some(w) = diff.width {
                 props.push(format!("width: {}px", w));
             }
             if let Some(h) = diff.height {
                 props.push(format!("height: {}px", h));
-            }
-            if let Some(rot) = diff.rotation {
-                props.push(format!("rotate: {}deg", rot));
             }
             if let Some(ref fill) = diff.fill {
                 props.push(format!("fill: {}", fill));

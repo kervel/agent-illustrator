@@ -40,9 +40,9 @@ keyframe "gone" {
 
     // ...but it only works if some element actually carries the kf-box1 class.
     // Match a class attribute (not the `.kf-box1` CSS selector) — the wrapper
-    // group is `<g class="kf-box1">` (or `kf-hidden kf-box1`).
+    // group is `<g class="kf-box1 kf-anim">` (or `kf-hidden kf-box1 kf-anim`).
     assert!(
-        svg.contains(r#"class="kf-box1""#) || svg.contains("kf-hidden kf-box1"),
+        svg.contains(r#"class="kf-box1 "#) || svg.contains("kf-hidden kf-box1"),
         "element box1 must carry the kf-box1 class so the hide rule binds, got:\n{}",
         svg
     );
