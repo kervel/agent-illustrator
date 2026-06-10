@@ -21,6 +21,10 @@ pub struct FrameState {
     pub hidden_connections: HashSet<String>,
     /// Per-element transform overrides (element_id -> style modifiers)
     pub transforms: HashMap<String, Vec<crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>>>,
+    /// Constraints added by keyframes, active from their frame forward (cumulative).
+    pub added_constraints: Vec<crate::parser::ast::ConstrainDecl>,
+    /// Names of constraints disabled from this frame forward (cumulative).
+    pub disabled_constraints: HashSet<String>,
     /// If true, skip constraint re-solving for this frame
     pub no_resolve: bool,
 }
@@ -97,6 +101,9 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
     let mut hidden_connections: HashSet<String> = HashSet::new();
     // Cumulative transforms: element id -> merged modifiers (later keys override earlier).
     let mut cumulative_transforms: HashMap<String, Vec<crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>>> = HashMap::new();
+    // Cumulative constraint changes.
+    let mut added_constraints: Vec<crate::parser::ast::ConstrainDecl> = Vec::new();
+    let mut disabled_constraints: HashSet<String> = HashSet::new();
 
     for kf in keyframes {
         // Apply operations cumulatively
@@ -122,8 +129,15 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
                         entry.push(m.clone());
                     }
                 }
-                // Constraint ops are accumulated into FrameState in Task B3.
-                KeyframeOp::Constrain(_) | KeyframeOp::Disable(_) | KeyframeOp::Enable(_) => {}
+                KeyframeOp::Constrain(decl) => {
+                    added_constraints.push(decl.clone());
+                }
+                KeyframeOp::Disable(names) => {
+                    for n in names { disabled_constraints.insert(n.node.0.clone()); }
+                }
+                KeyframeOp::Enable(names) => {
+                    for n in names { disabled_constraints.remove(&n.node.0); }
+                }
             }
         }
 
@@ -132,6 +146,8 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
             hidden_elements: hidden_elements.clone(),
             hidden_connections: hidden_connections.clone(),
             transforms: cumulative_transforms.clone(),
+            added_constraints: added_constraints.clone(),
+            disabled_constraints: disabled_constraints.clone(),
             no_resolve: kf.no_resolve,
         });
     }
@@ -543,6 +559,19 @@ mod tests {
         let mods = vec![modi(StyleKey::Dx, 5.0), modi(StyleKey::X, 100.0)];
         apply_transform_to_element(std::slice::from_mut(&mut elem), "e", &mods);
         assert!((elem.bounds.x - 105.0).abs() < 0.001, "x {}", elem.bounds.x);
+    }
+
+    #[test]
+    fn constraint_ops_accumulate_per_frame() {
+        let kf = KeyframeDecl {
+            name: Spanned::new("k".into(), 0..0),
+            operations: vec![
+                Spanned::new(KeyframeOp::Disable(vec![make_id("a_home")]), 0..0),
+            ],
+            no_resolve: false,
+        };
+        let states = compute_frame_states(&[&kf]);
+        assert!(states[0].disabled_constraints.contains("a_home"));
     }
 
     #[test]
