@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 880 540" data-frames="prompt,predict,append">
+  <style>
+    :root {
+    --foreground-3: #999999;
+    --secondary-1: #ff9800;
+    --background-1: #ffffff;
+    --secondary-dark: #e65100;
+    --accent-1: #2196f3;
+    --text-3: #999999;
+    --secondary-2: #fff3e0;
+    --foreground-1: #333333;
+    --text-light: #ffffff;
+    --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --text-1: #333333;
+    --accent-light: #e3f2fd;
+    --accent-dark: #1565c0;
+    --secondary-3: #ffe0b2;
+    --background-3: #eeeeee;
+    --background-light: #ffffff;
+    --secondary-light: #fff3e0;
+    --accent-3: #bbdefb;
+    --foreground-2: #666666;
+    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
+    --text-2: #666666;
+    --text-dark: #1a1a1a;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --accent-2: #e3f2fd;
+  }
+
+    /* Keyframe animation CSS (auto-generated) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.frame-prompt {
+}
+.frame-predict {
+  .kf-tok3 { opacity: 1; }
+}
+.frame-append {
+  #inbox { width: 340px; }
+  .kf-tok1 { transform: translate(50px, 0px); }
+  .kf-tok2 { transform: translate(50px, 0px); }
+  .kf-tok3 { opacity: 1; }
+  .kf-tok3 { transform: translate(-240px, -180px); }
+}
+
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+
+  </style>
+  <rect id="canvas" class="ai-shape ai-rect" x="0" y="0" width="760" height="420" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
+  <g class="kf-inbox kf-anim">
+    <rect id="inbox" class="ai-shape ai-rect" x="130" y="85" width="240" height="70" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2"/>
+  </g>
+  <g class="kf-tok1 kf-anim">
+    <rect id="tok1" class="ai-shape ai-rect" x="175" y="102" width="50" height="36" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1.5"/>
+    <text class="ai-label" x="200" y="120" text-anchor="middle" dominant-baseline="middle">The</text>
+  </g>
+  <g class="kf-tok2 kf-anim">
+    <rect id="tok2" class="ai-shape ai-rect" x="235" y="102" width="50" height="36" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1.5"/>
+    <text class="ai-label" x="260" y="120" text-anchor="middle" dominant-baseline="middle">cat</text>
+  </g>
+  <rect id="llm" class="ai-shape ai-rect" x="520" y="85" width="160" height="70" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <text class="ai-label" x="600" y="120" text-anchor="middle" dominant-baseline="middle">LLM</text>
+  <g class="kf-hidden kf-tok3 kf-anim">
+    <rect id="tok3" class="ai-shape ai-rect" x="575" y="282" width="50" height="36" fill="var(--secondary-2)" stroke="var(--secondary-dark)" stroke-width="1.5"/>
+    <text class="ai-label" x="600" y="300" text-anchor="middle" dominant-baseline="middle">sat</text>
+  </g>
+</svg>
