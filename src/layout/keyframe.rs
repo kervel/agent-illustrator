@@ -122,6 +122,8 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
                         entry.push(m.clone());
                     }
                 }
+                // Constraint ops are accumulated into FrameState in Task B3.
+                KeyframeOp::Constrain(_) | KeyframeOp::Disable(_) | KeyframeOp::Enable(_) => {}
             }
         }
 

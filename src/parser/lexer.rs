@@ -128,6 +128,10 @@ pub enum Token {
     Hide,
     #[token("transform")]
     Transform,
+    #[token("disable")]
+    Disable,
+    #[token("enable")]
+    Enable,
 
     // Constraint keywords
     #[token("constrain")]

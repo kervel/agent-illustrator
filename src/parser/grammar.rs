@@ -1265,7 +1265,18 @@ where
                 )
             });
 
-        let keyframe_op = choice((show_op, hide_op, transform_op));
+        let kf_constrain_op = constrain_decl.clone()
+            .map_with(|decl, e| Spanned::new(KeyframeOp::Constrain(decl), span_range(&e.span())));
+
+        let disable_op = just(Token::Disable)
+            .ignore_then(identifier.clone().separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
+            .map_with(|names, e| Spanned::new(KeyframeOp::Disable(names), span_range(&e.span())));
+
+        let enable_op = just(Token::Enable)
+            .ignore_then(identifier.clone().separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
+            .map_with(|names, e| Spanned::new(KeyframeOp::Enable(names), span_range(&e.span())));
+
+        let keyframe_op = choice((show_op, hide_op, transform_op, kf_constrain_op, disable_op, enable_op));
 
         // Parse optional [no_resolve] modifier on keyframes
         let no_resolve_flag = just(Token::BracketOpen)
@@ -2665,6 +2676,30 @@ mod tests {
             }
             other => panic!("Expected TemplateDecl, got {:?}", other),
         }
+    }
+
+    #[test]
+    fn parses_keyframe_constraint_ops() {
+        use crate::parser::ast::{Statement, KeyframeOp};
+        let src = r#"
+rect a [width: 10, height: 10]
+constrain a.center_x = 10 as a_home
+keyframe "k" {
+    disable a_home
+    constrain a.center_x = 200
+    enable a_home
+}
+"#;
+        let doc = parse(src).expect("parse ok");
+        let kf = doc.statements.iter().find_map(|s| match &s.node {
+            Statement::Keyframe(k) => Some(k), _ => None,
+        }).expect("keyframe");
+        let has_disable = kf.operations.iter().any(|o| matches!(&o.node, KeyframeOp::Disable(n) if n.iter().any(|x| x.node.0 == "a_home")));
+        let has_enable  = kf.operations.iter().any(|o| matches!(&o.node, KeyframeOp::Enable(n) if n.iter().any(|x| x.node.0 == "a_home")));
+        let has_constr  = kf.operations.iter().any(|o| matches!(&o.node, KeyframeOp::Constrain(_)));
+        assert!(has_disable, "disable parsed");
+        assert!(has_enable, "enable parsed");
+        assert!(has_constr, "keyframe-scoped constrain parsed");
     }
 
     #[test]

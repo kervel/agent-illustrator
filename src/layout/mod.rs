@@ -223,6 +223,13 @@ fn validate_refs_in_statement(
                             });
                         }
                     }
+                    crate::parser::ast::KeyframeOp::Constrain(decl) => {
+                        validate_constraint_expr_refs(&decl.expr, defined, &op.span)?;
+                    }
+                    crate::parser::ast::KeyframeOp::Disable(_)
+                    | crate::parser::ast::KeyframeOp::Enable(_) => {
+                        // These reference constraint names (not element ids); not validated here.
+                    }
                 }
             }
         }

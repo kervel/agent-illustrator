@@ -288,6 +288,12 @@ pub enum KeyframeOp {
         target: Spanned<Identifier>,
         modifiers: Vec<Spanned<StyleModifier>>,
     },
+    /// Activate a constraint for this frame forward (cumulative).
+    Constrain(ConstrainDecl),
+    /// Deactivate named constraints from this frame forward.
+    Disable(Vec<Spanned<Identifier>>),
+    /// Reactivate previously disabled named constraints.
+    Enable(Vec<Spanned<Identifier>>),
 }
 
 /// Position constraint
