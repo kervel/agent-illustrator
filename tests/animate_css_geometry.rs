@@ -18,8 +18,10 @@ keyframe "move" { transform box [dx: 40] }
 "#;
 
 fn animate_css(src: &str) -> String {
-    let mut cfg = RenderConfig::default();
-    cfg.animate_css = true;
+    let cfg = RenderConfig {
+        animate_css: true,
+        ..Default::default()
+    };
     render_with_config(src, cfg).expect("render")
 }
 
@@ -41,6 +43,37 @@ fn animate_css_emits_element_size_keyframes() {
     assert!(
         svg.contains("@keyframes kf-width-box"),
         "expected a width @keyframes (kf-width-box) for the grown element, got:\n{}",
+        svg
+    );
+}
+
+#[test]
+fn animate_css_morphable_connection_d_keyframes() {
+    let svg = animate_css(SRC); // feed: straight box.right->other.left, box widens (morphable)
+    assert!(
+        svg.contains("@keyframes kf-d-feed"),
+        "expected d-morph @keyframes (kf-d-feed) for the following connection, got:\n{}",
+        svg
+    );
+}
+
+#[test]
+fn animate_css_reshaping_connection_crossfades() {
+    let svg = animate_css(r#"
+rect box [width: 80, height: 40]
+rect other [width: 80, height: 40]
+constrain box.center_x = 120
+constrain box.center_y = 100
+constrain other.center_x = 120
+constrain other.center_y = 320
+box.bottom -> other.top as link
+keyframe "idle" {}
+keyframe "shift" { transform box [dx: 220] }
+"#);
+    // reshaping route → crossfade variant participates in a (step) opacity animation
+    assert!(
+        svg.contains("conn-link-fshift") && svg.contains("kf-variant-link-shift"),
+        "expected crossfade variant animation for reshaping route, got:\n{}",
         svg
     );
 }

@@ -538,7 +538,15 @@ fn render_pipeline(
             let conn_meta = renderer::svg::build_conn_meta(&result);
             let mut base_dims: std::collections::HashMap<String, (f64, f64)> = std::collections::HashMap::new();
             collect_base_dims(&result.root_elements, &mut base_dims);
-            let css = generate_animate_css(&frame_states, &frame_diffs, &conn_meta, &base_dims);
+            // Base (frame-0) `d` per connection — the rest value for d-morph keyframes.
+            let mut base_conn_d: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+            for (i, c) in result.connections.iter().enumerate() {
+                let id = c.name.as_ref().map(|x| x.0.clone()).unwrap_or_else(|| format!("idx{}", i));
+                if let Some((r, m, sw)) = conn_meta.get(&id) {
+                    base_conn_d.insert(id, format!("path(\"{}\")", renderer::svg::connection_path_d(&c.path, *r, *m, *sw)));
+                }
+            }
+            let css = generate_animate_css(&frame_states, &frame_diffs, &conn_meta, &base_dims, &base_conn_d);
             if let Some(pos) = svg.rfind("</style>") {
                 svg.insert_str(pos, &css);
             }
@@ -640,11 +648,27 @@ fn smooth_keyframes_body(prop: &str, vals: &[Option<String>], identity: &str, pc
     Some(body)
 }
 
+/// Emit a step-end `@keyframes` body for an opacity timeline (one value per frame).
+fn step_opacity_keyframes_body(timeline: &[f64], pct_per_frame: f64, n: usize) -> String {
+    let mut body = String::new();
+    for (i, &opacity) in timeline.iter().enumerate() {
+        let start_pct = i as f64 * pct_per_frame;
+        let end_pct = (i + 1) as f64 * pct_per_frame;
+        if i == n - 1 {
+            body.push_str(&format!("  {:.1}% {{ opacity: {}; }}\n", start_pct, opacity));
+        } else {
+            body.push_str(&format!("  {:.1}%, {:.1}% {{ opacity: {}; }}\n", start_pct, end_pct - 0.01, opacity));
+        }
+    }
+    body
+}
+
 fn generate_animate_css(
     frame_states: &[layout::keyframe::FrameState],
     frame_diffs: &[layout::keyframe::FrameLayout],
     conn_meta: &std::collections::HashMap<String, (layout::RoutingMode, bool, f64)>,
     base_dims: &std::collections::HashMap<String, (f64, f64)>,
+    base_conn_d: &std::collections::HashMap<String, String>,
 ) -> String {
     let n = frame_diffs.len();
     if n == 0 {
@@ -792,9 +816,51 @@ fn generate_animate_css(
         css.push_str("}\n");
 
         css.push_str(&format!(
-            ".ai-connection.conn-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
+            ".conn-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
             conn_id, anim_name, total_duration
         ));
+    }
+
+    // Connection geometry: morphable → smooth d-morph; reshaping → crossfade variants.
+    let mut d_tl: std::collections::BTreeMap<String, Vec<Option<String>>> = std::collections::BTreeMap::new();
+    let mut base_fade: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
+    // key = "<id>\u{1}<frame>" → opacity timeline (1 only in that frame)
+    let mut variant_tl: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
+    for (i, diff) in frame_diffs.iter().enumerate() {
+        for (id, d) in &diff.connection_diffs {
+            if let Some(pts) = &d.path {
+                if d.morphable {
+                    if let Some((routing, marker, sw)) = conn_meta.get(id) {
+                        let ds = renderer::svg::connection_path_d(pts, *routing, *marker, *sw);
+                        d_tl.entry(id.clone()).or_insert_with(|| vec![None; n])[i] = Some(format!("path(\"{}\")", ds));
+                    }
+                } else {
+                    base_fade.entry(id.clone()).or_insert_with(|| vec![1.0; n])[i] = 0.0;
+                    variant_tl.entry(format!("{}\u{1}{}", id, diff.name)).or_insert_with(|| vec![0.0; n])[i] = 1.0;
+                }
+            }
+        }
+    }
+    for (id, vals) in &d_tl {
+        let identity = base_conn_d.get(id).cloned().unwrap_or_default();
+        if let Some(body) = smooth_keyframes_body("d", vals, &identity, pct_per_frame) {
+            let anim = format!("kf-d-{}", id);
+            css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
+            css.push_str(&format!(".conn-{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+        }
+    }
+    for (id, tl) in &base_fade {
+        let anim = format!("kf-basefade-{}", id);
+        css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, step_opacity_keyframes_body(tl, pct_per_frame, n)));
+        css.push_str(&format!(".conn-{}-base {{ animation: {} {:.1}s step-end infinite; }}\n", id, anim, total_duration));
+    }
+    for (key, tl) in &variant_tl {
+        let mut it = key.split('\u{1}');
+        let id = it.next().unwrap_or("");
+        let frame = it.next().unwrap_or("");
+        let anim = format!("kf-variant-{}-{}", id, frame);
+        css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, step_opacity_keyframes_body(tl, pct_per_frame, n)));
+        css.push_str(&format!(".conn-{}-f{} {{ animation: {} {:.1}s step-end infinite; }}\n", id, frame, anim, total_duration));
     }
 
     css
