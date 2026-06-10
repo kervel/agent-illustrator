@@ -187,6 +187,16 @@ don't settle for plain rectangles. Use `--skill-find-clipart` to find and embed
 SVG clipart for actors (people, servers, terminals, etc.). File-based SVG templates
 bring the animation to life.
 
+### `--animate` vs `--animate-css`
+
+`--animate` embeds JS that flips a `frame-<name>` class — full motion, but only when the
+SVG is opened directly. JS does **not** run when an SVG is embedded as an `<img>` (e.g. a
+GitHub README), so use `--animate-css` there: it is a self-cycling, pure-CSS animation
+that runs in an `<img>`. It animates visibility (stepped) **and** geometry — element
+position/size and connection paths (smoothly; reshaping connectors cross-fade). Use
+`--animate-css` for SVGs you embed as images; `--animate` for standalone interactive
+viewing.
+
 ### CSS Transitions
 
 Transitions are emitted by default for animated output (`0.5s ease`):
