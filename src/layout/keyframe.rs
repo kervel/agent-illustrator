@@ -380,52 +380,58 @@ fn apply_transform_to_element(
 ) {
     for elem in elements.iter_mut() {
         if elem.id.as_ref().map_or(false, |id| id.0 == target_id) {
-            // Apply style modifiers
-            for modifier in modifiers {
-                match &modifier.node.key.node {
-                    StyleKey::Rotation => {
-                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                            elem.styles.rotation = Some(*value);
-                        }
-                    }
-                    StyleKey::Fill => {
-                        elem.styles.fill = ResolvedStyles::color_to_css(&modifier.node.value.node);
-                    }
-                    StyleKey::Stroke => {
-                        elem.styles.stroke = ResolvedStyles::color_to_css(&modifier.node.value.node);
-                    }
-                    StyleKey::Opacity => {
-                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                            elem.styles.opacity = Some(*value);
-                        }
-                    }
-                    StyleKey::Width => {
-                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                            elem.bounds.width = *value;
-                        }
-                    }
-                    StyleKey::Height => {
-                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                            elem.bounds.height = *value;
-                        }
-                    }
-                    StyleKey::X => {
-                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                            elem.bounds.x = *value;
-                        }
-                    }
-                    StyleKey::Y => {
-                        if let StyleValue::Number { value, .. } = &modifier.node.value.node {
-                            elem.bounds.y = *value;
-                        }
-                    }
-                    _ => {} // Other modifiers ignored for now
-                }
-            }
+            apply_modifiers_ordered(elem, modifiers);
             return;
         }
         // Recurse into children
         apply_transform_to_element(&mut elem.children, target_id, modifiers);
+    }
+}
+
+/// Apply transform modifiers in a fixed order against the element's base bounds:
+/// 1) absolutes + visual, 2) dx/dy deltas, 3) scale about center.
+fn apply_modifiers_ordered(
+    elem: &mut ElementLayout,
+    modifiers: &[crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>],
+) {
+    let num = |v: &StyleValue| -> Option<f64> {
+        if let StyleValue::Number { value, .. } = v { Some(*value) } else { None }
+    };
+
+    // Pass 1: absolutes + visual
+    for m in modifiers {
+        match &m.node.key.node {
+            StyleKey::Rotation => { if let Some(v) = num(&m.node.value.node) { elem.styles.rotation = Some(v); } }
+            StyleKey::Fill => { elem.styles.fill = ResolvedStyles::color_to_css(&m.node.value.node); }
+            StyleKey::Stroke => { elem.styles.stroke = ResolvedStyles::color_to_css(&m.node.value.node); }
+            StyleKey::Opacity => { if let Some(v) = num(&m.node.value.node) { elem.styles.opacity = Some(v); } }
+            StyleKey::Width => { if let Some(v) = num(&m.node.value.node) { elem.bounds.width = v; } }
+            StyleKey::Height => { if let Some(v) = num(&m.node.value.node) { elem.bounds.height = v; } }
+            StyleKey::X => { if let Some(v) = num(&m.node.value.node) { elem.bounds.x = v; } }
+            StyleKey::Y => { if let Some(v) = num(&m.node.value.node) { elem.bounds.y = v; } }
+            _ => {}
+        }
+    }
+    // Pass 2: deltas
+    for m in modifiers {
+        match &m.node.key.node {
+            StyleKey::Dx => { if let Some(v) = num(&m.node.value.node) { elem.bounds.x += v; } }
+            StyleKey::Dy => { if let Some(v) = num(&m.node.value.node) { elem.bounds.y += v; } }
+            _ => {}
+        }
+    }
+    // Pass 3: scale about center
+    for m in modifiers {
+        if let StyleKey::Scale = &m.node.key.node {
+            if let Some(s) = num(&m.node.value.node) {
+                let nw = elem.bounds.width * s;
+                let nh = elem.bounds.height * s;
+                elem.bounds.x -= (nw - elem.bounds.width) / 2.0;
+                elem.bounds.y -= (nh - elem.bounds.height) / 2.0;
+                elem.bounds.width = nw;
+                elem.bounds.height = nh;
+            }
+        }
     }
 }
 
@@ -489,6 +495,50 @@ mod tests {
 
     fn make_id(name: &str) -> Spanned<Identifier> {
         Spanned::new(Identifier(name.to_string()), 0..0)
+    }
+
+    /// Build a minimal rectangle ElementLayout for geometry tests.
+    fn mk_elem(id: &str, x: f64, y: f64, w: f64, h: f64) -> ElementLayout {
+        use crate::layout::types::{AnchorSet, BoundingBox, ElementType};
+        use crate::parser::ast::ShapeType;
+        ElementLayout {
+            id: Some(Identifier(id.to_string())),
+            element_type: ElementType::Shape(ShapeType::Rectangle),
+            bounds: BoundingBox { x, y, width: w, height: h },
+            styles: ResolvedStyles::default(),
+            children: Vec::new(),
+            label: None,
+            anchors: AnchorSet::default(),
+            path_normalize: false,
+            z_order: 0,
+        }
+    }
+
+    fn modi(key: StyleKey, v: f64) -> Spanned<StyleModifier> {
+        Spanned::new(StyleModifier {
+            key: Spanned::new(key, 0..0),
+            value: Spanned::new(StyleValue::Number { value: v, unit: None }, 0..0),
+        }, 0..0)
+    }
+
+    #[test]
+    fn scale_grows_about_center() {
+        let mut elem = mk_elem("e", 100.0, 100.0, 200.0, 100.0); // center (200,150)
+        let mods = vec![modi(StyleKey::Scale, 2.0)];
+        apply_transform_to_element(std::slice::from_mut(&mut elem), "e", &mods);
+        assert!((elem.bounds.width - 400.0).abs() < 0.001, "width {}", elem.bounds.width);
+        assert!((elem.bounds.height - 200.0).abs() < 0.001, "height {}", elem.bounds.height);
+        assert!((elem.bounds.x - 0.0).abs() < 0.001, "x {}", elem.bounds.x);   // 100 - (400-200)/2
+        assert!((elem.bounds.y - 50.0).abs() < 0.001, "y {}", elem.bounds.y);  // 100 - (200-100)/2
+    }
+
+    #[test]
+    fn dx_dy_offset_from_base_after_absolute() {
+        let mut elem = mk_elem("e", 10.0, 10.0, 5.0, 5.0);
+        // absolute x=100 then dx=5 => 105, regardless of modifier declaration order
+        let mods = vec![modi(StyleKey::Dx, 5.0), modi(StyleKey::X, 100.0)];
+        apply_transform_to_element(std::slice::from_mut(&mut elem), "e", &mods);
+        assert!((elem.bounds.x - 105.0).abs() < 0.001, "x {}", elem.bounds.x);
     }
 
     fn make_keyframe(name: &str, ops: Vec<KeyframeOp>) -> KeyframeDecl {
