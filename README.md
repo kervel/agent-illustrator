@@ -24,6 +24,9 @@ Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-fr
 | **Railway Topology** | **Agentic Loop (animated)** |
 | Nested row/col layouts, connection routing | Keyframe animation, SVG clipart, custom CSS |
 | [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | [![Agentic Loop](examples/agentic-loop-story.svg)](examples/agentic-loop-story.ail) |
+| **Next-Token Prediction (animated)** | |
+| Keyframe geometry: a growing input box with connectors that follow moving endpoints | |
+| [![Next-Token Prediction](examples/token-prediction.svg)](examples/token-prediction.ail) | |
 
 Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
 
