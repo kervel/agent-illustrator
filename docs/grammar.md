@@ -128,6 +128,8 @@ File-based templates:
     template "photo" from "path/to/file.png"    Import raster image (referenced)
 
 SVG files are embedded directly (content parsed, dimensions from viewBox).
+File SVG templates auto-trim their viewBox to the artwork's content bbox (so anchors
+hug the drawing and connectors are consistent). Disable per instance with `[trim: false]`.
 Raster images (PNG, JPG, JPEG, GIF, WebP, BMP) are referenced by path.
 The SVG viewer loads raster images at render time.
 

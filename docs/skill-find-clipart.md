@@ -71,12 +71,19 @@ it — skipping this is the main reason clipart diagrams look wrong.
 - Remove the root `width`/`height` attributes so the AIL instance `[width:/height:]`
   controls the rendered size (a leftover fixed `width` fights the template sizing).
 
-### 2b. Tighten the viewBox to the artwork (scale prep)
+### 2b. viewBox margin is trimmed automatically
 
-Many SVGs have large empty padding around the subject. If the `viewBox` is mostly
-whitespace, `[width: 60]` makes the *subject* render tiny. Crop the `viewBox` to the
-artwork's tight bounding box so the subject fills the box. (Render and eyeball, or use
-a tool that reports the content bbox, e.g. `inkscape --query-*` or `usvg`.)
+Many SVGs have large empty padding around the subject — and different icons have
+different padding, which makes connectors anchor inconsistently (some touch the art,
+some float far). agent-illustrator handles this for you: on import it trims each file
+SVG template's element box to the artwork's content bounding box (computed with `usvg`),
+so anchors hug the drawing and connector gaps are uniform. You do **not** need to crop
+by hand.
+
+If a specific icon trims wrong — e.g. `usvg` couldn't fully parse it (it then falls back
+to the raw viewBox), or the computed box is off — pass `[trim: false]` on that instance
+and crop it manually instead. (Still give the artwork a sensible `viewBox` for the
+fallback path.) This is the only case where 2b is manual.
 
 ### 2c. Reconcile scale across ALL clipart (do this holistically, not per-item)
 
