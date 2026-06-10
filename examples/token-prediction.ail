@@ -1,47 +1,99 @@
-/* INTENT: an input box of token chips grows wider and recenters while a
-   predicted token chip moves up from below the LLM box into the box's new
-   right-hand slot. Render: agent-illustrator examples/token-prediction.ail --animate */
+/* STORYBOARD (constraint-toggle motion, three predict→append cycles)
+   prompt:      box [The cat sat] + LLM; feed arrow box->LLM.
+   predict_on:  "on" appears below the LLM (red) + predict arrow.
+   append_on:   box grows a slot; "on" slides up into it, turns plain.
+   predict_the: "the" appears below the LLM (red) + predict arrow.
+   append_the:  box grows; "the" slides up, turns plain.
+   predict_mat: "mat" appears below the LLM (red) + predict arrow.
+   append_mat:  box grows; "mat" slides up, turns plain → [The cat sat on the mat].
+   STORY ARC: the model predicts ONE token, appends it to its own input, and runs
+   again — three times, so the loop is unmistakable. Each predicted token (red)
+   becomes plain input as it's appended.
 
-rect canvas [width: 760, height: 420, fill: white, stroke: none, opacity: 0.01]
+   The input box grows via `transform inbox [width: N]` and the feed arrow follows
+   the growing right edge automatically (AIL re-anchors connections to their
+   endpoints every keyframe — no extra constraints needed).
+*/
+
+rect canvas [width: 800, height: 420, fill: white, stroke: none, opacity: 0.01]
 constrain canvas.center_x = 380
-constrain canvas.center_y = 210
+constrain canvas.center_y = 200
 
-rect inbox [width: 240, height: 70, fill: accent-light, stroke: accent-1, stroke_width: 2]
-constrain inbox.center_x = 250 as inbox_cx
-constrain inbox.center_y = 120
+rect inbox [width: 190, height: 70, fill: #eef3f6, stroke: secondary-1, stroke_width: 2]
+constrain inbox.left = 80
+constrain inbox.center_y = 150
 
-rect tok1 [width: 50, height: 36, fill: background-2, stroke: foreground-3, label: "The"]
-rect tok2 [width: 50, height: 36, fill: background-2, stroke: foreground-3, label: "cat"]
-constrain tok1.center_y = 120
-constrain tok2.center_y = 120
-// Chips ride along with the box: positioned relative to inbox.center_x, so when the
-// box recenters in "append" the whole cluster cascades to new solved positions.
-constrain tok1.center_x = inbox.center_x - 50
-constrain tok2.center_x = inbox.center_x + 10
+/* input chips at fixed slots (pitch 56); the box grows past them to the right */
+rect a [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "The"]
+rect b [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "cat"]
+rect c [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "sat"]
+constrain a.center_y = 150
+constrain b.center_y = 150
+constrain c.center_y = 150
+constrain a.center_x = 119
+constrain b.center_x = 175
+constrain c.center_x = 231
 
-rect llm [width: 160, height: 70, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "LLM"]
-constrain llm.center_x = 600
-constrain llm.center_y = 120
+rect llm [width: 150, height: 64, fill: secondary-1, label: "LLM"]
+constrain llm.center_x = 560
+constrain llm.center_y = 150
 
-rect tok3 [width: 50, height: 36, fill: secondary-2, stroke: secondary-dark, label: "sat"]
-constrain tok3.center_x = 600
-constrain tok3.center_y = 300 as tok3_home
+/* predicted tokens — each starts below the LLM (red = just predicted) */
+rect d [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "on"]
+rect e [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "the"]
+rect f [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "mat"]
+constrain d.center_x = llm.center_x as d_hx
+constrain d.center_y = 300 as d_hy
+constrain e.center_x = llm.center_x as e_hx
+constrain e.center_y = 300 as e_hy
+constrain f.center_x = llm.center_x as f_hx
+constrain f.center_y = 300 as f_hy
+
+inbox.right -> llm.left as feed [stroke: foreground-2, stroke_width: 2]
+llm.bottom -> d.top as parrow_d [stroke: accent-1, stroke_width: 2, label: "predicts one token"]
+llm.bottom -> e.top as parrow_e [stroke: accent-1, stroke_width: 2]
+llm.bottom -> f.top as parrow_f [stroke: accent-1, stroke_width: 2]
+
+text "Predict one token, append it — then repeat." cap [fill: #1b2733]
+constrain cap.center_x = 360
+constrain cap.top = 360
 
 keyframe "prompt" {
-    hide tok3
+    hide d, e, f, parrow_d, parrow_e, parrow_f
 }
-
-keyframe "predict" {
-    show tok3
+keyframe "predict_on" {
+    show d, parrow_d
 }
-
-keyframe "append" {
-    // grow the input box wider + recenter
-    transform inbox [width: 340, dx: -50]
-    disable inbox_cx
-    constrain inbox.center_x = 300
-    // move the predicted token up into the box's new right slot
-    disable tok3_home
-    constrain tok3.center_x = 360
-    constrain tok3.center_y = 120
+keyframe "append_on" {
+    hide parrow_d
+    transform inbox [width: 246]
+    disable d_hx
+    disable d_hy
+    constrain d.center_x = 287
+    constrain d.center_y = 150
+    transform d [stroke: #cdd8e3, stroke_width: 1]
+}
+keyframe "predict_the" {
+    show e, parrow_e
+}
+keyframe "append_the" {
+    hide parrow_e
+    transform inbox [width: 302]
+    disable e_hx
+    disable e_hy
+    constrain e.center_x = 343
+    constrain e.center_y = 150
+    transform e [stroke: #cdd8e3, stroke_width: 1]
+}
+keyframe "predict_mat" {
+    show f, parrow_f
+}
+keyframe "append_mat" {
+    hide parrow_f
+    transform inbox [width: 358]
+    disable f_hx
+    disable f_hy
+    constrain f.center_x = 399
+    constrain f.center_y = 150
+    transform f [stroke: #cdd8e3, stroke_width: 1]
 }
