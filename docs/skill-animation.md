@@ -189,15 +189,53 @@ bring the animation to life.
 
 ### CSS Transitions
 
-For smooth playback, add a CSS file with transitions:
+Transitions are emitted by default for animated output (`0.5s ease`):
+`.kf-anim` covers transform (position/rotation) + opacity on each element's wrapper
+group; `.ai-shape` covers width/height/fill/stroke on shapes. Frames tween
+automatically — no extra CSS required.
+
+To change duration/easing, override the rules via `--stylesheet-css` (it layers on
+top of the defaults):
 
 ```css
-svg * {
-    transition: opacity 0.5s ease-in-out;
-}
+.kf-anim  { transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out; }
+.ai-shape { transition: width 0.8s ease-in-out, height 0.8s ease-in-out; }
 ```
 
 Apply with: `agent-illustrator file.ail --animate --stylesheet-css transitions.css`
+
+### Geometry Animation (Position & Size)
+
+`transform` inside a keyframe can move and resize elements:
+
+```
+keyframe "grow" {
+    transform box [width: 340, dx: -50]   // grow wider + recenter
+    transform chip [dx: 0, dy: -180]      // move up
+}
+```
+
+- **Position** (`x`/`y`/`dx`/`dy`) and **rotation** tween via a `transform` on the
+  element's wrapper group, so the element's label moves with it. `dx`/`dy` are
+  offsets from the laid-out (frame-0) position.
+- **Size** (`width`/`height`/`scale`) tweens via the shape's geometry; `scale` is
+  about the center.
+
+To make the solver place dependents relative to a moved element, change the active
+constraints in the keyframe — name the original constraint and `disable` it, then add
+the new one:
+
+```
+constrain chip.center_y = 300 as chip_home
+keyframe "merge" {
+    disable chip_home
+    constrain chip.center_y = 120        // re-pin; solver moves chip, it tweens
+}
+```
+
+Without this, the always-solved constraints pull elements back to their frame-0
+positions. Children constrained relative to a resized/moved parent cascade to new
+solved positions and each tweens (the box-of-chips grows and recenters as a unit).
 
 ---
 
@@ -207,8 +245,13 @@ Apply with: `agent-illustrator file.ail --animate --stylesheet-css transitions.c
    the arrow renders to nowhere. Always hide connections when hiding their endpoints.
 2. **Cumulative keyframes** — Each frame builds on the previous. If you `hide X` in
    frame 2, X stays hidden in frames 3+ unless you `show X` again.
-3. **Transform persistence** — Transforms in frame N carry forward. To reset opacity
-   to 1.0 in a later frame, you must explicitly `transform elem [opacity: 1.0]`.
+3. **Transform persistence** — Transforms in frame N carry forward (visual AND
+   geometry), merged per-property. To reset a property in a later frame, restate it
+   explicitly (e.g. `transform elem [opacity: 1.0]`, or `dx: 0`).
+3b. **Labels and resize** — Position animation moves an element's label with it (both
+   live in the same wrapper group). But a *labeled* element that itself resizes
+   (width/height) does not re-center its own label. Resize unlabeled frames/boxes;
+   put labels on the chips that move.
 4. **Frame naming** — Use descriptive names ("user_sends_prompt", not "frame3").
    Names appear in the animation player UI.
 5. **Element count** — Animations tend to need many elements (persistent + transient

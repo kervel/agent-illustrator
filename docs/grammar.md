@@ -173,12 +173,32 @@ keyframe "name" {
     show element1, element2          Make elements visible
     hide element3, connection_name   Make elements/connections invisible
     transform element4 [rotation: 45, fill: red]   Per-frame overrides
+    disable a_home                   Deactivate a named constraint (this frame on)
+    constrain element4.center_x = 300   Add a constraint (this frame on)
+    enable a_home                    Reactivate a disabled named constraint
 }
 
 Keyframes are cumulative: each frame builds on the previous frame's state.
+Transforms (visual AND geometry) persist forward, merged per-property; to reset
+a property, restate it (e.g. dx: 0).
 Without keyframes, all elements are visible (backward compatible).
 Named connections (a -> b as name) can be referenced in show/hide.
 Referencing nonexistent elements is a hard error.
+
+Transform geometry keys (inside keyframe transform [...]):
+    x: N, y: N         Absolute target position
+    dx: N, dy: N       Offset relative to the laid-out (frame-0) position
+    width: N, height: N   Absolute target size
+    scale: N           Uniform scale about the element's center
+    rotation: N        Rotation in degrees
+Position + rotation animate via a transform on the element's wrapper group (so the
+label rides along); size animates via the shape's width/height.
+
+Named constraints & per-keyframe control:
+    constrain a.center_x = 50 as a_home   Name a constraint (handle for disable/enable)
+    Inside a keyframe: constrain <expr> (adds; overrides any earlier constraint on the
+    same element+property), disable <name>, enable <name>. Without this, the
+    always-solved constraints pull elements back to their frame-0 positions.
 
 CLI flags:
     --frame N          Render single frame as static SVG (by index or name)
@@ -188,6 +208,8 @@ SVG output:
     data-frames="frame1,frame2,..."    Frame names on SVG root
     .frame-<name> { ... }              CSS classes with per-frame diffs
     Elements hidden in frame 0 get inline opacity="0"
+    .kf-anim / .ai-shape transition rules are emitted by default (0.5s ease) so
+    position/size/opacity tween smoothly; override via --stylesheet-css.
 
 RESERVED IDENTIFIERS
 --------------------
