@@ -247,6 +247,14 @@ and no other constraint references it) holds its frame-0 laid-out position. Ther
 needed for it. To leave an element where a *previous* keyframe moved it, keep that
 keyframe's `constrain` (or transform) active; cumulative state carries it forward.
 
+### Connections follow automatically
+
+Connections re-anchor to their endpoints every keyframe — move or resize an element and
+any connection touching it follows on its own (no extra constraints, no naming required).
+It slides smoothly when the route keeps its shape (Chrome/Safari) and crossfades when the
+route reshapes; either way it lands correct at each keyframe. (Firefox holds a sliding
+connector at its start route; reshaped/crossfaded ones animate everywhere.)
+
 ---
 
 ## Part 3: Gotchas

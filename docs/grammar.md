@@ -184,6 +184,8 @@ a property, restate it (e.g. dx: 0).
 Without keyframes, all elements are visible (backward compatible).
 Named connections (a -> b as name) can be referenced in show/hide.
 Referencing nonexistent elements is a hard error.
+Connections automatically follow moving/resized endpoints across keyframes (CSS d:
+morph where the route shape is unchanged, opacity crossfade where it reshapes).
 
 Transform geometry keys (inside keyframe transform [...]):
     x: N, y: N         Absolute target position
