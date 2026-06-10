@@ -215,6 +215,23 @@ fn resolve_instance(
     result
 }
 
+/// Read `[trim: false]` from instance modifiers (default true). Accepts keyword/ident
+/// `true`/`false` and numeric 0/non-0. `trim` parses as `StyleKey::Custom("trim")`.
+fn read_trim_flag(modifiers: &[Spanned<StyleModifier>]) -> bool {
+    for m in modifiers {
+        let is_trim = matches!(&m.node.key.node, StyleKey::Custom(k) if k == "trim");
+        if is_trim {
+            return match &m.node.value.node {
+                StyleValue::Keyword(s) => s != "false",
+                StyleValue::Identifier(Identifier(s)) => s != "false",
+                StyleValue::Number { value, .. } => *value != 0.0,
+                _ => true,
+            };
+        }
+    }
+    true
+}
+
 /// Resolve an SVG file template into an SvgEmbed shape
 fn resolve_svg_template(
     def: &super::registry::TemplateDefinition,
@@ -236,7 +253,15 @@ fn resolve_svg_template(
         })?;
 
     let content = def.svg_content.clone().unwrap_or_default();
-    let (width, height) = def.svg_dimensions.unwrap_or((100.0, 100.0));
+
+    // Trim is on by default; `[trim: false]` on the instance disables it. When trimming,
+    // use the artwork's content bbox for sizing/anchors and offset the content so it
+    // fills the element rect. Falls back to the raw viewBox when no trimmed bbox exists.
+    let trim_enabled = read_trim_flag(instance_modifiers);
+    let ((width, height), (offset_x, offset_y)) = match (trim_enabled, def.svg_trimmed) {
+        (true, Some((mx, my, w, h))) => ((w, h), (mx, my)),
+        _ => (def.svg_dimensions.unwrap_or((100.0, 100.0)), (0.0, 0.0)),
+    };
 
     let shape = ShapeDecl {
         shape_type: Spanned::new(
@@ -244,6 +269,8 @@ fn resolve_svg_template(
                 content,
                 intrinsic_width: Some(width),
                 intrinsic_height: Some(height),
+                offset_x,
+                offset_y,
             },
             span.clone(),
         ),

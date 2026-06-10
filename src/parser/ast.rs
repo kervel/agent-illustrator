@@ -197,6 +197,10 @@ pub enum ShapeType {
         content: String,
         intrinsic_width: Option<f64>,
         intrinsic_height: Option<f64>,
+        /// Content bbox origin to subtract so the artwork fills the element rect
+        /// (0,0 when not trimmed).
+        offset_x: f64,
+        offset_y: f64,
     },
     /// Raster image reference (png, jpg, gif, webp, bmp)
     RasterImage {

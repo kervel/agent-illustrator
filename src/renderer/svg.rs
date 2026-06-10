@@ -1133,7 +1133,18 @@ fn render_element_inner(
             content,
             intrinsic_width,
             intrinsic_height,
+            offset_x,
+            offset_y,
         }) => {
+            // Content offset (subtract the trimmed bbox origin so the artwork fills the
+            // rect). Emitted only when non-zero, so non-trimmed embeds are unchanged.
+            let offset_xf = format!("{}", -offset_x);
+            let offset_yf = format!("{}", -offset_y);
+            let offset_tf = if offset_x.abs() > f64::EPSILON || offset_y.abs() > f64::EPSILON {
+                format!(" translate({}, {})", offset_xf, offset_yf)
+            } else {
+                String::new()
+            };
             // Render embedded SVG content from a template
             let prefix = builder.prefix();
             let embed_classes = std::iter::once(format!("{}svg-embed", prefix))
@@ -1155,19 +1166,19 @@ fn render_element_inner(
                     let cx = intrinsic_width.unwrap_or(element.bounds.width) / 2.0;
                     let cy = intrinsic_height.unwrap_or(element.bounds.height) / 2.0;
                     format!(
-                        "translate({}, {}) scale({}, {}) rotate({} {} {})",
-                        element.bounds.x, element.bounds.y, scale_x, scale_y, rotation, cx, cy
+                        "translate({}, {}) scale({}, {}) rotate({} {} {}){}",
+                        element.bounds.x, element.bounds.y, scale_x, scale_y, rotation, cx, cy, offset_tf
                     )
                 } else {
                     format!(
-                        "translate({}, {}) scale({}, {})",
-                        element.bounds.x, element.bounds.y, scale_x, scale_y
+                        "translate({}, {}) scale({}, {}){}",
+                        element.bounds.x, element.bounds.y, scale_x, scale_y, offset_tf
                     )
                 }
             } else {
                 format!(
-                    "translate({}, {}) scale({}, {})",
-                    element.bounds.x, element.bounds.y, scale_x, scale_y
+                    "translate({}, {}) scale({}, {}){}",
+                    element.bounds.x, element.bounds.y, scale_x, scale_y, offset_tf
                 )
             };
 
