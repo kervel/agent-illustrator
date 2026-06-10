@@ -336,17 +336,37 @@ impl SvgBuilder {
 
     /// Add a text element
     pub fn add_text(&mut self, text: &str, x: f64, y: f64, anchor: &TextAnchor, styles: &str) {
+        self.add_text_with_classes(text, x, y, anchor, styles, "");
+    }
+
+    /// Add a text label with extra CSS classes appended (e.g. `conn-<name>` so a
+    /// connection's label is toggled together with its path by keyframe CSS).
+    pub fn add_text_with_classes(
+        &mut self,
+        text: &str,
+        x: f64,
+        y: f64,
+        anchor: &TextAnchor,
+        styles: &str,
+        extra_classes: &str,
+    ) {
         let prefix = self.prefix();
         let anchor_str = match anchor {
             TextAnchor::Start => "start",
             TextAnchor::Middle => "middle",
             TextAnchor::End => "end",
         };
+        let extra = if extra_classes.is_empty() {
+            String::new()
+        } else {
+            format!(" {}", extra_classes)
+        };
 
         self.elements.push(format!(
-            r#"{}<text class="{}label" x="{}" y="{}" text-anchor="{}" dominant-baseline="middle"{}>{}</text>"#,
+            r#"{}<text class="{}label{}" x="{}" y="{}" text-anchor="{}" dominant-baseline="middle"{}>{}</text>"#,
             self.indent_str(),
             prefix,
+            extra,
             x,
             y,
             anchor_str,
@@ -856,11 +876,13 @@ fn generate_keyframe_css(
             }
         }
 
-        // Connection visibility diffs
+        // Connection visibility diffs. Target `.conn-<name>` (not
+        // `.ai-connection.conn-<name>`) so the rule matches both the path and its
+        // label (the label carries `conn-<name>` but not the `ai-connection` class).
         for (conn_name, diff) in &frame.connection_diffs {
             if let Some(opacity) = diff.opacity {
                 css.push_str(&format!(
-                    "  .ai-connection.conn-{} {{ opacity: {}; }}\n",
+                    "  .conn-{} {{ opacity: {}; }}\n",
                     conn_name, opacity
                 ));
             }
@@ -1274,17 +1296,32 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
     if let Some(label) = &conn.label {
         // Use label's own styles if available (from referenced element),
         // otherwise apply subtle defaults for connector labels
-        let label_styles = label
+        let mut label_styles = label
             .styles
             .as_ref()
             .map(format_text_styles)
             .unwrap_or_else(|| r#" fill="var(--text-2)" font-size="12""#.to_string());
-        builder.add_text(
+        // Propagate the connection's opacity to the label so a hidden connection
+        // (e.g. frame-0 hidden) hides its label too.
+        if let Some(opacity) = conn.styles.opacity {
+            if (opacity - 1.0).abs() > f64::EPSILON {
+                label_styles.push_str(&format!(r#" opacity="{}""#, opacity));
+            }
+        }
+        // Carry the `conn-<name>` class so keyframe frame CSS toggles the label
+        // together with the path.
+        let extra_classes = conn
+            .name
+            .as_ref()
+            .map(|n| format!("conn-{}", n.0))
+            .unwrap_or_default();
+        builder.add_text_with_classes(
             &label.text,
             label.position.x,
             label.position.y,
             &label.anchor,
             &label_styles,
+            &extra_classes,
         );
     }
 }

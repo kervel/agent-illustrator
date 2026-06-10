@@ -48,6 +48,31 @@ keyframe "gone" {
     );
 }
 
+/// Bug 3: hiding a connection must also hide its label. The label is a separate
+/// `<text>` node; without the `conn-<name>` class it isn't toggled by the frame CSS,
+/// so the label persists after the connection is hidden.
+#[test]
+fn hiding_connection_also_hides_its_label() {
+    let src = r#"
+rect a [width: 60, height: 30]
+rect b [width: 60, height: 30]
+constrain a.center_x = 100
+constrain a.center_y = 100
+constrain b.center_x = 300
+constrain b.center_y = 100
+a.right -> b.left as parrow [label: "predicts one token"]
+keyframe "idle" {}
+keyframe "gone" { hide parrow }
+"#;
+    let svg = render(src).expect("render ok");
+    // The frame rule hides .conn-parrow; the label <text> must carry that class so it
+    // is hidden together with the path.
+    let label_line = svg.lines().find(|l| l.contains("predicts one token"))
+        .expect("label text present in svg");
+    assert!(label_line.contains("conn-parrow"),
+        "connection label must carry the conn-parrow class so hide toggles it, got:\n{}", label_line);
+}
+
 /// Bug 2: `show` + `transform` on the same element in one keyframe must emit
 /// BOTH the visibility (opacity) and the transform (stroke) overrides.
 #[test]
