@@ -429,70 +429,7 @@ impl SvgBuilder {
             .collect::<Vec<_>>()
             .join(" ");
 
-        // Shorten endpoint when marker is present to place arrow tip at anchor position
-        // The arrow marker has refX=1, so the arrow extends ~9 marker units past the endpoint.
-        // With markerWidth=4 and markerUnits="strokeWidth", each marker unit = (4 * strokeWidth) / 10.
-        // So pullback = 9 * (4/10) * strokeWidth = 3.6 * strokeWidth.
-        let path = if marker_end && path.len() >= 2 {
-            let mut shortened = path.to_vec();
-            let last_idx = shortened.len() - 1;
-            let prev_idx = last_idx - 1;
-
-            // Calculate tangent direction at endpoint
-            let dx = shortened[last_idx].x - shortened[prev_idx].x;
-            let dy = shortened[last_idx].y - shortened[prev_idx].y;
-            let len = (dx * dx + dy * dy).sqrt();
-
-            if len > 0.001 {
-                // Pull back to compensate for arrow length (scales with stroke width)
-                let pullback = 3.6 * stroke_width;
-                shortened[last_idx].x -= dx / len * pullback;
-                shortened[last_idx].y -= dy / len * pullback;
-            }
-            shortened
-        } else {
-            path.to_vec()
-        };
-
-        // Generate path data based on routing mode
-        let d = match routing_mode {
-            RoutingMode::Curved if path.len() >= 4 => {
-                // Cubic Bezier: M start C control1 control2 end [S control2 end]...
-                let mut d = format!(
-                    "M{} {} C{} {} {} {} {} {}",
-                    path[0].x,
-                    path[0].y,
-                    path[1].x,
-                    path[1].y,
-                    path[2].x,
-                    path[2].y,
-                    path[3].x,
-                    path[3].y
-                );
-                // Additional segments use C (cubic Bezier with explicit control points)
-                // Each additional segment needs 3 points: ctrl1, ctrl2, endpoint
-                let remaining = &path[4..];
-                for chunk in remaining.chunks(3) {
-                    if chunk.len() == 3 {
-                        d.push_str(&format!(
-                            " C{} {} {} {} {} {}",
-                            chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y, chunk[2].x, chunk[2].y
-                        ));
-                    } else if chunk.len() == 2 {
-                        // Fallback: 2 points as quadratic Bezier
-                        d.push_str(&format!(
-                            " Q{} {} {} {}",
-                            chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y
-                        ));
-                    } else if chunk.len() == 1 {
-                        // Odd point at end - just draw line to it
-                        d.push_str(&format!(" L{} {}", chunk[0].x, chunk[0].y));
-                    }
-                }
-                d
-            }
-            _ => path_to_d(&path), // Default polyline for orthogonal/direct
-        };
+        let d = connection_path_d(path, routing_mode, marker_end, stroke_width);
 
         let marker = if marker_end {
             format!(r#" marker-end="url(#{prefix}arrow)""#)
@@ -762,17 +699,24 @@ pub fn render_svg_with_keyframes(
         &empty_set
     };
 
-    for conn in &result.connections {
-        if let Some(name) = &conn.name {
-            if frame0_hidden_conns.contains(&name.0) {
-                // Render with opacity 0 for hidden connections
-                let mut hidden_conn = conn.clone();
-                hidden_conn.styles.opacity = Some(0.0);
-                render_connection(&hidden_conn, &mut builder);
-                continue;
-            }
+    for (i, conn) in result.connections.iter().enumerate() {
+        let id = conn
+            .name
+            .as_ref()
+            .map(|n| n.0.clone())
+            .unwrap_or_else(|| format!("idx{}", i));
+        let hidden0 = conn
+            .name
+            .as_ref()
+            .map_or(false, |n| frame0_hidden_conns.contains(&n.0));
+        if hidden0 {
+            // Render with opacity 0 for hidden connections
+            let mut hidden_conn = conn.clone();
+            hidden_conn.styles.opacity = Some(0.0);
+            render_connection(&hidden_conn, &mut builder, Some(&id));
+            continue;
         }
-        render_connection(conn, &mut builder);
+        render_connection(conn, &mut builder, Some(&id));
     }
 
     // Render debug overlays
@@ -932,7 +876,7 @@ pub fn render_svg_with_stylesheet(
 
     // Render all connections
     for conn in &result.connections {
-        render_connection(conn, &mut builder);
+        render_connection(conn, &mut builder, None);
     }
 
     // Render debug overlays
@@ -1266,12 +1210,17 @@ fn render_element_inner(
     }
 }
 
-/// Render a connection to the builder
-fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
+/// Render a connection to the builder. `id` is the stable keyframe identity
+/// (name, or `idx<N>` for unnamed) used for the `conn-<id>` CSS class; `None` on the
+/// non-keyframe path falls back to the connection's name.
+fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Option<&str>) {
     let mut classes = conn.styles.css_classes.clone();
-    // Add connection name as CSS class for keyframe targeting (Feature 011)
-    if let Some(name) = &conn.name {
-        classes.push(format!("conn-{}", name.0));
+    // Stable connection class for keyframe targeting (path morph / crossfade / opacity).
+    let conn_class = id
+        .map(|s| s.to_string())
+        .or_else(|| conn.name.as_ref().map(|n| n.0.clone()));
+    if let Some(c) = &conn_class {
+        classes.push(format!("conn-{}", c));
     }
     let styles = format_connection_styles(&conn.styles);
 
@@ -1308,12 +1257,11 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder) {
                 label_styles.push_str(&format!(r#" opacity="{}""#, opacity));
             }
         }
-        // Carry the `conn-<name>` class so keyframe frame CSS toggles the label
+        // Carry the `conn-<id>` class so keyframe frame CSS toggles the label
         // together with the path.
-        let extra_classes = conn
-            .name
+        let extra_classes = conn_class
             .as_ref()
-            .map(|n| format!("conn-{}", n.0))
+            .map(|c| format!("conn-{}", c))
             .unwrap_or_default();
         builder.add_text_with_classes(
             &label.text,
@@ -1491,6 +1439,53 @@ fn callout_path_d(b: &BoundingBox, pointer: PointerDir) -> String {
 }
 
 /// Convert a path of points to an SVG path d attribute
+/// Build the SVG path `d` string for a connection, including the arrow-marker pullback,
+/// matching exactly what `add_connection_path` renders. Shared so per-frame keyframe CSS
+/// (`d: path(...)`) targets the same geometry the base path uses.
+fn connection_path_d(path: &[Point], routing_mode: RoutingMode, marker_end: bool, stroke_width: f64) -> String {
+    // Shorten the endpoint when a marker is present so the arrow tip lands on the anchor.
+    // pullback = 9 * (markerWidth=4 / 10) * strokeWidth = 3.6 * strokeWidth.
+    let path = if marker_end && path.len() >= 2 {
+        let mut shortened = path.to_vec();
+        let last_idx = shortened.len() - 1;
+        let prev_idx = last_idx - 1;
+        let dx = shortened[last_idx].x - shortened[prev_idx].x;
+        let dy = shortened[last_idx].y - shortened[prev_idx].y;
+        let len = (dx * dx + dy * dy).sqrt();
+        if len > 0.001 {
+            let pullback = 3.6 * stroke_width;
+            shortened[last_idx].x -= dx / len * pullback;
+            shortened[last_idx].y -= dy / len * pullback;
+        }
+        shortened
+    } else {
+        path.to_vec()
+    };
+
+    match routing_mode {
+        RoutingMode::Curved if path.len() >= 4 => {
+            let mut d = format!(
+                "M{} {} C{} {} {} {} {} {}",
+                path[0].x, path[0].y, path[1].x, path[1].y, path[2].x, path[2].y, path[3].x, path[3].y
+            );
+            for chunk in path[4..].chunks(3) {
+                if chunk.len() == 3 {
+                    d.push_str(&format!(
+                        " C{} {} {} {} {} {}",
+                        chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y, chunk[2].x, chunk[2].y
+                    ));
+                } else if chunk.len() == 2 {
+                    d.push_str(&format!(" Q{} {} {} {}", chunk[0].x, chunk[0].y, chunk[1].x, chunk[1].y));
+                } else if chunk.len() == 1 {
+                    d.push_str(&format!(" L{} {}", chunk[0].x, chunk[0].y));
+                }
+            }
+            d
+        }
+        _ => path_to_d(&path),
+    }
+}
+
 fn path_to_d(path: &[Point]) -> String {
     if path.is_empty() {
         return String::new();
