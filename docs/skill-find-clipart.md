@@ -56,7 +56,79 @@ Subagent prompt template:
 
 ---
 
-## Part 2: Integration with AIL
+## Part 2: Process Each Found SVG (REQUIRED before integration)
+
+Raw downloads are almost never usable as-is. Found clipart comes from different
+authors, at different scales, in different styles. Process every SVG before importing
+it — skipping this is the main reason clipart diagrams look wrong.
+
+### 2a. Normalize the SVG
+
+- Ensure a `viewBox` exists — the embedder reads it to size the clipart. If only
+  `width`/`height` are present, convert them to `viewBox="0 0 W H"`.
+- Strip the `<?xml … ?>` declaration, `<!DOCTYPE …>`, editor metadata (`<metadata>`,
+  Inkscape/Sodipodi namespaces and attributes), and comments.
+- Remove the root `width`/`height` attributes so the AIL instance `[width:/height:]`
+  controls the rendered size (a leftover fixed `width` fights the template sizing).
+
+### 2b. Tighten the viewBox to the artwork (scale prep)
+
+Many SVGs have large empty padding around the subject. If the `viewBox` is mostly
+whitespace, `[width: 60]` makes the *subject* render tiny. Crop the `viewBox` to the
+artwork's tight bounding box so the subject fills the box. (Render and eyeball, or use
+a tool that reports the content bbox, e.g. `inkscape --query-*` or `usvg`.)
+
+### 2c. Reconcile scale across ALL clipart (do this holistically, not per-item)
+
+Clipart from different sources has no shared scale — a "person" and a "car" found
+separately can differ by 5–10× intrinsically. After tightening each viewBox, fix the
+sizes in one pass that compares all items together (it cannot be judged item-by-item).
+
+Sizing must be **intentional** — pick one of two regimes, never the middle:
+
+- **Icon set (flat / line art, usually square-ish):** make the icons *exactly* the same
+  box size — a uniform grid (e.g. all `[width: 60, height: 60]`). Two icons at "almost
+  but not quite" the same size (58 vs 62) look broken — the eye reads the mismatch as a
+  mistake. Snap them equal.
+- **Skeuomorphic / photorealistic scene art:** size by true real-world proportion
+  instead (person ~1.7 m tall, car ~4 m long → the car ~2.3× the person). Here genuine
+  size *differences* read naturally, so deliberate, obvious differences are correct.
+
+The trap to avoid in both cases is the near-match: icons that are close-but-unequal.
+Either identical, or clearly different — nothing in between.
+
+### 2d. Simplify
+
+If a clipart is too detailed or too colorful for a technical diagram, reduce it: drop
+filters/gradients/clip-paths, merge or remove fine detail, and cut the palette to a few
+flat colors. Tools like `svgo` / `scour` help, but also prune by hand. Simpler reads
+better at diagram scale.
+
+### 2e. Match the design's stroke/fill
+
+Edit the artwork to match the diagram's visual language: set strokes/fills to
+`currentColor`, symbolic palette tokens (`fill="var(--accent-1)"`), or a shared CSS
+class, and match stroke width/style to the surrounding shapes. All clipart should look
+like it belongs to one set, not a ransom note of styles.
+
+### 2f. Make ids/defs unique
+
+Embedding puts multiple clipart (and repeated instances) into one SVG document. Rename
+every `id=`, gradient/clipPath/filter/mask id, and the matching `url(#…)` reference so
+they don't collide — id collisions make one clipart's fill/clip silently apply to
+another.
+
+### 2g. Record license + attribution
+
+Save the source URL and license for each item (e.g. a `clipart/CREDITS.md`). Required
+for CC-BY / Wikimedia; good practice everywhere.
+
+> A search subagent can do 2a, 2d–2g per item in parallel, but **2b/2c (scale)** need a
+> final single pass that compares all the processed clipart together.
+
+---
+
+## Part 3: Integration with AIL
 
 ### File-Based SVG Templates
 
@@ -103,7 +175,7 @@ directly in the SVG. For SVG-only clipart, the content is embedded by default.
 
 ---
 
-## Part 3: Quality Checks
+## Part 4: Quality Checks
 
 1. **Render test** — After importing each clipart, render the diagram and verify
    the icon appears at the right size and position
