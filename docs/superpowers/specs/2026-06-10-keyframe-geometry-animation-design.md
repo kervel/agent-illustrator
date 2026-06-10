@@ -88,34 +88,60 @@ This realizes the documented persistence for *all* transforms. It is a behavior
 change to existing visual transforms (they become persistent) — approved, and it
 aligns code with the skill doc.
 
-### 4. Smooth transitions, CSS-controlled — `generate_keyframe_css` (src/renderer/svg.rs)
+### 4. Two animation channels — position on the wrapper group, size on the shape
 
-Emit two **low-specificity, overridable** default rules in the keyframe CSS:
+**Why two channels (the label-desync constraint):** a shape and its label are rendered
+as *sibling* SVG nodes — the `<text>` is placed at absolute coordinates derived from
+the shape's frame-0 bounds. Emitting raw `#id { x: Npx }` moves the shape but leaves
+its label behind. The prior hide/show fix already wraps every keyframe-referenced
+element in a `<g class="kf-{id}">` that contains *both* the shape and its label.
+Animation therefore splits:
+
+- **Position + rotation** (`x`, `y`, `dx`, `dy`, `rotation`) → emitted as a
+  `transform: translate(Δx px, Δy px) rotate(Δdeg)` on the per-element wrapper group
+  `.frame-<name> .kf-{id}`. The label rides along. Position is emitted as a **delta**
+  from the frame-0 base (`solved - base`); the inner shape keeps its base coordinates.
+  (`transform` is GPU-friendly and universally supported, unlike SVG geometry `x`/`y`.)
+- **Size** (`width`, `height`, `scale`) → emitted as `width`/`height` props on the
+  inner shape `.frame-<name> #{id}`. "Grow wider + recenter" = `width` grows on the
+  shape + `translate(-Δ)` on the group → net center holds. This is the confirmed
+  rect-resize mechanism.
+- **Color** (`fill`, `stroke`) → on the inner shape `#{id}` (existing).
+- **Opacity** (show/hide) → on the wrapper group `.kf-{id}` (existing).
+
+Known limitation: a *labeled* element that itself resizes (width/height) will not
+re-center its own label (the label tweens position via the group, not size). Acceptable
+for frames/unlabeled boxes and the acceptance scenario (the box that resizes is a frame;
+the labeled chips only move). Documented as a gotcha.
+
+### 5. Smooth transitions, CSS-controlled — `generate_keyframe_css` (src/renderer/svg.rs)
+
+Emit **low-specificity, overridable** default rules in the keyframe CSS:
 
 ```css
-.kf-animatable {
-  transition: x .5s ease, y .5s ease, width .5s ease, height .5s ease,
-              rotate .5s ease, fill .5s ease, stroke .5s ease;
-}
-.kf-fade { transition: opacity .5s ease; }
+.kf-anim  { transition: transform .5s ease, opacity .5s ease; }   /* wrapper groups */
+.ai-shape { transition: width .5s ease, height .5s ease, fill .5s ease, stroke .5s ease; }
 ```
 
-- `kf-animatable` is added to elements that have any geometry/color diff in any frame.
-- `kf-fade` is added to the visibility wrapper groups (both the `kf-hidden kf-{id}`
-  groups and the visible-start `kf-{id}` groups from the prior hide/show fix), so
-  show/hide cross-fades (opacity tweens, per decision).
+- `.kf-anim` is added to every keyframe wrapper group (the `kf-hidden kf-{id}` groups
+  and the visible-start `kf-{id}` groups). Wrapper groups carry position + opacity.
+- `.ai-shape` already classes every shape; size/color transitions ride on it. Static
+  elements with no diff never change, so they never animate — no opt-in tracking needed.
 - Single-class specificity means a user's `--stylesheet-css` (layered *after* the
-  generated CSS) can override duration/easing — "controlled by CSS." Default is
-  `.5s ease`.
+  generated CSS) overrides duration/easing — "controlled by CSS." Default `.5s ease`.
 - These base rules are emitted even under `--no-frame-css` (they are hooks, not
   per-frame rules), so an external deck still gets motion.
 
-### 5. Renderer class hooks — `render_svg_with_keyframes` / `render_element_*`
+### 5b. Renderer + diff changes
 
-Compute a `kf_animatable: HashSet<String>` (ids with any non-opacity diff in any
-frame) alongside the existing `kf_referenced` set, thread it to the element renderer,
-and add the `kf-animatable` class to those shapes. Add `kf-fade` to wrapper groups in
-`start_visibility_group` / `start_kf_class_group`.
+- `start_visibility_group` / `start_kf_class_group` add the shared `kf-anim` class.
+- `kf_referenced` (which decides who gets a `kf-{id}` wrapper) is widened to include
+  elements with **any** diff in any frame (position/size/color/opacity), so moved
+  elements get a wrapper group to translate.
+- `ElementDiff` position fields become **translate deltas** (`tx`, `ty` = solved-base)
+  rather than absolute coordinates; `width`/`height` stay absolute. `diff_element`
+  computes the deltas. `generate_keyframe_css` emits `transform: translate(tx, ty)
+  rotate(rot)` on `.kf-{id}` and `width`/`height` on `#{id}`.
 
 ### 6. Named constraints & per-keyframe constraint control (the unblock)
 
@@ -196,8 +222,10 @@ New tests (likely `tests/keyframe_geometry_animation.rs` + unit tests in
    right `#id { x:…; y:…; width:…; height:… }` per frame.
 2. **dx/dy** — delta from base produces the expected absolute target.
 3. **scale** — `scale: 2` doubles width/height and keeps center fixed (x/y shift).
-4. **Transition emission** — `.kf-animatable` and `.kf-fade` rules present with
-   default `.5s ease`; animatable elements carry the `kf-animatable` class.
+4. **Transition emission** — `.kf-anim` (transform+opacity) and `.ai-shape`
+   (width/height/fill/stroke) transition rules present with default `.5s ease`;
+   wrapper groups carry the `kf-anim` class. Position emitted as
+   `transform: translate(...)` on `.kf-{id}`, size as `width/height` on `#{id}`.
 5. **Cumulative persistence** — a transform in frame 1 still applies in frame 2 when
    frame 2 doesn't restate it; a per-property override in frame 2 merges correctly.
 6. **Group cascade** — a child constrained to a transformed parent gets its own
