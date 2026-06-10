@@ -199,6 +199,8 @@ Named constraints & per-keyframe control:
     Inside a keyframe: constrain <expr> (adds; overrides any earlier constraint on the
     same element+property), disable <name>, enable <name>. Without this, the
     always-solved constraints pull elements back to their frame-0 positions.
+    An element left with no active constraint holds its frame-0 laid-out position
+    (each frame re-solves from the base layout); enable <name> restores a disabled pin.
 
 CLI flags:
     --frame N          Render single frame as static SVG (by index or name)

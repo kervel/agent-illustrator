@@ -231,11 +231,21 @@ keyframe "merge" {
     disable chip_home
     constrain chip.center_y = 120        // re-pin; solver moves chip, it tweens
 }
+keyframe "reset" {
+    enable chip_home                     // restore the original pin; chip tweens back
+}
 ```
 
 Without this, the always-solved constraints pull elements back to their frame-0
 positions. Children constrained relative to a resized/moved parent cascade to new
 solved positions and each tweens (the box-of-chips grows and recenters as a unit).
+
+**Under-constrained elements.** Each frame is re-solved from the frame-0 base layout,
+so an element with no active constraint (e.g. you `disable`d its pin without re-pinning,
+and no other constraint references it) holds its frame-0 laid-out position. There is no
+"undefined position" case — the base layout is always the fallback — so no lint is
+needed for it. To leave an element where a *previous* keyframe moved it, keep that
+keyframe's `constrain` (or transform) active; cumulative state carries it forward.
 
 ---
 
