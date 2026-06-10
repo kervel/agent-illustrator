@@ -447,6 +447,27 @@ impl SvgBuilder {
         ));
     }
 
+    /// Add a hidden crossfade variant path for a connection whose route reshapes in a
+    /// given frame. Shown only in that frame via `.frame-<frame> .conn-<id>-f<frame>`.
+    pub fn add_connection_variant(&mut self, d: &str, id: &str, frame: &str, marker_end: bool) {
+        let prefix = self.prefix();
+        let marker = if marker_end {
+            format!(r#" marker-end="url(#{prefix}arrow)""#)
+        } else {
+            String::new()
+        };
+        self.connections.push(format!(
+            r#"{}<path class="{}connection conn-{} conn-{}-f{}" d="{}" fill="none" opacity="0"{}/>"#,
+            self.indent_str(),
+            prefix,
+            id,
+            id,
+            frame,
+            d,
+            marker
+        ));
+    }
+
     /// Add a group element with optional ID and classes
     pub fn start_group(&mut self, id: Option<&str>, classes: &[String]) {
         let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
@@ -739,6 +760,21 @@ pub fn render_svg_with_keyframes(
         render_connection(conn, &mut builder, Some(&id));
     }
 
+    // Crossfade variants: for each connection whose route reshapes in a frame
+    // (non-morphable), render a hidden variant path the frame CSS fades in.
+    for frame in frame_diffs {
+        for (conn_id, diff) in &frame.connection_diffs {
+            if let Some(pts) = &diff.path {
+                if !diff.morphable {
+                    if let Some((routing, marker, sw)) = conn_meta.get(conn_id) {
+                        let d = connection_path_d(pts, *routing, *marker, *sw);
+                        builder.add_connection_variant(&d, conn_id, &frame.name, *marker);
+                    }
+                }
+            }
+        }
+    }
+
     // Render debug overlays
     if debug {
         for element in &result.root_elements {
@@ -855,6 +891,13 @@ fn generate_keyframe_css(
                         let d = connection_path_d(pts, *routing, *marker, *sw);
                         css.push_str(&format!("  .conn-{} {{ d: path(\"{}\"); }}\n", conn_id, d));
                     }
+                } else {
+                    // Reshaped route: crossfade base out, this frame's variant in.
+                    css.push_str(&format!("  .conn-{}-base {{ opacity: 0; }}\n", conn_id));
+                    css.push_str(&format!(
+                        "  .conn-{}-f{} {{ opacity: 1; }}\n",
+                        conn_id, frame.name
+                    ));
                 }
             }
         }
@@ -1248,6 +1291,12 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         .or_else(|| conn.name.as_ref().map(|n| n.0.clone()));
     if let Some(c) = &conn_class {
         classes.push(format!("conn-{}", c));
+        // Only in the keyframe render path (id provided): mark this as the base path
+        // (vs a crossfade variant) so a reshaped frame can hide just the base via
+        // `.conn-<id>-base { opacity: 0 }`. Keeps static output unchanged.
+        if id.is_some() {
+            classes.push(format!("conn-{}-base", c));
+        }
     }
     let styles = format_connection_styles(&conn.styles);
 

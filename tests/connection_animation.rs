@@ -66,3 +66,25 @@ keyframe "go" { transform mover [dx: 50] }
     assert!(!svg.contains(".conn-feed { d:"),
         "static connection must not get a path diff (anti-flicker), got:\n{}", svg);
 }
+
+#[test]
+fn connection_crossfades_when_route_reshapes() {
+    // Vertical stack → orthogonal route is a straight line (2 pts); shifting box
+    // horizontally forces a bend (more pts) → not morphable → crossfade variant.
+    let svg = render(r#"
+rect box [width: 80, height: 40]
+rect other [width: 80, height: 40]
+constrain box.center_x = 120
+constrain box.center_y = 100
+constrain other.center_x = 120
+constrain other.center_y = 320
+box.bottom -> other.top as link
+keyframe "idle" {}
+keyframe "shift" { transform box [dx: 220] }
+"#).expect("render");
+    let has_variant = svg.contains("conn-link-fshift");
+    let has_morph = svg.contains(".conn-link { d:");
+    assert!(has_variant && !has_morph,
+        "reshaped route should crossfade (variant + opacity), not morph. variant={} morph={}\n{}",
+        has_variant, has_morph, svg);
+}
