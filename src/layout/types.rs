@@ -641,9 +641,13 @@ impl ResolvedStyles {
                 | StyleKey::LabelOffset
                 | StyleKey::ZOrder
                 | StyleKey::Pointer
+                | StyleKey::Dx
+                | StyleKey::Dy
+                | StyleKey::Scale
                 | StyleKey::Custom(_) => {
                     // Labels, label position, gap, size, routing, role, and position modifiers
-                    // handled separately in layout engine; custom keys ignored for now
+                    // handled separately in layout engine; dx/dy/scale are keyframe-only
+                    // geometry transforms applied in the keyframe engine; custom keys ignored
                 }
             }
         }

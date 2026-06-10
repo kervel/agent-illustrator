@@ -367,6 +367,12 @@ pub enum StyleKey {
     ZOrder,
     /// Pointer (tail) direction for callout shapes
     Pointer,
+    /// Delta-X: position offset relative to the laid-out position (keyframe transforms)
+    Dx,
+    /// Delta-Y: position offset relative to the laid-out position (keyframe transforms)
+    Dy,
+    /// Uniform scale about the element's center (keyframe transforms)
+    Scale,
     Custom(String),
 }
 

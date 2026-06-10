@@ -166,6 +166,9 @@ where
                 "label_offset" => StyleKey::LabelOffset,
                 "z_order" => StyleKey::ZOrder,
                 "pointer" => StyleKey::Pointer,
+                "dx" => StyleKey::Dx,
+                "dy" => StyleKey::Dy,
+                "scale" => StyleKey::Scale,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)
@@ -2661,5 +2664,27 @@ mod tests {
             }
             other => panic!("Expected TemplateDecl, got {:?}", other),
         }
+    }
+
+    #[test]
+    fn parses_dx_dy_scale_transform_keys() {
+        use crate::parser::ast::{Statement, KeyframeOp, StyleKey};
+        let src = r#"
+rect box [width: 10, height: 10]
+keyframe "k" { transform box [dx: 5, dy: -3, scale: 2] }
+"#;
+        let doc = parse(src).expect("parse ok");
+        let kf = doc.statements.iter().find_map(|s| match &s.node {
+            Statement::Keyframe(k) => Some(k),
+            _ => None,
+        }).expect("keyframe present");
+        let modifiers = kf.operations.iter().find_map(|op| match &op.node {
+            KeyframeOp::Transform { modifiers, .. } => Some(modifiers),
+            _ => None,
+        }).expect("transform op");
+        let keys: Vec<&StyleKey> = modifiers.iter().map(|m| &m.node.key.node).collect();
+        assert!(keys.contains(&&StyleKey::Dx), "dx should map to StyleKey::Dx, got {:?}", keys);
+        assert!(keys.contains(&&StyleKey::Dy), "dy should map to StyleKey::Dy");
+        assert!(keys.contains(&&StyleKey::Scale), "scale should map to StyleKey::Scale");
     }
 }
