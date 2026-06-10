@@ -535,7 +535,10 @@ fn render_pipeline(
                 svg.insert_str(pos, &js);
             }
         } else if config.animate_css {
-            let css = generate_animate_css(&frame_states, &frame_diffs);
+            let conn_meta = renderer::svg::build_conn_meta(&result);
+            let mut base_dims: std::collections::HashMap<String, (f64, f64)> = std::collections::HashMap::new();
+            collect_base_dims(&result.root_elements, &mut base_dims);
+            let css = generate_animate_css(&frame_states, &frame_diffs, &conn_meta, &base_dims);
             if let Some(pos) = svg.rfind("</style>") {
                 svg.insert_str(pos, &css);
             }
@@ -603,9 +606,45 @@ fn filter_visible_elements(
 /// Generate pure CSS animation (no JS required).
 /// Each element/connection gets its own @keyframes animation that toggles
 /// opacity at the right frame percentages.
+/// Collect each element's base (frame-0) width/height by id, recursively.
+fn collect_base_dims(
+    elements: &[layout::ElementLayout],
+    out: &mut std::collections::HashMap<String, (f64, f64)>,
+) {
+    for e in elements {
+        if let Some(id) = &e.id {
+            out.insert(id.0.clone(), (e.bounds.width, e.bounds.height));
+        }
+        collect_base_dims(&e.children, out);
+    }
+}
+
+/// Emit a `@keyframes` body for a per-frame value timeline, holding each frame's value
+/// then easing to the next (mimics the JS frame-class + transition feel). `vals[i]` is
+/// the full CSS value for frame i (e.g. "translate(40px, 0px)"); None = `identity`.
+/// Returns None when every frame equals `identity` (nothing to animate).
+fn smooth_keyframes_body(prop: &str, vals: &[Option<String>], identity: &str, pct_per_frame: f64) -> Option<String> {
+    if vals.iter().all(|v| v.as_deref().unwrap_or(identity) == identity) {
+        return None;
+    }
+    let val = |i: usize| vals[i].clone().unwrap_or_else(|| identity.to_string());
+    let trans = pct_per_frame * 0.3; // ~30% of each frame window eases; the rest holds
+    let mut body = String::new();
+    body.push_str(&format!("  0% {{ {}: {}; }}\n", prop, val(0)));
+    for i in 1..vals.len() {
+        let start = i as f64 * pct_per_frame;
+        body.push_str(&format!("  {:.2}% {{ {}: {}; }}\n", start, prop, val(i - 1)));
+        body.push_str(&format!("  {:.2}% {{ {}: {}; }}\n", (start + trans).min(100.0), prop, val(i)));
+    }
+    body.push_str(&format!("  100% {{ {}: {}; }}\n", prop, val(vals.len() - 1)));
+    Some(body)
+}
+
 fn generate_animate_css(
     frame_states: &[layout::keyframe::FrameState],
     frame_diffs: &[layout::keyframe::FrameLayout],
+    conn_meta: &std::collections::HashMap<String, (layout::RoutingMode, bool, f64)>,
+    base_dims: &std::collections::HashMap<String, (f64, f64)>,
 ) -> String {
     let n = frame_diffs.len();
     if n == 0 {
@@ -684,6 +723,47 @@ fn generate_animate_css(
             ".kf-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
             elem_id, anim_name, total_duration
         ));
+    }
+
+    // Element geometry (smooth): transform on the wrapper, width/height on the shape.
+    let mut xf_tl: std::collections::BTreeMap<String, Vec<Option<String>>> = std::collections::BTreeMap::new();
+    let mut w_tl: std::collections::BTreeMap<String, Vec<Option<String>>> = std::collections::BTreeMap::new();
+    let mut h_tl: std::collections::BTreeMap<String, Vec<Option<String>>> = std::collections::BTreeMap::new();
+    for (i, diff) in frame_diffs.iter().enumerate() {
+        for (id, d) in &diff.element_diffs {
+            if let Some(t) = renderer::svg::frame_transform_css(d.tx, d.ty, d.rotation) {
+                xf_tl.entry(id.clone()).or_insert_with(|| vec![None; n])[i] = Some(t);
+            }
+            if let Some(wv) = d.width {
+                w_tl.entry(id.clone()).or_insert_with(|| vec![None; n])[i] = Some(format!("{}px", wv));
+            }
+            if let Some(hv) = d.height {
+                h_tl.entry(id.clone()).or_insert_with(|| vec![None; n])[i] = Some(format!("{}px", hv));
+            }
+        }
+    }
+    for (id, vals) in &xf_tl {
+        if let Some(body) = smooth_keyframes_body("transform", vals, "translate(0px, 0px)", pct_per_frame) {
+            let anim = format!("kf-geo-{}", id);
+            css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
+            css.push_str(&format!(".kf-{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+        }
+    }
+    for (id, vals) in &w_tl {
+        let identity = base_dims.get(id).map(|(w, _)| format!("{}px", w)).unwrap_or_default();
+        if let Some(body) = smooth_keyframes_body("width", vals, &identity, pct_per_frame) {
+            let anim = format!("kf-width-{}", id);
+            css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
+            css.push_str(&format!("#{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+        }
+    }
+    for (id, vals) in &h_tl {
+        let identity = base_dims.get(id).map(|(_, h)| format!("{}px", h)).unwrap_or_default();
+        if let Some(body) = smooth_keyframes_body("height", vals, &identity, pct_per_frame) {
+            let anim = format!("kf-height-{}", id);
+            css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
+            css.push_str(&format!("#{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+        }
     }
 
     // Generate @keyframes for each connection
