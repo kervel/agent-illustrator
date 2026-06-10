@@ -50,3 +50,25 @@ keyframe "grow" { transform box [width: 300] }
     // box is geometry-diffed → gets a wrapper group carrying kf-anim
     assert!(svg.contains("kf-anim"), "wrapper group should carry kf-anim, got:\n{}", svg);
 }
+
+#[test]
+fn disable_then_reconstrain_moves_element_semantically() {
+    // chip is pinned below at center_y=300 in frame 0; in "merge" we disable that
+    // pin and re-pin it to y=100. It should move ~200px up (translate ty ~ -200).
+    let src = r#"
+rect chip [width: 40, height: 20]
+constrain chip.center_x = 100
+constrain chip.center_y = 300 as chip_home
+keyframe "idle" {}
+keyframe "merge" {
+    disable chip_home
+    constrain chip.center_y = 100
+}
+"#;
+    let svg = render(src).expect("render ok");
+    // chip moves up: a negative ty translate appears on .kf-chip in the merge frame.
+    assert!(svg.contains(".kf-chip { transform: translate("),
+        "chip should translate after re-constrain, got:\n{}", svg);
+    assert!(svg.contains("-200px") || svg.contains("-199") || svg.contains("-201"),
+        "chip should move ~200px up, got:\n{}", svg);
+}

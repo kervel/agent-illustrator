@@ -198,8 +198,12 @@ pub fn compute_frame_diffs(
         let mut element_diffs = BTreeMap::new();
         let mut connection_diffs = BTreeMap::new();
 
-        // Re-solve layout for this frame (transforms + constraint cascading)
-        let solved_result = if !state.transforms.is_empty() {
+        // Re-solve layout for this frame (transforms + constraint cascading).
+        // Also re-solve when constraints were added/disabled this frame.
+        let needs_resolve = !state.transforms.is_empty()
+            || !state.added_constraints.is_empty()
+            || !state.disabled_constraints.is_empty();
+        let solved_result = if needs_resolve {
             resolve_frame_layout(base_result, state, doc, config)
         } else {
             None
@@ -304,9 +308,9 @@ fn resolve_frame_layout(
     result.rebuild_index();
 
     if !state.no_resolve {
-        // Build a modified document where constraints on transformed elements'
-        // geometry properties are replaced with the transform values.
-        let modified_doc = rewrite_constraints_for_transforms(doc, state);
+        // Build the per-frame active constraint set: drop constraints on
+        // geometry-transformed elements + disabled/overridden ones, append added.
+        let modified_doc = build_active_document(doc, state);
 
         // Re-solve constraints using modified document.
         // Transformed positions are now baked into constraints,
@@ -331,13 +335,16 @@ fn resolve_frame_layout(
     Some(result)
 }
 
-/// Remove constraints that directly position transformed elements,
-/// so the solver uses the transformed positions (from element bounds)
-/// as SUGGESTED values and cascades to dependents.
-fn rewrite_constraints_for_transforms(doc: &Document, state: &FrameState) -> Document {
+/// Build the per-frame active constraint document. Starting from the base doc:
+/// (1) drop constraints whose LHS targets a geometry-transformed element (the
+/// transform value wins), (2) drop constraints named in `disabled_constraints`,
+/// (3) drop base/earlier constraints overridden by an added constraint on the same
+/// (element, property), then (4) append the keyframe-added constraints. The solver
+/// re-runs on this active set so dependents cascade to their new positions.
+fn build_active_document(doc: &Document, state: &FrameState) -> Document {
     use crate::parser::ast::*;
 
-    // Collect element IDs that have geometry transforms (x, y, width, height)
+    // (a) elements with geometry transforms — their own positioning constraints drop.
     let mut geometry_transformed: HashSet<&str> = HashSet::new();
     for (elem_id, modifiers) in &state.transforms {
         let has_geometry = modifiers.iter().any(|m| matches!(
@@ -350,26 +357,55 @@ fn rewrite_constraints_for_transforms(doc: &Document, state: &FrameState) -> Doc
         }
     }
 
-    if geometry_transformed.is_empty() {
-        return doc.clone();
-    }
+    // (b) (element, property) targets newly pinned by added constraints → override base.
+    let added_targets: HashSet<(String, String)> = state.added_constraints.iter()
+        .filter_map(|c| constraint_target(&c.expr))
+        .collect();
 
-    // Clone document and remove constrain statements whose LHS
-    // directly targets a geometry-transformed element
     let mut new_doc = doc.clone();
     new_doc.statements.retain(|stmt| {
-        if let Statement::Constrain(constrain) = &stmt.node {
-            // Check if the LHS references a transformed element
-            if let Some(elem_name) = get_constraint_lhs_element(&constrain.expr) {
-                if geometry_transformed.contains(elem_name.as_str()) {
-                    return false; // Drop this constraint
-                }
+        if let Statement::Constrain(c) = &stmt.node {
+            // drop if its LHS element is geometry-transformed
+            if let Some(elem) = get_constraint_lhs_element(&c.expr) {
+                if geometry_transformed.contains(elem.as_str()) { return false; }
+            }
+            // drop if named and disabled
+            if let Some(name) = &c.name {
+                if state.disabled_constraints.contains(&name.node.0) { return false; }
+            }
+            // drop if overridden by an added constraint on the same (element, property)
+            if let Some(tgt) = constraint_target(&c.expr) {
+                if added_targets.contains(&tgt) { return false; }
             }
         }
         true
     });
 
+    // (c) append the keyframe-added constraints (active from this frame forward).
+    for decl in &state.added_constraints {
+        new_doc.statements.push(Spanned::new(Statement::Constrain(decl.clone()), 0..0));
+    }
     new_doc
+}
+
+/// (element, property-name) targeted by a constraint LHS, for override detection.
+fn constraint_target(expr: &crate::parser::ast::ConstraintExpr) -> Option<(String, String)> {
+    use crate::parser::ast::ConstraintExpr;
+    let pr = match expr {
+        ConstraintExpr::Equal { left, .. }
+        | ConstraintExpr::EqualWithOffset { left, .. }
+        | ConstraintExpr::Constant { left, .. }
+        | ConstraintExpr::GreaterOrEqual { left, .. }
+        | ConstraintExpr::LessOrEqual { left, .. } => left,
+        ConstraintExpr::Midpoint { target, .. } => target,
+        ConstraintExpr::Contains { container, .. } => {
+            return Some((container.node.0.clone(), "contains".to_string()));
+        }
+    };
+    Some((
+        pr.element.node.leaf().0.clone(),
+        format!("{:?}", pr.property.node),
+    ))
 }
 
 /// Extract the element name from the LHS of a constraint expression.
