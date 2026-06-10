@@ -93,6 +93,8 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
     let mut frames = Vec::with_capacity(keyframes.len());
     let mut hidden_elements: HashSet<String> = HashSet::new();
     let mut hidden_connections: HashSet<String> = HashSet::new();
+    // Cumulative transforms: element id -> merged modifiers (later keys override earlier).
+    let mut cumulative_transforms: HashMap<String, Vec<crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>>> = HashMap::new();
 
     for kf in keyframes {
         // Apply operations cumulatively
@@ -110,17 +112,14 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
                         hidden_connections.insert(target.node.0.clone());
                     }
                 }
-                KeyframeOp::Transform { .. } => {
-                    // Transforms don't affect visibility
+                KeyframeOp::Transform { target, modifiers } => {
+                    let entry = cumulative_transforms.entry(target.node.0.clone()).or_default();
+                    for m in modifiers {
+                        // per-property override: drop any earlier modifier with the same key
+                        entry.retain(|existing| existing.node.key.node != m.node.key.node);
+                        entry.push(m.clone());
+                    }
                 }
-            }
-        }
-
-        // Collect transforms for this frame
-        let mut transforms = HashMap::new();
-        for op in &kf.operations {
-            if let KeyframeOp::Transform { target, modifiers } = &op.node {
-                transforms.insert(target.node.0.clone(), modifiers.clone());
             }
         }
 
@@ -128,7 +127,7 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
             name: kf.name.node.clone(),
             hidden_elements: hidden_elements.clone(),
             hidden_connections: hidden_connections.clone(),
-            transforms,
+            transforms: cumulative_transforms.clone(),
             no_resolve: kf.no_resolve,
         });
     }
@@ -539,6 +538,28 @@ mod tests {
         let mods = vec![modi(StyleKey::Dx, 5.0), modi(StyleKey::X, 100.0)];
         apply_transform_to_element(std::slice::from_mut(&mut elem), "e", &mods);
         assert!((elem.bounds.x - 105.0).abs() < 0.001, "x {}", elem.bounds.x);
+    }
+
+    #[test]
+    fn transforms_persist_and_merge_forward() {
+        let kf1 = make_keyframe("a", vec![
+            KeyframeOp::Transform {
+                target: make_id("box"),
+                modifiers: vec![modi(StyleKey::Width, 360.0)],
+            },
+        ]);
+        let kf2 = make_keyframe("b", vec![
+            KeyframeOp::Transform {
+                target: make_id("box"),
+                modifiers: vec![modi(StyleKey::X, 120.0)],
+            },
+        ]);
+        let states = compute_frame_states(&[&kf1, &kf2]);
+        // Frame b must still carry the width from frame a, plus its own x.
+        let box_mods = states[1].transforms.get("box").expect("box transformed in frame b");
+        let keys: Vec<&StyleKey> = box_mods.iter().map(|m| &m.node.key.node).collect();
+        assert!(keys.contains(&&StyleKey::Width), "width persists into frame b, got {:?}", keys);
+        assert!(keys.contains(&&StyleKey::X), "x added in frame b");
     }
 
     fn make_keyframe(name: &str, ops: Vec<KeyframeOp>) -> KeyframeDecl {
