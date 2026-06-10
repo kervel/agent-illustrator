@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 450 424.5685424949238">
   <style>
     :root {
+    --status-error: #f44336;
+    --accent-3: #bbdefb;
+    --background-2: #f5f5f5;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --background-3: #eeeeee;
+    --accent-1: #2196f3;
     --accent-2: #e3f2fd;
     --text-3: #999999;
-    --accent-light: #e3f2fd;
-    --status-error: #f44336;
-    --text-dark: #1a1a1a;
-    --secondary-1: #ff9800;
-    --status-success: #4caf50;
+    --secondary-2: #fff3e0;
+    --text-light: #ffffff;
+    --foreground-dark: #1a1a1a;
+    --background-dark: #333333;
     --foreground-1: #333333;
     --text-2: #666666;
-    --foreground-light: #e0e0e0;
-    --status-warning: #ff9800;
-    --foreground-dark: #1a1a1a;
-    --background-1: #ffffff;
-    --secondary-dark: #e65100;
     --secondary-3: #ffe0b2;
-    --foreground-2: #666666;
-    --background-light: #ffffff;
-    --background-2: #f5f5f5;
-    --background-dark: #333333;
-    --text-1: #333333;
-    --text-light: #ffffff;
-    --accent-1: #2196f3;
-    --foreground-3: #999999;
-    --accent-dark: #1565c0;
-    --accent-3: #bbdefb;
-    --secondary-2: #fff3e0;
-    --background-3: #eeeeee;
     --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
+    --background-1: #ffffff;
+    --foreground-light: #e0e0e0;
+    --background-light: #ffffff;
+    --text-1: #333333;
+    --text-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
+    --accent-dark: #1565c0;
+    --status-success: #4caf50;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -120,7 +120,7 @@
   <g id="team_svg" class="ai-container">
     <g id="alice" class="ai-container">
       <g class="ai-container">
-        <g id="avatar" class="ai-svg-embed" transform="translate(15, 15) scale(1, 1)">
+        <g id="avatar" class="ai-svg-embed" transform="translate(15, 15) scale(1.5, 1.2244897959183674) translate(-10, -6)">
           <!-- Simple person icon: head + shoulders -->
           <circle cx="30" cy="18" r="12" fill="#666"/>
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
@@ -131,7 +131,7 @@
     </g>
     <g id="bob" class="ai-container">
       <g class="ai-container">
-        <g id="avatar" class="ai-svg-embed" transform="translate(145, 15) scale(1, 1)">
+        <g id="avatar" class="ai-svg-embed" transform="translate(145, 15) scale(1.5, 1.2244897959183674) translate(-10, -6)">
           <!-- Simple person icon: head + shoulders -->
           <circle cx="30" cy="18" r="12" fill="#666"/>
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
@@ -142,7 +142,7 @@
     </g>
     <g id="charlie" class="ai-container">
       <g class="ai-container">
-        <g id="avatar" class="ai-svg-embed" transform="translate(275, 15) scale(1, 1)">
+        <g id="avatar" class="ai-svg-embed" transform="translate(275, 15) scale(1.5, 1.2244897959183674) translate(-10, -6)">
           <!-- Simple person icon: head + shoulders -->
           <circle cx="30" cy="18" r="12" fill="#666"/>
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
@@ -157,22 +157,22 @@
     <text id="logo_label" class="ai-shape ai-text" x="132" y="202" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
   </g>
   <g id="rotated_icons" class="ai-container">
-    <g id="i0" class="ai-svg-embed" transform="translate(65.85786437626905, 251.2842712474619) scale(0.6666666666666666, 0.6666666666666666)">
+    <g id="i0" class="ai-svg-embed" transform="translate(65.85786437626905, 251.2842712474619) scale(1, 0.8163265306122449) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
-    <g id="i15" class="ai-svg-embed" transform="translate(121.36296694843728, 246.7893738196301) scale(0.8164965809277258, 0.8164965809277267) rotate(15 30 30)">
+    <g id="i15" class="ai-svg-embed" transform="translate(121.36296694843728, 246.7893738196301) scale(1.2247448713915887, 0.9997917317482368) rotate(15 20 24.5) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
-    <g id="i30" class="ai-svg-embed" transform="translate(178.53735630058026, 243.96376317177314) scale(0.910683602522959, 0.9106836025229588) rotate(30 30 30)">
+    <g id="i30" class="ai-svg-embed" transform="translate(178.53735630058026, 243.96376317177314) scale(1.3660254037844386, 1.1151227785995415) rotate(30 20 24.5) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
-    <g id="i45" class="ai-svg-embed" transform="translate(237.57359312880715, 243) scale(0.9428090415820634, 0.9428090415820634) rotate(45 30 30)">
+    <g id="i45" class="ai-svg-embed" transform="translate(237.57359312880715, 243) scale(1.4142135623730951, 1.1544600509168124) rotate(45 20 24.5) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>

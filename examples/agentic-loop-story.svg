@@ -2,77 +2,78 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -80 1200 580" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
   <style>
     :root {
-    --foreground-1: #333333;
-    --background-1: #ffffff;
-    --background-3: #eeeeee;
-    --foreground-2: #666666;
-    --text-1: #333333;
-    --foreground-dark: #1a1a1a;
-    --accent-2: #e3f2fd;
-    --foreground-light: #e0e0e0;
-    --text-dark: #1a1a1a;
-    --accent-3: #bbdefb;
-    --accent-light: #e3f2fd;
-    --secondary-1: #ff9800;
-    --secondary-dark: #e65100;
-    --background-dark: #333333;
-    --status-success: #4caf50;
-    --status-error: #f44336;
-    --secondary-light: #fff3e0;
-    --accent-1: #2196f3;
-    --background-light: #ffffff;
     --accent-dark: #1565c0;
+    --background-3: #eeeeee;
+    --background-light: #ffffff;
     --text-light: #ffffff;
     --text-3: #999999;
+    --foreground-1: #333333;
+    --text-1: #333333;
+    --secondary-light: #fff3e0;
+    --text-dark: #1a1a1a;
     --status-warning: #ff9800;
+    --foreground-light: #e0e0e0;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
     --text-2: #666666;
+    --background-dark: #333333;
+    --foreground-dark: #1a1a1a;
     --background-2: #f5f5f5;
-    --foreground-3: #999999;
+    --accent-1: #2196f3;
+    --background-1: #ffffff;
+    --foreground-2: #666666;
+    --accent-3: #bbdefb;
     --secondary-3: #ffe0b2;
+    --accent-2: #e3f2fd;
     --secondary-2: #fff3e0;
+    --foreground-3: #999999;
+    --secondary-dark: #e65100;
+    --status-success: #4caf50;
+    --status-error: #f44336;
   }
 
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
 .ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
 .frame-idle {
 }
 .frame-user_prompt {
   .kf-speech_bubble { opacity: 1; }
-  .ai-connection.conn-prompt_arrow { opacity: 1; }
+  .conn-prompt_arrow { opacity: 1; }
 }
 .frame-system_prompt {
   .kf-sys_envelope { opacity: 1; }
   .kf-sys_line1 { opacity: 1; }
   .kf-sys_line2 { opacity: 1; }
-  .ai-connection.conn-req_arrow { opacity: 1; }
+  .conn-req_arrow { opacity: 1; }
 }
 .frame-tool_response {
   .kf-tc_line1 { opacity: 1; }
   .kf-tc_line2 { opacity: 1; }
   .kf-tool_call_envelope { opacity: 1; }
-  .ai-connection.conn-resp_arrow { opacity: 1; }
+  .conn-resp_arrow { opacity: 1; }
 }
 .frame-tool_exec {
   .kf-exec_envelope { opacity: 1; }
   .kf-exec_line1 { opacity: 1; }
   .kf-exec_line2 { opacity: 1; }
-  .ai-connection.conn-exec_arrow { opacity: 1; }
+  .conn-exec_arrow { opacity: 1; }
 }
 .frame-result_return {
   .kf-result_envelope { opacity: 1; }
   .kf-result_line1 { opacity: 1; }
   .kf-result_line2 { opacity: 1; }
-  .ai-connection.conn-return_to_cli { opacity: 1; }
-  .ai-connection.conn-return_to_cloud { opacity: 1; }
+  .conn-return_to_cli { opacity: 1; }
+  .conn-return_to_cloud { opacity: 1; }
 }
 .frame-final_answer {
   .kf-ans_line1 { opacity: 1; }
   .kf-ans_line2 { opacity: 1; }
   .kf-answer_envelope { opacity: 1; }
-  .ai-connection.conn-final_to_cli { opacity: 1; }
-  .ai-connection.conn-final_to_user { opacity: 1; }
+  .conn-final_to_cli { opacity: 1; }
+  .conn-final_to_user { opacity: 1; }
 }
 
     /* Modern styling for agentic-loop animation */
@@ -597,7 +598,7 @@ text {
   </defs>
   <g id="diagram" class="ai-container">
     <rect id="canvas" class="ai-shape ai-rect" x="0" y="-20" width="1080" height="460" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
-    <g id="user_icon" class="ai-svg-embed" transform="translate(72, 55) scale(1.5, 1.5)">
+    <g id="user_icon" class="ai-svg-embed" transform="translate(72, 55) scale(1.8461538461538463, 1.8181818181818181) translate(-6, -6)">
       <!-- Head -->
       <circle cx="32" cy="20" r="14" fill="#444" stroke="#333" stroke-width="1.5"/>
       <!-- Body/torso -->
@@ -606,7 +607,7 @@ text {
       <!-- Base line -->
       <line x1="6" y1="72" x2="58" y2="72" stroke="#333" stroke-width="1.5"/>
     </g>
-    <g id="cli_icon" class="ai-svg-embed" transform="translate(418, 65) scale(1.55, 1.5625)">
+    <g id="cli_icon" class="ai-svg-embed" transform="translate(418, 65) scale(1.631578947368421, 1.6666666666666667) translate(-2, -2)">
       <!-- Monitor body -->
       <rect x="2" y="2" width="76" height="50" rx="4" ry="4"
       fill="#2d2d2d" stroke="#333" stroke-width="2"/>
@@ -625,11 +626,11 @@ text {
       <!-- Base -->
       <rect x="24" y="58" width="32" height="4" rx="1" ry="1" fill="#555"/>
     </g>
-    <g id="cloud_icon" class="ai-svg-embed" transform="translate(818, 74.5) scale(1.55, 1.5576923076923077)">
+    <g id="cloud_icon" class="ai-svg-embed" transform="translate(818, 74.5) scale(1.837037037037037, 2.076923076923077) translate(-6, -1)">
       <path d="M64,40 L20,40 C12.268,40 6,33.732 6,26 C6,18.268 12.268,12 20,12 C20.69,12 21.37,12.048 22.036,12.14 C25.268,5.192 32.456,1 40.5,1 C51.27,1 60,9.506 60,20 C60,20.34 59.986,20.676 59.96,21.01 C67.626,22.222 73.5,28.86 73.5,36.5 C73.5,38.433 70,40 64,40 Z"
       fill="none" stroke="#555" stroke-width="2.5" stroke-linejoin="round"/>
     </g>
-    <g id="gear_icon" class="ai-svg-embed" transform="translate(825, 275) scale(1.375, 1.375)">
+    <g id="gear_icon" class="ai-svg-embed" transform="translate(825, 275) scale(1.8151815638572155, 1.7857142193640343) translate(-8.399999618530273, -7.199999809265137)">
       <path d="M44.5,8 L44.5,16.2 C47.2,17 49.7,18.2 51.8,19.9 L58.4,13.3 C60.1,14.8 61.6,16.5 62.9,18.3 L56.3,24.9 C58,27 59.2,29.5 60,32.2 L68.2,32.2 C68.7,34.1 69,36 69,38 C69,40 68.7,41.9 68.2,43.8 L60,43.8 C59.2,46.5 58,49 56.3,51.1 L62.9,57.7 C61.6,59.5 60.1,61.2 58.4,62.7 L51.8,56.1 C49.7,57.8 47.2,59 44.5,59.8 L44.5,68 C42.6,68.5 40.7,68.8 38.7,68.8 C36.7,68.8 34.8,68.5 32.9,68 L32.9,59.8 C30.2,59 27.7,57.8 25.6,56.1 L19,62.7 C17.3,61.2 15.8,59.5 14.5,57.7 L21.1,51.1 C19.4,49 18.2,46.5 17.4,43.8 L9.2,43.8 C8.7,41.9 8.4,40 8.4,38 C8.4,36 8.7,34.1 9.2,32.2 L17.4,32.2 C18.2,29.5 19.4,27 21.1,24.9 L14.5,18.3 C15.8,16.5 17.3,14.8 19,13.3 L25.6,19.9 C27.7,18.2 30.2,17 32.9,16.2 L32.9,8 C34.8,7.5 36.7,7.2 38.7,7.2 C40.7,7.2 42.6,7.5 44.5,8 Z"
       fill="#888" stroke="#555" stroke-width="2" stroke-linejoin="round"/>
       <!-- Center hole -->
@@ -689,12 +690,12 @@ text {
       <text id="ans_line2" class="ai-shape ai-text" x="189.60000000000002" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
     </g>
   </g>
-  <path class="ai-connection conn-prompt_arrow" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-req_arrow" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-resp_arrow" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-exec_arrow" d="M480 165 C480 317.9705854077836 672.0294145922164 330 814.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-return_to_cli" d="M825 330 C672.0294145922164 330 480 317.9705854077836 480 175.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-return_to_cloud" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-final_to_cli" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-final_to_user" d="M418 115 L178.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-prompt_arrow conn-prompt_arrow-base" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-req_arrow conn-req_arrow-base" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-resp_arrow conn-resp_arrow-base" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-exec_arrow conn-exec_arrow-base" d="M480 165 C480 317.9705854077836 672.0294145922164 330 814.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-return_to_cli conn-return_to_cli-base" d="M825 330 C672.0294145922164 330 480 317.9705854077836 480 175.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-return_to_cloud conn-return_to_cloud-base" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-final_to_cli conn-final_to_cli-base" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-final_to_user conn-final_to_user-base" d="M418 115 L178.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>
