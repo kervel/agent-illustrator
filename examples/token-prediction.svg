@@ -1,52 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 880 540" data-frames="prompt,predict,append">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -70 920 540" data-frames="prompt,predict_on,append_on,predict_the,append_the,predict_mat,append_mat">
   <style>
     :root {
+    --secondary-2: #fff3e0;
+    --accent-light: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
+    --background-2: #f5f5f5;
+    --text-1: #333333;
+    --background-1: #ffffff;
+    --text-light: #ffffff;
+    --text-dark: #1a1a1a;
+    --foreground-1: #333333;
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --secondary-3: #ffe0b2;
+    --background-dark: #333333;
+    --secondary-dark: #e65100;
+    --background-light: #ffffff;
+    --status-success: #4caf50;
+    --status-error: #f44336;
+    --status-warning: #ff9800;
+    --background-3: #eeeeee;
+    --foreground-2: #666666;
+    --secondary-1: #ff9800;
+    --text-2: #666666;
+    --accent-dark: #1565c0;
+    --foreground-3: #999999;
     --secondary-light: #fff3e0;
     --text-3: #999999;
-    --secondary-3: #ffe0b2;
-    --foreground-3: #999999;
-    --secondary-1: #ff9800;
-    --status-success: #4caf50;
-    --text-light: #ffffff;
-    --foreground-light: #e0e0e0;
-    --background-light: #ffffff;
-    --background-dark: #333333;
-    --text-1: #333333;
-    --foreground-2: #666666;
-    --background-3: #eeeeee;
-    --accent-light: #e3f2fd;
-    --background-1: #ffffff;
-    --accent-1: #2196f3;
-    --secondary-dark: #e65100;
-    --secondary-2: #fff3e0;
-    --foreground-dark: #1a1a1a;
-    --status-warning: #ff9800;
-    --text-2: #666666;
-    --text-dark: #1a1a1a;
-    --status-error: #f44336;
-    --background-2: #f5f5f5;
-    --foreground-1: #333333;
-    --accent-3: #bbdefb;
-    --accent-2: #e3f2fd;
-    --accent-dark: #1565c0;
   }
 
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
 .ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
 .frame-prompt {
 }
-.frame-predict {
-  .kf-tok3 { opacity: 1; }
+.frame-predict_on {
+  .kf-d { opacity: 1; }
+  .conn-parrow_d { opacity: 1; }
 }
-.frame-append {
-  #inbox { width: 340px; }
-  .kf-tok1 { transform: translate(50px, 0px); }
-  .kf-tok2 { transform: translate(50px, 0px); }
-  .kf-tok3 { opacity: 1; }
-  .kf-tok3 { transform: translate(-240px, -180px); }
+.frame-append_on {
+  .kf-d { opacity: 1; }
+  .kf-d { transform: translate(-273px, -150px); }
+  #d { stroke: #cdd8e3; }
+  #inbox { width: 246px; }
+  .conn-feed { d: path("M326 150 L477.8 150"); }
+  .conn-parrow_d-base { opacity: 0; }
+  .conn-parrow_d-fappend_on { opacity: 1; }
+}
+.frame-predict_the {
+  .kf-d { opacity: 1; }
+  .kf-d { transform: translate(-273px, -150px); }
+  #d { stroke: #cdd8e3; }
+  .kf-e { opacity: 1; }
+  #inbox { width: 246px; }
+  .conn-feed { d: path("M326 150 L477.8 150"); }
+  .conn-parrow_d-base { opacity: 0; }
+  .conn-parrow_d-fpredict_the { opacity: 1; }
+  .conn-parrow_e { opacity: 1; }
+}
+.frame-append_the {
+  .kf-d { opacity: 1; }
+  .kf-d { transform: translate(-273px, -150px); }
+  #d { stroke: #cdd8e3; }
+  .kf-e { opacity: 1; }
+  .kf-e { transform: translate(-217px, -150px); }
+  #e { stroke: #cdd8e3; }
+  #inbox { width: 302px; }
+  .conn-feed { d: path("M382 150 L477.8 150"); }
+  .conn-parrow_d-base { opacity: 0; }
+  .conn-parrow_d-fappend_the { opacity: 1; }
+  .conn-parrow_e-base { opacity: 0; }
+  .conn-parrow_e-fappend_the { opacity: 1; }
+}
+.frame-predict_mat {
+  .kf-d { opacity: 1; }
+  .kf-d { transform: translate(-273px, -150px); }
+  #d { stroke: #cdd8e3; }
+  .kf-e { opacity: 1; }
+  .kf-e { transform: translate(-217px, -150px); }
+  #e { stroke: #cdd8e3; }
+  .kf-f { opacity: 1; }
+  #inbox { width: 302px; }
+  .conn-feed { d: path("M382 150 L477.8 150"); }
+  .conn-parrow_d-base { opacity: 0; }
+  .conn-parrow_d-fpredict_mat { opacity: 1; }
+  .conn-parrow_e-base { opacity: 0; }
+  .conn-parrow_e-fpredict_mat { opacity: 1; }
+  .conn-parrow_f { opacity: 1; }
+}
+.frame-append_mat {
+  .kf-d { opacity: 1; }
+  .kf-d { transform: translate(-273px, -150px); }
+  #d { stroke: #cdd8e3; }
+  .kf-e { opacity: 1; }
+  .kf-e { transform: translate(-217px, -150px); }
+  #e { stroke: #cdd8e3; }
+  .kf-f { opacity: 1; }
+  .kf-f { transform: translate(-161px, -150px); }
+  #f { stroke: #cdd8e3; }
+  #inbox { width: 358px; }
+  .conn-feed { d: path("M438 150 L477.8 150"); }
+  .conn-parrow_d-base { opacity: 0; }
+  .conn-parrow_d-fappend_mat { opacity: 1; }
+  .conn-parrow_e-base { opacity: 0; }
+  .conn-parrow_e-fappend_mat { opacity: 1; }
+  .conn-parrow_f-base { opacity: 0; }
+  .conn-parrow_f-fappend_mat { opacity: 1; }
 }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -129,22 +193,48 @@
 }
 
   </style>
-  <rect id="canvas" class="ai-shape ai-rect" x="0" y="0" width="760" height="420" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <rect id="canvas" class="ai-shape ai-rect" x="-20" y="-10" width="800" height="420" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
   <g class="kf-inbox kf-anim">
-    <rect id="inbox" class="ai-shape ai-rect" x="130" y="85" width="240" height="70" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="2"/>
+    <rect id="inbox" class="ai-shape ai-rect" x="80" y="115" width="190" height="70" fill="#eef3f6" stroke="var(--secondary-1)" stroke-width="2"/>
   </g>
-  <g class="kf-tok1 kf-anim">
-    <rect id="tok1" class="ai-shape ai-rect" x="175" y="102" width="50" height="36" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1.5"/>
-    <text class="ai-label" x="200" y="120" text-anchor="middle" dominant-baseline="middle">The</text>
+  <rect id="a" class="ai-shape ai-rect" x="94" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
+  <text class="ai-label" x="119" y="150" text-anchor="middle" dominant-baseline="middle">The</text>
+  <rect id="b" class="ai-shape ai-rect" x="150" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
+  <text class="ai-label" x="175" y="150" text-anchor="middle" dominant-baseline="middle">cat</text>
+  <rect id="c" class="ai-shape ai-rect" x="206" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
+  <text class="ai-label" x="231" y="150" text-anchor="middle" dominant-baseline="middle">sat</text>
+  <rect id="llm" class="ai-shape ai-rect" x="485" y="118" width="150" height="64" fill="var(--secondary-1)" stroke="#333333" stroke-width="1.5"/>
+  <text class="ai-label" x="560" y="150" text-anchor="middle" dominant-baseline="middle">LLM</text>
+  <g class="kf-hidden kf-d kf-anim">
+    <rect id="d" class="ai-shape ai-rect" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+    <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle">on</text>
   </g>
-  <g class="kf-tok2 kf-anim">
-    <rect id="tok2" class="ai-shape ai-rect" x="235" y="102" width="50" height="36" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1.5"/>
-    <text class="ai-label" x="260" y="120" text-anchor="middle" dominant-baseline="middle">cat</text>
+  <g class="kf-hidden kf-e kf-anim">
+    <rect id="e" class="ai-shape ai-rect" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+    <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle">the</text>
   </g>
-  <rect id="llm" class="ai-shape ai-rect" x="520" y="85" width="160" height="70" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-  <text class="ai-label" x="600" y="120" text-anchor="middle" dominant-baseline="middle">LLM</text>
-  <g class="kf-hidden kf-tok3 kf-anim">
-    <rect id="tok3" class="ai-shape ai-rect" x="575" y="282" width="50" height="36" fill="var(--secondary-2)" stroke="var(--secondary-dark)" stroke-width="1.5"/>
-    <text class="ai-label" x="600" y="300" text-anchor="middle" dominant-baseline="middle">sat</text>
+  <g class="kf-hidden kf-f kf-anim">
+    <rect id="f" class="ai-shape ai-rect" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+    <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle">mat</text>
   </g>
+  <text id="cap" class="ai-shape ai-text" x="171" y="367" text-anchor="start" dominant-baseline="middle" fill="#1b2733">Predict one token, append it — then repeat.</text>
+  <text class="ai-label conn-parrow_d" x="570" y="231.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0">predicts one token</text>
+  <path class="ai-connection conn-feed conn-feed-base" d="M270 150 L477.8 150" fill="none" stroke="var(--foreground-2)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_d conn-parrow_d-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_e conn-parrow_e-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_f conn-parrow_f-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_d conn-parrow_d-fappend_on" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_d conn-parrow_d-fpredict_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_d conn-parrow_d-fappend_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_e conn-parrow_e-fappend_the" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_d conn-parrow_d-fpredict_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_e conn-parrow_e-fpredict_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_d conn-parrow_d-fappend_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_e conn-parrow_e-fappend_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-parrow_f conn-parrow_f-fappend_mat" d="M560 182 L560 197 L399 197 L399 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>
