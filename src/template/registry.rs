@@ -368,6 +368,38 @@ fn normalize_path(path: &std::path::Path) -> PathBuf {
     components.iter().collect()
 }
 
+/// Tight content bounding box (min_x, min_y, w, h) of an SVG's artwork, in viewBox
+/// coordinates. Returns None when the SVG can't be parsed or the bbox is degenerate /
+/// implausible (caller falls back to the raw viewBox). Best-effort: never panics.
+pub fn svg_content_bbox(svg: &str, viewbox_w: f64, viewbox_h: f64) -> Option<(f64, f64, f64, f64)> {
+    let opt = usvg::Options::default();
+    let tree = usvg::Tree::from_str(svg, &opt).ok()?;
+    let bb = tree.root().abs_bounding_box();
+    let (mut x, mut y, mut w, mut h) =
+        (bb.x() as f64, bb.y() as f64, bb.width() as f64, bb.height() as f64);
+
+    if !(x.is_finite() && y.is_finite() && w.is_finite() && h.is_finite()) || w <= 0.0 || h <= 0.0 {
+        return None;
+    }
+    // Clamp inside the viewBox (never larger; strokes can spill slightly).
+    let x2 = (x + w).min(viewbox_w);
+    let y2 = (y + h).min(viewbox_h);
+    x = x.max(0.0);
+    y = y.max(0.0);
+    w = (x2 - x).max(0.0);
+    h = (y2 - y).max(0.0);
+    if w <= 0.0 || h <= 0.0 {
+        return None;
+    }
+    // Reject implausibly small artwork (usvg likely dropped elements it couldn't parse):
+    // falling back to the viewBox is the safe direction.
+    let vb_area = viewbox_w * viewbox_h;
+    if vb_area > 0.0 && (w * h) / vb_area < 0.05 {
+        return None;
+    }
+    Some((x, y, w, h))
+}
+
 /// Parse SVG dimensions from content
 fn parse_svg_dimensions(svg: &str) -> Option<(f64, f64)> {
     // Try to parse viewBox first
@@ -420,6 +452,28 @@ mod tests {
 
     fn make_span() -> Span {
         0..1
+    }
+
+    #[test]
+    fn content_bbox_trims_fat_margin() {
+        // Drawing occupies (30,30)..(70,70) = 16% of the 100x100 viewBox (above the 5% guard).
+        let svg = r#"<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="30" width="40" height="40" fill="black"/></svg>"#;
+        let (x, y, w, h) = svg_content_bbox(svg, 100.0, 100.0).expect("bbox computed");
+        assert!((x - 30.0).abs() < 1.0, "min_x ~30, got {}", x);
+        assert!((y - 30.0).abs() < 1.0, "min_y ~30, got {}", y);
+        assert!((w - 40.0).abs() < 1.0, "w ~40, got {}", w);
+        assert!((h - 40.0).abs() < 1.0, "h ~40, got {}", h);
+    }
+
+    #[test]
+    fn content_bbox_fallback_on_unparseable() {
+        assert!(svg_content_bbox("not an svg", 100.0, 100.0).is_none());
+    }
+
+    #[test]
+    fn content_bbox_rejects_degenerate_tiny() {
+        let svg = r#"<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="2" height="2" fill="black"/></svg>"#;
+        assert!(svg_content_bbox(svg, 100.0, 100.0).is_none(), "2x2 in 100x100 is <5% area");
     }
 
     fn make_spanned<T>(node: T) -> Spanned<T> {
