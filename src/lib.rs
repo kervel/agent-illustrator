@@ -682,6 +682,11 @@ fn generate_animate_css(
     let mut css = String::new();
     css.push_str("\n/* CSS-only animation (auto-generated) */\n");
 
+    // Accumulate animation segments per CSS selector, then emit one `animation:` rule
+    // each. A selector can need several animations (e.g. visibility + geometry); CSS
+    // `animation` is a single shorthand, so separate rules would clobber each other.
+    let mut anim_rules: std::collections::BTreeMap<String, Vec<String>> = std::collections::BTreeMap::new();
+
     // Collect all elements that need animation: track their opacity per frame
     let mut elem_timelines: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
     let mut conn_timelines: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
@@ -743,10 +748,10 @@ fn generate_animate_css(
         }
         css.push_str("}\n");
 
-        css.push_str(&format!(
-            ".kf-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
-            elem_id, anim_name, total_duration
-        ));
+        anim_rules
+            .entry(format!(".kf-{}", elem_id))
+            .or_default()
+            .push(format!("{} {:.1}s step-end infinite", anim_name, total_duration));
     }
 
     // Element geometry (smooth): transform on the wrapper, width/height on the shape.
@@ -770,7 +775,10 @@ fn generate_animate_css(
         if let Some(body) = smooth_keyframes_body("transform", vals, "translate(0px, 0px)", pct_per_frame) {
             let anim = format!("kf-geo-{}", id);
             css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
-            css.push_str(&format!(".kf-{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+            anim_rules
+                .entry(format!(".kf-{}", id))
+                .or_default()
+                .push(format!("{} {:.1}s ease infinite", anim, total_duration));
         }
     }
     for (id, vals) in &w_tl {
@@ -778,7 +786,10 @@ fn generate_animate_css(
         if let Some(body) = smooth_keyframes_body("width", vals, &identity, pct_per_frame) {
             let anim = format!("kf-width-{}", id);
             css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
-            css.push_str(&format!("#{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+            anim_rules
+                .entry(format!("#{}", id))
+                .or_default()
+                .push(format!("{} {:.1}s ease infinite", anim, total_duration));
         }
     }
     for (id, vals) in &h_tl {
@@ -786,7 +797,10 @@ fn generate_animate_css(
         if let Some(body) = smooth_keyframes_body("height", vals, &identity, pct_per_frame) {
             let anim = format!("kf-height-{}", id);
             css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
-            css.push_str(&format!("#{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+            anim_rules
+                .entry(format!("#{}", id))
+                .or_default()
+                .push(format!("{} {:.1}s ease infinite", anim, total_duration));
         }
     }
 
@@ -815,10 +829,10 @@ fn generate_animate_css(
         }
         css.push_str("}\n");
 
-        css.push_str(&format!(
-            ".conn-{} {{ animation: {} {:.1}s step-end infinite; }}\n",
-            conn_id, anim_name, total_duration
-        ));
+        anim_rules
+            .entry(format!(".conn-{}", conn_id))
+            .or_default()
+            .push(format!("{} {:.1}s step-end infinite", anim_name, total_duration));
     }
 
     // Connection geometry: morphable → smooth d-morph; reshaping → crossfade variants.
@@ -846,13 +860,19 @@ fn generate_animate_css(
         if let Some(body) = smooth_keyframes_body("d", vals, &identity, pct_per_frame) {
             let anim = format!("kf-d-{}", id);
             css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
-            css.push_str(&format!(".conn-{} {{ animation: {} {:.1}s ease infinite; }}\n", id, anim, total_duration));
+            anim_rules
+                .entry(format!(".conn-{}", id))
+                .or_default()
+                .push(format!("{} {:.1}s ease infinite", anim, total_duration));
         }
     }
     for (id, tl) in &base_fade {
         let anim = format!("kf-basefade-{}", id);
         css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, step_opacity_keyframes_body(tl, pct_per_frame, n)));
-        css.push_str(&format!(".conn-{}-base {{ animation: {} {:.1}s step-end infinite; }}\n", id, anim, total_duration));
+        anim_rules
+            .entry(format!(".conn-{}-base", id))
+            .or_default()
+            .push(format!("{} {:.1}s step-end infinite", anim, total_duration));
     }
     for (key, tl) in &variant_tl {
         let mut it = key.split('\u{1}');
@@ -860,7 +880,15 @@ fn generate_animate_css(
         let frame = it.next().unwrap_or("");
         let anim = format!("kf-variant-{}-{}", id, frame);
         css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, step_opacity_keyframes_body(tl, pct_per_frame, n)));
-        css.push_str(&format!(".conn-{}-f{} {{ animation: {} {:.1}s step-end infinite; }}\n", id, frame, anim, total_duration));
+        anim_rules
+            .entry(format!(".conn-{}-f{}", id, frame))
+            .or_default()
+            .push(format!("{} {:.1}s step-end infinite", anim, total_duration));
+    }
+
+    // Emit one combined `animation:` rule per selector (multiple animations comma-joined).
+    for (selector, segs) in &anim_rules {
+        css.push_str(&format!("{} {{ animation: {}; }}\n", selector, segs.join(", ")));
     }
 
     css

@@ -48,6 +48,32 @@ fn animate_css_emits_element_size_keyframes() {
 }
 
 #[test]
+fn animate_css_combines_visibility_and_geometry_on_one_selector() {
+    // tok hides then shows AND moves. CSS `animation` is one shorthand property, so
+    // both must be listed in a SINGLE `.kf-tok { animation: ... }` rule — two separate
+    // rules would clobber each other (the second wins), leaving tok invisible.
+    let svg = animate_css(
+        r#"
+rect tok [width: 30, height: 20]
+rect target [width: 10, height: 10]
+constrain target.center_x = 400
+constrain target.center_y = 100
+constrain tok.center_x = 100
+constrain tok.center_y = 100
+keyframe "idle" { hide tok }
+keyframe "show" { show tok; transform tok [dx: 50] }
+"#,
+    );
+    let rules: Vec<&str> = svg.lines().filter(|l| l.contains(".kf-tok { animation:")).collect();
+    assert_eq!(rules.len(), 1, "expected ONE .kf-tok animation rule, got {}: {:?}", rules.len(), rules);
+    assert!(
+        rules[0].contains("kf-anim-tok") && rules[0].contains("kf-geo-tok"),
+        "the single rule must list BOTH visibility and geometry animations, got: {}",
+        rules[0]
+    );
+}
+
+#[test]
 fn animate_css_morphable_connection_d_keyframes() {
     let svg = animate_css(SRC); // feed: straight box.right->other.left, box widens (morphable)
     assert!(
