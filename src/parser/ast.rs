@@ -402,6 +402,13 @@ pub enum StyleValue {
     IdentifierList(Vec<Identifier>),
     /// Bracketed list of values (e.g. `at: [1, 0]`, `col_labels: ["a", "b"]`)
     List(Vec<Spanned<StyleValue>>),
+    /// Function-style value: `hatch(accent-1)`, `gradient(a, b, 90)`.
+    /// Used for pattern/gradient fills. `name` is the function name; `args`
+    /// are color/number atoms.
+    Call {
+        name: String,
+        args: Vec<Spanned<StyleValue>>,
+    },
 }
 
 // ============================================
