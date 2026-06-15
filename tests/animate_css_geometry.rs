@@ -74,6 +74,38 @@ keyframe "show" { show tok; transform tok [dx: 50] }
 }
 
 #[test]
+fn animate_css_hidden_connection_visibility_not_clobbered_by_reshape() {
+    // arrow is visible only in "point"; its endpoint (tok) moves in a later frame while
+    // the arrow is HIDDEN. The reshape must NOT emit a -base/variant animation that
+    // clobbers the arrow's show/hide. Net: the base path keeps its visibility animation
+    // and no `.conn-arr-base` animation rule is emitted.
+    let svg = animate_css(
+        r#"
+rect llmbox [width: 60, height: 30, label: "L"]
+rect tok [width: 30, height: 20, label: "t"]
+constrain llmbox.center_x = 100
+constrain llmbox.center_y = 60
+constrain tok.center_x = 100
+constrain tok.center_y = 200 as tok_home
+llmbox.bottom -> tok.top as arr
+keyframe "idle" { hide tok, arr }
+keyframe "point" { show tok, arr }
+keyframe "moved" { hide arr; disable tok_home; constrain tok.center_x = 400; constrain tok.center_y = 60 }
+"#,
+    );
+    assert!(
+        svg.contains(".conn-arr { animation:") && svg.contains("kf-anim-conn-arr"),
+        "arrow must keep its visibility animation, got:\n{}",
+        svg
+    );
+    assert!(
+        !svg.contains(".conn-arr-base { animation:"),
+        "a reshape while hidden must not emit a clobbering -base animation, got:\n{}",
+        svg
+    );
+}
+
+#[test]
 fn animate_css_morphable_connection_d_keyframes() {
     let svg = animate_css(SRC); // feed: straight box.right->other.left, box widens (morphable)
     assert!(

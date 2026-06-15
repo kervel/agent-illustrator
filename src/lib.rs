@@ -840,9 +840,18 @@ fn generate_animate_css(
     let mut base_fade: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
     // key = "<id>\u{1}<frame>" → opacity timeline (1 only in that frame)
     let mut variant_tl: std::collections::BTreeMap<String, Vec<f64>> = std::collections::BTreeMap::new();
+    // A connection's path geometry only matters in frames where it is VISIBLE. Skipping
+    // hidden frames avoids emitting `-base`/variant opacity animations that would clobber
+    // the connection's show/hide animation (both target the base path element).
+    let conn_visible = |id: &str, i: usize| -> bool {
+        conn_timelines.get(id).map(|tl| tl[i] > 0.5).unwrap_or(true)
+    };
     for (i, diff) in frame_diffs.iter().enumerate() {
         for (id, d) in &diff.connection_diffs {
             if let Some(pts) = &d.path {
+                if !conn_visible(id, i) {
+                    continue;
+                }
                 if d.morphable {
                     if let Some((routing, marker, sw)) = conn_meta.get(id) {
                         let ds = renderer::svg::connection_path_d(pts, *routing, *marker, *sw);
