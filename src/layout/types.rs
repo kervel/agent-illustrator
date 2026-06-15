@@ -519,10 +519,47 @@ impl Default for BoundingBox {
     }
 }
 
+/// A non-solid fill: a tiling pattern or a gradient.
+#[derive(Debug, Clone, PartialEq)]
+pub enum FillSpec {
+    Pattern {
+        kind: PatternKind,
+        /// CSS color string for the pattern marks (already resolved, e.g. `var(--accent-1)`).
+        fg: String,
+        /// CSS color string for the tile background; `transparent` when omitted.
+        bg: String,
+    },
+    Gradient {
+        kind: GradientKind,
+        from: String,
+        to: String,
+        /// Linear gradient angle in degrees: 0 = top->bottom, 90 = left->right.
+        /// Ignored for radial.
+        angle: f64,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PatternKind {
+    Hatch,
+    CrossHatch,
+    Dots,
+    Grid,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GradientKind {
+    Linear,
+    Radial,
+}
+
 /// Resolved style properties ready for rendering
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct ResolvedStyles {
     pub fill: Option<String>,
+    /// Non-solid fill (pattern/gradient). When `Some`, takes precedence over `fill`
+    /// and is rendered as an SVG `<defs>` entry referenced via `url(#id)`.
+    pub fill_pattern: Option<FillSpec>,
     pub stroke: Option<String>,
     pub stroke_width: Option<f64>,
     pub stroke_dasharray: Option<String>,
@@ -547,6 +584,7 @@ impl ResolvedStyles {
     pub fn with_defaults() -> Self {
         Self {
             fill: Some("#f0f0f0".to_string()),
+            fill_pattern: None,
             stroke: Some("#333333".to_string()),
             stroke_width: Some(2.0),
             stroke_dasharray: None,
@@ -569,7 +607,12 @@ impl ResolvedStyles {
         for modifier in modifiers {
             match &modifier.node.key.node {
                 StyleKey::Fill => {
-                    styles.fill = Self::color_to_css(&modifier.node.value.node);
+                    if let Some(spec) = Self::fill_spec_from_value(&modifier.node.value.node) {
+                        styles.fill_pattern = Some(spec);
+                        styles.fill = None;
+                    } else {
+                        styles.fill = Self::color_to_css(&modifier.node.value.node);
+                    }
                 }
                 StyleKey::Stroke => {
                     styles.stroke = Self::color_to_css(&modifier.node.value.node);
@@ -679,10 +722,64 @@ impl ResolvedStyles {
         }
     }
 
+    /// Build a FillSpec from a `fill:` style value, or `None` if the value is a
+    /// solid color. The grammar has already validated function name + arity, so
+    /// this method trusts the shape and applies defaults.
+    fn fill_spec_from_value(value: &StyleValue) -> Option<FillSpec> {
+        // A color argument -> CSS string, with a default fallback.
+        fn color_or(args: &[Spanned<StyleValue>], idx: usize, default: &str) -> String {
+            args.get(idx)
+                .and_then(|a| ResolvedStyles::color_to_css(&a.node))
+                .unwrap_or_else(|| default.to_string())
+        }
+        let (name, args): (&str, &[Spanned<StyleValue>]) = match value {
+            StyleValue::Call { name, args } => (name.as_str(), args.as_slice()),
+            // Bare `fill: hatch` etc. (no parens) arrives as an identifier/keyword.
+            StyleValue::Identifier(id) => (id.0.as_str(), &[]),
+            StyleValue::Keyword(k) => (k.as_str(), &[]),
+            _ => return None,
+        };
+        let pattern = |kind| {
+            Some(FillSpec::Pattern {
+                kind,
+                fg: color_or(args, 0, "var(--foreground-2)"),
+                bg: color_or(args, 1, "transparent"),
+            })
+        };
+        match name {
+            "hatch" => pattern(PatternKind::Hatch),
+            "cross_hatch" => pattern(PatternKind::CrossHatch),
+            "dots" => pattern(PatternKind::Dots),
+            "grid" => pattern(PatternKind::Grid),
+            "gradient" | "radial_gradient" => {
+                let kind = if name == "gradient" {
+                    GradientKind::Linear
+                } else {
+                    GradientKind::Radial
+                };
+                let angle = match args.get(2).map(|a| &a.node) {
+                    Some(StyleValue::Number { value, .. }) => *value,
+                    _ => 0.0,
+                };
+                Some(FillSpec::Gradient {
+                    kind,
+                    from: color_or(args, 0, "var(--foreground-2)"),
+                    to: color_or(args, 1, "var(--background-1)"),
+                    angle,
+                })
+            }
+            _ => None, // solid color name (e.g. "red") — not a fill function
+        }
+    }
+
     /// Merge another style set, with other taking precedence
     pub fn merge(&self, other: &ResolvedStyles) -> ResolvedStyles {
         ResolvedStyles {
             fill: other.fill.clone().or_else(|| self.fill.clone()),
+            fill_pattern: other
+                .fill_pattern
+                .clone()
+                .or_else(|| self.fill_pattern.clone()),
             stroke: other.stroke.clone().or_else(|| self.stroke.clone()),
             stroke_width: other.stroke_width.or(self.stroke_width),
             stroke_dasharray: other
@@ -1188,6 +1285,95 @@ mod tests {
 
         let styles = ResolvedStyles::from_modifiers(&modifiers);
         assert_eq!(styles.rotation, Some(45.0));
+    }
+
+    // ============================================
+    // Pattern / Gradient Fill Tests
+    // ============================================
+
+    mod fill_spec_tests {
+        use super::super::*;
+        use crate::parser::ast::{Identifier, Spanned, StyleKey, StyleModifier, StyleValue};
+
+        fn span0<T>(node: T) -> Spanned<T> {
+            Spanned::new(node, 0..0)
+        }
+
+        fn fill_modifier(value: StyleValue) -> Vec<Spanned<StyleModifier>> {
+            vec![span0(StyleModifier {
+                key: span0(StyleKey::Fill),
+                value: span0(value),
+            })]
+        }
+
+        #[test]
+        fn bare_hatch_becomes_default_pattern() {
+            let mods = fill_modifier(StyleValue::Identifier(Identifier::new("hatch")));
+            let s = ResolvedStyles::from_modifiers(&mods);
+            match s.fill_pattern {
+                Some(FillSpec::Pattern { kind, fg, bg }) => {
+                    assert_eq!(kind, PatternKind::Hatch);
+                    assert_eq!(fg, "var(--foreground-2)");
+                    assert_eq!(bg, "transparent");
+                }
+                other => panic!("expected Pattern, got {:?}", other),
+            }
+            assert_eq!(s.fill, None);
+        }
+
+        #[test]
+        fn hatch_with_one_color() {
+            let mods = fill_modifier(StyleValue::Call {
+                name: "hatch".into(),
+                args: vec![span0(StyleValue::Identifier(Identifier::new("red")))],
+            });
+            let s = ResolvedStyles::from_modifiers(&mods);
+            match s.fill_pattern {
+                Some(FillSpec::Pattern { fg, bg, .. }) => {
+                    assert_eq!(fg, "red");
+                    assert_eq!(bg, "transparent");
+                }
+                other => panic!("expected Pattern, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn gradient_with_angle() {
+            let mods = fill_modifier(StyleValue::Call {
+                name: "gradient".into(),
+                args: vec![
+                    span0(StyleValue::Keyword("blue".into())),
+                    span0(StyleValue::Keyword("white".into())),
+                    span0(StyleValue::Number {
+                        value: 90.0,
+                        unit: None,
+                    }),
+                ],
+            });
+            let s = ResolvedStyles::from_modifiers(&mods);
+            match s.fill_pattern {
+                Some(FillSpec::Gradient {
+                    kind,
+                    from,
+                    to,
+                    angle,
+                }) => {
+                    assert_eq!(kind, GradientKind::Linear);
+                    assert_eq!(from, "blue");
+                    assert_eq!(to, "white");
+                    assert_eq!(angle, 90.0);
+                }
+                other => panic!("expected Gradient, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn solid_fill_unchanged() {
+            let mods = fill_modifier(StyleValue::Keyword("blue".into()));
+            let s = ResolvedStyles::from_modifiers(&mods);
+            assert_eq!(s.fill, Some("blue".to_string()));
+            assert!(s.fill_pattern.is_none());
+        }
     }
 
     // ============================================
