@@ -1,8 +1,8 @@
 //! SVG generation from layout results
 
 use crate::layout::{
-    BoundingBox, ConnectionLayout, ElementLayout, ElementType, LayoutResult, Point, ResolvedStyles,
-    RoutingMode, TextAnchor,
+    BoundingBox, ConnectionLayout, ElementLayout, ElementType, FillSpec, GradientKind,
+    LayoutResult, PatternKind, Point, ResolvedStyles, RoutingMode, TextAnchor,
 };
 use crate::parser::ast::{ConnectionDirection, PointerDir, ShapeType};
 use crate::stylesheet::Stylesheet;
@@ -13,6 +13,8 @@ use super::SvgConfig;
 pub struct SvgBuilder {
     config: SvgConfig,
     defs: Vec<String>,
+    /// Ids of fill pattern/gradient defs already emitted (dedup, order-stable).
+    fill_def_ids: Vec<String>,
     styles: Vec<String>,
     elements: Vec<String>,
     connections: Vec<String>,
@@ -27,6 +29,7 @@ impl SvgBuilder {
         Self {
             config,
             defs: vec![],
+            fill_def_ids: vec![],
             styles: vec![],
             elements: vec![],
             connections: vec![],
@@ -94,6 +97,20 @@ impl SvgBuilder {
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>"#
         ));
+    }
+
+    /// If `styles` carries a pattern/gradient fill, ensure its `<defs>` entry is
+    /// emitted (once, deduped by content-derived id) and return `url(#id)` to use
+    /// as the shape's `fill`. Returns `None` for solid fills.
+    pub fn register_fill(&mut self, styles: &ResolvedStyles) -> Option<String> {
+        let spec = styles.fill_pattern.as_ref()?;
+        let prefix = self.prefix();
+        let (id, def) = build_fill_def(&prefix, spec);
+        if !self.fill_def_ids.contains(&id) {
+            self.fill_def_ids.push(id.clone());
+            self.defs.push(def);
+        }
+        Some(format!("url(#{})", id))
     }
 
     /// Add a rectangle element
@@ -984,7 +1001,8 @@ fn render_element_inner(
     kf_referenced: &std::collections::HashSet<String>,
 ) {
     let id = element.id.as_ref().map(|i| i.0.as_str());
-    let styles = format_styles(&element.styles);
+    let fill_override = builder.register_fill(&element.styles);
+    let styles = format_styles(&element.styles, fill_override.as_deref());
     let classes = element.styles.css_classes.clone();
 
     match &element.element_type {
@@ -1381,13 +1399,115 @@ fn format_text_styles(styles: &ResolvedStyles) -> String {
     }
 }
 
+/// Sanitize a CSS color string into an id-safe token: `var(--accent-1)` -> `accent-1`,
+/// `#ff0000` -> `ff0000`, `transparent` -> `transparent`. Keeps `[a-z0-9-]`.
+fn color_token(c: &str) -> String {
+    let inner = c
+        .trim()
+        .trim_start_matches("var(")
+        .trim_end_matches(')')
+        .trim_start_matches("--")
+        .trim_start_matches('#');
+    inner
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '-' {
+                ch.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect()
+}
+
+/// Build the (id, def-string) for a fill spec. `id` is fully prefixed and purely
+/// content-derived so identical fills dedup and output stays byte-stable.
+fn build_fill_def(prefix: &str, spec: &FillSpec) -> (String, String) {
+    match spec {
+        FillSpec::Pattern { kind, fg, bg } => {
+            let (kname, marks): (&str, String) = match kind {
+                PatternKind::Hatch => (
+                    "hatch",
+                    format!(
+                        r#"<path d="M0,8 L8,0 M-1,1 L1,-1 M7,9 L9,7" stroke="{fg}" stroke-width="1" fill="none"/>"#
+                    ),
+                ),
+                PatternKind::CrossHatch => (
+                    "crosshatch",
+                    format!(
+                        r#"<path d="M0,8 L8,0 M-1,1 L1,-1 M7,9 L9,7 M0,0 L8,8 M-1,7 L1,9 M7,-1 L9,1" stroke="{fg}" stroke-width="1" fill="none"/>"#
+                    ),
+                ),
+                PatternKind::Dots => (
+                    "dots",
+                    format!(r#"<circle cx="4" cy="4" r="1.5" fill="{fg}"/>"#),
+                ),
+                PatternKind::Grid => (
+                    "grid",
+                    format!(
+                        r#"<path d="M0,0 H8 M0,0 V8" stroke="{fg}" stroke-width="1" fill="none"/>"#
+                    ),
+                ),
+            };
+            let id = format!("{prefix}pat-{kname}-{}-{}", color_token(fg), color_token(bg));
+            let bg_rect = if bg == "transparent" {
+                String::new()
+            } else {
+                format!(r#"<rect width="8" height="8" fill="{bg}"/>"#)
+            };
+            let def = format!(
+                r#"<pattern id="{id}" patternUnits="userSpaceOnUse" width="8" height="8">{bg_rect}{marks}</pattern>"#
+            );
+            (id, def)
+        }
+        FillSpec::Gradient {
+            kind,
+            from,
+            to,
+            angle,
+        } => match kind {
+            GradientKind::Linear => {
+                // angle 0 = top->bottom, 90 = left->right (objectBoundingBox units).
+                let rad = angle.to_radians();
+                let dx = rad.sin();
+                let dy = rad.cos();
+                let x1 = 0.5 - dx / 2.0;
+                let y1 = 0.5 - dy / 2.0;
+                let x2 = 0.5 + dx / 2.0;
+                let y2 = 0.5 + dy / 2.0;
+                let id = format!(
+                    "{prefix}grad-lin-{}-{}-{}",
+                    color_token(from),
+                    color_token(to),
+                    (*angle as i64)
+                );
+                let def = format!(
+                    r#"<linearGradient id="{id}" x1="{x1:.4}" y1="{y1:.4}" x2="{x2:.4}" y2="{y2:.4}"><stop offset="0" stop-color="{from}"/><stop offset="1" stop-color="{to}"/></linearGradient>"#
+                );
+                (id, def)
+            }
+            GradientKind::Radial => {
+                let id = format!(
+                    "{prefix}grad-rad-{}-{}",
+                    color_token(from),
+                    color_token(to)
+                );
+                let def = format!(
+                    r#"<radialGradient id="{id}" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{from}"/><stop offset="1" stop-color="{to}"/></radialGradient>"#
+                );
+                (id, def)
+            }
+        },
+    }
+}
+
 /// Format ResolvedStyles as SVG attribute string
 /// Applies sensible defaults when styles are not specified
-fn format_styles(styles: &ResolvedStyles) -> String {
+fn format_styles(styles: &ResolvedStyles, fill_override: Option<&str>) -> String {
     let mut parts = vec![];
 
-    // Default fill: light gray for visibility
-    let fill = styles.fill.as_deref().unwrap_or("#f0f0f0");
+    // Fill: a pattern/gradient url override wins; else the solid fill; else default.
+    let fill = fill_override.or(styles.fill.as_deref()).unwrap_or("#f0f0f0");
     parts.push(format!(r#" fill="{}""#, fill));
 
     // Default stroke: dark gray
@@ -1651,6 +1771,68 @@ mod tests {
     use crate::parser::ast::{Identifier, LayoutType};
 
     #[test]
+    fn register_fill_emits_pattern_def_once() {
+        use crate::layout::{FillSpec, PatternKind};
+        let mut b = SvgBuilder::new(SvgConfig::default());
+        let styles = ResolvedStyles {
+            fill_pattern: Some(FillSpec::Pattern {
+                kind: PatternKind::Hatch,
+                fg: "var(--accent-1)".into(),
+                bg: "transparent".into(),
+            }),
+            ..Default::default()
+        };
+        let url1 = b.register_fill(&styles);
+        let url2 = b.register_fill(&styles); // identical -> dedup
+        assert!(url1.is_some());
+        assert_eq!(url1, url2);
+        let url = url1.unwrap();
+        assert!(url.starts_with("url(#"));
+        let count = b.defs.iter().filter(|d| d.contains("<pattern")).count();
+        assert_eq!(count, 1);
+    }
+
+    #[test]
+    fn register_fill_none_for_solid() {
+        let mut b = SvgBuilder::new(SvgConfig::default());
+        let styles = ResolvedStyles {
+            fill: Some("blue".into()),
+            ..Default::default()
+        };
+        assert_eq!(b.register_fill(&styles), None);
+    }
+
+    #[test]
+    fn format_styles_uses_fill_override() {
+        let styles = ResolvedStyles {
+            fill: Some("blue".into()),
+            ..Default::default()
+        };
+        let out = format_styles(&styles, Some("url(#grad-x)"));
+        assert!(out.contains(r##"fill="url(#grad-x)""##));
+        assert!(!out.contains(r##"fill="blue""##));
+    }
+
+    #[test]
+    fn register_fill_deterministic_id() {
+        use crate::layout::{FillSpec, GradientKind};
+        let make = || {
+            let mut b = SvgBuilder::new(SvgConfig::default());
+            let styles = ResolvedStyles {
+                fill_pattern: Some(FillSpec::Gradient {
+                    kind: GradientKind::Linear,
+                    from: "blue".into(),
+                    to: "white".into(),
+                    angle: 90.0,
+                }),
+                ..Default::default()
+            };
+            b.register_fill(&styles).unwrap()
+        };
+        assert_eq!(make(), make());
+    }
+
+    #[test]
     fn test_path_to_d() {
         let path = vec![
             Point::new(0.0, 0.0),
@@ -1672,6 +1854,7 @@ mod tests {
     fn test_format_styles() {
         let styles = ResolvedStyles {
             fill: Some("#ff0000".to_string()),
+            fill_pattern: None,
             stroke: Some("#000000".to_string()),
             stroke_width: Some(2.0),
             stroke_dasharray: Some("4,2".to_string()),
@@ -1682,7 +1865,7 @@ mod tests {
             css_classes: vec![],
             rotation: None,
         };
-        let result = format_styles(&styles);
+        let result = format_styles(&styles, None);
         assert!(result.contains(r##"fill="#ff0000""##));
         assert!(result.contains(r##"stroke="#000000""##));
         assert!(result.contains(r#"stroke-width="2""#));
@@ -1694,6 +1877,7 @@ mod tests {
     fn test_format_styles_with_opacities() {
         let styles = ResolvedStyles {
             fill: Some("var(--secondary-1)".to_string()),
+            fill_pattern: None,
             stroke: Some("#000000".to_string()),
             stroke_width: Some(2.0),
             stroke_dasharray: None,
@@ -1704,7 +1888,7 @@ mod tests {
             css_classes: vec![],
             rotation: None,
         };
-        let result = format_styles(&styles);
+        let result = format_styles(&styles, None);
         // Symbolic color is preserved, not flattened
         assert!(result.contains(r#"fill="var(--secondary-1)""#));
         assert!(result.contains(r#"fill-opacity="0.7""#));
