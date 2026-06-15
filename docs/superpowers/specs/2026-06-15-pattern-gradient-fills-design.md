@@ -16,7 +16,7 @@ discover them. This is a docs-only fix, bundled here.
 
 ## Goals
 
-1. Named semantic pattern fills: `hatch`, `cross-hatch`, `dots`, `grid`.
+1. Named semantic pattern fills: `hatch`, `cross_hatch`, `dots`, `grid`.
 2. Gradient fills: linear (`gradient`) and radial (`radial-gradient`).
 3. Document the existing stroke-dash support so agents discover it.
 
@@ -36,14 +36,14 @@ rect b [fill: hatch(accent-1)]                    # lines in accent-1
 rect c [fill: dots(accent-1, background-light)]   # fg dots over bg
 rect d [fill: gradient(accent-light, accent-dark)]    # vertical linear
 rect e [fill: gradient(blue, white, 90)]              # angled, degrees
-rect f [fill: radial-gradient(white, accent-1)]
+rect f [fill: radial_gradient(white, accent-1)]
 ```
 
-- **Patterns:** `hatch`, `cross-hatch`, `dots`, `grid`.
+- **Patterns:** `hatch`, `cross_hatch`, `dots`, `grid`.
   - Args: `name`, `name(fg)`, or `name(fg, bg)`.
   - Defaults: `fg = foreground-2`, `bg = transparent`.
 - **Gradients:** `gradient(from, to)`, `gradient(from, to, angleDeg)`,
-  `radial-gradient(from, to)`.
+  `radial_gradient(from, to)`.
   - `angleDeg`: 0 = top→bottom (default), 90 = left→right, 45 = diagonal.
   - Radial ignores angle.
 
@@ -111,7 +111,7 @@ HashMap-nondeterminism fixes.
 ## Error Handling
 
 Fail at parse/resolve with a clear, spanned message:
-- Unknown function name → list valid: `hatch, cross-hatch, dots, grid, gradient, radial-gradient`.
+- Unknown function name → list valid: `hatch, cross_hatch, dots, grid, gradient, radial_gradient`.
 - Gradient with fewer than 2 color stops → error.
 - Pattern with more than 2 args, or gradient with more than 3 → error.
 - Non-color where a color is expected (e.g. angle in color slot) → error.
