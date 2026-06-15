@@ -1,0 +1,18 @@
+// Pattern & gradient fill showcase
+// Demonstrates named pattern fills and linear/radial gradients.
+col diagram [gap: 20] {
+    text "Pattern & Gradient Fills" title [font_size: 22, fill: text-1]
+
+    row patterns [gap: 16] {
+        rect hatch_box [fill: hatch(accent-1), size: 80, label: "hatch"]
+        rect cross_box [fill: cross_hatch(accent-1), size: 80, label: "cross_hatch"]
+        rect dots_box [fill: dots(accent-1, background-light), size: 80, label: "dots"]
+        rect grid_box [fill: grid(foreground-2), size: 80, label: "grid"]
+    }
+
+    row gradients [gap: 16] {
+        rect lin_box [fill: gradient(accent-light, accent-dark), size: 80, label: "gradient"]
+        rect lin90_box [fill: gradient(accent-light, accent-dark, 90), size: 80, label: "gradient 90"]
+        rect rad_box [fill: radial_gradient(background-light, accent-1), size: 80, label: "radial"]
+    }
+}

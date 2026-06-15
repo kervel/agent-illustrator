@@ -119,7 +119,45 @@ svg * {
 
 ---
 
-## Part 4: Gotchas
+## Part 4: Pattern & Gradient Fills
+
+Beyond solid colors, `fill:` accepts patterns and gradients. Use them when the
+texture carries meaning (a hatched zone = "restricted", a gradient = "transition
+/ flow"), not as decoration.
+
+### Patterns
+
+```
+rect zone [fill: hatch]                             # default fg, transparent bg
+rect zone [fill: hatch(accent-1)]                   # colored marks
+rect zone [fill: dots(accent-1, background-light)]  # marks over a bg fill
+```
+
+Available: `hatch`, `cross_hatch`, `dots`, `grid`.
+Args: `name`, `name(fg)`, or `name(fg, bg)`. Defaults: fg=`foreground-2`, bg=`transparent`.
+
+### Gradients
+
+```
+rect bar [fill: gradient(accent-light, accent-dark)]  # vertical (top->bottom)
+rect bar [fill: gradient(blue, white, 90)]            # horizontal (left->right)
+rect bar [fill: radial_gradient(background-light, accent-1)]
+```
+
+`gradient(from, to[, angleDeg])` — angle 0 = top→bottom, 90 = left→right, 45 = diagonal.
+`radial_gradient(from, to)` — center `from` to edge `to`.
+
+Colors may be tokens (`accent-1`), hex (`#f00`), or named (`blue`), same as solid fills.
+
+## Part 5: Dashed & Dotted Strokes
+
+```
+rect box [stroke: accent-1, stroke_dasharray: "6,3"]   # custom dash
+rect box [stroke_dasharray: dashed]                    # = "8,4"
+rect box [stroke_dasharray: dotted]                    # = "2,2"
+```
+
+## Part 6: Gotchas
 
 1. **CSS opacity overrides break keyframe hide/show.** Never set `opacity` in CSS
    on elements that are toggled by keyframes. The CSS rule overrides the inline

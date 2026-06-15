@@ -79,11 +79,18 @@ Modifiers go in brackets after the element name:
     rect mybox [fill: blue, stroke: #333, stroke_width: 2]
 
 Common modifiers:
-    fill: <color>           Fill color
+    fill: <color>           Solid fill color
+    fill: <pattern>         Pattern fill: hatch, cross_hatch, dots, grid
+                            e.g. hatch(accent-1), dots(accent-1, background-light)
+    fill: gradient(a, b)         Linear gradient a->b (top->bottom)
+    fill: gradient(a, b, deg)    Linear gradient at angle (0=down, 90=right)
+    fill: radial_gradient(a, b)  Radial gradient, center a -> edge b
     fill_opacity: <0..1>    Alpha for the fill only (keeps the fill color)
     stroke: <color>         Border color
     stroke_width: <number>  Border thickness
     stroke_opacity: <0..1>  Alpha for the stroke only
+    stroke_dasharray: "6,3"  Dash pattern (SVG dasharray); also keywords
+                             dashed (= 8,4) and dotted (= 2,2)
     opacity: <0..1>         Alpha for the whole element
     size: <number>          Width and height (square/circle)
     width: <number>         Explicit width

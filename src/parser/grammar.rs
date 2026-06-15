@@ -280,6 +280,14 @@ where
                 span_range(&e.span()),
             )
         }),
+        // `grid` is a reserved token but is also a valid pattern-fill name in
+        // style values (`fill: grid`); accept it as a keyword value here.
+        just(Token::Grid).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("grid".to_string()),
+                span_range(&e.span()),
+            )
+        }),
         // Center token (can be used in style values like [label_position: center])
         just(Token::Center).map_with(|_, e| {
             Spanned::new(
@@ -338,7 +346,14 @@ where
     // style resolution can stay infallible. A bare `hatch` (no parens) is NOT
     // matched here — it falls through to `value_atom` as an identifier and is
     // interpreted as a default-colored pattern during resolution.
-    let call_value = identifier
+    // The function name is an identifier, except `grid` which is a reserved
+    // token (grid-layout keyword) so we accept it explicitly here.
+    let call_head = choice((
+        identifier.map(|id| Spanned::new(id.node.0.clone(), id.span)),
+        just(Token::Grid)
+            .map_with(|_, e| Spanned::new("grid".to_string(), span_range(&e.span()))),
+    ));
+    let call_value = call_head
         .then(
             value_atom
                 .clone()
@@ -348,7 +363,7 @@ where
                 .delimited_by(just(Token::ParenOpen), just(Token::ParenClose)),
         )
         .try_map(|(name, args), span| {
-            let n = name.node.0.as_str();
+            let n = name.node.as_str();
             let argc = args.len();
             let ok = match n {
                 "hatch" | "cross_hatch" | "dots" | "grid" => argc <= 2,
@@ -377,7 +392,7 @@ where
                 ));
             }
             Ok(StyleValue::Call {
-                name: name.node.0.clone(),
+                name: name.node.clone(),
                 args,
             })
         })
@@ -1418,6 +1433,17 @@ mod tests {
     #[test]
     fn parse_fill_radial_gradient() {
         parse("rect a [fill: radial_gradient(white, accent-1)]").expect("Should parse");
+    }
+
+    #[test]
+    fn parse_fill_grid_with_color() {
+        // `grid` is a reserved token but must work as a pattern-fill function.
+        parse("rect a [fill: grid(foreground-2)]").expect("Should parse");
+    }
+
+    #[test]
+    fn parse_fill_bare_grid() {
+        parse("rect a [fill: grid]").expect("Should parse");
     }
 
     #[test]

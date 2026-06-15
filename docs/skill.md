@@ -12,7 +12,8 @@ For specialized tasks, read the relevant sub-skill BEFORE starting:
 - **`agent-illustrator --skill-find-clipart`** — Finding and integrating open-source
   SVG clipart from the web. Use when diagrams need visual richness beyond basic shapes.
 - **`agent-illustrator --skill-styling`** — CSS styling, color tokens, modern visual
-  patterns (borderless cards, shadows, transitions). Use when diagrams need polish.
+  patterns (borderless cards, shadows, transitions), pattern/gradient fills
+  (`fill: hatch(...)`, `fill: gradient(...)`), and dashed strokes. Use when diagrams need polish.
 
 ## When to Use AIL vs Raw SVG
 

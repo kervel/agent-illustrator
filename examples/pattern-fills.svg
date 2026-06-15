@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 493 357">
+  <style>
+    :root {
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --text-light: #ffffff;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --background-dark: #333333;
+    --text-2: #666666;
+    --foreground-light: #e0e0e0;
+    --secondary-2: #fff3e0;
+    --background-1: #ffffff;
+    --background-light: #ffffff;
+    --foreground-2: #666666;
+    --accent-dark: #1565c0;
+    --accent-3: #bbdefb;
+    --accent-light: #e3f2fd;
+    --foreground-3: #999999;
+    --background-2: #f5f5f5;
+    --text-1: #333333;
+    --foreground-dark: #1a1a1a;
+    --background-3: #eeeeee;
+    --foreground-1: #333333;
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --secondary-1: #ff9800;
+  }
+
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+
+  </style>
+  <defs>
+    <pattern id="ai-pat-hatch-accent-1-transparent" patternUnits="userSpaceOnUse" width="8" height="8"><path d="M0,8 L8,0 M-1,1 L1,-1 M7,9 L9,7" stroke="var(--accent-1)" stroke-width="1" fill="none"/></pattern>
+    <pattern id="ai-pat-crosshatch-accent-1-transparent" patternUnits="userSpaceOnUse" width="8" height="8"><path d="M0,8 L8,0 M-1,1 L1,-1 M7,9 L9,7 M0,0 L8,8 M-1,7 L1,9 M7,-1 L9,1" stroke="var(--accent-1)" stroke-width="1" fill="none"/></pattern>
+    <pattern id="ai-pat-dots-accent-1-background-light" patternUnits="userSpaceOnUse" width="8" height="8"><rect width="8" height="8" fill="var(--background-light)"/><circle cx="4" cy="4" r="1.5" fill="var(--accent-1)"/></pattern>
+    <pattern id="ai-pat-grid-foreground-2-transparent" patternUnits="userSpaceOnUse" width="8" height="8"><path d="M0,0 H8 M0,0 V8" stroke="var(--foreground-2)" stroke-width="1" fill="none"/></pattern>
+    <linearGradient id="ai-grad-lin-accent-light-accent-dark-0" x1="0.5000" y1="0.0000" x2="0.5000" y2="1.0000"><stop offset="0" stop-color="var(--accent-light)"/><stop offset="1" stop-color="var(--accent-dark)"/></linearGradient>
+    <linearGradient id="ai-grad-lin-accent-light-accent-dark-90" x1="0.0000" y1="0.5000" x2="1.0000" y2="0.5000"><stop offset="0" stop-color="var(--accent-light)"/><stop offset="1" stop-color="var(--accent-dark)"/></linearGradient>
+    <radialGradient id="ai-grad-rad-background-light-accent-1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="var(--background-light)"/><stop offset="1" stop-color="var(--accent-1)"/></radialGradient>
+  </defs>
+  <g id="diagram" class="ai-container">
+    <text id="title" class="ai-shape ai-text" x="5" y="16" text-anchor="start" dominant-baseline="middle" font-size="22" fill="var(--text-1)">Pattern &amp; Gradient Fills</text>
+    <g id="patterns" class="ai-container">
+      <rect id="hatch_box" class="ai-shape ai-rect" x="10" y="52" width="80" height="80" fill="url(#ai-pat-hatch-accent-1-transparent)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="92" text-anchor="middle" dominant-baseline="middle">hatch</text>
+      <rect id="cross_box" class="ai-shape ai-rect" x="106" y="52" width="80" height="80" fill="url(#ai-pat-crosshatch-accent-1-transparent)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="146" y="92" text-anchor="middle" dominant-baseline="middle">cross_hatch</text>
+      <rect id="dots_box" class="ai-shape ai-rect" x="202" y="52" width="80" height="80" fill="url(#ai-pat-dots-accent-1-background-light)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="242" y="92" text-anchor="middle" dominant-baseline="middle">dots</text>
+      <rect id="grid_box" class="ai-shape ai-rect" x="298" y="52" width="80" height="80" fill="url(#ai-pat-grid-foreground-2-transparent)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="338" y="92" text-anchor="middle" dominant-baseline="middle">grid</text>
+    </g>
+    <g id="gradients" class="ai-container">
+      <rect id="lin_box" class="ai-shape ai-rect" x="10" y="162" width="80" height="80" fill="url(#ai-grad-lin-accent-light-accent-dark-0)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="50" y="202" text-anchor="middle" dominant-baseline="middle">gradient</text>
+      <rect id="lin90_box" class="ai-shape ai-rect" x="106" y="162" width="80" height="80" fill="url(#ai-grad-lin-accent-light-accent-dark-90)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="146" y="202" text-anchor="middle" dominant-baseline="middle">gradient 90</text>
+      <rect id="rad_box" class="ai-shape ai-rect" x="202" y="162" width="80" height="80" fill="url(#ai-grad-rad-background-light-accent-1)" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="242" y="202" text-anchor="middle" dominant-baseline="middle">radial</text>
+    </g>
+  </g>
+</svg>
