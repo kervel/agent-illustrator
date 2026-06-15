@@ -333,7 +333,58 @@ where
         .map_with(|items, e| Spanned::new(StyleValue::List(items), span_range(&e.span())))
         .boxed();
 
-    let style_value = choice((value_list, value_atom)).boxed();
+    // Function-style values for pattern/gradient fills, e.g. `hatch(accent-1)`,
+    // `gradient(blue, white, 90)`. Name + arity are validated here so that
+    // style resolution can stay infallible. A bare `hatch` (no parens) is NOT
+    // matched here — it falls through to `value_atom` as an identifier and is
+    // interpreted as a default-colored pattern during resolution.
+    let call_value = identifier
+        .then(
+            value_atom
+                .clone()
+                .separated_by(just(Token::Comma))
+                .allow_trailing()
+                .collect::<Vec<_>>()
+                .delimited_by(just(Token::ParenOpen), just(Token::ParenClose)),
+        )
+        .try_map(|(name, args), span| {
+            let n = name.node.0.as_str();
+            let argc = args.len();
+            let ok = match n {
+                "hatch" | "cross_hatch" | "dots" | "grid" => argc <= 2,
+                "gradient" => argc == 2 || argc == 3,
+                "radial_gradient" => argc == 2,
+                _ => {
+                    return Err(Rich::custom(
+                        span,
+                        format!(
+                            "unknown fill function `{}`; expected one of: \
+                             hatch, cross_hatch, dots, grid, gradient, radial_gradient",
+                            n
+                        ),
+                    ))
+                }
+            };
+            if !ok {
+                return Err(Rich::custom(
+                    span,
+                    format!(
+                        "`{}` got {} argument(s); patterns take 0-2 colors, \
+                         gradient takes 2 colors + optional angle, \
+                         radial_gradient takes 2 colors",
+                        n, argc
+                    ),
+                ));
+            }
+            Ok(StyleValue::Call {
+                name: name.node.0.clone(),
+                args,
+            })
+        })
+        .map_with(|v, e| Spanned::new(v, span_range(&e.span())))
+        .boxed();
+
+    let style_value = choice((value_list, call_value, value_atom)).boxed();
 
     let modifier = style_key
         .then_ignore(just(Token::Colon))
@@ -1347,6 +1398,42 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_fill_hatch_no_args() {
+        // `fill: hatch` parses as a bare identifier (Call requires parens).
+        parse("rect a [fill: hatch]").expect("Should parse");
+    }
+
+    #[test]
+    fn parse_fill_hatch_with_color() {
+        parse("rect a [fill: hatch(accent-1)]").expect("Should parse");
+    }
+
+    #[test]
+    fn parse_fill_gradient_three_args() {
+        parse("rect a [fill: gradient(blue, white, 90)]").expect("Should parse");
+    }
+
+    #[test]
+    fn parse_fill_radial_gradient() {
+        parse("rect a [fill: radial_gradient(white, accent-1)]").expect("Should parse");
+    }
+
+    #[test]
+    fn parse_fill_unknown_function_errors() {
+        assert!(parse("rect a [fill: bogus(blue, white)]").is_err());
+    }
+
+    #[test]
+    fn parse_fill_gradient_one_stop_errors() {
+        assert!(parse("rect a [fill: gradient(blue)]").is_err());
+    }
+
+    #[test]
+    fn parse_fill_pattern_too_many_args_errors() {
+        assert!(parse("rect a [fill: hatch(a, b, c)]").is_err());
+    }
 
     #[test]
     fn test_parse_simple_shape() {
