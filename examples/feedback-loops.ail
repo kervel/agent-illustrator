@@ -47,21 +47,21 @@ constrain agent_via.center_y = result.bottom + 50
 // Align loops horizontally
 constrain assign.left = task.left
 
-// Human internal flow (right to left: evaluate -> spot -> tune -> assign)
-evaluate -> spot [stroke: accent-dark, stroke_width: 3]
-spot -> tune [stroke: accent-dark, stroke_width: 3]
-tune -> assign [stroke: accent-dark, stroke_width: 3]
+// Human internal flow (left to right: assign -> tune -> spot -> evaluate)
+assign -> tune [stroke: accent-dark, stroke_width: 3]
+tune -> spot [stroke: accent-dark, stroke_width: 3]
+spot -> evaluate [stroke: accent-dark, stroke_width: 3]
 
-// Human loop-back: assign.top -> evaluate.top (curves ABOVE)
-assign.top -> evaluate.top [stroke: accent-dark, stroke_width: 3, routing: curved, via: human_via]
+// Human loop-back (feedback): evaluate.top -> assign.top (curves ABOVE, dashed)
+evaluate.top -> assign.top [stroke: accent-dark, stroke_width: 3, routing: curved, via: human_via, stroke_dasharray: dashed]
 
 // Agent internal flow (left to right: task -> execute -> check -> result)
 task -> execute [stroke: secondary-dark, stroke_width: 3]
 execute -> check [stroke: secondary-dark, stroke_width: 3]
 check -> result [stroke: secondary-dark, stroke_width: 3]
 
-// Agent loop-back: result.bottom -> task.bottom (curves BELOW)
-result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, routing: curved, via: agent_via]
+// Agent loop-back (feedback): result.bottom -> task.bottom (curves BELOW, dashed)
+result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, routing: curved, via: agent_via, stroke_dasharray: dashed]
 
 // Cross connections (vertical)
 assign.bottom -> task.top [stroke: foreground-3, stroke_width: 1]

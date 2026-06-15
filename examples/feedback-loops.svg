@@ -2,33 +2,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -74.95677714974302 660 455.913554299486">
   <style>
     :root {
-    --text-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --secondary-2: #fff3e0;
-    --secondary-dark: #e65100;
-    --status-warning: #ff9800;
-    --foreground-2: #666666;
-    --text-1: #333333;
-    --text-2: #666666;
-    --status-success: #4caf50;
-    --accent-light: #e3f2fd;
-    --accent-1: #2196f3;
+    --accent-dark: #1565c0;
     --foreground-3: #999999;
-    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
     --background-3: #eeeeee;
-    --background-light: #ffffff;
-    --accent-3: #bbdefb;
+    --text-3: #999999;
+    --text-light: #ffffff;
     --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --text-1: #333333;
+    --secondary-3: #ffe0b2;
+    --status-success: #4caf50;
+    --secondary-dark: #e65100;
+    --foreground-2: #666666;
+    --accent-1: #2196f3;
+    --status-error: #f44336;
+    --text-2: #666666;
+    --accent-2: #e3f2fd;
+    --secondary-light: #fff3e0;
+    --background-2: #f5f5f5;
+    --accent-light: #e3f2fd;
+    --background-light: #ffffff;
+    --status-warning: #ff9800;
     --foreground-1: #333333;
     --background-dark: #333333;
-    --secondary-3: #ffe0b2;
+    --accent-3: #bbdefb;
     --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --accent-2: #e3f2fd;
-    --status-error: #f44336;
-    --secondary-light: #fff3e0;
-    --accent-dark: #1565c0;
-    --text-light: #ffffff;
+    --foreground-light: #e0e0e0;
     --text-dark: #1a1a1a;
   }
 
@@ -154,14 +154,14 @@
     </g>
   </g>
   <text class="ai-label" x="286.75727583760306" y="143.15561166803258" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">tunes</text>
-  <path class="ai-connection" d="M435 82 L425.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M295 82 L285.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M155 82 L145.8 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M75 57 C74.99999999999999 -14.956777149743019 213.043222850257 7 285 7 C356.956777149743 7 495 -14.956777149743019 495 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M135 82 L144.2 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M275 82 L284.2 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M415 82 L424.2 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M495 57 C495 -14.956777149743019 356.956777149743 7 285 7 C213.043222850257 7 74.99999999999999 -14.956777149743019 75 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M135 224 L144.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M275 224 L284.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M415 224 L424.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M495 249 C495 320.956777149743 356.956777149743 299 285 299 C213.043222850257 299 75 320.956777149743 75 259.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M495 249 C495 320.956777149743 356.956777149743 299 285 299 C213.043222850257 299 75 320.956777149743 75 259.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M75 107 L75 195.4" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M495 199 L495 110.6" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M215 107 C215 174.00925309239017 355 131.99074690760983 355 191.8" fill="none" stroke="var(--accent-1)" stroke-width="2" marker-end="url(#ai-arrow)"/>
