@@ -968,37 +968,46 @@ fn collect_labels_recursive(
     scope: &FrameScope<'_>,
     labels: &mut Vec<LabelInfo>,
 ) {
+    collect_labels_in(elem, &[], scope, labels)
+}
+
+/// `siblings` is the element's own row in the tree, so an unnamed element can
+/// still be named by the grid cell it sits in.
+fn collect_labels_in(
+    elem: &ElementLayout,
+    siblings: &[&ElementLayout],
+    scope: &FrameScope<'_>,
+    labels: &mut Vec<LabelInfo>,
+) {
     // A hidden element takes its label — and its whole subtree — off screen.
     if scope.hides_element(elem) {
         return;
     }
-    if let Some(label) = &elem.label {
-        let owner = elem
-            .id
+    let owner = || {
+        elem.id
             .as_ref()
             .map(|id| id.0.clone())
-            .unwrap_or_else(|| "<anon>".to_string());
+            .or_else(|| grid_cell_name(elem, siblings))
+            .unwrap_or_else(|| "<anon>".to_string())
+    };
+    if let Some(label) = &elem.label {
         labels.push(LabelInfo {
-            owner,
+            owner: owner(),
             bbox: estimate_label_bbox(label),
             parent_opacity: elem.styles.opacity,
         });
     }
     // Standalone text elements act like labels for overlap checking
     if is_text_shape(elem) {
-        let owner = elem
-            .id
-            .as_ref()
-            .map(|id| id.0.clone())
-            .unwrap_or_else(|| "<anon>".to_string());
         labels.push(LabelInfo {
-            owner,
+            owner: owner(),
             bbox: elem.bounds,
             parent_opacity: elem.styles.opacity,
         });
     }
+    let children: Vec<&ElementLayout> = elem.children.iter().collect();
     for child in &elem.children {
-        collect_labels_recursive(child, scope, labels);
+        collect_labels_in(child, &children, scope, labels);
     }
 }
 
@@ -1230,6 +1239,19 @@ fn collect_opaque_elements(
     scope: &FrameScope<'_>,
     elements: &mut Vec<OpaqueElement>,
 ) {
+    collect_opaque_elements_in(elem, parent_name, child_index, &[], scope, elements)
+}
+
+/// `siblings` is the element's own row in the tree, so an unnamed element can
+/// still be named by the grid cell it sits in.
+fn collect_opaque_elements_in(
+    elem: &ElementLayout,
+    parent_name: Option<&str>,
+    child_index: usize,
+    siblings: &[&ElementLayout],
+    scope: &FrameScope<'_>,
+    elements: &mut Vec<OpaqueElement>,
+) {
     if scope.hides_element(elem) {
         return;
     }
@@ -1238,7 +1260,8 @@ fn collect_opaque_elements(
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
-            element_display_name(elem, parent_name, child_index)
+            grid_cell_name(elem, siblings)
+                .unwrap_or_else(|| element_display_name(elem, parent_name, child_index))
         };
         elements.push(OpaqueElement {
             id,
@@ -1247,8 +1270,9 @@ fn collect_opaque_elements(
     }
 
     let name = elem.id.as_ref().map(|id| id.0.as_str());
+    let children: Vec<&ElementLayout> = elem.children.iter().collect();
     for (i, child) in elem.children.iter().enumerate() {
-        collect_opaque_elements(child, name, i, scope, elements);
+        collect_opaque_elements_in(child, name, i, &children, scope, elements);
     }
 }
 
@@ -1256,6 +1280,19 @@ fn collect_visible_elements(
     elem: &ElementLayout,
     parent_name: Option<&str>,
     child_index: usize,
+    scope: &FrameScope<'_>,
+    elements: &mut Vec<OpaqueElement>,
+) {
+    collect_visible_elements_in(elem, parent_name, child_index, &[], scope, elements)
+}
+
+/// `siblings` is the element's own row in the tree, so an unnamed element can
+/// still be named by the grid cell it sits in.
+fn collect_visible_elements_in(
+    elem: &ElementLayout,
+    parent_name: Option<&str>,
+    child_index: usize,
+    siblings: &[&ElementLayout],
     scope: &FrameScope<'_>,
     elements: &mut Vec<OpaqueElement>,
 ) {
@@ -1267,7 +1304,8 @@ fn collect_visible_elements(
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
-            element_display_name(elem, parent_name, child_index)
+            grid_cell_name(elem, siblings)
+                .unwrap_or_else(|| element_display_name(elem, parent_name, child_index))
         };
         elements.push(OpaqueElement {
             id,
@@ -1276,8 +1314,9 @@ fn collect_visible_elements(
     }
 
     let name = elem.id.as_ref().map(|id| id.0.as_str());
+    let children: Vec<&ElementLayout> = elem.children.iter().collect();
     for (i, child) in elem.children.iter().enumerate() {
-        collect_visible_elements(child, name, i, scope, elements);
+        collect_visible_elements_in(child, name, i, &children, scope, elements);
     }
 }
 

@@ -69,6 +69,36 @@ grid deling [cols: 5, rows: 4, gap: 4, cell_width: 46, cell_height: 52] {
 }
 
 #[test]
+fn every_category_names_an_anonymous_child_by_its_cell() {
+    // Not just the overlap category: a label or straddle warning about an
+    // unnamed grid child used to read "<anon>", which locates nothing.
+    let source = r#"
+grid g [cols: 3, rows: 1, gap: 0, cell_width: 60, cell_height: 40] {
+    rect [at: [0,1], label: "b", fill: accent-light, stroke: accent-dark]
+}
+text "los label" los
+constrain los.x = 70
+constrain los.y = 10
+"#;
+    let warnings = lint(source);
+    assert!(
+        !messages(&warnings).iter().any(|m| m.contains("<anon>")
+            || m.contains("<child #")),
+        "no warning should fall back to a positional name: {:?}",
+        messages(&warnings)
+    );
+    assert!(
+        messages(&warnings)
+            .iter()
+            .filter(|m| m.contains("cell [0,1] of g"))
+            .count()
+            >= 2,
+        "the cell name should reach every category: {:?}",
+        messages(&warnings)
+    );
+}
+
+#[test]
 fn a_rule_drawn_across_a_grid_is_not_a_collision() {
     // A grid renders as a bare <g>: it paints nothing, so a line drawn
     // inside its bounds has not collided with anything. This is the recipe
