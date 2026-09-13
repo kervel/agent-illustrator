@@ -27,6 +27,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | One caption across a walkthrough | `transform cap [label: "..."]` per keyframe | one text element per step |
 | Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
 | Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
+| Colouring the words on a shape | `label_fill:` | `fill:` (that is the shape) |
 
 `grid` is not only for heatmaps: it is the general alignment scaffold. Empty
 cells are fine — place content by coordinate, address cells as `g.cell(r, c)`.
@@ -138,7 +139,7 @@ IMPORTANT: Do NOT use ImageMagick `convert` or `rsvg-convert` — they don't sup
 
 After each render, verify ALL of these. If any fail, fix and re-render:
 
-1. Run `agent-illustrator --lint diagram.ail`. The warnings are there to prevent common mistakes, but can occasionally have false positives.
+1. Run `agent-illustrator --lint diagram.ail`. The warnings are there to prevent common mistakes, but can occasionally have false positives. `unknown-modifier` never is: it means a key you wrote is being ignored, so check the spelling.
 2. Visual check (render the svg to png)
 2.1 No overlapping elements or labels
 2.2 Connections don't route through text
@@ -250,6 +251,19 @@ sized up front for the longest wording it ever takes, so leave it auto-sized —
 only add `width` when you want a specific box, and the linter will tell you the
 px if the text does not fit it.
 
+#### Label colour
+
+`fill` colours a shape; the words written on it are coloured by `label_fill`.
+This is what makes a grid usable when the cell contents carry meaning:
+
+```
+rect [at: [1, 3], label: "4", label_fill: accent-dark, fill: background-1, stroke: none]
+```
+
+It is a keyframe transform key too, so a step can recolour a digit:
+`transform cell_b [label_fill: accent-dark]`. A standalone `text` element takes
+its colour from plain `fill`.
+
 #### Grid (any row/column alignment: matrix, table, heatmap, number columns)
 
 `grid g [cols: 6, rows: 6, gap: 5, cell_width: 56, cell_height: 56]` lays a
@@ -301,8 +315,9 @@ The box grows to fit everything listed, plus the padding. Declare backgrounds
 FIRST in a `group` so they render behind the foreground.
 
 `contains` frees **both** dimensions, so it cannot draw a line: a `height: 3`
-rule told to contain a row of cells comes back 52px tall. For a line, constrain
-the two edges you care about and leave the height alone:
+rule told to contain a row of cells comes back 52px tall (`--lint` reports it as
+`over-constrained`). For a line, constrain the two edges you care about and
+leave the height alone:
 
 ```
 rect rule [height: 3, fill: foreground-1]

@@ -749,6 +749,7 @@ fn arguments_to_modifiers(
                 "z_order" => StyleKey::ZOrder,
                 "pointer" => StyleKey::Pointer,
                 "align" => StyleKey::Align,
+                "label_fill" => StyleKey::LabelFill,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(

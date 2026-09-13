@@ -61,6 +61,8 @@ pub struct ElementDiff {
     pub opacity: Option<f64>,
     pub fill: Option<String>,
     pub stroke: Option<String>,
+    /// Colour of the element's label for this frame
+    pub label_fill: Option<String>,
     /// Replacement text for this frame (a text shape's content, or an
     /// element's label), when a keyframe rewrote it.
     pub label: Option<String>,
@@ -87,6 +89,7 @@ impl ElementDiff {
             && self.opacity.is_none()
             && self.fill.is_none()
             && self.stroke.is_none()
+            && self.label_fill.is_none()
             && self.label.is_none()
     }
 }
@@ -617,6 +620,7 @@ fn apply_modifiers_ordered(
             StyleKey::Align => { elem.styles.align = crate::layout::types::parse_align(&m.node.value.node); }
             StyleKey::Rotation => { if let Some(v) = num(&m.node.value.node) { elem.styles.rotation = Some(v); } }
             StyleKey::Fill => { elem.styles.fill = ResolvedStyles::color_to_css(&m.node.value.node); }
+            StyleKey::LabelFill => { elem.styles.label_fill = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Stroke => { elem.styles.stroke = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Opacity => { if let Some(v) = num(&m.node.value.node) { elem.styles.opacity = Some(v); } }
             StyleKey::Width => { if let Some(v) = num(&m.node.value.node) { elem.bounds.width = v; } }
@@ -694,6 +698,9 @@ fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
     }
     if base.styles.stroke != solved.styles.stroke {
         diff.stroke = solved.styles.stroke.clone();
+    }
+    if base.styles.label_fill != solved.styles.label_fill {
+        diff.label_fill = solved.styles.label_fill.clone();
     }
 
     let base_text = element_text(base);

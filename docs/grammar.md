@@ -100,6 +100,7 @@ Common modifiers:
     align: start|center|end Text position in its box; cross-axis alignment
                             of a row's/column's children (left/center/right
                             are accepted spellings; default start)
+    label_fill: <color>     Colour of the label text (fill colours the shape)
     rotation: <degrees>     Rotate element (clockwise)
     class: <name>           Custom CSS class (for external styling)
     z_order: <number>       Render order for groups (higher = on top)
@@ -205,9 +206,11 @@ Transform geometry keys (inside keyframe transform [...]):
     width: N, height: N   Absolute target size
     scale: N           Uniform scale about the element's center
     rotation: N        Rotation in degrees
-Other transform keys: fill, stroke, opacity, align, and label (rewrites the
-element's words for that frame -- a text element's content or any element's
-label; the box grows to fit longer text but never shrinks).
+Other transform keys: fill, stroke, opacity, align, label_fill, and label
+(rewrites the element's words for that frame -- a text element's content or any
+element's label). The box never changes size: auto-sized text is laid out for
+the longest wording any frame gives it, and an explicit width is kept as
+written (--lint reports text that does not fit it).
 Position + rotation animate via a transform on the element's wrapper group (so the
 label rides along); size animates via the shape's width/height.
 

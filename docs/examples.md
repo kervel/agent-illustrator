@@ -359,7 +359,7 @@ EXAMPLE 7: Heatmap with fill_opacity
 ------------------------------------
 // One hue, varying fill_opacity per cell — no need to pre-compute a
 // blended hex per cell. Intensity reads as alpha over the same color.
-grid heat [columns: 3] {
+grid heat [cols: 3] {
     rect a1 [fill: secondary-1, fill_opacity: 0.2]
     rect a2 [fill: secondary-1, fill_opacity: 0.4]
     rect a3 [fill: secondary-1, fill_opacity: 0.6]

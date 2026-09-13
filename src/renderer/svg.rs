@@ -919,6 +919,13 @@ fn generate_keyframe_css(
                     props.join("; ")
                 ));
             }
+            // Label colour lives on the text node inside the wrapper group.
+            if let Some(colour) = &diff.label_fill {
+                css.push_str(&format!(
+                    "  .kf-{} text {{ fill: {}; }}\n",
+                    elem_id, colour
+                ));
+            }
             // Rewritten text: fade the base wording out and this frame's in.
             if let Some(text) = &diff.label {
                 if let Some(n) = text_variants
@@ -1355,11 +1362,20 @@ fn render_element_inner(
 
     // Render label if present
     if let Some(label) = &element.label {
-        let font_styles = element
-            .styles
-            .font_size
-            .map(|fs| format!(r#" font-size="{}""#, fs))
-            .unwrap_or_default();
+        let font_styles = {
+            let size = element
+                .styles
+                .font_size
+                .map(|fs| format!(r#" font-size="{}""#, fs))
+                .unwrap_or_default();
+            let colour = element
+                .styles
+                .label_fill
+                .as_ref()
+                .map(|c| format!(r#" fill="{}""#, c))
+                .unwrap_or_default();
+            format!("{}{}", size, colour)
+        };
         let variants = element
             .id
             .as_ref()
@@ -1975,6 +1991,7 @@ mod tests {
             css_classes: vec![],
             rotation: None,
             align: None,
+            label_fill: None,
         };
         let result = format_styles(&styles, None);
         assert!(result.contains(r##"fill="#ff0000""##));
@@ -1999,6 +2016,7 @@ mod tests {
             css_classes: vec![],
             rotation: None,
             align: None,
+            label_fill: None,
         };
         let result = format_styles(&styles, None);
         // Symbolic color is preserved, not flattened

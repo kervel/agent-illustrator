@@ -576,6 +576,9 @@ pub struct ResolvedStyles {
     /// children line up on the cross axis.  `None` means "start", which is
     /// what every element did before `align` existed.
     pub align: Option<TextAnchor>,
+    /// Colour of the element's label text. `fill` colours the shape; the words
+    /// written on it are a separate thing to colour.
+    pub label_fill: Option<String>,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -616,6 +619,7 @@ impl ResolvedStyles {
             css_classes: vec![],
             rotation: None,
             align: None,
+            label_fill: None,
         }
     }
 
@@ -694,6 +698,9 @@ impl ResolvedStyles {
                 }
                 StyleKey::Align => {
                     styles.align = parse_align(&modifier.node.value.node);
+                }
+                StyleKey::LabelFill => {
+                    styles.label_fill = Self::color_to_css(&modifier.node.value.node);
                 }
                 StyleKey::Label
                 | StyleKey::LabelPosition
@@ -822,6 +829,7 @@ impl ResolvedStyles {
             },
             rotation: other.rotation.or(self.rotation),
             align: other.align.or(self.align),
+            label_fill: other.label_fill.clone().or_else(|| self.label_fill.clone()),
         }
     }
 }

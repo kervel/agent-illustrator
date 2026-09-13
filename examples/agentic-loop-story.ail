@@ -77,35 +77,35 @@ group diagram {
 
     // === SPEECH BUBBLE (frame 2): near user ===
     rect speech_bubble [width: 280, height: 56, fill: accent-light, stroke: none,
-                        corner_radius: 18, label: "list my Python files", font_size: 16]
+                        label: "list my Python files", font_size: 16]
 
     // === SYSTEM PROMPT ENVELOPE (frame 3-4): between CLI and Cloud ===
     rect sys_envelope [width: 340, height: 88, fill: accent-light, stroke: none,
-                       corner_radius: 12, opacity: 0.9]
+                       opacity: 0.9]
     text "[system] You are Claude Code..." sys_line1 [font_size: 16, fill: foreground-2]
     text "[user] list my Python files" sys_line2 [font_size: 16, fill: accent-dark]
 
     // === TOOL CALL RESPONSE (frame 5): between Cloud and CLI ===
     rect tool_call_envelope [width: 310, height: 70, fill: secondary-light, stroke: none,
-                             corner_radius: 12, opacity: 0.9]
+                             opacity: 0.9]
     text "tool_call: bash" tc_line1 [font_size: 16, fill: foreground-2]
     text "find . -name '*.py'" tc_line2 [font_size: 16, fill: secondary-dark]
 
     // === EXEC RESULT (frame 6): between CLI and Gear ===
     rect exec_envelope [width: 290, height: 80, fill: accent-light, stroke: none,
-                        corner_radius: 12, opacity: 0.9]
+                        opacity: 0.9]
     text "$ find . -name '*.py'" exec_line1 [font_size: 16, fill: accent-dark]
     text "./main.py  ./test_api.py" exec_line2 [font_size: 16, fill: foreground-1]
 
     // === RESULT RETURN (frame 7): between Gear and Cloud ===
     rect result_envelope [width: 290, height: 70, fill: accent-light, stroke: none,
-                          corner_radius: 12, opacity: 0.9]
+                          opacity: 0.9]
     text "tool_result + conversation" result_line1 [font_size: 16, fill: foreground-2]
     text "./main.py  ./test_api.py" result_line2 [font_size: 16, fill: accent-dark]
 
     // === FINAL ANSWER (frame 8): between CLI and User ===
     rect answer_envelope [width: 290, height: 70, fill: secondary-light, stroke: none,
-                          corner_radius: 12, opacity: 0.9]
+                          opacity: 0.9]
     text "I found 2 Python files:" ans_line1 [font_size: 16, fill: foreground-1]
     text "main.py and test_api.py" ans_line2 [font_size: 16, fill: secondary-dark]
 }
