@@ -23,7 +23,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 |---------------|-----|-------|
 | A box around existing elements | `constrain bg contains a, b [padding: 30]` | Hand-computed `width`/`height` |
 | Anything on a lattice: matrix, table, calendar, aligned number columns | `grid` + `[at: [row, col]]`, cells as `g.cell(r, c)` | `constrain` lines with a hand-picked pitch |
-| Text that must not jump when its wording changes | fixed `width` + `align: start` | auto-sized and centred |
+| Text that must not jump when its wording changes | leave it auto-sized, add `align: start` | guessing a `width` for the longest wording |
 | One caption across a walkthrough | `transform cap [label: "..."]` per keyframe | one text element per step |
 | Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
 | Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
@@ -244,9 +244,11 @@ col steps [gap: 10, align: center]               // children centred
 row legend [gap: 8, align: end]                  // children share a bottom edge
 ```
 
-An auto-sized text box is exactly as wide as its words, so changing text shifts
-it. For any text that changes, give it a `width` sized for the longest wording
-plus `align: start`.
+An auto-sized text box is exactly as wide as its words, so a box positioned by
+its centre moves when the wording changes. A caption rewritten by keyframes is
+sized up front for the longest wording it ever takes, so leave it auto-sized —
+only add `width` when you want a specific box, and the linter will tell you the
+px if the text does not fit it.
 
 #### Grid (any row/column alignment: matrix, table, heatmap, number columns)
 
@@ -297,6 +299,17 @@ constrain bg contains svc1, svc2, svc3 [padding: 30]
 ```
 The box grows to fit everything listed, plus the padding. Declare backgrounds
 FIRST in a `group` so they render behind the foreground.
+
+`contains` frees **both** dimensions, so it cannot draw a line: a `height: 3`
+rule told to contain a row of cells comes back 52px tall. For a line, constrain
+the two edges you care about and leave the height alone:
+
+```
+rect rule [height: 3, fill: foreground-1]
+constrain rule.left = g.cell(1, 1).left
+constrain rule.right = g.cell(1, 3).right
+constrain rule.top = g.cell(1, 3).bottom + 4
+```
 
 ### Template Best Practices
 
@@ -382,7 +395,7 @@ keyframe "request" {
 — a text element's content, or any other element's label:
 
 ```
-text "the client sends a request" caption [width: 420, align: start]
+text "the client sends a request" caption [align: start]
 constrain caption.y = stage.bottom + 24
 
 keyframe "send" { }
@@ -390,8 +403,9 @@ keyframe "receive" { transform caption [label: "the server receives it"] }
 keyframe "reply"   { transform caption [label: "and answers"] }
 ```
 
-One caption beats one text element per step. Size the box for the longest
-wording and use `align: start`; a box grows to fit but never shrinks.
+One caption beats one text element per step. Leave it auto-sized — it is laid
+out for the longest wording any frame gives it, so it never resizes and never
+shifts; `align: start` pins the text to its left edge.
 
 ### Key Rules
 - Keyframes are **cumulative**: each builds on the previous

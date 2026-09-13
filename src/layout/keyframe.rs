@@ -492,12 +492,12 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
 
     match &mut elem.element_type {
         ElementType::Shape(ShapeType::Text { content }) => {
+            // The box never changes: a box that resized mid-animation would
+            // drag its anchor with it and the text would shift from frame to
+            // frame. Auto-sized text is widened once, before layout, by
+            // `size_text_for_keyframe_wordings`; an explicit width is the
+            // author's and is left alone (the linter reports it if too small).
             *content = text.to_string();
-            let font_size = elem.styles.font_size.unwrap_or(14.0);
-            let needed = (text.len() as f64 * font_size * 0.6).max(20.0);
-            if needed > elem.bounds.width {
-                elem.bounds.width = needed;
-            }
         }
         _ => {
             if let Some(label) = &mut elem.label {
@@ -505,6 +505,99 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
             }
         }
     }
+}
+
+/// Width a piece of text needs, by the same estimate the layout engine uses.
+pub fn estimated_text_width(text: &str, font_size: f64) -> f64 {
+    (text.len() as f64 * font_size * 0.6).max(20.0)
+}
+
+/// Size auto-sized text elements for the longest wording they ever take on.
+///
+/// A caption rewritten by keyframes is laid out once, from its frame-0 text.
+/// Without this it would be too narrow for its later wordings, and since the
+/// author cannot know how wide a wording renders, sizing it by hand is
+/// guesswork. Elements with an explicit `width` are left untouched.
+pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
+    // element id -> every wording a keyframe gives it
+    let mut wordings: HashMap<String, Vec<String>> = HashMap::new();
+    for kf in extract_keyframes(&doc) {
+        for op in &kf.operations {
+            if let KeyframeOp::Transform { target, modifiers } = &op.node {
+                for m in modifiers {
+                    if matches!(m.node.key.node, StyleKey::Label) {
+                        if let Some(text) = string_value(&m.node.value.node) {
+                            wordings
+                                .entry(target.node.0.clone())
+                                .or_default()
+                                .push(text.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if wordings.is_empty() {
+        return doc;
+    }
+
+    fn widen(stmts: &mut [crate::parser::ast::Spanned<Statement>], wordings: &HashMap<String, Vec<String>>) {
+        use crate::parser::ast::{ShapeType, Spanned, StyleModifier, StyleValue};
+        for stmt in stmts.iter_mut() {
+            match &mut stmt.node {
+                Statement::Shape(shape) => {
+                    let ShapeType::Text { content } = &shape.shape_type.node else {
+                        continue;
+                    };
+                    let Some(name) = shape.name.as_ref().map(|n| n.node.0.clone()) else {
+                        continue;
+                    };
+                    let Some(texts) = wordings.get(&name) else {
+                        continue;
+                    };
+                    // An explicit width is a deliberate choice; leave it.
+                    if shape
+                        .modifiers
+                        .iter()
+                        .any(|m| matches!(m.node.key.node, StyleKey::Width | StyleKey::Size))
+                    {
+                        continue;
+                    }
+                    let font_size = shape
+                        .modifiers
+                        .iter()
+                        .find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+                            (StyleKey::FontSize, StyleValue::Number { value, .. }) => Some(*value),
+                            _ => None,
+                        })
+                        .unwrap_or(14.0);
+                    let widest = texts
+                        .iter()
+                        .map(|t| t.as_str())
+                        .chain(std::iter::once(content.as_str()))
+                        .map(|t| estimated_text_width(t, font_size))
+                        .fold(0.0_f64, f64::max);
+                    let span = shape.shape_type.span.clone();
+                    shape.modifiers.push(Spanned::new(
+                        StyleModifier {
+                            key: Spanned::new(StyleKey::Width, span.clone()),
+                            value: Spanned::new(
+                                StyleValue::Number { value: widest, unit: None },
+                                span.clone(),
+                            ),
+                        },
+                        span,
+                    ));
+                }
+                Statement::Layout(l) => widen(&mut l.children, wordings),
+                Statement::Group(g) => widen(&mut g.children, wordings),
+                _ => {}
+            }
+        }
+    }
+
+    widen(&mut doc.statements, &wordings);
+    doc
 }
 
 /// Apply transform modifiers in a fixed order against the element's base bounds:

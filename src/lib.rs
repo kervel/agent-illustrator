@@ -394,6 +394,10 @@ fn render_pipeline(
     // constraints before layout and the constraint solver see them.
     let doc = crate::parser::ast::expand_point_constraints(doc);
 
+    // Size auto-sized text for the longest wording any keyframe gives it, so a
+    // rewritten caption never has to resize (and shift) mid-animation.
+    let doc = layout::keyframe::size_text_for_keyframe_wordings(doc);
+
     // Validate color references against stylesheet
     validate_colors(&doc, &config.stylesheet)?;
 

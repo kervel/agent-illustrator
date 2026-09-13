@@ -99,59 +99,89 @@ keyframe "b" {
     assert!(!frame_b.contains(">before<"));
 }
 
+fn caption_x(svg: &str) -> f64 {
+    let line = svg
+        .lines()
+        .find(|l| l.contains("id=\"cap\""))
+        .expect("caption");
+    let start = line.find(" x=\"").expect("x attribute") + 4;
+    let rest = &line[start..];
+    rest[..rest.find('"').unwrap()].parse::<f64>().unwrap()
+}
+
 #[test]
-fn a_longer_wording_grows_the_box_but_a_wider_one_is_kept() {
-    // An auto-sized caption grows to fit longer text...
-    let grows = r#"
-text "hi" cap
+fn an_auto_sized_caption_is_laid_out_for_its_longest_wording() {
+    // Sized up front, so it never has to resize — and therefore never
+    // shifts — when a later frame gives it more words. The author does not
+    // have to guess how wide the longest wording renders.
+    let source = r#"
+rect stage [width: 400, height: 60]
+text "hi" cap [align: start]
+constrain cap.center_x = stage.center_x
+constrain cap.y = stage.bottom + 20
 keyframe "a" {
 }
 keyframe "b" {
   transform cap [label: "a considerably longer caption than before"]
 }
 "#;
-    let svg = render(grows, |mut c| {
-        c.frame = Some("b".to_string());
-        c
-    });
+    let frame = |name: &str| {
+        let name = name.to_string();
+        render(source, move |mut c| {
+            c.frame = Some(name);
+            c
+        })
+    };
+    let (a, b) = (frame("a"), frame("b"));
+    assert!(b.contains("a considerably longer caption than before"));
     assert!(
-        svg.contains("a considerably longer caption than before"),
-        "got: {}",
-        svg
+        (caption_x(&a) - caption_x(&b)).abs() < 0.01,
+        "a centred caption must not shift: {} vs {}",
+        caption_x(&a),
+        caption_x(&b)
     );
+}
 
-    // ...but a box given a deliberate width keeps it, so right-aligned text
-    // does not wander when the wording changes.
-    let fixed = r#"
-text "hi" cap [width: 400, align: end]
+#[test]
+fn an_explicit_width_is_never_changed_and_is_linted_when_too_small() {
+    let source = r#"
+rect stage [width: 400, height: 60]
+text "hi" cap [width: 200, align: start]
+constrain cap.center_x = stage.center_x
+constrain cap.y = stage.bottom + 20
 keyframe "a" {
 }
 keyframe "b" {
-  transform cap [label: "still inside the same box"]
+  transform cap [label: "a wording that is far wider than two hundred pixels"]
 }
 "#;
-    let frame_a = render(fixed, |mut c| {
-        c.frame = Some("a".to_string());
-        c
-    });
-    let frame_b = render(fixed, |mut c| {
-        c.frame = Some("b".to_string());
-        c
-    });
-    let x_of = |svg: &str| {
-        let line = svg
-            .lines()
-            .find(|l| l.contains("id=\"cap\""))
-            .expect("caption")
-            .to_string();
-        let start = line.find(" x=\"").expect("x attribute") + 4;
-        let rest = &line[start..];
-        rest[..rest.find('"').unwrap()].parse::<f64>().unwrap()
+    let frame = |name: &str| {
+        let name = name.to_string();
+        render(source, move |mut c| {
+            c.frame = Some(name);
+            c
+        })
     };
     assert!(
-        (x_of(&frame_a) - x_of(&frame_b)).abs() < 0.01,
-        "anchor should not move: {} vs {}",
-        x_of(&frame_a),
-        x_of(&frame_b)
+        (caption_x(&frame("a")) - caption_x(&frame("b"))).abs() < 0.01,
+        "an explicit box must not resize behind the author's back"
     );
+
+    // ...but silence would hide the problem, so the linter names the width
+    // the wording actually needs.
+    let (_svg, warnings) =
+        agent_illustrator::render_with_lint(source, RenderConfig::new().with_lint(true))
+            .expect("should render");
+    let overflow = warnings
+        .iter()
+        .find(|w| w.category.to_string() == "label-overflow")
+        .unwrap_or_else(|| {
+            panic!(
+                "expected a label-overflow warning, got: {:?}",
+                warnings.iter().map(|w| &w.message).collect::<Vec<_>>()
+            )
+        });
+    assert!(overflow.message.contains("needs about"), "{}", overflow.message);
+    assert!(overflow.message.contains("200px"), "{}", overflow.message);
+    assert_eq!(overflow.frames, vec!["b".to_string()]);
 }

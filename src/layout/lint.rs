@@ -160,6 +160,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_crowded_layouts(doc, &mut warnings);
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
+    check_text_fits_its_box(result, doc, &mut warnings);
     dedup_warnings(&mut warnings);
     warnings
 }
@@ -298,6 +299,59 @@ fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
 }
 
+/// Grid cells exist only so `g.cell(r, c)` has something to address; nothing
+/// is ever drawn for them.  A cell cannot collide with anything — least of all
+/// with the child that was placed in it.
+fn is_reference_only(elem: &ElementLayout) -> bool {
+    matches!(elem.element_type, ElementType::GridCell)
+}
+
+/// A layout container with no fill and no border paints nothing: it renders as
+/// a bare `<g>` and only describes a region. Something drawn *inside* that
+/// region has not collided with anything — a rule laid across a grid, a
+/// highlight over a column. Two regions genuinely crossing each other, or a
+/// shape sticking out of one, are still reported.
+fn is_bare_container(elem: &ElementLayout) -> bool {
+    matches!(
+        elem.element_type,
+        ElementType::Layout(_) | ElementType::Group
+    ) && elem.styles.fill.is_none()
+        && elem.styles.fill_pattern.is_none()
+        && elem
+            .styles
+            .stroke
+            .as_ref()
+            .is_none_or(|s| s.eq_ignore_ascii_case("none"))
+}
+
+/// True when one of the pair is a bare region wholly containing the other.
+fn is_drawn_inside_a_bare_region(a: &ElementLayout, b: &ElementLayout) -> bool {
+    (is_bare_container(a) && a.bounds.contains_bbox(&b.bounds))
+        || (is_bare_container(b) && b.bounds.contains_bbox(&a.bounds))
+}
+
+/// Name an anonymous element by the grid cell it sits in, if it sits in one.
+/// `<child #12 of deling>` says nothing; `cell [3,1] of deling` says where to look.
+fn grid_cell_name(elem: &ElementLayout, siblings: &[&ElementLayout]) -> Option<String> {
+    if elem.id.is_some() {
+        return None; // it has a name of its own
+    }
+    let center = elem.bounds.center();
+    siblings
+        .iter()
+        .find(|s| is_reference_only(s) && s.bounds.contains(center))
+        .and_then(|cell| cell.id.as_ref())
+        .and_then(|id| parse_grid_cell_id(&id.0))
+        .map(|(grid, row, col)| format!("cell [{},{}] of {}", row, col, grid))
+}
+
+/// Split a generated cell id back into (grid, row, col).
+fn parse_grid_cell_id(id: &str) -> Option<(&str, &str, &str)> {
+    let (grid, coords) = id.split_once("__cell_")?;
+    let (row, col) = coords.split_once('_')?;
+    Some((grid, row, col))
+}
+
 /// More lenient visibility check for connection-crossing detection:
 /// elements with opacity >= 0.5 are visible enough to cause visual overlap
 /// with connections passing through them.
@@ -431,6 +485,11 @@ fn check_overlap_siblings(
                 continue;
             }
 
+            // Something drawn inside a container that paints nothing.
+            if is_drawn_inside_a_bare_region(a, b) {
+                continue;
+            }
+
             // Skip if both are non-opaque (two transparent zones)
             if !is_opaque(a) && !is_opaque(b) {
                 continue;
@@ -489,10 +548,13 @@ fn is_template_instance_group(parent: &ElementLayout) -> bool {
     };
     let prefix = format!("{}_", id);
 
-    // Direct children match prefix
+    // Direct children match prefix. Generated grid cells are skipped: their
+    // ids are `{grid}__cell_r_c`, which would otherwise make every named grid
+    // look like a template instance and silence its overlap checks.
     let named_children: Vec<&str> = parent
         .children
         .iter()
+        .filter(|c| !is_reference_only(c))
         .filter_map(|c| c.id.as_ref().map(|id| id.0.as_str()))
         .collect();
     if !named_children.is_empty() && named_children.iter().all(|c| c.starts_with(&prefix)) {
@@ -541,6 +603,7 @@ fn check_overlaps_recursive(
             let named_children: Vec<_> = parent
                 .children
                 .iter()
+                .filter(|c| !is_reference_only(c))
                 .filter_map(|c| c.id.as_ref().map(|id| id.0.as_str()))
                 .collect();
             !named_children.is_empty()
@@ -558,11 +621,19 @@ fn check_overlaps_recursive(
         .enumerate()
         .filter(|(_, c)| !scope.hides_element(c))
         .collect();
+    // Reference-only cells are kept for naming but never take part in a pair.
+    let all_children: Vec<&ElementLayout> = parent.children.iter().collect();
     if !skip_sibling_checks {
         for i in 0..children.len() {
             for j in (i + 1)..children.len() {
                 let (index_a, a) = children[i];
                 let (index_b, b) = children[j];
+
+                // Grid cells are never drawn: a cell cannot collide with
+                // anything, least of all the child placed inside it.
+                if is_reference_only(a) || is_reference_only(b) {
+                    continue;
+                }
 
                 // Skip if both are non-opaque (two transparent zones)
                 if !is_opaque(a) && !is_opaque(b) {
@@ -599,8 +670,16 @@ fn check_overlaps_recursive(
                         a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
                     let overlap_h =
                         a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
-                    let name_a = element_display_name(a, parent_name, index_a);
-                    let name_b = element_display_name(b, parent_name, index_b);
+                    let mut name_a = grid_cell_name(a, &all_children)
+                        .unwrap_or_else(|| element_display_name(a, parent_name, index_a));
+                    let mut name_b = grid_cell_name(b, &all_children)
+                        .unwrap_or_else(|| element_display_name(b, parent_name, index_b));
+                    // Two anonymous children of the same cell would otherwise
+                    // read as one element overlapping itself.
+                    if name_a == name_b {
+                        name_a = format!("{} (child #{})", name_a, index_a + 1);
+                        name_b = format!("{} (child #{})", name_b, index_b + 1);
+                    }
                     warnings.push(LintWarning {
                         category: LintCategory::Overlap,
                         message: format!(
@@ -2020,6 +2099,78 @@ fn check_over_constrained_in_stmts(
 /// Detect labels that are larger than their containing shape.
 /// This catches cases like a "+3.3V" label on a 4px-high power rail,
 /// where the text visibly overflows the element.
+/// Text wider than the box it was given.
+///
+/// A box is only as wide as the author said, and how wide a wording renders is
+/// not something the author can work out by eye — so when the text does not
+/// fit, say so and name the width it needs. Keyframe wordings are checked too:
+/// text rewritten by a later frame is laid out from its frame-0 wording.
+fn check_text_fits_its_box(
+    result: &LayoutResult,
+    doc: &Document,
+    warnings: &mut Vec<LintWarning>,
+) {
+    // Every wording each element ever shows: its own, plus keyframe rewrites.
+    let mut wordings: HashMap<String, Vec<(String, Option<String>)>> = HashMap::new();
+    for kf in super::keyframe::extract_keyframes(doc) {
+        for op in &kf.operations {
+            if let crate::parser::ast::KeyframeOp::Transform { target, modifiers } = &op.node {
+                for m in modifiers {
+                    if !matches!(m.node.key.node, crate::parser::ast::StyleKey::Label) {
+                        continue;
+                    }
+                    let text = match &m.node.value.node {
+                        crate::parser::ast::StyleValue::String(s) => s.clone(),
+                        crate::parser::ast::StyleValue::Keyword(k) => k.clone(),
+                        _ => continue,
+                    };
+                    wordings
+                        .entry(target.node.0.clone())
+                        .or_default()
+                        .push((text, Some(kf.name.node.clone())));
+                }
+            }
+        }
+    }
+
+    fn walk(
+        elem: &ElementLayout,
+        wordings: &HashMap<String, Vec<(String, Option<String>)>>,
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        if let (Some(id), ElementType::Shape(ShapeType::Text { content })) =
+            (elem.id.as_ref(), &elem.element_type)
+        {
+            let font_size = elem.styles.font_size.unwrap_or(14.0);
+            let mut candidates = vec![(content.clone(), None)];
+            candidates.extend(wordings.get(&id.0).cloned().unwrap_or_default());
+
+            for (text, frame) in candidates {
+                let needed = super::keyframe::estimated_text_width(&text, font_size);
+                if needed <= elem.bounds.width + 2.0 {
+                    continue;
+                }
+                warnings.push(LintWarning {
+                    category: LintCategory::LabelOverflow,
+                    message: format!(
+                        "text \"{}\" on \"{}\" needs about {:.0}px but its box is {:.0}px; \
+                         widen it (or drop the explicit width and let it size itself)",
+                        text, id.0, needed, elem.bounds.width
+                    ),
+                    frames: frame.into_iter().collect(),
+                });
+            }
+        }
+        for child in &elem.children {
+            walk(child, wordings, warnings);
+        }
+    }
+
+    for elem in &result.root_elements {
+        walk(elem, &wordings, warnings);
+    }
+}
+
 fn check_label_overflow(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     for elem in &result.root_elements {
         check_label_overflow_recursive(elem, warnings);

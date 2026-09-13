@@ -437,7 +437,7 @@ row stage [gap: 60] {
 }
 client.right -> server.left as call
 
-text "the client sends a request" caption [width: 420, align: start]
+text "the client sends a request" caption [align: start]
 constrain caption.center_x = stage.center_x
 constrain caption.y = stage.bottom + 24
 
@@ -452,6 +452,7 @@ keyframe "reply" {
     transform caption [label: "and answers", fill: accent-dark]
 }
 
-The caption box is wider than any wording and left-aligned, so the text
-holds its position across frames. `--frames-to-dir out/` renders them
-all; `--animate` plays them back.
+The caption is auto-sized: it is laid out for the longest wording any
+frame gives it, so it never resizes and the text holds its position from
+frame to frame. `--frames-to-dir out/` renders them all; `--animate`
+plays them back.

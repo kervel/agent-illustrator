@@ -163,7 +163,7 @@ A narration line that changes per frame is ONE text element rewritten by each
 keyframe — not one element per step:
 
 ```
-text "the client sends a request" caption [width: 420, align: start]
+text "the client sends a request" caption [align: start]
 constrain caption.center_x = stage.center_x
 constrain caption.y = stage.bottom + 24
 
@@ -171,9 +171,11 @@ keyframe "arrive" { transform caption [label: "the server receives it"] }
 keyframe "reply"  { transform caption [label: "and answers"] }
 ```
 
-Give the box a `width` sized for the longest wording plus `align: start`, so the
-text does not shift between frames. Ten stacked text elements would cost their
-own constraints, their own show/hide rules, and a pile of lint noise.
+Leave the box auto-sized: a caption a keyframe rewrites is laid out for the
+longest wording it ever takes, so it never resizes — and never shifts —
+mid-animation. `align: start` keeps the text against its left edge. Ten stacked
+text elements would cost their own constraints, their own show/hide rules, and a
+pile of lint noise.
 
 ### Named Connections for Keyframe Control
 
