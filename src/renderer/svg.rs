@@ -9,6 +9,15 @@ use crate::stylesheet::Stylesheet;
 
 use super::SvgConfig;
 
+/// The x coordinate that anchors text to the given edge of a box.
+fn anchor_x(bounds: &BoundingBox, anchor: TextAnchor) -> f64 {
+    match anchor {
+        TextAnchor::Start => bounds.x,
+        TextAnchor::Middle => bounds.x + bounds.width / 2.0,
+        TextAnchor::End => bounds.right(),
+    }
+}
+
 /// Build SVG elements incrementally
 pub struct SvgBuilder {
     config: SvgConfig,
@@ -1094,8 +1103,10 @@ fn render_element_inner(
             });
         }
         ElementType::Shape(ShapeType::Text { content }) => {
-            // Render text element as SVG text
-            // Position text at the center of bounds, vertically centered using dominant-baseline
+            // Render text element as SVG text, vertically centered using
+            // dominant-baseline.  Horizontally the text sits where `align`
+            // says inside its box; without `align` it starts at the left
+            // edge, which is where text has always been drawn.
             let font_styles = element
                 .styles
                 .font_size
@@ -1108,13 +1119,15 @@ fn render_element_inner(
                 .map(|f| format!(r#" fill="{}""#, f))
                 .unwrap_or_default();
             let combined_styles = format!("{}{}", font_styles, fill_style);
+            let anchor = element.styles.align.unwrap_or(TextAnchor::Start);
+            let x = anchor_x(&element.bounds, anchor);
             render_shape_with_rotation(element, builder, |b| {
                 b.add_text_element(
                     id,
                     content,
-                    element.bounds.x,
+                    x,
                     element.bounds.y + element.bounds.height / 2.0,
-                    &TextAnchor::Start,
+                    &anchor,
                     &classes,
                     &combined_styles,
                 );
@@ -1864,6 +1877,7 @@ mod tests {
             font_size: None,
             css_classes: vec![],
             rotation: None,
+            align: None,
         };
         let result = format_styles(&styles, None);
         assert!(result.contains(r##"fill="#ff0000""##));
@@ -1887,6 +1901,7 @@ mod tests {
             font_size: None,
             css_classes: vec![],
             rotation: None,
+            align: None,
         };
         let result = format_styles(&styles, None);
         // Symbolic color is preserved, not flattened

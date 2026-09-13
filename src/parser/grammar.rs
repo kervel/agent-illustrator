@@ -169,6 +169,7 @@ where
                 "dx" => StyleKey::Dx,
                 "dy" => StyleKey::Dy,
                 "scale" => StyleKey::Scale,
+                "align" => StyleKey::Align,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(key, id.span)

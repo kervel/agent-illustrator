@@ -959,6 +959,14 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
                 )
             }
         };
+        // An explicit `align:` overrides the horizontal placement, keeping a
+        // small inset so left/right aligned text does not touch the border.
+        let (label_x, anchor) = match extract_align(&shape.modifiers) {
+            Some(TextAnchor::Start) => (position.x + LABEL_INSET, TextAnchor::Start),
+            Some(TextAnchor::End) => (position.x + width - LABEL_INSET, TextAnchor::End),
+            Some(TextAnchor::Middle) => (position.x + width / 2.0, TextAnchor::Middle),
+            None => (label_x, anchor),
+        };
         LabelLayout {
             text,
             position: Point::new(label_x, label_y),
@@ -1355,6 +1363,20 @@ fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> 
 }
 
 /// Extract the font_size modifier value from modifiers
+/// Distance a left- or right-aligned label keeps from the shape's border.
+const LABEL_INSET: f64 = 8.0;
+
+/// Read an `align:` modifier, if the element carries one.
+fn extract_align(modifiers: &[Spanned<StyleModifier>]) -> Option<TextAnchor> {
+    modifiers.iter().find_map(|m| {
+        if matches!(m.node.key.node, StyleKey::Align) {
+            crate::layout::types::parse_align(&m.node.value.node)
+        } else {
+            None
+        }
+    })
+}
+
 fn extract_font_size(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
     modifiers.iter().find_map(|m| {
         if matches!(m.node.key.node, StyleKey::FontSize) {
@@ -1473,10 +1495,12 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
 
     // Extract gap modifier from layout modifiers (can be negative for overlap)
     let gap = extract_gap(&layout.modifiers);
+    // Cross-axis alignment of the children (default: start).
+    let align = extract_align(&layout.modifiers);
 
     let (mut children, bounds) = match layout.layout_type.node {
-        LayoutType::Row => layout_row(&layout.children, position, config, gap),
-        LayoutType::Column => layout_column(&layout.children, position, config, gap),
+        LayoutType::Row => layout_row(&layout.children, position, config, gap, align),
+        LayoutType::Column => layout_column(&layout.children, position, config, gap, align),
         LayoutType::Grid => layout_grid(layout, position, config, gap),
         LayoutType::Stack => layout_stack(&layout.children, position, config),
     };
@@ -1536,7 +1560,8 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
 
     // Groups default to column layout (no gap override)
     // Filter out Label statements from layout children
-    let (mut children, bounds) = layout_column(&group.children, position, config, None);
+    let (mut children, bounds) =
+        layout_column(&group.children, position, config, None, extract_align(&group.modifiers));
 
     let styles = ResolvedStyles::from_modifiers(&group.modifiers);
 
@@ -1712,11 +1737,48 @@ fn resolve_custom_anchors_from_bounds(
     }
 }
 
+/// Shift children so they line up on the container's cross axis.
+///
+/// `extent` is each child's size on that axis and `track` the size of the
+/// widest (or tallest) one; `start` alignment is the historical behaviour and
+/// moves nothing.
+fn align_cross_axis(
+    layouts: &mut [ElementLayout],
+    align: Option<TextAnchor>,
+    track: f64,
+    vertical: bool,
+) {
+    let align = match align {
+        Some(a) if a != TextAnchor::Start => a,
+        _ => return,
+    };
+    for layout in layouts.iter_mut() {
+        let extent = if vertical {
+            layout.bounds.height
+        } else {
+            layout.bounds.width
+        };
+        let shift = match align {
+            TextAnchor::Middle => (track - extent) / 2.0,
+            TextAnchor::End => track - extent,
+            TextAnchor::Start => 0.0,
+        };
+        if shift.abs() > f64::EPSILON {
+            if vertical {
+                offset_element(layout, 0.0, shift);
+            } else {
+                offset_element(layout, shift, 0.0);
+            }
+        }
+    }
+}
+
 fn layout_row(
     children: &[Spanned<Statement>],
     position: Point,
     config: &LayoutConfig,
     gap_override: Option<f64>,
+    align: Option<TextAnchor>,
 ) -> (Vec<ElementLayout>, BoundingBox) {
     let mut layouts = vec![];
     let mut x = position.x + config.container_padding;
@@ -1756,6 +1818,9 @@ fn layout_row(
     };
     let total_height = max_height + 2.0 * config.container_padding;
 
+    // A row's cross axis is vertical: children line up against the tallest one.
+    align_cross_axis(&mut layouts, align, max_height, true);
+
     (
         layouts,
         BoundingBox::new(position.x, position.y, total_width, total_height),
@@ -1767,6 +1832,7 @@ fn layout_column(
     position: Point,
     config: &LayoutConfig,
     gap_override: Option<f64>,
+    align: Option<TextAnchor>,
 ) -> (Vec<ElementLayout>, BoundingBox) {
     let mut layouts = vec![];
     let mut y = position.y + config.container_padding;
@@ -1805,6 +1871,9 @@ fn layout_column(
     } else {
         y - position.y - spacing + config.container_padding
     };
+
+    // A column's cross axis is horizontal: children line up against the widest one.
+    align_cross_axis(&mut layouts, align, max_width, false);
 
     (
         layouts,
@@ -3599,17 +3668,34 @@ fn collect_layout_alignment_constraints(
                         .with_layout_container(container_name.clone())
                 };
 
+                // Cross-axis alignment: children line up by their leading
+                // edge (the default), their centers, or their trailing edge.
+                let (cross_prop, cross_name) = match extract_align(&l.modifiers) {
+                    Some(TextAnchor::Middle) => match l.layout_type.node {
+                        LayoutType::Row => (super::solver::LayoutProperty::CenterY, "center_y"),
+                        _ => (super::solver::LayoutProperty::CenterX, "center_x"),
+                    },
+                    Some(TextAnchor::End) => match l.layout_type.node {
+                        LayoutType::Row => (super::solver::LayoutProperty::Bottom, "bottom"),
+                        _ => (super::solver::LayoutProperty::Right, "right"),
+                    },
+                    _ => match l.layout_type.node {
+                        LayoutType::Row => (super::solver::LayoutProperty::Y, "y"),
+                        _ => (super::solver::LayoutProperty::X, "x"),
+                    },
+                };
+
                 if child_ids.len() > 1 {
                     match l.layout_type.node {
                         LayoutType::Row => {
                             for i in 1..child_ids.len() {
                                 collector.constraints.push(LayoutConstraint::Equal {
-                                    left: LayoutVariable::y(&child_ids[i]),
-                                    right: LayoutVariable::y(&child_ids[0]),
+                                    left: LayoutVariable::new(&child_ids[i], cross_prop),
+                                    right: LayoutVariable::new(&child_ids[0], cross_prop),
                                     offset: 0.0,
                                     source: make_source(format!(
-                                        "row alignment: {}.y = {}.y",
-                                        child_ids[i], child_ids[0]
+                                        "row alignment: {}.{} = {}.{}",
+                                        child_ids[i], cross_name, child_ids[0], cross_name
                                     )),
                                 });
 
@@ -3632,12 +3718,12 @@ fn collect_layout_alignment_constraints(
                         LayoutType::Column => {
                             for i in 1..child_ids.len() {
                                 collector.constraints.push(LayoutConstraint::Equal {
-                                    left: LayoutVariable::x(&child_ids[i]),
-                                    right: LayoutVariable::x(&child_ids[0]),
+                                    left: LayoutVariable::new(&child_ids[i], cross_prop),
+                                    right: LayoutVariable::new(&child_ids[0], cross_prop),
                                     offset: 0.0,
                                     source: make_source(format!(
-                                        "col alignment: {}.x = {}.x",
-                                        child_ids[i], child_ids[0]
+                                        "col alignment: {}.{} = {}.{}",
+                                        child_ids[i], cross_name, child_ids[0], cross_name
                                     )),
                                 });
 

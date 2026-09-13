@@ -748,6 +748,7 @@ fn arguments_to_modifiers(
                 "rotation" | "rotate" => StyleKey::Rotation,
                 "z_order" => StyleKey::ZOrder,
                 "pointer" => StyleKey::Pointer,
+                "align" => StyleKey::Align,
                 other => StyleKey::Custom(other.to_string()),
             };
             Spanned::new(
