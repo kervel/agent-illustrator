@@ -123,6 +123,10 @@ Every diagram requires multiple iterations. Follow this cycle:
 5. Fix issues in AIL code
 6. Repeat from step 2
 
+Text has no measurable size until it is rendered, so "does this label fit, does
+that box clear the line above" is guesswork. `--debug` draws every element's box
+— text included — which answers it in one render instead of three.
+
 Use a phased approach for complex diagrams:
 - **Phase 1 — Components**: Test each template/component in isolation.
 - **Phase 2 — Layout**: Position components. Fix spacing, alignment, grouping.
