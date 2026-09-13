@@ -165,6 +165,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_label_overflow(result, &mut warnings);
     check_text_fits_its_box(result, doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
+    check_unknown_colors(doc, &mut warnings);
     dedup_warnings(&mut warnings);
     warnings
 }
@@ -207,7 +208,7 @@ impl FrameScope<'_> {
 /// All checks whose verdict depends on what is visible at the same moment.
 fn check_collisions(
     result: &LayoutResult,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
@@ -404,15 +405,38 @@ fn is_text_shape_straddle(text: &ElementLayout, shape: &ElementLayout) -> bool {
 
 /// Scan the document for all element IDs involved in `contains` constraints
 /// (both containers and contained elements).
-fn collect_contains_ids(doc: &Document) -> HashSet<String> {
-    let mut ids = HashSet::new();
-    collect_contains_ids_from_stmts(&doc.statements, &mut ids);
-    ids
+/// Which elements a `contains` constraint wraps, per container.
+///
+/// A container overlapping its own contents is the whole point of `contains`,
+/// so that pair is exempt. Everything else is not: being wrapped by a box does
+/// not stop an element from colliding with the rest of the diagram, and the
+/// container itself can still land on something unrelated.
+#[derive(Default)]
+pub(crate) struct ContainsRelations {
+    by_container: HashMap<String, HashSet<String>>,
+}
+
+impl ContainsRelations {
+    /// True when one of these two wraps the other.
+    fn wraps(&self, a: Option<&str>, b: Option<&str>) -> bool {
+        let (Some(a), Some(b)) = (a, b) else {
+            return false;
+        };
+        self.by_container.get(a).is_some_and(|c| c.contains(b))
+            || self.by_container.get(b).is_some_and(|c| c.contains(a))
+    }
+
+}
+
+fn collect_contains_ids(doc: &Document) -> ContainsRelations {
+    let mut relations = ContainsRelations::default();
+    collect_contains_ids_from_stmts(&doc.statements, &mut relations);
+    relations
 }
 
 fn collect_contains_ids_from_stmts(
     stmts: &[crate::parser::ast::Spanned<Statement>],
-    ids: &mut HashSet<String>,
+    relations: &mut ContainsRelations,
 ) {
     for stmt in stmts {
         match &stmt.node {
@@ -423,17 +447,20 @@ fn collect_contains_ids_from_stmts(
                     ..
                 } = &c.expr
                 {
-                    ids.insert(container.node.0.clone());
+                    let entry = relations
+                        .by_container
+                        .entry(container.node.0.clone())
+                        .or_default();
                     for elem in elements {
-                        ids.insert(elem.node.0.clone());
+                        entry.insert(elem.node.0.clone());
                     }
                 }
             }
             Statement::Layout(l) => {
-                collect_contains_ids_from_stmts(&l.children, ids);
+                collect_contains_ids_from_stmts(&l.children, relations);
             }
             Statement::Group(g) => {
-                collect_contains_ids_from_stmts(&g.children, ids);
+                collect_contains_ids_from_stmts(&g.children, relations);
             }
             _ => {}
         }
@@ -444,7 +471,7 @@ fn collect_contains_ids_from_stmts(
 
 fn check_overlaps(
     result: &LayoutResult,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
@@ -473,7 +500,7 @@ fn check_overlaps(
 fn reportable_overlap(
     a: &ElementLayout,
     b: &ElementLayout,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
 ) -> Option<(f64, f64)> {
     // Reference-only grid cells are never drawn; ignore them.
     if is_reference_only(a) || is_reference_only(b) {
@@ -495,17 +522,16 @@ fn reportable_overlap(
         return None;
     }
 
-    // Either side is a `contains` container or one of its targets.
-    if let Some(id) = a.id_str() {
-        if contains_ids.contains(id) {
-            return None;
-        }
+    // A `contains` container sitting over its own contents is the point.
+    if contains_ids.wraps(a.id_str(), b.id_str()) {
+        return None;
     }
-    if let Some(id) = b.id_str() {
-        if contains_ids.contains(id) {
-            return None;
-        }
-    }
+
+    // Nothing else about a `contains` container is special: whether it is a
+    // backdrop to rest on or a box that hides what it covers is decided by
+    // its opacity, a few lines up — a background zone is drawn see-through
+    // (the idiom the docs give is `opacity: 0.3`) and is already exempt,
+    // while a solid one really does cover what lands under it.
 
     // Text-on-shape: only flag if the text straddles the edge
     if is_text_shape(a) != is_text_shape(b) {
@@ -545,7 +571,7 @@ fn check_against_region_contents(
     outside: &ElementLayout,
     outside_name: &str,
     region: &ElementLayout,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
@@ -582,7 +608,7 @@ fn check_against_region_contents(
 fn check_overlap_siblings(
     siblings: &[ElementLayout],
     parent_name: Option<&str>,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
@@ -662,7 +688,7 @@ fn is_template_instance_group(parent: &ElementLayout) -> bool {
 fn check_overlaps_recursive(
     parent: &ElementLayout,
     template_prefix: Option<&str>,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
@@ -2277,6 +2303,114 @@ fn check_over_constrained_in_stmts(
 /// Detect labels that are larger than their containing shape.
 /// This catches cases like a "+3.3V" label on a 4px-high power rail,
 /// where the text visibly overflows the element.
+/// Every CSS named colour, plus the keywords a colour property also accepts.
+/// A word that is neither one of these nor a palette token is passed straight
+/// through to the SVG, where the browser draws black or nothing.
+const CSS_COLOR_NAMES: &[&str] = &[
+    "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
+    "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse",
+    "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue",
+    "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki",
+    "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon",
+    "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise",
+    "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick",
+    "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod",
+    "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo",
+    "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue",
+    "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey",
+    "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
+    "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta",
+    "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
+    "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
+    "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite",
+    "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod",
+    "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink",
+    "plum", "powderblue", "purple", "rebeccapurple", "red", "rosybrown", "royalblue",
+    "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver",
+    "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue",
+    "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke",
+    "yellow", "yellowgreen", "none", "transparent", "currentcolor", "inherit"
+];
+
+/// Colour values that name nothing.
+///
+/// `fill: geenkleur` parses, renders, and shows up as black — the same class
+/// of silent mistake as a misspelled modifier, and easier to make when a
+/// custom stylesheet defines the token names.
+fn check_unknown_colors(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    use crate::parser::ast::{StyleKey, StyleValue};
+
+    fn check(
+        modifiers: &[crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>],
+        owner: &str,
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        for m in modifiers {
+            let key = match &m.node.key.node {
+                StyleKey::Fill => "fill",
+                StyleKey::Stroke => "stroke",
+                StyleKey::LabelFill => "label_fill",
+                _ => continue,
+            };
+            // Hex, palette tokens and fill functions are resolved elsewhere;
+            // a bare word is the only thing that can silently mean nothing.
+            let word = match &m.node.value.node {
+                StyleValue::Identifier(id) => id.0.as_str(),
+                StyleValue::Keyword(k) => k.as_str(),
+                _ => continue,
+            };
+            let lower = word.to_ascii_lowercase();
+            if CSS_COLOR_NAMES.contains(&lower.as_str()) {
+                continue;
+            }
+            // `fill: hatch` and friends are pattern shorthands, not colours.
+            if matches!(lower.as_str(), "hatch" | "dots" | "grid" | "gradient" | "radial") {
+                continue;
+            }
+            warnings.push(LintWarning {
+                category: LintCategory::UnknownModifier,
+                message: format!(
+                    "{}: \"{}\" on {} is not a palette token or a CSS colour name; \
+                     it reaches the SVG as-is and will not render as intended",
+                    key, word, owner
+                ),
+                frames: Vec::new(),
+            });
+        }
+    }
+
+    fn walk(stmts: &[crate::parser::ast::Spanned<Statement>], warnings: &mut Vec<LintWarning>) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Shape(shape) => {
+                    let owner = shape
+                        .name
+                        .as_ref()
+                        .map(|n| format!("\"{}\"", n.node.0))
+                        .unwrap_or_else(|| "an unnamed element".to_string());
+                    check(&shape.modifiers, &owner, warnings);
+                }
+                Statement::Layout(l) => walk(&l.children, warnings),
+                Statement::Group(g) => walk(&g.children, warnings),
+                Statement::Keyframe(kf) => {
+                    for op in &kf.operations {
+                        if let crate::parser::ast::KeyframeOp::Transform { target, modifiers } =
+                            &op.node
+                        {
+                            let owner =
+                                format!("\"{}\" in keyframe \"{}\"", target.node.0, kf.name.node);
+                            check(modifiers, &owner, warnings);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    walk(&doc.statements, warnings);
+}
+
 /// Modifier keys that no part of the pipeline reads.
 ///
 /// An unrecognised key parses fine and is then dropped on the floor, so an
@@ -2571,7 +2705,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        let contains_ids = HashSet::new();
+        let contains_ids = ContainsRelations::default();
         check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].message.contains("\"a\""));
@@ -2588,7 +2722,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &FrameScope::all_visible(), &mut warnings);
+        check_overlaps_recursive(&group, None, &ContainsRelations::default(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -2601,12 +2735,43 @@ mod tests {
                 make_rect(Some("child"), 10.0, 10.0, 50.0, 50.0),
             ],
         );
-        let mut contains_ids = HashSet::new();
-        contains_ids.insert("container".to_string());
-        contains_ids.insert("child".to_string());
+        let mut contains_ids = ContainsRelations::default();
+        contains_ids
+            .by_container
+            .entry("container".to_string())
+            .or_default()
+            .insert("child".to_string());
         let mut warnings = Vec::new();
         check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
+    }
+
+    #[test]
+    fn test_overlap_reported_for_contains_target_and_an_outsider() {
+        // Being wrapped exempts the pair, not the element.
+        let group = make_group(
+            Some("g"),
+            vec![
+                make_rect(Some("container"), 0.0, 0.0, 200.0, 200.0),
+                make_rect(Some("child"), 10.0, 10.0, 50.0, 50.0),
+                make_rect(Some("outsider"), 30.0, 30.0, 50.0, 50.0),
+            ],
+        );
+        let mut contains_ids = ContainsRelations::default();
+        contains_ids
+            .by_container
+            .entry("container".to_string())
+            .or_default()
+            .insert("child".to_string());
+        let mut warnings = Vec::new();
+        check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
+        assert!(
+            warnings
+                .iter()
+                .any(|w| w.message.contains("\"child\"") && w.message.contains("\"outsider\"")),
+            "got: {:?}",
+            warnings.iter().map(|w| &w.message).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -2619,7 +2784,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &FrameScope::all_visible(), &mut warnings);
+        check_overlaps_recursive(&group, None, &ContainsRelations::default(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -2633,7 +2798,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &FrameScope::all_visible(), &mut warnings);
+        check_overlaps_recursive(&group, None, &ContainsRelations::default(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 

@@ -273,7 +273,13 @@ grids are trivial. Children without a size inherit the cell size.
 
 Address any cell as `g.cell(row, col)` in `constrain`/connections — that is what
 makes a grid an alignment scaffold rather than just a picture: draw a frame
-around a block of cells, aim a callout at one, connect two. `col_labels: [...]`
+around a block of cells, aim a callout at one, connect two.
+
+**Leave a `gap` if you need rules between rows.** With `gap: 0` the cells touch,
+so a separator laid on a row boundary necessarily overlaps the row above or
+below and `--lint` reports it — correctly. Give the grid a gap and put the rule
+in that space: `gap: 8` with `constrain rule.top = g.cell(1,1).bottom + 2`.
+Worked sums, tables and anything with subtotals need this. `col_labels: [...]`
 / `row_labels: [...]` add aligned text gutters. For a heatmap, use one hue with
 per-cell `fill_opacity`. See `--examples`.
 
