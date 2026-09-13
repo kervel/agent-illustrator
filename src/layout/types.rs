@@ -572,6 +572,30 @@ pub struct ResolvedStyles {
     pub css_classes: Vec<String>,
     /// Rotation angle in degrees (clockwise positive, 0 = no rotation)
     pub rotation: Option<f64>,
+    /// Where text sits inside the element's box, and how a row's or column's
+    /// children line up on the cross axis.  `None` means "start", which is
+    /// what every element did before `align` existed.
+    pub align: Option<TextAnchor>,
+    /// Colour of the element's label text. `fill` colours the shape; the words
+    /// written on it are a separate thing to colour.
+    pub label_fill: Option<String>,
+}
+
+/// Parse an `align:` value.  Accepts both the SVG spelling
+/// (`start`/`middle`/`end`) and the everyday one (`left`/`center`/`right`).
+pub fn parse_align(value: &StyleValue) -> Option<TextAnchor> {
+    let word = match value {
+        StyleValue::Keyword(k) => k.as_str(),
+        StyleValue::Identifier(id) => id.0.as_str(),
+        StyleValue::String(s) => s.as_str(),
+        _ => return None,
+    };
+    match word {
+        "start" | "left" | "top" => Some(TextAnchor::Start),
+        "center" | "centre" | "middle" => Some(TextAnchor::Middle),
+        "end" | "right" | "bottom" => Some(TextAnchor::End),
+        _ => None,
+    }
 }
 
 /// Clamp an alpha/opacity value into the valid [0.0, 1.0] range
@@ -594,6 +618,8 @@ impl ResolvedStyles {
             font_size: Some(14.0),
             css_classes: vec![],
             rotation: None,
+            align: None,
+            label_fill: None,
         }
     }
 
@@ -669,6 +695,12 @@ impl ResolvedStyles {
                     if let StyleValue::Number { value, .. } = &modifier.node.value.node {
                         styles.rotation = Some(*value);
                     }
+                }
+                StyleKey::Align => {
+                    styles.align = parse_align(&modifier.node.value.node);
+                }
+                StyleKey::LabelFill => {
+                    styles.label_fill = Self::color_to_css(&modifier.node.value.node);
                 }
                 StyleKey::Label
                 | StyleKey::LabelPosition
@@ -796,6 +828,8 @@ impl ResolvedStyles {
                 classes
             },
             rotation: other.rotation.or(self.rotation),
+            align: other.align.or(self.align),
+            label_fill: other.label_fill.clone().or_else(|| self.label_fill.clone()),
         }
     }
 }

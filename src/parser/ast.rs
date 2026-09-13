@@ -383,6 +383,12 @@ pub enum StyleKey {
     Dy,
     /// Uniform scale about the element's center (keyframe transforms)
     Scale,
+    /// Text alignment inside an element's box, and cross-axis alignment of
+    /// a row's or column's children (`start` / `center` / `end`)
+    Align,
+    /// Colour of an element's label text (the shape's own `fill` colours the
+    /// shape, not the words on it)
+    LabelFill,
     Custom(String),
 }
 

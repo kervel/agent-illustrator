@@ -19,6 +19,7 @@ pub mod stylesheet;
 pub mod template;
 
 pub use error::ParseError;
+pub use layout::lint::{LintCategory, LintWarning};
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
 pub use renderer::{render_svg, render_svg_with_keyframes, render_svg_with_stylesheet, SvgConfig};
@@ -393,6 +394,10 @@ fn render_pipeline(
     // constraints before layout and the constraint solver see them.
     let doc = crate::parser::ast::expand_point_constraints(doc);
 
+    // Size auto-sized text for the longest wording any keyframe gives it, so a
+    // rewritten caption never has to resize (and shift) mid-animation.
+    let doc = layout::keyframe::size_text_for_keyframe_wordings(doc);
+
     // Validate color references against stylesheet
     validate_colors(&doc, &config.stylesheet)?;
 
@@ -564,6 +569,18 @@ fn render_pipeline(
     };
 
     Ok((svg, lint_warnings))
+}
+
+/// Names of the keyframes declared in `source`, in declaration order.
+///
+/// Empty for a document without keyframes.  Useful for rendering every
+/// frame without having to transcribe the names out of the source.
+pub fn frame_names(source: &str) -> Result<Vec<String>, RenderError> {
+    let doc = parse(source)?;
+    Ok(layout::keyframe::extract_keyframes(&doc)
+        .iter()
+        .map(|kf| kf.name.node.clone())
+        .collect())
 }
 
 /// Resolve a frame selector (index or name) to an index
@@ -750,6 +767,58 @@ fn generate_animate_css(
 
         anim_rules
             .entry(format!(".kf-{}", elem_id))
+            .or_default()
+            .push(format!("{} {:.1}s step-end infinite", anim_name, total_duration));
+    }
+
+    // Text rewritten by keyframes: CSS cannot swap text, so each wording is
+    // its own node and only one is opaque at a time.  `-base` carries the
+    // original wording and shows in every frame that does not override it.
+    let text_variants = renderer::svg::collect_text_variants(frame_diffs);
+    let mut txt_timelines: std::collections::BTreeMap<String, Vec<f64>> =
+        std::collections::BTreeMap::new();
+    for (elem_id, texts) in &text_variants {
+        let base_selector = format!(".aitxt-{}-base", elem_id);
+        txt_timelines.insert(base_selector.clone(), vec![1.0; n]);
+        for v in 0..texts.len() {
+            txt_timelines.insert(format!(".aitxt-{}-v{}", elem_id, v), vec![0.0; n]);
+        }
+        for (i, diff) in frame_diffs.iter().enumerate() {
+            let Some(text) = diff.element_diffs.get(elem_id).and_then(|d| d.label.as_ref()) else {
+                continue;
+            };
+            let Some(v) = texts.iter().position(|t| t == text) else {
+                continue;
+            };
+            txt_timelines.get_mut(&base_selector).unwrap()[i] = 0.0;
+            txt_timelines
+                .get_mut(&format!(".aitxt-{}-v{}", elem_id, v))
+                .unwrap()[i] = 1.0;
+        }
+    }
+    for (selector, timeline) in &txt_timelines {
+        if timeline.windows(2).all(|w| (w[0] - w[1]).abs() < f64::EPSILON) {
+            continue;
+        }
+        let anim_name = format!("kf-txt-{}", selector.trim_start_matches('.'));
+        css.push_str(&format!("@keyframes {} {{\n", anim_name));
+        for (i, &opacity) in timeline.iter().enumerate() {
+            let start_pct = i as f64 * pct_per_frame;
+            let end_pct = (i + 1) as f64 * pct_per_frame;
+            if i == n - 1 {
+                css.push_str(&format!("  {:.1}% {{ opacity: {}; }}\n", start_pct, opacity));
+            } else {
+                css.push_str(&format!(
+                    "  {:.1}%, {:.1}% {{ opacity: {}; }}\n",
+                    start_pct,
+                    end_pct - 0.01,
+                    opacity
+                ));
+            }
+        }
+        css.push_str("}\n");
+        anim_rules
+            .entry(selector.clone())
             .or_default()
             .push(format!("{} {:.1}s step-end infinite", anim_name, total_duration));
     }

@@ -17,14 +17,34 @@ use super::types::{
 };
 
 /// A lint warning about a layout defect
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LintWarning {
     pub category: LintCategory,
     pub message: String,
+    /// Keyframes in which this defect occurs.  Empty means the defect is
+    /// frame-independent (no keyframes, or present in every frame).
+    pub frames: Vec<String>,
+}
+
+impl LintWarning {
+    /// Human-readable frame annotation, e.g. ` [frames: step-2, step-3]`.
+    /// Empty when the warning is frame-independent.
+    pub fn frame_suffix(&self) -> String {
+        match self.frames.len() {
+            0 => String::new(),
+            1 => format!(" [frame: {}]", self.frames[0]),
+            n if n <= 3 => format!(" [frames: {}]", self.frames.join(", ")),
+            n => format!(
+                " [frames: {}, +{} more]",
+                self.frames[..3].join(", "),
+                n - 3
+            ),
+        }
+    }
 }
 
 /// Category of lint defect
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LintCategory {
     Overlap,
     Containment,
@@ -39,6 +59,43 @@ pub enum LintCategory {
     CrowdedLayout,
     OverConstrained,
     LabelOverflow,
+    UnknownModifier,
+}
+
+impl LintCategory {
+    /// Every category, in the order they are documented.
+    pub const ALL: [LintCategory; 14] = [
+        LintCategory::Overlap,
+        LintCategory::Containment,
+        LintCategory::Label,
+        LintCategory::Connection,
+        LintCategory::Alignment,
+        LintCategory::RedundantConstant,
+        LintCategory::ReducibleBend,
+        LintCategory::MissingAnchor,
+        LintCategory::Contrast,
+        LintCategory::SteepDirect,
+        LintCategory::CrowdedLayout,
+        LintCategory::OverConstrained,
+        LintCategory::LabelOverflow,
+        LintCategory::UnknownModifier,
+    ];
+
+    /// Parse a category from its kebab-case name (as printed by `Display`).
+    pub fn parse(name: &str) -> Option<LintCategory> {
+        LintCategory::ALL
+            .into_iter()
+            .find(|c| c.to_string() == name)
+    }
+
+    /// Comma-separated list of all category names, for error messages.
+    pub fn all_names() -> String {
+        LintCategory::ALL
+            .iter()
+            .map(|c| c.to_string())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
 }
 
 impl fmt::Display for LintCategory {
@@ -57,6 +114,7 @@ impl fmt::Display for LintCategory {
             LintCategory::CrowdedLayout => write!(f, "crowded-layout"),
             LintCategory::OverConstrained => write!(f, "over-constrained"),
             LintCategory::LabelOverflow => write!(f, "label-overflow"),
+            LintCategory::UnknownModifier => write!(f, "unknown-modifier"),
         }
     }
 }
@@ -68,34 +126,34 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     let mut warnings = Vec::new();
     let contains_ids = collect_contains_ids(doc);
 
-    // Keyframe-aware overlap detection (Feature 011)
+    // Keyframe-aware collision detection (Feature 011).
+    //
+    // Every check that asks "do these two things collide?" is only
+    // meaningful for things that are on screen *at the same time*.  With
+    // keyframes we therefore run those checks once per frame against that
+    // frame's visible set, and merge the results afterwards: a defect that
+    // shows up in every frame is reported once without annotation, one that
+    // only shows up in some frames is reported once naming those frames.
     let keyframes = super::keyframe::extract_keyframes(doc);
     let frame_states = super::keyframe::compute_frame_states(&keyframes);
 
     if frame_states.is_empty() {
-        // No keyframes — run overlap checks globally as before
-        check_overlaps(result, &contains_ids, &HashSet::new(), &mut warnings);
+        check_collisions(result, &contains_ids, &FrameScope::all_visible(), &mut warnings);
     } else {
-        // Run overlap checks per frame, excluding hidden elements
+        let mut per_frame: Vec<(String, Vec<LintWarning>)> = Vec::with_capacity(frame_states.len());
         for state in &frame_states {
-            check_overlaps(result, &contains_ids, &state.hidden_elements, &mut warnings);
+            let scope = FrameScope {
+                hidden_elements: &state.hidden_elements,
+                hidden_connections: &state.hidden_connections,
+            };
+            let mut frame_warnings = Vec::new();
+            check_collisions(result, &contains_ids, &scope, &mut frame_warnings);
+            per_frame.push((state.name.clone(), frame_warnings));
         }
+        merge_frame_warnings(per_frame, &mut warnings);
     }
 
     check_contains(result, doc, &mut warnings);
-    check_labels(result, &mut warnings);
-    check_label_element_overlaps(result, &mut warnings);
-
-    // Connection crossing checks — keyframe-aware
-    if frame_states.is_empty() {
-        check_connections(result, &HashSet::new(), &HashSet::new(), &mut warnings);
-    } else {
-        for state in &frame_states {
-            check_connections(result, &state.hidden_elements, &state.hidden_connections, &mut warnings);
-        }
-    }
-
-    check_label_connection_overlaps(result, &mut warnings);
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
@@ -105,7 +163,109 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_crowded_layouts(doc, &mut warnings);
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
+    check_text_fits_its_box(result, doc, &mut warnings);
+    check_unknown_modifiers(doc, &mut warnings);
+    check_unknown_colors(doc, &mut warnings);
+    dedup_warnings(&mut warnings);
     warnings
+}
+
+/// Which elements and connections are on screen for the check currently running.
+///
+/// Element visibility is resolved by pruning during traversal: hiding a group
+/// hides everything inside it, so a subtree is skipped as soon as its root is
+/// hidden and nested children need no explicit entry in `hidden_elements`.
+pub(crate) struct FrameScope<'a> {
+    hidden_elements: &'a HashSet<String>,
+    hidden_connections: &'a HashSet<String>,
+}
+
+/// An empty scope: nothing is hidden (documents without keyframes).
+static NOTHING_HIDDEN: std::sync::OnceLock<HashSet<String>> = std::sync::OnceLock::new();
+
+impl FrameScope<'static> {
+    fn all_visible() -> Self {
+        let empty = NOTHING_HIDDEN.get_or_init(HashSet::new);
+        FrameScope {
+            hidden_elements: empty,
+            hidden_connections: empty,
+        }
+    }
+}
+
+impl FrameScope<'_> {
+    fn hides_element(&self, elem: &ElementLayout) -> bool {
+        elem.id
+            .as_ref()
+            .is_some_and(|id| self.hidden_elements.contains(&id.0))
+    }
+
+    fn hides_connection(&self, name: Option<&str>) -> bool {
+        name.is_some_and(|n| self.hidden_connections.contains(n))
+    }
+}
+
+/// All checks whose verdict depends on what is visible at the same moment.
+fn check_collisions(
+    result: &LayoutResult,
+    contains_ids: &ContainsRelations,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
+    check_overlaps(result, contains_ids, scope, warnings);
+    check_labels(result, scope, warnings);
+    check_label_element_overlaps(result, scope, warnings);
+    check_connections(result, scope, warnings);
+    check_label_connection_overlaps(result, scope, warnings);
+}
+
+/// Collapse per-frame warnings into one warning per distinct defect.
+///
+/// A defect seen in every frame is frame-independent and reported bare; one
+/// seen in a subset carries the frame names so the reader knows where to look.
+fn merge_frame_warnings(
+    per_frame: Vec<(String, Vec<LintWarning>)>,
+    out: &mut Vec<LintWarning>,
+) {
+    let frame_count = per_frame.len();
+    // Preserve first-seen order; group by (category, message).
+    let mut order: Vec<(LintCategory, String)> = Vec::new();
+    let mut frames_by_defect: HashMap<(LintCategory, String), Vec<String>> = HashMap::new();
+
+    for (frame_name, frame_warnings) in per_frame {
+        let mut seen_this_frame: HashSet<(LintCategory, String)> = HashSet::new();
+        for w in frame_warnings {
+            let key = (w.category, w.message.clone());
+            if !seen_this_frame.insert(key.clone()) {
+                continue;
+            }
+            let entry = frames_by_defect.entry(key.clone()).or_insert_with(|| {
+                order.push(key.clone());
+                Vec::new()
+            });
+            entry.push(frame_name.clone());
+        }
+    }
+
+    for key in order {
+        let frames = frames_by_defect.remove(&key).unwrap_or_default();
+        let (category, message) = key;
+        out.push(LintWarning {
+            category,
+            message,
+            frames: if frames.len() == frame_count {
+                Vec::new()
+            } else {
+                frames
+            },
+        });
+    }
+}
+
+/// Drop exact duplicates, keeping the first occurrence.
+fn dedup_warnings(warnings: &mut Vec<LintWarning>) {
+    let mut seen: HashSet<(LintCategory, String)> = HashSet::new();
+    warnings.retain(|w| seen.insert((w.category, w.message.clone())));
 }
 
 /// Display name for an element: its ID if named, or positional path if anonymous.
@@ -142,6 +302,59 @@ fn is_callout(elem: &ElementLayout) -> bool {
 
 fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
+}
+
+/// Grid cells exist only so `g.cell(r, c)` has something to address; nothing
+/// is ever drawn for them.  A cell cannot collide with anything — least of all
+/// with the child that was placed in it.
+fn is_reference_only(elem: &ElementLayout) -> bool {
+    matches!(elem.element_type, ElementType::GridCell)
+}
+
+/// A layout container with no fill and no border paints nothing: it renders as
+/// a bare `<g>` and only describes a region. Something drawn *inside* that
+/// region has not collided with anything — a rule laid across a grid, a
+/// highlight over a column. Two regions genuinely crossing each other, or a
+/// shape sticking out of one, are still reported.
+fn is_bare_container(elem: &ElementLayout) -> bool {
+    matches!(
+        elem.element_type,
+        ElementType::Layout(_) | ElementType::Group
+    ) && elem.styles.fill.is_none()
+        && elem.styles.fill_pattern.is_none()
+        && elem
+            .styles
+            .stroke
+            .as_ref()
+            .is_none_or(|s| s.eq_ignore_ascii_case("none"))
+}
+
+/// True when one of the pair is a bare region wholly containing the other.
+fn is_drawn_inside_a_bare_region(a: &ElementLayout, b: &ElementLayout) -> bool {
+    (is_bare_container(a) && a.bounds.contains_bbox(&b.bounds))
+        || (is_bare_container(b) && b.bounds.contains_bbox(&a.bounds))
+}
+
+/// Name an anonymous element by the grid cell it sits in, if it sits in one.
+/// `<child #12 of deling>` says nothing; `cell [3,1] of deling` says where to look.
+fn grid_cell_name(elem: &ElementLayout, siblings: &[&ElementLayout]) -> Option<String> {
+    if elem.id.is_some() {
+        return None; // it has a name of its own
+    }
+    let center = elem.bounds.center();
+    siblings
+        .iter()
+        .find(|s| is_reference_only(s) && s.bounds.contains(center))
+        .and_then(|cell| cell.id.as_ref())
+        .and_then(|id| parse_grid_cell_id(&id.0))
+        .map(|(grid, row, col)| format!("cell [{},{}] of {}", row, col, grid))
+}
+
+/// Split a generated cell id back into (grid, row, col).
+fn parse_grid_cell_id(id: &str) -> Option<(&str, &str, &str)> {
+    let (grid, coords) = id.split_once("__cell_")?;
+    let (row, col) = coords.split_once('_')?;
+    Some((grid, row, col))
 }
 
 /// More lenient visibility check for connection-crossing detection:
@@ -192,15 +405,38 @@ fn is_text_shape_straddle(text: &ElementLayout, shape: &ElementLayout) -> bool {
 
 /// Scan the document for all element IDs involved in `contains` constraints
 /// (both containers and contained elements).
-fn collect_contains_ids(doc: &Document) -> HashSet<String> {
-    let mut ids = HashSet::new();
-    collect_contains_ids_from_stmts(&doc.statements, &mut ids);
-    ids
+/// Which elements a `contains` constraint wraps, per container.
+///
+/// A container overlapping its own contents is the whole point of `contains`,
+/// so that pair is exempt. Everything else is not: being wrapped by a box does
+/// not stop an element from colliding with the rest of the diagram, and the
+/// container itself can still land on something unrelated.
+#[derive(Default)]
+pub(crate) struct ContainsRelations {
+    by_container: HashMap<String, HashSet<String>>,
+}
+
+impl ContainsRelations {
+    /// True when one of these two wraps the other.
+    fn wraps(&self, a: Option<&str>, b: Option<&str>) -> bool {
+        let (Some(a), Some(b)) = (a, b) else {
+            return false;
+        };
+        self.by_container.get(a).is_some_and(|c| c.contains(b))
+            || self.by_container.get(b).is_some_and(|c| c.contains(a))
+    }
+
+}
+
+fn collect_contains_ids(doc: &Document) -> ContainsRelations {
+    let mut relations = ContainsRelations::default();
+    collect_contains_ids_from_stmts(&doc.statements, &mut relations);
+    relations
 }
 
 fn collect_contains_ids_from_stmts(
     stmts: &[crate::parser::ast::Spanned<Statement>],
-    ids: &mut HashSet<String>,
+    relations: &mut ContainsRelations,
 ) {
     for stmt in stmts {
         match &stmt.node {
@@ -211,17 +447,20 @@ fn collect_contains_ids_from_stmts(
                     ..
                 } = &c.expr
                 {
-                    ids.insert(container.node.0.clone());
+                    let entry = relations
+                        .by_container
+                        .entry(container.node.0.clone())
+                        .or_default();
                     for elem in elements {
-                        ids.insert(elem.node.0.clone());
+                        entry.insert(elem.node.0.clone());
                     }
                 }
             }
             Statement::Layout(l) => {
-                collect_contains_ids_from_stmts(&l.children, ids);
+                collect_contains_ids_from_stmts(&l.children, relations);
             }
             Statement::Group(g) => {
-                collect_contains_ids_from_stmts(&g.children, ids);
+                collect_contains_ids_from_stmts(&g.children, relations);
             }
             _ => {}
         }
@@ -232,27 +471,136 @@ fn collect_contains_ids_from_stmts(
 
 fn check_overlaps(
     result: &LayoutResult,
-    contains_ids: &HashSet<String>,
-    hidden_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
     // Filter out hidden elements for keyframe-aware overlap detection
     let visible_roots: Vec<&ElementLayout> = result
         .root_elements
         .iter()
-        .filter(|e| {
-            e.id.as_ref()
-                .is_none_or(|id| !hidden_ids.contains(&id.0))
-        })
+        .filter(|e| !scope.hides_element(e))
         .collect();
 
     // Collect references for sibling check
     let visible_refs: Vec<ElementLayout> = visible_roots.iter().map(|e| (*e).clone()).collect();
-    check_overlap_siblings(&visible_refs, None, contains_ids, warnings);
+    check_overlap_siblings(&visible_refs, None, contains_ids, scope, warnings);
 
     // Then recurse into each visible element's children
     for elem in &visible_roots {
-        check_overlaps_recursive(elem, None, contains_ids, warnings);
+        check_overlaps_recursive(elem, None, contains_ids, scope, warnings);
+    }
+}
+
+/// Do these two elements overlap in a way worth reporting?
+///
+/// Returns the overlapping width and height when they do. The exemptions live
+/// here so every caller — siblings, nested children, and a shape checked
+/// against the contents of a region — judges a pair the same way.
+fn reportable_overlap(
+    a: &ElementLayout,
+    b: &ElementLayout,
+    contains_ids: &ContainsRelations,
+) -> Option<(f64, f64)> {
+    // Reference-only grid cells are never drawn; ignore them.
+    if is_reference_only(a) || is_reference_only(b) {
+        return None;
+    }
+
+    // Callouts are annotation pins; overlapping their target is intended.
+    if is_callout(a) || is_callout(b) {
+        return None;
+    }
+
+    // Two transparent zones.
+    if !is_opaque(a) && !is_opaque(b) {
+        return None;
+    }
+
+    // For two non-text shapes, skip if either is non-opaque (zone background)
+    if !is_text_shape(a) && !is_text_shape(b) && (!is_opaque(a) || !is_opaque(b)) {
+        return None;
+    }
+
+    // A `contains` container sitting over its own contents is the point.
+    if contains_ids.wraps(a.id_str(), b.id_str()) {
+        return None;
+    }
+
+    // Nothing else about a `contains` container is special: whether it is a
+    // backdrop to rest on or a box that hides what it covers is decided by
+    // its opacity, a few lines up — a background zone is drawn see-through
+    // (the idiom the docs give is `opacity: 0.3`) and is already exempt,
+    // while a solid one really does cover what lands under it.
+
+    // Text-on-shape: only flag if the text straddles the edge
+    if is_text_shape(a) != is_text_shape(b) {
+        let (text, shape) = if is_text_shape(a) { (a, b) } else { (b, a) };
+        if !is_text_shape_straddle(text, shape) {
+            return None;
+        }
+    }
+
+    if !a.bounds.intersects(&b.bounds) {
+        return None;
+    }
+    Some((
+        a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x),
+        a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y),
+    ))
+}
+
+fn overlap_warning(name_a: &str, name_b: &str, w: f64, h: f64) -> LintWarning {
+    LintWarning {
+        category: LintCategory::Overlap,
+        message: format!(
+            "elements {} and {} overlap by {:.0}x{:.0}px",
+            name_a, name_b, w, h
+        ),
+        frames: Vec::new(),
+    }
+}
+
+/// Check an element against what a bare region actually draws.
+///
+/// A container that paints nothing is not itself something to collide with,
+/// but its contents are — and they sit one level down, where the sibling
+/// checks never look. Without this, a shape landing on a grid's digits is
+/// reported against neither the grid nor the digit.
+fn check_against_region_contents(
+    outside: &ElementLayout,
+    outside_name: &str,
+    region: &ElementLayout,
+    contains_ids: &ContainsRelations,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
+    if scope.hides_element(region) {
+        return;
+    }
+    let siblings: Vec<&ElementLayout> = region.children.iter().collect();
+    for (i, child) in region.children.iter().enumerate() {
+        if scope.hides_element(child) {
+            continue;
+        }
+        // Descend through nested bare regions to the things that are drawn.
+        if is_bare_container(child) {
+            check_against_region_contents(
+                outside,
+                outside_name,
+                child,
+                contains_ids,
+                scope,
+                warnings,
+            );
+            continue;
+        }
+        if let Some((w, h)) = reportable_overlap(outside, child, contains_ids) {
+            let child_name = grid_cell_name(child, &siblings).unwrap_or_else(|| {
+                element_display_name(child, region.id.as_ref().map(|id| id.0.as_str()), i)
+            });
+            warnings.push(overlap_warning(outside_name, &child_name, w, h));
+        }
     }
 }
 
@@ -260,68 +608,39 @@ fn check_overlaps(
 fn check_overlap_siblings(
     siblings: &[ElementLayout],
     parent_name: Option<&str>,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
+    let refs: Vec<&ElementLayout> = siblings.iter().collect();
     for i in 0..siblings.len() {
         for j in (i + 1)..siblings.len() {
             let a = &siblings[i];
             let b = &siblings[j];
 
-            // Reference-only grid cells are never drawn; ignore them.
-            if matches!(a.element_type, ElementType::GridCell)
-                || matches!(b.element_type, ElementType::GridCell)
-            {
+            let name = |elem: &ElementLayout, index: usize| {
+                grid_cell_name(elem, &refs)
+                    .unwrap_or_else(|| element_display_name(elem, parent_name, index))
+            };
+
+            // A container that paints nothing is not something to collide
+            // with — but what it draws one level down is.
+            if is_drawn_inside_a_bare_region(a, b) {
+                let (region, outside, outside_index) =
+                    if is_bare_container(a) { (a, b, j) } else { (b, a, i) };
+                check_against_region_contents(
+                    outside,
+                    &name(outside, outside_index),
+                    region,
+                    contains_ids,
+                    scope,
+                    warnings,
+                );
                 continue;
             }
 
-            // Callouts are annotation pins; overlapping their target is intended.
-            if is_callout(a) || is_callout(b) {
-                continue;
-            }
-
-            // Skip if both are non-opaque (two transparent zones)
-            if !is_opaque(a) && !is_opaque(b) {
-                continue;
-            }
-
-            // For two non-text shapes, skip if either is non-opaque (zone background)
-            if !is_text_shape(a) && !is_text_shape(b) && (!is_opaque(a) || !is_opaque(b)) {
-                continue;
-            }
-
-            if let Some(id) = a.id_str() {
-                if contains_ids.contains(id) {
-                    continue;
-                }
-            }
-            if let Some(id) = b.id_str() {
-                if contains_ids.contains(id) {
-                    continue;
-                }
-            }
-
-            // Text-on-shape: only flag if the text straddles the edge
-            if is_text_shape(a) != is_text_shape(b) {
-                let (text, shape) = if is_text_shape(a) { (a, b) } else { (b, a) };
-                if !is_text_shape_straddle(text, shape) {
-                    continue;
-                }
-            }
-
-            if a.bounds.intersects(&b.bounds) {
-                let overlap_w = a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
-                let overlap_h =
-                    a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
-                let name_a = element_display_name(a, parent_name, i);
-                let name_b = element_display_name(b, parent_name, j);
-                warnings.push(LintWarning {
-                    category: LintCategory::Overlap,
-                    message: format!(
-                        "elements {} and {} overlap by {:.0}x{:.0}px",
-                        name_a, name_b, overlap_w, overlap_h
-                    ),
-                });
+            if let Some((w, h)) = reportable_overlap(a, b, contains_ids) {
+                warnings.push(overlap_warning(&name(a, i), &name(b, j), w, h));
             }
         }
     }
@@ -337,10 +656,13 @@ fn is_template_instance_group(parent: &ElementLayout) -> bool {
     };
     let prefix = format!("{}_", id);
 
-    // Direct children match prefix
+    // Direct children match prefix. Generated grid cells are skipped: their
+    // ids are `{grid}__cell_r_c`, which would otherwise make every named grid
+    // look like a template instance and silence its overlap checks.
     let named_children: Vec<&str> = parent
         .children
         .iter()
+        .filter(|c| !is_reference_only(c))
         .filter_map(|c| c.id.as_ref().map(|id| id.0.as_str()))
         .collect();
     if !named_children.is_empty() && named_children.iter().all(|c| c.starts_with(&prefix)) {
@@ -366,7 +688,8 @@ fn is_template_instance_group(parent: &ElementLayout) -> bool {
 fn check_overlaps_recursive(
     parent: &ElementLayout,
     template_prefix: Option<&str>,
-    contains_ids: &HashSet<String>,
+    contains_ids: &ContainsRelations,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
     let parent_name = parent.id.as_ref().map(|id| id.0.as_str());
@@ -388,6 +711,7 @@ fn check_overlaps_recursive(
             let named_children: Vec<_> = parent
                 .children
                 .iter()
+                .filter(|c| !is_reference_only(c))
                 .filter_map(|c| c.id.as_ref().map(|id| id.0.as_str()))
                 .collect();
             !named_children.is_empty()
@@ -396,66 +720,69 @@ fn check_overlaps_recursive(
             false
         };
 
-    let children = &parent.children;
+    // Hidden children take their whole subtree out of this frame's checks.
+    // Original child indices are kept so anonymous elements get the same
+    // display name in every frame (and dedup can match them up).
+    let children: Vec<(usize, &ElementLayout)> = parent
+        .children
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| !scope.hides_element(c))
+        .collect();
+    // Reference-only cells are kept for naming but never take part in a pair.
+    let all_children: Vec<&ElementLayout> = parent.children.iter().collect();
     if !skip_sibling_checks {
         for i in 0..children.len() {
             for j in (i + 1)..children.len() {
-                let a = &children[i];
-                let b = &children[j];
+                let (index_a, a) = children[i];
+                let (index_b, b) = children[j];
 
-                // Skip if both are non-opaque (two transparent zones)
-                if !is_opaque(a) && !is_opaque(b) {
+                let name = |elem: &ElementLayout, index: usize| {
+                    grid_cell_name(elem, &all_children)
+                        .unwrap_or_else(|| element_display_name(elem, parent_name, index))
+                };
+
+                // A container that paints nothing is not something to collide
+                // with — but what it draws one level down is.
+                if is_drawn_inside_a_bare_region(a, b) {
+                    let (region, outside, outside_index) =
+                        if is_bare_container(a) { (a, b, index_b) } else { (b, a, index_a) };
+                    check_against_region_contents(
+                        outside,
+                        &name(outside, outside_index),
+                        region,
+                        contains_ids,
+                        scope,
+                        warnings,
+                    );
                     continue;
                 }
 
-                // For two non-text shapes, skip if either is non-opaque (zone background)
-                if !is_text_shape(a) && !is_text_shape(b) && (!is_opaque(a) || !is_opaque(b)) {
-                    continue;
-                }
-
-                // Skip if either is a contains target/container
-                if let Some(id) = a.id_str() {
-                    if contains_ids.contains(id) {
-                        continue;
+                if let Some((w, h)) = reportable_overlap(a, b, contains_ids) {
+                    let mut name_a = name(a, index_a);
+                    let mut name_b = name(b, index_b);
+                    // Two anonymous children of the same cell would otherwise
+                    // read as one element overlapping itself.
+                    if name_a == name_b {
+                        name_a = format!("{} (child #{})", name_a, index_a + 1);
+                        name_b = format!("{} (child #{})", name_b, index_b + 1);
                     }
-                }
-                if let Some(id) = b.id_str() {
-                    if contains_ids.contains(id) {
-                        continue;
-                    }
-                }
-
-                // Text-on-shape: only flag if the text straddles the edge
-                if is_text_shape(a) != is_text_shape(b) {
-                    let (text, shape) = if is_text_shape(a) { (a, b) } else { (b, a) };
-                    if !is_text_shape_straddle(text, shape) {
-                        continue;
-                    }
-                }
-
-                if a.bounds.intersects(&b.bounds) {
-                    let overlap_w =
-                        a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
-                    let overlap_h =
-                        a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
-                    let name_a = element_display_name(a, parent_name, i);
-                    let name_b = element_display_name(b, parent_name, j);
-                    warnings.push(LintWarning {
-                        category: LintCategory::Overlap,
-                        message: format!(
-                            "elements {} and {} overlap by {:.0}x{:.0}px",
-                            name_a, name_b, overlap_w, overlap_h
-                        ),
-                    });
+                    warnings.push(overlap_warning(&name_a, &name_b, w, h));
                 }
             }
         }
     } // end skip_sibling_checks
 
     // Recurse into children that have children
-    for child in children.iter() {
+    for (_, child) in children.iter() {
         if !child.children.is_empty() {
-            check_overlaps_recursive(child, current_prefix.as_deref(), contains_ids, warnings);
+            check_overlaps_recursive(
+                child,
+                current_prefix.as_deref(),
+                contains_ids,
+                scope,
+                warnings,
+            );
         }
     }
 }
@@ -464,6 +791,91 @@ fn check_overlaps_recursive(
 
 fn check_contains(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
     check_contains_in_stmts(&doc.statements, result, warnings);
+    check_contains_overrides_size(result, doc, warnings);
+}
+
+/// `contains` frees both dimensions, which quietly discards a size the author
+/// wrote down. A `height: 3` rule told to contain a row of cells comes back as
+/// tall as the cells, and nothing says so. Warn, and point at the alternative:
+/// constraining the two edges that matter leaves the other dimension alone.
+fn check_contains_overrides_size(
+    result: &LayoutResult,
+    doc: &Document,
+    warnings: &mut Vec<LintWarning>,
+) {
+    use crate::parser::ast::StyleKey;
+
+    // Containers of a `contains` constraint, and the sizes they declared.
+    let mut containers: Vec<String> = Vec::new();
+    fn collect_containers(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<String>) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Constrain(c) => {
+                    if let ConstraintExpr::Contains { container, .. } = &c.expr {
+                        out.push(container.node.0.clone());
+                    }
+                }
+                Statement::Layout(l) => collect_containers(&l.children, out),
+                Statement::Group(g) => collect_containers(&g.children, out),
+                _ => {}
+            }
+        }
+    }
+    collect_containers(&doc.statements, &mut containers);
+    if containers.is_empty() {
+        return;
+    }
+
+    fn declared_sizes(
+        stmts: &[crate::parser::ast::Spanned<Statement>],
+        containers: &[String],
+        result: &LayoutResult,
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Shape(shape) => {
+                    let Some(name) = shape.name.as_ref().map(|n| n.node.0.clone()) else {
+                        continue;
+                    };
+                    if !containers.contains(&name) {
+                        continue;
+                    }
+                    for m in &shape.modifiers {
+                        let (axis, declared) = match (&m.node.key.node, &m.node.value.node) {
+                            (StyleKey::Width, crate::parser::ast::StyleValue::Number { value, .. }) => {
+                                ("width", *value)
+                            }
+                            (StyleKey::Height, crate::parser::ast::StyleValue::Number { value, .. }) => {
+                                ("height", *value)
+                            }
+                            _ => continue,
+                        };
+                        let actual = result.get_element_by_name(&name).map(|e| {
+                            if axis == "width" { e.bounds.width } else { e.bounds.height }
+                        });
+                        let Some(actual) = actual else { continue };
+                        if (actual - declared).abs() < 1.0 {
+                            continue; // the size survived; nothing to report
+                        }
+                        warnings.push(LintWarning {
+                            category: LintCategory::OverConstrained,
+                            message: format!(
+                                "\"{}\" declares {}: {:.0} but `contains` sizes both axes, so it came out {:.0}; \
+                                 to keep the other axis, constrain the edges instead (e.g. \"{}\".left / .right)",
+                                name, axis, declared, actual, name
+                            ),
+                            frames: Vec::new(),
+                        });
+                    }
+                }
+                Statement::Layout(l) => declared_sizes(&l.children, containers, result, warnings),
+                Statement::Group(g) => declared_sizes(&g.children, containers, result, warnings),
+                _ => {}
+            }
+        }
+    }
+    declared_sizes(&doc.statements, &containers, result, warnings);
 }
 
 fn check_contains_in_stmts(
@@ -495,6 +907,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past left edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                                 // Check right edge
@@ -506,6 +919,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past right edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                                 // Check top edge
@@ -517,6 +931,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past top edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                                 // Check bottom edge
@@ -528,6 +943,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past bottom edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -573,47 +989,67 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
     BoundingBox::new(x, y, width, height)
 }
 
-fn collect_labels_recursive(elem: &ElementLayout, labels: &mut Vec<LabelInfo>) {
-    if let Some(label) = &elem.label {
-        let owner = elem
-            .id
+fn collect_labels_recursive(
+    elem: &ElementLayout,
+    scope: &FrameScope<'_>,
+    labels: &mut Vec<LabelInfo>,
+) {
+    collect_labels_in(elem, &[], scope, labels)
+}
+
+/// `siblings` is the element's own row in the tree, so an unnamed element can
+/// still be named by the grid cell it sits in.
+fn collect_labels_in(
+    elem: &ElementLayout,
+    siblings: &[&ElementLayout],
+    scope: &FrameScope<'_>,
+    labels: &mut Vec<LabelInfo>,
+) {
+    // A hidden element takes its label — and its whole subtree — off screen.
+    if scope.hides_element(elem) {
+        return;
+    }
+    let owner = || {
+        elem.id
             .as_ref()
             .map(|id| id.0.clone())
-            .unwrap_or_else(|| "<anon>".to_string());
+            .or_else(|| grid_cell_name(elem, siblings))
+            .unwrap_or_else(|| "<anon>".to_string())
+    };
+    if let Some(label) = &elem.label {
         labels.push(LabelInfo {
-            owner,
+            owner: owner(),
             bbox: estimate_label_bbox(label),
             parent_opacity: elem.styles.opacity,
         });
     }
     // Standalone text elements act like labels for overlap checking
     if is_text_shape(elem) {
-        let owner = elem
-            .id
-            .as_ref()
-            .map(|id| id.0.clone())
-            .unwrap_or_else(|| "<anon>".to_string());
         labels.push(LabelInfo {
-            owner,
+            owner: owner(),
             bbox: elem.bounds,
             parent_opacity: elem.styles.opacity,
         });
     }
+    let children: Vec<&ElementLayout> = elem.children.iter().collect();
     for child in &elem.children {
-        collect_labels_recursive(child, labels);
+        collect_labels_in(child, &children, scope, labels);
     }
 }
 
-fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
     let mut labels = Vec::new();
 
     // Collect element labels
     for elem in &result.root_elements {
-        collect_labels_recursive(elem, &mut labels);
+        collect_labels_recursive(elem, scope, &mut labels);
     }
 
     // Collect connection labels
     for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
         if let Some(label) = &conn.label {
             let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
             labels.push(LabelInfo {
@@ -651,6 +1087,7 @@ fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                 warnings.push(LintWarning {
                     category: LintCategory::Label,
                     message: format!("labels on \"{}\" and \"{}\" overlap", a.owner, b.owner),
+                    frames: Vec::new(),
                 });
             }
         }
@@ -663,13 +1100,20 @@ fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
 /// bbox intersects the element but is NOT fully contained.  A label
 /// completely inside a box is fine (looks intentional); one that crosses
 /// an edge looks like a placement accident.
-fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+fn check_label_element_overlaps(
+    result: &LayoutResult,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
     // Collect all labels with owner info
     let mut labels: Vec<LabelInfo> = Vec::new();
     for elem in &result.root_elements {
-        collect_labels_recursive(elem, &mut labels);
+        collect_labels_recursive(elem, scope, &mut labels);
     }
     for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
         if let Some(label) = &conn.label {
             let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
             labels.push(LabelInfo {
@@ -683,7 +1127,7 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
     // Collect all opaque, non-text shape elements
     let mut shapes: Vec<OpaqueElement> = Vec::new();
     for (i, elem) in result.root_elements.iter().enumerate() {
-        collect_opaque_elements(elem, None, i, &mut shapes);
+        collect_opaque_elements(elem, None, i, scope, &mut shapes);
     }
 
     for label in &labels {
@@ -721,6 +1165,7 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
                          overlaps by {:.0}x{:.0}px",
                         label.owner, shape.id, overlap_w, overlap_h
                     ),
+                    frames: Vec::new(),
                 });
             }
         }
@@ -817,14 +1262,32 @@ fn collect_opaque_elements(
     elem: &ElementLayout,
     parent_name: Option<&str>,
     child_index: usize,
+    scope: &FrameScope<'_>,
     elements: &mut Vec<OpaqueElement>,
 ) {
+    collect_opaque_elements_in(elem, parent_name, child_index, &[], scope, elements)
+}
+
+/// `siblings` is the element's own row in the tree, so an unnamed element can
+/// still be named by the grid cell it sits in.
+fn collect_opaque_elements_in(
+    elem: &ElementLayout,
+    parent_name: Option<&str>,
+    child_index: usize,
+    siblings: &[&ElementLayout],
+    scope: &FrameScope<'_>,
+    elements: &mut Vec<OpaqueElement>,
+) {
+    if scope.hides_element(elem) {
+        return;
+    }
     // Only collect visual shapes (not groups/layouts) that are opaque and non-text
     if is_visual_shape(elem) && !is_text_shape(elem) && is_opaque(elem) {
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
-            element_display_name(elem, parent_name, child_index)
+            grid_cell_name(elem, siblings)
+                .unwrap_or_else(|| element_display_name(elem, parent_name, child_index))
         };
         elements.push(OpaqueElement {
             id,
@@ -833,8 +1296,9 @@ fn collect_opaque_elements(
     }
 
     let name = elem.id.as_ref().map(|id| id.0.as_str());
+    let children: Vec<&ElementLayout> = elem.children.iter().collect();
     for (i, child) in elem.children.iter().enumerate() {
-        collect_opaque_elements(child, name, i, elements);
+        collect_opaque_elements_in(child, name, i, &children, scope, elements);
     }
 }
 
@@ -842,14 +1306,32 @@ fn collect_visible_elements(
     elem: &ElementLayout,
     parent_name: Option<&str>,
     child_index: usize,
+    scope: &FrameScope<'_>,
     elements: &mut Vec<OpaqueElement>,
 ) {
+    collect_visible_elements_in(elem, parent_name, child_index, &[], scope, elements)
+}
+
+/// `siblings` is the element's own row in the tree, so an unnamed element can
+/// still be named by the grid cell it sits in.
+fn collect_visible_elements_in(
+    elem: &ElementLayout,
+    parent_name: Option<&str>,
+    child_index: usize,
+    siblings: &[&ElementLayout],
+    scope: &FrameScope<'_>,
+    elements: &mut Vec<OpaqueElement>,
+) {
+    if scope.hides_element(elem) {
+        return;
+    }
     // Collect visual shapes that are substantially visible (opacity >= 0.5)
     if is_visual_shape(elem) && !is_text_shape(elem) && is_substantially_visible(elem) {
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
-            element_display_name(elem, parent_name, child_index)
+            grid_cell_name(elem, siblings)
+                .unwrap_or_else(|| element_display_name(elem, parent_name, child_index))
         };
         elements.push(OpaqueElement {
             id,
@@ -858,30 +1340,27 @@ fn collect_visible_elements(
     }
 
     let name = elem.id.as_ref().map(|id| id.0.as_str());
+    let children: Vec<&ElementLayout> = elem.children.iter().collect();
     for (i, child) in elem.children.iter().enumerate() {
-        collect_visible_elements(child, name, i, elements);
+        collect_visible_elements_in(child, name, i, &children, scope, elements);
     }
 }
 
 fn check_connections(
     result: &LayoutResult,
-    hidden_elements: &HashSet<String>,
-    hidden_connections: &HashSet<String>,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
     // Collect all substantially visible, non-text elements in this frame
     let mut opaque_elements = Vec::new();
     for (i, elem) in result.root_elements.iter().enumerate() {
-        collect_visible_elements(elem, None, i, &mut opaque_elements);
+        collect_visible_elements(elem, None, i, scope, &mut opaque_elements);
     }
-    opaque_elements.retain(|oe| !hidden_elements.contains(&oe.id));
 
     for conn in &result.connections {
         // Skip connections that are hidden in this frame
-        if let Some(name) = &conn.name {
-            if hidden_connections.contains(&name.0) {
-                continue;
-            }
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
         }
 
         let from_id = &conn.from_id.0;
@@ -925,6 +1404,7 @@ fn check_connections(
                             "connection {}→{} overlaps element \"{}\"",
                             from_id, to_id, oe.id
                         ),
+                        frames: Vec::new(),
                     });
                 }
             }
@@ -954,6 +1434,7 @@ fn check_connections(
                                 "connection {}→{} crosses element \"{}\"",
                                 from_id, to_id, oe.id
                             ),
+                            frames: Vec::new(),
                         });
                     }
                 }
@@ -967,7 +1448,11 @@ fn check_connections(
 /// Check if any label (element label, connection label, or standalone text)
 /// overlaps with a connection path segment.  This catches labels placed at
 /// bend points or too close to connector lines.
-fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+fn check_label_connection_overlaps(
+    result: &LayoutResult,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
     // Collect user-level labels only (skip template internals).
     // Template children have IDs like `q_main_g_label`; we skip labels whose
     // owner shares a prefix with a root-level template group.
@@ -984,12 +1469,15 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
     // Collect labels from elements + standalone text (skipping template internals)
     let mut labels: Vec<LabelInfo> = Vec::new();
     for elem in &result.root_elements {
-        collect_labels_recursive(elem, &mut labels);
+        collect_labels_recursive(elem, scope, &mut labels);
     }
     labels.retain(|l| !is_template_internal(&l.owner));
 
     // Collect connection labels
     for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
         if let Some(label) = &conn.label {
             let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
             labels.push(LabelInfo {
@@ -1011,6 +1499,9 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
         for conn in &result.connections {
             // Skip curved connections (control points ≠ actual curve)
             if conn.routing_mode == RoutingMode::Curved {
+                continue;
+            }
+            if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
                 continue;
             }
 
@@ -1039,6 +1530,7 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
                             "label on \"{}\" overlaps connection {}",
                             label.owner, conn_name
                         ),
+                        frames: Vec::new(),
                     });
                     // Only report once per label-connection pair
                     break;
@@ -1083,6 +1575,7 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     "connection {}→{} is nearly horizontal (off by {:.0}px); aligning Y positions would straighten it",
                     conn.from_id.0, conn.to_id.0, dy
                 ),
+                frames: Vec::new(),
             });
         } else if dx < ALIGNMENT_THRESHOLD && dy > dx * 4.0 {
             // Nearly vertical — small X offset
@@ -1092,6 +1585,7 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     "connection {}→{} is nearly vertical (off by {:.0}px); aligning X positions would straighten it",
                     conn.from_id.0, conn.to_id.0, dx
                 ),
+                frames: Vec::new(),
             });
         }
     }
@@ -1197,6 +1691,7 @@ fn check_redundant_constants(doc: &Document, warnings: &mut Vec<LintWarning>) {
         warnings.push(LintWarning {
             category: LintCategory::RedundantConstant,
             message,
+            frames: Vec::new(),
         });
     }
 }
@@ -1255,6 +1750,7 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
                     shortest_len,
                     shortest_orientation
                 ),
+                frames: Vec::new(),
             });
         }
     }
@@ -1331,6 +1827,7 @@ fn check_missing_anchors_in_stmts(
                                  use e.g. {}.bottom -> {}.top for better routing",
                                 from_name, to_name, from_name, to_name
                             ),
+                            frames: Vec::new(),
                         });
                     }
                     if conn.to.anchor.is_none() {
@@ -1341,6 +1838,7 @@ fn check_missing_anchors_in_stmts(
                                  use e.g. {}.bottom -> {}.top for better routing",
                                 from_name, to_name, from_name, to_name
                             ),
+                            frames: Vec::new(),
                         });
                     }
                 }
@@ -1457,6 +1955,7 @@ fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning
                              label text may be unreadable without CSS overrides for light text",
                             name, dark_desc
                         ),
+                        frames: Vec::new(),
                     });
                 }
             }
@@ -1508,6 +2007,7 @@ fn check_steep_direct(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                      consider routing: orthogonal or routing: curved (ignore if intended)",
                     conn.from_id.0, conn.to_id.0, angle_deg
                 ),
+                frames: Vec::new(),
             });
         }
     }
@@ -1557,6 +2057,7 @@ fn check_crowded_layouts_in_stmts(
                                 "{} {} has {} children; for >8 elements, consider using group with constraints instead",
                                 layout_kind, layout_name, child_count
                             ),
+                            frames: Vec::new(),
                         });
                     }
                 }
@@ -1687,6 +2188,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, residual
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1713,6 +2215,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, residual
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1733,6 +2236,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, residual
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1753,6 +2257,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, violation
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1773,6 +2278,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, violation
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1797,6 +2303,270 @@ fn check_over_constrained_in_stmts(
 /// Detect labels that are larger than their containing shape.
 /// This catches cases like a "+3.3V" label on a 4px-high power rail,
 /// where the text visibly overflows the element.
+/// Every CSS named colour, plus the keywords a colour property also accepts.
+/// A word that is neither one of these nor a palette token is passed straight
+/// through to the SVG, where the browser draws black or nothing.
+const CSS_COLOR_NAMES: &[&str] = &[
+    "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
+    "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse",
+    "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue",
+    "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki",
+    "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon",
+    "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise",
+    "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick",
+    "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod",
+    "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo",
+    "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue",
+    "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey",
+    "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
+    "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta",
+    "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
+    "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
+    "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite",
+    "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod",
+    "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink",
+    "plum", "powderblue", "purple", "rebeccapurple", "red", "rosybrown", "royalblue",
+    "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver",
+    "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue",
+    "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke",
+    "yellow", "yellowgreen", "none", "transparent", "currentcolor", "inherit"
+];
+
+/// Colour values that name nothing.
+///
+/// `fill: geenkleur` parses, renders, and shows up as black — the same class
+/// of silent mistake as a misspelled modifier, and easier to make when a
+/// custom stylesheet defines the token names.
+fn check_unknown_colors(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    use crate::parser::ast::{StyleKey, StyleValue};
+
+    fn check(
+        modifiers: &[crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>],
+        owner: &str,
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        for m in modifiers {
+            let key = match &m.node.key.node {
+                StyleKey::Fill => "fill",
+                StyleKey::Stroke => "stroke",
+                StyleKey::LabelFill => "label_fill",
+                _ => continue,
+            };
+            // Hex, palette tokens and fill functions are resolved elsewhere;
+            // a bare word is the only thing that can silently mean nothing.
+            let word = match &m.node.value.node {
+                StyleValue::Identifier(id) => id.0.as_str(),
+                StyleValue::Keyword(k) => k.as_str(),
+                _ => continue,
+            };
+            let lower = word.to_ascii_lowercase();
+            if CSS_COLOR_NAMES.contains(&lower.as_str()) {
+                continue;
+            }
+            // `fill: hatch` and friends are pattern shorthands, not colours.
+            if matches!(lower.as_str(), "hatch" | "dots" | "grid" | "gradient" | "radial") {
+                continue;
+            }
+            warnings.push(LintWarning {
+                category: LintCategory::UnknownModifier,
+                message: format!(
+                    "{}: \"{}\" on {} is not a palette token or a CSS colour name; \
+                     it reaches the SVG as-is and will not render as intended",
+                    key, word, owner
+                ),
+                frames: Vec::new(),
+            });
+        }
+    }
+
+    fn walk(stmts: &[crate::parser::ast::Spanned<Statement>], warnings: &mut Vec<LintWarning>) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Shape(shape) => {
+                    let owner = shape
+                        .name
+                        .as_ref()
+                        .map(|n| format!("\"{}\"", n.node.0))
+                        .unwrap_or_else(|| "an unnamed element".to_string());
+                    check(&shape.modifiers, &owner, warnings);
+                }
+                Statement::Layout(l) => walk(&l.children, warnings),
+                Statement::Group(g) => walk(&g.children, warnings),
+                Statement::Keyframe(kf) => {
+                    for op in &kf.operations {
+                        if let crate::parser::ast::KeyframeOp::Transform { target, modifiers } =
+                            &op.node
+                        {
+                            let owner =
+                                format!("\"{}\" in keyframe \"{}\"", target.node.0, kf.name.node);
+                            check(modifiers, &owner, warnings);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    walk(&doc.statements, warnings);
+}
+
+/// Modifier keys that no part of the pipeline reads.
+///
+/// An unrecognised key parses fine and is then dropped on the floor, so an
+/// invented name (`fill_label` for `label_fill`, say) renders without a word
+/// of complaint and the author only notices from the picture. These are the
+/// keys that are not `StyleKey` variants but are still consumed somewhere.
+const KNOWN_CUSTOM_KEYS: &[&str] = &[
+    "at",           // grid placement
+    "cell_width",   // grid
+    "cell_height",  // grid
+    "cols",         // grid
+    "rows",         // grid
+    "col_labels",   // grid
+    "row_labels",   // grid
+    "trim",         // svg templates
+    "via",          // connection routing
+    "padding",      // contains
+];
+
+fn check_unknown_modifiers(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    fn owner_name(name: Option<&crate::parser::ast::Spanned<crate::parser::ast::Identifier>>) -> String {
+        name.map(|n| format!("\"{}\"", n.node.0))
+            .unwrap_or_else(|| "an unnamed element".to_string())
+    }
+
+    fn check(
+        modifiers: &[crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>],
+        owner: &str,
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        for m in modifiers {
+            if let crate::parser::ast::StyleKey::Custom(key) = &m.node.key.node {
+                if KNOWN_CUSTOM_KEYS.contains(&key.as_str()) {
+                    continue;
+                }
+                warnings.push(LintWarning {
+                    category: LintCategory::UnknownModifier,
+                    message: format!(
+                        "unknown modifier \"{}\" on {} is ignored; check the spelling against --grammar",
+                        key, owner
+                    ),
+                    frames: Vec::new(),
+                });
+            }
+        }
+    }
+
+    fn walk(
+        stmts: &[crate::parser::ast::Spanned<Statement>],
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Shape(shape) => check(&shape.modifiers, &owner_name(shape.name.as_ref()), warnings),
+                Statement::Layout(l) => {
+                    check(&l.modifiers, &owner_name(l.name.as_ref()), warnings);
+                    walk(&l.children, warnings);
+                }
+                Statement::Group(g) => {
+                    check(&g.modifiers, &owner_name(g.name.as_ref()), warnings);
+                    walk(&g.children, warnings);
+                }
+                Statement::Connection(conns) => {
+                    for c in conns {
+                        let owner = format!("connection {}->{}", c.from.element.node.0, c.to.element.node.0);
+                        check(&c.modifiers, &owner, warnings);
+                    }
+                }
+                Statement::Keyframe(kf) => {
+                    for op in &kf.operations {
+                        if let crate::parser::ast::KeyframeOp::Transform { target, modifiers } = &op.node {
+                            let owner = format!("\"{}\" in keyframe \"{}\"", target.node.0, kf.name.node);
+                            check(modifiers, &owner, warnings);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    walk(&doc.statements, warnings);
+}
+
+/// Text wider than the box it was given.
+///
+/// A box is only as wide as the author said, and how wide a wording renders is
+/// not something the author can work out by eye — so when the text does not
+/// fit, say so and name the width it needs. Keyframe wordings are checked too:
+/// text rewritten by a later frame is laid out from its frame-0 wording.
+fn check_text_fits_its_box(
+    result: &LayoutResult,
+    doc: &Document,
+    warnings: &mut Vec<LintWarning>,
+) {
+    // Every wording each element ever shows: its own, plus keyframe rewrites.
+    let mut wordings: HashMap<String, Vec<(String, Option<String>)>> = HashMap::new();
+    for kf in super::keyframe::extract_keyframes(doc) {
+        for op in &kf.operations {
+            if let crate::parser::ast::KeyframeOp::Transform { target, modifiers } = &op.node {
+                for m in modifiers {
+                    if !matches!(m.node.key.node, crate::parser::ast::StyleKey::Label) {
+                        continue;
+                    }
+                    let text = match &m.node.value.node {
+                        crate::parser::ast::StyleValue::String(s) => s.clone(),
+                        crate::parser::ast::StyleValue::Keyword(k) => k.clone(),
+                        _ => continue,
+                    };
+                    wordings
+                        .entry(target.node.0.clone())
+                        .or_default()
+                        .push((text, Some(kf.name.node.clone())));
+                }
+            }
+        }
+    }
+
+    fn walk(
+        elem: &ElementLayout,
+        wordings: &HashMap<String, Vec<(String, Option<String>)>>,
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        if let (Some(id), ElementType::Shape(ShapeType::Text { content })) =
+            (elem.id.as_ref(), &elem.element_type)
+        {
+            let font_size = elem.styles.font_size.unwrap_or(14.0);
+            let mut candidates = vec![(content.clone(), None)];
+            candidates.extend(wordings.get(&id.0).cloned().unwrap_or_default());
+
+            for (text, frame) in candidates {
+                let needed = super::keyframe::estimated_text_width(&text, font_size);
+                if needed <= elem.bounds.width + 2.0 {
+                    continue;
+                }
+                warnings.push(LintWarning {
+                    category: LintCategory::LabelOverflow,
+                    message: format!(
+                        "text \"{}\" on \"{}\" needs about {:.0}px but its box is {:.0}px; \
+                         widen it (or drop the explicit width and let it size itself)",
+                        text, id.0, needed, elem.bounds.width
+                    ),
+                    frames: frame.into_iter().collect(),
+                });
+            }
+        }
+        for child in &elem.children {
+            walk(child, wordings, warnings);
+        }
+    }
+
+    for elem in &result.root_elements {
+        walk(elem, &wordings, warnings);
+    }
+}
+
 fn check_label_overflow(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     for elem in &result.root_elements {
         check_label_overflow_recursive(elem, warnings);
@@ -1846,6 +2616,7 @@ fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintW
                 warnings.push(LintWarning {
                     category: LintCategory::LabelOverflow,
                     message: detail,
+                    frames: Vec::new(),
                 });
             }
         }
@@ -1934,8 +2705,8 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        let contains_ids = HashSet::new();
-        check_overlaps_recursive(&group, None, &contains_ids, &mut warnings);
+        let contains_ids = ContainsRelations::default();
+        check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].message.contains("\"a\""));
         assert!(warnings[0].message.contains("\"b\""));
@@ -1951,7 +2722,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &mut warnings);
+        check_overlaps_recursive(&group, None, &ContainsRelations::default(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -1964,12 +2735,43 @@ mod tests {
                 make_rect(Some("child"), 10.0, 10.0, 50.0, 50.0),
             ],
         );
-        let mut contains_ids = HashSet::new();
-        contains_ids.insert("container".to_string());
-        contains_ids.insert("child".to_string());
+        let mut contains_ids = ContainsRelations::default();
+        contains_ids
+            .by_container
+            .entry("container".to_string())
+            .or_default()
+            .insert("child".to_string());
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &contains_ids, &mut warnings);
+        check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
+    }
+
+    #[test]
+    fn test_overlap_reported_for_contains_target_and_an_outsider() {
+        // Being wrapped exempts the pair, not the element.
+        let group = make_group(
+            Some("g"),
+            vec![
+                make_rect(Some("container"), 0.0, 0.0, 200.0, 200.0),
+                make_rect(Some("child"), 10.0, 10.0, 50.0, 50.0),
+                make_rect(Some("outsider"), 30.0, 30.0, 50.0, 50.0),
+            ],
+        );
+        let mut contains_ids = ContainsRelations::default();
+        contains_ids
+            .by_container
+            .entry("container".to_string())
+            .or_default()
+            .insert("child".to_string());
+        let mut warnings = Vec::new();
+        check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
+        assert!(
+            warnings
+                .iter()
+                .any(|w| w.message.contains("\"child\"") && w.message.contains("\"outsider\"")),
+            "got: {:?}",
+            warnings.iter().map(|w| &w.message).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -1982,7 +2784,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &mut warnings);
+        check_overlaps_recursive(&group, None, &ContainsRelations::default(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -1996,7 +2798,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &mut warnings);
+        check_overlaps_recursive(&group, None, &ContainsRelations::default(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 

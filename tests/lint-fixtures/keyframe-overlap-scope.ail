@@ -1,0 +1,19 @@
+// `always_a`/`always_b` collide in every frame; `late` only collides
+// once it is shown in the last frame.
+rect always_a [width: 100, height: 60]
+rect always_b [width: 100, height: 60]
+rect late [width: 100, height: 60]
+
+constrain always_b.x = always_a.x + 40
+constrain always_b.y = always_a.y
+constrain late.x = always_a.x + 20
+constrain late.y = always_a.y + 20
+
+keyframe "start" {
+  hide late
+}
+keyframe "middle" {
+}
+keyframe "end" {
+  show late
+}

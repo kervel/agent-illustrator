@@ -17,8 +17,89 @@ use std::path::PathBuf;
 use clap::Parser;
 
 use agent_illustrator::{
-    render_with_config, render_with_lint, ImageHrefMode, RenderConfig, Stylesheet,
+    frame_names, render_with_config, render_with_lint, ImageHrefMode, LintCategory, RenderConfig,
+    Stylesheet,
 };
+
+/// Render every keyframe into `dir` as `<NN>-<name>.svg`.
+///
+/// One command instead of a shell loop over hand-copied frame names, so
+/// checking that every frame renders correctly stays a single step.
+fn write_all_frames(source: &str, config: RenderConfig, dir: &std::path::Path) {
+    let names = match frame_names(source) {
+        Ok(names) => names,
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
+    if names.is_empty() {
+        eprintln!("Error: --frames-to-dir requires keyframes in the input");
+        std::process::exit(1);
+    }
+    if let Err(e) = fs::create_dir_all(dir) {
+        eprintln!("Error creating directory '{}': {}", dir.display(), e);
+        std::process::exit(1);
+    }
+
+    for (i, name) in names.iter().enumerate() {
+        // Select by index: a frame named "2" would otherwise be ambiguous.
+        let mut frame_config = config.clone();
+        frame_config.frame = Some(i.to_string());
+
+        let svg = match render_with_config(source, frame_config) {
+            Ok(svg) => svg,
+            Err(e) => {
+                eprintln!("Error rendering frame '{}': {}", name, e);
+                std::process::exit(1);
+            }
+        };
+
+        let path = dir.join(format!("{:02}-{}.svg", i, sanitize_filename(name)));
+        if let Err(e) = fs::write(&path, svg) {
+            eprintln!("Error writing '{}': {}", path.display(), e);
+            std::process::exit(1);
+        }
+        println!("{}", path.display());
+    }
+}
+
+/// Make a frame name safe to use as a filename.
+fn sanitize_filename(name: &str) -> String {
+    let cleaned: String = name
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' {
+                c
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    let trimmed = cleaned.trim_matches('-');
+    if trimmed.is_empty() {
+        "frame".to_string()
+    } else {
+        trimmed.to_string()
+    }
+}
+
+/// Resolve category names from the CLI, exiting with a helpful message on typos.
+fn parse_lint_categories(names: &[String]) -> Vec<LintCategory> {
+    names
+        .iter()
+        .map(|name| {
+            LintCategory::parse(name.trim()).unwrap_or_else(|| {
+                eprintln!(
+                    "Error: unknown lint category '{}'. Valid categories: {}",
+                    name,
+                    LintCategory::all_names()
+                );
+                std::process::exit(2);
+            })
+        })
+        .collect()
+}
 
 #[derive(Parser)]
 #[command(name = "agent-illustrator")]
@@ -71,6 +152,19 @@ struct Cli {
     #[arg(long)]
     lint: bool,
 
+    /// Only report these lint categories (comma-separated, repeatable).
+    /// Run --lint-categories to list the valid names.
+    #[arg(long, value_delimiter = ',')]
+    lint_category: Vec<String>,
+
+    /// Suppress these lint categories (comma-separated, repeatable)
+    #[arg(long, value_delimiter = ',')]
+    lint_exclude: Vec<String>,
+
+    /// List the lint category names and exit
+    #[arg(long)]
+    lint_categories: bool,
+
     /// How raster image paths (from "template X from file.png") appear in SVG output.
     /// Use 'base64' to embed images directly in the SVG for fully self-contained output.
     /// Use 'verbatim' (default) to keep paths as written in the AIL source.
@@ -80,6 +174,15 @@ struct Cli {
     /// Render a single keyframe as a static SVG (by index or name)
     #[arg(long)]
     frame: Option<String>,
+
+    /// Render every keyframe as a static SVG into this directory,
+    /// as <NN>-<name>.svg. The directory is created if needed.
+    #[arg(long, value_name = "DIR")]
+    frames_to_dir: Option<PathBuf>,
+
+    /// List the keyframe names in the input and exit
+    #[arg(long)]
+    list_frames: bool,
 
     /// Embed minimal JS for self-contained animated playback
     #[arg(long)]
@@ -154,6 +257,16 @@ fn main() {
         return;
     }
 
+    if cli.lint_categories {
+        for category in LintCategory::ALL {
+            println!("{}", category);
+        }
+        return;
+    }
+
+    let include_categories = parse_lint_categories(&cli.lint_category);
+    let exclude_categories = parse_lint_categories(&cli.lint_exclude);
+
     // If no input file and stdin is a terminal (interactive), show intro help
     if cli.input.is_none() && io::stdin().is_terminal() {
         print_intro();
@@ -221,7 +334,7 @@ fn main() {
         .with_trace(cli.trace)
         .with_lint(cli.lint)
         .with_image_href_mode(cli.image_href.into());
-    config.frame = cli.frame;
+    config.frame = cli.frame.clone();
     config.animate = cli.animate;
     config.animate_css = cli.animate_css;
     config.no_frame_css = cli.no_frame_css;
@@ -235,17 +348,68 @@ fn main() {
         }
     }
 
+    if cli.list_frames {
+        match frame_names(&source) {
+            Ok(names) if names.is_empty() => eprintln!("no keyframes in input"),
+            Ok(names) => {
+                for (i, name) in names.iter().enumerate() {
+                    println!("{}\t{}", i, name);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+
+    if let Some(dir) = &cli.frames_to_dir {
+        if cli.frame.is_some() || cli.animate || cli.animate_css {
+            eprintln!("Error: --frames-to-dir cannot be combined with --frame or --animate");
+            std::process::exit(2);
+        }
+        write_all_frames(&source, config, dir);
+        return;
+    }
+
     if cli.lint {
         match render_with_lint(&source, config) {
             Ok((svg, lint_warnings)) => {
                 println!("{}", svg);
-                if lint_warnings.is_empty() {
-                    eprintln!("lint: clean");
-                } else {
-                    for w in &lint_warnings {
-                        eprintln!("lint: {}: {}", w.category, w.message);
+                let total = lint_warnings.len();
+                let shown: Vec<_> = lint_warnings
+                    .iter()
+                    .filter(|w| {
+                        (include_categories.is_empty() || include_categories.contains(&w.category))
+                            && !exclude_categories.contains(&w.category)
+                    })
+                    .collect();
+                if shown.is_empty() {
+                    if total == 0 {
+                        eprintln!("lint: clean");
+                    } else {
+                        eprintln!("lint: clean in selected categories ({} filtered out)", total);
                     }
-                    eprintln!("lint: {} warning(s)", lint_warnings.len());
+                } else {
+                    for w in &shown {
+                        eprintln!(
+                            "lint: {}{}: {}",
+                            w.category,
+                            w.frame_suffix(),
+                            w.message
+                        );
+                    }
+                    let hidden = total - shown.len();
+                    if hidden > 0 {
+                        eprintln!(
+                            "lint: {} warning(s), {} filtered out",
+                            shown.len(),
+                            hidden
+                        );
+                    } else {
+                        eprintln!("lint: {} warning(s)", shown.len());
+                    }
                     std::process::exit(1);
                 }
             }
@@ -282,6 +446,8 @@ OPTIONS:
     --stylesheet-css   CSS stylesheet for colors and visual styling
     -s, --stylesheet   [Deprecated] TOML color palette
     -d, --debug        Show element bounds and IDs
+    --lint             Report layout defects (--lint-categories lists the kinds)
+    --frames-to-dir    Render every keyframe into a directory
     -h, --help         Print help
 
 QUICK START:
