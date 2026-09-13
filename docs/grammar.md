@@ -97,6 +97,9 @@ Common modifiers:
     height: <number>        Explicit height
     gap: <number>           Space between children (layouts)
     label: "text"           Add label to shape
+    align: start|center|end Text position in its box; cross-axis alignment
+                            of a row's/column's children (left/center/right
+                            are accepted spellings; default start)
     rotation: <degrees>     Rotate element (clockwise)
     class: <name>           Custom CSS class (for external styling)
     z_order: <number>       Render order for groups (higher = on top)
@@ -202,6 +205,9 @@ Transform geometry keys (inside keyframe transform [...]):
     width: N, height: N   Absolute target size
     scale: N           Uniform scale about the element's center
     rotation: N        Rotation in degrees
+Other transform keys: fill, stroke, opacity, align, and label (rewrites the
+element's words for that frame -- a text element's content or any element's
+label; the box grows to fit longer text but never shrinks).
 Position + rotation animate via a transform on the element's wrapper group (so the
 label rides along); size animates via the shape's width/height.
 

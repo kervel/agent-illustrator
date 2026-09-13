@@ -399,3 +399,59 @@ cell (0-indexed, sparse). `grid.cell(row, col)` addresses a cell's box in
 constraints, and a callout's `tip` anchor (the pointer apex) is aimed at it
 with a point-constraint. Callouts auto-size to their label and may overlap
 the content they annotate.
+
+EXAMPLE 9: Grid as an alignment scaffold (not a heatmap)
+--------------------------------------------------------
+// A grid is the general answer to "these should line up in rows and
+// columns" — a worked sum, a table, a calendar. Cells carry the layout;
+// `contains` over cell refs frames a block of them. No hand-computed
+// pitch, no per-digit constraints.
+grid digits [cols: 4, rows: 3, gap: 4, cell_width: 46, cell_height: 46,
+             col_labels: ["1000", "100", "10", "1"]] {
+    text "2" [at: [0, 0], align: center]
+    text "4" [at: [0, 1], align: center]
+    text "7" [at: [0, 2], align: center]
+    text "1" [at: [0, 3], align: center]
+    text "+" [at: [1, 0], align: center]
+    text "3" [at: [1, 2], align: center]
+    text "9" [at: [1, 3], align: center]
+    text "2" [at: [2, 2], align: center]
+    text "8" [at: [2, 3], align: center]
+}
+
+rect carry [fill: accent-light, stroke: accent-dark, opacity: 0.4]
+constrain carry contains digits.cell(0, 3), digits.cell(2, 3) [padding: 3]
+
+`align: center` centres each digit in its cell, so the columns line up
+whatever the glyph widths. The highlight is never sized by hand:
+`contains` over two cell refs spans the block between them.
+
+EXAMPLE 10: One caption across a keyframe walkthrough
+-----------------------------------------------------
+// `transform <element> [label: "..."]` rewrites an element's words for a
+// frame, so one caption follows the steps instead of one text element
+// per step plus its constraints and show/hide rules.
+row stage [gap: 60] {
+    rect client [width: 120, height: 50, label: "client"]
+    rect server [width: 120, height: 50, label: "server"]
+}
+client.right -> server.left as call
+
+text "the client sends a request" caption [width: 420, align: start]
+constrain caption.center_x = stage.center_x
+constrain caption.y = stage.bottom + 24
+
+keyframe "send" {
+    hide call
+}
+keyframe "arrive" {
+    show call
+    transform caption [label: "the server receives it"]
+}
+keyframe "reply" {
+    transform caption [label: "and answers", fill: accent-dark]
+}
+
+The caption box is wider than any wording and left-aligned, so the text
+holds its position across frames. `--frames-to-dir out/` renders them
+all; `--animate` plays them back.

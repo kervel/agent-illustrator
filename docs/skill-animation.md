@@ -62,12 +62,13 @@ Do NOT write the full animation at once. Build frame by frame:
 
 ### Phase 4: Lint Pass (MANDATORY)
 
-Run `--lint` and fix ALL warnings before proceeding. Overlap warnings between
-elements that are never visible simultaneously are false positives (the linter
-is not yet keyframe-aware), but all other warnings MUST be fixed:
+Run `--lint` and fix ALL warnings before proceeding. The linter is
+keyframe-aware: things never visible at the same time are not reported as
+colliding, and each defect is reported once, naming the frames it occurs in.
 
 ```bash
 agent-illustrator --lint file.ail 2>&1 | grep '^lint:'
+agent-illustrator --lint --lint-exclude redundant-constant file.ail   # narrow it
 ```
 
 **Fix these categories immediately:**
@@ -77,8 +78,8 @@ agent-illustrator --lint file.ail 2>&1 | grep '^lint:'
 - `redundant-constant:` — repeated magic numbers. Use element references instead.
 - `reducible-bend:` — unnecessary bends in connections. Align elements to simplify paths.
 
-**Safe to ignore:** `overlap:` warnings between transient elements that occupy the
-same position in different keyframes (they are never visible simultaneously).
+A warning tagged `[frame: x]` occurs only in that frame — render it and look.
+An untagged one is present in every frame.
 
 ### Phase 5: Frame-by-Frame Verification (MANDATORY)
 
@@ -86,11 +87,12 @@ After writing all keyframes, render EVERY frame as a static image and check each
 Delegate this to a subagent to avoid bloating the main context with image data:
 
 ```bash
-# Render each frame individually
-for frame in "startup" "request" "tool_call" "execute" "respond"; do
-  agent-illustrator file.ail --frame "$frame" > "frame_${frame}.svg"
-  google-chrome --headless --screenshot="frame_${frame}.png" --window-size=2400,1800 \
-    "file://$(pwd)/frame_${frame}.svg"
+# Render every frame in one command: out/00-startup.svg, out/01-request.svg, ...
+agent-illustrator file.ail --frames-to-dir out/
+
+for svg in out/*.svg; do
+  google-chrome --headless --screenshot="${svg%.svg}.png" --window-size=2400,1800 \
+    "file://$(pwd)/$svg"
 done
 ```
 
@@ -154,6 +156,24 @@ Position envelopes BETWEEN the actors they travel between:
 constrain msg.center_x = midpoint(sender, receiver)
 constrain msg.center_y = sender.center_y
 ```
+
+### One Caption, Not Ten Text Elements
+
+A narration line that changes per frame is ONE text element rewritten by each
+keyframe — not one element per step:
+
+```
+text "the client sends a request" caption [width: 420, align: start]
+constrain caption.center_x = stage.center_x
+constrain caption.y = stage.bottom + 24
+
+keyframe "arrive" { transform caption [label: "the server receives it"] }
+keyframe "reply"  { transform caption [label: "and answers"] }
+```
+
+Give the box a `width` sized for the longest wording plus `align: start`, so the
+text does not shift between frames. Ten stacked text elements would cost their
+own constraints, their own show/hide rules, and a pile of lint noise.
 
 ### Named Connections for Keyframe Control
 

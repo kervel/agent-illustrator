@@ -15,26 +15,40 @@ For specialized tasks, read the relevant sub-skill BEFORE starting:
   patterns (borderless cards, shadows, transitions), pattern/gradient fills
   (`fill: hatch(...)`, `fill: gradient(...)`), and dashed strokes. Use when diagrams need polish.
 
+## Reach For These First
+
+Check here before writing coordinates or a run of `constrain` lines.
+
+| What you want | Use | Never |
+|---------------|-----|-------|
+| A box around existing elements | `constrain bg contains a, b [padding: 30]` | Hand-computed `width`/`height` |
+| Anything on a lattice: matrix, table, calendar, aligned number columns | `grid` + `[at: [row, col]]`, cells as `g.cell(r, c)` | `constrain` lines with a hand-picked pitch |
+| Text that must not jump when its wording changes | fixed `width` + `align: start` | auto-sized and centred |
+| One caption across a walkthrough | `transform cap [label: "..."]` per keyframe | one text element per step |
+| Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
+| Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
+
+`grid` is not only for heatmaps: it is the general alignment scaffold. Empty
+cells are fine — place content by coordinate, address cells as `g.cell(r, c)`.
+
 ## When to Use AIL vs Raw SVG
 
-AIL is for **diagrams** (boxes, arrows, architecture, flows). For **free-form icons or illustrations**
-(a car, a robot, a logo), use **raw SVG** instead — the design phases and iteration workflow
-below still apply, but output `<svg>` with `<path d="...">` for direct coordinate control.
+AIL is for **diagrams** (boxes, arrows, architecture, flows). For **free-form icons or
+illustrations** (a car, a robot, a logo), use **raw SVG** — the design phases and iteration
+workflow below still apply, but output `<path d="...">` for direct coordinate control.
 
 ## BEFORE YOU START (MANDATORY)
 
-You MUST complete these steps before writing any AIL code:
+Before writing any AIL code:
 
-1. Run `agent-illustrator --grammar` — read the FULL grammar specification
+1. Run `agent-illustrator --grammar` — the full, authoritative syntax spec
 2. Run `agent-illustrator --examples` — study ALL annotated examples
 3. Plan your iteration: you will render, check, and refine multiple times
 
-The syntax reference below is a SUMMARY. The grammar has the complete specification.
-Do NOT start writing AIL until you have read both --grammar and --examples.
+The reference below is a summary; do NOT start until you have read both.
 
-For diagrams with more than 8 elements, you MUST use constraint-based positioning
-(as shown in Example 6 of --examples). Do NOT use nested row/col for the main layout
-of complex diagrams — it creates overlapping elements and bad connection routing.
+Above 8 elements, position with constraints (Example 6 in --examples). Nested
+row/col for a complex main layout produces overlaps and bad routing.
 
 ---
 
@@ -132,9 +146,9 @@ After each render, verify ALL of these. If any fail, fix and re-render:
 
 ### Adversarial Review (MANDATORY before declaring done)
 
-Adversarial review only works when done by unbiased agents. therefore, subagent is the preferred technique. Note: this is an expensive step. So don't do it before you solved everything else.
+Review only works unbiased, so a subagent is preferred. It is expensive — do it last.
 
-**Option A — Subagent review (preferred):** Render to PNG first, then spawn a subagent with the PNG file path and the original prompt. The subagent MUST use the Read tool to view the image directly — do NOT describe the diagram to the subagent, that reintroduces your own bias and defeats the purpose.
+**Option A — Subagent review (preferred):** Render to PNG, then spawn a subagent with the PNG path and the original prompt. It MUST Read the image itself — describing the diagram reintroduces your bias.
 
 Use this exact prompt for the subagent:
 
@@ -145,11 +159,11 @@ Use this exact prompt for the subagent:
 > - Only report what you can actually see. Do not speculate about intent.
 > - If no defects found, say "CLEAN".
 
-Fix all CERTAIN defects and verify each POSSIBLE defect before fixing or dismissing. When you got substantial feedback, do a complete new iteration (including all other steps)
+Fix every CERTAIN defect; verify each POSSIBLE one before fixing or dismissing. Substantial feedback means a full new iteration.
 
-**Option B — Self-review (ONLY if subagents unavailable):** Describe every element and its spatial relationships in text. Then compare that description to the actual image. Mismatches are bugs. Go element-by-element: for each one, ask "what's wrong with THIS one?" Look for gaps, detached parts, overlapping labels, misaligned edges.
+**Option B — Self-review (ONLY if subagents unavailable):** Describe every element and its spatial relationships, then compare that to the actual image. Mismatches are bugs. Element by element, ask "what's wrong with THIS one?" — gaps, detached parts, overlapping labels, misaligned edges.
 
-Do NOT declare done until the adversarial review passes clean.
+Not done until the review is clean.
 
 ---
 
@@ -214,17 +228,34 @@ tag.tip -> box [routing: direct]       // or aim with a connection
 
 Callouts are exempt from overlap lint — they are meant to sit over what they annotate.
 
-#### Grid (lattice / matrix / heatmap)
+#### Text alignment
+
+`align: start|center|end` (or `left`/`center`/`right`): where text sits in its
+own box, and which edge a container's children line up on. Default is `start`.
+
+```
+text "caption" cap [width: 400, align: start]    // left-aligned in a 400px box
+rect r [width: 200, label: "title", align: left] // label inset from the border
+col steps [gap: 10, align: center]               // children centred
+row legend [gap: 8, align: end]                  // children share a bottom edge
+```
+
+An auto-sized text box is exactly as wide as its words, so changing text shifts
+it. For any text that changes, give it a `width` sized for the longest wording
+plus `align: start`.
+
+#### Grid (any row/column alignment: matrix, table, heatmap, number columns)
 
 `grid g [cols: 6, rows: 6, gap: 5, cell_width: 56, cell_height: 56]` lays a
 regular lattice. Place children by coordinate with `[at: [row, col]]` (0-indexed);
-unplaced children fill row-major; unoccupied cells stay empty — so sparse or
-triangular grids are trivial. Children without a size inherit the cell size.
+unplaced children fill row-major; empty cells stay empty, so sparse or triangular
+grids are trivial. Children without a size inherit the cell size.
 
-`col_labels: [...]` / `row_labels: [...]` add aligned text gutters. Address any
-cell as `g.cell(row, col)` in `constrain`/connections (e.g. to aim a callout).
-For an attention-heatmap, use one hue with per-cell `fill_opacity`. See the
-attention-heatmap example in `--examples`.
+Address any cell as `g.cell(row, col)` in `constrain`/connections — that is what
+makes a grid an alignment scaffold rather than just a picture: draw a frame
+around a block of cells, aim a callout at one, connect two. `col_labels: [...]`
+/ `row_labels: [...]` add aligned text gutters. For a heatmap, use one hue with
+per-cell `fill_opacity`. See `--examples`.
 
 ### Layout Strategy
 
@@ -252,14 +283,16 @@ source.bottom -> target.top [routing: curved, via: via_pt]
 ```
 Keep via-points 30-60px from the connection line. Too far = huge loops.
 
-#### Background containers
+#### Fitting a box around elements (`contains`)
 
-Use `contains` to auto-size a background rect around its content:
+Any box that should wrap existing elements — a background zone, a frame, a
+highlight — is sized by `contains`, never by hand:
 ```
 rect bg [fill: accent-light, stroke: accent-dark, opacity: 0.3]
 constrain bg contains svc1, svc2, svc3 [padding: 30]
 ```
-The container grows to fit all listed elements with the specified padding. Declare backgrounds FIRST in a `group` so they render behind foreground elements.
+The box grows to fit everything listed, plus the padding. Declare backgrounds
+FIRST in a `group` so they render behind the foreground.
 
 ### Template Best Practices
 
@@ -292,9 +325,11 @@ Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2
 
 Do not attempt to use these — they will waste iteration cycles:
 
-- `padding`, `margin`, `border`, `align` modifiers — use `constrain`, `gap`, `stroke`
-- `label` on `text` elements — use `text "content" name`, not `text name [label: "content"]`
+- `padding`, `margin`, `border` modifiers — use `constrain`, `gap`, `stroke`
 - Percentage-based sizing — all sizes are in pixels
+
+`text name [label: "content"]` does not create text — use `text "content" name`.
+(`label:` in a keyframe `transform` *does* rewrite an element's words.)
 
 ### Common Pitfalls
 
@@ -319,7 +354,8 @@ Create animated sequences where elements appear/disappear across frames.
 ### Workflow
 1. Layout all elements globally with constraints
 2. Add `keyframe` blocks to control visibility per frame
-3. Use `--frame N` to verify each frame as a static image
+3. Run `--frames-to-dir out/` to write every frame as a static SVG, then look at
+   each one (`--list-frames` prints the names; `--frame <name>` renders one)
 4. Use `--animate` for self-contained playback, or add external CSS transitions
 
 ### Syntax
@@ -332,15 +368,35 @@ keyframe "startup" {
 keyframe "request" {
     show envelope, req_arrow          // Show in this frame
     transform server [rotation: 10]   // Per-frame overrides
+    transform caption [label: "the server receives the request"]
 }
 ```
+
+### One caption for the whole walkthrough
+
+`transform <element> [label: "..."]` rewrites an element's words for that frame
+— a text element's content, or any other element's label:
+
+```
+text "the client sends a request" caption [width: 420, align: start]
+constrain caption.y = stage.bottom + 24
+
+keyframe "send" { }
+keyframe "receive" { transform caption [label: "the server receives it"] }
+keyframe "reply"   { transform caption [label: "and answers"] }
+```
+
+One caption beats one text element per step. Size the box for the longest
+wording and use `align: start`; a box grows to fit but never shrinks.
 
 ### Key Rules
 - Keyframes are **cumulative**: each builds on the previous
 - Without keyframes, everything is visible (backward compatible)
 - References to nonexistent elements are hard errors
-- The linter checks overlaps per-frame (no false positives from hidden elements)
-- Use `--frame "name"` to render and verify individual frames
+- The linter checks collisions per-frame: things that are never visible at the
+  same time are never reported as overlapping, and a defect is reported once,
+  naming the frames it occurs in
+- Use `--frames-to-dir <dir>` to render every frame in one command
 
 ---
 

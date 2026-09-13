@@ -446,6 +446,8 @@ OPTIONS:
     --stylesheet-css   CSS stylesheet for colors and visual styling
     -s, --stylesheet   [Deprecated] TOML color palette
     -d, --debug        Show element bounds and IDs
+    --lint             Report layout defects (--lint-categories lists the kinds)
+    --frames-to-dir    Render every keyframe into a directory
     -h, --help         Print help
 
 QUICK START:
