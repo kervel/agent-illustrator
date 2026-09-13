@@ -17,8 +17,72 @@ use std::path::PathBuf;
 use clap::Parser;
 
 use agent_illustrator::{
-    render_with_config, render_with_lint, ImageHrefMode, LintCategory, RenderConfig, Stylesheet,
+    frame_names, render_with_config, render_with_lint, ImageHrefMode, LintCategory, RenderConfig,
+    Stylesheet,
 };
+
+/// Render every keyframe into `dir` as `<NN>-<name>.svg`.
+///
+/// One command instead of a shell loop over hand-copied frame names, so
+/// checking that every frame renders correctly stays a single step.
+fn write_all_frames(source: &str, config: RenderConfig, dir: &std::path::Path) {
+    let names = match frame_names(source) {
+        Ok(names) => names,
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
+    if names.is_empty() {
+        eprintln!("Error: --frames-to-dir requires keyframes in the input");
+        std::process::exit(1);
+    }
+    if let Err(e) = fs::create_dir_all(dir) {
+        eprintln!("Error creating directory '{}': {}", dir.display(), e);
+        std::process::exit(1);
+    }
+
+    for (i, name) in names.iter().enumerate() {
+        // Select by index: a frame named "2" would otherwise be ambiguous.
+        let mut frame_config = config.clone();
+        frame_config.frame = Some(i.to_string());
+
+        let svg = match render_with_config(source, frame_config) {
+            Ok(svg) => svg,
+            Err(e) => {
+                eprintln!("Error rendering frame '{}': {}", name, e);
+                std::process::exit(1);
+            }
+        };
+
+        let path = dir.join(format!("{:02}-{}.svg", i, sanitize_filename(name)));
+        if let Err(e) = fs::write(&path, svg) {
+            eprintln!("Error writing '{}': {}", path.display(), e);
+            std::process::exit(1);
+        }
+        println!("{}", path.display());
+    }
+}
+
+/// Make a frame name safe to use as a filename.
+fn sanitize_filename(name: &str) -> String {
+    let cleaned: String = name
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' {
+                c
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    let trimmed = cleaned.trim_matches('-');
+    if trimmed.is_empty() {
+        "frame".to_string()
+    } else {
+        trimmed.to_string()
+    }
+}
 
 /// Resolve category names from the CLI, exiting with a helpful message on typos.
 fn parse_lint_categories(names: &[String]) -> Vec<LintCategory> {
@@ -110,6 +174,15 @@ struct Cli {
     /// Render a single keyframe as a static SVG (by index or name)
     #[arg(long)]
     frame: Option<String>,
+
+    /// Render every keyframe as a static SVG into this directory,
+    /// as <NN>-<name>.svg. The directory is created if needed.
+    #[arg(long, value_name = "DIR")]
+    frames_to_dir: Option<PathBuf>,
+
+    /// List the keyframe names in the input and exit
+    #[arg(long)]
+    list_frames: bool,
 
     /// Embed minimal JS for self-contained animated playback
     #[arg(long)]
@@ -261,7 +334,7 @@ fn main() {
         .with_trace(cli.trace)
         .with_lint(cli.lint)
         .with_image_href_mode(cli.image_href.into());
-    config.frame = cli.frame;
+    config.frame = cli.frame.clone();
     config.animate = cli.animate;
     config.animate_css = cli.animate_css;
     config.no_frame_css = cli.no_frame_css;
@@ -273,6 +346,31 @@ fn main() {
         if let Some(parent) = path.parent() {
             config = config.with_template_base_path(parent.to_path_buf());
         }
+    }
+
+    if cli.list_frames {
+        match frame_names(&source) {
+            Ok(names) if names.is_empty() => eprintln!("no keyframes in input"),
+            Ok(names) => {
+                for (i, name) in names.iter().enumerate() {
+                    println!("{}\t{}", i, name);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+
+    if let Some(dir) = &cli.frames_to_dir {
+        if cli.frame.is_some() || cli.animate || cli.animate_css {
+            eprintln!("Error: --frames-to-dir cannot be combined with --frame or --animate");
+            std::process::exit(2);
+        }
+        write_all_frames(&source, config, dir);
+        return;
     }
 
     if cli.lint {

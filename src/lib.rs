@@ -567,6 +567,18 @@ fn render_pipeline(
     Ok((svg, lint_warnings))
 }
 
+/// Names of the keyframes declared in `source`, in declaration order.
+///
+/// Empty for a document without keyframes.  Useful for rendering every
+/// frame without having to transcribe the names out of the source.
+pub fn frame_names(source: &str) -> Result<Vec<String>, RenderError> {
+    let doc = parse(source)?;
+    Ok(layout::keyframe::extract_keyframes(&doc)
+        .iter()
+        .map(|kf| kf.name.node.clone())
+        .collect())
+}
+
 /// Resolve a frame selector (index or name) to an index
 fn resolve_frame_index(
     selector: &str,
