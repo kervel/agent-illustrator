@@ -61,6 +61,9 @@ pub struct ElementDiff {
     pub opacity: Option<f64>,
     pub fill: Option<String>,
     pub stroke: Option<String>,
+    /// Replacement text for this frame (a text shape's content, or an
+    /// element's label), when a keyframe rewrote it.
+    pub label: Option<String>,
 }
 
 /// Diff for a connection between frame N and frame 0
@@ -84,6 +87,7 @@ impl ElementDiff {
             && self.opacity.is_none()
             && self.fill.is_none()
             && self.stroke.is_none()
+            && self.label.is_none()
     }
 }
 
@@ -467,6 +471,42 @@ fn apply_transform_to_element(
     }
 }
 
+/// Read a modifier value that carries text.
+fn string_value(value: &StyleValue) -> Option<&str> {
+    match value {
+        StyleValue::String(s) => Some(s.as_str()),
+        StyleValue::Keyword(k) => Some(k.as_str()),
+        StyleValue::Identifier(id) => Some(id.0.as_str()),
+        _ => None,
+    }
+}
+
+/// Replace an element's text for this frame.
+///
+/// A text shape carries its words in its shape type; every other element
+/// carries them in its label.  The box grows if the new text needs more room
+/// but never shrinks, so a caption given a deliberate width keeps it.
+fn set_element_text(elem: &mut ElementLayout, text: &str) {
+    use crate::layout::types::ElementType;
+    use crate::parser::ast::ShapeType;
+
+    match &mut elem.element_type {
+        ElementType::Shape(ShapeType::Text { content }) => {
+            *content = text.to_string();
+            let font_size = elem.styles.font_size.unwrap_or(14.0);
+            let needed = (text.len() as f64 * font_size * 0.6).max(20.0);
+            if needed > elem.bounds.width {
+                elem.bounds.width = needed;
+            }
+        }
+        _ => {
+            if let Some(label) = &mut elem.label {
+                label.text = text.to_string();
+            }
+        }
+    }
+}
+
 /// Apply transform modifiers in a fixed order against the element's base bounds:
 /// 1) absolutes + visual, 2) dx/dy deltas, 3) scale about center.
 fn apply_modifiers_ordered(
@@ -480,6 +520,8 @@ fn apply_modifiers_ordered(
     // Pass 1: absolutes + visual
     for m in modifiers {
         match &m.node.key.node {
+            StyleKey::Label => { if let Some(text) = string_value(&m.node.value.node) { set_element_text(elem, text); } }
+            StyleKey::Align => { elem.styles.align = crate::layout::types::parse_align(&m.node.value.node); }
             StyleKey::Rotation => { if let Some(v) = num(&m.node.value.node) { elem.styles.rotation = Some(v); } }
             StyleKey::Fill => { elem.styles.fill = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Stroke => { elem.styles.stroke = ResolvedStyles::color_to_css(&m.node.value.node); }
@@ -561,7 +603,23 @@ fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
         diff.stroke = solved.styles.stroke.clone();
     }
 
+    let base_text = element_text(base);
+    let solved_text = element_text(solved);
+    if base_text != solved_text {
+        diff.label = solved_text.map(|t| t.to_string());
+    }
+
     diff
+}
+
+/// The words an element shows: a text shape's content, else its label.
+fn element_text(elem: &ElementLayout) -> Option<&str> {
+    use crate::layout::types::ElementType;
+    use crate::parser::ast::ShapeType;
+    match &elem.element_type {
+        ElementType::Shape(ShapeType::Text { content }) => Some(content.as_str()),
+        _ => elem.label.as_ref().map(|l| l.text.as_str()),
+    }
 }
 
 /// Get the set of visible element IDs for a given frame.

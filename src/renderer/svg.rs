@@ -9,6 +9,29 @@ use crate::stylesheet::Stylesheet;
 
 use super::SvgConfig;
 
+/// Every distinct wording a keyframe gives an element, in first-seen order.
+///
+/// Transforms are cumulative, so a rewrite in one frame still shows up in the
+/// diffs of every later frame; collecting distinct texts keeps that from
+/// emitting the same `<text>` node once per frame.
+pub(crate) fn collect_text_variants(
+    frame_diffs: &[crate::layout::keyframe::FrameLayout],
+) -> std::collections::HashMap<String, Vec<String>> {
+    let mut variants: std::collections::HashMap<String, Vec<String>> =
+        std::collections::HashMap::new();
+    for frame in frame_diffs {
+        for (elem_id, diff) in &frame.element_diffs {
+            if let Some(text) = &diff.label {
+                let texts = variants.entry(elem_id.clone()).or_default();
+                if !texts.iter().any(|t| t == text) {
+                    texts.push(text.clone());
+                }
+            }
+        }
+    }
+    variants
+}
+
 /// The x coordinate that anchors text to the given edge of a box.
 fn anchor_x(bounds: &BoundingBox, anchor: TextAnchor) -> f64 {
     match anchor {
@@ -30,6 +53,10 @@ pub struct SvgBuilder {
     indent: usize,
     /// Frame names for data-frames attribute (Feature 011)
     data_frames: Option<String>,
+    /// Per-element replacement text per frame, for keyframes that rewrite an
+    /// element's words: element id -> [(frame name, text)].  CSS cannot swap
+    /// text, so each variant is rendered as its own hidden `<text>` node.
+    text_variants: std::collections::HashMap<String, Vec<String>>,
 }
 
 impl SvgBuilder {
@@ -44,7 +71,21 @@ impl SvgBuilder {
             connections: vec![],
             indent: 1,
             data_frames: None,
+            text_variants: std::collections::HashMap::new(),
         }
+    }
+
+    /// Register the per-frame text variants to render alongside base text.
+    pub fn set_text_variants(
+        &mut self,
+        variants: std::collections::HashMap<String, Vec<String>>,
+    ) {
+        self.text_variants = variants;
+    }
+
+    /// The alternative wordings registered for an element, if any.
+    fn variants_for(&self, id: &str) -> Vec<String> {
+        self.text_variants.get(id).cloned().unwrap_or_default()
     }
 
     /// Add raw CSS to the SVG `<style>` block
@@ -737,6 +778,8 @@ pub fn render_svg_with_keyframes(
         .filter(|id| !frame0_hidden.contains(id))
         .collect();
 
+    builder.set_text_variants(collect_text_variants(frame_diffs));
+
     let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
     sorted_elements.sort_by_key(|e| e.z_order);
     for element in &sorted_elements {
@@ -829,6 +872,7 @@ fn generate_keyframe_css(
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
     conn_meta: &std::collections::HashMap<String, (RoutingMode, bool, f64)>,
 ) -> String {
+    let text_variants = collect_text_variants(frame_diffs);
     let mut css = String::new();
     css.push_str("/* Keyframe animation CSS (auto-generated) */\n");
     css.push_str(".kf-hidden { opacity: 0; }\n");
@@ -874,6 +918,16 @@ fn generate_keyframe_css(
                     elem_id,
                     props.join("; ")
                 ));
+            }
+            // Rewritten text: fade the base wording out and this frame's in.
+            if let Some(text) = &diff.label {
+                if let Some(n) = text_variants
+                    .get(elem_id)
+                    .and_then(|texts| texts.iter().position(|t| t == text))
+                {
+                    css.push_str(&format!("  .aitxt-{}-base {{ opacity: 0; }}\n", elem_id));
+                    css.push_str(&format!("  .aitxt-{}-v{} {{ opacity: 1; }}\n", elem_id, n));
+                }
             }
         }
 
@@ -1121,16 +1175,37 @@ fn render_element_inner(
             let combined_styles = format!("{}{}", font_styles, fill_style);
             let anchor = element.styles.align.unwrap_or(TextAnchor::Start);
             let x = anchor_x(&element.bounds, anchor);
+            let y = element.bounds.y + element.bounds.height / 2.0;
+            // Keyframes that rewrite this text render each wording as its own
+            // hidden node next to the base one; CSS cannot swap text content.
+            let variants = id.map(|i| builder.variants_for(i)).unwrap_or_default();
+            let mut base_classes = classes.clone();
+            if let (Some(i), false) = (id, variants.is_empty()) {
+                base_classes.push(format!("aitxt-{}-base", i));
+            }
             render_shape_with_rotation(element, builder, |b| {
                 b.add_text_element(
                     id,
                     content,
                     x,
-                    element.bounds.y + element.bounds.height / 2.0,
+                    y,
                     &anchor,
-                    &classes,
+                    &base_classes,
                     &combined_styles,
                 );
+                for (n, text) in variants.iter().enumerate() {
+                    let mut variant_classes = classes.clone();
+                    variant_classes.push(format!("aitxt-{}-v{}", id.unwrap_or(""), n));
+                    b.add_text_element(
+                        None,
+                        text,
+                        x,
+                        y,
+                        &anchor,
+                        &variant_classes,
+                        &format!("{} opacity=\"0\"", combined_styles),
+                    );
+                }
             });
         }
         ElementType::Shape(ShapeType::SvgEmbed {
@@ -1285,13 +1360,35 @@ fn render_element_inner(
             .font_size
             .map(|fs| format!(r#" font-size="{}""#, fs))
             .unwrap_or_default();
-        builder.add_text(
+        let variants = element
+            .id
+            .as_ref()
+            .map(|id| builder.variants_for(&id.0))
+            .unwrap_or_default();
+        let own_id = element.id.as_ref().map(|id| id.0.clone()).unwrap_or_default();
+        let base_classes = if variants.is_empty() {
+            String::new()
+        } else {
+            format!("aitxt-{}-base", own_id)
+        };
+        builder.add_text_with_classes(
             &label.text,
             label.position.x,
             label.position.y,
             &label.anchor,
             &font_styles,
+            &base_classes,
         );
+        for (n, text) in variants.iter().enumerate() {
+            builder.add_text_with_classes(
+                text,
+                label.position.x,
+                label.position.y,
+                &label.anchor,
+                &format!("{} opacity=\"0\"", font_styles),
+                &format!("aitxt-{}-v{}", own_id, n),
+            );
+        }
     }
 }
 
