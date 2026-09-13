@@ -404,9 +404,9 @@ EXAMPLE 9: Grid as an alignment scaffold (not a heatmap)
 --------------------------------------------------------
 // A grid is the general answer to "these should line up in rows and
 // columns" — a worked sum, a table, a calendar. Cells carry the layout;
-// `contains` over cell refs frames a block of them. No hand-computed
-// pitch, no per-digit constraints.
-grid digits [cols: 4, rows: 3, gap: 4, cell_width: 46, cell_height: 46,
+// cell refs position the rule and frame a block. No hand-computed pitch,
+// no per-digit constraints.
+grid digits [cols: 4, rows: 3, gap: 8, cell_width: 38, cell_height: 44,
              col_labels: ["1000", "100", "10", "1"]] {
     text "2" [at: [0, 0], align: center]
     text "4" [at: [0, 1], align: center]
@@ -419,12 +419,26 @@ grid digits [cols: 4, rows: 3, gap: 4, cell_width: 46, cell_height: 46,
     text "8" [at: [2, 3], align: center]
 }
 
+// The rule sits IN the gap between the rows, not on the boundary.
+rect rule [height: 3, fill: foreground-1, stroke: none]
+constrain rule.left = digits.cell(1, 0).left
+constrain rule.right = digits.cell(1, 3).right
+constrain rule.top = digits.cell(1, 3).bottom + 2
+
 rect carry [fill: accent-light, stroke: accent-dark, opacity: 0.4]
-constrain carry contains digits.cell(0, 3), digits.cell(2, 3) [padding: 3]
+constrain carry contains digits.cell(0, 3), digits.cell(2, 3) [padding: 2]
 
 `align: center` centres each digit in its cell, so the columns line up
 whatever the glyph widths. The highlight is never sized by hand:
 `contains` over two cell refs spans the block between them.
+
+Three details that make this lint clean. The grid has a `gap`, so the
+rule has somewhere to live: with `gap: 0` the cells touch and a rule on a
+row boundary necessarily overlaps a neighbouring row. The rule is
+positioned by its edges (`.left` / `.right` / `.top`), not by `contains`,
+which would free its height and turn 3px into a whole cell. And the
+highlight is drawn see-through, so the digits resting on it are not
+collisions.
 
 EXAMPLE 10: One caption across a keyframe walkthrough
 -----------------------------------------------------
