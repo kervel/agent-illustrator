@@ -1,0 +1,26 @@
+// Ten captions occupying the same spot, one visible per frame.
+// They can never collide, so the linter must stay quiet about them.
+rect stage [width: 300, height: 120]
+
+text "the first step of the walkthrough" cap1
+text "the second step of the walkthrough" cap2
+text "the third step of the walkthrough" cap3
+
+constrain cap1.center_x = stage.center_x
+constrain cap2.center_x = stage.center_x
+constrain cap3.center_x = stage.center_x
+constrain cap1.y = stage.bottom + 20
+constrain cap2.y = stage.bottom + 20
+constrain cap3.y = stage.bottom + 20
+
+keyframe "one" {
+  hide cap2, cap3
+}
+keyframe "two" {
+  hide cap1
+  show cap2
+}
+keyframe "three" {
+  hide cap2
+  show cap3
+}

@@ -17,14 +17,34 @@ use super::types::{
 };
 
 /// A lint warning about a layout defect
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LintWarning {
     pub category: LintCategory,
     pub message: String,
+    /// Keyframes in which this defect occurs.  Empty means the defect is
+    /// frame-independent (no keyframes, or present in every frame).
+    pub frames: Vec<String>,
+}
+
+impl LintWarning {
+    /// Human-readable frame annotation, e.g. ` [frames: step-2, step-3]`.
+    /// Empty when the warning is frame-independent.
+    pub fn frame_suffix(&self) -> String {
+        match self.frames.len() {
+            0 => String::new(),
+            1 => format!(" [frame: {}]", self.frames[0]),
+            n if n <= 3 => format!(" [frames: {}]", self.frames.join(", ")),
+            n => format!(
+                " [frames: {}, +{} more]",
+                self.frames[..3].join(", "),
+                n - 3
+            ),
+        }
+    }
 }
 
 /// Category of lint defect
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LintCategory {
     Overlap,
     Containment,
@@ -39,6 +59,41 @@ pub enum LintCategory {
     CrowdedLayout,
     OverConstrained,
     LabelOverflow,
+}
+
+impl LintCategory {
+    /// Every category, in the order they are documented.
+    pub const ALL: [LintCategory; 13] = [
+        LintCategory::Overlap,
+        LintCategory::Containment,
+        LintCategory::Label,
+        LintCategory::Connection,
+        LintCategory::Alignment,
+        LintCategory::RedundantConstant,
+        LintCategory::ReducibleBend,
+        LintCategory::MissingAnchor,
+        LintCategory::Contrast,
+        LintCategory::SteepDirect,
+        LintCategory::CrowdedLayout,
+        LintCategory::OverConstrained,
+        LintCategory::LabelOverflow,
+    ];
+
+    /// Parse a category from its kebab-case name (as printed by `Display`).
+    pub fn parse(name: &str) -> Option<LintCategory> {
+        LintCategory::ALL
+            .into_iter()
+            .find(|c| c.to_string() == name)
+    }
+
+    /// Comma-separated list of all category names, for error messages.
+    pub fn all_names() -> String {
+        LintCategory::ALL
+            .iter()
+            .map(|c| c.to_string())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
 }
 
 impl fmt::Display for LintCategory {
@@ -68,34 +123,34 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     let mut warnings = Vec::new();
     let contains_ids = collect_contains_ids(doc);
 
-    // Keyframe-aware overlap detection (Feature 011)
+    // Keyframe-aware collision detection (Feature 011).
+    //
+    // Every check that asks "do these two things collide?" is only
+    // meaningful for things that are on screen *at the same time*.  With
+    // keyframes we therefore run those checks once per frame against that
+    // frame's visible set, and merge the results afterwards: a defect that
+    // shows up in every frame is reported once without annotation, one that
+    // only shows up in some frames is reported once naming those frames.
     let keyframes = super::keyframe::extract_keyframes(doc);
     let frame_states = super::keyframe::compute_frame_states(&keyframes);
 
     if frame_states.is_empty() {
-        // No keyframes — run overlap checks globally as before
-        check_overlaps(result, &contains_ids, &HashSet::new(), &mut warnings);
+        check_collisions(result, &contains_ids, &FrameScope::all_visible(), &mut warnings);
     } else {
-        // Run overlap checks per frame, excluding hidden elements
+        let mut per_frame: Vec<(String, Vec<LintWarning>)> = Vec::with_capacity(frame_states.len());
         for state in &frame_states {
-            check_overlaps(result, &contains_ids, &state.hidden_elements, &mut warnings);
+            let scope = FrameScope {
+                hidden_elements: &state.hidden_elements,
+                hidden_connections: &state.hidden_connections,
+            };
+            let mut frame_warnings = Vec::new();
+            check_collisions(result, &contains_ids, &scope, &mut frame_warnings);
+            per_frame.push((state.name.clone(), frame_warnings));
         }
+        merge_frame_warnings(per_frame, &mut warnings);
     }
 
     check_contains(result, doc, &mut warnings);
-    check_labels(result, &mut warnings);
-    check_label_element_overlaps(result, &mut warnings);
-
-    // Connection crossing checks — keyframe-aware
-    if frame_states.is_empty() {
-        check_connections(result, &HashSet::new(), &HashSet::new(), &mut warnings);
-    } else {
-        for state in &frame_states {
-            check_connections(result, &state.hidden_elements, &state.hidden_connections, &mut warnings);
-        }
-    }
-
-    check_label_connection_overlaps(result, &mut warnings);
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
@@ -105,7 +160,106 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_crowded_layouts(doc, &mut warnings);
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
+    dedup_warnings(&mut warnings);
     warnings
+}
+
+/// Which elements and connections are on screen for the check currently running.
+///
+/// Element visibility is resolved by pruning during traversal: hiding a group
+/// hides everything inside it, so a subtree is skipped as soon as its root is
+/// hidden and nested children need no explicit entry in `hidden_elements`.
+pub(crate) struct FrameScope<'a> {
+    hidden_elements: &'a HashSet<String>,
+    hidden_connections: &'a HashSet<String>,
+}
+
+/// An empty scope: nothing is hidden (documents without keyframes).
+static NOTHING_HIDDEN: std::sync::OnceLock<HashSet<String>> = std::sync::OnceLock::new();
+
+impl FrameScope<'static> {
+    fn all_visible() -> Self {
+        let empty = NOTHING_HIDDEN.get_or_init(HashSet::new);
+        FrameScope {
+            hidden_elements: empty,
+            hidden_connections: empty,
+        }
+    }
+}
+
+impl FrameScope<'_> {
+    fn hides_element(&self, elem: &ElementLayout) -> bool {
+        elem.id
+            .as_ref()
+            .is_some_and(|id| self.hidden_elements.contains(&id.0))
+    }
+
+    fn hides_connection(&self, name: Option<&str>) -> bool {
+        name.is_some_and(|n| self.hidden_connections.contains(n))
+    }
+}
+
+/// All checks whose verdict depends on what is visible at the same moment.
+fn check_collisions(
+    result: &LayoutResult,
+    contains_ids: &HashSet<String>,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
+    check_overlaps(result, contains_ids, scope, warnings);
+    check_labels(result, scope, warnings);
+    check_label_element_overlaps(result, scope, warnings);
+    check_connections(result, scope, warnings);
+    check_label_connection_overlaps(result, scope, warnings);
+}
+
+/// Collapse per-frame warnings into one warning per distinct defect.
+///
+/// A defect seen in every frame is frame-independent and reported bare; one
+/// seen in a subset carries the frame names so the reader knows where to look.
+fn merge_frame_warnings(
+    per_frame: Vec<(String, Vec<LintWarning>)>,
+    out: &mut Vec<LintWarning>,
+) {
+    let frame_count = per_frame.len();
+    // Preserve first-seen order; group by (category, message).
+    let mut order: Vec<(LintCategory, String)> = Vec::new();
+    let mut frames_by_defect: HashMap<(LintCategory, String), Vec<String>> = HashMap::new();
+
+    for (frame_name, frame_warnings) in per_frame {
+        let mut seen_this_frame: HashSet<(LintCategory, String)> = HashSet::new();
+        for w in frame_warnings {
+            let key = (w.category, w.message.clone());
+            if !seen_this_frame.insert(key.clone()) {
+                continue;
+            }
+            let entry = frames_by_defect.entry(key.clone()).or_insert_with(|| {
+                order.push(key.clone());
+                Vec::new()
+            });
+            entry.push(frame_name.clone());
+        }
+    }
+
+    for key in order {
+        let frames = frames_by_defect.remove(&key).unwrap_or_default();
+        let (category, message) = key;
+        out.push(LintWarning {
+            category,
+            message,
+            frames: if frames.len() == frame_count {
+                Vec::new()
+            } else {
+                frames
+            },
+        });
+    }
+}
+
+/// Drop exact duplicates, keeping the first occurrence.
+fn dedup_warnings(warnings: &mut Vec<LintWarning>) {
+    let mut seen: HashSet<(LintCategory, String)> = HashSet::new();
+    warnings.retain(|w| seen.insert((w.category, w.message.clone())));
 }
 
 /// Display name for an element: its ID if named, or positional path if anonymous.
@@ -233,17 +387,14 @@ fn collect_contains_ids_from_stmts(
 fn check_overlaps(
     result: &LayoutResult,
     contains_ids: &HashSet<String>,
-    hidden_ids: &HashSet<String>,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
     // Filter out hidden elements for keyframe-aware overlap detection
     let visible_roots: Vec<&ElementLayout> = result
         .root_elements
         .iter()
-        .filter(|e| {
-            e.id.as_ref()
-                .is_none_or(|id| !hidden_ids.contains(&id.0))
-        })
+        .filter(|e| !scope.hides_element(e))
         .collect();
 
     // Collect references for sibling check
@@ -252,7 +403,7 @@ fn check_overlaps(
 
     // Then recurse into each visible element's children
     for elem in &visible_roots {
-        check_overlaps_recursive(elem, None, contains_ids, warnings);
+        check_overlaps_recursive(elem, None, contains_ids, scope, warnings);
     }
 }
 
@@ -321,6 +472,7 @@ fn check_overlap_siblings(
                         "elements {} and {} overlap by {:.0}x{:.0}px",
                         name_a, name_b, overlap_w, overlap_h
                     ),
+                    frames: Vec::new(),
                 });
             }
         }
@@ -367,6 +519,7 @@ fn check_overlaps_recursive(
     parent: &ElementLayout,
     template_prefix: Option<&str>,
     contains_ids: &HashSet<String>,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
     let parent_name = parent.id.as_ref().map(|id| id.0.as_str());
@@ -396,12 +549,20 @@ fn check_overlaps_recursive(
             false
         };
 
-    let children = &parent.children;
+    // Hidden children take their whole subtree out of this frame's checks.
+    // Original child indices are kept so anonymous elements get the same
+    // display name in every frame (and dedup can match them up).
+    let children: Vec<(usize, &ElementLayout)> = parent
+        .children
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| !scope.hides_element(c))
+        .collect();
     if !skip_sibling_checks {
         for i in 0..children.len() {
             for j in (i + 1)..children.len() {
-                let a = &children[i];
-                let b = &children[j];
+                let (index_a, a) = children[i];
+                let (index_b, b) = children[j];
 
                 // Skip if both are non-opaque (two transparent zones)
                 if !is_opaque(a) && !is_opaque(b) {
@@ -438,14 +599,15 @@ fn check_overlaps_recursive(
                         a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x);
                     let overlap_h =
                         a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y);
-                    let name_a = element_display_name(a, parent_name, i);
-                    let name_b = element_display_name(b, parent_name, j);
+                    let name_a = element_display_name(a, parent_name, index_a);
+                    let name_b = element_display_name(b, parent_name, index_b);
                     warnings.push(LintWarning {
                         category: LintCategory::Overlap,
                         message: format!(
                             "elements {} and {} overlap by {:.0}x{:.0}px",
                             name_a, name_b, overlap_w, overlap_h
                         ),
+                        frames: Vec::new(),
                     });
                 }
             }
@@ -453,9 +615,15 @@ fn check_overlaps_recursive(
     } // end skip_sibling_checks
 
     // Recurse into children that have children
-    for child in children.iter() {
+    for (_, child) in children.iter() {
         if !child.children.is_empty() {
-            check_overlaps_recursive(child, current_prefix.as_deref(), contains_ids, warnings);
+            check_overlaps_recursive(
+                child,
+                current_prefix.as_deref(),
+                contains_ids,
+                scope,
+                warnings,
+            );
         }
     }
 }
@@ -495,6 +663,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past left edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                                 // Check right edge
@@ -506,6 +675,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past right edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                                 // Check top edge
@@ -517,6 +687,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past top edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                                 // Check bottom edge
@@ -528,6 +699,7 @@ fn check_contains_in_stmts(
                                             "element \"{}\" extends {:.0}px past bottom edge of container \"{}\"",
                                             elem_id.node.0, overflow, container.node.0
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -573,7 +745,15 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
     BoundingBox::new(x, y, width, height)
 }
 
-fn collect_labels_recursive(elem: &ElementLayout, labels: &mut Vec<LabelInfo>) {
+fn collect_labels_recursive(
+    elem: &ElementLayout,
+    scope: &FrameScope<'_>,
+    labels: &mut Vec<LabelInfo>,
+) {
+    // A hidden element takes its label — and its whole subtree — off screen.
+    if scope.hides_element(elem) {
+        return;
+    }
     if let Some(label) = &elem.label {
         let owner = elem
             .id
@@ -600,20 +780,23 @@ fn collect_labels_recursive(elem: &ElementLayout, labels: &mut Vec<LabelInfo>) {
         });
     }
     for child in &elem.children {
-        collect_labels_recursive(child, labels);
+        collect_labels_recursive(child, scope, labels);
     }
 }
 
-fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
     let mut labels = Vec::new();
 
     // Collect element labels
     for elem in &result.root_elements {
-        collect_labels_recursive(elem, &mut labels);
+        collect_labels_recursive(elem, scope, &mut labels);
     }
 
     // Collect connection labels
     for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
         if let Some(label) = &conn.label {
             let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
             labels.push(LabelInfo {
@@ -651,6 +834,7 @@ fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                 warnings.push(LintWarning {
                     category: LintCategory::Label,
                     message: format!("labels on \"{}\" and \"{}\" overlap", a.owner, b.owner),
+                    frames: Vec::new(),
                 });
             }
         }
@@ -663,13 +847,20 @@ fn check_labels(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
 /// bbox intersects the element but is NOT fully contained.  A label
 /// completely inside a box is fine (looks intentional); one that crosses
 /// an edge looks like a placement accident.
-fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+fn check_label_element_overlaps(
+    result: &LayoutResult,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
     // Collect all labels with owner info
     let mut labels: Vec<LabelInfo> = Vec::new();
     for elem in &result.root_elements {
-        collect_labels_recursive(elem, &mut labels);
+        collect_labels_recursive(elem, scope, &mut labels);
     }
     for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
         if let Some(label) = &conn.label {
             let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
             labels.push(LabelInfo {
@@ -683,7 +874,7 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
     // Collect all opaque, non-text shape elements
     let mut shapes: Vec<OpaqueElement> = Vec::new();
     for (i, elem) in result.root_elements.iter().enumerate() {
-        collect_opaque_elements(elem, None, i, &mut shapes);
+        collect_opaque_elements(elem, None, i, scope, &mut shapes);
     }
 
     for label in &labels {
@@ -721,6 +912,7 @@ fn check_label_element_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWa
                          overlaps by {:.0}x{:.0}px",
                         label.owner, shape.id, overlap_w, overlap_h
                     ),
+                    frames: Vec::new(),
                 });
             }
         }
@@ -817,8 +1009,12 @@ fn collect_opaque_elements(
     elem: &ElementLayout,
     parent_name: Option<&str>,
     child_index: usize,
+    scope: &FrameScope<'_>,
     elements: &mut Vec<OpaqueElement>,
 ) {
+    if scope.hides_element(elem) {
+        return;
+    }
     // Only collect visual shapes (not groups/layouts) that are opaque and non-text
     if is_visual_shape(elem) && !is_text_shape(elem) && is_opaque(elem) {
         let id = if let Some(name) = &elem.id {
@@ -834,7 +1030,7 @@ fn collect_opaque_elements(
 
     let name = elem.id.as_ref().map(|id| id.0.as_str());
     for (i, child) in elem.children.iter().enumerate() {
-        collect_opaque_elements(child, name, i, elements);
+        collect_opaque_elements(child, name, i, scope, elements);
     }
 }
 
@@ -842,8 +1038,12 @@ fn collect_visible_elements(
     elem: &ElementLayout,
     parent_name: Option<&str>,
     child_index: usize,
+    scope: &FrameScope<'_>,
     elements: &mut Vec<OpaqueElement>,
 ) {
+    if scope.hides_element(elem) {
+        return;
+    }
     // Collect visual shapes that are substantially visible (opacity >= 0.5)
     if is_visual_shape(elem) && !is_text_shape(elem) && is_substantially_visible(elem) {
         let id = if let Some(name) = &elem.id {
@@ -859,29 +1059,25 @@ fn collect_visible_elements(
 
     let name = elem.id.as_ref().map(|id| id.0.as_str());
     for (i, child) in elem.children.iter().enumerate() {
-        collect_visible_elements(child, name, i, elements);
+        collect_visible_elements(child, name, i, scope, elements);
     }
 }
 
 fn check_connections(
     result: &LayoutResult,
-    hidden_elements: &HashSet<String>,
-    hidden_connections: &HashSet<String>,
+    scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
     // Collect all substantially visible, non-text elements in this frame
     let mut opaque_elements = Vec::new();
     for (i, elem) in result.root_elements.iter().enumerate() {
-        collect_visible_elements(elem, None, i, &mut opaque_elements);
+        collect_visible_elements(elem, None, i, scope, &mut opaque_elements);
     }
-    opaque_elements.retain(|oe| !hidden_elements.contains(&oe.id));
 
     for conn in &result.connections {
         // Skip connections that are hidden in this frame
-        if let Some(name) = &conn.name {
-            if hidden_connections.contains(&name.0) {
-                continue;
-            }
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
         }
 
         let from_id = &conn.from_id.0;
@@ -925,6 +1121,7 @@ fn check_connections(
                             "connection {}→{} overlaps element \"{}\"",
                             from_id, to_id, oe.id
                         ),
+                        frames: Vec::new(),
                     });
                 }
             }
@@ -954,6 +1151,7 @@ fn check_connections(
                                 "connection {}→{} crosses element \"{}\"",
                                 from_id, to_id, oe.id
                             ),
+                            frames: Vec::new(),
                         });
                     }
                 }
@@ -967,7 +1165,11 @@ fn check_connections(
 /// Check if any label (element label, connection label, or standalone text)
 /// overlaps with a connection path segment.  This catches labels placed at
 /// bend points or too close to connector lines.
-fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+fn check_label_connection_overlaps(
+    result: &LayoutResult,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
     // Collect user-level labels only (skip template internals).
     // Template children have IDs like `q_main_g_label`; we skip labels whose
     // owner shares a prefix with a root-level template group.
@@ -984,12 +1186,15 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
     // Collect labels from elements + standalone text (skipping template internals)
     let mut labels: Vec<LabelInfo> = Vec::new();
     for elem in &result.root_elements {
-        collect_labels_recursive(elem, &mut labels);
+        collect_labels_recursive(elem, scope, &mut labels);
     }
     labels.retain(|l| !is_template_internal(&l.owner));
 
     // Collect connection labels
     for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
         if let Some(label) = &conn.label {
             let owner = format!("{}→{}", conn.from_id.0, conn.to_id.0);
             labels.push(LabelInfo {
@@ -1011,6 +1216,9 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
         for conn in &result.connections {
             // Skip curved connections (control points ≠ actual curve)
             if conn.routing_mode == RoutingMode::Curved {
+                continue;
+            }
+            if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
                 continue;
             }
 
@@ -1039,6 +1247,7 @@ fn check_label_connection_overlaps(result: &LayoutResult, warnings: &mut Vec<Lin
                             "label on \"{}\" overlaps connection {}",
                             label.owner, conn_name
                         ),
+                        frames: Vec::new(),
                     });
                     // Only report once per label-connection pair
                     break;
@@ -1083,6 +1292,7 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     "connection {}→{} is nearly horizontal (off by {:.0}px); aligning Y positions would straighten it",
                     conn.from_id.0, conn.to_id.0, dy
                 ),
+                frames: Vec::new(),
             });
         } else if dx < ALIGNMENT_THRESHOLD && dy > dx * 4.0 {
             // Nearly vertical — small X offset
@@ -1092,6 +1302,7 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     "connection {}→{} is nearly vertical (off by {:.0}px); aligning X positions would straighten it",
                     conn.from_id.0, conn.to_id.0, dx
                 ),
+                frames: Vec::new(),
             });
         }
     }
@@ -1197,6 +1408,7 @@ fn check_redundant_constants(doc: &Document, warnings: &mut Vec<LintWarning>) {
         warnings.push(LintWarning {
             category: LintCategory::RedundantConstant,
             message,
+            frames: Vec::new(),
         });
     }
 }
@@ -1255,6 +1467,7 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
                     shortest_len,
                     shortest_orientation
                 ),
+                frames: Vec::new(),
             });
         }
     }
@@ -1331,6 +1544,7 @@ fn check_missing_anchors_in_stmts(
                                  use e.g. {}.bottom -> {}.top for better routing",
                                 from_name, to_name, from_name, to_name
                             ),
+                            frames: Vec::new(),
                         });
                     }
                     if conn.to.anchor.is_none() {
@@ -1341,6 +1555,7 @@ fn check_missing_anchors_in_stmts(
                                  use e.g. {}.bottom -> {}.top for better routing",
                                 from_name, to_name, from_name, to_name
                             ),
+                            frames: Vec::new(),
                         });
                     }
                 }
@@ -1457,6 +1672,7 @@ fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning
                              label text may be unreadable without CSS overrides for light text",
                             name, dark_desc
                         ),
+                        frames: Vec::new(),
                     });
                 }
             }
@@ -1508,6 +1724,7 @@ fn check_steep_direct(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                      consider routing: orthogonal or routing: curved (ignore if intended)",
                     conn.from_id.0, conn.to_id.0, angle_deg
                 ),
+                frames: Vec::new(),
             });
         }
     }
@@ -1557,6 +1774,7 @@ fn check_crowded_layouts_in_stmts(
                                 "{} {} has {} children; for >8 elements, consider using group with constraints instead",
                                 layout_kind, layout_name, child_count
                             ),
+                            frames: Vec::new(),
                         });
                     }
                 }
@@ -1687,6 +1905,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, residual
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1713,6 +1932,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, residual
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1733,6 +1953,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, residual
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1753,6 +1974,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, violation
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1773,6 +1995,7 @@ fn check_over_constrained_in_stmts(
                                             "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
                                             desc, violation
                                         ),
+                                        frames: Vec::new(),
                                     });
                                 }
                             }
@@ -1846,6 +2069,7 @@ fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintW
                 warnings.push(LintWarning {
                     category: LintCategory::LabelOverflow,
                     message: detail,
+                    frames: Vec::new(),
                 });
             }
         }
@@ -1935,7 +2159,7 @@ mod tests {
         );
         let mut warnings = Vec::new();
         let contains_ids = HashSet::new();
-        check_overlaps_recursive(&group, None, &contains_ids, &mut warnings);
+        check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].message.contains("\"a\""));
         assert!(warnings[0].message.contains("\"b\""));
@@ -1951,7 +2175,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &mut warnings);
+        check_overlaps_recursive(&group, None, &HashSet::new(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -1968,7 +2192,7 @@ mod tests {
         contains_ids.insert("container".to_string());
         contains_ids.insert("child".to_string());
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &contains_ids, &mut warnings);
+        check_overlaps_recursive(&group, None, &contains_ids, &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -1982,7 +2206,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &mut warnings);
+        check_overlaps_recursive(&group, None, &HashSet::new(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 
@@ -1996,7 +2220,7 @@ mod tests {
             ],
         );
         let mut warnings = Vec::new();
-        check_overlaps_recursive(&group, None, &HashSet::new(), &mut warnings);
+        check_overlaps_recursive(&group, None, &HashSet::new(), &FrameScope::all_visible(), &mut warnings);
         assert_eq!(warnings.len(), 0);
     }
 

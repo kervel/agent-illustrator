@@ -19,6 +19,7 @@ pub mod stylesheet;
 pub mod template;
 
 pub use error::ParseError;
+pub use layout::lint::{LintCategory, LintWarning};
 pub use layout::{LayoutConfig, LayoutError, LayoutResult};
 pub use parser::{parse, Document};
 pub use renderer::{render_svg, render_svg_with_keyframes, render_svg_with_stylesheet, SvgConfig};

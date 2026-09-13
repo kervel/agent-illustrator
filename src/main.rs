@@ -17,8 +17,25 @@ use std::path::PathBuf;
 use clap::Parser;
 
 use agent_illustrator::{
-    render_with_config, render_with_lint, ImageHrefMode, RenderConfig, Stylesheet,
+    render_with_config, render_with_lint, ImageHrefMode, LintCategory, RenderConfig, Stylesheet,
 };
+
+/// Resolve category names from the CLI, exiting with a helpful message on typos.
+fn parse_lint_categories(names: &[String]) -> Vec<LintCategory> {
+    names
+        .iter()
+        .map(|name| {
+            LintCategory::parse(name.trim()).unwrap_or_else(|| {
+                eprintln!(
+                    "Error: unknown lint category '{}'. Valid categories: {}",
+                    name,
+                    LintCategory::all_names()
+                );
+                std::process::exit(2);
+            })
+        })
+        .collect()
+}
 
 #[derive(Parser)]
 #[command(name = "agent-illustrator")]
@@ -70,6 +87,19 @@ struct Cli {
     /// Lint mode: check for layout defects (overlaps, containment violations, etc.)
     #[arg(long)]
     lint: bool,
+
+    /// Only report these lint categories (comma-separated, repeatable).
+    /// Run --lint-categories to list the valid names.
+    #[arg(long, value_delimiter = ',')]
+    lint_category: Vec<String>,
+
+    /// Suppress these lint categories (comma-separated, repeatable)
+    #[arg(long, value_delimiter = ',')]
+    lint_exclude: Vec<String>,
+
+    /// List the lint category names and exit
+    #[arg(long)]
+    lint_categories: bool,
 
     /// How raster image paths (from "template X from file.png") appear in SVG output.
     /// Use 'base64' to embed images directly in the SVG for fully self-contained output.
@@ -153,6 +183,16 @@ fn main() {
         print_skill_styling();
         return;
     }
+
+    if cli.lint_categories {
+        for category in LintCategory::ALL {
+            println!("{}", category);
+        }
+        return;
+    }
+
+    let include_categories = parse_lint_categories(&cli.lint_category);
+    let exclude_categories = parse_lint_categories(&cli.lint_exclude);
 
     // If no input file and stdin is a terminal (interactive), show intro help
     if cli.input.is_none() && io::stdin().is_terminal() {
@@ -239,13 +279,39 @@ fn main() {
         match render_with_lint(&source, config) {
             Ok((svg, lint_warnings)) => {
                 println!("{}", svg);
-                if lint_warnings.is_empty() {
-                    eprintln!("lint: clean");
-                } else {
-                    for w in &lint_warnings {
-                        eprintln!("lint: {}: {}", w.category, w.message);
+                let total = lint_warnings.len();
+                let shown: Vec<_> = lint_warnings
+                    .iter()
+                    .filter(|w| {
+                        (include_categories.is_empty() || include_categories.contains(&w.category))
+                            && !exclude_categories.contains(&w.category)
+                    })
+                    .collect();
+                if shown.is_empty() {
+                    if total == 0 {
+                        eprintln!("lint: clean");
+                    } else {
+                        eprintln!("lint: clean in selected categories ({} filtered out)", total);
                     }
-                    eprintln!("lint: {} warning(s)", lint_warnings.len());
+                } else {
+                    for w in &shown {
+                        eprintln!(
+                            "lint: {}{}: {}",
+                            w.category,
+                            w.frame_suffix(),
+                            w.message
+                        );
+                    }
+                    let hidden = total - shown.len();
+                    if hidden > 0 {
+                        eprintln!(
+                            "lint: {} warning(s), {} filtered out",
+                            shown.len(),
+                            hidden
+                        );
+                    } else {
+                        eprintln!("lint: {} warning(s)", shown.len());
+                    }
                     std::process::exit(1);
                 }
             }
