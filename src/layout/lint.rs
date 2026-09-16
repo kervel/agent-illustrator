@@ -1389,8 +1389,12 @@ fn collect_opaque_elements_in(
     if scope.hides_element(elem) {
         return;
     }
-    // Only collect visual shapes (not groups/layouts) that are opaque and non-text
-    if is_visual_shape(elem) && !is_text_shape(elem) && is_opaque(elem) {
+    // Only collect visual shapes (not groups/layouts) that are opaque and
+    // non-text. An element that paints nothing is not something a connection
+    // can cross: a `via:` waypoint is an invisible 1px circle that the route
+    // is deliberately threaded through, and reporting the route for hitting
+    // it describes the author's own instruction back at them.
+    if is_visual_shape(elem) && !is_text_shape(elem) && is_opaque(elem) && !paints_nothing(elem) {
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
@@ -1434,7 +1438,11 @@ fn collect_visible_elements_in(
         return;
     }
     // Collect visual shapes that are substantially visible (opacity >= 0.5)
-    if is_visual_shape(elem) && !is_text_shape(elem) && is_substantially_visible(elem) {
+    if is_visual_shape(elem)
+        && !is_text_shape(elem)
+        && is_substantially_visible(elem)
+        && !paints_nothing(elem)
+    {
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
@@ -2075,6 +2083,19 @@ fn is_dark_fill(fill: &str) -> Option<String> {
     None
 }
 
+/// True when a label is drawn inside its element's box.
+///
+/// Both the contrast and overflow rules are about text sitting ON a shape: a
+/// label that hangs above or beside its element is drawn on the background, so
+/// it neither inherits the shape's fill for contrast nor has to fit inside it.
+fn label_is_inside(label: &crate::layout::types::LabelLayout) -> bool {
+    use crate::layout::types::ShapeLabelPosition;
+    label
+        .placement
+        .as_ref()
+        .is_none_or(|p| p.position == ShapeLabelPosition::Inside)
+}
+
 fn check_contrast(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     for elem in &result.root_elements {
         check_contrast_recursive(elem, warnings);
@@ -2083,7 +2104,7 @@ fn check_contrast(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
 
 fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
     // Check if this element has a label AND a dark fill AND no explicit label color
-    if let Some(label) = &elem.label {
+    if let Some(label) = &elem.label.as_ref().filter(|l| label_is_inside(l)) {
         let has_label_color = label
             .styles
             .as_ref()
@@ -2795,7 +2816,8 @@ fn check_label_overflow(result: &LayoutResult, warnings: &mut Vec<LintWarning>) 
 }
 
 fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
-    if let Some(label) = &elem.label {
+    // An outside label is not trying to fit in the box, so it cannot overflow it.
+    if let Some(label) = &elem.label.as_ref().filter(|l| label_is_inside(l)) {
         // Skip text elements — they don't have a "container" to overflow
         if !is_text_shape(elem) {
             let label_bbox = estimate_label_bbox(label);

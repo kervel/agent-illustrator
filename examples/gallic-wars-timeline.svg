@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -16 914 349">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40.00000000000001 -16 914 349">
   <style>
     :root {
     --accent-1: #2196f3;
@@ -114,7 +114,7 @@
   </style>
   <g id="diagram" class="ai-container">
     <text id="title" class="ai-shape ai-text" x="347.74399999999997" y="52" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">Conquest of Gaul</text>
-    <rect id="axis" class="ai-shape ai-rect" x="20" y="168.5" width="780" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="axis" class="ai-shape ai-rect" x="19.999999999999993" y="168.5" width="780" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
     <path id="arrow_tip" class="ai-shape ai-path" d="M800.00 163.00 L814.00 170.00 L800.00 177.00 Z"  fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
     <circle id="d58" class="ai-shape ai-circle" cx="90" cy="170" r="9" fill="var(--accent-dark)" stroke="var(--background-1)" stroke-width="3"/>
     <circle id="d57" class="ai-shape ai-circle" cx="250" cy="170" r="9" fill="var(--accent-dark)" stroke="var(--background-1)" stroke-width="3"/>

@@ -267,11 +267,10 @@ template "diode" {
 
 // DC Motor template
 template "motor" {
-    circle body [size: 50, fill: none, stroke: foreground-1, stroke_width: 2]
-
-    text "M" motor_label [font_size: 20, fill: foreground-1]
-    constrain motor_label.center_x = body.center_x
-    constrain motor_label.center_y = body.center_y
+    // The M belongs to the body, so it is the body's label — not a text
+    // element constrained on top of it.
+    circle body [size: 50, fill: none, stroke: foreground-1, stroke_width: 2,
+                 label: "M", font_size: 20, label_fill: foreground-1]
 
     rect top_lead [width: 2, height: 15, fill: foreground-1, stroke: none]
     constrain top_lead.center_x = body.center_x
@@ -370,7 +369,7 @@ constrain gnd_main.top = q_main.bottom + 40
 
 // 5V gate drive section - middle
 constrain vcc_5v.center_x = 200
-constrain vcc_5v.top = 20
+constrain vcc_5v.top = vcc_12v.top
 
 constrain r_pullup.center_x = vcc_5v.center_x
 constrain r_pullup.top = vcc_5v.bottom + 30
@@ -397,12 +396,15 @@ constrain r_base.left = gpio.right + 15
 constrain r_base.center_y = gpio.center_y
 
 constrain r_led.top = gpio.bottom + 20
-constrain r_led.center_x = gpio.aux_x
+// Align on the anchors the wires actually use, not on centres: a
+// resistor's left_conn is at its end, so centring it under gpio.aux
+// leaves the wire with a jog.
+constrain r_led.left_conn_x = gpio.aux_x
 
-constrain status_led.center_x = r_led.center_x
+constrain status_led.anode_x = r_led.right_conn_x
 constrain status_led.top = r_led.bottom + 30
 
-constrain gnd_led.conn_x = status_led.center_x
+constrain gnd_led.conn_x = status_led.cathode_x
 constrain gnd_led.top = gnd_main.top
 
 

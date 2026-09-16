@@ -15,14 +15,17 @@ rect llm [width: 180, height: 70, fill: secondary-light, stroke: secondary-dark,
 rect tool [width: 180, height: 70, fill: foreground-3, stroke: foreground-1, stroke_width: 2.5, label: "Tool (bash)"]
 rect user [width: 180, height: 70, fill: accent-light, stroke: accent-dark, stroke_width: 2.5, label: "User"]
 
+// Four corners: two columns, two rows. Stating each literal once and
+// relating the rest says the layout is a grid, which repeating 120 and
+// 520 four times does not.
 constrain cli.center_x = 120
 constrain cli.center_y = 60
 constrain llm.center_x = 520
-constrain llm.center_y = 60
-constrain tool.center_x = 520
+constrain llm.center_y = cli.center_y
+constrain tool.center_x = llm.center_x
 constrain tool.center_y = 380
-constrain user.center_x = 120
-constrain user.center_y = 380
+constrain user.center_x = cli.center_x
+constrain user.center_y = tool.center_y
 
 // === MESSAGE ENVELOPES (positioned, hidden by default via keyframes) ===
 
@@ -32,16 +35,17 @@ rect exec_env [width: 200, height: 100, fill: foreground-3, stroke: foreground-1
 rect req2_env [width: 200, height: 80, fill: accent-light, stroke: accent-1, stroke_width: 2, opacity: 0.3, label: "history + result"]
 rect resp2_env [width: 200, height: 80, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.3, label: "text response"]
 
+// Envelopes ride the midlines between those corners.
 constrain req1_env.center_x = 320
-constrain req1_env.center_y = 60
-constrain resp1_env.center_x = 320
-constrain resp1_env.center_y = 60
-constrain exec_env.center_x = 520
+constrain req1_env.center_y = cli.center_y
+constrain resp1_env.center_x = req1_env.center_x
+constrain resp1_env.center_y = cli.center_y
+constrain exec_env.center_x = llm.center_x
 constrain exec_env.center_y = 220
-constrain req2_env.center_x = 320
-constrain req2_env.center_y = 380
-constrain resp2_env.center_x = 120
-constrain resp2_env.center_y = 220
+constrain req2_env.center_x = req1_env.center_x
+constrain req2_env.center_y = tool.center_y
+constrain resp2_env.center_x = cli.center_x
+constrain resp2_env.center_y = exec_env.center_y
 
 // === CONNECTIONS (named for keyframe control) ===
 

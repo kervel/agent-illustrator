@@ -27,22 +27,26 @@ constrain inbox.center_y = 150
 rect a [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "The"]
 rect b [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "cat"]
 rect c [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "sat"]
-constrain a.center_y = 150
-constrain b.center_y = 150
-constrain c.center_y = 150
+constrain a.center_y = inbox.center_y
+constrain b.center_y = inbox.center_y
+constrain c.center_y = inbox.center_y
 constrain a.center_x = 119
 constrain b.center_x = 175
 constrain c.center_x = 231
 
 rect llm [width: 150, height: 64, fill: secondary-1, label: "LLM"]
 constrain llm.center_x = 560
-constrain llm.center_y = 150
+constrain llm.center_y = inbox.center_y
 
 /* predicted tokens — each starts below the LLM (red = just predicted) */
 rect d [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "on"]
 rect e [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "the"]
 rect f [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "mat"]
 constrain d.center_x = llm.center_x as d_hx
+// d, e and f each keep their own literal home row. They look like a
+// redundant-constant, but keyframes disable these pins individually to
+// move one box without the others — relating them would couple elements
+// the animation exists to separate.
 constrain d.center_y = 300 as d_hy
 constrain e.center_x = llm.center_x as e_hx
 constrain e.center_y = 300 as e_hy

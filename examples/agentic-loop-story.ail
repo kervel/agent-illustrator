@@ -180,7 +180,7 @@ constrain result_line2.center_y = result_envelope.center_y + 14
 
 // Final answer: between CLI and User
 constrain answer_envelope.center_x = 300
-constrain answer_envelope.center_y = 215
+constrain answer_envelope.center_y = sys_envelope.center_y
 constrain ans_line1.center_x = answer_envelope.center_x
 constrain ans_line1.center_y = answer_envelope.center_y - 14
 constrain ans_line2.center_x = answer_envelope.center_x

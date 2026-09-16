@@ -70,7 +70,7 @@ constrain title.center_x = 410
 constrain title.bottom = 60
 
 // Axis centered
-constrain axis.center_x = 410
+constrain axis.center_x = title.center_x
 constrain axis.center_y = 170
 constrain arrow_tip.left = axis.right
 constrain arrow_tip.center_y = axis.center_y

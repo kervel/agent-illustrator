@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -53.75 178 197.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -73.5 350 261.5">
   <style>
     :root {
     --accent-1: #2196f3;
@@ -123,25 +123,25 @@
       <circle id="entry_south" class="ai-shape ai-circle" cx="15" cy="55" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
     </g>
     <g id="junction_center" class="ai-container">
-      <circle id="j1" class="ai-shape ai-circle" cx="39" cy="15" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="15" text-anchor="middle" dominant-baseline="middle"><tspan x="39" dy="-0"><tspan>Switch 1</tspan></tspan></text>
-      <circle id="j2" class="ai-shape ai-circle" cx="39" cy="45" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="45" text-anchor="middle" dominant-baseline="middle"><tspan x="39" dy="-0"><tspan>Switch 2</tspan></tspan></text>
-      <circle id="j3" class="ai-shape ai-circle" cx="39" cy="75" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="39" y="75" text-anchor="middle" dominant-baseline="middle"><tspan x="39" dy="-0"><tspan>Switch 3</tspan></tspan></text>
+      <circle id="j1" class="ai-shape ai-circle" cx="125" cy="15" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="125" y="-4.75" text-anchor="middle" dominant-baseline="middle"><tspan x="125" dy="-0"><tspan>Switch 1</tspan></tspan></text>
+      <circle id="j2" class="ai-shape ai-circle" cx="125" cy="69" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="125" y="49.25" text-anchor="middle" dominant-baseline="middle"><tspan x="125" dy="-0"><tspan>Switch 2</tspan></tspan></text>
+      <circle id="j3" class="ai-shape ai-circle" cx="125" cy="123" r="5" fill="#228B22" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="125" y="103.25" text-anchor="middle" dominant-baseline="middle"><tspan x="125" dy="-0"><tspan>Switch 3</tspan></tspan></text>
     </g>
     <g id="exit" class="ai-container">
-      <circle id="exit_t1" class="ai-shape ai-circle" cx="63" cy="15" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
-      <circle id="exit_t2" class="ai-shape ai-circle" cx="63" cy="45" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
-      <circle id="exit_t3" class="ai-shape ai-circle" cx="63" cy="75" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
+      <circle id="exit_t1" class="ai-shape ai-circle" cx="235" cy="15" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
+      <circle id="exit_t2" class="ai-shape ai-circle" cx="235" cy="45" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
+      <circle id="exit_t3" class="ai-shape ai-circle" cx="235" cy="75" r="5" fill="#4169E1" stroke="#333333" stroke-width="1.5"/>
     </g>
   </g>
-  <path class="ai-connection" d="M20 15 L23.2 15" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M18.84110639798688 58.2009219983224 L27 58.2009219983224 L27 71.7990780016776 L24.358893602013122 71.7990780016776" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M44 15 L50.8 15" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M42.12347523777212 18.90434404721515 L55.37872041983603 35.473400524795025" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M44 45 L50.8 45" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M42.12347523777212 71.09565595278485 L55.37872041983603 54.526599475204975" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M44 75 L50.8 75" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M42.12347523777212 41.095655952784846 L42.12347523777212 30 L59.87652476222788 30 L59.87652476222788 22.504344047215152" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M20 15 L109.2 15" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M19.25297284773019 57.629110487687754 L70 57.629110487687754 L70 120.37088951231225 L109.94702715226981 120.37088951231225" fill="none" stroke="#4169E1" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M130 15 L222.8 15" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129.82381910618867 16.315587028960543 L223.22988138089966 41.789967649336276" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129.88507880704995 67.93416462391637 L223.0804077107981 47.60063831764405" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129.07866445537644 120.10785611346034 L225.04805872888147 52.05683108315678" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129.58269689184817 121.0002777199208 L223.81821958389048 79.87932236339324" fill="none" stroke="#228B22" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M129.48833805280884 66.79663404680292 L180 66.79663404680292 L180 17.20336595319707 L226.91166194719116 17.20336595319707" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ai-arrow)"/>
 </svg>
