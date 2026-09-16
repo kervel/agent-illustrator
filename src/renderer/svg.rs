@@ -1266,12 +1266,34 @@ fn render_element_inner(
                 .map(|f| format!(r#" fill="{}""#, f))
                 .unwrap_or_default();
             let combined_styles = format!("{}{}", font_styles, fill_style);
-            let anchor = element.styles.align.unwrap_or(TextAnchor::Start);
-            let x = anchor_x(&element.bounds, anchor);
+            // Without `align`, text has always started at its box's left
+            // edge, and for a box sized to the text it is drawing that IS the
+            // centre: left = centre - width/2. The two only diverge when the
+            // box carries slack — a wording wider than this one exists in
+            // another frame, or the box was constrained wider than its text —
+            // and then start-anchoring dumps all of the slack on one side.
+            // Centre it instead, so the misplacement is unreachable rather
+            // than merely unlikely. An explicit `align` still wins.
             let y = element.bounds.y + element.bounds.height / 2.0;
             // Keyframes that rewrite this text render each wording as its own
             // hidden node next to the base one; CSS cannot swap text content.
             let variants = id.map(|i| builder.variants_for(i)).unwrap_or_default();
+            // Without `align`, text has always started at its box's left edge,
+            // and for a box sized to the wording it is drawing that IS the
+            // centre: left = centre - width/2. The two only diverge when the
+            // box carries slack, and the slack an author never asked for comes
+            // from keyframes: the box is sized for the widest wording any
+            // frame shows, so every narrower one drifts left by half the
+            // difference. Centre those instead. A box with one wording, or an
+            // explicit `align`, is untouched.
+            let anchor = element.styles.align.unwrap_or({
+                if element.styles.width_is_derived {
+                    TextAnchor::Middle
+                } else {
+                    TextAnchor::Start
+                }
+            });
+            let x = anchor_x(&element.bounds, anchor);
             let mut base_classes = classes.clone();
             if let (Some(i), false) = (id, variants.is_empty()) {
                 base_classes.push(format!("aitxt-{}-base", i));
@@ -2013,6 +2035,7 @@ mod tests {
     fn register_fill_none_for_solid() {
         let mut b = SvgBuilder::new(SvgConfig::default());
         let styles = ResolvedStyles {
+            width_is_derived: false,
             fill: Some("blue".into()),
             ..Default::default()
         };
@@ -2022,6 +2045,7 @@ mod tests {
     #[test]
     fn format_styles_uses_fill_override() {
         let styles = ResolvedStyles {
+            width_is_derived: false,
             fill: Some("blue".into()),
             ..Default::default()
         };
@@ -2070,6 +2094,7 @@ mod tests {
     #[test]
     fn test_format_styles() {
         let styles = ResolvedStyles {
+            width_is_derived: false,
             fill: Some("#ff0000".to_string()),
             fill_pattern: None,
             stroke: Some("#000000".to_string()),
@@ -2095,6 +2120,7 @@ mod tests {
     #[test]
     fn test_format_styles_with_opacities() {
         let styles = ResolvedStyles {
+            width_is_derived: false,
             fill: Some("var(--secondary-1)".to_string()),
             fill_pattern: None,
             stroke: Some("#000000".to_string()),

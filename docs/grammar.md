@@ -137,6 +137,15 @@ constrain a.top = b.bottom + 20        Position with offset
 constrain a.width = 100                Fixed dimension
 constrain a.center_x = midpoint(b, c)  Center between two elements
 constrain bg contains a, b [padding: 10]   Auto-size container
+constrain a.center_x = 50 as a_home    Name a constraint
+disable a_home                         Release a named constraint (top level
+                                       or inside a keyframe)
+enable a_home                          Reactivate it
+
+Restating a constraint on the same element+property overrides the earlier one,
+whatever is on the right-hand side; --lint reports the override. Use `disable`
+when you need to release a pin without replacing it — e.g. a file that
+composes a shared part it does not own.
 
 Contains: container grows to surround listed elements with padding.
           Container width/height become flexible; position may shift.
@@ -221,13 +230,20 @@ Transform geometry keys (inside keyframe transform [...]):
     width: N, height: N   Absolute target size
     scale: N           Uniform scale about the element's center
     rotation: N        Rotation in degrees
-Other transform keys: fill, stroke, opacity, align, label_fill, and label
+Other transform keys: fill, stroke, stroke_width, stroke_dasharray, opacity,
+align, label_fill, and label
 (rewrites the element's words for that frame -- a text element's content or any
 element's label). The box never changes size: auto-sized text is laid out for
 the longest wording any frame gives it, and an explicit width is kept as
 written (--lint reports text that does not fit it).
 Position + rotation animate via a transform on the element's wrapper group (so the
 label rides along); size animates via the shape's width/height.
+
+    A key that cannot be animated (z_order, font_size, routing, ...) is
+    reported by --lint rather than silently ignored. stroke_dasharray only
+    interpolates between patterns with the same dash count, so dashed -> solid
+    is written as a zero-length pattern ("0,0"), not `none`, if a smooth
+    transition is wanted.
 
 Named constraints & per-keyframe control:
     constrain a.center_x = 50 as a_home   Name a constraint (handle for disable/enable)

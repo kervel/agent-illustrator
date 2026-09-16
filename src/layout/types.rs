@@ -579,6 +579,11 @@ pub struct ResolvedStyles {
     /// Colour of the element's label text. `fill` colours the shape; the words
     /// written on it are a separate thing to colour.
     pub label_fill: Option<String>,
+    /// This element's `width:` was derived from the wordings its keyframes
+    /// give it, not written by the author. The box is therefore sized for the
+    /// widest wording and every narrower one sits in slack the author never
+    /// asked for — so text in it centres instead of hugging the left edge.
+    pub width_is_derived: bool,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -612,6 +617,7 @@ impl ResolvedStyles {
             stroke: Some("#333333".to_string()),
             stroke_width: Some(2.0),
             stroke_dasharray: None,
+            width_is_derived: false,
             opacity: Some(1.0),
             fill_opacity: None,
             stroke_opacity: None,
@@ -629,6 +635,12 @@ impl ResolvedStyles {
     /// The actual color values are provided via a `<style>` block in the SVG output.
     pub fn from_modifiers(modifiers: &[Spanned<StyleModifier>]) -> Self {
         let mut styles = Self::default();
+        styles.width_is_derived = modifiers.iter().any(|m| {
+            matches!(m.node.key.node, StyleKey::Width)
+                && matches!(&m.node.value.node,
+                    StyleValue::Number { unit: Some(u), .. }
+                        if u == crate::layout::keyframe::SYNTHETIC_WIDTH_UNIT)
+        });
 
         for modifier in modifiers {
             match &modifier.node.key.node {
@@ -807,6 +819,7 @@ impl ResolvedStyles {
     /// Merge another style set, with other taking precedence
     pub fn merge(&self, other: &ResolvedStyles) -> ResolvedStyles {
         ResolvedStyles {
+            width_is_derived: self.width_is_derived || other.width_is_derived,
             fill: other.fill.clone().or_else(|| self.fill.clone()),
             fill_pattern: other
                 .fill_pattern

@@ -522,6 +522,9 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
 }
 
 /// Width a piece of text needs, by the same estimate the layout engine uses.
+/// Marks a `width:` this pass derived, rather than one the author wrote.
+pub const SYNTHETIC_WIDTH_UNIT: &str = "kf-auto";
+
 pub fn estimated_text_width(text: &str, font_size: f64) -> f64 {
     crate::layout::text::measure_str(text, font_size).max(20.0)
 }
@@ -535,6 +538,23 @@ pub fn estimated_text_width(text: &str, font_size: f64) -> f64 {
 pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
     // element id -> every wording a keyframe gives it
     let mut wordings: HashMap<String, Vec<String>> = HashMap::new();
+    // Elements whose label the FIRST keyframe rewrites. Keyframes are
+    // cumulative and frame 0 is the first one, so for these the declared
+    // wording is on screen in no frame at all and must not reserve space —
+    // that slack is what pushes centre-constrained text off-centre.
+    let mut overridden_at_frame_zero: HashSet<String> = HashSet::new();
+    if let Some(first) = extract_keyframes(&doc).first() {
+        for op in &first.operations {
+            if let KeyframeOp::Transform { target, modifiers } = &op.node {
+                if modifiers
+                    .iter()
+                    .any(|m| matches!(m.node.key.node, StyleKey::Label))
+                {
+                    overridden_at_frame_zero.insert(target.node.0.clone());
+                }
+            }
+        }
+    }
     for kf in extract_keyframes(&doc) {
         for op in &kf.operations {
             if let KeyframeOp::Transform { target, modifiers } = &op.node {
@@ -555,7 +575,11 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
         return doc;
     }
 
-    fn widen(stmts: &mut [crate::parser::ast::Spanned<Statement>], wordings: &HashMap<String, Vec<String>>) {
+    fn widen(
+        stmts: &mut [crate::parser::ast::Spanned<Statement>],
+        wordings: &HashMap<String, Vec<String>>,
+        overridden_at_frame_zero: &HashSet<String>,
+    ) {
         use crate::parser::ast::{ShapeType, Spanned, StyleModifier, StyleValue};
         for stmt in stmts.iter_mut() {
             match &mut stmt.node {
@@ -585,10 +609,17 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
                             _ => None,
                         })
                         .unwrap_or(14.0);
+                    // Size from the wordings actually displayed. The declared
+                    // one counts only when frame 0 still shows it.
+                    let declared = if overridden_at_frame_zero.contains(&name) {
+                        None
+                    } else {
+                        Some(content.as_str())
+                    };
                     let widest = texts
                         .iter()
                         .map(|t| t.as_str())
-                        .chain(std::iter::once(content.as_str()))
+                        .chain(declared)
                         .map(|t| estimated_text_width(t, font_size))
                         .fold(0.0_f64, f64::max);
                     let span = shape.shape_type.span.clone();
@@ -596,21 +627,26 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
                         StyleModifier {
                             key: Spanned::new(StyleKey::Width, span.clone()),
                             value: Spanned::new(
-                                StyleValue::Number { value: widest, unit: None },
+                                // Tagged so it is distinguishable from a width
+                                // the author wrote: this one is derived from
+                                // the wordings, and text inside it should
+                                // centre rather than hug the left edge. Every
+                                // width reader ignores `unit`.
+                                StyleValue::Number { value: widest, unit: Some(SYNTHETIC_WIDTH_UNIT.to_string()) },
                                 span.clone(),
                             ),
                         },
                         span,
                     ));
                 }
-                Statement::Layout(l) => widen(&mut l.children, wordings),
-                Statement::Group(g) => widen(&mut g.children, wordings),
+                Statement::Layout(l) => widen(&mut l.children, wordings, overridden_at_frame_zero),
+                Statement::Group(g) => widen(&mut g.children, wordings, overridden_at_frame_zero),
                 _ => {}
             }
         }
     }
 
-    widen(&mut doc.statements, &wordings);
+    widen(&mut doc.statements, &wordings, &overridden_at_frame_zero);
     doc
 }
 
