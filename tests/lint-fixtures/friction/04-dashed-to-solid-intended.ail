@@ -1,0 +1,35 @@
+// FIXTURE 4 — P1-3, written as I would reach for it if stroke_dasharray were
+// animatable. THIS IS THE INTENDED SOURCE, NOT WORKING CODE: it renders on
+// 8277305 (transform accepts unknown keys quietly) but the dashes never go.
+//
+// The meaning is "a provisional thing becomes a settled one", which in this
+// vocabulary is dashed-outline-no-fill -> solid-outline-filled. One property,
+// one frame, one line.
+
+rect item [width: 240, height: 56, fill: none, stroke: accent-dark, stroke_width: 2,
+           stroke_dasharray: dashed, label: "item"]
+constrain item.left = 60
+constrain item.center_y = 60
+
+keyframe "provisional" {
+    // as declared
+}
+
+keyframe "settled" {
+    transform item [stroke_dasharray: none, fill: accent-light]
+}
+
+// What it takes today. The twin must be declared after the original, so it
+// paints over the original's label, so the twin needs its own — and the
+// original's must be hidden in the same frame. Three elements and two hide
+// lists for one property. (stroke_width has the same gap: a "this one now
+// matters" emphasis beat is equally unreachable.)
+//
+//   rect item_solid [width: 240, height: 56, fill: accent-light,
+//                    stroke: accent-dark, stroke_width: 2]
+//   constrain item_solid.left = item.left
+//   constrain item_solid.center_y = item.center_y
+//   text "item" item_solid_name ...
+//   keyframe "provisional" { hide item_solid, item_solid_name }
+//   keyframe "settled"     { hide item, item_name
+//                            show item_solid, item_solid_name }

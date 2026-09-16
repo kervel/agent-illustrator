@@ -1,0 +1,35 @@
+// FIXTURE 3 — THE NEGATIVE CASE. This one MUST keep warning after the
+// exemption lands. Reduced from one of the 25 correct check_hand_placed_labels
+// hits in the source deck.
+//
+// The shape is a card: a title plus two detail lines at a smaller size and a
+// different colour, each its own text element constrained inside a visible,
+// filled, stroked box. This is genuinely hand-placed text that belongs in a
+// label: — the rule is right to complain, and the markup on main expresses it
+// losslessly:
+//
+//   rect card [width: 290, height: 92, fill: background-light,
+//              stroke: foreground-2, stroke_width: 2,
+//              label: "Title<br><small><span fill=secondary-dark>first detail
+//                      line</span></small><br><small><span fill=secondary-dark>
+//                      second detail line</span></small>"]
+//
+// Expected on 8277305 AND after: label: texts "card_name", "card_one",
+// "card_two" sit inside "card". If this goes quiet, the exemption is too broad
+// — the box paints a fill AND a stroke and is nobody's sizing rect.
+
+rect card [width: 290, height: 92, fill: background-light, stroke: foreground-2, stroke_width: 2]
+constrain card.left = 30
+constrain card.top = 20
+
+text "Title" card_name [font_size: 15, fill: text-1]
+constrain card_name.center_x = card.center_x
+constrain card_name.top = card.top + 10
+
+text "first detail line" card_one [font_size: 11, fill: secondary-dark]
+constrain card_one.center_x = card.center_x
+constrain card_one.top = card_name.bottom + 8
+
+text "second detail line" card_two [font_size: 11, fill: secondary-dark]
+constrain card_two.center_x = card.center_x
+constrain card_two.top = card_one.bottom + 6

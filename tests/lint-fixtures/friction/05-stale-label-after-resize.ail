@@ -1,0 +1,41 @@
+// FIXTURE 5 — P0-1(3), the stale label, with the real constraints from the
+// source deck's bars. A bar spans from one scale tick to another, so its width
+// is never authored: both edges are constrained and the solver resizes it.
+//
+// Observed on 0.1.24, all three labels already text-anchor="middle":
+//
+//   bar_a  left+right constrained, no align       <text x="100">   WRONG
+//   bar_b  left+right constrained, align: center  <text x="100">   WRONG
+//   bar_c  width: modifier, then shifted          <text x="265">   right
+//
+// 100 is the centre of the pre-resize auto-sized box (left=60, ~80 wide). The
+// solver then stretched it to 60..470 and the label stayed. 265 is the true
+// centre and only the shifted bar gets it. align changes nothing either way —
+// the anchor is correct, the coordinate is stale.
+//
+// Expected after the fix: bar_a and bar_b both land on 265, same as bar_c.
+// Worth asserting bar_c does NOT move, so a fix to the resize path cannot
+// regress the shift path.
+
+rect t_from [width: 1, height: 1, fill: none, stroke: none]
+constrain t_from.center_x = 60
+constrain t_from.center_y = 300
+
+rect t_to [width: 1, height: 1, fill: none, stroke: none]
+constrain t_to.center_x = 470
+constrain t_to.center_y = 300
+
+rect bar_a [height: 56, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "V1"]
+constrain bar_a.left = t_from.center_x
+constrain bar_a.right = t_to.center_x
+constrain bar_a.center_y = 60
+
+rect bar_b [height: 56, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "V1", align: center]
+constrain bar_b.left = t_from.center_x
+constrain bar_b.right = t_to.center_x
+constrain bar_b.center_y = 140
+
+// Control: same span, but width authored so the solver only shifts it.
+rect bar_c [width: 410, height: 56, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "V1"]
+constrain bar_c.left = t_from.center_x
+constrain bar_c.center_y = 220

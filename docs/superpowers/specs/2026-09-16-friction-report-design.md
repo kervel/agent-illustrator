@@ -266,6 +266,58 @@ promise a smooth morph that the renderer cannot deliver.
 **Tests:** a keyframe that changes dasharray emits it in that frame's CSS;
 stroke_width likewise; neither appears in the diff when unchanged.
 
+### 3b — `transform` says what it cannot animate
+
+Found by the reporter while writing fixture 4, and narrower and nastier than
+first diagnosed. `unknown-modifier` *does* fire on transform keys — a
+misspelling is caught. But `stroke_dasharray` is a **recognised** `StyleKey`,
+so it passes the unknown-key check and is then dropped by the `_ => {}` arm of
+`apply_modifiers_ordered`. Verified:
+
+    keyframe "settled" {
+        transform item [stroke_dasharray: none, fill: accent-light,
+                        bogus_key: 7]
+    }
+
+    -> lint: unknown-modifier: "bogus_key" ... is ignored
+       (nothing at all about stroke_dasharray)
+    -> frame 1: fill="var(--accent-light)" stroke-dasharray="8,4"
+
+The fill lands, the dashes stay, and the only signal is noticing on screen. So
+the failure is inverted from the usual one: an author who **misspells** a key
+gets a warning, and an author who writes a **correct** key that simply is not
+animatable gets silence.
+
+Fifteen valid `StyleKey`s are in that gap today — every variant not handled by
+`apply_modifiers_ordered`:
+
+    Class  FillOpacity  FontSize  Gap  LabelAt  LabelOffset  LabelPosition
+    Pointer  Role  Routing  Size  StrokeDasharray  StrokeOpacity
+    StrokeWidth  ZOrder
+
+**The change:** `apply_modifiers_ordered` stops using a silent catch-all.
+Every `StyleKey` is either animated, or named in an explicit
+`not-animatable` list that produces a lint warning saying so. A new key added
+to the enum then forces a decision at compile time instead of defaulting to
+silence.
+
+Parts 3 and 3a move `StrokeDasharray` and `StrokeWidth` out of that list. The
+remainder stay listed and warn — with the note that `FillOpacity`,
+`StrokeOpacity`, `FontSize` and `Size` are all genuinely CSS-animatable and are
+candidates for a later pass. This part is about ending the silence, not about
+animating everything.
+
+**Why this is worth doing even if nobody animates a dash:** it is the same
+defect as the friction report's headline complaint, one layer up. The tool
+accepted what the author wrote, did something else, and said nothing. That is
+what makes an agent distrust the tool, and no amount of correct behaviour
+elsewhere compensates for it.
+
+**Tests:** a transform with `stroke_dasharray` animates it and warns about
+nothing; a transform with `z_order` warns that it cannot be animated and names
+the key; a misspelled key still produces `unknown-modifier` and not the new
+warning; the two are distinguishable in the output.
+
 ## Part 4 — `include "parts/base.ail"`
 
 **The defect:** six scenario diagrams share one base picture. With no include,
@@ -532,6 +584,28 @@ than from the deck:
 Both are `paints_nothing` on one side. A fixture pairing each with a genuine
 visible-on-visible overlap proves the exemption is not over-broad, which is the
 property the deck's surviving 25 `label` warnings also check.
+
+**Correction — the tick idiom above had its dependency backwards.** It was
+written from the report's prose, never from the real thing, and it positioned
+the tick *relative to the axis*. The real idiom is the reverse: the ticks are
+the coordinate system, and the visible rule is positioned **and sized** by
+them, with no width of its own. The committed fixture
+(`tests/lint-fixtures/friction/01-invisible-tick-anchors.ail`) has the real
+shape:
+
+    rect t_start [width: 1, height: 1, fill: none, stroke: none]   // + t_mid, t_end
+    constrain t_start.center_x = 60
+    rect rule [height: 2, fill: foreground-2]     // no width authored
+    constrain rule.left  = t_start.center_x
+    constrain rule.right = t_end.center_x
+
+This changes what Part 2 must not break. An invisible element here is a
+**load-bearing dependency of a visible element's geometry**, not decoration —
+so anything altering how elements that paint nothing participate in the solve
+would silently resize `rule`. The fixture asserts it still solves to x=60,
+width=800, which is a solver assertion, not a lint one. Exempting an element
+from *lint* must not exempt it from *layout*, and that distinction was not
+visible from my invented version.
 
 The deck remains the better end-to-end check while it exists — 8 real files
 beat any fixture for catching an exemption that is subtly too wide — so run

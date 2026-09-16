@@ -1,0 +1,35 @@
+// FIXTURE 1 — invisible tick anchors defining a scale, and a visible rule
+// sized BY them. From a real timeline diagram; 41 of that deck's 124 overlap
+// warnings came from this idiom.
+//
+// Note the dependency direction: the ticks are NOT positioned relative to the
+// rule. The rule is positioned and SIZED by the ticks — it has no width of its
+// own — and each tick after the first takes its y from the first. The ticks are
+// the coordinate system; the rule is drawn onto it.
+//
+// Expected on 8277305: overlap warnings for every tick-vs-rule pair, plus
+// tick-vs-anything-crossing. Expected after the exemption: silence, and the
+// rule still solves to the same geometry (left=60, right=860).
+
+rect t_start [width: 1, height: 1, fill: none, stroke: none]
+constrain t_start.center_x = 60
+constrain t_start.center_y = 250
+
+rect t_mid [width: 1, height: 1, fill: none, stroke: none]
+constrain t_mid.center_x = 400
+constrain t_mid.center_y = t_start.center_y
+
+rect t_end [width: 1, height: 1, fill: none, stroke: none]
+constrain t_end.center_x = 860
+constrain t_end.center_y = t_start.center_y
+
+rect rule [height: 2, fill: foreground-2]
+constrain rule.left = t_start.center_x
+constrain rule.right = t_end.center_x
+constrain rule.center_y = t_mid.center_y
+
+// A visible marker sitting on the scale — a real visible-on-visible overlap,
+// so the exemption has something it MUST still report in the same file.
+circle pin [size: 16, fill: accent-2, stroke: accent-dark, stroke_width: 2]
+constrain pin.center_x = t_mid.center_x
+constrain pin.center_y = rule.center_y

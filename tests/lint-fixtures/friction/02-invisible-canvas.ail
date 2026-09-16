@@ -1,0 +1,25 @@
+// FIXTURE 2 — an invisible rect pinned at the origin purely to fix the SVG's
+// extent. Used because there is no other way to say "the drawing is this big".
+// Generated ~62 overlap warnings in the source deck (it overlaps every element
+// by construction) and, on main, 8 more from check_hand_placed_labels, which
+// reports every positioned text as "sitting inside" it.
+//
+// Expected on 8277305: overlap canvas-vs-each element, AND
+//   label: texts "a", "b" sit inside "canvas" — write canvas [label: "…"]
+// Expected after: silence on both, from one shared paints-nothing predicate.
+
+rect canvas [width: 400, height: 200, fill: none, stroke: none]
+constrain canvas.left = 0
+constrain canvas.top = 0
+
+rect box [width: 160, height: 60, fill: accent-light, stroke: accent-dark, stroke_width: 2]
+constrain box.center_x = 200
+constrain box.center_y = 70
+
+text "alpha" a [font_size: 13, fill: text-2]
+constrain a.center_x = 200
+constrain a.center_y = 140
+
+text "beta" b [font_size: 13, fill: text-3]
+constrain b.center_x = 200
+constrain b.center_y = 165
