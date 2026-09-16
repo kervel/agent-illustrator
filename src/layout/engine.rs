@@ -2761,11 +2761,6 @@ pub fn resolve_constrain_statements_two_phase(
     // Collect user constraints (constrain statements)
     // Anchor-based constraints are automatically deferred by the collector (Feature 011)
     collect_constrain_statements(&doc.statements, &mut collector);
-    // A later statement supersedes an earlier one on the same element+property.
-    let overridden = drop_superseded_user_constraints(&mut collector.constraints);
-    result
-        .overridden_constraints
-        .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
 
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
@@ -2781,8 +2776,27 @@ pub fn resolve_constrain_statements_two_phase(
     let group_anchor_decls = build_group_anchor_decl_map(doc);
 
     // Partition constraints into local (per-template) and global
-    let (local_by_instance, global_constraints) =
+    let (mut local_by_instance, mut global_constraints) =
         partition_constraints(&collector.constraints, &element_to_template);
+
+    // A later statement supersedes an earlier one on the same
+    // element+property — but only among constraints that compete in the SAME
+    // solve. A template-internal constraint and an instance-level one are
+    // resolved in different passes, and dropping the internal one orphans the
+    // relationships that pass owns: a junction pinned 40px right of its
+    // neighbour ends up left of it when the neighbour is re-pinned from
+    // outside.
+    {
+        let mut overridden = drop_superseded_user_constraints(&mut global_constraints);
+        for group in local_by_instance.values_mut() {
+            overridden.extend(drop_superseded_user_constraints(group));
+        }
+        overridden.sort();
+        overridden.dedup();
+        result
+            .overridden_constraints
+            .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
+    }
 
     if config.trace {
         eprintln!("TRACE: Two-phase constraint solver");
@@ -3013,11 +3027,6 @@ pub fn resolve_constrain_statements(
     // Collect user constraints (constrain statements)
     // Anchor-based constraints are automatically deferred by the collector (Feature 011)
     collect_constrain_statements(&doc.statements, &mut collector);
-    // A later statement supersedes an earlier one on the same element+property.
-    let overridden = drop_superseded_user_constraints(&mut collector.constraints);
-    result
-        .overridden_constraints
-        .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
 
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
@@ -3032,8 +3041,27 @@ pub fn resolve_constrain_statements(
 
     // Separate constraints into internal (within a template) and external (across templates)
     // using the proper constraint classification based on template instance tracking
-    let (mut local_by_instance, external_constraints) =
+    let (mut local_by_instance, mut external_constraints) =
         partition_constraints(&collector.constraints, &element_to_template);
+
+    // A later statement supersedes an earlier one on the same
+    // element+property — but only among constraints that compete in the SAME
+    // solve. A template-internal constraint and an instance-level one are
+    // resolved in different passes, and dropping the internal one orphans the
+    // relationships that pass owns: a junction pinned 40px right of its
+    // neighbour ends up left of it when the neighbour is re-pinned from
+    // outside.
+    {
+        let mut overridden = drop_superseded_user_constraints(&mut external_constraints);
+        for group in local_by_instance.values_mut() {
+            overridden.extend(drop_superseded_user_constraints(group));
+        }
+        overridden.sort();
+        overridden.dedup();
+        result
+            .overridden_constraints
+            .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
+    }
 
     // Flatten all local constraints into a single Vec for solving together
     // (The old approach solved all internal constraints in one pass)

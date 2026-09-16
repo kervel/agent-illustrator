@@ -198,3 +198,38 @@ disable no_such_pin
     );
     assert!(result.is_err(), "a typo must not silently do nothing");
 }
+
+#[test]
+fn an_instance_level_pin_does_not_drop_a_template_internal_constraint() {
+    // Last-wins applies among constraints that compete in the SAME solve.
+    // Template-internal constraints and instance-level ones are resolved in
+    // different passes, so treating them as rivals deletes relationships the
+    // local pass owns.
+    //
+    // examples/railway-topology-templated.ail is the case that caught this: it
+    // aligns six meso junctions to their micro counterparts from outside the
+    // template, and leaves jA1/jA2 to the template's own `jA2 = jB2 + 40`.
+    // Deduplicating across the two scopes dropped the internal pin on jB2 and
+    // dragged jA2 from 299 to 245 — left of the neighbour it is supposed to
+    // sit right of.
+    let source = std::fs::read_to_string("examples/railway-topology-templated.ail")
+        .expect("example is part of the repo");
+    let svg = render(&source).expect("renders");
+    let cx = |id: &str| -> f64 {
+        let m = format!(r#"id="{id}""#);
+        let start = svg.find(&m).expect("element rendered");
+        let rest = &svg[start..];
+        let i = rest.find(r#"cx=""#).expect("cx") + 4;
+        let tail = &rest[i..];
+        tail[..tail.find('"').unwrap()].parse().unwrap()
+    };
+    let (ja2, jb2) = (cx("meso_tracks_jA2"), cx("meso_tracks_jB2"));
+    assert!(
+        ja2 > jb2,
+        "jA2 must stay right of jB2, got jA2={ja2} jB2={jb2}"
+    );
+    assert!(
+        (cx("meso_tracks_jB2") - cx("micro_tracks_jB2")).abs() < 0.5,
+        "and the instance-level alignment must still be satisfied"
+    );
+}
