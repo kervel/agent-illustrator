@@ -23,6 +23,11 @@ Check here before writing coordinates or a run of `constrain` lines.
 |---------------|-----|-------|
 | A box around existing elements | `constrain bg contains a, b [padding: 30]` | Hand-computed `width`/`height` |
 | Anything on a lattice: matrix, table, calendar, aligned number columns | `grid` + `[at: [row, col]]`, cells as `g.cell(r, c)` | `constrain` lines with a hand-picked pitch |
+| Text centred in a box | `rect b [label: "x"]` | a separate `text` element plus constraints |
+| Several lines in a box | `label: "a<br>b<br>c"` | one `text` element per line |
+| A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
+| A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
+| Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
 | Text that must not jump when its wording changes | leave it auto-sized, add `align: start` | guessing a `width` for the longest wording |
 | One caption across a walkthrough | `transform cap [label: "..."]` per keyframe | one text element per step |
 | Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
@@ -233,6 +238,34 @@ tag.tip -> box [routing: direct]       // or aim with a connection
 
 Callouts are exempt from overlap lint — they are meant to sit over what they annotate.
 
+#### Labels on boxes
+
+Words that belong to a box are its `label:`, never a `text` element you
+position yourself. The box sizes itself around them, so there is no offset to
+guess and nothing drifts when the wording changes.
+
+```
+rect b [label: "Cache"]                                     // centred inside
+rect b [label: "Cache", align: end]                         // inside, right-aligned
+rect b [label: "based_on", label_position: below, align: end]   // caption under it
+rect bg [label: "Production Zone", label_position: above, align: start]
+```
+
+`label_position:` is `inside` (default), `above`, `below`, `left` or `right`;
+`align:` picks which edge the label lines up on, and `label_offset:` the gap
+(default 6). An outside label counts as part of the element, so rows and
+`contains` reserve room for it.
+
+A label takes inline markup — `<br>`, `<b>`, `<i>`, `<small>`, and
+`<span fill=accent-dark>`. A bare `<` stays literal, so `"T < now"` is fine.
+
+```
+rect card [label: "<b>changeset from INES</b><br>temporal_mode = correction<br><small>V2 inherits its label</small>"]
+```
+
+Give the box an explicit `width:` and the label wraps to it and the box grows
+taller; without one the box widens to the longest line.
+
 #### Text alignment
 
 `align: start|center|end` (or `left`/`center`/`right`): where text sits in its
@@ -367,6 +400,7 @@ Do not attempt to use these — they will waste iteration cycles:
 - Percentage-based sizing — all sizes are in pixels
 
 `text name [label: "content"]` does not create text — use `text "content" name`.
+A shape's `label:` takes `<br>`, `<b>`, `<i>`, `<small>` and `<span fill=…>`.
 (`label:` in a keyframe `transform` *does* rewrite an element's words.)
 
 ### Common Pitfalls

@@ -281,10 +281,10 @@ template "data_store" (name: "DB") {
 
 group diagram {
     // Background rects (drawn first = behind everything else)
-    rect prod_bg [width: 550, height: 200, fill: accent-light, stroke: accent-dark, stroke_width: 2, opacity: 0.25]
-    text "Production Zone" prod_label [font_size: 14, fill: accent-dark]
-    rect data_bg [width: 550, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.25]
-    text "Data Layer" data_label [font_size: 14, fill: secondary-dark]
+    rect prod_bg [width: 550, height: 200, fill: accent-light, stroke: accent-dark, stroke_width: 2, opacity: 0.25,
+                  label: "Production Zone", label_position: above, align: start, label_fill: accent-dark]
+    rect data_bg [width: 550, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.25,
+                  label: "Data Layer", label_position: above, align: start, label_fill: secondary-dark]
 
     // Entry point
     rect gateway [width: 140, height: 50, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "API Gateway"]
@@ -306,13 +306,13 @@ group diagram {
 // Backgrounds (y positions chosen to surround their content)
 constrain prod_bg.center_x = 300
 constrain prod_bg.center_y = 170
-constrain prod_label.center_x = 300
-constrain prod_label.center_y = 80
 
 constrain data_bg.center_x = 300
 constrain data_bg.center_y = 370
-constrain data_label.center_x = 300
-constrain data_label.center_y = 320
+
+// Zone titles ride on their background rect. `label_position: above` keeps
+// the title clear of the box and inside the canvas, so there is no offset
+// to guess and nothing to re-derive when a zone moves or resizes.
 
 // Gateway at top center
 constrain gateway.center_x = 300
