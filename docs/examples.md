@@ -470,3 +470,38 @@ The caption is auto-sized: it is laid out for the longest wording any
 frame gives it, so it never resizes and the text holds its position from
 frame to frame. `--frames-to-dir out/` renders them all; `--animate`
 plays them back.
+
+
+MULTI-LINE CARDS
+================
+
+A card with a title and detail lines is ONE rect. Reach for `label:` markup
+before you reach for a `text` element and a pair of constraints — a separate
+text element has to be positioned by hand, does not move when the box moves,
+and is what `--lint`'s `label` category exists to talk you out of.
+
+row cards [gap: 34] {
+    rect changeset [width: 290, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                    label: "<b>Changeset</b><br><small>temporal_mode: correction</small><br><small>event_ref -> an event</small>"]
+
+    rect note [width: 240, fill: background-1, stroke: foreground-2,
+               label: "an explanation long enough that it has to wrap, which it does because the width is explicit"]
+
+    rect chip [width: 90, height: 40, fill: secondary-light, stroke: secondary-dark,
+               label: "based_on", label_position: below, align: end]
+}
+
+    <br>                  line break
+    <b>..</b>             bold
+    <i>..</i>             italic
+    <small>..</small>     smaller
+    <span fill=accent-dark>..</span>   coloured run
+
+The box grows to fit the label. With an explicit `width:` the text wraps to
+it and the box grows taller instead of spilling out of the sides. A bare `<`
+is literal text, so "a < b" and "Vec<String>" are safe.
+
+`label_position:` puts the label outside the box — `above`, `below`, `left`,
+`right` — and `align:` picks the edge it lines up on. An outside label is part
+of the element's bounds, so a row or column reserves space for it and a
+caption never collides with the next element along.

@@ -1566,6 +1566,17 @@ fn check_connections(
 /// Check if any label (element label, connection label, or standalone text)
 /// overlaps with a connection path segment.  This catches labels placed at
 /// bend points or too close to connector lines.
+/// True when a label is drawn within one of the connection's endpoints.
+///
+/// Anonymous elements have no id to match on, so a subtitle inside the column
+/// an arrow terminates at cannot be recognised by name — but it is still
+/// inside the thing the connection points to.
+fn label_sits_in_endpoint(result: &LayoutResult, id: &str, bbox: &BoundingBox) -> bool {
+    result
+        .get_element_by_name(id)
+        .is_some_and(|elem| elem.bounds.intersects(bbox))
+}
+
 /// An element's own id plus every descendant's.
 ///
 /// A connection terminating at a container reaches everything drawn in it, so
@@ -1661,6 +1672,8 @@ fn check_label_connection_overlaps(
             // for.
             if endpoint_family(result, &conn.from_id.0).contains(&label.owner)
                 || endpoint_family(result, &conn.to_id.0).contains(&label.owner)
+                || label_sits_in_endpoint(result, &conn.from_id.0, &label.bbox)
+                || label_sits_in_endpoint(result, &conn.to_id.0, &label.bbox)
             {
                 continue;
             }

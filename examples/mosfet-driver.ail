@@ -378,7 +378,10 @@ constrain r_gate.center_y = r_pullup.bottom + 40
 constrain r_gate.left = r_pullup.right + 30
 
 // NPN driver below gate resistor
-constrain q_driver.center_x = vcc_5v.center_x
+// The pull-up's right end and the driver's collector are the same node, so
+// pin them to each other: centring the transistor instead leaves the wire
+// between them with a 22px jog.
+constrain q_driver.collector_x = r_pullup.right_conn_x
 constrain q_driver.top = r_gate.bottom + 40
 
 constrain r_pulldown.center_x = r_gate.center_x + 50
