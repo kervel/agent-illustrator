@@ -177,3 +177,249 @@ pub fn measure_runs(lines: &[TextLine], font_size: f64) -> TextMetrics {
         line_count,
     }
 }
+
+/// Tags the label markup subset understands. Anything else that looks like a
+/// tag is left as literal text and reported by the linter.
+pub const SUPPORTED_TAGS: &[&str] = &["br", "b", "i", "small", "span"];
+
+/// A malformed *recognised* tag. Unrecognised angle brackets are not errors —
+/// they are text.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MarkupError {
+    pub message: String,
+    /// Byte offset into the label string where the problem starts.
+    pub offset: usize,
+}
+
+/// Style state carried down through nested tags.
+#[derive(Clone)]
+struct MarkupStyle {
+    bold: bool,
+    italic: bool,
+    scale: f64,
+    fill: Option<String>,
+}
+
+impl MarkupStyle {
+    fn root() -> Self {
+        MarkupStyle {
+            bold: false,
+            italic: false,
+            scale: 1.0,
+            fill: None,
+        }
+    }
+}
+
+/// Flush the pending characters as a run under the current style.
+fn flush_run(buf: &mut String, style: &MarkupStyle, lines: &mut Vec<TextLine>) {
+    if buf.is_empty() {
+        return;
+    }
+    lines.last_mut().expect("always one line").push(TextRun {
+        text: std::mem::take(buf),
+        bold: style.bold,
+        italic: style.italic,
+        scale: style.scale,
+        fill: style.fill.clone(),
+    });
+}
+
+/// Parse the label markup subset into lines of styled runs.
+///
+/// `<` only begins a tag when a recognised tag name follows it; otherwise it
+/// is literal text, so `"T < confirmed_until"` and `"Vec<String>"` survive.
+pub fn parse_markup(src: &str) -> Result<RichText, MarkupError> {
+    let chars: Vec<char> = src.chars().collect();
+    let mut lines: Vec<TextLine> = vec![Vec::new()];
+    let mut stack: Vec<(String, MarkupStyle)> = Vec::new();
+    let mut style = MarkupStyle::root();
+    let mut buf = String::new();
+    let mut i = 0usize;
+
+    while i < chars.len() {
+        let c = chars[i];
+
+        if c == '\n' {
+            flush_run(&mut buf, &style, &mut lines);
+            lines.push(Vec::new());
+            i += 1;
+            continue;
+        }
+
+        if c == '&' {
+            if let Some((entity, len)) = read_entity(&chars[i..]) {
+                buf.push(entity);
+                i += len;
+                continue;
+            }
+            buf.push(c);
+            i += 1;
+            continue;
+        }
+
+        if c != '<' {
+            buf.push(c);
+            i += 1;
+            continue;
+        }
+
+        // `<` — a tag only if a recognised name follows, else literal.
+        match read_tag(&chars[i..]) {
+            None => {
+                buf.push('<');
+                i += 1;
+            }
+            Some(tag) => {
+                flush_run(&mut buf, &style, &mut lines);
+                let offset = i;
+                i += tag.consumed;
+
+                if tag.closing {
+                    match stack.pop() {
+                        Some((open, prev)) if open == tag.name => style = prev,
+                        _ => {
+                            return Err(MarkupError {
+                                message: format!(
+                                    "</{}> closes a tag that was never opened",
+                                    tag.name
+                                ),
+                                offset,
+                            })
+                        }
+                    }
+                    continue;
+                }
+
+                match tag.name.as_str() {
+                    "br" => lines.push(Vec::new()),
+                    "b" => {
+                        stack.push(("b".into(), style.clone()));
+                        style.bold = true;
+                    }
+                    "i" => {
+                        stack.push(("i".into(), style.clone()));
+                        style.italic = true;
+                    }
+                    "small" => {
+                        stack.push(("small".into(), style.clone()));
+                        style.scale *= 0.8;
+                    }
+                    "span" => {
+                        let fill = tag.fill.ok_or_else(|| MarkupError {
+                            message: "<span> needs a fill, e.g. <span fill=accent-dark>"
+                                .to_string(),
+                            offset,
+                        })?;
+                        stack.push(("span".into(), style.clone()));
+                        style.fill = Some(fill);
+                    }
+                    other => unreachable!("read_tag only yields supported names, got {other}"),
+                }
+            }
+        }
+    }
+
+    flush_run(&mut buf, &style, &mut lines);
+
+    if let Some((open, _)) = stack.last() {
+        return Err(MarkupError {
+            message: format!("<{open}> is never closed; add </{open}>"),
+            offset: src.len(),
+        });
+    }
+
+    Ok(RichText { lines })
+}
+
+struct ParsedTag {
+    name: String,
+    closing: bool,
+    /// `fill=` value on a `<span>`.
+    fill: Option<String>,
+    /// Characters consumed, including the angle brackets.
+    consumed: usize,
+}
+
+/// Read a recognised tag starting at `chars[0] == '<'`. Returns `None` when
+/// what follows is not a supported tag name, so the `<` stays literal.
+fn read_tag(chars: &[char]) -> Option<ParsedTag> {
+    debug_assert_eq!(chars[0], '<');
+    let mut i = 1;
+    let closing = chars.get(i) == Some(&'/');
+    if closing {
+        i += 1;
+    }
+
+    let name_start = i;
+    while i < chars.len() && chars[i].is_ascii_alphabetic() {
+        i += 1;
+    }
+    let name: String = chars[name_start..i]
+        .iter()
+        .collect::<String>()
+        .to_ascii_lowercase();
+    if !SUPPORTED_TAGS.contains(&name.as_str()) {
+        return None;
+    }
+
+    // Attributes: only `fill=` on `<span>`, bare or quoted.
+    let mut fill = None;
+    while i < chars.len() && chars[i] != '>' {
+        if chars[i].is_whitespace() || chars[i] == '/' {
+            i += 1;
+            continue;
+        }
+        let attr_start = i;
+        while i < chars.len() && chars[i] != '=' && chars[i] != '>' {
+            i += 1;
+        }
+        let attr: String = chars[attr_start..i].iter().collect();
+        if chars.get(i) != Some(&'=') {
+            continue;
+        }
+        i += 1; // '='
+        let quote = matches!(chars.get(i), Some('"') | Some('\''));
+        if quote {
+            i += 1;
+        }
+        let val_start = i;
+        while i < chars.len()
+            && chars[i] != '>'
+            && !(quote && (chars[i] == '"' || chars[i] == '\''))
+            && !(!quote && chars[i].is_whitespace())
+        {
+            i += 1;
+        }
+        let value: String = chars[val_start..i].iter().collect();
+        if quote {
+            i += 1;
+        }
+        if attr.eq_ignore_ascii_case("fill") {
+            fill = Some(value);
+        }
+    }
+
+    if chars.get(i) != Some(&'>') {
+        return None; // never closed the bracket — treat `<` as literal
+    }
+
+    Some(ParsedTag {
+        name,
+        closing,
+        fill,
+        consumed: i + 1,
+    })
+}
+
+/// Read an XML entity at `chars[0] == '&'`, returning the character and the
+/// number of characters consumed.
+fn read_entity(chars: &[char]) -> Option<(char, usize)> {
+    for (name, ch) in [("lt;", '<'), ("gt;", '>'), ("amp;", '&'), ("quot;", '"')] {
+        let n = name.chars().count();
+        if chars.len() > n && chars[1..=n].iter().collect::<String>() == name {
+            return Some((ch, n + 1));
+        }
+    }
+    None
+}
