@@ -139,7 +139,7 @@
     <g id="agent_section" class="ai-container">
       <g id="agent_header" class="ai-container">
         <text id="agent_title" class="ai-shape ai-text" x="15" y="174" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--secondary-dark)">AGENT</text>
-        <text id="agent_sub" class="ai-shape ai-text" x="71.23" y="172.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">— fast · ephemeral</text>
+        <text id="agent_sub" class="ai-shape ai-text" x="93.23" y="172.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">— fast · ephemeral</text>
       </g>
       <g id="agent_loop" class="ai-container">
         <rect id="task" class="ai-shape ai-rect" x="15" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>

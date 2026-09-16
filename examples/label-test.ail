@@ -18,9 +18,15 @@ group another {
 
 // Test old [label: "text"] modifier still works (backward compatible)
 rect standalone [label: "Standalone Label"]
+constrain standalone.top = another.bottom + 20
 
-// Test connection label with shape reference
+// Test connection label with shape reference. The boxes are held apart so
+// the label has a span to sit on: a 100px label on a 20px gap straddles
+// both boxes, which --lint reports.
 text "Connection Label" conn_label [font_size: 12, fill: accent-1]
 rect source
 rect target
+constrain source.top = standalone.bottom + 30
+constrain target.left = source.right + 140
+constrain target.center_y = source.center_y
 source -> target [label: conn_label]

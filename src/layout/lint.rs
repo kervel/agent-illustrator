@@ -1566,6 +1566,27 @@ fn check_connections(
 /// Check if any label (element label, connection label, or standalone text)
 /// overlaps with a connection path segment.  This catches labels placed at
 /// bend points or too close to connector lines.
+/// An element's own id plus every descendant's.
+///
+/// A connection terminating at a container reaches everything drawn in it, so
+/// rules about "what this connection touches" have to treat the family as one.
+fn endpoint_family(result: &LayoutResult, id: &str) -> HashSet<String> {
+    fn collect(elem: &ElementLayout, out: &mut HashSet<String>) {
+        if let Some(id) = &elem.id {
+            out.insert(id.0.clone());
+        }
+        for child in &elem.children {
+            collect(child, out);
+        }
+    }
+    let mut out = HashSet::new();
+    out.insert(id.to_string());
+    if let Some(elem) = result.get_element_by_name(id) {
+        collect(elem, &mut out);
+    }
+    out
+}
+
 fn check_label_connection_overlaps(
     result: &LayoutResult,
     scope: &FrameScope<'_>,
@@ -1631,9 +1652,16 @@ fn check_label_connection_overlaps(
                 continue;
             }
 
-            // Skip: label on an element that is an endpoint of this connection
-            // (e.g., junction labels at railway switches, pin labels at transistor leads)
-            if label.owner == conn.from_id.0 || label.owner == conn.to_id.0 {
+            // Skip: label on an element that is an endpoint of this
+            // connection, or on anything inside one (e.g. junction labels at
+            // railway switches, pin labels at transistor leads, a level name
+            // inside the column the arrow terminates at). A connection that
+            // ends AT a container necessarily reaches its contents, so
+            // reporting the contact describes the connection the author asked
+            // for.
+            if endpoint_family(result, &conn.from_id.0).contains(&label.owner)
+                || endpoint_family(result, &conn.to_id.0).contains(&label.owner)
+            {
                 continue;
             }
 
