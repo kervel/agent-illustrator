@@ -63,6 +63,10 @@ pub struct ElementDiff {
     pub stroke: Option<String>,
     /// Colour of the element's label for this frame
     pub label_fill: Option<String>,
+    /// Dash pattern for this frame. Dashed-outline -> solid is the central
+    /// beat of "a planned thing becomes a confirmed thing".
+    pub stroke_dasharray: Option<String>,
+    pub stroke_width: Option<f64>,
     /// Replacement text for this frame (a text shape's content, or an
     /// element's label), when a keyframe rewrote it.
     pub label: Option<String>,
@@ -90,6 +94,8 @@ impl ElementDiff {
             && self.fill.is_none()
             && self.stroke.is_none()
             && self.label_fill.is_none()
+            && self.stroke_dasharray.is_none()
+            && self.stroke_width.is_none()
             && self.label.is_none()
     }
 }
@@ -608,6 +614,58 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
     doc
 }
 
+/// Keys `transform` can actually animate.
+///
+/// The catch-all in `apply_modifiers_ordered` used to swallow anything else
+/// without a word. `unknown-modifier` only fires on a *misspelled* key, so an
+/// author who wrote a recognised-but-unanimatable key — `stroke_dasharray`
+/// was the reported one — got correct syntax, no error, no warning, and a
+/// diagram that quietly did something else.
+///
+/// Every StyleKey is named here explicitly rather than falling through a `_`
+/// arm, so adding a variant to the enum forces a decision instead of
+/// defaulting to silence.
+pub fn is_animatable(key: &StyleKey) -> bool {
+    match key {
+        StyleKey::Label
+        | StyleKey::Align
+        | StyleKey::Rotation
+        | StyleKey::Fill
+        | StyleKey::LabelFill
+        | StyleKey::Stroke
+        | StyleKey::StrokeDasharray
+        | StyleKey::StrokeWidth
+        | StyleKey::Opacity
+        | StyleKey::Width
+        | StyleKey::Height
+        | StyleKey::X
+        | StyleKey::Y
+        | StyleKey::Dx
+        | StyleKey::Dy
+        | StyleKey::Scale => true,
+        // Recognised, but the renderer cannot vary them per frame. Several
+        // (fill_opacity, stroke_opacity, font_size, size) are genuinely
+        // CSS-animatable and are candidates for a later pass; the point here
+        // is that saying so out loud beats dropping them quietly.
+        StyleKey::Class
+        | StyleKey::FillOpacity
+        | StyleKey::FontSize
+        | StyleKey::Gap
+        | StyleKey::LabelAt
+        | StyleKey::LabelOffset
+        | StyleKey::LabelPosition
+        | StyleKey::Pointer
+        | StyleKey::Role
+        | StyleKey::Routing
+        | StyleKey::Size
+        | StyleKey::StrokeOpacity
+        | StyleKey::ZOrder => false,
+        // Anything not yet classified: treat as not animatable and say so,
+        // rather than pretending it worked.
+        _ => false,
+    }
+}
+
 /// Apply transform modifiers in a fixed order against the element's base bounds:
 /// 1) absolutes + visual, 2) dx/dy deltas, 3) scale about center.
 fn apply_modifiers_ordered(
@@ -628,10 +686,15 @@ fn apply_modifiers_ordered(
             StyleKey::LabelFill => { elem.styles.label_fill = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Stroke => { elem.styles.stroke = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Opacity => { if let Some(v) = num(&m.node.value.node) { elem.styles.opacity = Some(v); } }
+            StyleKey::StrokeDasharray => { elem.styles.stroke_dasharray = string_value(&m.node.value.node).map(|s| s.to_string()); }
+            StyleKey::StrokeWidth => { if let Some(v) = num(&m.node.value.node) { elem.styles.stroke_width = Some(v); } }
             StyleKey::Width => { if let Some(v) = num(&m.node.value.node) { elem.bounds.width = v; } }
             StyleKey::Height => { if let Some(v) = num(&m.node.value.node) { elem.bounds.height = v; } }
             StyleKey::X => { if let Some(v) = num(&m.node.value.node) { elem.bounds.x = v; } }
             StyleKey::Y => { if let Some(v) = num(&m.node.value.node) { elem.bounds.y = v; } }
+            // Handled in later passes, or deliberately not animatable —
+            // `is_animatable` is the single list, and lint reads it so the
+            // drop is never silent.
             _ => {}
         }
     }
@@ -703,6 +766,12 @@ fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
     }
     if base.styles.stroke != solved.styles.stroke {
         diff.stroke = solved.styles.stroke.clone();
+    }
+    if base.styles.stroke_dasharray != solved.styles.stroke_dasharray {
+        diff.stroke_dasharray = solved.styles.stroke_dasharray.clone();
+    }
+    if base.styles.stroke_width != solved.styles.stroke_width {
+        diff.stroke_width = solved.styles.stroke_width;
     }
     if base.styles.label_fill != solved.styles.label_fill {
         diff.label_fill = solved.styles.label_fill.clone();

@@ -988,6 +988,16 @@ fn generate_keyframe_css(
             if let Some(ref stroke) = diff.stroke {
                 props.push(format!("stroke: {}", stroke));
             }
+            if let Some(ref dash) = diff.stroke_dasharray {
+                // Note: stroke-dasharray only interpolates between patterns
+                // with the same dash count. Dashed -> solid is expressed as a
+                // zero-length pattern ("0,0"), not as `none`, if a smooth
+                // transition is wanted.
+                props.push(format!("stroke-dasharray: {}", dash));
+            }
+            if let Some(sw) = diff.stroke_width {
+                props.push(format!("stroke-width: {}px", sw));
+            }
             if !props.is_empty() {
                 css.push_str(&format!(
                     "  #{} {{ {}; }}\n",

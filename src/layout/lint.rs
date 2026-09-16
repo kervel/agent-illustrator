@@ -174,6 +174,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_hand_placed_labels(result, doc, &mut warnings);
     check_label_markup(doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
+    check_unanimatable_transform_keys(doc, &mut warnings);
     check_unknown_colors(doc, &mut warnings);
     check_overridden_constraints(result, &mut warnings);
     dedup_warnings(&mut warnings);
@@ -2570,6 +2571,67 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "via",          // connection routing
     "padding",      // contains
 ];
+
+/// Report `transform` keys that are recognised but cannot be animated.
+///
+/// `unknown-modifier` catches a misspelling. This catches the opposite and
+/// nastier case: a correct key that the renderer silently drops, so the author
+/// doing it *right* is the one who gets no signal.
+fn check_unanimatable_transform_keys(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    use crate::layout::keyframe::is_animatable;
+    use crate::parser::ast::{KeyframeOp, StyleKey};
+
+    for stmt in &doc.statements {
+        let Statement::Keyframe(kf) = &stmt.node else {
+            continue;
+        };
+        for op in &kf.operations {
+            let KeyframeOp::Transform { target, modifiers } = &op.node else {
+                continue;
+            };
+            for m in modifiers {
+                // A Custom key is a typo; `unknown-modifier` owns that case.
+                if matches!(m.node.key.node, StyleKey::Custom(_)) {
+                    continue;
+                }
+                if is_animatable(&m.node.key.node) {
+                    continue;
+                }
+                let key = style_key_name(&m.node.key.node);
+                warnings.push(LintWarning {
+                    category: LintCategory::UnknownModifier,
+                    message: format!(
+                        "\"{key}\" on \"{}\" in keyframe \"{}\" cannot be animated and is \
+                         ignored; set it on the element itself instead",
+                        target.node.0, kf.name.node
+                    ),
+                    frames: vec![kf.name.node.clone()],
+                    pair: None,
+                });
+            }
+        }
+    }
+}
+
+/// Spell a StyleKey the way an author writes it.
+fn style_key_name(key: &crate::parser::ast::StyleKey) -> String {
+    use crate::parser::ast::StyleKey as K;
+    match key {
+        K::Custom(c) => return c.clone(),
+        other => {
+            // Debug spelling is CamelCase; the DSL is snake_case.
+            let dbg = format!("{other:?}");
+            let mut out = String::new();
+            for (i, ch) in dbg.chars().enumerate() {
+                if ch.is_uppercase() && i > 0 {
+                    out.push('_');
+                }
+                out.extend(ch.to_lowercase());
+            }
+            out
+        }
+    }
+}
 
 fn check_unknown_modifiers(doc: &Document, warnings: &mut Vec<LintWarning>) {
     fn owner_name(name: Option<&crate::parser::ast::Spanned<crate::parser::ast::Identifier>>) -> String {
