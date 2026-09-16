@@ -24,7 +24,9 @@ col diagram [gap: 40] {
 
   // === AGENT LOOP (bottom) ===
   col agent_section [gap: 8] {
-    row agent_header [gap: 8] {
+    // The assign->task connector drops through this row at x = assign's
+    // centre; the gap keeps the subtitle clear of it.
+    row agent_header [gap: 30] {
       text "AGENT" agent_title [font_size: 14, fill: secondary-dark]
       text "— fast · ephemeral" agent_sub [font_size: 11, fill: text-3]
     }

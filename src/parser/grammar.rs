@@ -1402,7 +1402,20 @@ where
         // - connection_decl before template_instance (both start with identifier)
         // - shape_decl before template_instance (rect, circle, etc. are keywords)
         // - template_instance last (identifier identifier pattern is very general)
+        // Top-level `disable a_home, b_home`: release a pin written elsewhere.
+        // Same spelling as the keyframe op, so a composing file does not have
+        // to learn a second syntax for the same idea.
+        let disable_stmt = just(Token::Disable)
+            .ignore_then(
+                identifier
+                    .separated_by(just(Token::Comma))
+                    .at_least(1)
+                    .collect::<Vec<_>>(),
+            )
+            .map(Statement::DisableConstraint);
+
         choice((
+            disable_stmt,
             constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
             keyframe_decl.map(Statement::Keyframe), // Feature 011: before templates

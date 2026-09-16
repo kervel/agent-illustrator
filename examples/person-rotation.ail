@@ -83,7 +83,13 @@ p0.feet -> p180.feet [stroke: #e65100, stroke_width: 2, routing: curved, via: to
 p270.crown -> p135.crown [stroke: #1565c0, stroke_width: 2, routing: curved, via: bottom_via, label: "crowns"]
 p270.feet -> p135.feet [stroke: #e65100, stroke_width: 2, routing: curved, via: bottom_via, label: "feet"]
 
-// Hand-to-hand straight connections between adjacent people
+// Hand-to-hand straight connections between adjacent people.
+//
+// --lint reports two of these and both are intentional: this file exists to
+// VERIFY that anchors rotate with their element, so it always joins
+// hand_right to hand_left. On a figure rotated 180 degrees that anchor is on
+// the far side, so the line must reach across the torso — which is the
+// property being demonstrated, not a routing defect.
 p0.hand_right -> p90.hand_left [stroke: #2e7d32, stroke_width: 2]
 p90.hand_right -> p180.hand_left [stroke: #2e7d32, stroke_width: 2]
 

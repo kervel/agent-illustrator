@@ -145,14 +145,16 @@ IMPORTANT: Do NOT use ImageMagick `convert` or `rsvg-convert` — they don't sup
 After each render, verify ALL of these. If any fail, fix and re-render:
 
 1. Run `agent-illustrator --lint diagram.ail`. The warnings are there to prevent common mistakes, but can occasionally have false positives. `unknown-modifier` never is: it means a key you wrote is being ignored, so check the spelling.
-2. Visual check (render the svg to png)
-2.1 No overlapping elements or labels
-2.2 Connections don't route through text
-2.3 Background containers surround their content
-2.4 All labels readable at rendered size
-2.5 No excessive whitespace gaps
-2.6 All connections go to correct elements
-2.7 Elements are at least 60x35px
+2. Visual check (render the svg to png). **The screenshot pass is for meaning,
+   not for collisions.** `--lint` answers "do these overlap" and "does this
+   text fit" mechanically and better than the eye does — do not re-check them
+   here.
+2.1 Connections don't route through text
+2.2 Background containers surround their content
+2.3 No excessive whitespace gaps
+2.4 All connections go to correct elements
+2.5 Elements are at least 60x35px
+2.6 The diagram says what the prompt actually asked for
 
 ### Adversarial Review (MANDATORY before declaring done)
 
@@ -386,7 +388,10 @@ Use semantic palette colors. NEVER use `*-dark` as a fill — it renders near-bl
 | Primary lines/text | `foreground-1` |
 | Secondary lines | `foreground-2`, `foreground-3` |
 
-Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2`, `accent-light`, `accent-dark`, `secondary-light`, `secondary-dark`, `text-1`, `text-2`, `text-3`.
+Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2`, `accent-light`, `accent-dark`, `secondary-light`, `secondary-dark`, `text-1`, `text-2`, `text-3`, `background-light`, `background-dark`, `background-1`, `background-2`, `background-3`.
+
+There is no bare `background` (or `foreground`, or `accent`) — every name
+carries a suffix.
 
 ---
 

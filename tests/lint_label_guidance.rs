@@ -81,3 +81,41 @@ fn a_less_than_sign_in_a_label_is_not_reported_as_markup() {
     let messages = lint(r#"rect a [label: "T < confirmed_until"]"#);
     assert!(messages.is_empty(), "got: {messages:?}");
 }
+
+#[test]
+fn an_outside_label_cannot_overflow_its_box() {
+    // A 10px switch cannot hold its own name, which is why the label goes
+    // outside. Once it is outside it is drawn on the background and is not
+    // trying to fit in the box, so reporting overflow is wrong.
+    let messages = lint(
+        r#"circle j [size: 10, fill: accent-dark, label: "Switch 1", label_position: above]"#,
+    );
+    assert!(
+        !messages.iter().any(|m| m.contains("overflow")),
+        "got: {messages:?}"
+    );
+}
+
+#[test]
+fn an_outside_label_does_not_inherit_the_shape_fill_for_contrast() {
+    let messages = lint(
+        r#"circle j [size: 10, fill: #228B22, label: "Switch 1", label_position: below]"#,
+    );
+    assert!(
+        !messages.iter().any(|m| m.contains("dark fill")),
+        "got: {messages:?}"
+    );
+}
+
+#[test]
+fn an_inside_label_still_reports_overflow_and_contrast() {
+    let messages = lint(r#"circle j [size: 10, fill: #228B22, label: "Switch 1"]"#);
+    assert!(
+        messages.iter().any(|m| m.contains("overflow")),
+        "inside labels must still report overflow: {messages:?}"
+    );
+    assert!(
+        messages.iter().any(|m| m.contains("dark fill")),
+        "inside labels must still report contrast: {messages:?}"
+    );
+}

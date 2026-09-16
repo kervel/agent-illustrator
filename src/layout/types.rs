@@ -579,6 +579,11 @@ pub struct ResolvedStyles {
     /// Colour of the element's label text. `fill` colours the shape; the words
     /// written on it are a separate thing to colour.
     pub label_fill: Option<String>,
+    /// This element's `width:` was derived from the wordings its keyframes
+    /// give it, not written by the author. The box is therefore sized for the
+    /// widest wording and every narrower one sits in slack the author never
+    /// asked for — so text in it centres instead of hugging the left edge.
+    pub width_is_derived: bool,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -612,6 +617,7 @@ impl ResolvedStyles {
             stroke: Some("#333333".to_string()),
             stroke_width: Some(2.0),
             stroke_dasharray: None,
+            width_is_derived: false,
             opacity: Some(1.0),
             fill_opacity: None,
             stroke_opacity: None,
@@ -629,6 +635,12 @@ impl ResolvedStyles {
     /// The actual color values are provided via a `<style>` block in the SVG output.
     pub fn from_modifiers(modifiers: &[Spanned<StyleModifier>]) -> Self {
         let mut styles = Self::default();
+        styles.width_is_derived = modifiers.iter().any(|m| {
+            matches!(m.node.key.node, StyleKey::Width)
+                && matches!(&m.node.value.node,
+                    StyleValue::Number { unit: Some(u), .. }
+                        if u == crate::layout::keyframe::SYNTHETIC_WIDTH_UNIT)
+        });
 
         for modifier in modifiers {
             match &modifier.node.key.node {
@@ -807,6 +819,7 @@ impl ResolvedStyles {
     /// Merge another style set, with other taking precedence
     pub fn merge(&self, other: &ResolvedStyles) -> ResolvedStyles {
         ResolvedStyles {
+            width_is_derived: self.width_is_derived || other.width_is_derived,
             fill: other.fill.clone().or_else(|| self.fill.clone()),
             fill_pattern: other
                 .fill_pattern
@@ -853,6 +866,115 @@ pub enum TextAnchor {
     End,
 }
 
+/// Where a shape's label sits relative to its box.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShapeLabelPosition {
+    Inside,
+    Above,
+    Below,
+    Left,
+    Right,
+}
+
+/// Inset from a box's edge for an edge-aligned label inside it.
+pub const LABEL_INSET: f64 = 8.0;
+/// Default gap between a box and a label placed outside it.
+pub const LABEL_OUTSIDE_OFFSET: f64 = 6.0;
+
+/// How a label is positioned against its element's box.
+///
+/// A label's point is always *derived* from this plus the element's current
+/// bounds — never remembered across a geometry change. The solver can move a
+/// box, resize it, or both, and re-running [`place_label`] is what keeps the
+/// label with it.
+#[derive(Debug, Clone)]
+pub struct LabelPlacement {
+    pub position: ShapeLabelPosition,
+    pub align: Option<TextAnchor>,
+    pub offset: f64,
+    /// Shapes whose label is not centred on the box: a Line's label rides
+    /// above the stroke, a Callout's clears its pointer.
+    pub nudge: (f64, f64),
+}
+
+impl Default for LabelPlacement {
+    fn default() -> Self {
+        LabelPlacement {
+            position: ShapeLabelPosition::Inside,
+            align: None,
+            offset: LABEL_OUTSIDE_OFFSET,
+            nudge: (0.0, 0.0),
+        }
+    }
+}
+
+/// The one place a label's point is decided.
+///
+/// Pure in `(bounds, placement, metrics)`, so it can be re-run after any
+/// geometry change. `metrics.height` matters because the renderer centres a
+/// multi-line block about the returned y.
+pub fn place_label(
+    bounds: &BoundingBox,
+    placement: &LabelPlacement,
+    metrics: &crate::layout::text::TextMetrics,
+) -> (Point, TextAnchor) {
+    let (x, y, w, h) = (bounds.x, bounds.y, bounds.width, bounds.height);
+    let offset = placement.offset;
+    let (nx, ny) = placement.nudge;
+
+    let (px, py, anchor) = match placement.position {
+        ShapeLabelPosition::Inside => {
+            let cy = y + h / 2.0 + ny;
+            // An explicit `align:` overrides the horizontal placement, keeping
+            // a small inset so edge-aligned text does not touch the border.
+            match placement.align {
+                Some(TextAnchor::Start) => (x + LABEL_INSET, cy, TextAnchor::Start),
+                Some(TextAnchor::End) => (x + w - LABEL_INSET, cy, TextAnchor::End),
+                Some(TextAnchor::Middle) => (x + w / 2.0, cy, TextAnchor::Middle),
+                None => (x + w / 2.0 + nx, cy, TextAnchor::Middle),
+            }
+        }
+        // Above/below: `align` picks the horizontal edge to align to. The y is
+        // the vertical centre of the label block, because the renderer centres
+        // n lines about it.
+        ShapeLabelPosition::Above => {
+            let ly = y - offset - metrics.height / 2.0;
+            match placement.align.unwrap_or(TextAnchor::Middle) {
+                TextAnchor::Start => (x, ly, TextAnchor::Start),
+                TextAnchor::Middle => (x + w / 2.0, ly, TextAnchor::Middle),
+                TextAnchor::End => (x + w, ly, TextAnchor::End),
+            }
+        }
+        ShapeLabelPosition::Below => {
+            let ly = y + h + offset + metrics.height / 2.0;
+            match placement.align.unwrap_or(TextAnchor::Middle) {
+                TextAnchor::Start => (x, ly, TextAnchor::Start),
+                TextAnchor::Middle => (x + w / 2.0, ly, TextAnchor::Middle),
+                TextAnchor::End => (x + w, ly, TextAnchor::End),
+            }
+        }
+        // Left/right: `align` picks the vertical edge. `parse_align` already
+        // maps top -> Start and bottom -> End.
+        ShapeLabelPosition::Left => {
+            let ly = vertical_edge(y, h, placement.align, metrics.height);
+            (x - offset, ly, TextAnchor::End)
+        }
+        ShapeLabelPosition::Right => {
+            let ly = vertical_edge(y, h, placement.align, metrics.height);
+            (x + w + offset, ly, TextAnchor::Start)
+        }
+    };
+    (Point::new(px, py), anchor)
+}
+
+fn vertical_edge(y: f64, h: f64, align: Option<TextAnchor>, text_height: f64) -> f64 {
+    match align.unwrap_or(TextAnchor::Middle) {
+        TextAnchor::Start => y + text_height / 2.0,
+        TextAnchor::Middle => y + h / 2.0,
+        TextAnchor::End => y + h - text_height / 2.0,
+    }
+}
+
 /// Layout information for a label
 #[derive(Debug, Clone)]
 pub struct LabelLayout {
@@ -863,8 +985,14 @@ pub struct LabelLayout {
     pub rich: crate::layout::text::RichText,
     /// Base font size the runs were measured at.
     pub font_size: f64,
+    /// Derived cache: where the renderer draws the text. Recomputed from
+    /// `placement` and the element's bounds whenever the geometry changes.
     pub position: Point,
     pub anchor: TextAnchor,
+    /// How the point above is derived. `None` for labels that are not placed
+    /// against a box at all (connection labels, grid gutter labels), which are
+    /// positioned by their own code and left alone by `refresh`.
+    pub placement: Option<LabelPlacement>,
     /// Optional styles for the label (used when referencing a styled element)
     pub styles: Option<ResolvedStyles>,
 }
@@ -884,8 +1012,23 @@ impl LabelLayout {
             font_size,
             position,
             anchor,
+            placement: None,
             styles: None,
         }
+    }
+
+    /// Re-derive `position` and `anchor` from `bounds`.
+    ///
+    /// A no-op for a label with no `placement` — those are not placed against
+    /// a box and own their own position.
+    pub fn refresh(&mut self, bounds: &BoundingBox) {
+        let Some(placement) = &self.placement else {
+            return;
+        };
+        let metrics = crate::layout::text::measure_runs(&self.rich.lines, self.font_size);
+        let (position, anchor) = place_label(bounds, placement, &metrics);
+        self.position = position;
+        self.anchor = anchor;
     }
 
     /// As [`LabelLayout::from_source`], carrying styles inherited from a
@@ -955,6 +1098,11 @@ pub struct LayoutResult {
     pub connections: Vec<ConnectionLayout>,
     /// Bounding box containing all elements
     pub bounds: BoundingBox,
+    /// `(element, property)` pairs where a later `constrain` superseded an
+    /// earlier one. Overriding is allowed but never silent — lint reports it,
+    /// because a silent last-wins hides a mistake as effectively as the hard
+    /// error it replaced.
+    pub overridden_constraints: Vec<(String, String)>,
 }
 
 impl LayoutResult {
@@ -965,6 +1113,7 @@ impl LayoutResult {
             root_elements: vec![],
             connections: vec![],
             bounds: BoundingBox::zero(),
+            overridden_constraints: vec![],
         }
     }
 

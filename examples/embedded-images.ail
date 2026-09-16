@@ -21,30 +21,30 @@ template "logo" from "assets/logo.png"
 
 // === TEAM USING SVG IMAGES ===
 
-row team_svg [gap: 40] {
+row team_svg [gap: 130] {
     group alice {
         col [gap: 4] {
-            person_svg avatar [width: 60, height: 60]
+            person_svg alice_avatar [width: 60, height: 60]
             rect label_bg [width: 70, height: 20, fill: none, stroke: none, label: "Alice", font_size: 12]
         }
-        anchor left_conn [position: avatar.left - 4, direction: left]
-        anchor right_conn [position: avatar.right + 4, direction: right]
+        anchor left_conn [position: alice_avatar.left - 4, direction: left]
+        anchor right_conn [position: alice_avatar.right + 4, direction: right]
     }
     group bob {
         col [gap: 4] {
-            person_svg avatar [width: 60, height: 60]
+            person_svg bob_avatar [width: 60, height: 60]
             rect label_bg [width: 70, height: 20, fill: none, stroke: none, label: "Bob", font_size: 12]
         }
-        anchor left_conn [position: avatar.left - 4, direction: left]
-        anchor right_conn [position: avatar.right + 4, direction: right]
+        anchor left_conn [position: bob_avatar.left - 4, direction: left]
+        anchor right_conn [position: bob_avatar.right + 4, direction: right]
     }
     group charlie {
         col [gap: 4] {
-            person_svg avatar [width: 60, height: 60]
+            person_svg charlie_avatar [width: 60, height: 60]
             rect label_bg [width: 70, height: 20, fill: none, stroke: none, label: "Charlie", font_size: 12]
         }
-        anchor left_conn [position: avatar.left - 4, direction: left]
-        anchor right_conn [position: avatar.right + 4, direction: right]
+        anchor left_conn [position: charlie_avatar.left - 4, direction: left]
+        anchor right_conn [position: charlie_avatar.right + 4, direction: right]
     }
 }
 

@@ -64,11 +64,12 @@ pub enum LintCategory {
     OverConstrained,
     LabelOverflow,
     UnknownModifier,
+    OverriddenConstraint,
 }
 
 impl LintCategory {
     /// Every category, in the order they are documented.
-    pub const ALL: [LintCategory; 14] = [
+    pub const ALL: [LintCategory; 15] = [
         LintCategory::Overlap,
         LintCategory::Containment,
         LintCategory::Label,
@@ -83,6 +84,7 @@ impl LintCategory {
         LintCategory::OverConstrained,
         LintCategory::LabelOverflow,
         LintCategory::UnknownModifier,
+        LintCategory::OverriddenConstraint,
     ];
 
     /// Parse a category from its kebab-case name (as printed by `Display`).
@@ -119,6 +121,7 @@ impl fmt::Display for LintCategory {
             LintCategory::OverConstrained => write!(f, "over-constrained"),
             LintCategory::LabelOverflow => write!(f, "label-overflow"),
             LintCategory::UnknownModifier => write!(f, "unknown-modifier"),
+            LintCategory::OverriddenConstraint => write!(f, "overridden-constraint"),
         }
     }
 }
@@ -171,7 +174,9 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_hand_placed_labels(result, doc, &mut warnings);
     check_label_markup(doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
+    check_unanimatable_transform_keys(doc, &mut warnings);
     check_unknown_colors(doc, &mut warnings);
+    check_overridden_constraints(result, &mut warnings);
     dedup_warnings(&mut warnings);
     warnings
 }
@@ -346,6 +351,40 @@ fn is_bare_container(elem: &ElementLayout) -> bool {
             .stroke
             .as_ref()
             .is_none_or(|s| s.eq_ignore_ascii_case("none"))
+}
+
+/// True when an element paints nothing at all.
+///
+/// `fill: none` (or no fill on a shape that defaults to none, or a zero fill
+/// opacity) plus no visible stroke means the element renders no ink. It marks
+/// out a region — a canvas extent, a tick anchor, a spacer — and a region
+/// cannot collide with what sits in it, nor can text be said to sit "inside"
+/// it in any way an author could fix by moving the text into its label.
+///
+/// This is deliberately narrow. A *translucent* zone is still visible and
+/// still collides; only genuinely invisible elements are exempt. An element
+/// exempted here is exempt from LINT only — it keeps participating in layout
+/// exactly as before, which matters because invisible tick anchors are
+/// routinely the load-bearing geometry other elements are sized from.
+pub(crate) fn paints_nothing(elem: &ElementLayout) -> bool {
+    !has_visible_fill(elem) && !has_visible_border(elem)
+}
+
+/// Counterpart to [`has_visible_border`]: does this element paint any fill?
+fn has_visible_fill(elem: &ElementLayout) -> bool {
+    if elem.styles.fill_pattern.is_some() {
+        return true;
+    }
+    if let Some(fo) = elem.styles.fill_opacity {
+        if fo <= 0.0 {
+            return false;
+        }
+    }
+    match elem.styles.fill.as_deref() {
+        None => false,
+        Some(f) if f.eq_ignore_ascii_case("none") => false,
+        Some(_) => true,
+    }
 }
 
 /// True when one of the pair is a bare region wholly containing the other.
@@ -655,6 +694,17 @@ fn check_overlap_siblings(
                     .unwrap_or_else(|| element_display_name(elem, parent_name, index))
             };
 
+            // An element that paints nothing cannot collide with anything — not
+            // with the other party, and not with whatever that party draws one
+            // level down either. This must come before the bare-region descent
+            // below, which picks one side as "the region" and walks into the
+            // other's children: for an invisible *shape* (not a Layout/Group)
+            // that picked the wrong side and reported every child of a row
+            // against the canvas it sits on.
+            if paints_nothing(a) || paints_nothing(b) {
+                continue;
+            }
+
             // A container that paints nothing is not something to collide
             // with — but what it draws one level down is.
             if is_drawn_inside_a_bare_region(a, b) {
@@ -773,6 +823,17 @@ fn check_overlaps_recursive(
                     grid_cell_name(elem, &all_children)
                         .unwrap_or_else(|| element_display_name(elem, parent_name, index))
                 };
+
+                // An element that paints nothing cannot collide with anything — not
+                // with the other party, and not with whatever that party draws one
+                // level down either. This must come before the bare-region descent
+                // below, which picks one side as "the region" and walks into the
+                // other's children: for an invisible *shape* (not a Layout/Group)
+                // that picked the wrong side and reported every child of a row
+                // against the canvas it sits on.
+                if paints_nothing(a) || paints_nothing(b) {
+                    continue;
+                }
 
                 // A container that paints nothing is not something to collide
                 // with — but what it draws one level down is.
@@ -1328,8 +1389,12 @@ fn collect_opaque_elements_in(
     if scope.hides_element(elem) {
         return;
     }
-    // Only collect visual shapes (not groups/layouts) that are opaque and non-text
-    if is_visual_shape(elem) && !is_text_shape(elem) && is_opaque(elem) {
+    // Only collect visual shapes (not groups/layouts) that are opaque and
+    // non-text. An element that paints nothing is not something a connection
+    // can cross: a `via:` waypoint is an invisible 1px circle that the route
+    // is deliberately threaded through, and reporting the route for hitting
+    // it describes the author's own instruction back at them.
+    if is_visual_shape(elem) && !is_text_shape(elem) && is_opaque(elem) && !paints_nothing(elem) {
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
@@ -1373,7 +1438,11 @@ fn collect_visible_elements_in(
         return;
     }
     // Collect visual shapes that are substantially visible (opacity >= 0.5)
-    if is_visual_shape(elem) && !is_text_shape(elem) && is_substantially_visible(elem) {
+    if is_visual_shape(elem)
+        && !is_text_shape(elem)
+        && is_substantially_visible(elem)
+        && !paints_nothing(elem)
+    {
         let id = if let Some(name) = &elem.id {
             name.0.clone()
         } else {
@@ -1497,6 +1566,38 @@ fn check_connections(
 /// Check if any label (element label, connection label, or standalone text)
 /// overlaps with a connection path segment.  This catches labels placed at
 /// bend points or too close to connector lines.
+/// True when a label is drawn within one of the connection's endpoints.
+///
+/// Anonymous elements have no id to match on, so a subtitle inside the column
+/// an arrow terminates at cannot be recognised by name — but it is still
+/// inside the thing the connection points to.
+fn label_sits_in_endpoint(result: &LayoutResult, id: &str, bbox: &BoundingBox) -> bool {
+    result
+        .get_element_by_name(id)
+        .is_some_and(|elem| elem.bounds.intersects(bbox))
+}
+
+/// An element's own id plus every descendant's.
+///
+/// A connection terminating at a container reaches everything drawn in it, so
+/// rules about "what this connection touches" have to treat the family as one.
+fn endpoint_family(result: &LayoutResult, id: &str) -> HashSet<String> {
+    fn collect(elem: &ElementLayout, out: &mut HashSet<String>) {
+        if let Some(id) = &elem.id {
+            out.insert(id.0.clone());
+        }
+        for child in &elem.children {
+            collect(child, out);
+        }
+    }
+    let mut out = HashSet::new();
+    out.insert(id.to_string());
+    if let Some(elem) = result.get_element_by_name(id) {
+        collect(elem, &mut out);
+    }
+    out
+}
+
 fn check_label_connection_overlaps(
     result: &LayoutResult,
     scope: &FrameScope<'_>,
@@ -1562,9 +1663,18 @@ fn check_label_connection_overlaps(
                 continue;
             }
 
-            // Skip: label on an element that is an endpoint of this connection
-            // (e.g., junction labels at railway switches, pin labels at transistor leads)
-            if label.owner == conn.from_id.0 || label.owner == conn.to_id.0 {
+            // Skip: label on an element that is an endpoint of this
+            // connection, or on anything inside one (e.g. junction labels at
+            // railway switches, pin labels at transistor leads, a level name
+            // inside the column the arrow terminates at). A connection that
+            // ends AT a container necessarily reaches its contents, so
+            // reporting the contact describes the connection the author asked
+            // for.
+            if endpoint_family(result, &conn.from_id.0).contains(&label.owner)
+                || endpoint_family(result, &conn.to_id.0).contains(&label.owner)
+                || label_sits_in_endpoint(result, &conn.from_id.0, &label.bbox)
+                || label_sits_in_endpoint(result, &conn.to_id.0, &label.bbox)
+            {
                 continue;
             }
 
@@ -1691,6 +1801,38 @@ fn collect_constant_constraints(
             }
             _ => {}
         }
+    }
+}
+
+/// Report a `constrain` that a later statement superseded.
+///
+/// Overriding is allowed — an author restating their intent is legitimate, and
+/// it is how a file composing a shared part re-pins something in it. But a
+/// silent override hides a mistake as effectively as the hard error it
+/// replaced, so it is always reported.
+fn check_overridden_constraints(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    // The superseded constraint never reached the solver, so `over-constrained`
+    // reporting it as "violated" is describing a statement that was
+    // deliberately dropped. The override warning below says the useful version
+    // of the same thing, and naming one line twice is what taught authors to
+    // stop reading lint output.
+    for (element, property) in &result.overridden_constraints {
+        let qualified = format!("{element}.{property}");
+        warnings.retain(|w| {
+            w.category != LintCategory::OverConstrained || !w.message.contains(&qualified)
+        });
+    }
+
+    for (element, property) in &result.overridden_constraints {
+        warnings.push(LintWarning {
+            category: LintCategory::OverriddenConstraint,
+            message: format!(
+                "a later constrain on \"{element}\".{property} overrides an earlier one; \
+                 the last statement wins — delete the earlier one if that was intended"
+            ),
+            frames: vec![],
+            pair: None,
+        });
     }
 }
 
@@ -1982,6 +2124,19 @@ fn is_dark_fill(fill: &str) -> Option<String> {
     None
 }
 
+/// True when a label is drawn inside its element's box.
+///
+/// Both the contrast and overflow rules are about text sitting ON a shape: a
+/// label that hangs above or beside its element is drawn on the background, so
+/// it neither inherits the shape's fill for contrast nor has to fit inside it.
+fn label_is_inside(label: &crate::layout::types::LabelLayout) -> bool {
+    use crate::layout::types::ShapeLabelPosition;
+    label
+        .placement
+        .as_ref()
+        .is_none_or(|p| p.position == ShapeLabelPosition::Inside)
+}
+
 fn check_contrast(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     for elem in &result.root_elements {
         check_contrast_recursive(elem, warnings);
@@ -1990,7 +2145,7 @@ fn check_contrast(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
 
 fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
     // Check if this element has a label AND a dark fill AND no explicit label color
-    if let Some(label) = &elem.label {
+    if let Some(label) = &elem.label.as_ref().filter(|l| label_is_inside(l)) {
         let has_label_color = label
             .styles
             .as_ref()
@@ -2495,6 +2650,67 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "padding",      // contains
 ];
 
+/// Report `transform` keys that are recognised but cannot be animated.
+///
+/// `unknown-modifier` catches a misspelling. This catches the opposite and
+/// nastier case: a correct key that the renderer silently drops, so the author
+/// doing it *right* is the one who gets no signal.
+fn check_unanimatable_transform_keys(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    use crate::layout::keyframe::is_animatable;
+    use crate::parser::ast::{KeyframeOp, StyleKey};
+
+    for stmt in &doc.statements {
+        let Statement::Keyframe(kf) = &stmt.node else {
+            continue;
+        };
+        for op in &kf.operations {
+            let KeyframeOp::Transform { target, modifiers } = &op.node else {
+                continue;
+            };
+            for m in modifiers {
+                // A Custom key is a typo; `unknown-modifier` owns that case.
+                if matches!(m.node.key.node, StyleKey::Custom(_)) {
+                    continue;
+                }
+                if is_animatable(&m.node.key.node) {
+                    continue;
+                }
+                let key = style_key_name(&m.node.key.node);
+                warnings.push(LintWarning {
+                    category: LintCategory::UnknownModifier,
+                    message: format!(
+                        "\"{key}\" on \"{}\" in keyframe \"{}\" cannot be animated and is \
+                         ignored; set it on the element itself instead",
+                        target.node.0, kf.name.node
+                    ),
+                    frames: vec![kf.name.node.clone()],
+                    pair: None,
+                });
+            }
+        }
+    }
+}
+
+/// Spell a StyleKey the way an author writes it.
+fn style_key_name(key: &crate::parser::ast::StyleKey) -> String {
+    use crate::parser::ast::StyleKey as K;
+    match key {
+        K::Custom(c) => return c.clone(),
+        other => {
+            // Debug spelling is CamelCase; the DSL is snake_case.
+            let dbg = format!("{other:?}");
+            let mut out = String::new();
+            for (i, ch) in dbg.chars().enumerate() {
+                if ch.is_uppercase() && i > 0 {
+                    out.push('_');
+                }
+                out.extend(ch.to_lowercase());
+            }
+            out
+        }
+    }
+}
+
 fn check_unknown_modifiers(doc: &Document, warnings: &mut Vec<LintWarning>) {
     fn owner_name(name: Option<&crate::parser::ast::Spanned<crate::parser::ast::Identifier>>) -> String {
         name.map(|n| format!("\"{}\"", n.node.0))
@@ -2641,7 +2857,8 @@ fn check_label_overflow(result: &LayoutResult, warnings: &mut Vec<LintWarning>) 
 }
 
 fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning>) {
-    if let Some(label) = &elem.label {
+    // An outside label is not trying to fit in the box, so it cannot overflow it.
+    if let Some(label) = &elem.label.as_ref().filter(|l| label_is_inside(l)) {
         // Skip text elements — they don't have a "container" to overflow
         if !is_text_shape(elem) {
             let label_bbox = estimate_label_bbox(label);
@@ -3067,6 +3284,7 @@ mod tests {
             root_elements: vec![],
             connections,
             bounds: BoundingBox::zero(),
+            overridden_constraints: vec![],
         }
     }
 
@@ -3200,6 +3418,7 @@ mod tests {
             connections: vec![],
             elements: HashMap::new(),
             bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+            overridden_constraints: vec![],
         };
         let mut warnings = Vec::new();
         check_label_overflow(&result, &mut warnings);
@@ -3217,6 +3436,7 @@ mod tests {
             connections: vec![],
             elements: HashMap::new(),
             bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+            overridden_constraints: vec![],
         };
         let mut warnings = Vec::new();
         check_label_overflow(&result, &mut warnings);
@@ -3233,6 +3453,7 @@ mod tests {
             connections: vec![],
             elements: HashMap::new(),
             bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+            overridden_constraints: vec![],
         };
         let mut warnings = Vec::new();
         check_label_overflow(&result, &mut warnings);
@@ -3268,7 +3489,14 @@ fn check_hand_placed_labels(
             next.push(id.0.clone());
             // A translucent zone is a background wash, not a box with a
             // label: text over it is an annotation and stays legitimate.
-            let labellable = is_visual_shape(elem) && !is_callout(elem) && is_opaque(elem);
+            // `is_opaque` exempts a translucent zone background. An element
+            // that paints nothing at all sets no opacity, so it passed that
+            // guard and the rule told authors to move text into the label of
+            // an invisible sizing rect. Both exemptions are wanted.
+            let labellable = is_visual_shape(elem)
+                && !is_callout(elem)
+                && is_opaque(elem)
+                && !paints_nothing(elem);
             if is_text_shape(elem) || labellable {
                 out.push(Seen {
                     id: id.0.clone(),

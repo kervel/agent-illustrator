@@ -63,6 +63,10 @@ pub struct ElementDiff {
     pub stroke: Option<String>,
     /// Colour of the element's label for this frame
     pub label_fill: Option<String>,
+    /// Dash pattern for this frame. Dashed-outline -> solid is the central
+    /// beat of "a planned thing becomes a confirmed thing".
+    pub stroke_dasharray: Option<String>,
+    pub stroke_width: Option<f64>,
     /// Replacement text for this frame (a text shape's content, or an
     /// element's label), when a keyframe rewrote it.
     pub label: Option<String>,
@@ -90,6 +94,8 @@ impl ElementDiff {
             && self.fill.is_none()
             && self.stroke.is_none()
             && self.label_fill.is_none()
+            && self.stroke_dasharray.is_none()
+            && self.stroke_width.is_none()
             && self.label.is_none()
     }
 }
@@ -516,6 +522,9 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
 }
 
 /// Width a piece of text needs, by the same estimate the layout engine uses.
+/// Marks a `width:` this pass derived, rather than one the author wrote.
+pub const SYNTHETIC_WIDTH_UNIT: &str = "kf-auto";
+
 pub fn estimated_text_width(text: &str, font_size: f64) -> f64 {
     crate::layout::text::measure_str(text, font_size).max(20.0)
 }
@@ -529,6 +538,23 @@ pub fn estimated_text_width(text: &str, font_size: f64) -> f64 {
 pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
     // element id -> every wording a keyframe gives it
     let mut wordings: HashMap<String, Vec<String>> = HashMap::new();
+    // Elements whose label the FIRST keyframe rewrites. Keyframes are
+    // cumulative and frame 0 is the first one, so for these the declared
+    // wording is on screen in no frame at all and must not reserve space —
+    // that slack is what pushes centre-constrained text off-centre.
+    let mut overridden_at_frame_zero: HashSet<String> = HashSet::new();
+    if let Some(first) = extract_keyframes(&doc).first() {
+        for op in &first.operations {
+            if let KeyframeOp::Transform { target, modifiers } = &op.node {
+                if modifiers
+                    .iter()
+                    .any(|m| matches!(m.node.key.node, StyleKey::Label))
+                {
+                    overridden_at_frame_zero.insert(target.node.0.clone());
+                }
+            }
+        }
+    }
     for kf in extract_keyframes(&doc) {
         for op in &kf.operations {
             if let KeyframeOp::Transform { target, modifiers } = &op.node {
@@ -549,7 +575,11 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
         return doc;
     }
 
-    fn widen(stmts: &mut [crate::parser::ast::Spanned<Statement>], wordings: &HashMap<String, Vec<String>>) {
+    fn widen(
+        stmts: &mut [crate::parser::ast::Spanned<Statement>],
+        wordings: &HashMap<String, Vec<String>>,
+        overridden_at_frame_zero: &HashSet<String>,
+    ) {
         use crate::parser::ast::{ShapeType, Spanned, StyleModifier, StyleValue};
         for stmt in stmts.iter_mut() {
             match &mut stmt.node {
@@ -579,10 +609,17 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
                             _ => None,
                         })
                         .unwrap_or(14.0);
+                    // Size from the wordings actually displayed. The declared
+                    // one counts only when frame 0 still shows it.
+                    let declared = if overridden_at_frame_zero.contains(&name) {
+                        None
+                    } else {
+                        Some(content.as_str())
+                    };
                     let widest = texts
                         .iter()
                         .map(|t| t.as_str())
-                        .chain(std::iter::once(content.as_str()))
+                        .chain(declared)
                         .map(|t| estimated_text_width(t, font_size))
                         .fold(0.0_f64, f64::max);
                     let span = shape.shape_type.span.clone();
@@ -590,22 +627,79 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
                         StyleModifier {
                             key: Spanned::new(StyleKey::Width, span.clone()),
                             value: Spanned::new(
-                                StyleValue::Number { value: widest, unit: None },
+                                // Tagged so it is distinguishable from a width
+                                // the author wrote: this one is derived from
+                                // the wordings, and text inside it should
+                                // centre rather than hug the left edge. Every
+                                // width reader ignores `unit`.
+                                StyleValue::Number { value: widest, unit: Some(SYNTHETIC_WIDTH_UNIT.to_string()) },
                                 span.clone(),
                             ),
                         },
                         span,
                     ));
                 }
-                Statement::Layout(l) => widen(&mut l.children, wordings),
-                Statement::Group(g) => widen(&mut g.children, wordings),
+                Statement::Layout(l) => widen(&mut l.children, wordings, overridden_at_frame_zero),
+                Statement::Group(g) => widen(&mut g.children, wordings, overridden_at_frame_zero),
                 _ => {}
             }
         }
     }
 
-    widen(&mut doc.statements, &wordings);
+    widen(&mut doc.statements, &wordings, &overridden_at_frame_zero);
     doc
+}
+
+/// Keys `transform` can actually animate.
+///
+/// The catch-all in `apply_modifiers_ordered` used to swallow anything else
+/// without a word. `unknown-modifier` only fires on a *misspelled* key, so an
+/// author who wrote a recognised-but-unanimatable key — `stroke_dasharray`
+/// was the reported one — got correct syntax, no error, no warning, and a
+/// diagram that quietly did something else.
+///
+/// Every StyleKey is named here explicitly rather than falling through a `_`
+/// arm, so adding a variant to the enum forces a decision instead of
+/// defaulting to silence.
+pub fn is_animatable(key: &StyleKey) -> bool {
+    match key {
+        StyleKey::Label
+        | StyleKey::Align
+        | StyleKey::Rotation
+        | StyleKey::Fill
+        | StyleKey::LabelFill
+        | StyleKey::Stroke
+        | StyleKey::StrokeDasharray
+        | StyleKey::StrokeWidth
+        | StyleKey::Opacity
+        | StyleKey::Width
+        | StyleKey::Height
+        | StyleKey::X
+        | StyleKey::Y
+        | StyleKey::Dx
+        | StyleKey::Dy
+        | StyleKey::Scale => true,
+        // Recognised, but the renderer cannot vary them per frame. Several
+        // (fill_opacity, stroke_opacity, font_size, size) are genuinely
+        // CSS-animatable and are candidates for a later pass; the point here
+        // is that saying so out loud beats dropping them quietly.
+        StyleKey::Class
+        | StyleKey::FillOpacity
+        | StyleKey::FontSize
+        | StyleKey::Gap
+        | StyleKey::LabelAt
+        | StyleKey::LabelOffset
+        | StyleKey::LabelPosition
+        | StyleKey::Pointer
+        | StyleKey::Role
+        | StyleKey::Routing
+        | StyleKey::Size
+        | StyleKey::StrokeOpacity
+        | StyleKey::ZOrder => false,
+        // Anything not yet classified: treat as not animatable and say so,
+        // rather than pretending it worked.
+        _ => false,
+    }
 }
 
 /// Apply transform modifiers in a fixed order against the element's base bounds:
@@ -628,10 +722,15 @@ fn apply_modifiers_ordered(
             StyleKey::LabelFill => { elem.styles.label_fill = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Stroke => { elem.styles.stroke = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Opacity => { if let Some(v) = num(&m.node.value.node) { elem.styles.opacity = Some(v); } }
+            StyleKey::StrokeDasharray => { elem.styles.stroke_dasharray = string_value(&m.node.value.node).map(|s| s.to_string()); }
+            StyleKey::StrokeWidth => { if let Some(v) = num(&m.node.value.node) { elem.styles.stroke_width = Some(v); } }
             StyleKey::Width => { if let Some(v) = num(&m.node.value.node) { elem.bounds.width = v; } }
             StyleKey::Height => { if let Some(v) = num(&m.node.value.node) { elem.bounds.height = v; } }
             StyleKey::X => { if let Some(v) = num(&m.node.value.node) { elem.bounds.x = v; } }
             StyleKey::Y => { if let Some(v) = num(&m.node.value.node) { elem.bounds.y = v; } }
+            // Handled in later passes, or deliberately not animatable —
+            // `is_animatable` is the single list, and lint reads it so the
+            // drop is never silent.
             _ => {}
         }
     }
@@ -703,6 +802,12 @@ fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
     }
     if base.styles.stroke != solved.styles.stroke {
         diff.stroke = solved.styles.stroke.clone();
+    }
+    if base.styles.stroke_dasharray != solved.styles.stroke_dasharray {
+        diff.stroke_dasharray = solved.styles.stroke_dasharray.clone();
+    }
+    if base.styles.stroke_width != solved.styles.stroke_width {
+        diff.stroke_width = solved.styles.stroke_width;
     }
     if base.styles.label_fill != solved.styles.label_fill {
         diff.label_fill = solved.styles.label_fill.clone();

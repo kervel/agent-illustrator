@@ -46,7 +46,7 @@
 .frame-append_on {
   .kf-d { opacity: 1; }
   .kf-d { transform: translate(-273px, -150px); }
-  #d { stroke: #cdd8e3; }
+  #d { stroke: #cdd8e3; stroke-width: 1px; }
   #inbox { width: 246px; }
   .conn-feed { d: path("M326 150 L477.8 150"); }
   .conn-parrow_d-base { opacity: 0; }
@@ -55,7 +55,7 @@
 .frame-predict_the {
   .kf-d { opacity: 1; }
   .kf-d { transform: translate(-273px, -150px); }
-  #d { stroke: #cdd8e3; }
+  #d { stroke: #cdd8e3; stroke-width: 1px; }
   .kf-e { opacity: 1; }
   #inbox { width: 246px; }
   .conn-feed { d: path("M326 150 L477.8 150"); }
@@ -66,10 +66,10 @@
 .frame-append_the {
   .kf-d { opacity: 1; }
   .kf-d { transform: translate(-273px, -150px); }
-  #d { stroke: #cdd8e3; }
+  #d { stroke: #cdd8e3; stroke-width: 1px; }
   .kf-e { opacity: 1; }
   .kf-e { transform: translate(-217px, -150px); }
-  #e { stroke: #cdd8e3; }
+  #e { stroke: #cdd8e3; stroke-width: 1px; }
   #inbox { width: 302px; }
   .conn-feed { d: path("M382 150 L477.8 150"); }
   .conn-parrow_d-base { opacity: 0; }
@@ -80,10 +80,10 @@
 .frame-predict_mat {
   .kf-d { opacity: 1; }
   .kf-d { transform: translate(-273px, -150px); }
-  #d { stroke: #cdd8e3; }
+  #d { stroke: #cdd8e3; stroke-width: 1px; }
   .kf-e { opacity: 1; }
   .kf-e { transform: translate(-217px, -150px); }
-  #e { stroke: #cdd8e3; }
+  #e { stroke: #cdd8e3; stroke-width: 1px; }
   .kf-f { opacity: 1; }
   #inbox { width: 302px; }
   .conn-feed { d: path("M382 150 L477.8 150"); }
@@ -96,13 +96,13 @@
 .frame-append_mat {
   .kf-d { opacity: 1; }
   .kf-d { transform: translate(-273px, -150px); }
-  #d { stroke: #cdd8e3; }
+  #d { stroke: #cdd8e3; stroke-width: 1px; }
   .kf-e { opacity: 1; }
   .kf-e { transform: translate(-217px, -150px); }
-  #e { stroke: #cdd8e3; }
+  #e { stroke: #cdd8e3; stroke-width: 1px; }
   .kf-f { opacity: 1; }
   .kf-f { transform: translate(-161px, -150px); }
-  #f { stroke: #cdd8e3; }
+  #f { stroke: #cdd8e3; stroke-width: 1px; }
   #inbox { width: 358px; }
   .conn-feed { d: path("M438 150 L477.8 150"); }
   .conn-parrow_d-base { opacity: 0; }

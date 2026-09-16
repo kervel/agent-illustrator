@@ -1,7 +1,7 @@
 // Railway Junction with Direct Routing
 // Demonstrates diagonal connections for track switches
 
-row junction {
+row junction [gap: 90] {
     // Entry tracks (2 main lines)
     col entry [gap: 30] {
         circle entry_north [size: 10, fill: #4169E1]
@@ -9,10 +9,12 @@ row junction {
     }
 
     // Junction switches - tracks split/merge here
-    col junction_center [gap: 20] {
-        circle j1 [size: 10, fill: #228B22, label: "Switch 1"]
-        circle j2 [size: 10, fill: #228B22, label: "Switch 2"]
-        circle j3 [size: 10, fill: #228B22, label: "Switch 3"]
+    // A 10px switch cannot hold its own name: the label goes above the
+    // circle rather than inside it, and the gap leaves room for it.
+    col junction_center [gap: 44] {
+        circle j1 [size: 10, fill: #228B22, label: "Switch 1", label_position: above]
+        circle j2 [size: 10, fill: #228B22, label: "Switch 2", label_position: above]
+        circle j3 [size: 10, fill: #228B22, label: "Switch 3", label_position: above]
     }
 
     // Exit tracks (3 yard tracks)

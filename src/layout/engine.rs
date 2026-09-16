@@ -292,7 +292,7 @@ fn collect_element_template_mapping(
         // These statement types don't have element IDs or children to process
         Statement::Connection(_)
         | Statement::Constraint(_)
-        | Statement::Constrain(_)
+        | Statement::Constrain(_) | Statement::DisableConstraint(_)
         | Statement::TemplateDecl(_)
         | Statement::TemplateInstance(_)
         | Statement::Export(_)
@@ -764,6 +764,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
     // First validate references
     super::validate_references(doc)?;
     validate_label_markup(&doc.statements)?;
+    validate_disabled_constraints(doc)?;
 
     let mut result = LayoutResult::new();
     let mut position = Point::new(0.0, 0.0);
@@ -773,7 +774,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
             // Skip connections, constraints, constrain, and standalone labels at document root
             Statement::Connection(_)
             | Statement::Constraint(_)
-            | Statement::Constrain(_)
+            | Statement::Constrain(_) | Statement::DisableConstraint(_)
             | Statement::Label(_)
             | Statement::Keyframe(_) => continue,
             _ => {
@@ -899,7 +900,7 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // Layout the inner element - Label positioning is handled by the parent container
             layout_statement(inner, position, config)
         }
-        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) => {
+        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) | Statement::DisableConstraint(_) => {
             // These are handled separately
             unreachable!("Connections and constraints should be filtered out")
         }
@@ -928,106 +929,37 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
     let label = resolved_label.map(|(rich, font_size)| {
-        let (label_x, label_y, anchor) = match &shape.shape_type.node {
-            ShapeType::Line => {
-                // Center horizontally on the line, position above with offset
-                let label_offset = 12.0; // pixels above the line
-                (
-                    position.x + width / 2.0,
-                    position.y + height / 2.0 - label_offset,
-                    TextAnchor::Middle,
-                )
-            }
+        // Shapes whose label is not centred on the box nudge it: a Line's
+        // label rides above the stroke, a Callout's clears its pointer.
+        let nudge = match &shape.shape_type.node {
+            ShapeType::Line => (0.0, -12.0),
             ShapeType::Callout { .. } => {
-                // Center within the pill body (offset away from the pointer side)
                 let ps = CALLOUT_POINTER_SIZE;
-                let (dx, dy) = match extract_pointer(&shape.modifiers) {
+                match extract_pointer(&shape.modifiers) {
                     PointerDir::Up => (0.0, ps / 2.0),
                     PointerDir::Down => (0.0, -ps / 2.0),
                     PointerDir::Left => (ps / 2.0, 0.0),
                     PointerDir::Right => (-ps / 2.0, 0.0),
-                };
-                (
-                    position.x + width / 2.0 + dx,
-                    position.y + height / 2.0 + dy,
-                    TextAnchor::Middle,
-                )
+                }
             }
-            _ => {
-                // Default: center within the shape bounds
-                (
-                    position.x + width / 2.0,
-                    position.y + height / 2.0,
-                    TextAnchor::Middle,
-                )
-            }
+            _ => (0.0, 0.0),
         };
-        let align = extract_align(&shape.modifiers);
-        let offset = extract_label_offset(&shape.modifiers);
+        let placement = LabelPlacement {
+            position: extract_label_position(&shape.modifiers),
+            align: extract_align(&shape.modifiers),
+            offset: extract_label_offset(&shape.modifiers),
+            nudge,
+        };
+        let bounds = BoundingBox::new(position.x, position.y, width, height);
         let metrics = crate::layout::text::measure_runs(&rich.lines, font_size);
-
-        let (label_x, label_y, anchor) = match extract_label_position(&shape.modifiers) {
-            ShapeLabelPosition::Inside => {
-                // An explicit `align:` overrides the horizontal placement,
-                // keeping a small inset so edge-aligned text does not touch
-                // the border.
-                match align {
-                    Some(TextAnchor::Start) => {
-                        (position.x + LABEL_INSET, label_y, TextAnchor::Start)
-                    }
-                    Some(TextAnchor::End) => {
-                        (position.x + width - LABEL_INSET, label_y, TextAnchor::End)
-                    }
-                    Some(TextAnchor::Middle) => {
-                        (position.x + width / 2.0, label_y, TextAnchor::Middle)
-                    }
-                    None => (label_x, label_y, anchor),
-                }
-            }
-            // Above/below: `align` picks the horizontal edge to align to. The
-            // y is the vertical centre of the label block, because the
-            // renderer centres n lines about it.
-            ShapeLabelPosition::Above => {
-                let y = position.y - offset - metrics.height / 2.0;
-                match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
-                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
-                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
-                }
-            }
-            ShapeLabelPosition::Below => {
-                let y = position.y + height + offset + metrics.height / 2.0;
-                match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
-                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
-                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
-                }
-            }
-            // Left/right: `align` picks the vertical edge. `parse_align`
-            // already maps top -> Start and bottom -> End.
-            ShapeLabelPosition::Left => {
-                let y = match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => position.y + metrics.height / 2.0,
-                    TextAnchor::Middle => position.y + height / 2.0,
-                    TextAnchor::End => position.y + height - metrics.height / 2.0,
-                };
-                (position.x - offset, y, TextAnchor::End)
-            }
-            ShapeLabelPosition::Right => {
-                let y = match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => position.y + metrics.height / 2.0,
-                    TextAnchor::Middle => position.y + height / 2.0,
-                    TextAnchor::End => position.y + height - metrics.height / 2.0,
-                };
-                (position.x + width + offset, y, TextAnchor::Start)
-            }
-        };
+        let (label_position, anchor) = place_label(&bounds, &placement, &metrics);
         LabelLayout {
             text: rich.plain(),
             rich,
             font_size,
-            position: Point::new(label_x, label_y),
+            position: label_position,
             anchor,
+            placement: Some(placement),
             styles: None,
         }
     });
@@ -1450,23 +1382,6 @@ fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> 
             None
         }
     })
-}
-
-/// Extract the font_size modifier value from modifiers
-/// Distance a left- or right-aligned label keeps from the shape's border.
-const LABEL_INSET: f64 = 8.0;
-
-/// Default gap between a shape's edge and a label placed outside it.
-const LABEL_OUTSIDE_OFFSET: f64 = 6.0;
-
-/// Where a shape's label sits relative to the shape.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ShapeLabelPosition {
-    Inside,
-    Above,
-    Below,
-    Left,
-    Right,
 }
 
 /// Read a `label_position:` modifier. Unknown words fall back to `inside`;
@@ -1945,7 +1860,7 @@ fn layout_row(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
-                | Statement::Constrain(_)
+                | Statement::Constrain(_) | Statement::DisableConstraint(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -1999,7 +1914,7 @@ fn layout_column(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
-                | Statement::Constrain(_)
+                | Statement::Constrain(_) | Statement::DisableConstraint(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -2145,7 +2060,7 @@ fn grid_filtered_children(layout: &LayoutDecl) -> Vec<&Spanned<Statement>> {
                 c.node,
                 Statement::Connection(_)
                     | Statement::Constraint(_)
-                    | Statement::Constrain(_)
+                    | Statement::Constrain(_) | Statement::DisableConstraint(_)
                     | Statement::Label(_)
             ) && !has_role_label(&c.node)
         })
@@ -2356,7 +2271,7 @@ fn layout_stack(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
-                | Statement::Constrain(_)
+                | Statement::Constrain(_) | Statement::DisableConstraint(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -2699,6 +2614,11 @@ fn resize_element_by_name(
             LayoutProperty::Height => elem.bounds.height = new_value,
             _ => {}
         }
+        let bounds = elem.bounds;
+        if let Some(label) = &mut elem.label {
+            label.refresh(&bounds);
+        }
+        elem.anchors = AnchorSet::for_element_type(&elem.element_type, &bounds);
     }
     Ok(())
 }
@@ -2715,6 +2635,12 @@ fn resize_element_recursive(
             LayoutProperty::Width => elem.bounds.width = new_value,
             LayoutProperty::Height => elem.bounds.height = new_value,
             _ => {}
+        }
+        // The label is placed *from* the box, so a resize moves it. Without
+        // this the label keeps the centre the box had before it was stretched.
+        let bounds = elem.bounds;
+        if let Some(label) = &mut elem.label {
+            label.refresh(&bounds);
         }
         return true;
     }
@@ -2850,8 +2776,27 @@ pub fn resolve_constrain_statements_two_phase(
     let group_anchor_decls = build_group_anchor_decl_map(doc);
 
     // Partition constraints into local (per-template) and global
-    let (local_by_instance, global_constraints) =
+    let (mut local_by_instance, mut global_constraints) =
         partition_constraints(&collector.constraints, &element_to_template);
+
+    // A later statement supersedes an earlier one on the same
+    // element+property — but only among constraints that compete in the SAME
+    // solve. A template-internal constraint and an instance-level one are
+    // resolved in different passes, and dropping the internal one orphans the
+    // relationships that pass owns: a junction pinned 40px right of its
+    // neighbour ends up left of it when the neighbour is re-pinned from
+    // outside.
+    {
+        let mut overridden = drop_superseded_user_constraints(&mut global_constraints);
+        for group in local_by_instance.values_mut() {
+            overridden.extend(drop_superseded_user_constraints(group));
+        }
+        overridden.sort();
+        overridden.dedup();
+        result
+            .overridden_constraints
+            .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
+    }
 
     if config.trace {
         eprintln!("TRACE: Two-phase constraint solver");
@@ -3096,8 +3041,27 @@ pub fn resolve_constrain_statements(
 
     // Separate constraints into internal (within a template) and external (across templates)
     // using the proper constraint classification based on template instance tracking
-    let (mut local_by_instance, external_constraints) =
+    let (mut local_by_instance, mut external_constraints) =
         partition_constraints(&collector.constraints, &element_to_template);
+
+    // A later statement supersedes an earlier one on the same
+    // element+property — but only among constraints that compete in the SAME
+    // solve. A template-internal constraint and an instance-level one are
+    // resolved in different passes, and dropping the internal one orphans the
+    // relationships that pass owns: a junction pinned 40px right of its
+    // neighbour ends up left of it when the neighbour is re-pinned from
+    // outside.
+    {
+        let mut overridden = drop_superseded_user_constraints(&mut external_constraints);
+        for group in local_by_instance.values_mut() {
+            overridden.extend(drop_superseded_user_constraints(group));
+        }
+        overridden.sort();
+        overridden.dedup();
+        result
+            .overridden_constraints
+            .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
+    }
 
     // Flatten all local constraints into a single Vec for solving together
     // (The old approach solved all internal constraints in one pass)
@@ -3563,6 +3527,88 @@ fn update_element_anchors_recursive(elem: &mut ElementLayout, name: &str, anchor
 /// Extract the target (element_id, property) from a constraint
 /// For Equal constraints, we extract the left-hand side variable
 /// For Midpoint constraints, we extract the target variable
+/// Drop user constraints that a later statement supersedes.
+///
+/// `constrain a.center_x = 100` followed by `constrain a.center_x = 300` is an
+/// author restating their intent, and it must mean the same thing whatever is
+/// on the right-hand side. It did not: a literal RHS became a REQUIRED
+/// equality and a cross-reference a STRONG one, so the first pair was
+/// unsatisfiable and the second silently last-wins.
+///
+/// Resolving it here rather than by demoting REQUIRED keeps the solve
+/// deterministic. Two equal-strength constraints leave Cassowary free to
+/// satisfy either, and with kasuari's internal hashing that is how
+/// nondeterministic output gets in. One constraint per (element, property)
+/// reaches the solver, so there is no tie to break.
+///
+/// Only exact (element, property) pairs are matched. `center_x = 100` against
+/// `left = 0` + `right = 50` still conflicts, because those are different
+/// properties colliding through derived expressions — a genuine
+/// over-constraint, and worth reporting.
+fn drop_superseded_user_constraints(
+    constraints: &mut Vec<super::solver::LayoutConstraint>,
+) -> Vec<(String, super::solver::LayoutProperty)> {
+    use super::solver::ConstraintOrigin;
+    use std::collections::HashMap;
+
+    // Only *equalities* replace one another. Inequalities accumulate by
+    // nature: `contains` emits four per contained element, all targeting the
+    // container, and dropping all but the last would leave a container
+    // wrapping only its final child.
+    fn replaces(c: &super::solver::LayoutConstraint) -> bool {
+        use super::solver::LayoutConstraint as C;
+        matches!(c, C::Fixed { .. } | C::Equal { .. } | C::Midpoint { .. })
+    }
+
+    // Last index claiming each (element, property), among user constraints.
+    let mut last_claim: HashMap<(String, super::solver::LayoutProperty), usize> = HashMap::new();
+    for (i, c) in constraints.iter().enumerate() {
+        if c.source().origin != ConstraintOrigin::UserDefined || !replaces(c) {
+            continue;
+        }
+        if let Some(key) = get_constraint_target_var(c) {
+            last_claim.insert(key, i);
+        }
+    }
+
+    let mut overridden = Vec::new();
+    let mut keep = Vec::with_capacity(constraints.len());
+    for (i, c) in constraints.drain(..).enumerate() {
+        let superseded = c.source().origin == ConstraintOrigin::UserDefined
+            && replaces(&c)
+            && get_constraint_target_var(&c)
+                .and_then(|k| last_claim.get(&k).map(|last| (*last != i, k)))
+                .map(|(dropped, k)| {
+                    if dropped {
+                        overridden.push(k);
+                    }
+                    dropped
+                })
+                .unwrap_or(false);
+        if !superseded {
+            keep.push(c);
+        }
+    }
+    *constraints = keep;
+    overridden
+}
+
+/// Spell a layout property the way an author writes it in `constrain`.
+fn property_name(p: super::solver::LayoutProperty) -> String {
+    use super::solver::LayoutProperty as P;
+    match p {
+        P::X => "x",
+        P::Y => "y",
+        P::Width => "width",
+        P::Height => "height",
+        P::CenterX => "center_x",
+        P::CenterY => "center_y",
+        P::Right => "right",
+        P::Bottom => "bottom",
+    }
+    .to_string()
+}
+
 fn get_constraint_target_var(
     constraint: &super::solver::LayoutConstraint,
 ) -> Option<(String, super::solver::LayoutProperty)> {
@@ -3753,20 +3799,87 @@ fn collect_bounds_updates(elem: &ElementLayout, updates: &mut Vec<(String, Bound
 }
 
 /// Collect only constrain statements (not intrinsics or layout constraints)
+/// Names released by top-level `disable` statements, anywhere in the tree.
+fn collect_disabled_constraint_names(stmts: &[Spanned<Statement>], out: &mut HashSet<String>) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::DisableConstraint(names) => {
+                out.extend(names.iter().map(|n| n.node.0.clone()));
+            }
+            Statement::Layout(l) => collect_disabled_constraint_names(&l.children, out),
+            Statement::Group(g) => collect_disabled_constraint_names(&g.children, out),
+            _ => {}
+        }
+    }
+}
+
+/// Every name a `constrain ... as <name>` introduces.
+fn collect_constraint_names(stmts: &[Spanned<Statement>], out: &mut HashSet<String>) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constrain(c) => {
+                if let Some(n) = &c.name {
+                    out.insert(n.node.0.clone());
+                }
+            }
+            Statement::Layout(l) => collect_constraint_names(&l.children, out),
+            Statement::Group(g) => collect_constraint_names(&g.children, out),
+            _ => {}
+        }
+    }
+}
+
+/// A top-level `disable` naming nothing is a typo, and silently doing nothing
+/// is the failure mode this whole change exists to remove.
+fn validate_disabled_constraints(doc: &Document) -> Result<(), LayoutError> {
+    let mut disabled = HashSet::new();
+    collect_disabled_constraint_names(&doc.statements, &mut disabled);
+    if disabled.is_empty() {
+        return Ok(());
+    }
+    let mut known = HashSet::new();
+    collect_constraint_names(&doc.statements, &mut known);
+    let mut unknown: Vec<_> = disabled.difference(&known).cloned().collect();
+    unknown.sort();
+    if let Some(name) = unknown.first() {
+        let mut suggestions: Vec<String> = known.iter().cloned().collect();
+        suggestions.sort();
+        return Err(LayoutError::undefined(name, 0..0, suggestions));
+    }
+    Ok(())
+}
+
 fn collect_constrain_statements(
     stmts: &[Spanned<Statement>],
     collector: &mut super::collector::ConstraintCollector,
 ) {
+    let mut disabled = HashSet::new();
+    collect_disabled_constraint_names(stmts, &mut disabled);
+    collect_constrain_statements_inner(stmts, collector, &disabled);
+}
+
+fn collect_constrain_statements_inner(
+    stmts: &[Spanned<Statement>],
+    collector: &mut super::collector::ConstraintCollector,
+    disabled: &HashSet<String>,
+) {
     for stmt in stmts {
         match &stmt.node {
             Statement::Constrain(c) => {
+                // A released pin never reaches the solver, so the element is
+                // free to be re-pinned — or to hold its laid-out position.
+                if let Some(n) = &c.name {
+                    if disabled.contains(&n.node.0) {
+                        continue;
+                    }
+                }
                 collector.collect_constrain_expr(&c.expr, &stmt.span);
             }
             Statement::Layout(l) => {
-                collect_constrain_statements(&l.children, collector);
+                collect_constrain_statements_inner(&l.children, collector, disabled);
             }
             Statement::Group(g) => {
-                collect_constrain_statements(&g.children, collector);
+                collect_constrain_statements_inner(&g.children, collector, disabled);
             }
             _ => {}
         }

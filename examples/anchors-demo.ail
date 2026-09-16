@@ -12,7 +12,7 @@ rect c [width: 80, height: 40]
 
 // Position elements
 constrain b.left = a.right + 60
-constrain c.top = a.bottom + 40
+constrain c.top = a.bottom + 60
 constrain c.horizontal_center = midpoint(a, b)
 
 // Anchor-based connections - specify exact attachment points
@@ -20,7 +20,7 @@ a.right -> b.left    // Right edge of 'a' to left edge of 'b'
 a.bottom -> c.top    // Bottom of 'a' to top of 'c'
 
 // Mixed: explicit source anchor, auto-detect target
-b.bottom -> c
+b.bottom -> c.top
 
 // ============================================================
 // Part 2: Template with custom anchors
