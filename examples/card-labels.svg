@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 844.23 471.5">
+  <style>
+    :root {
+    --secondary-light: #fff3e0;
+    --accent-1: #2196f3;
+    --background-light: #ffffff;
+    --text-3: #999999;
+    --foreground-light: #e0e0e0;
+    --accent-3: #bbdefb;
+    --accent-light: #e3f2fd;
+    --accent-dark: #1565c0;
+    --secondary-2: #fff3e0;
+    --foreground-2: #666666;
+    --secondary-3: #ffe0b2;
+    --status-success: #4caf50;
+    --background-2: #f5f5f5;
+    --background-dark: #333333;
+    --secondary-1: #ff9800;
+    --status-warning: #ff9800;
+    --foreground-3: #999999;
+    --text-dark: #1a1a1a;
+    --background-3: #eeeeee;
+    --text-light: #ffffff;
+    --status-error: #f44336;
+    --text-2: #666666;
+    --foreground-1: #333333;
+    --foreground-dark: #1a1a1a;
+    --background-1: #ffffff;
+    --text-1: #333333;
+    --accent-2: #e3f2fd;
+    --secondary-dark: #e65100;
+  }
+
+    /* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+
+  </style>
+  <g id="sheet" class="ai-container">
+    <text id="heading" class="ai-shape ai-text" x="5" y="14" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--foreground-1)">Labels on boxes</text>
+    <g id="placements" class="ai-container">
+      <rect id="p_in" class="ai-shape ai-rect" x="10" y="72" width="110" height="54" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="65" y="99" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>inside</tspan></tspan></text>
+      <rect id="p_above" class="ai-shape ai-rect" x="154" y="72" width="110" height="54" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="209" y="57.25" text-anchor="middle" dominant-baseline="middle"><tspan x="209" dy="-0"><tspan>above</tspan></tspan></text>
+      <rect id="p_below" class="ai-shape ai-rect" x="298" y="72" width="110" height="54" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="353" y="140.75" text-anchor="middle" dominant-baseline="middle"><tspan x="353" dy="-0"><tspan>below</tspan></tspan></text>
+      <rect id="p_left" class="ai-shape ai-rect" x="442" y="72" width="110" height="54" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="436" y="99" text-anchor="end" dominant-baseline="middle"><tspan x="436" dy="-0"><tspan>left</tspan></tspan></text>
+      <rect id="p_right" class="ai-shape ai-rect" x="586" y="72" width="110" height="54" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="702" y="99" text-anchor="start" dominant-baseline="middle"><tspan x="702" dy="-0"><tspan>right</tspan></tspan></text>
+    </g>
+    <g id="alignments" class="ai-container">
+      <rect id="a_start" class="ai-shape ai-rect" x="10" y="180" width="170" height="54" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+      <text class="ai-label" x="10" y="248.75" text-anchor="start" dominant-baseline="middle"><tspan x="10" dy="-0"><tspan>below, start</tspan></tspan></text>
+      <rect id="a_mid" class="ai-shape ai-rect" x="214" y="180" width="170" height="54" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+      <text class="ai-label" x="299" y="248.75" text-anchor="middle" dominant-baseline="middle"><tspan x="299" dy="-0"><tspan>below, center</tspan></tspan></text>
+      <rect id="a_end" class="ai-shape ai-rect" x="418" y="180" width="170" height="54" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+      <text class="ai-label" x="588" y="248.75" text-anchor="end" dominant-baseline="middle"><tspan x="588" dy="-0"><tspan>below, end</tspan></tspan></text>
+    </g>
+    <g id="cards" class="ai-container">
+      <rect id="card" class="ai-shape ai-rect" x="10" y="288" width="190.67800000000005" height="68.5" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="105.33900000000003" y="322.25" text-anchor="middle" dominant-baseline="middle"><tspan x="105.33900000000003" dy="-17.5"><tspan font-weight="bold">changeset from INES</tspan></tspan><tspan x="105.33900000000003" dy="17.5"><tspan>temporal_mode = correction</tspan></tspan><tspan x="105.33900000000003" dy="17.5"><tspan font-size="11.200000000000001">V2 inherits its label from V1</tspan></tspan></text>
+      <rect id="wrapped" class="ai-shape ai-rect" x="234.67800000000005" y="288" width="240" height="68.5" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="354.67800000000005" y="322.25" text-anchor="middle" dominant-baseline="middle"><tspan x="354.67800000000005" dy="-17.5"><tspan>T &lt;= now confirmed_from &lt;= T &lt;</tspan></tspan><tspan x="354.67800000000005" dy="17.5"><tspan>confirmed_until, so the event is</tspan></tspan><tspan x="354.67800000000005" dy="17.5"><tspan>active</tspan></tspan></text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,41 @@
+// Boxes with labels: inside, outside, multi-line, wrapped.
+// This is the reference for "put text on a box" — no offsets to guess.
+
+col sheet [gap: 44] {
+    text "Labels on boxes" heading [font_size: 18, fill: foreground-1]
+
+    // --- where the label sits -------------------------------------------
+    row placements [gap: 34] {
+        rect p_in    [width: 110, height: 54, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                      label: "inside"]
+        rect p_above [width: 110, height: 54, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                      label: "above", label_position: above]
+        rect p_below [width: 110, height: 54, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                      label: "below", label_position: below]
+        rect p_left  [width: 110, height: 54, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                      label: "left", label_position: left]
+        rect p_right [width: 110, height: 54, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                      label: "right", label_position: right]
+    }
+
+    // --- align picks the edge the label lines up on ----------------------
+    row alignments [gap: 34] {
+        rect a_start [width: 170, height: 54, fill: secondary-light, stroke: secondary-dark, stroke_width: 2,
+                      label: "below, start", label_position: below, align: start]
+        rect a_mid   [width: 170, height: 54, fill: secondary-light, stroke: secondary-dark, stroke_width: 2,
+                      label: "below, center", label_position: below, align: center]
+        rect a_end   [width: 170, height: 54, fill: secondary-light, stroke: secondary-dark, stroke_width: 2,
+                      label: "below, end", label_position: below, align: end]
+    }
+
+    // --- a multi-line card is one modifier --------------------------------
+    row cards [gap: 34] {
+        rect card [fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                   label: "<b>changeset from INES</b><br>temporal_mode = correction<br><small>V2 inherits its label from V1</small>"]
+
+        // An explicit width is a promise about the box: the label wraps to it
+        // and the box grows taller, instead of running out through the sides.
+        rect wrapped [width: 240, fill: accent-light, stroke: accent-dark, stroke_width: 2,
+                      label: "T <= now confirmed_from <= T < confirmed_until, so the event is active"]
+    }
+}
