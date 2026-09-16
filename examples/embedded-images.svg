@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 450 424.5685424949238">
   <style>
     :root {
-    --status-error: #f44336;
-    --accent-3: #bbdefb;
-    --background-2: #f5f5f5;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --background-3: #eeeeee;
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
-    --text-3: #999999;
-    --secondary-2: #fff3e0;
-    --text-light: #ffffff;
-    --foreground-dark: #1a1a1a;
-    --background-dark: #333333;
-    --foreground-1: #333333;
-    --text-2: #666666;
-    --secondary-3: #ffe0b2;
-    --secondary-light: #fff3e0;
-    --secondary-dark: #e65100;
-    --status-warning: #ff9800;
-    --background-1: #ffffff;
-    --foreground-light: #e0e0e0;
-    --background-light: #ffffff;
-    --text-1: #333333;
-    --text-dark: #1a1a1a;
-    --accent-light: #e3f2fd;
-    --secondary-1: #ff9800;
+    --accent-3: #bbdefb;
     --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
     --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -126,7 +126,7 @@
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
         </g>
         <rect id="label_bg" class="ai-shape ai-rect" x="15" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="50" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12">Alice</text>
+        <text class="ai-label" x="50" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="50" dy="-0"><tspan>Alice</tspan></tspan></text>
       </g>
     </g>
     <g id="bob" class="ai-container">
@@ -137,7 +137,7 @@
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
         </g>
         <rect id="label_bg" class="ai-shape ai-rect" x="145" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="180" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12">Bob</text>
+        <text class="ai-label" x="180" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="180" dy="-0"><tspan>Bob</tspan></tspan></text>
       </g>
     </g>
     <g id="charlie" class="ai-container">
@@ -148,13 +148,13 @@
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
         </g>
         <rect id="label_bg" class="ai-shape ai-rect" x="275" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="310" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12">Charlie</text>
+        <text class="ai-label" x="310" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="310" dy="-0"><tspan>Charlie</tspan></tspan></text>
       </g>
     </g>
   </g>
   <g id="logo_section" class="ai-container">
     <image id="company_logo" class="ai-raster-image" href="assets/logo.png" x="80" y="139" width="200" height="50"/>
-    <text id="logo_label" class="ai-shape ai-text" x="132" y="202" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
+    <text id="logo_label" class="ai-shape ai-text" x="139.99" y="202" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
   </g>
   <g id="rotated_icons" class="ai-container">
     <g id="i0" class="ai-svg-embed" transform="translate(65.85786437626905, 251.2842712474619) scale(1, 0.8163265306122449) translate(-10, -6)">
@@ -178,9 +178,9 @@
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
   </g>
-  <text id="rotation_label" class="ai-shape ai-text" x="87" y="314.5685424949238" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
-  <text class="ai-label" x="305" y="44" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">works with</text>
-  <text class="ai-label" x="305" y="66" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">mentors</text>
+  <text id="rotation_label" class="ai-shape ai-text" x="111.34499999999997" y="314.5685424949238" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
+  <text class="ai-label" x="305" y="44" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="305" dy="-0"><tspan>works with</tspan></tspan></text>
+  <text class="ai-label" x="305" y="66" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="305" dy="-0"><tspan>mentors</tspan></tspan></text>
   <path class="ai-connection" d="M339 45 L278.2 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M339 45 L278.2 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

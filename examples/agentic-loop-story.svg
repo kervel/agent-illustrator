@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -80 1200 580" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
   <style>
     :root {
-    --accent-dark: #1565c0;
-    --background-3: #eeeeee;
-    --background-light: #ffffff;
-    --text-light: #ffffff;
-    --text-3: #999999;
-    --foreground-1: #333333;
-    --text-1: #333333;
-    --secondary-light: #fff3e0;
-    --text-dark: #1a1a1a;
-    --status-warning: #ff9800;
-    --foreground-light: #e0e0e0;
-    --accent-light: #e3f2fd;
-    --secondary-1: #ff9800;
-    --text-2: #666666;
-    --background-dark: #333333;
-    --foreground-dark: #1a1a1a;
-    --background-2: #f5f5f5;
     --accent-1: #2196f3;
-    --background-1: #ffffff;
-    --foreground-2: #666666;
-    --accent-3: #bbdefb;
-    --secondary-3: #ffe0b2;
     --accent-2: #e3f2fd;
-    --secondary-2: #fff3e0;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
     --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
     --secondary-dark: #e65100;
-    --status-success: #4caf50;
+    --secondary-light: #fff3e0;
     --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
   }
 
     /* Keyframe animation CSS (auto-generated) */
@@ -119,7 +119,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.kf-ans_line1 { animation: kf-anim-ans_line1 14.0s step-end infinite; }
 @keyframes kf-anim-ans_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -129,7 +128,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.kf-ans_line2 { animation: kf-anim-ans_line2 14.0s step-end infinite; }
 @keyframes kf-anim-answer_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -139,7 +137,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.kf-answer_envelope { animation: kf-anim-answer_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-exec_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -149,7 +146,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-exec_arrow { animation: kf-anim-exec_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-exec_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -159,7 +155,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-exec_envelope { animation: kf-anim-exec_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-exec_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -169,7 +164,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-exec_line1 { animation: kf-anim-exec_line1 14.0s step-end infinite; }
 @keyframes kf-anim-exec_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -179,7 +173,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-exec_line2 { animation: kf-anim-exec_line2 14.0s step-end infinite; }
 @keyframes kf-anim-final_to_cli {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -189,7 +182,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.kf-final_to_cli { animation: kf-anim-final_to_cli 14.0s step-end infinite; }
 @keyframes kf-anim-final_to_user {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -199,7 +191,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.kf-final_to_user { animation: kf-anim-final_to_user 14.0s step-end infinite; }
 @keyframes kf-anim-prompt_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
@@ -209,7 +200,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-prompt_arrow { animation: kf-anim-prompt_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-req_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -219,7 +209,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-req_arrow { animation: kf-anim-req_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-resp_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -229,7 +218,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-resp_arrow { animation: kf-anim-resp_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-result_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -239,7 +227,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.kf-result_envelope { animation: kf-anim-result_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-result_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -249,7 +236,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.kf-result_line1 { animation: kf-anim-result_line1 14.0s step-end infinite; }
 @keyframes kf-anim-result_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -259,7 +245,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.kf-result_line2 { animation: kf-anim-result_line2 14.0s step-end infinite; }
 @keyframes kf-anim-return_to_cli {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -269,7 +254,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.kf-return_to_cli { animation: kf-anim-return_to_cli 14.0s step-end infinite; }
 @keyframes kf-anim-return_to_cloud {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -279,7 +263,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.kf-return_to_cloud { animation: kf-anim-return_to_cloud 14.0s step-end infinite; }
 @keyframes kf-anim-speech_bubble {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
@@ -289,7 +272,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-speech_bubble { animation: kf-anim-speech_bubble 14.0s step-end infinite; }
 @keyframes kf-anim-sys_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -299,7 +281,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-sys_envelope { animation: kf-anim-sys_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-sys_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -309,7 +290,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-sys_line1 { animation: kf-anim-sys_line1 14.0s step-end infinite; }
 @keyframes kf-anim-sys_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -319,7 +299,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-sys_line2 { animation: kf-anim-sys_line2 14.0s step-end infinite; }
 @keyframes kf-anim-tc_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -329,7 +308,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-tc_line1 { animation: kf-anim-tc_line1 14.0s step-end infinite; }
 @keyframes kf-anim-tc_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -339,7 +317,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-tc_line2 { animation: kf-anim-tc_line2 14.0s step-end infinite; }
 @keyframes kf-anim-tool_call_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -349,7 +326,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.kf-tool_call_envelope { animation: kf-anim-tool_call_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-conn-ans_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -359,7 +335,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.ai-connection.conn-ans_line1 { animation: kf-anim-conn-ans_line1 14.0s step-end infinite; }
 @keyframes kf-anim-conn-ans_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -369,7 +344,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.ai-connection.conn-ans_line2 { animation: kf-anim-conn-ans_line2 14.0s step-end infinite; }
 @keyframes kf-anim-conn-answer_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -379,7 +353,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.ai-connection.conn-answer_envelope { animation: kf-anim-conn-answer_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-conn-exec_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -389,7 +362,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-exec_arrow { animation: kf-anim-conn-exec_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-conn-exec_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -399,7 +371,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-exec_envelope { animation: kf-anim-conn-exec_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-conn-exec_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -409,7 +380,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-exec_line1 { animation: kf-anim-conn-exec_line1 14.0s step-end infinite; }
 @keyframes kf-anim-conn-exec_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -419,7 +389,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-exec_line2 { animation: kf-anim-conn-exec_line2 14.0s step-end infinite; }
 @keyframes kf-anim-conn-final_to_cli {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -429,7 +398,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.ai-connection.conn-final_to_cli { animation: kf-anim-conn-final_to_cli 14.0s step-end infinite; }
 @keyframes kf-anim-conn-final_to_user {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -439,7 +407,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 1; }
 }
-.ai-connection.conn-final_to_user { animation: kf-anim-conn-final_to_user 14.0s step-end infinite; }
 @keyframes kf-anim-conn-prompt_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
@@ -449,7 +416,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-prompt_arrow { animation: kf-anim-conn-prompt_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-conn-req_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -459,7 +425,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-req_arrow { animation: kf-anim-conn-req_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-conn-resp_arrow {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -469,7 +434,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-resp_arrow { animation: kf-anim-conn-resp_arrow 14.0s step-end infinite; }
 @keyframes kf-anim-conn-result_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -479,7 +443,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-result_envelope { animation: kf-anim-conn-result_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-conn-result_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -489,7 +452,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-result_line1 { animation: kf-anim-conn-result_line1 14.0s step-end infinite; }
 @keyframes kf-anim-conn-result_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -499,7 +461,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-result_line2 { animation: kf-anim-conn-result_line2 14.0s step-end infinite; }
 @keyframes kf-anim-conn-return_to_cli {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -509,7 +470,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-return_to_cli { animation: kf-anim-conn-return_to_cli 14.0s step-end infinite; }
 @keyframes kf-anim-conn-return_to_cloud {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -519,7 +479,6 @@ text {
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-return_to_cloud { animation: kf-anim-conn-return_to_cloud 14.0s step-end infinite; }
 @keyframes kf-anim-conn-speech_bubble {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
@@ -529,7 +488,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-speech_bubble { animation: kf-anim-conn-speech_bubble 14.0s step-end infinite; }
 @keyframes kf-anim-conn-sys_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -539,7 +497,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-sys_envelope { animation: kf-anim-conn-sys_envelope 14.0s step-end infinite; }
 @keyframes kf-anim-conn-sys_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -549,7 +506,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-sys_line1 { animation: kf-anim-conn-sys_line1 14.0s step-end infinite; }
 @keyframes kf-anim-conn-sys_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -559,7 +515,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-sys_line2 { animation: kf-anim-conn-sys_line2 14.0s step-end infinite; }
 @keyframes kf-anim-conn-tc_line1 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -569,7 +524,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-tc_line1 { animation: kf-anim-conn-tc_line1 14.0s step-end infinite; }
 @keyframes kf-anim-conn-tc_line2 {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -579,7 +533,6 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-tc_line2 { animation: kf-anim-conn-tc_line2 14.0s step-end infinite; }
 @keyframes kf-anim-conn-tool_call_envelope {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
@@ -589,7 +542,54 @@ text {
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-.ai-connection.conn-tool_call_envelope { animation: kf-anim-conn-tool_call_envelope 14.0s step-end infinite; }
+.conn-ans_line1 { animation: kf-anim-conn-ans_line1 14.0s step-end infinite; }
+.conn-ans_line2 { animation: kf-anim-conn-ans_line2 14.0s step-end infinite; }
+.conn-answer_envelope { animation: kf-anim-conn-answer_envelope 14.0s step-end infinite; }
+.conn-exec_arrow { animation: kf-anim-conn-exec_arrow 14.0s step-end infinite; }
+.conn-exec_envelope { animation: kf-anim-conn-exec_envelope 14.0s step-end infinite; }
+.conn-exec_line1 { animation: kf-anim-conn-exec_line1 14.0s step-end infinite; }
+.conn-exec_line2 { animation: kf-anim-conn-exec_line2 14.0s step-end infinite; }
+.conn-final_to_cli { animation: kf-anim-conn-final_to_cli 14.0s step-end infinite; }
+.conn-final_to_user { animation: kf-anim-conn-final_to_user 14.0s step-end infinite; }
+.conn-prompt_arrow { animation: kf-anim-conn-prompt_arrow 14.0s step-end infinite; }
+.conn-req_arrow { animation: kf-anim-conn-req_arrow 14.0s step-end infinite; }
+.conn-resp_arrow { animation: kf-anim-conn-resp_arrow 14.0s step-end infinite; }
+.conn-result_envelope { animation: kf-anim-conn-result_envelope 14.0s step-end infinite; }
+.conn-result_line1 { animation: kf-anim-conn-result_line1 14.0s step-end infinite; }
+.conn-result_line2 { animation: kf-anim-conn-result_line2 14.0s step-end infinite; }
+.conn-return_to_cli { animation: kf-anim-conn-return_to_cli 14.0s step-end infinite; }
+.conn-return_to_cloud { animation: kf-anim-conn-return_to_cloud 14.0s step-end infinite; }
+.conn-speech_bubble { animation: kf-anim-conn-speech_bubble 14.0s step-end infinite; }
+.conn-sys_envelope { animation: kf-anim-conn-sys_envelope 14.0s step-end infinite; }
+.conn-sys_line1 { animation: kf-anim-conn-sys_line1 14.0s step-end infinite; }
+.conn-sys_line2 { animation: kf-anim-conn-sys_line2 14.0s step-end infinite; }
+.conn-tc_line1 { animation: kf-anim-conn-tc_line1 14.0s step-end infinite; }
+.conn-tc_line2 { animation: kf-anim-conn-tc_line2 14.0s step-end infinite; }
+.conn-tool_call_envelope { animation: kf-anim-conn-tool_call_envelope 14.0s step-end infinite; }
+.kf-ans_line1 { animation: kf-anim-ans_line1 14.0s step-end infinite; }
+.kf-ans_line2 { animation: kf-anim-ans_line2 14.0s step-end infinite; }
+.kf-answer_envelope { animation: kf-anim-answer_envelope 14.0s step-end infinite; }
+.kf-exec_arrow { animation: kf-anim-exec_arrow 14.0s step-end infinite; }
+.kf-exec_envelope { animation: kf-anim-exec_envelope 14.0s step-end infinite; }
+.kf-exec_line1 { animation: kf-anim-exec_line1 14.0s step-end infinite; }
+.kf-exec_line2 { animation: kf-anim-exec_line2 14.0s step-end infinite; }
+.kf-final_to_cli { animation: kf-anim-final_to_cli 14.0s step-end infinite; }
+.kf-final_to_user { animation: kf-anim-final_to_user 14.0s step-end infinite; }
+.kf-prompt_arrow { animation: kf-anim-prompt_arrow 14.0s step-end infinite; }
+.kf-req_arrow { animation: kf-anim-req_arrow 14.0s step-end infinite; }
+.kf-resp_arrow { animation: kf-anim-resp_arrow 14.0s step-end infinite; }
+.kf-result_envelope { animation: kf-anim-result_envelope 14.0s step-end infinite; }
+.kf-result_line1 { animation: kf-anim-result_line1 14.0s step-end infinite; }
+.kf-result_line2 { animation: kf-anim-result_line2 14.0s step-end infinite; }
+.kf-return_to_cli { animation: kf-anim-return_to_cli 14.0s step-end infinite; }
+.kf-return_to_cloud { animation: kf-anim-return_to_cloud 14.0s step-end infinite; }
+.kf-speech_bubble { animation: kf-anim-speech_bubble 14.0s step-end infinite; }
+.kf-sys_envelope { animation: kf-anim-sys_envelope 14.0s step-end infinite; }
+.kf-sys_line1 { animation: kf-anim-sys_line1 14.0s step-end infinite; }
+.kf-sys_line2 { animation: kf-anim-sys_line2 14.0s step-end infinite; }
+.kf-tc_line1 { animation: kf-anim-tc_line1 14.0s step-end infinite; }
+.kf-tc_line2 { animation: kf-anim-tc_line2 14.0s step-end infinite; }
+.kf-tool_call_envelope { animation: kf-anim-tool_call_envelope 14.0s step-end infinite; }
 </style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
@@ -636,58 +636,58 @@ text {
       <!-- Center hole -->
       <circle cx="38.7" cy="38" r="12" fill="#fff" stroke="#555" stroke-width="2"/>
     </g>
-    <text id="user_label" class="ai-shape ai-text" x="96" y="191" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">User</text>
-    <text id="cli_label" class="ai-shape ai-text" x="414" y="181" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">CLI Harness</text>
-    <text id="cloud_label" class="ai-shape ai-text" x="862" y="58.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">LLM</text>
-    <text id="gear_label" class="ai-shape ai-text" x="814" y="401" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">Tool (bash)</text>
+    <text id="user_label" class="ai-shape ai-text" x="98.89" y="191" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">User</text>
+    <text id="cli_label" class="ai-shape ai-text" x="424.43" y="181" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">CLI Harness</text>
+    <text id="cloud_label" class="ai-shape ai-text" x="860.55" y="58.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">LLM</text>
+    <text id="gear_label" class="ai-shape ai-text" x="829.43" y="401" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">Tool (bash)</text>
     <g class="kf-hidden kf-speech_bubble kf-anim">
       <rect id="speech_bubble" class="ai-shape ai-rect" x="100" y="27" width="280" height="56" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16">list my Python files</text>
+      <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16"><tspan x="240" dy="-0"><tspan>list my Python files</tspan></tspan></text>
     </g>
     <g class="kf-hidden kf-sys_envelope kf-anim">
       <rect id="sys_envelope" class="ai-shape ai-rect" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-sys_line1 kf-anim">
-      <text id="sys_line1" class="ai-shape ai-text" x="531.2" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
+      <text id="sys_line1" class="ai-shape ai-text" x="564.3919999999999" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
     </g>
     <g class="kf-hidden kf-sys_line2 kf-anim">
-      <text id="sys_line2" class="ai-shape ai-text" x="550.4" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
+      <text id="sys_line2" class="ai-shape ai-text" x="591.528" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
     </g>
     <g class="kf-hidden kf-tool_call_envelope kf-anim">
       <rect id="tool_call_envelope" class="ai-shape ai-rect" x="525" y="180" width="310" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-tc_line1 kf-anim">
-      <text id="tc_line1" class="ai-shape ai-text" x="608" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_call: bash</text>
+      <text id="tc_line1" class="ai-shape ai-text" x="628.864" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_call: bash</text>
     </g>
     <g class="kf-hidden kf-tc_line2 kf-anim">
-      <text id="tc_line2" class="ai-shape ai-text" x="588.8" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
+      <text id="tc_line2" class="ai-shape ai-text" x="618.696" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
     </g>
     <g class="kf-hidden kf-exec_envelope kf-anim">
       <rect id="exec_envelope" class="ai-shape ai-rect" x="115" y="280" width="290" height="80" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-exec_line1 kf-anim">
-      <text id="exec_line1" class="ai-shape ai-text" x="159.2" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
+      <text id="exec_line1" class="ai-shape ai-text" x="192.024" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
     </g>
     <g class="kf-hidden kf-exec_line2 kf-anim">
-      <text id="exec_line2" class="ai-shape ai-text" x="144.8" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
+      <text id="exec_line2" class="ai-shape ai-text" x="179.95999999999998" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
     </g>
     <g class="kf-hidden kf-result_envelope kf-anim">
       <rect id="result_envelope" class="ai-shape ai-rect" x="535" y="180" width="290" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-result_line1 kf-anim">
-      <text id="result_line1" class="ai-shape ai-text" x="555.2" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_result + conversation</text>
+      <text id="result_line1" class="ai-shape ai-text" x="588.624" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_result + conversation</text>
     </g>
     <g class="kf-hidden kf-result_line2 kf-anim">
-      <text id="result_line2" class="ai-shape ai-text" x="564.8" y="229" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
+      <text id="result_line2" class="ai-shape ai-text" x="599.96" y="229" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
     </g>
     <g class="kf-hidden kf-answer_envelope kf-anim">
       <rect id="answer_envelope" class="ai-shape ai-rect" x="155" y="180" width="290" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-ans_line1 kf-anim">
-      <text id="ans_line1" class="ai-shape ai-text" x="189.60000000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
+      <text id="ans_line1" class="ai-shape ai-text" x="223.06400000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
     </g>
     <g class="kf-hidden kf-ans_line2 kf-anim">
-      <text id="ans_line2" class="ai-shape ai-text" x="189.60000000000002" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
+      <text id="ans_line2" class="ai-shape ai-text" x="215.512" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
     </g>
   </g>
   <path class="ai-connection conn-prompt_arrow conn-prompt_arrow-base" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>

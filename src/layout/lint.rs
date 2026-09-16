@@ -24,6 +24,10 @@ pub struct LintWarning {
     /// Keyframes in which this defect occurs.  Empty means the defect is
     /// frame-independent (no keyframes, or present in every frame).
     pub frames: Vec<String>,
+    /// The two element names this warning is about, sorted, when it is about
+    /// a pair. Lets `dedup_warnings` recognise one piece of geometry reported
+    /// under two categories.
+    pub pair: Option<(String, String)>,
 }
 
 impl LintWarning {
@@ -164,6 +168,8 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
     check_text_fits_its_box(result, doc, &mut warnings);
+    check_hand_placed_labels(result, doc, &mut warnings);
+    check_label_markup(doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
     check_unknown_colors(doc, &mut warnings);
     dedup_warnings(&mut warnings);
@@ -258,6 +264,7 @@ fn merge_frame_warnings(
             } else {
                 frames
             },
+            pair: None,
         });
     }
 }
@@ -266,6 +273,18 @@ fn merge_frame_warnings(
 fn dedup_warnings(warnings: &mut Vec<LintWarning>) {
     let mut seen: HashSet<(LintCategory, String)> = HashSet::new();
     warnings.retain(|w| seen.insert((w.category, w.message.clone())));
+
+    // The same geometry reported twice — once as an overlap, once as a label
+    // straddle — reads as two problems. Keep the label one: it names the text.
+    let labelled: HashSet<(String, String)> = warnings
+        .iter()
+        .filter(|w| matches!(w.category, LintCategory::Label))
+        .filter_map(|w| w.pair.clone())
+        .collect();
+    warnings.retain(|w| {
+        !(matches!(w.category, LintCategory::Overlap)
+            && w.pair.as_ref().is_some_and(|p| labelled.contains(p)))
+    });
 }
 
 /// Display name for an element: its ID if named, or positional path if anonymous.
@@ -558,6 +577,19 @@ fn overlap_warning(name_a: &str, name_b: &str, w: f64, h: f64) -> LintWarning {
             name_a, name_b, w, h
         ),
         frames: Vec::new(),
+        pair: Some(sorted_pair(name_a, name_b)),
+    }
+}
+
+/// The two names a pair-warning is about, quotes stripped and order-independent
+/// so the same geometry reported by two checks compares equal.
+fn sorted_pair(a: &str, b: &str) -> (String, String) {
+    let clean = |s: &str| s.trim_matches('"').to_string();
+    let (a, b) = (clean(a), clean(b));
+    if a <= b {
+        (a, b)
+    } else {
+        (b, a)
     }
 }
 
@@ -789,6 +821,11 @@ fn check_overlaps_recursive(
 
 // ── FR3: Contains constraint verification ─────────────────────────
 
+/// Containment violations below this are solver float residue, not a mistake.
+/// Reporting a 0px overshoot on correct code is how the linter taught agents
+/// that its warnings are noise.
+const CONTAINMENT_EPSILON: f64 = 0.5;
+
 fn check_contains(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
     check_contains_in_stmts(&doc.statements, result, warnings);
     check_contains_overrides_size(result, doc, warnings);
@@ -866,6 +903,7 @@ fn check_contains_overrides_size(
                                 name, axis, declared, actual, name
                             ),
                             frames: Vec::new(),
+                            pair: None,
                         });
                     }
                 }
@@ -899,7 +937,7 @@ fn check_contains_in_stmts(
                             if let Some(elem) = result.get_element_by_name(&elem_id.node.0) {
                                 let eb = elem.bounds;
                                 // Check left edge
-                                if cb.x > eb.x - pad {
+                                if cb.x > eb.x - pad + CONTAINMENT_EPSILON {
                                     let overflow = cb.x - (eb.x - pad);
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
@@ -908,10 +946,11 @@ fn check_contains_in_stmts(
                                             elem_id.node.0, overflow, container.node.0
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                                 // Check right edge
-                                if cb.right() < eb.right() + pad {
+                                if cb.right() + CONTAINMENT_EPSILON < eb.right() + pad {
                                     let overflow = (eb.right() + pad) - cb.right();
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
@@ -920,10 +959,11 @@ fn check_contains_in_stmts(
                                             elem_id.node.0, overflow, container.node.0
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                                 // Check top edge
-                                if cb.y > eb.y - pad {
+                                if cb.y > eb.y - pad + CONTAINMENT_EPSILON {
                                     let overflow = cb.y - (eb.y - pad);
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
@@ -932,10 +972,11 @@ fn check_contains_in_stmts(
                                             elem_id.node.0, overflow, container.node.0
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                                 // Check bottom edge
-                                if cb.bottom() < eb.bottom() + pad {
+                                if cb.bottom() + CONTAINMENT_EPSILON < eb.bottom() + pad {
                                     let overflow = (eb.bottom() + pad) - cb.bottom();
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
@@ -944,6 +985,7 @@ fn check_contains_in_stmts(
                                             elem_id.node.0, overflow, container.node.0
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                             }
@@ -975,9 +1017,12 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
         .styles
         .as_ref()
         .and_then(|s| s.font_size)
-        .unwrap_or(14.0);
-    let width = label.text.len() as f64 * (font_size * 0.6);
-    let height = font_size;
+        .unwrap_or(label.font_size);
+    // Measure the laid-out lines, not the flattened wording: a three-line
+    // card joined into one string looks three times too wide.
+    let metrics = crate::layout::text::measure_runs(&label.rich.lines, font_size);
+    let width = metrics.width;
+    let height = metrics.height;
 
     let x = match label.anchor {
         TextAnchor::Start => label.position.x,
@@ -1088,6 +1133,7 @@ fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Ve
                     category: LintCategory::Label,
                     message: format!("labels on \"{}\" and \"{}\" overlap", a.owner, b.owner),
                     frames: Vec::new(),
+                    pair: None,
                 });
             }
         }
@@ -1166,6 +1212,7 @@ fn check_label_element_overlaps(
                         label.owner, shape.id, overlap_w, overlap_h
                     ),
                     frames: Vec::new(),
+                    pair: Some(sorted_pair(&label.owner, &shape.id)),
                 });
             }
         }
@@ -1405,6 +1452,7 @@ fn check_connections(
                             from_id, to_id, oe.id
                         ),
                         frames: Vec::new(),
+                        pair: None,
                     });
                 }
             }
@@ -1435,6 +1483,7 @@ fn check_connections(
                                 from_id, to_id, oe.id
                             ),
                             frames: Vec::new(),
+                            pair: None,
                         });
                     }
                 }
@@ -1531,6 +1580,7 @@ fn check_label_connection_overlaps(
                             label.owner, conn_name
                         ),
                         frames: Vec::new(),
+                        pair: None,
                     });
                     // Only report once per label-connection pair
                     break;
@@ -1576,6 +1626,7 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     conn.from_id.0, conn.to_id.0, dy
                 ),
                 frames: Vec::new(),
+                pair: None,
             });
         } else if dx < ALIGNMENT_THRESHOLD && dy > dx * 4.0 {
             // Nearly vertical — small X offset
@@ -1586,6 +1637,7 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     conn.from_id.0, conn.to_id.0, dx
                 ),
                 frames: Vec::new(),
+                pair: None,
             });
         }
     }
@@ -1692,6 +1744,7 @@ fn check_redundant_constants(doc: &Document, warnings: &mut Vec<LintWarning>) {
             category: LintCategory::RedundantConstant,
             message,
             frames: Vec::new(),
+            pair: None,
         });
     }
 }
@@ -1751,6 +1804,7 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
                     shortest_orientation
                 ),
                 frames: Vec::new(),
+                pair: None,
             });
         }
     }
@@ -1828,6 +1882,7 @@ fn check_missing_anchors_in_stmts(
                                 from_name, to_name, from_name, to_name
                             ),
                             frames: Vec::new(),
+                            pair: None,
                         });
                     }
                     if conn.to.anchor.is_none() {
@@ -1839,6 +1894,7 @@ fn check_missing_anchors_in_stmts(
                                 from_name, to_name, from_name, to_name
                             ),
                             frames: Vec::new(),
+                            pair: None,
                         });
                     }
                 }
@@ -1956,6 +2012,7 @@ fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning
                             name, dark_desc
                         ),
                         frames: Vec::new(),
+                        pair: None,
                     });
                 }
             }
@@ -2008,6 +2065,7 @@ fn check_steep_direct(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
                     conn.from_id.0, conn.to_id.0, angle_deg
                 ),
                 frames: Vec::new(),
+                pair: None,
             });
         }
     }
@@ -2058,6 +2116,7 @@ fn check_crowded_layouts_in_stmts(
                                 layout_kind, layout_name, child_count
                             ),
                             frames: Vec::new(),
+                            pair: None,
                         });
                     }
                 }
@@ -2189,6 +2248,7 @@ fn check_over_constrained_in_stmts(
                                             desc, residual
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                             }
@@ -2216,6 +2276,7 @@ fn check_over_constrained_in_stmts(
                                             desc, residual
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                             }
@@ -2237,6 +2298,7 @@ fn check_over_constrained_in_stmts(
                                             desc, residual
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                             }
@@ -2258,6 +2320,7 @@ fn check_over_constrained_in_stmts(
                                             desc, violation
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                             }
@@ -2279,6 +2342,7 @@ fn check_over_constrained_in_stmts(
                                             desc, violation
                                         ),
                                         frames: Vec::new(),
+                                        pair: None,
                                     });
                                 }
                             }
@@ -2375,6 +2439,7 @@ fn check_unknown_colors(doc: &Document, warnings: &mut Vec<LintWarning>) {
                     key, word, owner
                 ),
                 frames: Vec::new(),
+                pair: None,
             });
         }
     }
@@ -2453,6 +2518,7 @@ fn check_unknown_modifiers(doc: &Document, warnings: &mut Vec<LintWarning>) {
                         key, owner
                     ),
                     frames: Vec::new(),
+                    pair: None,
                 });
             }
         }
@@ -2554,6 +2620,7 @@ fn check_text_fits_its_box(
                         text, id.0, needed, elem.bounds.width
                     ),
                     frames: frame.into_iter().collect(),
+                    pair: None,
                 });
             }
         }
@@ -2594,20 +2661,20 @@ fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintW
 
                 let detail = if width_overflow && height_overflow {
                     format!(
-                        "label \"{}\" on {} overflows both width ({:.0}px label vs {:.0}px shape) and height ({:.0}px vs {:.0}px); consider using a separate text element positioned nearby",
+                        "label \"{}\" on {} overflows both width ({:.0}px label vs {:.0}px shape) and height ({:.0}px vs {:.0}px); break it with <br>, or drop the explicit size and let the box fit itself",
                         label_text, name,
                         label_bbox.width, shape_bounds.width,
                         label_bbox.height, shape_bounds.height,
                     )
                 } else if width_overflow {
                     format!(
-                        "label \"{}\" on {} overflows width ({:.0}px label vs {:.0}px shape); consider making the shape wider or using a separate text element",
+                        "label \"{}\" on {} overflows width ({:.0}px label vs {:.0}px shape); a word too long to wrap — shorten it, break it with <br>, or widen the shape",
                         label_text, name,
                         label_bbox.width, shape_bounds.width,
                     )
                 } else {
                     format!(
-                        "label \"{}\" on {} overflows height ({:.0}px label vs {:.0}px shape); consider making the shape taller or using a separate text element",
+                        "label \"{}\" on {} overflows height ({:.0}px label vs {:.0}px shape); drop the explicit height and the box grows to its lines",
                         label_text, name,
                         label_bbox.height, shape_bounds.height,
                     )
@@ -2617,6 +2684,7 @@ fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintW
                     category: LintCategory::LabelOverflow,
                     message: detail,
                     frames: Vec::new(),
+                    pair: None,
                 });
             }
         }
@@ -3114,12 +3182,12 @@ mod tests {
         label_text: &str,
     ) -> ElementLayout {
         let mut elem = make_rect(Some(id), x, y, w, h);
-        elem.label = Some(LabelLayout {
-            text: label_text.to_string(),
-            position: Point::new(x + w / 2.0, y + h / 2.0),
-            anchor: TextAnchor::Middle,
-            styles: None,
-        });
+        elem.label = Some(LabelLayout::from_source(
+            label_text,
+            Point::new(x + w / 2.0, y + h / 2.0),
+            TextAnchor::Middle,
+            14.0,
+        ));
         elem
     }
 
@@ -3170,4 +3238,187 @@ mod tests {
         check_label_overflow(&result, &mut warnings);
         assert!(warnings.is_empty());
     }
+}
+
+/// A `text` element positioned inside a filled shape is almost always a label
+/// that was hand-placed with constraints.
+///
+/// Say so, and say what to write instead: agents act on a warning that
+/// contains the replacement syntax far more often than on one that only
+/// describes the symptom.
+fn check_hand_placed_labels(
+    result: &LayoutResult,
+    doc: &Document,
+    warnings: &mut Vec<LintWarning>,
+) {
+    let contains = collect_contains_ids(doc);
+
+    struct Seen {
+        id: String,
+        bounds: BoundingBox,
+        is_text: bool,
+        /// This element's own id plus every ancestor's, so a `contains` on an
+        /// enclosing group still counts as deliberate.
+        lineage: Vec<String>,
+    }
+
+    fn walk(elem: &ElementLayout, lineage: &[String], out: &mut Vec<Seen>) {
+        let mut next = lineage.to_vec();
+        if let Some(id) = &elem.id {
+            next.push(id.0.clone());
+            // A translucent zone is a background wash, not a box with a
+            // label: text over it is an annotation and stays legitimate.
+            let labellable = is_visual_shape(elem) && !is_callout(elem) && is_opaque(elem);
+            if is_text_shape(elem) || labellable {
+                out.push(Seen {
+                    id: id.0.clone(),
+                    bounds: elem.bounds,
+                    is_text: is_text_shape(elem),
+                    lineage: next.clone(),
+                });
+            }
+        }
+        for child in &elem.children {
+            walk(child, &next, out);
+        }
+    }
+
+    let mut seen = Vec::new();
+    for elem in &result.root_elements {
+        walk(elem, &[], &mut seen);
+    }
+
+    for shape in seen.iter().filter(|s| !s.is_text) {
+        // Group per box: three lines hand-placed in one card are one mistake
+        // with one fix, not three warnings.
+        let inside: Vec<&Seen> = seen
+            .iter()
+            .filter(|text| text.is_text)
+            .filter(|text| shape.bounds.contains_bbox(&text.bounds))
+            // A `contains` on the text, or on anything it sits inside, means
+            // the author asked for this arrangement.
+            .filter(|text| {
+                !text
+                    .lineage
+                    .iter()
+                    .any(|a| contains.wraps(Some(&shape.id), Some(a)))
+            })
+            .collect();
+
+        if inside.is_empty() {
+            continue;
+        }
+
+        let names = inside
+            .iter()
+            .map(|t| format!("\"{}\"", t.id))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let subject = if inside.len() == 1 { "text" } else { "texts" };
+        warnings.push(LintWarning {
+            category: LintCategory::Label,
+            message: format!(
+                "{subject} {names} sit inside \"{}\" — write {} [label: \"…\"] instead of \
+                 positioning them (<br> for more lines, label_position: below for a caption)",
+                shape.id, shape.id
+            ),
+            frames: Vec::new(),
+            // Only a single text identifies a pair the overlap check could
+            // also have reported.
+            pair: (inside.len() == 1).then(|| sorted_pair(&shape.id, &inside[0].id)),
+        });
+    }
+}
+
+/// `<bold>` parses as literal text and renders as the characters `<bold>`.
+/// That is a plausible-looking wrong picture, which is exactly what the label
+/// markup subset exists to prevent.
+fn check_label_markup(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    let mut labels = Vec::new();
+    collect_raw_labels(&doc.statements, &mut labels);
+    for (owner, raw) in labels {
+        for tag in unrecognised_tags(&raw) {
+            warnings.push(LintWarning {
+                category: LintCategory::Label,
+                message: format!(
+                    "label on \"{owner}\" contains unsupported markup <{tag}>; \
+                     supported: <br> <b> <i> <small> <span fill=…>"
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
+        }
+    }
+}
+
+/// Every `label:` in the document, with the name of the element carrying it.
+fn collect_raw_labels(
+    stmts: &[crate::parser::ast::Spanned<Statement>],
+    out: &mut Vec<(String, String)>,
+) {
+    for stmt in stmts {
+        let (modifiers, children, name) = match &stmt.node {
+            Statement::Shape(s) => (&s.modifiers, None, s.name.as_ref().map(|n| n.node.to_string())),
+            Statement::Layout(l) => (
+                &l.modifiers,
+                Some(&l.children),
+                l.name.as_ref().map(|n| n.node.to_string()),
+            ),
+            Statement::Group(g) => (
+                &g.modifiers,
+                Some(&g.children),
+                g.name.as_ref().map(|n| n.node.to_string()),
+            ),
+            _ => continue,
+        };
+        if let Some(raw) = modifiers.iter().find_map(|m| {
+            if matches!(m.node.key.node, crate::parser::ast::StyleKey::Label) {
+                match &m.node.value.node {
+                    crate::parser::ast::StyleValue::String(s) => Some(s.clone()),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        }) {
+            out.push((name.unwrap_or_else(|| "<anon>".to_string()), raw));
+        }
+        if let Some(children) = children {
+            collect_raw_labels(children, out);
+        }
+    }
+}
+
+/// Tag-shaped runs in a label that the markup parser does not recognise.
+///
+/// A bare `<` with no `>` after it, or `<` followed by a non-letter, is
+/// ordinary text like "a < b" and is not reported.
+fn unrecognised_tags(raw: &str) -> Vec<String> {
+    let chars: Vec<char> = raw.chars().collect();
+    let mut found = Vec::new();
+    let mut i = 0;
+    while i < chars.len() {
+        if chars[i] != '<' {
+            i += 1;
+            continue;
+        }
+        let mut j = i + 1;
+        if chars.get(j) == Some(&'/') {
+            j += 1;
+        }
+        let start = j;
+        while j < chars.len() && chars[j].is_ascii_alphabetic() {
+            j += 1;
+        }
+        let name: String = chars[start..j].iter().collect();
+        if !name.is_empty()
+            && chars.get(j) == Some(&'>')
+            && !crate::layout::text::SUPPORTED_TAGS.contains(&name.to_ascii_lowercase().as_str())
+            && !found.contains(&name)
+        {
+            found.push(name);
+        }
+        i += 1;
+    }
+    found
 }

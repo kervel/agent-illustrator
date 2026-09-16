@@ -248,6 +248,27 @@ where
                 span_range(&e.span()),
             )
         }),
+        // above / below / inside keyword values (used by `label_position:`).
+        // These are already lexer tokens for constraint relations; this only
+        // lets them be read as style values too.
+        just(Token::Above).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("above".to_string()),
+                span_range(&e.span()),
+            )
+        }),
+        just(Token::Below).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("below".to_string()),
+                span_range(&e.span()),
+            )
+        }),
+        just(Token::Inside).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("inside".to_string()),
+                span_range(&e.span()),
+            )
+        }),
         // up / down keyword values (used by `pointer: up|down` on callouts)
         just(Token::Up).map_with(|_, e| {
             Spanned::new(StyleValue::Keyword("up".to_string()), span_range(&e.span()))

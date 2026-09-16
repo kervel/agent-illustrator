@@ -1075,7 +1075,6 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 /// Resolve overlapping connection labels by nudging them apart
 fn resolve_label_overlaps(connections: &mut [ConnectionLayout]) {
     // Approximate character width and line height for label bounds estimation
-    const CHAR_WIDTH: f64 = 7.0;
     const LINE_HEIGHT: f64 = 14.0;
     const PADDING: f64 = 4.0;
     const MIN_SEPARATION: f64 = 2.0;
@@ -1094,7 +1093,8 @@ fn resolve_label_overlaps(connections: &mut [ConnectionLayout]) {
         .enumerate()
         .filter_map(|(idx, conn)| {
             conn.label.as_ref().map(|label| {
-                let width = label.text.len() as f64 * CHAR_WIDTH + PADDING * 2.0;
+                let width =
+                    crate::layout::text::measure_str(&label.text, 14.0) + PADDING * 2.0;
                 let height = LINE_HEIGHT + PADDING;
                 // Adjust x based on anchor
                 let x = match label.anchor {
@@ -1391,12 +1391,13 @@ fn extract_connection_label_with_ref(
     };
 
     (
-        Some(LabelLayout {
-            text,
-            position: Point::new(mid_x, mid_y),
+        Some(LabelLayout::from_source_with_styles(
+            &text,
+            Point::new(mid_x, mid_y),
             anchor,
-            styles: label_styles,
-        }),
+            14.0,
+            label_styles,
+        )),
         label_ref_id,
     )
 }

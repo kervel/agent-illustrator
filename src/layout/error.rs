@@ -32,6 +32,16 @@ pub enum LayoutError {
     #[error("invalid layout for element '{element}': {reason}")]
     InvalidLayout { element: String, reason: String },
 
+    /// A label used the markup subset incorrectly. Reported rather than
+    /// silently dropped: a half-parsed label renders a plausible-looking
+    /// wrong picture, which is the failure this feature exists to remove.
+    #[error("invalid label markup on '{owner}': {reason}")]
+    InvalidLabel {
+        owner: String,
+        reason: String,
+        span: Span,
+    },
+
     /// Element path not found during constraint resolution
     #[error("element path '{path}' not found")]
     PathNotFound {

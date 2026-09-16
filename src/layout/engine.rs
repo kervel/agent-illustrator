@@ -34,6 +34,7 @@ use crate::parser::ast::*;
 use super::config::LayoutConfig;
 use super::error::LayoutError;
 use super::types::*;
+use super::text::measure_str;
 
 // ============================================
 // Constraint Classification (Feature 010)
@@ -762,6 +763,7 @@ pub fn solve_global(
 pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, LayoutError> {
     // First validate references
     super::validate_references(doc)?;
+    validate_label_markup(&doc.statements)?;
 
     let mut result = LayoutResult::new();
     let mut position = Point::new(0.0, 0.0);
@@ -919,12 +921,13 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
 }
 
 fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
-    let (width, height) = compute_shape_size(shape, config);
+    let resolved_label = resolve_shape_label(shape);
+    let (width, height) = compute_shape_size(shape, config, resolved_label.as_ref());
     let styles = ResolvedStyles::from_modifiers(&shape.modifiers);
 
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
-    let label = extract_label(&shape.modifiers).map(|text| {
+    let label = resolved_label.map(|(rich, font_size)| {
         let (label_x, label_y, anchor) = match &shape.shape_type.node {
             ShapeType::Line => {
                 // Center horizontally on the line, position above with offset
@@ -959,16 +962,70 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
                 )
             }
         };
-        // An explicit `align:` overrides the horizontal placement, keeping a
-        // small inset so left/right aligned text does not touch the border.
-        let (label_x, anchor) = match extract_align(&shape.modifiers) {
-            Some(TextAnchor::Start) => (position.x + LABEL_INSET, TextAnchor::Start),
-            Some(TextAnchor::End) => (position.x + width - LABEL_INSET, TextAnchor::End),
-            Some(TextAnchor::Middle) => (position.x + width / 2.0, TextAnchor::Middle),
-            None => (label_x, anchor),
+        let align = extract_align(&shape.modifiers);
+        let offset = extract_label_offset(&shape.modifiers);
+        let metrics = crate::layout::text::measure_runs(&rich.lines, font_size);
+
+        let (label_x, label_y, anchor) = match extract_label_position(&shape.modifiers) {
+            ShapeLabelPosition::Inside => {
+                // An explicit `align:` overrides the horizontal placement,
+                // keeping a small inset so edge-aligned text does not touch
+                // the border.
+                match align {
+                    Some(TextAnchor::Start) => {
+                        (position.x + LABEL_INSET, label_y, TextAnchor::Start)
+                    }
+                    Some(TextAnchor::End) => {
+                        (position.x + width - LABEL_INSET, label_y, TextAnchor::End)
+                    }
+                    Some(TextAnchor::Middle) => {
+                        (position.x + width / 2.0, label_y, TextAnchor::Middle)
+                    }
+                    None => (label_x, label_y, anchor),
+                }
+            }
+            // Above/below: `align` picks the horizontal edge to align to. The
+            // y is the vertical centre of the label block, because the
+            // renderer centres n lines about it.
+            ShapeLabelPosition::Above => {
+                let y = position.y - offset - metrics.height / 2.0;
+                match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
+                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
+                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
+                }
+            }
+            ShapeLabelPosition::Below => {
+                let y = position.y + height + offset + metrics.height / 2.0;
+                match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
+                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
+                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
+                }
+            }
+            // Left/right: `align` picks the vertical edge. `parse_align`
+            // already maps top -> Start and bottom -> End.
+            ShapeLabelPosition::Left => {
+                let y = match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => position.y + metrics.height / 2.0,
+                    TextAnchor::Middle => position.y + height / 2.0,
+                    TextAnchor::End => position.y + height - metrics.height / 2.0,
+                };
+                (position.x - offset, y, TextAnchor::End)
+            }
+            ShapeLabelPosition::Right => {
+                let y = match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => position.y + metrics.height / 2.0,
+                    TextAnchor::Middle => position.y + height / 2.0,
+                    TextAnchor::End => position.y + height - metrics.height / 2.0,
+                };
+                (position.x + width + offset, y, TextAnchor::Start)
+            }
         };
         LabelLayout {
-            text,
+            text: rich.plain(),
+            rich,
+            font_size,
             position: Point::new(label_x, label_y),
             anchor,
             styles: None,
@@ -1010,7 +1067,35 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     }
 }
 
-fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
+/// The label of a shape, parsed and — when the shape has an explicit width —
+/// wrapped to fit inside it.
+///
+/// Sizing, placement and rendering all go through this, so a box is never
+/// sized for one set of lines and drawn with another. `validate_label_markup`
+/// has already rejected malformed markup by the time this runs, so the
+/// fallback to literal text is unreachable in practice.
+fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichText, f64)> {
+    let raw = extract_label(&shape.modifiers)?;
+    let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
+    let rich = crate::layout::text::parse_markup(&raw)
+        .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&raw));
+
+    // An explicit width is a promise about what fits *inside* the box, so an
+    // inside label wraps to it rather than running out through the borders.
+    // A label placed outside lives in open space and is not bound by it.
+    let inside = extract_label_position(&shape.modifiers) == ShapeLabelPosition::Inside;
+    let rich = match (inside, extract_width_modifier(&shape.modifiers)) {
+        (true, Some(w)) => crate::layout::text::wrap(&rich, font_size, w - 2.0 * LABEL_INSET),
+        _ => rich,
+    };
+    Some((rich, font_size))
+}
+
+fn compute_shape_size(
+    shape: &ShapeDecl,
+    config: &LayoutConfig,
+    label: Option<&(crate::layout::text::RichText, f64)>,
+) -> (f64, f64) {
     // Extract size modifiers from the shape
     let size = extract_size_modifier(&shape.modifiers);
     let width = extract_width_modifier(&shape.modifiers);
@@ -1026,13 +1111,12 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         return (s, s);
     }
 
-    // Calculate minimum width needed to fit label (if present)
-    let label_min_width = extract_label(&shape.modifiers).map(|text| {
-        // Approximate: ~8px per character for 14px font, plus 20px padding
-        let char_width = 8.0;
-        let padding = 20.0;
-        text.len() as f64 * char_width + padding
-    });
+    // The space the label needs, measured the same way lint checks it and
+    // the renderer draws it.
+    let label_metrics =
+        label.map(|(rich, font_size)| crate::layout::text::measure_runs(&rich.lines, *font_size));
+    let label_min_width = label_metrics.map(|m| m.width + 2.0 * LABEL_INSET);
+    let label_min_height = label_metrics.map(|m| m.height + 2.0 * LABEL_INSET);
 
     // If only width is provided, use it for width and default for height
     // If only height is provided, use default for width and it for height
@@ -1052,7 +1136,7 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
             // Use font_size from modifiers if available, otherwise default to 14px
             let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
             // Approximate width: ~0.6 * font_size per character
-            let estimated_width = content.len() as f64 * font_size * 0.6;
+            let estimated_width = measure_str(content, font_size);
             // Height is approximately the font size
             (estimated_width.max(20.0), font_size)
         }
@@ -1086,7 +1170,13 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         base_width
     };
 
-    let mut final_height = height.unwrap_or(default_height);
+    // A multi-line label grows the box downwards the same way a long one
+    // grows it sideways.
+    let mut final_height = match (height, label_min_height) {
+        (Some(h), _) => h,
+        (None, Some(min)) => default_height.max(min),
+        (None, None) => default_height,
+    };
     let mut final_width = final_width;
 
     // Callouts need room for the triangular pointer along its axis (only when
@@ -1366,6 +1456,63 @@ fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> 
 /// Distance a left- or right-aligned label keeps from the shape's border.
 const LABEL_INSET: f64 = 8.0;
 
+/// Default gap between a shape's edge and a label placed outside it.
+const LABEL_OUTSIDE_OFFSET: f64 = 6.0;
+
+/// Where a shape's label sits relative to the shape.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ShapeLabelPosition {
+    Inside,
+    Above,
+    Below,
+    Left,
+    Right,
+}
+
+/// Read a `label_position:` modifier. Unknown words fall back to `inside`;
+/// the linter reports them separately rather than silently moving the label.
+fn extract_label_position(modifiers: &[Spanned<StyleModifier>]) -> ShapeLabelPosition {
+    modifiers
+        .iter()
+        .find_map(|m| {
+            if !matches!(m.node.key.node, StyleKey::LabelPosition) {
+                return None;
+            }
+            let word = match &m.node.value.node {
+                StyleValue::Keyword(k) => k.as_str(),
+                StyleValue::Identifier(id) => id.0.as_str(),
+                StyleValue::String(s) => s.as_str(),
+                _ => return None,
+            };
+            match word {
+                "inside" => Some(ShapeLabelPosition::Inside),
+                "above" => Some(ShapeLabelPosition::Above),
+                "below" => Some(ShapeLabelPosition::Below),
+                "left" => Some(ShapeLabelPosition::Left),
+                "right" => Some(ShapeLabelPosition::Right),
+                _ => None,
+            }
+        })
+        .unwrap_or(ShapeLabelPosition::Inside)
+}
+
+/// Gap between the shape's edge and an outside label.
+fn extract_label_offset(modifiers: &[Spanned<StyleModifier>]) -> f64 {
+    modifiers
+        .iter()
+        .find_map(|m| {
+            if matches!(m.node.key.node, StyleKey::LabelOffset) {
+                match &m.node.value.node {
+                    StyleValue::Number { value, .. } => Some(*value),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(LABEL_OUTSIDE_OFFSET)
+}
+
 /// Read an `align:` modifier, if the element carries one.
 fn extract_align(modifiers: &[Spanned<StyleModifier>]) -> Option<TextAnchor> {
     modifiers.iter().find_map(|m| {
@@ -1528,11 +1675,13 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         None
     } else {
         // Fall back to the old modifier-based label
-        extract_label(&layout.modifiers).map(|text| LabelLayout {
-            text,
-            position: Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
-            anchor: TextAnchor::Middle,
-            styles: None,
+        extract_label(&layout.modifiers).map(|text| {
+            LabelLayout::from_source(
+                &text,
+                Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
+                TextAnchor::Middle,
+                extract_font_size(&layout.modifiers).unwrap_or(14.0),
+            )
         })
     };
 
@@ -1587,11 +1736,13 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         None
     } else {
         // Fall back to the old modifier-based label
-        extract_label(&group.modifiers).map(|text| LabelLayout {
-            text,
-            position: Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
-            anchor: TextAnchor::End,
-            styles: None,
+        extract_label(&group.modifiers).map(|text| {
+            LabelLayout::from_source(
+                &text,
+                Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
+                TextAnchor::End,
+                extract_font_size(&group.modifiers).unwrap_or(14.0),
+            )
         })
     };
 
@@ -1963,7 +2114,7 @@ fn extract_string_list(modifiers: &[Spanned<StyleModifier>], name: &str) -> Opti
 
 /// Build a left-aligned text element for a grid gutter label.
 fn grid_label_element(text: &str, x: f64, y: f64) -> ElementLayout {
-    let w = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+    let w = measure_str(text, GRID_LABEL_FONT);
     let bounds = BoundingBox::new(x, y, w.max(1.0), GRID_LABEL_FONT);
     let styles = ResolvedStyles {
         font_size: Some(GRID_LABEL_FONT),
@@ -2102,7 +2253,7 @@ fn layout_grid(
         .as_ref()
         .map(|rl| {
             rl.iter()
-                .map(|s| s.len() as f64 * GRID_LABEL_FONT * 0.6)
+                .map(|s| measure_str(s, GRID_LABEL_FONT))
                 .fold(0.0_f64, f64::max)
                 + 6.0
         })
@@ -2163,14 +2314,14 @@ fn layout_grid(
     // Column labels (centered above each column), row labels (right-aligned left of each row).
     if let Some(cl) = &col_labels {
         for (c, text) in cl.iter().enumerate().take(cols) {
-            let tw = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+            let tw = measure_str(text, GRID_LABEL_FONT);
             let bx = cell_x(c) + (cell_w - tw) / 2.0;
             out.push(grid_label_element(text, bx, position.y + pad));
         }
     }
     if let Some(rl) = &row_labels {
         for (r, text) in rl.iter().enumerate().take(rows) {
-            let tw = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+            let tw = measure_str(text, GRID_LABEL_FONT);
             let bx = origin_x - 6.0 - tw;
             let by = cell_y(r) + (cell_h - GRID_LABEL_FONT) / 2.0;
             out.push(grid_label_element(text, bx, by));
@@ -4635,4 +4786,50 @@ mod tests {
             group.bounds.height
         );
     }
+}
+
+/// Reject malformed label markup before anything is laid out.
+///
+/// A half-parsed label would render a plausible-looking wrong picture, which
+/// is exactly the failure this feature exists to remove — so it is an error,
+/// not a silent fallback. A `<` that begins no recognised tag is literal
+/// text and never reaches here.
+fn validate_label_markup(stmts: &[Spanned<Statement>]) -> Result<(), LayoutError> {
+    for stmt in stmts {
+        let (modifiers, children, name) = match &stmt.node {
+            Statement::Shape(s) => (&s.modifiers, None, s.name.as_ref().map(|n| n.node.clone())),
+            Statement::Layout(l) => (
+                &l.modifiers,
+                Some(&l.children),
+                l.name.as_ref().map(|n| n.node.clone()),
+            ),
+            Statement::Group(g) => (
+                &g.modifiers,
+                Some(&g.children),
+                g.name.as_ref().map(|n| n.node.clone()),
+            ),
+            Statement::Label(inner) => {
+                validate_label_markup(&[Spanned::new((**inner).clone(), stmt.span.clone())])?;
+                continue;
+            }
+            _ => continue,
+        };
+
+        if let Some(raw) = extract_label(modifiers) {
+            if let Err(e) = crate::layout::text::parse_markup(&raw) {
+                return Err(LayoutError::InvalidLabel {
+                    owner: name
+                        .map(|n| n.to_string())
+                        .unwrap_or_else(|| "an unnamed element".to_string()),
+                    reason: e.message,
+                    span: stmt.span.clone(),
+                });
+            }
+        }
+
+        if let Some(children) = children {
+            validate_label_markup(children)?;
+        }
+    }
+    Ok(())
 }

@@ -77,7 +77,7 @@ grid g [cols: 3, rows: 1, gap: 0, cell_width: 60, cell_height: 40] {
     rect [at: [0,1], label: "b", fill: accent-light, stroke: accent-dark]
 }
 text "los label" los
-constrain los.x = 70
+constrain los.x = 90
 constrain los.y = 10
 "#;
     let warnings = lint(source);

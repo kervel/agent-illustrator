@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -16 914 350">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -16 914 349">
   <style>
     :root {
-    --accent-light: #e3f2fd;
-    --secondary-light: #fff3e0;
     --accent-1: #2196f3;
-    --secondary-dark: #e65100;
-    --foreground-1: #333333;
-    --foreground-3: #999999;
     --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
     --status-success: #4caf50;
     --status-warning: #ff9800;
-    --status-error: #f44336;
-    --background-light: #ffffff;
-    --foreground-2: #666666;
-    --text-light: #ffffff;
-    --accent-3: #bbdefb;
     --text-1: #333333;
-    --text-dark: #1a1a1a;
-    --secondary-3: #ffe0b2;
-    --background-3: #eeeeee;
-    --foreground-dark: #1a1a1a;
     --text-2: #666666;
-    --accent-dark: #1565c0;
-    --background-dark: #333333;
-    --background-1: #ffffff;
-    --secondary-1: #ff9800;
-    --foreground-light: #e0e0e0;
-    --background-2: #f5f5f5;
     --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -113,7 +113,7 @@
 
   </style>
   <g id="diagram" class="ai-container">
-    <text id="title" class="ai-shape ai-text" x="333.2" y="52" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">Conquest of Gaul</text>
+    <text id="title" class="ai-shape ai-text" x="347.74399999999997" y="52" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">Conquest of Gaul</text>
     <rect id="axis" class="ai-shape ai-rect" x="20" y="168.5" width="780" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
     <path id="arrow_tip" class="ai-shape ai-path" d="M800.00 163.00 L814.00 170.00 L800.00 177.00 Z"  fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
     <circle id="d58" class="ai-shape ai-circle" cx="90" cy="170" r="9" fill="var(--accent-dark)" stroke="var(--background-1)" stroke-width="3"/>
@@ -126,25 +126,15 @@
     <rect id="stem55" class="ai-shape ai-rect" x="409" y="131" width="2" height="30" fill="var(--foreground-3)" stroke="none" stroke-width="1.5"/>
     <rect id="stem52" class="ai-shape ai-rect" x="569" y="182" width="2" height="30" fill="var(--accent-1)" stroke="none" stroke-width="1.5"/>
     <rect id="stem50" class="ai-shape ai-rect" x="729" y="131" width="2" height="30" fill="var(--foreground-3)" stroke="none" stroke-width="1.5"/>
-    <rect id="bg58" class="ai-shape ai-rect" x="20" y="81" width="140" height="50" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
-    <text id="t58" class="ai-shape ai-text" x="73.5" y="91.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">58 BC</text>
-    <text id="t58a" class="ai-shape ai-text" x="37.2" y="105.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-1)">Defeats Helvetii</text>
-    <text id="t58b" class="ai-shape ai-text" x="50.4" y="117.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-2)">&amp; Ariovistus</text>
-    <rect id="bg55" class="ai-shape ai-rect" x="340" y="81" width="140" height="50" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
-    <text id="t55" class="ai-shape ai-text" x="393.5" y="91.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">55 BC</text>
-    <text id="t55a" class="ai-shape ai-text" x="353.9" y="105.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-1)">Crosses the Rhine</text>
-    <text id="t55b" class="ai-shape ai-text" x="353.9" y="117.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-2)">&amp; invades Britain</text>
-    <rect id="bg50" class="ai-shape ai-rect" x="660" y="81" width="140" height="50" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
-    <text id="t50" class="ai-shape ai-text" x="713.5" y="91.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">50 BC</text>
-    <text id="t50a" class="ai-shape ai-text" x="693.7" y="105.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-1)">All of Gaul</text>
-    <text id="t50b" class="ai-shape ai-text" x="703.6" y="117.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-2)">pacified</text>
-    <rect id="bg57" class="ai-shape ai-rect" x="180" y="209" width="140" height="50" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
-    <text id="t57" class="ai-shape ai-text" x="233.5" y="219.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--accent-dark)">57 BC</text>
-    <text id="t57a" class="ai-shape ai-text" x="226.9" y="233.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-1)">Subdues</text>
-    <text id="t57b" class="ai-shape ai-text" x="217" y="245.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-2)">the Belgae</text>
-    <rect id="bg52" class="ai-shape ai-rect" x="495" y="212" width="150" height="62" fill="var(--accent-1)" stroke="var(--accent-dark)" stroke-width="2"/>
-    <text id="t52" class="ai-shape ai-text" x="552" y="224" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-light)">52 BC</text>
-    <text id="t52a" class="ai-shape ai-text" x="516" y="239" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-light)">Siege of Alesia</text>
-    <text id="t52b" class="ai-shape ai-text" x="498" y="251" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--accent-light)">Vercingetorix surrenders</text>
+    <rect id="bg58" class="ai-shape ai-rect" x="20" y="73.75" width="140" height="57.25" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
+    <text class="ai-label" x="90" y="102.375" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--text-1)"><tspan x="90" dy="-13.75"><tspan fill="accent-dark">58 BC</tspan></tspan><tspan x="90" dy="13.75"><tspan>Defeats Helvetii</tspan></tspan><tspan x="90" dy="13.75"><tspan fill="text-2">&amp; Ariovistus</tspan></tspan></text>
+    <rect id="bg55" class="ai-shape ai-rect" x="340" y="73.75" width="140" height="57.25" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
+    <text class="ai-label" x="410" y="102.375" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--text-1)"><tspan x="410" dy="-13.75"><tspan fill="accent-dark">55 BC</tspan></tspan><tspan x="410" dy="13.75"><tspan>Crosses the Rhine</tspan></tspan><tspan x="410" dy="13.75"><tspan fill="text-2">&amp; invades Britain</tspan></tspan></text>
+    <rect id="bg50" class="ai-shape ai-rect" x="660" y="73.75" width="140" height="57.25" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
+    <text class="ai-label" x="730" y="102.375" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--text-1)"><tspan x="730" dy="-13.75"><tspan fill="accent-dark">50 BC</tspan></tspan><tspan x="730" dy="13.75"><tspan>All of Gaul</tspan></tspan><tspan x="730" dy="13.75"><tspan fill="text-2">pacified</tspan></tspan></text>
+    <rect id="bg57" class="ai-shape ai-rect" x="180" y="209" width="140" height="57.25" fill="var(--background-2)" stroke="var(--foreground-3)" stroke-width="1"/>
+    <text class="ai-label" x="250" y="237.625" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--text-1)"><tspan x="250" dy="-13.75"><tspan fill="accent-dark">57 BC</tspan></tspan><tspan x="250" dy="13.75"><tspan>Subdues</tspan></tspan><tspan x="250" dy="13.75"><tspan fill="text-2">the Belgae</tspan></tspan></text>
+    <rect id="bg52" class="ai-shape ai-rect" x="495" y="212" width="150" height="61" fill="var(--accent-1)" stroke="var(--accent-dark)" stroke-width="2"/>
+    <text class="ai-label" x="570" y="242.5" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="var(--text-light)"><tspan x="570" dy="-15"><tspan font-weight="bold">52 BC</tspan></tspan><tspan x="570" dy="15"><tspan>Siege of Alesia</tspan></tspan><tspan x="570" dy="15"><tspan font-size="9.600000000000001" fill="accent-light">Vercingetorix surrenders</tspan></tspan></text>
   </g>
 </svg>

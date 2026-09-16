@@ -35,14 +35,16 @@ template "ext" (name: "External") {
 
 group diagram {
     // Background zones (drawn first = behind)
-    rect app_bg [width: 580, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15]
-    text "Application Layer" app_label [font_size: 12, fill: accent-dark]
+    // Zone titles ride on their zone: `label_position: above` keeps them
+    // clear of the contents with no offset to guess.
+    rect app_bg [width: 580, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15,
+                 label: "Application Layer", label_position: above, align: start, label_fill: accent-dark, font_size: 12]
 
-    rect async_bg [width: 460, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10]
-    text "Async / Real-time" async_label [font_size: 12, fill: accent-dark]
+    rect async_bg [width: 460, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10,
+                   label: "Async / Real-time", label_position: above, align: start, label_fill: accent-dark, font_size: 12]
 
-    rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15]
-    text "Data Layer" data_label [font_size: 12, fill: secondary-dark]
+    rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15,
+                  label: "Data Layer", label_position: above, align: start, label_fill: secondary-dark, font_size: 12]
 
     // Client
     rect browser [width: 160, height: 46, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "Browser"]
@@ -59,16 +61,13 @@ group diagram {
     svc channels [name: "Django Channels"]
 
     // Data layer
-    store postgres [name: "PostgreSQL"]
+    store postgres [name: "PostgreSQL<br><small>+ PostGIS</small>"]
     store redis [name: "Redis"]
     store minio [name: "MinIO / S3"]
 
     // External / Auth
     ext keycloak [name: "OAuth2 / OIDC"]
     ext sentry [name: "Sentry"]
-
-    // PostGIS sub-label
-    text "+ PostGIS" postgis_label [font_size: 10, fill: secondary-dark]
 
     // Via points for routing Django data connections around async layer
     circle via_pg [size: 1, opacity: 0]
@@ -93,8 +92,6 @@ constrain nginx.center_y = 150
 // App layer background centered on title
 constrain app_bg.center_x = 245
 constrain app_bg.center_y = 280
-constrain app_label.center_x = app_bg.center_x
-constrain app_label.bottom = app_bg.bottom - 4
 
 // Angular and Django side by side in app layer
 constrain angular.center_x = 30
@@ -105,8 +102,6 @@ constrain django.center_y = angular.center_y
 // Async layer background — 100px gap from app layer for routing
 constrain async_bg.center_x = diagram_title.center_x
 constrain async_bg.center_y = 510
-constrain async_label.center_x = async_bg.center_x
-constrain async_label.top = async_bg.top + 6
 
 // Celery and Channels — aligned with data stores to get clean vertical connections
 constrain celery.center_x = 200
@@ -117,8 +112,6 @@ constrain channels.center_y = celery.center_y
 // Data layer background — 80px gap from async for routing
 constrain data_bg.center_x = diagram_title.center_x
 constrain data_bg.center_y = 700
-constrain data_label.center_x = data_bg.center_x
-constrain data_label.bottom = data_bg.bottom - 4
 
 // Data stores spread wider to avoid routing conflicts
 constrain postgres.center_x = angular.center_x
@@ -127,10 +120,6 @@ constrain redis.center_x = diagram_title.center_x
 constrain redis.center_y = postgres.center_y
 constrain minio.center_x = 540
 constrain minio.center_y = postgres.center_y
-
-// PostGIS label below PostgreSQL
-constrain postgis_label.center_x = postgres.center_x
-constrain postgis_label.top = 748
 
 // External services on the right — enough spacing
 constrain keycloak.center_x = 720

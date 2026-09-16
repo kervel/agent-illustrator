@@ -96,10 +96,25 @@ Common modifiers:
     width: <number>         Explicit width
     height: <number>        Explicit height
     gap: <number>           Space between children (layouts)
-    label: "text"           Add label to shape
-    align: start|center|end Text position in its box; cross-axis alignment
-                            of a row's/column's children (left/center/right
-                            are accepted spellings; default start)
+    label: "text"           Words on the shape. Accepts inline markup:
+                              <br>              line break (\n works too)
+                              <b>..</b>         bold
+                              <i>..</i>         italic
+                              <small>..</small> smaller
+                              <span fill=accent-dark>..</span>  coloured run
+                            A bare `<` is literal text, so "a < b" is fine.
+                            The box grows to fit; with an explicit width the
+                            text wraps to it instead of overflowing.
+    label_position: <where> inside (default) | above | below | left | right
+                            An outside label is part of the element's bounds,
+                            so layouts reserve space for it.
+    label_offset: <number>  Gap from the shape's edge for an outside label
+                            (default 6)
+    align: start|center|end Inside: text position in its box. above/below:
+                            which edge the label aligns to. left/right:
+                            top|center|bottom (same spellings). Also the
+                            cross-axis alignment of a row's/column's children
+                            (left/center/right accepted; default start)
     label_fill: <color>     Colour of the label text (fill colours the shape)
     rotation: <degrees>     Rotate element (clockwise)
     class: <name>           Custom CSS class (for external styling)
@@ -242,6 +257,13 @@ EXAMPLES
 Basic shapes:
     rect server [fill: steelblue, label: "Server"]
     circle node [fill: gold, size: 30]
+
+Labels:
+    rect b [label: "Cache"]                        // centred inside
+    rect b [label: "Cache", align: end]            // inside, right-aligned
+    rect b [label: "based_on", label_position: below, align: end]
+    rect card [label: "<b>title</b><br>second line<br><small>note</small>"]
+    rect card [width: 200, label: "a long sentence that wraps to the width"]
 
 Layout:
     row [gap: 20] {
