@@ -11,6 +11,7 @@ pub mod keyframe;
 pub mod lint;
 pub mod routing;
 pub mod solver;
+pub mod text;
 pub mod transform;
 pub mod types;
 
