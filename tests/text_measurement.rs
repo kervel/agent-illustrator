@@ -97,3 +97,45 @@ fn small_runs_measure_narrower_and_do_not_change_line_height() {
     assert!(small.width < normal.width);
     assert!((small.height - normal.height).abs() < 0.001);
 }
+
+use agent_illustrator::{render_with_lint, RenderConfig};
+
+fn render_str(source: &str) -> String {
+    agent_illustrator::render(source).expect("renders")
+}
+
+#[test]
+fn a_label_that_fits_its_box_is_not_reported_as_overflowing() {
+    // The box was sized at 8.0px/char and checked at 8.4px/char, so labels
+    // that fit were reported as straddling. One measurer, one answer.
+    let source = r#"rect card [label: "temporal_mode = correction"]"#;
+    let (_svg, warnings) =
+        render_with_lint(source, RenderConfig::new().with_lint(true)).expect("renders");
+    assert!(
+        warnings.is_empty(),
+        "an auto-sized box must fit its own label, got: {:?}",
+        warnings.iter().map(|w| w.message.clone()).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn a_label_full_of_maths_symbols_does_not_inflate_its_box() {
+    // Each ≤ is 3 UTF-8 bytes; the old sites measured it as 3 characters.
+    let narrow = render_str(r#"rect a [label: "T <= now"]"#);
+    let symbolic = render_str(r#"rect a [label: "T ≤ now"]"#);
+    let width_of = |svg: &str| -> f64 {
+        let at = svg.find("width=\"").expect("a width attribute");
+        svg[at + 7..]
+            .split('"')
+            .next()
+            .unwrap()
+            .parse()
+            .unwrap_or(0.0)
+    };
+    assert!(
+        width_of(&symbolic) <= width_of(&narrow) + 1.0,
+        "≤ should not measure wider than <=: {} vs {}",
+        width_of(&symbolic),
+        width_of(&narrow)
+    );
+}

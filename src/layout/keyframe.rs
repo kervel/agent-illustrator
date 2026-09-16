@@ -512,7 +512,7 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
 
 /// Width a piece of text needs, by the same estimate the layout engine uses.
 pub fn estimated_text_width(text: &str, font_size: f64) -> f64 {
-    (text.len() as f64 * font_size * 0.6).max(20.0)
+    crate::layout::text::measure_str(text, font_size).max(20.0)
 }
 
 /// Size auto-sized text elements for the longest wording they ever take on.

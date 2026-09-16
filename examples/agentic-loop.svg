@@ -2,61 +2,62 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 725 520" data-frames="startup,request,tool_call,execute,return,respond">
   <style>
     :root {
-    --text-2: #666666;
-    --text-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --secondary-1: #ff9800;
     --foreground-2: #666666;
-    --foreground-dark: #1a1a1a;
-    --text-3: #999999;
-    --background-3: #eeeeee;
-    --accent-dark: #1565c0;
-    --background-dark: #333333;
-    --secondary-light: #fff3e0;
-    --background-2: #f5f5f5;
-    --status-warning: #ff9800;
-    --status-success: #4caf50;
-    --foreground-3: #999999;
+    --secondary-3: #ffe0b2;
     --secondary-dark: #e65100;
+    --foreground-1: #333333;
+    --foreground-dark: #1a1a1a;
+    --background-dark: #333333;
+    --text-2: #666666;
     --text-light: #ffffff;
     --secondary-2: #fff3e0;
-    --status-error: #f44336;
+    --secondary-light: #fff3e0;
+    --status-success: #4caf50;
     --foreground-light: #e0e0e0;
-    --accent-1: #2196f3;
-    --text-1: #333333;
-    --background-1: #ffffff;
-    --accent-2: #e3f2fd;
-    --secondary-1: #ff9800;
-    --accent-light: #e3f2fd;
-    --accent-3: #bbdefb;
-    --foreground-1: #333333;
-    --secondary-3: #ffe0b2;
+    --accent-dark: #1565c0;
+    --background-3: #eeeeee;
     --background-light: #ffffff;
+    --foreground-3: #999999;
+    --text-3: #999999;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --accent-1: #2196f3;
+    --background-1: #ffffff;
+    --text-1: #333333;
+    --text-dark: #1a1a1a;
+    --accent-2: #e3f2fd;
+    --background-2: #f5f5f5;
+    --accent-3: #bbdefb;
   }
 
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
 .ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
 .frame-startup {
 }
 .frame-request {
   .kf-req1_env { opacity: 1; }
-  .ai-connection.conn-send_req1 { opacity: 1; }
+  .conn-send_req1 { opacity: 1; }
 }
 .frame-tool_call {
   .kf-resp1_env { opacity: 1; }
-  .ai-connection.conn-recv_resp1 { opacity: 1; }
+  .conn-recv_resp1 { opacity: 1; }
 }
 .frame-execute {
   .kf-exec_env { opacity: 1; }
-  .ai-connection.conn-exec_tool { opacity: 1; }
+  .conn-exec_tool { opacity: 1; }
 }
 .frame-return {
   .kf-req2_env { opacity: 1; }
-  .ai-connection.conn-send_req2 { opacity: 1; }
+  .conn-send_req2 { opacity: 1; }
 }
 .frame-respond {
   .kf-resp2_env { opacity: 1; }
-  .ai-connection.conn-recv_resp2 { opacity: 1; }
+  .conn-recv_resp2 { opacity: 1; }
 }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -172,9 +173,9 @@
     <rect id="resp2_env" class="ai-shape ai-rect" x="20" y="180" width="200" height="80" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2" opacity="0.3"/>
     <text class="ai-label" x="120" y="220" text-anchor="middle" dominant-baseline="middle">text response</text>
   </g>
-  <path class="ai-connection conn-send_req1" d="M210 60 L419.2 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-recv_resp1" d="M430 60 L220.8 60" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-exec_tool" d="M120 95 L120 220 L520 220 L520 334.2" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-send_req2" d="M610 380 L625 380 L625 60 L620.8 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-recv_resp2" d="M520 95 L520 220 L120 220 L120 334.2" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-send_req1 conn-send_req1-base" d="M210 60 L419.2 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-recv_resp1 conn-recv_resp1-base" d="M430 60 L220.8 60" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-exec_tool conn-exec_tool-base" d="M120 95 L120 220 L520 220 L520 334.2" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-send_req2 conn-send_req2-base" d="M610 380 L625 380 L625 60 L620.8 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-recv_resp2 conn-recv_resp2-base" d="M520 95 L520 220 L120 220 L120 334.2" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>

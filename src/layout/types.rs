@@ -1051,9 +1051,9 @@ fn collect_leaf_bounds(element: &ElementLayout, bounds: &mut Option<BoundingBox>
     }
 }
 
-/// Estimate the width of a text label (approximate: ~7px per character for default font)
+/// Estimate the width of a text label.
 fn estimate_label_width(text: &str) -> f64 {
-    text.len() as f64 * 7.0
+    crate::layout::text::measure_str(text, 14.0)
 }
 
 /// Expand bounds to include a label, accounting for text anchor

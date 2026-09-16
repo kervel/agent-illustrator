@@ -976,7 +976,7 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
         .as_ref()
         .and_then(|s| s.font_size)
         .unwrap_or(14.0);
-    let width = label.text.len() as f64 * (font_size * 0.6);
+    let width = crate::layout::text::measure_str(&label.text, font_size);
     let height = font_size;
 
     let x = match label.anchor {

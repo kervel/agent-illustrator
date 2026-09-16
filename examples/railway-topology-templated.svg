@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-178 -35 584.5 362">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-149.356 -35 555.856 362">
   <style>
     :root {
-    --secondary-2: #fff3e0;
-    --foreground-3: #999999;
+    --background-3: #eeeeee;
+    --background-light: #ffffff;
     --background-2: #f5f5f5;
     --accent-1: #2196f3;
-    --accent-3: #bbdefb;
-    --background-3: #eeeeee;
-    --text-light: #ffffff;
-    --secondary-light: #fff3e0;
-    --text-dark: #1a1a1a;
-    --accent-light: #e3f2fd;
-    --foreground-2: #666666;
-    --background-light: #ffffff;
-    --text-1: #333333;
-    --status-warning: #ff9800;
-    --text-3: #999999;
-    --background-1: #ffffff;
-    --background-dark: #333333;
+    --accent-2: #e3f2fd;
     --secondary-1: #ff9800;
+    --foreground-2: #666666;
+    --secondary-2: #fff3e0;
+    --text-light: #ffffff;
+    --text-1: #333333;
+    --text-dark: #1a1a1a;
+    --text-3: #999999;
+    --accent-light: #e3f2fd;
+    --status-success: #4caf50;
+    --background-1: #ffffff;
+    --secondary-3: #ffe0b2;
+    --accent-dark: #1565c0;
+    --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-error: #f44336;
+    --accent-3: #bbdefb;
+    --status-warning: #ff9800;
+    --text-2: #666666;
+    --background-dark: #333333;
+    --foreground-1: #333333;
     --foreground-light: #e0e0e0;
     --foreground-dark: #1a1a1a;
-    --secondary-dark: #e65100;
-    --accent-2: #e3f2fd;
-    --foreground-1: #333333;
-    --secondary-3: #ffe0b2;
-    --status-success: #4caf50;
-    --status-error: #f44336;
-    --text-2: #666666;
-    --accent-dark: #1565c0;
+    --foreground-3: #999999;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -136,8 +136,8 @@
         </g>
       </g>
       <g id="micro_label" class="ai-container">
-        <text id="micro_title" class="ai-shape ai-text" x="-103.6" y="43" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Micro</text>
-        <text class="ai-shape ai-text" x="-118" y="63" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Detailed tracks</text>
+        <text id="micro_title" class="ai-shape ai-text" x="-84.696" y="43" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Micro</text>
+        <text class="ai-shape ai-text" x="-89.35600000000001" y="63" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Detailed tracks</text>
       </g>
     </g>
     <g id="meso" class="ai-container">
@@ -164,8 +164,8 @@
         </g>
       </g>
       <g id="meso_label" class="ai-container">
-        <text id="meso_title" class="ai-shape ai-text" x="-97.6" y="144" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Meso</text>
-        <text class="ai-shape ai-text" x="-96.39999999999999" y="164" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">OPs + Tracks</text>
+        <text id="meso_title" class="ai-shape ai-text" x="-84.706" y="144" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Meso</text>
+        <text class="ai-shape ai-text" x="-83.02" y="164" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">OPs + Tracks</text>
       </g>
     </g>
     <g id="macro" class="ai-container">
@@ -176,14 +176,14 @@
         <text class="ai-label" x="318" y="242" text-anchor="middle" dominant-baseline="middle">OP 2</text>
       </g>
       <g id="macro_label" class="ai-container">
-        <text id="macro_title" class="ai-shape ai-text" x="-103.6" y="234" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Macro</text>
-        <text class="ai-shape ai-text" x="-103.6" y="254" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Nodes &amp; Lines</text>
+        <text id="macro_title" class="ai-shape ai-text" x="-88.036" y="234" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Macro</text>
+        <text class="ai-shape ai-text" x="-88.036" y="254" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--text-2)">Nodes &amp; Lines</text>
       </g>
     </g>
   </g>
   <text class="ai-label" x="184" y="232" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">Section of Line</text>
-  <text class="ai-label" x="-48.599999999999994" y="101.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Aggregation</text>
-  <text class="ai-label" x="-45" y="197" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Simplification</text>
+  <text class="ai-label" x="-38.094" y="101.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Aggregation</text>
+  <text class="ai-label" x="-37.763999999999996" y="197" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Simplification</text>
   <path class="ai-connection" d="M31 28 L71 28" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M77 28 L291 28" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M297 28 L337 28" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
@@ -201,6 +201,6 @@
   <path class="ai-connection" d="M80.81656549744979 131.38748608236259 L112.18343450255021 172.61251391763741" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M256.0978824663912 172.85549792324457 L296.9021175336088 131.14450207675543" fill="none" stroke="var(--foreground-3)" stroke-width="2"/>
   <path class="ai-connection" d="M75 242 L293 242" fill="none" stroke="var(--accent-1)" stroke-width="3"/>
-  <path class="ai-connection" d="M-58.599999999999994 69 L-58.599999999999994 126.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M-55 170 L-55 216.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-48.094 69 L-48.094 126.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-47.763999999999996 170 L-47.763999999999996 216.8" fill="none" stroke="var(--foreground-3)" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

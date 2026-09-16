@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 415 574.5">
   <style>
     :root {
-    --status-success: #4caf50;
-    --background-3: #eeeeee;
-    --foreground-2: #666666;
+    --secondary-3: #ffe0b2;
+    --secondary-light: #fff3e0;
+    --status-warning: #ff9800;
     --accent-3: #bbdefb;
-    --secondary-2: #fff3e0;
-    --background-dark: #333333;
+    --text-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --secondary-dark: #e65100;
+    --background-2: #f5f5f5;
+    --foreground-2: #666666;
     --accent-1: #2196f3;
-    --foreground-3: #999999;
+    --status-error: #f44336;
+    --text-1: #333333;
     --accent-light: #e3f2fd;
-    --foreground-light: #e0e0e0;
-    --background-1: #ffffff;
+    --background-light: #ffffff;
     --text-2: #666666;
     --text-light: #ffffff;
-    --text-dark: #1a1a1a;
-    --secondary-3: #ffe0b2;
-    --status-warning: #ff9800;
-    --foreground-dark: #1a1a1a;
-    --foreground-1: #333333;
-    --background-light: #ffffff;
-    --text-3: #999999;
-    --secondary-1: #ff9800;
     --accent-2: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --background-3: #eeeeee;
+    --secondary-2: #fff3e0;
+    --status-success: #4caf50;
+    --foreground-3: #999999;
+    --background-1: #ffffff;
+    --background-dark: #333333;
+    --foreground-1: #333333;
+    --text-dark: #1a1a1a;
     --accent-dark: #1565c0;
-    --secondary-dark: #e65100;
-    --status-error: #f44336;
-    --background-2: #f5f5f5;
-    --secondary-light: #fff3e0;
-    --text-1: #333333;
+    --secondary-1: #ff9800;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -122,11 +122,11 @@
   <rect id="c" class="ai-shape ai-rect" x="70" y="80" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
   <g id="srv1" class="ai-container">
     <rect id="srv1_body" class="ai-shape ai-rect" x="0" y="180" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
-    <text id="srv1_txt" class="ai-shape ai-text" x="39.2" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+    <text id="srv1_txt" class="ai-shape ai-text" x="37.664" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
   </g>
   <g id="srv2" class="ai-container">
     <rect id="srv2_body" class="ai-shape ai-rect" x="180" y="180" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
-    <text id="srv2_txt" class="ai-shape ai-text" x="219.2" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+    <text id="srv2_txt" class="ai-shape ai-text" x="217.664" y="250" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
   </g>
   <g id="alice" class="ai-container">
     <circle id="alice_head" class="ai-shape ai-circle" cx="15" cy="348" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>

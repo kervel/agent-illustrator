@@ -34,6 +34,7 @@ use crate::parser::ast::*;
 use super::config::LayoutConfig;
 use super::error::LayoutError;
 use super::types::*;
+use super::text::measure_str;
 
 // ============================================
 // Constraint Classification (Feature 010)
@@ -1026,12 +1027,11 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         return (s, s);
     }
 
-    // Calculate minimum width needed to fit label (if present)
+    // Minimum width needed to fit the label, measured the same way lint
+    // checks it.
     let label_min_width = extract_label(&shape.modifiers).map(|text| {
-        // Approximate: ~8px per character for 14px font, plus 20px padding
-        let char_width = 8.0;
-        let padding = 20.0;
-        text.len() as f64 * char_width + padding
+        let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
+        measure_str(&text, font_size) + 2.0 * LABEL_INSET
     });
 
     // If only width is provided, use it for width and default for height
@@ -1052,7 +1052,7 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
             // Use font_size from modifiers if available, otherwise default to 14px
             let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
             // Approximate width: ~0.6 * font_size per character
-            let estimated_width = content.len() as f64 * font_size * 0.6;
+            let estimated_width = measure_str(content, font_size);
             // Height is approximately the font size
             (estimated_width.max(20.0), font_size)
         }
@@ -1963,7 +1963,7 @@ fn extract_string_list(modifiers: &[Spanned<StyleModifier>], name: &str) -> Opti
 
 /// Build a left-aligned text element for a grid gutter label.
 fn grid_label_element(text: &str, x: f64, y: f64) -> ElementLayout {
-    let w = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+    let w = measure_str(text, GRID_LABEL_FONT);
     let bounds = BoundingBox::new(x, y, w.max(1.0), GRID_LABEL_FONT);
     let styles = ResolvedStyles {
         font_size: Some(GRID_LABEL_FONT),
@@ -2102,7 +2102,7 @@ fn layout_grid(
         .as_ref()
         .map(|rl| {
             rl.iter()
-                .map(|s| s.len() as f64 * GRID_LABEL_FONT * 0.6)
+                .map(|s| measure_str(s, GRID_LABEL_FONT))
                 .fold(0.0_f64, f64::max)
                 + 6.0
         })
@@ -2163,14 +2163,14 @@ fn layout_grid(
     // Column labels (centered above each column), row labels (right-aligned left of each row).
     if let Some(cl) = &col_labels {
         for (c, text) in cl.iter().enumerate().take(cols) {
-            let tw = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+            let tw = measure_str(text, GRID_LABEL_FONT);
             let bx = cell_x(c) + (cell_w - tw) / 2.0;
             out.push(grid_label_element(text, bx, position.y + pad));
         }
     }
     if let Some(rl) = &row_labels {
         for (r, text) in rl.iter().enumerate().take(rows) {
-            let tw = text.len() as f64 * GRID_LABEL_FONT * 0.6;
+            let tw = measure_str(text, GRID_LABEL_FONT);
             let bx = origin_x - 6.0 - tw;
             let by = cell_y(r) + (cell_h - GRID_LABEL_FONT) / 2.0;
             out.push(grid_label_element(text, bx, by));
