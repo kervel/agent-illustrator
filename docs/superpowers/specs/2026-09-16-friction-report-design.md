@@ -445,11 +445,38 @@ story, but they do not depend on each other mechanically.
 ## Corpus
 
 The reporter is holding their 8-file deck unmodified as a pre-fix corpus, at
-`…/worktrees/mr944/presentations/76-bitemporality/diagrams/` on this machine
-(uncommitted, so it exists nowhere else). Baseline against `8277305`:
-overlap 124, label 33, 8/8 rendering. Those numbers are the acceptance check
-for Parts 1 and 2 — overlap should fall by roughly 100 and label by 8, with
-the other 25 label warnings surviving untouched.
+`…/worktrees/mr944/presentations/76-bitemporality/diagrams/` on this machine.
+Baseline against `8277305`: overlap 124, label 33, 8/8 rendering. Recorded,
+with the per-container split and a reproduction script, in `friction-corpus.md`
+and `friction-corpus-check.sh` at the repo root.
+
+**That corpus is perishable and this spec does not depend on it.** It lives in
+an uncommitted git worktree on one machine; it is corroboration, not a test.
+The two idioms that produce ~100 of the 124 overlap warnings are small enough
+to state outright, and Part 2's committed fixtures are built from these rather
+than from the deck:
+
+    // idiom 1 — an invisible rect fixing the canvas extent (~62 warnings)
+    rect canvas [width: 400, height: 200, fill: none, stroke: none]
+    constrain canvas.left = 0
+    constrain canvas.top = 0
+    // ...every visible element then "overlaps" it
+
+    // idiom 2 — invisible tick anchors on an axis (~41 warnings)
+    rect axis [width: 400, height: 2, fill: foreground-1]
+    rect tick [width: 1, height: 1, fill: none, stroke: none]
+    constrain tick.center_x = 120
+    constrain tick.center_y = axis.center_y
+    // the tick is defined to sit on the axis; that is not a collision
+
+Both are `paints_nothing` on one side. A fixture pairing each with a genuine
+visible-on-visible overlap proves the exemption is not over-broad, which is the
+property the deck's surviving 25 `label` warnings also check.
+
+The deck remains the better end-to-end check while it exists — 8 real files
+beat any fixture for catching an exemption that is subtly too wide — so run
+`friction-corpus-check.sh` if it is still there, and do not block on it if it
+is not.
 
 ## Global constraints
 
