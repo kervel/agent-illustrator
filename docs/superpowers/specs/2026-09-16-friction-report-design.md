@@ -424,6 +424,62 @@ position; `disable` of an unknown name is a hard error.
 
 ---
 
+## Part 7 — The examples practise what the linter preaches
+
+**The defect:** agents read examples more than they read docs. Fourteen of the
+shipped `examples/*.ail` emit 74 lint warnings between them:
+
+    24  connection            11  redundant-constant     10  overlap
+     9  label                  8  reducible-bend          3  label-overflow
+     3  contrast               3  alignment               2  over-constrained
+     1  missing-anchor
+
+The reporter measured `connection`, `redundant-constant`, `label`,
+`reducible-bend`, `label-overflow` and `missing-anchor` as **100% signal**
+across their 8 files — zero false positives, every one a real defect. That is
+56 of these 74.
+
+Two are broken renders rather than style nits:
+
+- `mosfet-driver.ail` positions a separate text element inside
+  `load_motor_body` — the precise habit the box-label work was meant to
+  retire, still shipped as an example.
+- `railway-junction-direct.ail` puts three 53px labels on 10px shapes,
+  overflowing both dimensions, and additionally straddles five element edges.
+
+The box-label work updated three examples and never audited the rest. An agent
+copying `mosfet-driver.ail` learns the idiom that Part 1 and the
+`check_hand_placed_labels` rule both exist to eliminate.
+
+**The change:** drive the example corpus to zero warnings in the six
+high-signal categories, and explain every remaining one.
+
+- `label` / `label-overflow` → rewrite onto `label:` with `<br>` and
+  `label_position`, which is what the rule already tells the author to do.
+- `redundant-constant` → relate the elements instead of repeating a literal,
+  which is the better teaching example anyway.
+- `connection`, `reducible-bend`, `missing-anchor` → fix the routing.
+- `overlap` → recount **after** Part 2. Some are the invisible-element false
+  positive Part 2 removes; whatever survives is real and gets fixed.
+- `contrast`, `alignment`, `over-constrained` → judge individually; the
+  reporter had no data on these three, so they get looked at rather than
+  assumed.
+
+**This part runs last and is measured, not estimated.** The counts above are
+against `8277305`; Parts 1, 2 and 5 all change what the linter reports, so the
+audit re-runs on top of them rather than working from this table.
+
+**Examples.md** gains a markup example. It currently shows `label_position`
+but no `<br>`, `<small>` or `<span fill=>`, so the multi-line card — the single
+most useful thing the label work added, and the one the reporter independently
+confirmed is not lossy for real content — appears in no example file an agent
+would read.
+
+**Test:** a test that lints every `examples/*.ail` and fails on any warning in
+the six high-signal categories, so the corpus cannot rot again. Categories with
+known false-positive rates stay out of the gate until Part 2 has earned them a
+place in it.
+
 ## Ordering
 
 **Part 1 goes first, and not for mechanical reasons.** The
@@ -436,9 +492,13 @@ not trail it any longer than necessary.
 
 Then 2, 3, 5 and 6, which are independent of each other and of 1.
 
-4 (`include`) is last: it is the only grammar change of real size, the only one
-that touches the CLI's file handling, and the only one whose tests need a
-fixture tree on disk. 6 pairs naturally with 4 — re-pinning a shared part is
+4 (`include`) is last of the code parts: it is the only grammar change of real
+size, the only one that touches the CLI's file handling, and the only one whose
+tests need a fixture tree on disk.
+
+7 (the example audit) runs after everything, because Parts 1, 2 and 5 all
+change what the linter reports and auditing before them would be measuring a
+moving target. 6 pairs naturally with 4 — re-pinning a shared part is
 only useful once `include` exists — so 6 immediately before 4 gives the best
 story, but they do not depend on each other mechanically.
 
