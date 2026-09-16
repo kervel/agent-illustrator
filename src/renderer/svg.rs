@@ -99,7 +99,11 @@ impl SvgBuilder {
             return;
         }
         let mut css = String::from(":root {\n");
-        for (token, value) in &stylesheet.colors {
+        // Sorted, not HashMap order: an unsorted block makes every re-render
+        // produce a different file, which buries real changes in review noise.
+        let mut tokens: Vec<_> = stylesheet.colors.iter().collect();
+        tokens.sort_by(|a, b| a.0.cmp(b.0));
+        for (token, value) in tokens {
             css.push_str(&format!("    --{}: {};\n", token, value));
         }
         css.push_str("  }\n");
