@@ -1085,6 +1085,11 @@ pub struct LayoutResult {
     pub connections: Vec<ConnectionLayout>,
     /// Bounding box containing all elements
     pub bounds: BoundingBox,
+    /// `(element, property)` pairs where a later `constrain` superseded an
+    /// earlier one. Overriding is allowed but never silent — lint reports it,
+    /// because a silent last-wins hides a mistake as effectively as the hard
+    /// error it replaced.
+    pub overridden_constraints: Vec<(String, String)>,
 }
 
 impl LayoutResult {
@@ -1095,6 +1100,7 @@ impl LayoutResult {
             root_elements: vec![],
             connections: vec![],
             bounds: BoundingBox::zero(),
+            overridden_constraints: vec![],
         }
     }
 

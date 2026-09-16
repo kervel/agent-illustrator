@@ -103,7 +103,7 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
                 }
             }
         }
-        Statement::Constraint(_) | Statement::Constrain(_) => {
+        Statement::Constraint(_) | Statement::Constrain(_) | Statement::DisableConstraint(_) => {
             // Constraints don't define new identifiers
         }
         Statement::TemplateDecl(t) => {
@@ -146,6 +146,9 @@ fn validate_refs_in_statement(
                 }
             }
         }
+        // Names a constraint, not an element; validated in the engine where
+        // the set of named constraints is known.
+        Statement::DisableConstraint(_) => {}
         Statement::Constraint(c) => {
             if !defined.contains(&c.subject.node.0) {
                 return Err(LayoutError::UndefinedIdentifier {

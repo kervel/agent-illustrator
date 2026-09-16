@@ -292,7 +292,7 @@ fn collect_element_template_mapping(
         // These statement types don't have element IDs or children to process
         Statement::Connection(_)
         | Statement::Constraint(_)
-        | Statement::Constrain(_)
+        | Statement::Constrain(_) | Statement::DisableConstraint(_)
         | Statement::TemplateDecl(_)
         | Statement::TemplateInstance(_)
         | Statement::Export(_)
@@ -764,6 +764,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
     // First validate references
     super::validate_references(doc)?;
     validate_label_markup(&doc.statements)?;
+    validate_disabled_constraints(doc)?;
 
     let mut result = LayoutResult::new();
     let mut position = Point::new(0.0, 0.0);
@@ -773,7 +774,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
             // Skip connections, constraints, constrain, and standalone labels at document root
             Statement::Connection(_)
             | Statement::Constraint(_)
-            | Statement::Constrain(_)
+            | Statement::Constrain(_) | Statement::DisableConstraint(_)
             | Statement::Label(_)
             | Statement::Keyframe(_) => continue,
             _ => {
@@ -899,7 +900,7 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // Layout the inner element - Label positioning is handled by the parent container
             layout_statement(inner, position, config)
         }
-        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) => {
+        Statement::Connection(_) | Statement::Constraint(_) | Statement::Constrain(_) | Statement::DisableConstraint(_) => {
             // These are handled separately
             unreachable!("Connections and constraints should be filtered out")
         }
@@ -1859,7 +1860,7 @@ fn layout_row(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
-                | Statement::Constrain(_)
+                | Statement::Constrain(_) | Statement::DisableConstraint(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -1913,7 +1914,7 @@ fn layout_column(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
-                | Statement::Constrain(_)
+                | Statement::Constrain(_) | Statement::DisableConstraint(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -2059,7 +2060,7 @@ fn grid_filtered_children(layout: &LayoutDecl) -> Vec<&Spanned<Statement>> {
                 c.node,
                 Statement::Connection(_)
                     | Statement::Constraint(_)
-                    | Statement::Constrain(_)
+                    | Statement::Constrain(_) | Statement::DisableConstraint(_)
                     | Statement::Label(_)
             ) && !has_role_label(&c.node)
         })
@@ -2270,7 +2271,7 @@ fn layout_stack(
             child.node,
             Statement::Connection(_)
                 | Statement::Constraint(_)
-                | Statement::Constrain(_)
+                | Statement::Constrain(_) | Statement::DisableConstraint(_)
                 | Statement::Label(_)
         ) || has_role_label(&child.node)
         {
@@ -2760,6 +2761,11 @@ pub fn resolve_constrain_statements_two_phase(
     // Collect user constraints (constrain statements)
     // Anchor-based constraints are automatically deferred by the collector (Feature 011)
     collect_constrain_statements(&doc.statements, &mut collector);
+    // A later statement supersedes an earlier one on the same element+property.
+    let overridden = drop_superseded_user_constraints(&mut collector.constraints);
+    result
+        .overridden_constraints
+        .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
 
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
@@ -3007,6 +3013,11 @@ pub fn resolve_constrain_statements(
     // Collect user constraints (constrain statements)
     // Anchor-based constraints are automatically deferred by the collector (Feature 011)
     collect_constrain_statements(&doc.statements, &mut collector);
+    // A later statement supersedes an earlier one on the same element+property.
+    let overridden = drop_superseded_user_constraints(&mut collector.constraints);
+    result
+        .overridden_constraints
+        .extend(overridden.into_iter().map(|(e, p)| (e, property_name(p))));
 
     // Also collect x/y modifiers from shapes as position constraints
     collect_position_constraints_from_shapes(&doc.statements, &mut collector);
@@ -3488,6 +3499,88 @@ fn update_element_anchors_recursive(elem: &mut ElementLayout, name: &str, anchor
 /// Extract the target (element_id, property) from a constraint
 /// For Equal constraints, we extract the left-hand side variable
 /// For Midpoint constraints, we extract the target variable
+/// Drop user constraints that a later statement supersedes.
+///
+/// `constrain a.center_x = 100` followed by `constrain a.center_x = 300` is an
+/// author restating their intent, and it must mean the same thing whatever is
+/// on the right-hand side. It did not: a literal RHS became a REQUIRED
+/// equality and a cross-reference a STRONG one, so the first pair was
+/// unsatisfiable and the second silently last-wins.
+///
+/// Resolving it here rather than by demoting REQUIRED keeps the solve
+/// deterministic. Two equal-strength constraints leave Cassowary free to
+/// satisfy either, and with kasuari's internal hashing that is how
+/// nondeterministic output gets in. One constraint per (element, property)
+/// reaches the solver, so there is no tie to break.
+///
+/// Only exact (element, property) pairs are matched. `center_x = 100` against
+/// `left = 0` + `right = 50` still conflicts, because those are different
+/// properties colliding through derived expressions — a genuine
+/// over-constraint, and worth reporting.
+fn drop_superseded_user_constraints(
+    constraints: &mut Vec<super::solver::LayoutConstraint>,
+) -> Vec<(String, super::solver::LayoutProperty)> {
+    use super::solver::ConstraintOrigin;
+    use std::collections::HashMap;
+
+    // Only *equalities* replace one another. Inequalities accumulate by
+    // nature: `contains` emits four per contained element, all targeting the
+    // container, and dropping all but the last would leave a container
+    // wrapping only its final child.
+    fn replaces(c: &super::solver::LayoutConstraint) -> bool {
+        use super::solver::LayoutConstraint as C;
+        matches!(c, C::Fixed { .. } | C::Equal { .. } | C::Midpoint { .. })
+    }
+
+    // Last index claiming each (element, property), among user constraints.
+    let mut last_claim: HashMap<(String, super::solver::LayoutProperty), usize> = HashMap::new();
+    for (i, c) in constraints.iter().enumerate() {
+        if c.source().origin != ConstraintOrigin::UserDefined || !replaces(c) {
+            continue;
+        }
+        if let Some(key) = get_constraint_target_var(c) {
+            last_claim.insert(key, i);
+        }
+    }
+
+    let mut overridden = Vec::new();
+    let mut keep = Vec::with_capacity(constraints.len());
+    for (i, c) in constraints.drain(..).enumerate() {
+        let superseded = c.source().origin == ConstraintOrigin::UserDefined
+            && replaces(&c)
+            && get_constraint_target_var(&c)
+                .and_then(|k| last_claim.get(&k).map(|last| (*last != i, k)))
+                .map(|(dropped, k)| {
+                    if dropped {
+                        overridden.push(k);
+                    }
+                    dropped
+                })
+                .unwrap_or(false);
+        if !superseded {
+            keep.push(c);
+        }
+    }
+    *constraints = keep;
+    overridden
+}
+
+/// Spell a layout property the way an author writes it in `constrain`.
+fn property_name(p: super::solver::LayoutProperty) -> String {
+    use super::solver::LayoutProperty as P;
+    match p {
+        P::X => "x",
+        P::Y => "y",
+        P::Width => "width",
+        P::Height => "height",
+        P::CenterX => "center_x",
+        P::CenterY => "center_y",
+        P::Right => "right",
+        P::Bottom => "bottom",
+    }
+    .to_string()
+}
+
 fn get_constraint_target_var(
     constraint: &super::solver::LayoutConstraint,
 ) -> Option<(String, super::solver::LayoutProperty)> {
@@ -3678,20 +3771,87 @@ fn collect_bounds_updates(elem: &ElementLayout, updates: &mut Vec<(String, Bound
 }
 
 /// Collect only constrain statements (not intrinsics or layout constraints)
+/// Names released by top-level `disable` statements, anywhere in the tree.
+fn collect_disabled_constraint_names(stmts: &[Spanned<Statement>], out: &mut HashSet<String>) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::DisableConstraint(names) => {
+                out.extend(names.iter().map(|n| n.node.0.clone()));
+            }
+            Statement::Layout(l) => collect_disabled_constraint_names(&l.children, out),
+            Statement::Group(g) => collect_disabled_constraint_names(&g.children, out),
+            _ => {}
+        }
+    }
+}
+
+/// Every name a `constrain ... as <name>` introduces.
+fn collect_constraint_names(stmts: &[Spanned<Statement>], out: &mut HashSet<String>) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constrain(c) => {
+                if let Some(n) = &c.name {
+                    out.insert(n.node.0.clone());
+                }
+            }
+            Statement::Layout(l) => collect_constraint_names(&l.children, out),
+            Statement::Group(g) => collect_constraint_names(&g.children, out),
+            _ => {}
+        }
+    }
+}
+
+/// A top-level `disable` naming nothing is a typo, and silently doing nothing
+/// is the failure mode this whole change exists to remove.
+fn validate_disabled_constraints(doc: &Document) -> Result<(), LayoutError> {
+    let mut disabled = HashSet::new();
+    collect_disabled_constraint_names(&doc.statements, &mut disabled);
+    if disabled.is_empty() {
+        return Ok(());
+    }
+    let mut known = HashSet::new();
+    collect_constraint_names(&doc.statements, &mut known);
+    let mut unknown: Vec<_> = disabled.difference(&known).cloned().collect();
+    unknown.sort();
+    if let Some(name) = unknown.first() {
+        let mut suggestions: Vec<String> = known.iter().cloned().collect();
+        suggestions.sort();
+        return Err(LayoutError::undefined(name, 0..0, suggestions));
+    }
+    Ok(())
+}
+
 fn collect_constrain_statements(
     stmts: &[Spanned<Statement>],
     collector: &mut super::collector::ConstraintCollector,
 ) {
+    let mut disabled = HashSet::new();
+    collect_disabled_constraint_names(stmts, &mut disabled);
+    collect_constrain_statements_inner(stmts, collector, &disabled);
+}
+
+fn collect_constrain_statements_inner(
+    stmts: &[Spanned<Statement>],
+    collector: &mut super::collector::ConstraintCollector,
+    disabled: &HashSet<String>,
+) {
     for stmt in stmts {
         match &stmt.node {
             Statement::Constrain(c) => {
+                // A released pin never reaches the solver, so the element is
+                // free to be re-pinned — or to hold its laid-out position.
+                if let Some(n) = &c.name {
+                    if disabled.contains(&n.node.0) {
+                        continue;
+                    }
+                }
                 collector.collect_constrain_expr(&c.expr, &stmt.span);
             }
             Statement::Layout(l) => {
-                collect_constrain_statements(&l.children, collector);
+                collect_constrain_statements_inner(&l.children, collector, disabled);
             }
             Statement::Group(g) => {
-                collect_constrain_statements(&g.children, collector);
+                collect_constrain_statements_inner(&g.children, collector, disabled);
             }
             _ => {}
         }

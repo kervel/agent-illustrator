@@ -146,6 +146,9 @@ pub enum Statement {
     AnchorDecl(AnchorDecl),
     /// Keyframe declaration: `keyframe "name" { show/hide/transform ... }` (Feature 011)
     Keyframe(KeyframeDecl),
+    /// Top-level `disable a_home, b_home`: release named constraints written
+    /// elsewhere, for a file composing a shared part it does not own.
+    DisableConstraint(Vec<Spanned<Identifier>>),
 }
 
 /// Shape declaration

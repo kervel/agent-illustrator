@@ -64,11 +64,12 @@ pub enum LintCategory {
     OverConstrained,
     LabelOverflow,
     UnknownModifier,
+    OverriddenConstraint,
 }
 
 impl LintCategory {
     /// Every category, in the order they are documented.
-    pub const ALL: [LintCategory; 14] = [
+    pub const ALL: [LintCategory; 15] = [
         LintCategory::Overlap,
         LintCategory::Containment,
         LintCategory::Label,
@@ -83,6 +84,7 @@ impl LintCategory {
         LintCategory::OverConstrained,
         LintCategory::LabelOverflow,
         LintCategory::UnknownModifier,
+        LintCategory::OverriddenConstraint,
     ];
 
     /// Parse a category from its kebab-case name (as printed by `Display`).
@@ -119,6 +121,7 @@ impl fmt::Display for LintCategory {
             LintCategory::OverConstrained => write!(f, "over-constrained"),
             LintCategory::LabelOverflow => write!(f, "label-overflow"),
             LintCategory::UnknownModifier => write!(f, "unknown-modifier"),
+            LintCategory::OverriddenConstraint => write!(f, "overridden-constraint"),
         }
     }
 }
@@ -172,6 +175,7 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_label_markup(doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
     check_unknown_colors(doc, &mut warnings);
+    check_overridden_constraints(result, &mut warnings);
     dedup_warnings(&mut warnings);
     warnings
 }
@@ -1734,6 +1738,38 @@ fn collect_constant_constraints(
     }
 }
 
+/// Report a `constrain` that a later statement superseded.
+///
+/// Overriding is allowed — an author restating their intent is legitimate, and
+/// it is how a file composing a shared part re-pins something in it. But a
+/// silent override hides a mistake as effectively as the hard error it
+/// replaced, so it is always reported.
+fn check_overridden_constraints(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    // The superseded constraint never reached the solver, so `over-constrained`
+    // reporting it as "violated" is describing a statement that was
+    // deliberately dropped. The override warning below says the useful version
+    // of the same thing, and naming one line twice is what taught authors to
+    // stop reading lint output.
+    for (element, property) in &result.overridden_constraints {
+        let qualified = format!("{element}.{property}");
+        warnings.retain(|w| {
+            w.category != LintCategory::OverConstrained || !w.message.contains(&qualified)
+        });
+    }
+
+    for (element, property) in &result.overridden_constraints {
+        warnings.push(LintWarning {
+            category: LintCategory::OverriddenConstraint,
+            message: format!(
+                "a later constrain on \"{element}\".{property} overrides an earlier one; \
+                 the last statement wins — delete the earlier one if that was intended"
+            ),
+            frames: vec![],
+            pair: None,
+        });
+    }
+}
+
 fn check_redundant_constants(doc: &Document, warnings: &mut Vec<LintWarning>) {
     let mut constants: Vec<(String, String, f64)> = Vec::new();
     collect_constant_constraints(&doc.statements, &mut constants);
@@ -3107,6 +3143,7 @@ mod tests {
             root_elements: vec![],
             connections,
             bounds: BoundingBox::zero(),
+            overridden_constraints: vec![],
         }
     }
 
@@ -3240,6 +3277,7 @@ mod tests {
             connections: vec![],
             elements: HashMap::new(),
             bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+            overridden_constraints: vec![],
         };
         let mut warnings = Vec::new();
         check_label_overflow(&result, &mut warnings);
@@ -3257,6 +3295,7 @@ mod tests {
             connections: vec![],
             elements: HashMap::new(),
             bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+            overridden_constraints: vec![],
         };
         let mut warnings = Vec::new();
         check_label_overflow(&result, &mut warnings);
@@ -3273,6 +3312,7 @@ mod tests {
             connections: vec![],
             elements: HashMap::new(),
             bounds: BoundingBox::new(0.0, 0.0, 100.0, 100.0),
+            overridden_constraints: vec![],
         };
         let mut warnings = Vec::new();
         check_label_overflow(&result, &mut warnings);
