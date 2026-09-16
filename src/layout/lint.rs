@@ -389,12 +389,6 @@ fn has_visible_fill(elem: &ElementLayout) -> bool {
 
 /// True when one of the pair is a bare region wholly containing the other.
 fn is_drawn_inside_a_bare_region(a: &ElementLayout, b: &ElementLayout) -> bool {
-    // Something that paints nothing cannot collide with anything, whether or
-    // not it contains the other party: an invisible tick sitting ON a rule is
-    // the idiom, not a defect.
-    if paints_nothing(a) || paints_nothing(b) {
-        return true;
-    }
     (is_bare_container(a) && a.bounds.contains_bbox(&b.bounds))
         || (is_bare_container(b) && b.bounds.contains_bbox(&a.bounds))
 }
@@ -700,6 +694,17 @@ fn check_overlap_siblings(
                     .unwrap_or_else(|| element_display_name(elem, parent_name, index))
             };
 
+            // An element that paints nothing cannot collide with anything — not
+            // with the other party, and not with whatever that party draws one
+            // level down either. This must come before the bare-region descent
+            // below, which picks one side as "the region" and walks into the
+            // other's children: for an invisible *shape* (not a Layout/Group)
+            // that picked the wrong side and reported every child of a row
+            // against the canvas it sits on.
+            if paints_nothing(a) || paints_nothing(b) {
+                continue;
+            }
+
             // A container that paints nothing is not something to collide
             // with — but what it draws one level down is.
             if is_drawn_inside_a_bare_region(a, b) {
@@ -818,6 +823,17 @@ fn check_overlaps_recursive(
                     grid_cell_name(elem, &all_children)
                         .unwrap_or_else(|| element_display_name(elem, parent_name, index))
                 };
+
+                // An element that paints nothing cannot collide with anything — not
+                // with the other party, and not with whatever that party draws one
+                // level down either. This must come before the bare-region descent
+                // below, which picks one side as "the region" and walks into the
+                // other's children: for an invisible *shape* (not a Layout/Group)
+                // that picked the wrong side and reported every child of a row
+                // against the canvas it sits on.
+                if paints_nothing(a) || paints_nothing(b) {
+                    continue;
+                }
 
                 // A container that paints nothing is not something to collide
                 // with — but what it draws one level down is.

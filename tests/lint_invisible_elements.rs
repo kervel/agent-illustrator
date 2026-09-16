@@ -183,3 +183,43 @@ constrain card_two.top = card_one.bottom + 6
         "the hand-placed-label rule must still fire, got: {msgs:?}"
     );
 }
+
+#[test]
+fn children_of_a_layout_are_also_exempt_from_an_invisible_canvas() {
+    // Found by mr944-b6 running the corpus: three canvas overlaps survived,
+    // all of them elements inside a `row`. The bare-region descent picks one
+    // side as "the region" and walks into the other's children, and for an
+    // invisible *shape* — not a Layout/Group, so `is_bare_container` is false
+    // — it picked the wrong side and reported every child of the row against
+    // the canvas. A fixture whose elements are all top-level cannot catch it.
+    let msgs = overlaps(
+        r#"
+rect canvas [width: 400, height: 200, fill: none, stroke: none]
+constrain canvas.left = 0
+constrain canvas.top = 0
+row chips [gap: 8] {
+    rect m12 [width: 78, height: 26, fill: accent-light, stroke: accent-dark]
+    rect m13 [width: 78, height: 26, fill: accent-light, stroke: accent-dark]
+}
+constrain chips.center_x = 150
+constrain chips.center_y = 100
+"#,
+    );
+    assert!(msgs.is_empty(), "got: {msgs:?}");
+}
+
+#[test]
+fn two_visible_elements_inside_a_layout_still_report() {
+    // The same descent must keep working for things that do paint.
+    let msgs = overlaps(
+        r#"
+rect zone [width: 400, height: 200, fill: accent-light, stroke: accent-dark]
+constrain zone.left = 0
+constrain zone.top = 0
+rect wide [width: 600, height: 30, fill: secondary-light, stroke: secondary-dark]
+constrain wide.center_x = 100
+constrain wide.center_y = 100
+"#,
+    );
+    assert!(!msgs.is_empty(), "visible-on-visible must still report");
+}
