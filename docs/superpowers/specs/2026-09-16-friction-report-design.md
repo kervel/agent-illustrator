@@ -206,6 +206,29 @@ fn paints_nothing(elem: &ElementLayout) -> bool {
 zero opacity. `has_visible_fill` is its counterpart: `fill: none`, absent fill
 on a shape whose default is none, or `fill_opacity: 0`.
 
+**`paints_nothing` is shared by every rule that asks "is this element in that
+one", not just `check_overlaps`.** The `check_hand_placed_labels` rule added
+with the box-label work has the same hole from the other direction: its guard
+is `is_opaque`, which exempts a *translucent* zone background, but a
+`rect [fill: none, stroke: none]` sets no opacity at all, so `is_opaque`
+returns true and the rule fires. Measured on the reporter's 8 files with the
+build at `8277305`: 33 `label` warnings, of which 8 are the invisible canvas
+listing every text in the diagram as sitting inside it. Reproduced minimally:
+
+    rect canvas [width: 400, height: 200, fill: none, stroke: none]
+    text "alpha" t1 ...   // constrained inside it
+    text "beta"  t2 ...
+    -> label: texts "t1", "t2" sit inside "canvas" — write canvas [label: "…"]
+
+Fixing only `check_overlaps` would leave a second rule emitting the same class
+of noise from the same element, so `paints_nothing` replaces the guard in both.
+`check_hand_placed_labels` keeps its `is_opaque` check as well — a translucent
+zone and an invisible one are different exemptions and both are wanted.
+
+The remaining 25 of those 33 warnings name real visible boxes and are correct;
+the reporter confirmed the suggested rewrite is not lossy for multi-line,
+multi-colour cards, so the rule stays as-is beyond the guard.
+
 Deliberately **not** doing per-element `lint_overlap: allow` suppression, which
 the report also suggested. It is a grammar addition that makes every future
 false positive the author's problem to annotate; fixing the rule fixes it for
@@ -403,12 +426,30 @@ position; `disable` of an unknown name is a hard error.
 
 ## Ordering
 
-1, 2, 3, 5 and 6 are independent and can land in any order. 4 (`include`) is
-last: it is the only grammar change of real size, the only one that touches
-the CLI's file handling, and the only one whose tests need a fixture tree on
-disk. 6 pairs naturally with 4 — re-pinning a shared part is only useful once
-`include` exists — so 6 immediately before 4 gives the best story, but they do
-not depend on each other mechanically.
+**Part 1 goes first, and not for mechanical reasons.** The
+`check_hand_placed_labels` rule already tells authors to move text *into* a
+`label:`. Any box sized by left+right constraints then renders that label in
+the wrong place — the stale-position bug. Until Part 1 lands, the linter and
+the renderer point in opposite directions, and following the advice makes the
+diagram worse. The rule shipped first by accident of ordering; the fix should
+not trail it any longer than necessary.
+
+Then 2, 3, 5 and 6, which are independent of each other and of 1.
+
+4 (`include`) is last: it is the only grammar change of real size, the only one
+that touches the CLI's file handling, and the only one whose tests need a
+fixture tree on disk. 6 pairs naturally with 4 — re-pinning a shared part is
+only useful once `include` exists — so 6 immediately before 4 gives the best
+story, but they do not depend on each other mechanically.
+
+## Corpus
+
+The reporter is holding their 8-file deck unmodified as a pre-fix corpus, at
+`…/worktrees/mr944/presentations/76-bitemporality/diagrams/` on this machine
+(uncommitted, so it exists nowhere else). Baseline against `8277305`:
+overlap 124, label 33, 8/8 rendering. Those numbers are the acceptance check
+for Parts 1 and 2 — overlap should fall by roughly 100 and label by 8, with
+the other 25 label warnings surviving untouched.
 
 ## Global constraints
 
