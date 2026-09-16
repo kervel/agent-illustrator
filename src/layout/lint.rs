@@ -348,8 +348,48 @@ fn is_bare_container(elem: &ElementLayout) -> bool {
             .is_none_or(|s| s.eq_ignore_ascii_case("none"))
 }
 
+/// True when an element paints nothing at all.
+///
+/// `fill: none` (or no fill on a shape that defaults to none, or a zero fill
+/// opacity) plus no visible stroke means the element renders no ink. It marks
+/// out a region — a canvas extent, a tick anchor, a spacer — and a region
+/// cannot collide with what sits in it, nor can text be said to sit "inside"
+/// it in any way an author could fix by moving the text into its label.
+///
+/// This is deliberately narrow. A *translucent* zone is still visible and
+/// still collides; only genuinely invisible elements are exempt. An element
+/// exempted here is exempt from LINT only — it keeps participating in layout
+/// exactly as before, which matters because invisible tick anchors are
+/// routinely the load-bearing geometry other elements are sized from.
+pub(crate) fn paints_nothing(elem: &ElementLayout) -> bool {
+    !has_visible_fill(elem) && !has_visible_border(elem)
+}
+
+/// Counterpart to [`has_visible_border`]: does this element paint any fill?
+fn has_visible_fill(elem: &ElementLayout) -> bool {
+    if elem.styles.fill_pattern.is_some() {
+        return true;
+    }
+    if let Some(fo) = elem.styles.fill_opacity {
+        if fo <= 0.0 {
+            return false;
+        }
+    }
+    match elem.styles.fill.as_deref() {
+        None => false,
+        Some(f) if f.eq_ignore_ascii_case("none") => false,
+        Some(_) => true,
+    }
+}
+
 /// True when one of the pair is a bare region wholly containing the other.
 fn is_drawn_inside_a_bare_region(a: &ElementLayout, b: &ElementLayout) -> bool {
+    // Something that paints nothing cannot collide with anything, whether or
+    // not it contains the other party: an invisible tick sitting ON a rule is
+    // the idiom, not a defect.
+    if paints_nothing(a) || paints_nothing(b) {
+        return true;
+    }
     (is_bare_container(a) && a.bounds.contains_bbox(&b.bounds))
         || (is_bare_container(b) && b.bounds.contains_bbox(&a.bounds))
 }
@@ -3268,7 +3308,14 @@ fn check_hand_placed_labels(
             next.push(id.0.clone());
             // A translucent zone is a background wash, not a box with a
             // label: text over it is an annotation and stays legitimate.
-            let labellable = is_visual_shape(elem) && !is_callout(elem) && is_opaque(elem);
+            // `is_opaque` exempts a translucent zone background. An element
+            // that paints nothing at all sets no opacity, so it passed that
+            // guard and the rule told authors to move text into the label of
+            // an invisible sizing rect. Both exemptions are wanted.
+            let labellable = is_visual_shape(elem)
+                && !is_callout(elem)
+                && is_opaque(elem)
+                && !paints_nothing(elem);
             if is_text_shape(elem) || labellable {
                 out.push(Seen {
                     id: id.0.clone(),
