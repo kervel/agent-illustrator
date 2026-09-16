@@ -143,3 +143,56 @@ fn wrapping_keeps_run_styling_across_the_break() {
         "bold should survive the wrap"
     );
 }
+
+use agent_illustrator::render;
+
+#[test]
+fn a_multiline_label_renders_one_tspan_per_line() {
+    let svg = render(r#"rect card [label: "alpha<br>beta<br>gamma"]"#).expect("renders");
+    assert_eq!(svg.matches("<tspan").count(), 6, "svg was: {svg}");
+    assert!(svg.contains("alpha") && svg.contains("beta") && svg.contains("gamma"));
+}
+
+#[test]
+fn a_box_grows_in_height_to_fit_its_lines() {
+    let one = render(r#"rect card [label: "alpha"]"#).expect("renders");
+    let three = render(r#"rect card [label: "alpha<br>beta<br>gamma"]"#).expect("renders");
+    let height_of = |svg: &str| -> f64 {
+        let at = svg.find("<rect").expect("a rect");
+        let h = svg[at..].find(" height=\"").expect("rect height") + at + 9;
+        svg[h..].split('"').next().unwrap().parse().unwrap()
+    };
+    assert!(
+        height_of(&three) > height_of(&one),
+        "three lines ({}) should be taller than one ({})",
+        height_of(&three),
+        height_of(&one)
+    );
+}
+
+#[test]
+fn a_box_grows_in_width_to_fit_its_longest_line() {
+    let svg = render(r#"rect card [label: "a<br>a much longer second line"]"#).expect("renders");
+    let at = svg.find("<rect").expect("a rect");
+    let w = svg[at..].find(" width=\"").expect("rect width") + at + 8;
+    let width: f64 = svg[w..].split('"').next().unwrap().parse().unwrap();
+    assert!(width > 100.0, "expected the box to widen, got {width}");
+}
+
+#[test]
+fn bold_runs_reach_the_svg() {
+    let svg = render(r#"rect card [label: "<b>title</b>"]"#).expect("renders");
+    assert!(svg.contains("font-weight"), "svg was: {svg}");
+}
+
+#[test]
+fn a_span_fill_reaches_the_svg() {
+    let svg = render(r#"rect card [label: "<span fill=red>x</span>"]"#).expect("renders");
+    assert!(svg.contains("red"), "svg was: {svg}");
+}
+
+#[test]
+fn malformed_markup_is_a_render_error_not_silent_output() {
+    let err = render(r#"rect card [label: "<b>title"]"#);
+    assert!(err.is_err(), "unclosed <b> should not render");
+}

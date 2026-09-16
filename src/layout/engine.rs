@@ -763,6 +763,7 @@ pub fn solve_global(
 pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, LayoutError> {
     // First validate references
     super::validate_references(doc)?;
+    validate_label_markup(&doc.statements)?;
 
     let mut result = LayoutResult::new();
     let mut position = Point::new(0.0, 0.0);
@@ -925,6 +926,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
+    let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
     let label = extract_label(&shape.modifiers).map(|text| {
         let (label_x, label_y, anchor) = match &shape.shape_type.node {
             ShapeType::Line => {
@@ -968,12 +970,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
             Some(TextAnchor::Middle) => (position.x + width / 2.0, TextAnchor::Middle),
             None => (label_x, anchor),
         };
-        LabelLayout {
-            text,
-            position: Point::new(label_x, label_y),
-            anchor,
-            styles: None,
-        }
+        LabelLayout::from_source(&text, Point::new(label_x, label_y), anchor, font_size)
     });
 
     // Get element ID - check ShapeDecl.name first, then PathDecl.name for paths
@@ -1027,12 +1024,16 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         return (s, s);
     }
 
-    // Minimum width needed to fit the label, measured the same way lint
-    // checks it.
-    let label_min_width = extract_label(&shape.modifiers).map(|text| {
+    // The space the label needs, measured the same way lint checks it and
+    // the renderer draws it.
+    let label_metrics = extract_label(&shape.modifiers).map(|text| {
         let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
-        measure_str(&text, font_size) + 2.0 * LABEL_INSET
+        let rich = crate::layout::text::parse_markup(&text)
+            .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&text));
+        crate::layout::text::measure_runs(&rich.lines, font_size)
     });
+    let label_min_width = label_metrics.map(|m| m.width + 2.0 * LABEL_INSET);
+    let label_min_height = label_metrics.map(|m| m.height + 2.0 * LABEL_INSET);
 
     // If only width is provided, use it for width and default for height
     // If only height is provided, use default for width and it for height
@@ -1086,7 +1087,13 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
         base_width
     };
 
-    let mut final_height = height.unwrap_or(default_height);
+    // A multi-line label grows the box downwards the same way a long one
+    // grows it sideways.
+    let mut final_height = match (height, label_min_height) {
+        (Some(h), _) => h,
+        (None, Some(min)) => default_height.max(min),
+        (None, None) => default_height,
+    };
     let mut final_width = final_width;
 
     // Callouts need room for the triangular pointer along its axis (only when
@@ -1528,11 +1535,13 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         None
     } else {
         // Fall back to the old modifier-based label
-        extract_label(&layout.modifiers).map(|text| LabelLayout {
-            text,
-            position: Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
-            anchor: TextAnchor::Middle,
-            styles: None,
+        extract_label(&layout.modifiers).map(|text| {
+            LabelLayout::from_source(
+                &text,
+                Point::new(bounds.x + bounds.width / 2.0, bounds.y - 5.0),
+                TextAnchor::Middle,
+                extract_font_size(&layout.modifiers).unwrap_or(14.0),
+            )
         })
     };
 
@@ -1587,11 +1596,13 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         None
     } else {
         // Fall back to the old modifier-based label
-        extract_label(&group.modifiers).map(|text| LabelLayout {
-            text,
-            position: Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
-            anchor: TextAnchor::End,
-            styles: None,
+        extract_label(&group.modifiers).map(|text| {
+            LabelLayout::from_source(
+                &text,
+                Point::new(bounds.x - 10.0, bounds.y + bounds.height / 2.0),
+                TextAnchor::End,
+                extract_font_size(&group.modifiers).unwrap_or(14.0),
+            )
         })
     };
 
@@ -4635,4 +4646,50 @@ mod tests {
             group.bounds.height
         );
     }
+}
+
+/// Reject malformed label markup before anything is laid out.
+///
+/// A half-parsed label would render a plausible-looking wrong picture, which
+/// is exactly the failure this feature exists to remove — so it is an error,
+/// not a silent fallback. A `<` that begins no recognised tag is literal
+/// text and never reaches here.
+fn validate_label_markup(stmts: &[Spanned<Statement>]) -> Result<(), LayoutError> {
+    for stmt in stmts {
+        let (modifiers, children, name) = match &stmt.node {
+            Statement::Shape(s) => (&s.modifiers, None, s.name.as_ref().map(|n| n.node.clone())),
+            Statement::Layout(l) => (
+                &l.modifiers,
+                Some(&l.children),
+                l.name.as_ref().map(|n| n.node.clone()),
+            ),
+            Statement::Group(g) => (
+                &g.modifiers,
+                Some(&g.children),
+                g.name.as_ref().map(|n| n.node.clone()),
+            ),
+            Statement::Label(inner) => {
+                validate_label_markup(&[Spanned::new((**inner).clone(), stmt.span.clone())])?;
+                continue;
+            }
+            _ => continue,
+        };
+
+        if let Some(raw) = extract_label(modifiers) {
+            if let Err(e) = crate::layout::text::parse_markup(&raw) {
+                return Err(LayoutError::InvalidLabel {
+                    owner: name
+                        .map(|n| n.to_string())
+                        .unwrap_or_else(|| "an unnamed element".to_string()),
+                    reason: e.message,
+                    span: stmt.span.clone(),
+                });
+            }
+        }
+
+        if let Some(children) = children {
+            validate_label_markup(children)?;
+        }
+    }
+    Ok(())
 }

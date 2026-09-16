@@ -429,6 +429,78 @@ impl SvgBuilder {
             format!(" {}", extra_classes)
         };
 
+        let rich = crate::layout::text::RichText::from_plain(text);
+        self.push_text_element(&rich, 14.0, x, y, anchor_str, styles, prefix, &extra);
+    }
+
+    /// Add a label that carries markup, as one `<tspan>` per line.
+    #[allow(clippy::too_many_arguments)]
+    pub fn add_rich_text_with_classes(
+        &mut self,
+        rich: &crate::layout::text::RichText,
+        font_size: f64,
+        x: f64,
+        y: f64,
+        anchor: &TextAnchor,
+        styles: &str,
+        extra_classes: &str,
+    ) {
+        let prefix = self.prefix();
+        let anchor_str = match anchor {
+            TextAnchor::Start => "start",
+            TextAnchor::Middle => "middle",
+            TextAnchor::End => "end",
+        };
+        let extra = if extra_classes.is_empty() {
+            String::new()
+        } else {
+            format!(" {}", extra_classes)
+        };
+        self.push_text_element(rich, font_size, x, y, anchor_str, styles, prefix, &extra);
+    }
+
+    /// Emit the `<text>` element itself. Lines become `<tspan>`s stacked about
+    /// `y`, so a multi-line label stays vertically centred on the point the
+    /// layout engine chose for it.
+    #[allow(clippy::too_many_arguments)]
+    fn push_text_element(
+        &mut self,
+        rich: &crate::layout::text::RichText,
+        font_size: f64,
+        x: f64,
+        y: f64,
+        anchor_str: &str,
+        styles: &str,
+        prefix: String,
+        extra: &str,
+    ) {
+        let lines = &rich.lines;
+        let line_height = font_size * crate::layout::text::LINE_HEIGHT_FACTOR;
+        let first_dy = -((lines.len() as f64 - 1.0) / 2.0) * line_height;
+
+        let mut body = String::new();
+        for (i, line) in lines.iter().enumerate() {
+            let dy = if i == 0 { first_dy } else { line_height };
+            body.push_str(&format!(r#"<tspan x="{}" dy="{}">"#, x, dy));
+            for run in line {
+                let mut attrs = String::new();
+                if run.bold {
+                    attrs.push_str(r#" font-weight="bold""#);
+                }
+                if run.italic {
+                    attrs.push_str(r#" font-style="italic""#);
+                }
+                if (run.scale - 1.0).abs() > f64::EPSILON {
+                    attrs.push_str(&format!(r#" font-size="{}""#, font_size * run.scale));
+                }
+                if let Some(fill) = &run.fill {
+                    attrs.push_str(&format!(r#" fill="{}""#, escape_xml(fill)));
+                }
+                body.push_str(&format!("<tspan{}>{}</tspan>", attrs, escape_xml(&run.text)));
+            }
+            body.push_str("</tspan>");
+        }
+
         self.elements.push(format!(
             r#"{}<text class="{}label{}" x="{}" y="{}" text-anchor="{}" dominant-baseline="middle"{}>{}</text>"#,
             self.indent_str(),
@@ -438,7 +510,7 @@ impl SvgBuilder {
             y,
             anchor_str,
             styles,
-            escape_xml(text)
+            body
         ));
     }
 
@@ -1387,8 +1459,9 @@ fn render_element_inner(
         } else {
             format!("aitxt-{}-base", own_id)
         };
-        builder.add_text_with_classes(
-            &label.text,
+        builder.add_rich_text_with_classes(
+            &label.rich,
+            label.font_size,
             label.position.x,
             label.position.y,
             &label.anchor,
@@ -1396,8 +1469,11 @@ fn render_element_inner(
             &base_classes,
         );
         for (n, text) in variants.iter().enumerate() {
-            builder.add_text_with_classes(
-                text,
+            let rich = crate::layout::text::parse_markup(text)
+                .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));
+            builder.add_rich_text_with_classes(
+                &rich,
+                label.font_size,
                 label.position.x,
                 label.position.y,
                 &label.anchor,
@@ -1467,8 +1543,9 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
             .as_ref()
             .map(|c| format!("conn-{}", c))
             .unwrap_or_default();
-        builder.add_text_with_classes(
-            &label.text,
+        builder.add_rich_text_with_classes(
+            &label.rich,
+            label.font_size,
             label.position.x,
             label.position.y,
             &label.anchor,

@@ -856,11 +856,52 @@ pub enum TextAnchor {
 /// Layout information for a label
 #[derive(Debug, Clone)]
 pub struct LabelLayout {
+    /// The wording with markup stripped. Lint messages and keyframe diffs
+    /// compare wording, not styling, so they keep reading this.
     pub text: String,
+    /// The parsed lines of styled runs, as rendered.
+    pub rich: crate::layout::text::RichText,
+    /// Base font size the runs were measured at.
+    pub font_size: f64,
     pub position: Point,
     pub anchor: TextAnchor,
     /// Optional styles for the label (used when referencing a styled element)
     pub styles: Option<ResolvedStyles>,
+}
+
+impl LabelLayout {
+    /// Build a label from its raw source, parsing the markup subset.
+    ///
+    /// `validate_label_markup` runs before layout and turns malformed markup
+    /// into a hard error, so falling back to literal text here only affects
+    /// labels that validation does not reach.
+    pub fn from_source(raw: &str, position: Point, anchor: TextAnchor, font_size: f64) -> Self {
+        let rich = crate::layout::text::parse_markup(raw)
+            .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(raw));
+        LabelLayout {
+            text: rich.plain(),
+            rich,
+            font_size,
+            position,
+            anchor,
+            styles: None,
+        }
+    }
+
+    /// As [`LabelLayout::from_source`], carrying styles inherited from a
+    /// referenced element.
+    pub fn from_source_with_styles(
+        raw: &str,
+        position: Point,
+        anchor: TextAnchor,
+        font_size: f64,
+        styles: Option<ResolvedStyles>,
+    ) -> Self {
+        LabelLayout {
+            styles,
+            ..LabelLayout::from_source(raw, position, anchor, font_size)
+        }
+    }
 }
 
 /// Layout information for a single element
@@ -1051,15 +1092,11 @@ fn collect_leaf_bounds(element: &ElementLayout, bounds: &mut Option<BoundingBox>
     }
 }
 
-/// Estimate the width of a text label.
-fn estimate_label_width(text: &str) -> f64 {
-    crate::layout::text::measure_str(text, 14.0)
-}
-
 /// Expand bounds to include a label, accounting for text anchor
 fn expand_bounds_for_label(bounds: BoundingBox, label: &LabelLayout) -> BoundingBox {
-    let estimated_width = estimate_label_width(&label.text);
-    let estimated_height = 14.0; // approximate line height
+    let metrics = crate::layout::text::measure_runs(&label.rich.lines, label.font_size);
+    let estimated_width = metrics.width;
+    let estimated_height = metrics.height;
 
     // Calculate label bounds based on anchor
     let (label_left, label_right) = match label.anchor {
@@ -1071,9 +1108,10 @@ fn expand_bounds_for_label(bounds: BoundingBox, label: &LabelLayout) -> Bounding
         TextAnchor::End => (label.position.x - estimated_width, label.position.x),
     };
 
-    // Labels extend above their position point (text baseline)
-    let label_top = label.position.y - estimated_height;
-    let label_bottom = label.position.y;
+    // `position.y` is the vertical centre of the label block: the renderer
+    // centres n lines about it, so an outside label reserves the right space.
+    let label_top = label.position.y - estimated_height / 2.0;
+    let label_bottom = label.position.y + estimated_height / 2.0;
 
     let label_bounds = BoundingBox::new(
         label_left,

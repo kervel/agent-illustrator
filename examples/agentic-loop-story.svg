@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -80 1200 580" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
   <style>
     :root {
-    --foreground-2: #666666;
-    --secondary-2: #fff3e0;
-    --background-1: #ffffff;
-    --background-dark: #333333;
-    --foreground-3: #999999;
-    --accent-1: #2196f3;
-    --secondary-dark: #e65100;
-    --status-success: #4caf50;
     --status-error: #f44336;
-    --text-2: #666666;
-    --accent-light: #e3f2fd;
-    --text-3: #999999;
-    --text-light: #ffffff;
-    --foreground-1: #333333;
-    --background-light: #ffffff;
-    --foreground-dark: #1a1a1a;
-    --status-warning: #ff9800;
-    --background-2: #f5f5f5;
     --background-3: #eeeeee;
-    --secondary-1: #ff9800;
-    --text-1: #333333;
     --accent-2: #e3f2fd;
-    --text-dark: #1a1a1a;
     --accent-dark: #1565c0;
+    --foreground-dark: #1a1a1a;
+    --foreground-1: #333333;
+    --accent-light: #e3f2fd;
+    --status-success: #4caf50;
+    --text-1: #333333;
+    --foreground-2: #666666;
+    --secondary-1: #ff9800;
+    --text-3: #999999;
+    --secondary-2: #fff3e0;
+    --text-dark: #1a1a1a;
+    --text-2: #666666;
+    --background-light: #ffffff;
+    --text-light: #ffffff;
+    --background-1: #ffffff;
     --foreground-light: #e0e0e0;
-    --secondary-3: #ffe0b2;
+    --background-2: #f5f5f5;
+    --foreground-3: #999999;
+    --background-dark: #333333;
+    --accent-1: #2196f3;
     --accent-3: #bbdefb;
+    --secondary-3: #ffe0b2;
     --secondary-light: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-warning: #ff9800;
   }
 
     /* Keyframe animation CSS (auto-generated) */
@@ -642,7 +642,7 @@ text {
     <text id="gear_label" class="ai-shape ai-text" x="829.43" y="401" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">Tool (bash)</text>
     <g class="kf-hidden kf-speech_bubble kf-anim">
       <rect id="speech_bubble" class="ai-shape ai-rect" x="100" y="27" width="280" height="56" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16">list my Python files</text>
+      <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16"><tspan x="240" dy="-0"><tspan>list my Python files</tspan></tspan></text>
     </g>
     <g class="kf-hidden kf-sys_envelope kf-anim">
       <rect id="sys_envelope" class="ai-shape ai-rect" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>

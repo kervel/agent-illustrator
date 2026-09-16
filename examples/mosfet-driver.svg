@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-89.35 -56 708.8000000000001 439">
   <style>
     :root {
-    --foreground-light: #e0e0e0;
-    --foreground-1: #333333;
-    --background-light: #ffffff;
-    --background-2: #f5f5f5;
-    --text-3: #999999;
     --secondary-2: #fff3e0;
-    --secondary-light: #fff3e0;
-    --status-warning: #ff9800;
-    --secondary-1: #ff9800;
-    --status-error: #f44336;
-    --background-1: #ffffff;
-    --text-2: #666666;
-    --status-success: #4caf50;
-    --accent-light: #e3f2fd;
-    --accent-2: #e3f2fd;
-    --text-dark: #1a1a1a;
-    --foreground-2: #666666;
-    --background-3: #eeeeee;
     --foreground-3: #999999;
     --background-dark: #333333;
-    --foreground-dark: #1a1a1a;
+    --secondary-1: #ff9800;
+    --background-1: #ffffff;
+    --secondary-light: #fff3e0;
+    --text-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --secondary-dark: #e65100;
+    --foreground-1: #333333;
     --text-1: #333333;
+    --text-2: #666666;
+    --accent-2: #e3f2fd;
+    --foreground-2: #666666;
+    --foreground-dark: #1a1a1a;
+    --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --status-error: #f44336;
+    --background-light: #ffffff;
+    --text-3: #999999;
     --text-light: #ffffff;
-    --accent-1: #2196f3;
     --accent-3: #bbdefb;
     --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --accent-dark: #1565c0;
+    --background-3: #eeeeee;
+    --accent-1: #2196f3;
+    --foreground-light: #e0e0e0;
+    --status-success: #4caf50;
+    --background-2: #f5f5f5;
   }
 
     /* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
@@ -139,19 +139,19 @@
   </g>
   <g id="r_pullup" class="ai-container" transform="rotate(90 200 84)">
     <rect id="r_pullup_body" class="ai-shape ai-rect" x="180" y="76" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="200" y="84" text-anchor="middle" dominant-baseline="middle" font-size="10">10k</text>
+    <text class="ai-label" x="200" y="84" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="200" dy="-0"><tspan>10k</tspan></tspan></text>
     <rect id="r_pullup_left_lead" class="ai-shape ai-rect" x="170" y="83" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_pullup_right_lead" class="ai-shape ai-rect" x="220" y="83" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="r_gate" class="ai-container">
     <rect id="r_gate_body" class="ai-shape ai-rect" x="248" y="146" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="268" y="154" text-anchor="middle" dominant-baseline="middle" font-size="10">100Ω</text>
+    <text class="ai-label" x="268" y="154" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="268" dy="-0"><tspan>100Ω</tspan></tspan></text>
     <rect id="r_gate_left_lead" class="ai-shape ai-rect" x="238" y="153" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_gate_right_lead" class="ai-shape ai-rect" x="288" y="153" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="r_pulldown" class="ai-container" transform="rotate(90 318 266)">
     <rect id="r_pulldown_body" class="ai-shape ai-rect" x="298" y="258" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="318" y="266" text-anchor="middle" dominant-baseline="middle" font-size="10">100k</text>
+    <text class="ai-label" x="318" y="266" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="318" dy="-0"><tspan>100k</tspan></tspan></text>
     <rect id="r_pulldown_left_lead" class="ai-shape ai-rect" x="288" y="265" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_pulldown_right_lead" class="ai-shape ai-rect" x="338" y="265" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
@@ -170,17 +170,17 @@
   </g>
   <g id="gpio" class="ai-container">
     <rect id="gpio_body" class="ai-shape ai-rect" x="5" y="80" width="50" height="20" fill="var(--accent-2)" stroke="var(--accent-1)" stroke-width="1.5"/>
-    <text class="ai-label" x="30" y="90" text-anchor="middle" dominant-baseline="middle" font-size="10">GPIO_4</text>
+    <text class="ai-label" x="30" y="90" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="30" dy="-0"><tspan>GPIO_4</tspan></tspan></text>
   </g>
   <g id="r_base" class="ai-container">
     <rect id="r_base_body" class="ai-shape ai-rect" x="80" y="82" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="100" y="90" text-anchor="middle" dominant-baseline="middle" font-size="10">1kΩ</text>
+    <text class="ai-label" x="100" y="90" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="100" dy="-0"><tspan>1kΩ</tspan></tspan></text>
     <rect id="r_base_left_lead" class="ai-shape ai-rect" x="70" y="89" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_base_right_lead" class="ai-shape ai-rect" x="120" y="89" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="r_led" class="ai-container" transform="rotate(90 25 150)">
     <rect id="r_led_body" class="ai-shape ai-rect" x="5" y="142" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="25" y="150" text-anchor="middle" dominant-baseline="middle" font-size="10">330Ω</text>
+    <text class="ai-label" x="25" y="150" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="25" dy="-0"><tspan>330Ω</tspan></tspan></text>
     <rect id="r_led_left_lead" class="ai-shape ai-rect" x="-5" y="149" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_led_right_lead" class="ai-shape ai-rect" x="45" y="149" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>

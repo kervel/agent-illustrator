@@ -504,7 +504,12 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
         }
         _ => {
             if let Some(label) = &mut elem.label {
-                label.text = text.to_string();
+                // Reparse: the renderer draws `rich`, so rewriting only the
+                // flattened wording would leave the old words on screen.
+                let rich = crate::layout::text::parse_markup(text)
+                    .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));
+                label.text = rich.plain();
+                label.rich = rich;
             }
         }
     }

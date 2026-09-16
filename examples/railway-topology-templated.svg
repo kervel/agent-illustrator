@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-149.356 -35 555.856 362">
   <style>
     :root {
-    --background-3: #eeeeee;
-    --background-light: #ffffff;
-    --background-2: #f5f5f5;
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --secondary-1: #ff9800;
-    --foreground-2: #666666;
-    --secondary-2: #fff3e0;
-    --text-light: #ffffff;
-    --text-1: #333333;
-    --text-dark: #1a1a1a;
-    --text-3: #999999;
-    --accent-light: #e3f2fd;
-    --status-success: #4caf50;
-    --background-1: #ffffff;
-    --secondary-3: #ffe0b2;
     --accent-dark: #1565c0;
+    --status-warning: #ff9800;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-1: #ffffff;
+    --foreground-3: #999999;
+    --foreground-1: #333333;
+    --background-dark: #333333;
+    --text-light: #ffffff;
+    --status-error: #f44336;
+    --foreground-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
+    --foreground-light: #e0e0e0;
+    --accent-2: #e3f2fd;
+    --foreground-2: #666666;
+    --background-light: #ffffff;
+    --text-3: #999999;
+    --secondary-1: #ff9800;
+    --accent-3: #bbdefb;
+    --secondary-2: #fff3e0;
+    --accent-1: #2196f3;
     --secondary-light: #fff3e0;
     --secondary-dark: #e65100;
-    --status-error: #f44336;
-    --accent-3: #bbdefb;
-    --status-warning: #ff9800;
+    --status-success: #4caf50;
+    --text-1: #333333;
+    --text-dark: #1a1a1a;
     --text-2: #666666;
-    --background-dark: #333333;
-    --foreground-1: #333333;
-    --foreground-light: #e0e0e0;
-    --foreground-dark: #1a1a1a;
-    --foreground-3: #999999;
+    --secondary-3: #ffe0b2;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -143,9 +143,9 @@
     <g id="meso" class="ai-container">
       <g id="meso_content" class="ai-container">
         <ellipse id="op1" class="ai-shape ai-ellipse" cx="96.5" cy="152" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="96.5" y="152" text-anchor="middle" dominant-baseline="middle">OP 1 (Station)</text>
+        <text class="ai-label" x="96.5" y="152" text-anchor="middle" dominant-baseline="middle"><tspan x="96.5" dy="-0"><tspan>OP 1 (Station)</tspan></tspan></text>
         <ellipse id="op2" class="ai-shape ai-ellipse" cx="276.5" cy="152" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="276.5" y="152" text-anchor="middle" dominant-baseline="middle">OP 2 (Station)</text>
+        <text class="ai-label" x="276.5" y="152" text-anchor="middle" dominant-baseline="middle"><tspan x="276.5" dy="-0"><tspan>OP 2 (Station)</tspan></tspan></text>
         <g id="meso_tracks" class="ai-container">
           <g id="meso_tracks_content" class="ai-container">
             <g id="meso_tracks_trackA" class="ai-container">
@@ -171,9 +171,9 @@
     <g id="macro" class="ai-container">
       <g id="graph" class="ai-container">
         <circle id="n1" class="ai-shape ai-circle" cx="50" cy="242" r="25" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-        <text class="ai-label" x="50" y="242" text-anchor="middle" dominant-baseline="middle">OP 1</text>
+        <text class="ai-label" x="50" y="242" text-anchor="middle" dominant-baseline="middle"><tspan x="50" dy="-0"><tspan>OP 1</tspan></tspan></text>
         <circle id="n2" class="ai-shape ai-circle" cx="318" cy="242" r="25" fill="var(--accent-1)" stroke="#333333" stroke-width="1.5"/>
-        <text class="ai-label" x="318" y="242" text-anchor="middle" dominant-baseline="middle">OP 2</text>
+        <text class="ai-label" x="318" y="242" text-anchor="middle" dominant-baseline="middle"><tspan x="318" dy="-0"><tspan>OP 2</tspan></tspan></text>
       </g>
       <g id="macro_label" class="ai-container">
         <text id="macro_title" class="ai-shape ai-text" x="-88.036" y="234" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--text-1)">Macro</text>
@@ -181,9 +181,9 @@
       </g>
     </g>
   </g>
-  <text class="ai-label" x="184" y="232" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">Section of Line</text>
-  <text class="ai-label" x="-38.094" y="101.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Aggregation</text>
-  <text class="ai-label" x="-37.763999999999996" y="197" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11">Simplification</text>
+  <text class="ai-label" x="184" y="232" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="184" dy="-0"><tspan>Section of Line</tspan></tspan></text>
+  <text class="ai-label" x="-38.094" y="101.5" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11"><tspan x="-38.094" dy="-0"><tspan>Aggregation</tspan></tspan></text>
+  <text class="ai-label" x="-37.763999999999996" y="197" text-anchor="start" dominant-baseline="middle" fill="var(--foreground-3)" font-size="11"><tspan x="-37.763999999999996" dy="-0"><tspan>Simplification</tspan></tspan></text>
   <path class="ai-connection" d="M31 28 L71 28" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M77 28 L291 28" fill="none" stroke="var(--accent-1)" stroke-width="2"/>
   <path class="ai-connection" d="M297 28 L337 28" fill="none" stroke="var(--accent-1)" stroke-width="2"/>

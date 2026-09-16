@@ -2,34 +2,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 415 574.5">
   <style>
     :root {
-    --secondary-3: #ffe0b2;
-    --secondary-light: #fff3e0;
-    --status-warning: #ff9800;
-    --accent-3: #bbdefb;
-    --text-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --secondary-dark: #e65100;
-    --background-2: #f5f5f5;
-    --foreground-2: #666666;
-    --accent-1: #2196f3;
-    --status-error: #f44336;
-    --text-1: #333333;
-    --accent-light: #e3f2fd;
-    --background-light: #ffffff;
-    --text-2: #666666;
-    --text-light: #ffffff;
-    --accent-2: #e3f2fd;
     --foreground-light: #e0e0e0;
     --background-3: #eeeeee;
-    --secondary-2: #fff3e0;
-    --status-success: #4caf50;
-    --foreground-3: #999999;
-    --background-1: #ffffff;
-    --background-dark: #333333;
-    --foreground-1: #333333;
     --text-dark: #1a1a1a;
-    --accent-dark: #1565c0;
+    --text-3: #999999;
+    --text-light: #ffffff;
+    --accent-3: #bbdefb;
     --secondary-1: #ff9800;
+    --foreground-3: #999999;
+    --secondary-2: #fff3e0;
+    --secondary-dark: #e65100;
+    --status-success: #4caf50;
+    --secondary-3: #ffe0b2;
+    --accent-light: #e3f2fd;
+    --background-dark: #333333;
+    --background-2: #f5f5f5;
+    --foreground-1: #333333;
+    --accent-2: #e3f2fd;
+    --background-1: #ffffff;
+    --accent-dark: #1565c0;
+    --accent-1: #2196f3;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --foreground-2: #666666;
+    --status-warning: #ff9800;
+    --text-2: #666666;
+    --foreground-dark: #1a1a1a;
+    --text-1: #333333;
+    --background-light: #ffffff;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -138,8 +138,8 @@
   </g>
   <circle id="bottom_via" class="ai-shape ai-circle" cx="80" cy="454" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <circle id="top_via" class="ai-shape ai-circle" cx="80" cy="286" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="80" y="444" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
-  <text class="ai-label" x="80" y="296" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <text class="ai-label" x="80" y="444" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="80" dy="-0"><tspan>request</tspan></tspan></text>
+  <text class="ai-label" x="80" y="296" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="80" dy="-0"><tspan>response</tspan></tspan></text>
   <path class="ai-connection" d="M80 20 L110 20 L110 64 L132.8 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M40 40 L40 60 L110 60 L110 72.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M180 84 L180 99 L163.88888888888889 99 L163.88888888888889 80 L156.08888888888887 80" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>

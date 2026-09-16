@@ -1391,12 +1391,13 @@ fn extract_connection_label_with_ref(
     };
 
     (
-        Some(LabelLayout {
-            text,
-            position: Point::new(mid_x, mid_y),
+        Some(LabelLayout::from_source_with_styles(
+            &text,
+            Point::new(mid_x, mid_y),
             anchor,
-            styles: label_styles,
-        }),
+            14.0,
+            label_styles,
+        )),
         label_ref_id,
     )
 }

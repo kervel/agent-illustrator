@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -68 252 223.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -64.5 252 220">
   <style>
     :root {
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --text-dark: #1a1a1a;
-    --status-success: #4caf50;
+    --background-light: #ffffff;
+    --background-3: #eeeeee;
+    --secondary-dark: #e65100;
+    --foreground-1: #333333;
+    --background-dark: #333333;
+    --secondary-light: #fff3e0;
     --status-error: #f44336;
     --accent-2: #e3f2fd;
-    --background-dark: #333333;
-    --text-1: #333333;
-    --background-1: #ffffff;
-    --accent-1: #2196f3;
-    --accent-light: #e3f2fd;
-    --foreground-dark: #1a1a1a;
-    --background-2: #f5f5f5;
-    --secondary-dark: #e65100;
-    --status-warning: #ff9800;
     --secondary-1: #ff9800;
-    --foreground-light: #e0e0e0;
+    --foreground-dark: #1a1a1a;
+    --text-1: #333333;
     --foreground-2: #666666;
-    --foreground-1: #333333;
-    --text-3: #999999;
-    --secondary-light: #fff3e0;
-    --background-light: #ffffff;
+    --status-success: #4caf50;
+    --accent-1: #2196f3;
+    --foreground-light: #e0e0e0;
+    --text-dark: #1a1a1a;
+    --accent-light: #e3f2fd;
     --text-2: #666666;
-    --text-light: #ffffff;
-    --accent-3: #bbdefb;
-    --foreground-3: #999999;
+    --text-3: #999999;
+    --background-2: #f5f5f5;
     --accent-dark: #1565c0;
-    --background-3: #eeeeee;
+    --secondary-2: #fff3e0;
+    --status-warning: #ff9800;
+    --background-1: #ffffff;
+    --accent-3: #bbdefb;
+    --text-light: #ffffff;
+    --secondary-3: #ffe0b2;
+    --foreground-3: #999999;
   }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -139,8 +139,8 @@
   </g>
   <circle id="bottom_via" class="ai-shape ai-circle" cx="76" cy="95" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <circle id="top_via" class="ai-shape ai-circle" cx="76" cy="-4" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="76" y="85" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">request</text>
-  <text class="ai-label" x="76" y="6" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12">response</text>
+  <text class="ai-label" x="76" y="85" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="76" dy="-0"><tspan>request</tspan></tspan></text>
+  <text class="ai-label" x="76" y="6" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="76" dy="-0"><tspan>response</tspan></tspan></text>
   <path class="ai-connection" d="M23 69 C23 88.67796285752726 56.322037142472745 95 76 95 C95.67796285752726 95 129 88.67796285752726 129 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M129 22 C129 2.3220371424727446 95.67796285752726 -4 76 -4 C56.322037142472745 -4 22.999999999999996 2.3220371424727446 23 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

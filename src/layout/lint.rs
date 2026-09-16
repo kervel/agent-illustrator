@@ -975,9 +975,12 @@ fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
         .styles
         .as_ref()
         .and_then(|s| s.font_size)
-        .unwrap_or(14.0);
-    let width = crate::layout::text::measure_str(&label.text, font_size);
-    let height = font_size;
+        .unwrap_or(label.font_size);
+    // Measure the laid-out lines, not the flattened wording: a three-line
+    // card joined into one string looks three times too wide.
+    let metrics = crate::layout::text::measure_runs(&label.rich.lines, font_size);
+    let width = metrics.width;
+    let height = metrics.height;
 
     let x = match label.anchor {
         TextAnchor::Start => label.position.x,
@@ -3114,12 +3117,12 @@ mod tests {
         label_text: &str,
     ) -> ElementLayout {
         let mut elem = make_rect(Some(id), x, y, w, h);
-        elem.label = Some(LabelLayout {
-            text: label_text.to_string(),
-            position: Point::new(x + w / 2.0, y + h / 2.0),
-            anchor: TextAnchor::Middle,
-            styles: None,
-        });
+        elem.label = Some(LabelLayout::from_source(
+            label_text,
+            Point::new(x + w / 2.0, y + h / 2.0),
+            TextAnchor::Middle,
+            14.0,
+        ));
         elem
     }
 
