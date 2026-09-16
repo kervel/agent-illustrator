@@ -928,106 +928,37 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
     let label = resolved_label.map(|(rich, font_size)| {
-        let (label_x, label_y, anchor) = match &shape.shape_type.node {
-            ShapeType::Line => {
-                // Center horizontally on the line, position above with offset
-                let label_offset = 12.0; // pixels above the line
-                (
-                    position.x + width / 2.0,
-                    position.y + height / 2.0 - label_offset,
-                    TextAnchor::Middle,
-                )
-            }
+        // Shapes whose label is not centred on the box nudge it: a Line's
+        // label rides above the stroke, a Callout's clears its pointer.
+        let nudge = match &shape.shape_type.node {
+            ShapeType::Line => (0.0, -12.0),
             ShapeType::Callout { .. } => {
-                // Center within the pill body (offset away from the pointer side)
                 let ps = CALLOUT_POINTER_SIZE;
-                let (dx, dy) = match extract_pointer(&shape.modifiers) {
+                match extract_pointer(&shape.modifiers) {
                     PointerDir::Up => (0.0, ps / 2.0),
                     PointerDir::Down => (0.0, -ps / 2.0),
                     PointerDir::Left => (ps / 2.0, 0.0),
                     PointerDir::Right => (-ps / 2.0, 0.0),
-                };
-                (
-                    position.x + width / 2.0 + dx,
-                    position.y + height / 2.0 + dy,
-                    TextAnchor::Middle,
-                )
+                }
             }
-            _ => {
-                // Default: center within the shape bounds
-                (
-                    position.x + width / 2.0,
-                    position.y + height / 2.0,
-                    TextAnchor::Middle,
-                )
-            }
+            _ => (0.0, 0.0),
         };
-        let align = extract_align(&shape.modifiers);
-        let offset = extract_label_offset(&shape.modifiers);
+        let placement = LabelPlacement {
+            position: extract_label_position(&shape.modifiers),
+            align: extract_align(&shape.modifiers),
+            offset: extract_label_offset(&shape.modifiers),
+            nudge,
+        };
+        let bounds = BoundingBox::new(position.x, position.y, width, height);
         let metrics = crate::layout::text::measure_runs(&rich.lines, font_size);
-
-        let (label_x, label_y, anchor) = match extract_label_position(&shape.modifiers) {
-            ShapeLabelPosition::Inside => {
-                // An explicit `align:` overrides the horizontal placement,
-                // keeping a small inset so edge-aligned text does not touch
-                // the border.
-                match align {
-                    Some(TextAnchor::Start) => {
-                        (position.x + LABEL_INSET, label_y, TextAnchor::Start)
-                    }
-                    Some(TextAnchor::End) => {
-                        (position.x + width - LABEL_INSET, label_y, TextAnchor::End)
-                    }
-                    Some(TextAnchor::Middle) => {
-                        (position.x + width / 2.0, label_y, TextAnchor::Middle)
-                    }
-                    None => (label_x, label_y, anchor),
-                }
-            }
-            // Above/below: `align` picks the horizontal edge to align to. The
-            // y is the vertical centre of the label block, because the
-            // renderer centres n lines about it.
-            ShapeLabelPosition::Above => {
-                let y = position.y - offset - metrics.height / 2.0;
-                match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
-                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
-                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
-                }
-            }
-            ShapeLabelPosition::Below => {
-                let y = position.y + height + offset + metrics.height / 2.0;
-                match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
-                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
-                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
-                }
-            }
-            // Left/right: `align` picks the vertical edge. `parse_align`
-            // already maps top -> Start and bottom -> End.
-            ShapeLabelPosition::Left => {
-                let y = match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => position.y + metrics.height / 2.0,
-                    TextAnchor::Middle => position.y + height / 2.0,
-                    TextAnchor::End => position.y + height - metrics.height / 2.0,
-                };
-                (position.x - offset, y, TextAnchor::End)
-            }
-            ShapeLabelPosition::Right => {
-                let y = match align.unwrap_or(TextAnchor::Middle) {
-                    TextAnchor::Start => position.y + metrics.height / 2.0,
-                    TextAnchor::Middle => position.y + height / 2.0,
-                    TextAnchor::End => position.y + height - metrics.height / 2.0,
-                };
-                (position.x + width + offset, y, TextAnchor::Start)
-            }
-        };
+        let (label_position, anchor) = place_label(&bounds, &placement, &metrics);
         LabelLayout {
             text: rich.plain(),
             rich,
             font_size,
-            position: Point::new(label_x, label_y),
+            position: label_position,
             anchor,
+            placement: Some(placement),
             styles: None,
         }
     });
@@ -1450,23 +1381,6 @@ fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> 
             None
         }
     })
-}
-
-/// Extract the font_size modifier value from modifiers
-/// Distance a left- or right-aligned label keeps from the shape's border.
-const LABEL_INSET: f64 = 8.0;
-
-/// Default gap between a shape's edge and a label placed outside it.
-const LABEL_OUTSIDE_OFFSET: f64 = 6.0;
-
-/// Where a shape's label sits relative to the shape.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ShapeLabelPosition {
-    Inside,
-    Above,
-    Below,
-    Left,
-    Right,
 }
 
 /// Read a `label_position:` modifier. Unknown words fall back to `inside`;
@@ -2699,6 +2613,11 @@ fn resize_element_by_name(
             LayoutProperty::Height => elem.bounds.height = new_value,
             _ => {}
         }
+        let bounds = elem.bounds;
+        if let Some(label) = &mut elem.label {
+            label.refresh(&bounds);
+        }
+        elem.anchors = AnchorSet::for_element_type(&elem.element_type, &bounds);
     }
     Ok(())
 }
@@ -2715,6 +2634,12 @@ fn resize_element_recursive(
             LayoutProperty::Width => elem.bounds.width = new_value,
             LayoutProperty::Height => elem.bounds.height = new_value,
             _ => {}
+        }
+        // The label is placed *from* the box, so a resize moves it. Without
+        // this the label keeps the centre the box had before it was stretched.
+        let bounds = elem.bounds;
+        if let Some(label) = &mut elem.label {
+            label.refresh(&bounds);
         }
         return true;
     }
