@@ -423,3 +423,55 @@ fn read_entity(chars: &[char]) -> Option<(char, usize)> {
     }
     None
 }
+
+/// Greedily wrap each line to `max_width`, breaking only at spaces.
+///
+/// A word wider than the whole line is left to overflow: breaking mid-word
+/// needs hyphenation rules we do not have, and `--lint` reports the overflow
+/// with the shape's name, which is more useful than a silent mid-word break.
+pub fn wrap(rich: &RichText, font_size: f64, max_width: f64) -> RichText {
+    let mut out: Vec<TextLine> = Vec::new();
+
+    for source_line in &rich.lines {
+        let mut current: TextLine = Vec::new();
+        let mut current_width = 0.0f64;
+
+        for run in source_line {
+            // Split into words, keeping the spaces attached to the word that
+            // follows so that re-joining a line reproduces the original text.
+            for (idx, word) in run.text.split(' ').enumerate() {
+                let piece = if idx == 0 {
+                    word.to_string()
+                } else {
+                    format!(" {word}")
+                };
+                if piece.is_empty() {
+                    continue;
+                }
+                let styled = TextRun {
+                    text: piece.clone(),
+                    ..run.clone()
+                };
+                let w = styled.width(font_size);
+
+                if !current.is_empty() && current_width + w > max_width {
+                    out.push(std::mem::take(&mut current));
+                    // The word starts a fresh line, so drop its leading space.
+                    let trimmed = TextRun {
+                        text: piece.trim_start().to_string(),
+                        ..run.clone()
+                    };
+                    current_width = trimmed.width(font_size);
+                    current.push(trimmed);
+                } else {
+                    current_width += w;
+                    current.push(styled);
+                }
+            }
+        }
+
+        out.push(current);
+    }
+
+    RichText { lines: out }
+}

@@ -93,3 +93,53 @@ fn plain_flattening_drops_the_markup() {
 fn round_trips_through_from_plain() {
     assert_eq!(RichText::from_plain("x").plain(), "x");
 }
+
+use agent_illustrator::layout::text::{measure_runs, wrap};
+
+#[test]
+fn wrapping_breaks_at_spaces_to_fit_the_width() {
+    let rich = parse_markup("the quick brown fox jumps over the lazy dog").unwrap();
+    let wrapped = wrap(&rich, 14.0, 120.0);
+    assert!(wrapped.lines.len() > 1, "expected several lines");
+    let m = measure_runs(&wrapped.lines, 14.0);
+    assert!(m.width <= 120.0, "wrapped width {} exceeds 120", m.width);
+}
+
+#[test]
+fn wrapping_preserves_the_words() {
+    let rich = parse_markup("the quick brown fox jumps over the lazy dog").unwrap();
+    let wrapped = wrap(&rich, 14.0, 120.0);
+    assert_eq!(
+        wrapped.plain().split_whitespace().collect::<Vec<_>>(),
+        "the quick brown fox jumps over the lazy dog"
+            .split(' ')
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn an_explicit_break_survives_wrapping() {
+    let rich = parse_markup("alpha<br>beta").unwrap();
+    let wrapped = wrap(&rich, 14.0, 9999.0);
+    assert_eq!(wrapped.lines.len(), 2);
+}
+
+#[test]
+fn a_single_unbreakable_word_overflows_rather_than_being_hyphenated() {
+    // Breaking mid-word needs hyphenation rules we do not have; lint reports
+    // the overflow instead.
+    let rich = parse_markup("supercalifragilistic").unwrap();
+    let wrapped = wrap(&rich, 14.0, 20.0);
+    assert_eq!(wrapped.lines.len(), 1);
+}
+
+#[test]
+fn wrapping_keeps_run_styling_across_the_break() {
+    let rich = parse_markup("<b>alpha beta gamma delta epsilon</b>").unwrap();
+    let wrapped = wrap(&rich, 14.0, 60.0);
+    assert!(wrapped.lines.len() > 1);
+    assert!(
+        wrapped.lines.iter().all(|l| l.iter().all(|r| r.bold)),
+        "bold should survive the wrap"
+    );
+}
