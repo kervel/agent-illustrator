@@ -47,23 +47,19 @@ constrain wrapper contains child_a, child_b [padding: 20]
 
 
 // ------------------------------------------------------------
-// TEST 3: Text labels placed on top of shapes (normal labeling)
-// Placing a text element directly over a rect is standard
-// practice for titles, annotations, etc.
+// TEST 3: A two-line card written as one label
+// Hand-placing the two text elements over the box is what the
+// linter now steers away from: the offsets are guessed and the
+// lines drift when the wording changes. As a label it is exact.
 // ------------------------------------------------------------
 
 group text_on_shape {
-    rect info_box [width: 160, height: 80, fill: accent-light, stroke: accent-dark]
-    text "System Status" status_title [font_size: 14, fill: foreground-1]
-    text "All systems operational" status_detail [font_size: 10, fill: foreground-2]
+    rect info_box [width: 160, height: 80, fill: accent-light, stroke: accent-dark,
+                   label: "System Status<br><small>All systems operational</small>"]
 }
 
 constrain info_box.center_x = 500
 constrain info_box.center_y = zone_bg.center_y
-constrain status_title.center_x = info_box.center_x
-constrain status_title.center_y = info_box.center_y - 12
-constrain status_detail.center_x = info_box.center_x
-constrain status_detail.center_y = info_box.center_y + 12
 
 
 // ------------------------------------------------------------
