@@ -921,13 +921,13 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
 }
 
 fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
-    let (width, height) = compute_shape_size(shape, config);
+    let resolved_label = resolve_shape_label(shape);
+    let (width, height) = compute_shape_size(shape, config, resolved_label.as_ref());
     let styles = ResolvedStyles::from_modifiers(&shape.modifiers);
 
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
-    let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
-    let label = extract_label(&shape.modifiers).map(|text| {
+    let label = resolved_label.map(|(rich, font_size)| {
         let (label_x, label_y, anchor) = match &shape.shape_type.node {
             ShapeType::Line => {
                 // Center horizontally on the line, position above with offset
@@ -964,8 +964,6 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
         };
         let align = extract_align(&shape.modifiers);
         let offset = extract_label_offset(&shape.modifiers);
-        let rich = crate::layout::text::parse_markup(&text)
-            .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&text));
         let metrics = crate::layout::text::measure_runs(&rich.lines, font_size);
 
         let (label_x, label_y, anchor) = match extract_label_position(&shape.modifiers) {
@@ -1024,7 +1022,14 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
                 (position.x + width + offset, y, TextAnchor::Start)
             }
         };
-        LabelLayout::from_source(&text, Point::new(label_x, label_y), anchor, font_size)
+        LabelLayout {
+            text: rich.plain(),
+            rich,
+            font_size,
+            position: Point::new(label_x, label_y),
+            anchor,
+            styles: None,
+        }
     });
 
     // Get element ID - check ShapeDecl.name first, then PathDecl.name for paths
@@ -1062,7 +1067,35 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     }
 }
 
-fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
+/// The label of a shape, parsed and — when the shape has an explicit width —
+/// wrapped to fit inside it.
+///
+/// Sizing, placement and rendering all go through this, so a box is never
+/// sized for one set of lines and drawn with another. `validate_label_markup`
+/// has already rejected malformed markup by the time this runs, so the
+/// fallback to literal text is unreachable in practice.
+fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichText, f64)> {
+    let raw = extract_label(&shape.modifiers)?;
+    let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
+    let rich = crate::layout::text::parse_markup(&raw)
+        .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&raw));
+
+    // An explicit width is a promise about what fits *inside* the box, so an
+    // inside label wraps to it rather than running out through the borders.
+    // A label placed outside lives in open space and is not bound by it.
+    let inside = extract_label_position(&shape.modifiers) == ShapeLabelPosition::Inside;
+    let rich = match (inside, extract_width_modifier(&shape.modifiers)) {
+        (true, Some(w)) => crate::layout::text::wrap(&rich, font_size, w - 2.0 * LABEL_INSET),
+        _ => rich,
+    };
+    Some((rich, font_size))
+}
+
+fn compute_shape_size(
+    shape: &ShapeDecl,
+    config: &LayoutConfig,
+    label: Option<&(crate::layout::text::RichText, f64)>,
+) -> (f64, f64) {
     // Extract size modifiers from the shape
     let size = extract_size_modifier(&shape.modifiers);
     let width = extract_width_modifier(&shape.modifiers);
@@ -1080,12 +1113,8 @@ fn compute_shape_size(shape: &ShapeDecl, config: &LayoutConfig) -> (f64, f64) {
 
     // The space the label needs, measured the same way lint checks it and
     // the renderer draws it.
-    let label_metrics = extract_label(&shape.modifiers).map(|text| {
-        let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
-        let rich = crate::layout::text::parse_markup(&text)
-            .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&text));
-        crate::layout::text::measure_runs(&rich.lines, font_size)
-    });
+    let label_metrics =
+        label.map(|(rich, font_size)| crate::layout::text::measure_runs(&rich.lines, *font_size));
     let label_min_width = label_metrics.map(|m| m.width + 2.0 * LABEL_INSET);
     let label_min_height = label_metrics.map(|m| m.height + 2.0 * LABEL_INSET);
 

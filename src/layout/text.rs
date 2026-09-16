@@ -455,7 +455,7 @@ pub fn wrap(rich: &RichText, font_size: f64, max_width: f64) -> RichText {
                 let w = styled.width(font_size);
 
                 if !current.is_empty() && current_width + w > max_width {
-                    out.push(std::mem::take(&mut current));
+                    out.push(coalesce(std::mem::take(&mut current)));
                     // The word starts a fresh line, so drop its leading space.
                     let trimmed = TextRun {
                         text: piece.trim_start().to_string(),
@@ -470,8 +470,30 @@ pub fn wrap(rich: &RichText, font_size: f64, max_width: f64) -> RichText {
             }
         }
 
-        out.push(current);
+        out.push(coalesce(current));
     }
 
     RichText { lines: out }
+}
+
+/// Merge neighbouring runs that share their styling.
+///
+/// Wrapping splits a line word by word to measure it; without this every word
+/// would reach the renderer as its own `<tspan>`.
+fn coalesce(line: TextLine) -> TextLine {
+    let mut out: TextLine = Vec::new();
+    for run in line {
+        match out.last_mut() {
+            Some(prev)
+                if prev.bold == run.bold
+                    && prev.italic == run.italic
+                    && (prev.scale - run.scale).abs() < f64::EPSILON
+                    && prev.fill == run.fill =>
+            {
+                prev.text.push_str(&run.text);
+            }
+            _ => out.push(run),
+        }
+    }
+    out
 }

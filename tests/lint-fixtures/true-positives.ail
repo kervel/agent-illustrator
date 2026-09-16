@@ -115,7 +115,7 @@ source_rb.left -> target_rb.top
 // ------------------------------------------------------------
 
 group label_straddle_test {
-    rect straddle_box_a [width: 100, height: 50, fill: accent-1, stroke: foreground-1, label: "This Label Is Very Long"]
+    rect straddle_box_a [width: 100, height: 50, fill: accent-1, stroke: foreground-1, label: "ThisLabelIsVeryLongIndeed"]
     rect straddle_box_b [width: 100, height: 50, fill: accent-2, stroke: foreground-1, label: "Neighbour"]
 }
 

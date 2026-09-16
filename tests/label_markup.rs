@@ -196,3 +196,46 @@ fn malformed_markup_is_a_render_error_not_silent_output() {
     let err = render(r#"rect card [label: "<b>title"]"#);
     assert!(err.is_err(), "unclosed <b> should not render");
 }
+
+#[test]
+fn an_explicit_width_wraps_the_label_instead_of_overflowing() {
+    // The motivating failure: rect card [width: 300, label: "..."] drew the
+    // text straight out through both borders.
+    let svg = render(
+        r#"rect card [width: 200, label: "T <= now confirmed_from <= T < confirmed_until"]"#,
+    )
+    .expect("renders");
+    assert!(
+        svg.matches(r#"<tspan x="#).count() >= 2,
+        "expected a wrap, svg was: {svg}"
+    );
+}
+
+#[test]
+fn an_explicit_width_and_a_wrapped_label_grows_the_height() {
+    let short = render(r#"rect card [width: 200, label: "short"]"#).expect("renders");
+    let long = render(
+        r#"rect card [width: 200, label: "T <= now confirmed_from <= T < confirmed_until"]"#,
+    )
+    .expect("renders");
+    let h = |svg: &str| -> f64 {
+        let at = svg.find("<rect").unwrap();
+        let ha = svg[at..].find(" height=\"").unwrap() + at + 9;
+        svg[ha..].split('"').next().unwrap().parse().unwrap()
+    };
+    assert!(h(&long) > h(&short), "{} vs {}", h(&long), h(&short));
+}
+
+#[test]
+fn a_fully_explicit_box_keeps_its_size_and_lint_reports_the_overflow() {
+    use agent_illustrator::{render_with_lint, RenderConfig};
+    let source =
+        r#"rect card [width: 120, height: 30, label: "a very long label that cannot possibly fit"]"#;
+    let (_svg, warnings) =
+        render_with_lint(source, RenderConfig::new().with_lint(true)).expect("renders");
+    assert!(
+        warnings.iter().any(|w| w.message.contains("card")),
+        "expected an overflow warning naming the box, got: {:?}",
+        warnings.iter().map(|w| w.message.clone()).collect::<Vec<_>>()
+    );
+}

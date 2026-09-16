@@ -133,6 +133,22 @@ row [gap: 10] {
     )
     .expect("renders");
     assert!(svg.contains("first caption") && svg.contains("second caption"));
+
+    // The canvas must reach past the boxes to the captions under them.
+    let view = svg
+        .split("viewBox=\"")
+        .nth(1)
+        .and_then(|s| s.split('"').next())
+        .expect("a viewBox");
+    let parts: Vec<f64> = view
+        .split_whitespace()
+        .map(|p| p.parse().unwrap())
+        .collect();
+    let caption_y = text_y(&svg);
+    assert!(
+        caption_y <= parts[1] + parts[3],
+        "caption at y={caption_y} falls outside the viewBox {view}"
+    );
 }
 
 #[test]
