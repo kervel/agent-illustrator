@@ -962,13 +962,67 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
                 )
             }
         };
-        // An explicit `align:` overrides the horizontal placement, keeping a
-        // small inset so left/right aligned text does not touch the border.
-        let (label_x, anchor) = match extract_align(&shape.modifiers) {
-            Some(TextAnchor::Start) => (position.x + LABEL_INSET, TextAnchor::Start),
-            Some(TextAnchor::End) => (position.x + width - LABEL_INSET, TextAnchor::End),
-            Some(TextAnchor::Middle) => (position.x + width / 2.0, TextAnchor::Middle),
-            None => (label_x, anchor),
+        let align = extract_align(&shape.modifiers);
+        let offset = extract_label_offset(&shape.modifiers);
+        let rich = crate::layout::text::parse_markup(&text)
+            .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&text));
+        let metrics = crate::layout::text::measure_runs(&rich.lines, font_size);
+
+        let (label_x, label_y, anchor) = match extract_label_position(&shape.modifiers) {
+            ShapeLabelPosition::Inside => {
+                // An explicit `align:` overrides the horizontal placement,
+                // keeping a small inset so edge-aligned text does not touch
+                // the border.
+                match align {
+                    Some(TextAnchor::Start) => {
+                        (position.x + LABEL_INSET, label_y, TextAnchor::Start)
+                    }
+                    Some(TextAnchor::End) => {
+                        (position.x + width - LABEL_INSET, label_y, TextAnchor::End)
+                    }
+                    Some(TextAnchor::Middle) => {
+                        (position.x + width / 2.0, label_y, TextAnchor::Middle)
+                    }
+                    None => (label_x, label_y, anchor),
+                }
+            }
+            // Above/below: `align` picks the horizontal edge to align to. The
+            // y is the vertical centre of the label block, because the
+            // renderer centres n lines about it.
+            ShapeLabelPosition::Above => {
+                let y = position.y - offset - metrics.height / 2.0;
+                match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
+                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
+                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
+                }
+            }
+            ShapeLabelPosition::Below => {
+                let y = position.y + height + offset + metrics.height / 2.0;
+                match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => (position.x, y, TextAnchor::Start),
+                    TextAnchor::Middle => (position.x + width / 2.0, y, TextAnchor::Middle),
+                    TextAnchor::End => (position.x + width, y, TextAnchor::End),
+                }
+            }
+            // Left/right: `align` picks the vertical edge. `parse_align`
+            // already maps top -> Start and bottom -> End.
+            ShapeLabelPosition::Left => {
+                let y = match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => position.y + metrics.height / 2.0,
+                    TextAnchor::Middle => position.y + height / 2.0,
+                    TextAnchor::End => position.y + height - metrics.height / 2.0,
+                };
+                (position.x - offset, y, TextAnchor::End)
+            }
+            ShapeLabelPosition::Right => {
+                let y = match align.unwrap_or(TextAnchor::Middle) {
+                    TextAnchor::Start => position.y + metrics.height / 2.0,
+                    TextAnchor::Middle => position.y + height / 2.0,
+                    TextAnchor::End => position.y + height - metrics.height / 2.0,
+                };
+                (position.x + width + offset, y, TextAnchor::Start)
+            }
         };
         LabelLayout::from_source(&text, Point::new(label_x, label_y), anchor, font_size)
     });
@@ -1372,6 +1426,63 @@ fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> 
 /// Extract the font_size modifier value from modifiers
 /// Distance a left- or right-aligned label keeps from the shape's border.
 const LABEL_INSET: f64 = 8.0;
+
+/// Default gap between a shape's edge and a label placed outside it.
+const LABEL_OUTSIDE_OFFSET: f64 = 6.0;
+
+/// Where a shape's label sits relative to the shape.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ShapeLabelPosition {
+    Inside,
+    Above,
+    Below,
+    Left,
+    Right,
+}
+
+/// Read a `label_position:` modifier. Unknown words fall back to `inside`;
+/// the linter reports them separately rather than silently moving the label.
+fn extract_label_position(modifiers: &[Spanned<StyleModifier>]) -> ShapeLabelPosition {
+    modifiers
+        .iter()
+        .find_map(|m| {
+            if !matches!(m.node.key.node, StyleKey::LabelPosition) {
+                return None;
+            }
+            let word = match &m.node.value.node {
+                StyleValue::Keyword(k) => k.as_str(),
+                StyleValue::Identifier(id) => id.0.as_str(),
+                StyleValue::String(s) => s.as_str(),
+                _ => return None,
+            };
+            match word {
+                "inside" => Some(ShapeLabelPosition::Inside),
+                "above" => Some(ShapeLabelPosition::Above),
+                "below" => Some(ShapeLabelPosition::Below),
+                "left" => Some(ShapeLabelPosition::Left),
+                "right" => Some(ShapeLabelPosition::Right),
+                _ => None,
+            }
+        })
+        .unwrap_or(ShapeLabelPosition::Inside)
+}
+
+/// Gap between the shape's edge and an outside label.
+fn extract_label_offset(modifiers: &[Spanned<StyleModifier>]) -> f64 {
+    modifiers
+        .iter()
+        .find_map(|m| {
+            if matches!(m.node.key.node, StyleKey::LabelOffset) {
+                match &m.node.value.node {
+                    StyleValue::Number { value, .. } => Some(*value),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(LABEL_OUTSIDE_OFFSET)
+}
 
 /// Read an `align:` modifier, if the element carries one.
 fn extract_align(modifiers: &[Spanned<StyleModifier>]) -> Option<TextAnchor> {
