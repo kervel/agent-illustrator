@@ -41,7 +41,12 @@ sized for the longest wording. But `align` works exactly as documented:
 Dead on the requested centre. The reporter concluded align was broken because
 they tested it on a *rect's* `label:`, which fails for an unrelated reason (see
 below). So this is a **bad default plus a discoverability failure**, not broken
-machinery — and the fix is a default and a doc line, not new code.
+machinery.
+
+One further correction, established after the first draft of this spec: the
+default is not the primary cause either. Start-anchoring only misplaces text
+when the box carries slack, and slack comes from sizing the box for a wording
+that is not on screen. See Part 5, where 5a and 5b are ordered accordingly.
 
 **P0-1(3) — "the same left-anchoring applies to a `label:` on a shape sized by
 left+right constraints."**
@@ -296,24 +301,43 @@ library call with an include and no base_dir errors clearly.
 
 ## Part 5 — Defaults and docs
 
-**5a. Text-element alignment default.** A `text` element whose `center_x` is
-constrained almost certainly wants its glyphs centred. Changing the global
-default from `start` would move every existing unaligned text element, so the
-rule is narrower: when a text shape has no explicit `align` **and** its box was
-sized for a wording wider than the one being drawn (i.e. keyframes rewrote it,
-or the box was constraint-sized), the glyphs centre in the box.
+**These two are ordered deliberately: 5a is the load-bearing fix and 5b is the
+guard rail, which is the opposite of how the report reads.**
 
-This makes the common case right and leaves plain `text "x"` with no
-constraints exactly where it has always been drawn. The `--lint` `label`
-category also gains a note when a text element's drawn wording is much
-narrower than its box and no `align` was given — that is the P0-1(b) symptom,
-and it is cheaper to report than to guess at.
+`anchor=start` is harmless whenever a box is sized to the text it is actually
+drawing, because the box's left edge is `centre - width/2` and start-anchored
+glyphs of exactly that width land on the centre by construction. Measured, for
+`text "E — go-live" [font_size: 13]` constrained to `center_x = 545`:
 
-**5b. Size from displayed wordings.** The reporter's P0-1(b): the declared
-wording sizes the box even when every keyframe overrides it, so the box
-reserves space for a string that is never drawn. Size from the union of
-wordings actually displayed in some frame. Strictly shrinks boxes; no new
-failure mode.
+    no other wording exists:            x="511.408"   right edge 578.59, centre 545.0 — exact
+    a longer wording exists in frame b: x="429.03"    82px left of the requested centre
+
+Drift is not caused by start-anchoring. It is caused by **slack** — a box
+sized for a wording wider than the one on screen — and start-anchoring merely
+dumps all of the slack on one side. Remove the slack and the default is
+correct. This was verified independently by the reporter (`mr944-b6`), who
+measured the same effect against a marker rule at the constrained centre.
+
+**5a. Size from displayed wordings.** The reporter's P0-1(b), and the actual
+cure. A box is sized for its declared wording even when every keyframe
+overrides it, so it reserves space for a string drawn in no frame at all —
+which was literally the reporter's case. Size from the union of wordings
+actually displayed in some frame. Strictly shrinks boxes, introduces no new
+failure mode, and eliminates the drift entirely in every diagram whose frames
+carry wordings of similar length.
+
+**5b. Text-element alignment default.** 5a removes the drift wherever the
+wordings happen to be close in length; it cannot remove it where they
+genuinely differ, and nothing stops an author from constraining a box wider
+than its text. So the default still needs fixing — not because it is the main
+cause, but because it is the one change that makes the failure impossible to
+reach rather than unlikely.
+
+When a text shape has no explicit `align` **and** its box is wider than the
+wording being drawn, the glyphs centre in the box. Plain `text "x"` with no
+constraints and no keyframes has no slack, so it is unaffected — it renders
+byte-identically to today. `align` remains the explicit opt-out it already is,
+and already works.
 
 **5c. Palette.** Add the `background-*` family to the `docs/skill.md` palette
 list — `background-light`, `background-dark`, `background-1`, `background-2`,
