@@ -887,7 +887,14 @@ pub fn render_svg_with_keyframes(
         .flat_map(|f| f.element_diffs.iter())
         .filter(|(_, diff)| !diff.is_empty())
         .map(|(id, _)| id.clone())
-        .filter(|id| !frame0_hidden.contains(id))
+        // Frame-0-hidden elements stay IN this set. They take the visibility
+        // branch below, which wraps them in `kf-hidden kf-<id>` and returns
+        // before the wrapper branch, so including them cannot double-wrap —
+        // but the per-frame property class is applied further in, and
+        // excluding them here meant the rule was emitted while the class was
+        // not. Hiding is how a diagram tells a story, so most elements that
+        // change colour are also revealed at some point: that exclusion
+        // silently unbound nearly every property rule in a real deck.
         .collect();
 
     builder.set_text_variants(collect_text_variants(frame_diffs));

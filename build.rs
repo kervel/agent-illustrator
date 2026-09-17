@@ -17,7 +17,7 @@ use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-env-changed=AI_RELEASE_VERSION");
-    println!("cargo:rerun-if-changed=.git/HEAD");
+    watch_git_head();
 
     let version = std::env::var("AI_RELEASE_VERSION")
         .ok()
@@ -39,6 +39,32 @@ fn main() {
         .filter(|v| !v.trim().is_empty())
         .unwrap_or_else(|| "dev".to_string());
     println!("cargo:rustc-env=AI_STAMP={stamp}");
+}
+
+/// Ask cargo to re-run this script when the checked-out commit changes.
+///
+/// `.git/HEAD` alone is not enough: on a branch it holds `ref: refs/heads/NAME`
+/// and its contents do not change when you commit, so the baked version went
+/// stale and `--version` — the flag that exists to tell you which binary you
+/// have — reported the previous build. The ref file is what actually moves, so
+/// watch that too, and `packed-refs` for a ref that has been packed away.
+fn watch_git_head() {
+    let git_dir = std::path::Path::new(".git");
+    let head = git_dir.join("HEAD");
+    println!("cargo:rerun-if-changed={}", head.display());
+
+    if let Ok(contents) = std::fs::read_to_string(&head) {
+        if let Some(reference) = contents.strip_prefix("ref: ").map(str::trim) {
+            println!(
+                "cargo:rerun-if-changed={}",
+                git_dir.join(reference).display()
+            );
+        }
+    }
+    let packed = git_dir.join("packed-refs");
+    if packed.exists() {
+        println!("cargo:rerun-if-changed={}", packed.display());
+    }
 }
 
 fn git_describe() -> Option<String> {

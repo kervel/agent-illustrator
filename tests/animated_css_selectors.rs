@@ -179,3 +179,66 @@ fn a_static_frame_still_renders_the_property_directly() {
         .expect("cs rendered");
     assert!(line.contains("secondary-light"), "got: {line}");
 }
+
+#[test]
+fn a_hidden_then_shown_element_still_carries_its_property_class() {
+    // Hiding is how a diagram tells a story, so most elements that change
+    // colour are also revealed at some point. The class was keyed off a set
+    // that deliberately excludes frame-0-hidden elements — they get their
+    // wrapper from the visibility path instead — so the rule was emitted and
+    // the class was not, and the selector bound to nothing.
+    let svg = animated(
+        r#"
+rect box [width: 120, height: 40, fill: accent-1, label: "box"]
+constrain box.left = 20
+constrain box.center_y = 40
+keyframe "start"    { hide box }
+keyframe "appear"   { show box }
+keyframe "recolour" { transform box [fill: secondary-1] }
+"#,
+    );
+    let shape = svg
+        .lines()
+        .find(|l| l.contains(r#"id="box""#))
+        .expect("box rendered");
+    assert!(
+        shape.contains("kfp-box"),
+        "hidden-then-shown element must still carry the class: {shape}"
+    );
+    assert!(svg.contains(".kfp-box {"), "and the rule that selects it");
+}
+
+#[test]
+fn every_property_rule_binds_to_something() {
+    // The general invariant behind both this and the id-selector bug: a rule
+    // that selects a class nothing carries is silent and useless. Checked
+    // across the shapes a diagram is actually built from.
+    let svg = animated(
+        r#"
+rect a [width: 60, height: 30, fill: accent-1, label: "a"]
+circle b [size: 30, fill: accent-2]
+rect c [width: 60, height: 30, fill: accent-1, rotation: 15]
+constrain a.left = 10
+constrain b.left = 100
+constrain c.left = 200
+constrain a.center_y = 40
+constrain b.center_y = 40
+constrain c.center_y = 40
+keyframe "one" { hide a, b, c }
+keyframe "two" { show a, b, c }
+keyframe "three" {
+    transform a [fill: secondary-1]
+    transform b [fill: secondary-2]
+    transform c [fill: secondary-1]
+}
+"#,
+    );
+    for id in ["a", "b", "c"] {
+        if svg.contains(&format!(".kfp-{id} {{")) {
+            assert!(
+                svg.contains(&format!("kfp-{id}\"")) || svg.contains(&format!("kfp-{id} ")),
+                "rule .kfp-{id} is emitted but no node carries the class:\n{svg}"
+            );
+        }
+    }
+}
