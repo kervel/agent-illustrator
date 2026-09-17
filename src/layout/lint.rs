@@ -129,7 +129,11 @@ impl fmt::Display for LintCategory {
 /// Run all lint checks on a completed layout.
 /// If the document contains keyframes, overlap checks run per-frame
 /// with hidden elements excluded.
-pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
+pub fn check(
+    result: &LayoutResult,
+    doc: &Document,
+    config: &crate::layout::LayoutConfig,
+) -> Vec<LintWarning> {
     let mut warnings = Vec::new();
     let contains_ids = collect_contains_ids(doc);
 
@@ -153,8 +157,20 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
                 hidden_elements: &state.hidden_elements,
                 hidden_connections: &state.hidden_connections,
             };
+            // Ask the frame its own question. A keyframe that moves an element
+            // changes what collides with what, so checking a later frame's
+            // visible set against frame-0 coordinates reports pairs that have
+            // moved apart and — worse — misses pairs the keyframe moved
+            // together. Falls back to the base layout when a frame cannot be
+            // re-solved, which is the old behaviour rather than no check.
+            let solved = super::keyframe::resolve_frame_for_static(result, state, doc, config);
+            let frame_result = solved.as_ref().unwrap_or(result);
             let mut frame_warnings = Vec::new();
-            check_collisions(result, &contains_ids, &scope, &mut frame_warnings);
+            check_collisions(frame_result, &contains_ids, &scope, &mut frame_warnings);
+            // The hand-placed-label rule is a collision question too: text
+            // parked in a box that is hidden whenever the text is shown is not
+            // sitting on anything.
+            check_hand_placed_labels(frame_result, doc, &mut frame_warnings, &scope);
             per_frame.push((state.name.clone(), frame_warnings));
         }
         merge_frame_warnings(per_frame, &mut warnings);
@@ -171,7 +187,11 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
     check_text_fits_its_box(result, doc, &mut warnings);
-    check_hand_placed_labels(result, doc, &mut warnings);
+    // Without keyframes this is the only pass; with them it runs per frame
+    // inside the loop above, where the visible set is known.
+    if frame_states.is_empty() {
+        check_hand_placed_labels(result, doc, &mut warnings, &FrameScope::all_visible());
+    }
     check_label_markup(doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
     check_unanimatable_transform_keys(doc, &mut warnings);
@@ -228,6 +248,7 @@ fn check_collisions(
     check_label_element_overlaps(result, scope, warnings);
     check_connections(result, scope, warnings);
     check_label_connection_overlaps(result, scope, warnings);
+    check_near_misses(result, scope, warnings);
 }
 
 /// Collapse per-frame warnings into one warning per distinct defect.
@@ -526,6 +547,90 @@ fn collect_contains_ids_from_stmts(
 }
 
 // ── FR2: Overlap detection ────────────────────────────────────────
+
+/// Distance at which text is close enough to a visible edge to read as
+/// struck through.
+///
+/// Deliberately tiny. The defect is glyphs touching a line, not glyphs near
+/// one; a generous threshold would fire on every caption in a dense figure and
+/// make the category unusable, which is exactly how `overlap` became something
+/// authors excluded wholesale.
+const NEAR_MISS_EPSILON: f64 = 2.0;
+
+/// Report text whose box stops just short of a visible edge.
+///
+/// `overlap` and `label` both ask whether two boxes intersect. Text abutting a
+/// 2px rule at zero overlap answers no, so nothing fires — and on screen the
+/// rule runs through the words. This is the one collision class that survived
+/// every other rule in the friction report: a caption resting on an axis, and
+/// a vertical rule drawn through a bar's name that reached a screenshot
+/// instead of the linter.
+///
+/// Scoped narrowly on purpose: only TEXT, only against something that paints,
+/// only when the two do not already intersect (that is the overlap rule's
+/// finding, and naming one defect twice is what taught authors to stop
+/// reading lint output).
+fn check_near_misses(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
+    let mut elements: Vec<OpaqueElement> = Vec::new();
+    for (i, elem) in result.root_elements.iter().enumerate() {
+        collect_visible_elements(elem, None, i, scope, &mut elements);
+    }
+
+    let mut texts: Vec<(String, BoundingBox)> = Vec::new();
+    fn collect_texts(
+        elem: &ElementLayout,
+        scope: &FrameScope<'_>,
+        out: &mut Vec<(String, BoundingBox)>,
+    ) {
+        if scope.hides_element(elem) {
+            return;
+        }
+        if is_text_shape(elem) && !paints_nothing(elem) {
+            if let Some(id) = &elem.id {
+                out.push((id.0.clone(), elem.bounds));
+            }
+        }
+        for child in &elem.children {
+            collect_texts(child, scope, out);
+        }
+    }
+    for elem in &result.root_elements {
+        collect_texts(elem, scope, &mut texts);
+    }
+
+    for (text_id, tb) in &texts {
+        for other in &elements {
+            if &other.id == text_id {
+                continue;
+            }
+            // An actual intersection is the overlap rule's to report.
+            if tb.intersects(&other.bounds) {
+                continue;
+            }
+            let gap_x = (other.bounds.x - tb.right()).max(tb.x - other.bounds.right());
+            let gap_y = (other.bounds.y - tb.bottom()).max(tb.y - other.bounds.bottom());
+            // Close on one axis while genuinely spanning the other: a rule
+            // that runs past the text, not a neighbour beside it.
+            let grazes_horizontally =
+                gap_y <= NEAR_MISS_EPSILON && gap_y >= -NEAR_MISS_EPSILON && gap_x < 0.0;
+            let grazes_vertically =
+                gap_x <= NEAR_MISS_EPSILON && gap_x >= -NEAR_MISS_EPSILON && gap_y < 0.0;
+            if !(grazes_horizontally || grazes_vertically) {
+                continue;
+            }
+            warnings.push(LintWarning {
+                category: LintCategory::Overlap,
+                message: format!(
+                    "text \"{}\" grazes the edge of \"{}\"; at this distance the glyphs read as \
+                     struck through — move it clear or give it a gap",
+                    text_id, other.id
+                ),
+                frames: Vec::new(),
+                pair: Some(sorted_pair(text_id, &other.id)),
+            });
+        }
+    }
+}
 
 fn check_overlaps(
     result: &LayoutResult,
@@ -3471,6 +3576,7 @@ fn check_hand_placed_labels(
     result: &LayoutResult,
     doc: &Document,
     warnings: &mut Vec<LintWarning>,
+    scope: &FrameScope<'_>,
 ) {
     let contains = collect_contains_ids(doc);
 
@@ -3483,7 +3589,18 @@ fn check_hand_placed_labels(
         lineage: Vec<String>,
     }
 
-    fn walk(elem: &ElementLayout, lineage: &[String], out: &mut Vec<Seen>) {
+    fn walk(
+        elem: &ElementLayout,
+        lineage: &[String],
+        out: &mut Vec<Seen>,
+        scope: &FrameScope<'_>,
+    ) {
+        // Text parked in a box that is hidden whenever the text is shown is
+        // not sitting on anything. A hidden element takes its whole subtree
+        // out of this frame's question.
+        if scope.hides_element(elem) {
+            return;
+        }
         let mut next = lineage.to_vec();
         if let Some(id) = &elem.id {
             next.push(id.0.clone());
@@ -3507,13 +3624,13 @@ fn check_hand_placed_labels(
             }
         }
         for child in &elem.children {
-            walk(child, &next, out);
+            walk(child, &next, out, scope);
         }
     }
 
     let mut seen = Vec::new();
     for elem in &result.root_elements {
-        walk(elem, &[], &mut seen);
+        walk(elem, &[], &mut seen, scope);
     }
 
     for shape in seen.iter().filter(|s| !s.is_text) {

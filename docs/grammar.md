@@ -292,4 +292,15 @@ Connections:
     b -> c [routing: curved]  // smooth curve
     a -> b -> c -> d          // chained connections
 
+LINT
+----
+`--lint` reports likely defects and exits 1 when it finds any, so a build can
+gate on it. Categories: overlap, containment, label, connection, alignment,
+redundant-constant, reducible-bend, missing-anchor, contrast, steep-direct,
+crowded-layout, over-constrained, label-overflow, unknown-modifier,
+overridden-constraint.
+
+With keyframes, collision checks re-solve each frame, so a warning names the
+frames the defect actually appears in.
+
 Run --examples for more detailed patterns.

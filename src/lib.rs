@@ -478,7 +478,7 @@ fn render_pipeline(
 
     // Lint pass
     let lint_warnings = if config.lint {
-        layout::lint::check(&result, &doc)
+        layout::lint::check(&result, &doc, &config.layout)
     } else {
         Vec::new()
     };

@@ -167,7 +167,7 @@
     <path id="q_driver_emitter_arrow" class="ai-shape ai-path" d="M193.00 268.00 L190.00 261.00 L185.00 266.00 Z"  fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <text id="q_driver_b_label" class="ai-shape ai-text" x="140" y="254" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">B</text>
     <text id="q_driver_c_label" class="ai-shape ai-text" x="190" y="207.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">C</text>
-    <text id="q_driver_e_label" class="ai-shape ai-text" x="190" y="300.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">E</text>
+    <text id="q_driver_e_label" class="ai-shape ai-text" x="205" y="288" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--foreground-1)">E</text>
   </g>
   <g id="gpio" class="ai-container">
     <rect id="gpio_body" class="ai-shape ai-rect" x="5" y="80" width="50" height="20" fill="var(--accent-2)" stroke="var(--accent-1)" stroke-width="1.5"/>
