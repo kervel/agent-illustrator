@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -70 920 540" data-frames="prompt,predict_on,append_on,predict_the,append_the,predict_mat,append_mat">
-  <!-- agent-illustrator 0.1.26 -->
+  <!-- agent-illustrator dev -->
   <style>
     :root {
     --accent-1: #2196f3;

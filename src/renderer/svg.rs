@@ -767,7 +767,7 @@ impl SvgBuilder {
         svg.push_str(&format!(
             "{}<!-- agent-illustrator {} -->",
             if nl.is_empty() { "" } else { "  " },
-            env!("CARGO_PKG_VERSION")
+            env!("AI_STAMP")
         ));
         svg.push_str(nl);
 
