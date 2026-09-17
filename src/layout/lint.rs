@@ -3021,6 +3021,36 @@ fn check_text_fits_its_box(
                 });
             }
         }
+        // A shape's LABEL can be rewritten by a keyframe too, and that path
+        // was never measured: label-overflow checks the declared label only,
+        // so a replacement three times its box's width reported nothing and
+        // the diagram passed every gate while being visibly broken. The
+        // declared wording is left to check_label_overflow; these are the
+        // variants it cannot see.
+        if let (Some(id), Some(label)) = (elem.id.as_ref(), elem.label.as_ref()) {
+            if label_is_inside(label) {
+                for (text, frame) in wordings.get(&id.0).cloned().unwrap_or_default() {
+                    let rich = crate::layout::text::parse_markup(&text)
+                        .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&text));
+                    let metrics =
+                        crate::layout::text::measure_runs(&rich.lines, label.font_size);
+                    let needed = metrics.width + 2.0 * 8.0;
+                    if needed <= elem.bounds.width + 2.0 {
+                        continue;
+                    }
+                    warnings.push(LintWarning {
+                        category: LintCategory::LabelOverflow,
+                        message: format!(
+                            "label \"{}\" on \"{}\" needs about {:.0}px but its box is \
+                             {:.0}px; break it with <br>, widen the box, or shorten the wording",
+                            text, id.0, needed, elem.bounds.width
+                        ),
+                        frames: frame.into_iter().collect(),
+                        pair: None,
+                    });
+                }
+            }
+        }
         for child in &elem.children {
             walk(child, wordings, warnings);
         }

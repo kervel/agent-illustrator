@@ -928,7 +928,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
-    let label = resolved_label.map(|(rich, font_size)| {
+    let label = resolved_label.map(|(rich, font_size, raw)| {
         // Shapes whose label is not centred on the box nudge it: a Line's
         // label rides above the stroke, a Callout's clears its pointer.
         let nudge = match &shape.shape_type.node {
@@ -955,6 +955,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
         let (label_position, anchor) = place_label(&bounds, &placement, &metrics);
         LabelLayout {
             text: rich.plain(),
+            source: raw,
             rich,
             font_size,
             position: label_position,
@@ -1006,7 +1007,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 /// sized for one set of lines and drawn with another. `validate_label_markup`
 /// has already rejected malformed markup by the time this runs, so the
 /// fallback to literal text is unreachable in practice.
-fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichText, f64)> {
+fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichText, f64, String)> {
     let raw = extract_label(&shape.modifiers)?;
     let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
     let rich = crate::layout::text::parse_markup(&raw)
@@ -1020,13 +1021,13 @@ fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichTe
         (true, Some(w)) => crate::layout::text::wrap(&rich, font_size, w - 2.0 * LABEL_INSET),
         _ => rich,
     };
-    Some((rich, font_size))
+    Some((rich, font_size, raw))
 }
 
 fn compute_shape_size(
     shape: &ShapeDecl,
     config: &LayoutConfig,
-    label: Option<&(crate::layout::text::RichText, f64)>,
+    label: Option<&(crate::layout::text::RichText, f64, String)>,
 ) -> (f64, f64) {
     // Extract size modifiers from the shape
     let size = extract_size_modifier(&shape.modifiers);
@@ -1046,7 +1047,7 @@ fn compute_shape_size(
     // The space the label needs, measured the same way lint checks it and
     // the renderer draws it.
     let label_metrics =
-        label.map(|(rich, font_size)| crate::layout::text::measure_runs(&rich.lines, *font_size));
+        label.map(|(rich, font_size, _)| crate::layout::text::measure_runs(&rich.lines, *font_size));
     let label_min_width = label_metrics.map(|m| m.width + 2.0 * LABEL_INSET);
     let label_min_height = label_metrics.map(|m| m.height + 2.0 * LABEL_INSET);
 

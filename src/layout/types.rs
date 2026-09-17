@@ -978,9 +978,16 @@ fn vertical_edge(y: f64, h: f64, align: Option<TextAnchor>, text_height: f64) ->
 /// Layout information for a label
 #[derive(Debug, Clone)]
 pub struct LabelLayout {
-    /// The wording with markup stripped. Lint messages and keyframe diffs
-    /// compare wording, not styling, so they keep reading this.
+    /// The wording with markup stripped. Lint messages compare wording, not
+    /// styling, so they keep reading this.
     pub text: String,
+    /// The label exactly as written, markup and all.
+    ///
+    /// A keyframe that rewrites a label carries this rather than `text`: the
+    /// flattened form loses the tags, so the replacement was emitted as one
+    /// unwrapped line while the declared label was laid out properly — the
+    /// static path and the animated path disagreeing again.
+    pub source: String,
     /// The parsed lines of styled runs, as rendered.
     pub rich: crate::layout::text::RichText,
     /// Base font size the runs were measured at.
@@ -1008,6 +1015,7 @@ impl LabelLayout {
             .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(raw));
         LabelLayout {
             text: rich.plain(),
+            source: raw.to_string(),
             rich,
             font_size,
             position,

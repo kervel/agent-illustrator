@@ -529,6 +529,7 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
                 let rich = crate::layout::text::parse_markup(text)
                     .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));
                 label.text = rich.plain();
+                label.source = text.to_string();
                 label.rich = rich;
             }
         }
@@ -842,7 +843,9 @@ fn element_text(elem: &ElementLayout) -> Option<&str> {
     use crate::parser::ast::ShapeType;
     match &elem.element_type {
         ElementType::Shape(ShapeType::Text { content }) => Some(content.as_str()),
-        _ => elem.label.as_ref().map(|l| l.text.as_str()),
+        // The RAW label, markup and all: a keyframe that rewrites a label
+        // carries this forward, and the flattened form would drop the tags.
+        _ => elem.label.as_ref().map(|l| l.source.as_str()),
     }
 }
 
