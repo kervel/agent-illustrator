@@ -35,8 +35,9 @@ fn warnings(source: &str) -> Vec<String> {
 /// The `<text>` element carrying `class`, and its inner markup.
 fn text_node<'a>(svg: &'a str, class: &str) -> &'a str {
     // rfind, not find: the class also appears in the <style> block, where
-    // there is no <text> before it.
-    let start = svg.rfind(class).expect("variant rendered");
+    // there is no <text> before it. The class carries a per-document scope
+    // prefix, so match on its suffix.
+    let start = svg.rfind(class).unwrap_or_else(|| panic!("no {class} in:\n{svg}"));
     let from = svg[..start].rfind("<text").expect("opening tag");
     let end = svg[from..].find("</text>").expect("closing tag") + from;
     &svg[from..end]
@@ -45,7 +46,7 @@ fn text_node<'a>(svg: &'a str, class: &str) -> &'a str {
 #[test]
 fn a_rewritten_label_parses_its_markup() {
     let svg = animated(CARD);
-    let variant = text_node(&svg, "aitxt-card-v0");
+    let variant = text_node(&svg, "-card-v0");
     assert!(
         !variant.contains("<br>") && !variant.contains("<small>"),
         "tags must not survive as literal text: {variant}"
@@ -63,7 +64,7 @@ fn a_rewritten_label_parses_its_markup() {
 #[test]
 fn the_declared_label_is_unchanged() {
     let svg = animated(CARD);
-    let base = text_node(&svg, "aitxt-card-base");
+    let base = text_node(&svg, "-card-base");
     assert!(base.matches("dy=").count() >= 2, "got: {base}");
 }
 
@@ -81,7 +82,7 @@ fn a_static_frame_and_the_animated_variant_agree() {
         .expect("label rendered");
 
     let svg = animated(CARD);
-    let variant = text_node(&svg, "aitxt-card-v0");
+    let variant = text_node(&svg, "-card-v0");
     assert_eq!(
         variant.matches("dy=").count(),
         static_lines,

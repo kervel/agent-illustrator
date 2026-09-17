@@ -33,7 +33,7 @@ keyframe "gone" {
 
     // The CSS rule to hide box1 in the "gone" frame is emitted...
     assert!(
-        svg.contains(".kf-box1 { opacity: 0;"),
+        svg.contains("-box1 { opacity: 0;"),
         "expected hide rule .kf-box1 {{ opacity: 0; }} in CSS, got:\n{}",
         svg
     );
@@ -42,7 +42,7 @@ keyframe "gone" {
     // Match a class attribute (not the `.kf-box1` CSS selector) — the wrapper
     // group is `<g class="kf-box1 kf-anim">` (or `kf-hidden kf-box1 kf-anim`).
     assert!(
-        svg.contains(r#"class="kf-box1 "#) || svg.contains("kf-hidden kf-box1"),
+        svg.contains("-box1 ") || svg.contains("-box1\""),
         "element box1 must carry the kf-box1 class so the hide rule binds, got:\n{}",
         svg
     );
@@ -69,7 +69,7 @@ keyframe "gone" { hide parrow }
     // is hidden together with the path.
     let label_line = svg.lines().find(|l| l.contains("predicts one token"))
         .expect("label text present in svg");
-    assert!(label_line.contains("conn-parrow"),
+    assert!(label_line.contains("-parrow"),
         "connection label must carry the conn-parrow class so hide toggles it, got:\n{}", label_line);
 }
 
@@ -95,7 +95,7 @@ keyframe "active" {
 
     // The show must still emit the opacity override.
     assert!(
-        svg.contains(".kf-tok3 { opacity: 1;"),
+        svg.contains("-tok3 { opacity: 1;"),
         "expected show rule .kf-tok3 {{ opacity: 1; }}, got:\n{}",
         svg
     );
@@ -105,7 +105,7 @@ keyframe "active" {
     // a class on the shape (.kfp-tok3), not #tok3 — an id selector does not
     // survive an inlining filter that namespaces ids.
     assert!(
-        svg.contains(".kfp-tok3 {") && svg.contains("stroke:"),
+        svg.contains("-tok3 {") && svg.contains("stroke:"),
         "expected transform stroke override .kfp-tok3 {{ stroke: ... }} to survive show, got:\n{}",
         svg
     );

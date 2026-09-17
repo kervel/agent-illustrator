@@ -51,6 +51,9 @@ pub struct SvgBuilder {
     elements: Vec<String>,
     connections: Vec<String>,
     indent: usize,
+    /// Prefix that makes this document's keyframe classes unique. See
+    /// `SvgConfig::scope`.
+    scope: String,
     /// Palette tokens that a bare colour name resolves to, so a
     /// `<span fill=accent-dark>` in label markup becomes `var(--accent-dark)`
     /// exactly as the same name would on an element. Seeded from the default
@@ -67,6 +70,7 @@ pub struct SvgBuilder {
 impl SvgBuilder {
     /// Create a new SVG builder
     pub fn new(config: SvgConfig) -> Self {
+        let scope = config.scope.clone();
         Self {
             config,
             defs: vec![],
@@ -75,6 +79,7 @@ impl SvgBuilder {
             elements: vec![],
             connections: vec![],
             indent: 1,
+            scope,
             // Seeded with the default palette so a document that supplies no
             // stylesheet still resolves the documented colour names.
             palette_tokens: Stylesheet::default().colors.keys().cloned().collect(),
@@ -99,6 +104,11 @@ impl SvgBuilder {
     /// Add raw CSS to the SVG `<style>` block
     pub fn add_custom_css(&mut self, css: &str) {
         self.styles.push(css.to_string());
+    }
+
+    /// This document's keyframe-class prefix, empty for a standalone diagram.
+    pub fn scope(&self) -> &str {
+        &self.scope
     }
 
     /// Resolve a colour written in label markup the way an element's `fill:`
@@ -627,10 +637,12 @@ impl SvgBuilder {
             String::new()
         };
         self.connections.push(format!(
-            r#"{}<path class="{}connection conn-{} conn-{}-f{}" d="{}" fill="none" opacity="0"{}/>"#,
+            r#"{}<path class="{}connection conn-{}{} conn-{}{}-f{}" d="{}" fill="none" opacity="0"{}/>"#,
             self.indent_str(),
             prefix,
+            self.scope,
             id,
+            self.scope,
             id,
             frame,
             d,
@@ -672,8 +684,9 @@ impl SvgBuilder {
     /// Uses a CSS class so frame CSS rules can override visibility.
     pub fn start_visibility_group(&mut self, element_id: &str) {
         self.elements.push(format!(
-            r#"{}<g class="kf-hidden kf-{} kf-anim">"#,
+            r#"{}<g class="kf-hidden kf-{}{} kf-anim">"#,
             self.indent_str(),
+            self.scope,
             element_id
         ));
         self.indent += 1;
@@ -684,8 +697,9 @@ impl SvgBuilder {
     /// so a later frame's `.kf-{id} { opacity: 0 }` rule has a node to bind to.
     pub fn start_kf_class_group(&mut self, element_id: &str) {
         self.elements.push(format!(
-            r#"{}<g class="kf-{} kf-anim">"#,
+            r#"{}<g class="kf-{}{} kf-anim">"#,
             self.indent_str(),
+            self.scope,
             element_id
         ));
         self.indent += 1;
@@ -851,7 +865,7 @@ pub fn render_svg_with_keyframes(
     let keyframe_css = if no_frame_css {
         String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }\n")
     } else {
-        generate_keyframe_css(frame_states, frame_diffs, &conn_meta)
+        generate_keyframe_css(frame_states, frame_diffs, &conn_meta, &config.scope)
     };
     builder.add_custom_css(&keyframe_css);
 
@@ -990,6 +1004,7 @@ fn generate_keyframe_css(
     _frame_states: &[crate::layout::keyframe::FrameState],
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
     conn_meta: &std::collections::HashMap<String, (RoutingMode, bool, f64)>,
+    scope: &str,
 ) -> String {
     let text_variants = collect_text_variants(frame_diffs);
     let mut css = String::new();
@@ -1019,13 +1034,13 @@ fn generate_keyframe_css(
         for (elem_id, diff) in &frame.element_diffs {
             if let Some(opacity) = diff.opacity {
                 css.push_str(&format!(
-                    "  .kf-{} {{ opacity: {}; }}\n",
-                    elem_id, opacity
+                    "  .kf-{}{} {{ opacity: {}; }}\n",
+                    scope, elem_id, opacity
                 ));
             }
             // Position + rotation → transform on the wrapper group (label rides along).
             if let Some(t) = frame_transform_css(diff.tx, diff.ty, diff.rotation) {
-                css.push_str(&format!("  .kf-{} {{ transform: {}; }}\n", elem_id, t));
+                css.push_str(&format!("  .kf-{}{} {{ transform: {}; }}\n", scope, elem_id, t));
             }
             // Size + color → inner shape.
             let mut props = Vec::new();
@@ -1055,7 +1070,8 @@ fn generate_keyframe_css(
                 // A CSS rule beats a presentation attribute, so this overrides
                 // the shape's own fill=/stroke= without needing !important.
                 css.push_str(&format!(
-                    "  .kfp-{} {{ {}; }}\n",
+                    "  .kfp-{}{} {{ {}; }}\n",
+                    scope,
                     elem_id,
                     props.join("; ")
                 ));
@@ -1063,8 +1079,8 @@ fn generate_keyframe_css(
             // Label colour lives on the text node inside the wrapper group.
             if let Some(colour) = &diff.label_fill {
                 css.push_str(&format!(
-                    "  .kf-{} text {{ fill: {}; }}\n",
-                    elem_id, colour
+                    "  .kf-{}{} text {{ fill: {}; }}\n",
+                    scope, elem_id, colour
                 ));
             }
             // Rewritten text: fade the base wording out and this frame's in.
@@ -1073,8 +1089,8 @@ fn generate_keyframe_css(
                     .get(elem_id)
                     .and_then(|texts| texts.iter().position(|t| t == text))
                 {
-                    css.push_str(&format!("  .aitxt-{}-base {{ opacity: 0; }}\n", elem_id));
-                    css.push_str(&format!("  .aitxt-{}-v{} {{ opacity: 1; }}\n", elem_id, n));
+                    css.push_str(&format!("  .aitxt-{}{}-base {{ opacity: 0; }}\n", scope, elem_id));
+                    css.push_str(&format!("  .aitxt-{}{}-v{} {{ opacity: 1; }}\n", scope, elem_id, n));
                 }
             }
         }
@@ -1084,20 +1100,20 @@ fn generate_keyframe_css(
         // (reshaped) routes are handled by the crossfade variants (Task 4).
         for (conn_id, diff) in &frame.connection_diffs {
             if let Some(opacity) = diff.opacity {
-                css.push_str(&format!("  .conn-{} {{ opacity: {}; }}\n", conn_id, opacity));
+                css.push_str(&format!("  .conn-{}{} {{ opacity: {}; }}\n", scope, conn_id, opacity));
             }
             if let Some(pts) = &diff.path {
                 if diff.morphable {
                     if let Some((routing, marker, sw)) = conn_meta.get(conn_id) {
                         let d = connection_path_d(pts, *routing, *marker, *sw);
-                        css.push_str(&format!("  .conn-{} {{ d: path(\"{}\"); }}\n", conn_id, d));
+                        css.push_str(&format!("  .conn-{}{} {{ d: path(\"{}\"); }}\n", scope, conn_id, d));
                     }
                 } else {
                     // Reshaped route: crossfade base out, this frame's variant in.
-                    css.push_str(&format!("  .conn-{}-base {{ opacity: 0; }}\n", conn_id));
+                    css.push_str(&format!("  .conn-{}{}-base {{ opacity: 0; }}\n", scope, conn_id));
                     css.push_str(&format!(
-                        "  .conn-{}-f{} {{ opacity: 1; }}\n",
-                        conn_id, frame.name
+                        "  .conn-{}{}-f{} {{ opacity: 1; }}\n",
+                        scope, conn_id, frame.name
                     ));
                 }
             }
@@ -1222,7 +1238,7 @@ fn render_element_inner(
     // shape, which sits one <g> deeper.
     if let Some(i) = id {
         if kf_referenced.contains(i) {
-            classes.push(format!("kfp-{i}"));
+            classes.push(format!("kfp-{}{i}", builder.scope()));
         }
     }
     let classes = classes;
@@ -1360,9 +1376,10 @@ fn render_element_inner(
                 }
             });
             let x = anchor_x(&element.bounds, anchor);
+            let scope = builder.scope().to_string();
             let mut base_classes = classes.clone();
             if let (Some(i), false) = (id, variants.is_empty()) {
-                base_classes.push(format!("aitxt-{}-base", i));
+                base_classes.push(format!("aitxt-{}{}-base", scope, i));
             }
             render_shape_with_rotation(element, builder, |b| {
                 b.add_text_element(
@@ -1376,7 +1393,7 @@ fn render_element_inner(
                 );
                 for (n, text) in variants.iter().enumerate() {
                     let mut variant_classes = classes.clone();
-                    variant_classes.push(format!("aitxt-{}-v{}", id.unwrap_or(""), n));
+                    variant_classes.push(format!("aitxt-{}{}-v{}", scope, id.unwrap_or(""), n));
                     b.add_text_element(
                         None,
                         text,
@@ -1559,7 +1576,7 @@ fn render_element_inner(
         let base_classes = if variants.is_empty() {
             String::new()
         } else {
-            format!("aitxt-{}-base", own_id)
+            format!("aitxt-{}{}-base", builder.scope(), own_id)
         };
         builder.add_rich_text_with_classes(
             &label.rich,
@@ -1580,7 +1597,7 @@ fn render_element_inner(
                 label.position.y,
                 &label.anchor,
                 &format!("{} opacity=\"0\"", font_styles),
-                &format!("aitxt-{}-v{}", own_id, n),
+                &format!("aitxt-{}{}-v{}", builder.scope(), own_id, n),
             );
         }
     }
@@ -1596,12 +1613,12 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         .map(|s| s.to_string())
         .or_else(|| conn.name.as_ref().map(|n| n.0.clone()));
     if let Some(c) = &conn_class {
-        classes.push(format!("conn-{}", c));
+        classes.push(format!("conn-{}{}", builder.scope(), c));
         // Only in the keyframe render path (id provided): mark this as the base path
         // (vs a crossfade variant) so a reshaped frame can hide just the base via
         // `.conn-<id>-base { opacity: 0 }`. Keeps static output unchanged.
         if id.is_some() {
-            classes.push(format!("conn-{}-base", c));
+            classes.push(format!("conn-{}{}-base", builder.scope(), c));
         }
     }
     let styles = format_connection_styles(&conn.styles);
@@ -1643,7 +1660,7 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         // together with the path.
         let extra_classes = conn_class
             .as_ref()
-            .map(|c| format!("conn-{}", c))
+            .map(|c| format!("conn-{}{}", builder.scope(), c))
             .unwrap_or_default();
         builder.add_rich_text_with_classes(
             &label.rich,

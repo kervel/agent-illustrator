@@ -366,10 +366,31 @@ pub fn render_with_lint(
 }
 
 /// Internal shared render pipeline.
+/// A short, stable token derived from the source.
+///
+/// Keyframe CSS is built from names the author chose, so two diagrams inlined
+/// into one page that both call a keyframe "idle" and an element "v1" write
+/// rules that match each other's elements. Deriving the token from the source
+/// keeps a given document's output byte-stable while making it unique against
+/// any other document.
+fn document_scope(source: &str) -> String {
+    // FNV-1a: tiny, dependency-free, and deterministic across runs and hosts —
+    // which matters because these strings land in committed SVGs.
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for byte in source.as_bytes() {
+        hash ^= *byte as u64;
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    format!("{:08x}-", (hash >> 32) as u32)
+}
+
 fn render_pipeline(
     source: &str,
-    config: RenderConfig,
+    mut config: RenderConfig,
 ) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {
+    if config.svg.scope.is_empty() {
+        config.svg.scope = document_scope(source);
+    }
     // Parse the source
     let doc = parse(source)?;
 
@@ -555,7 +576,7 @@ fn render_pipeline(
                     base_conn_d.insert(id, format!("path(\"{}\")", renderer::svg::connection_path_d(&c.path, *r, *m, *sw)));
                 }
             }
-            let css = generate_animate_css(&frame_states, &frame_diffs, &conn_meta, &base_dims, &base_conn_d);
+            let css = generate_animate_css(&frame_states, &frame_diffs, &conn_meta, &base_dims, &base_conn_d, &config.svg.scope);
             if let Some(pos) = svg.rfind("</style>") {
                 svg.insert_str(pos, &css);
             }
@@ -690,6 +711,9 @@ fn generate_animate_css(
     conn_meta: &std::collections::HashMap<String, (layout::RoutingMode, bool, f64)>,
     base_dims: &std::collections::HashMap<String, (f64, f64)>,
     base_conn_d: &std::collections::HashMap<String, String>,
+    // Same per-document token the SVG's class names carry, so two animated
+    // diagrams inlined into one page cannot drive each other's elements.
+    scope: &str,
 ) -> String {
     let n = frame_diffs.len();
     if n == 0 {
@@ -749,7 +773,7 @@ fn generate_animate_css(
             continue;
         }
 
-        let anim_name = format!("kf-anim-{}", elem_id);
+        let anim_name = format!("kf-anim-{}{}", scope, elem_id);
         css.push_str(&format!("@keyframes {} {{\n", anim_name));
 
         for (i, &opacity) in timeline.iter().enumerate() {
@@ -770,7 +794,7 @@ fn generate_animate_css(
         css.push_str("}\n");
 
         anim_rules
-            .entry(format!(".kf-{}", elem_id))
+            .entry(format!(".kf-{}{}", scope, elem_id))
             .or_default()
             .push(format!("{} {:.1}s step-end infinite", anim_name, total_duration));
     }
@@ -782,10 +806,10 @@ fn generate_animate_css(
     let mut txt_timelines: std::collections::BTreeMap<String, Vec<f64>> =
         std::collections::BTreeMap::new();
     for (elem_id, texts) in &text_variants {
-        let base_selector = format!(".aitxt-{}-base", elem_id);
+        let base_selector = format!(".aitxt-{}{}-base", scope, elem_id);
         txt_timelines.insert(base_selector.clone(), vec![1.0; n]);
         for v in 0..texts.len() {
-            txt_timelines.insert(format!(".aitxt-{}-v{}", elem_id, v), vec![0.0; n]);
+            txt_timelines.insert(format!(".aitxt-{}{}-v{}", scope, elem_id, v), vec![0.0; n]);
         }
         for (i, diff) in frame_diffs.iter().enumerate() {
             let Some(text) = diff.element_diffs.get(elem_id).and_then(|d| d.label.as_ref()) else {
@@ -796,7 +820,7 @@ fn generate_animate_css(
             };
             txt_timelines.get_mut(&base_selector).unwrap()[i] = 0.0;
             txt_timelines
-                .get_mut(&format!(".aitxt-{}-v{}", elem_id, v))
+                .get_mut(&format!(".aitxt-{}{}-v{}", scope, elem_id, v))
                 .unwrap()[i] = 1.0;
         }
     }
@@ -846,10 +870,10 @@ fn generate_animate_css(
     }
     for (id, vals) in &xf_tl {
         if let Some(body) = smooth_keyframes_body("transform", vals, "translate(0px, 0px)", pct_per_frame) {
-            let anim = format!("kf-geo-{}", id);
+            let anim = format!("kf-geo-{}{}", scope, id);
             css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
             anim_rules
-                .entry(format!(".kf-{}", id))
+                .entry(format!(".kf-{}{}", scope, id))
                 .or_default()
                 .push(format!("{} {:.1}s ease infinite", anim, total_duration));
         }
@@ -883,7 +907,7 @@ fn generate_animate_css(
             continue;
         }
 
-        let anim_name = format!("kf-anim-conn-{}", conn_id);
+        let anim_name = format!("kf-anim-conn-{}{}", scope, conn_id);
         css.push_str(&format!("@keyframes {} {{\n", anim_name));
 
         for (i, &opacity) in timeline.iter().enumerate() {
@@ -903,7 +927,7 @@ fn generate_animate_css(
         css.push_str("}\n");
 
         anim_rules
-            .entry(format!(".conn-{}", conn_id))
+            .entry(format!(".conn-{}{}", scope, conn_id))
             .or_default()
             .push(format!("{} {:.1}s step-end infinite", anim_name, total_duration));
     }
@@ -943,16 +967,16 @@ fn generate_animate_css(
             let anim = format!("kf-d-{}", id);
             css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, body));
             anim_rules
-                .entry(format!(".conn-{}", id))
+                .entry(format!(".conn-{}{}", scope, id))
                 .or_default()
                 .push(format!("{} {:.1}s ease infinite", anim, total_duration));
         }
     }
     for (id, tl) in &base_fade {
-        let anim = format!("kf-basefade-{}", id);
+        let anim = format!("kf-basefade-{}{}", scope, id);
         css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, step_opacity_keyframes_body(tl, pct_per_frame, n)));
         anim_rules
-            .entry(format!(".conn-{}-base", id))
+            .entry(format!(".conn-{}{}-base", scope, id))
             .or_default()
             .push(format!("{} {:.1}s step-end infinite", anim, total_duration));
     }
@@ -960,10 +984,10 @@ fn generate_animate_css(
         let mut it = key.split('\u{1}');
         let id = it.next().unwrap_or("");
         let frame = it.next().unwrap_or("");
-        let anim = format!("kf-variant-{}-{}", id, frame);
+        let anim = format!("kf-variant-{}{}-{}", scope, id, frame);
         css.push_str(&format!("@keyframes {} {{\n{}}}\n", anim, step_opacity_keyframes_body(tl, pct_per_frame, n)));
         anim_rules
-            .entry(format!(".conn-{}-f{}", id, frame))
+            .entry(format!(".conn-{}{}-f{}", scope, id, frame))
             .or_default()
             .push(format!("{} {:.1}s step-end infinite", anim, total_duration));
     }

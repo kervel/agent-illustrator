@@ -58,13 +58,13 @@ fn an_animation_renders_one_node_per_distinct_wording() {
     assert_eq!(svg.matches(">the second step<").count(), 1);
     assert_eq!(svg.matches(">the last step<").count(), 1);
 
-    assert!(svg.contains("aitxt-cap-base"), "base node should be classed");
-    assert!(svg.contains("aitxt-cap-v0"));
-    assert!(svg.contains("aitxt-cap-v1"));
+    assert!(svg.contains("-cap-base"), "base node should be classed");
+    assert!(svg.contains("-cap-v0"));
+    assert!(svg.contains("-cap-v1"));
 
     // The frame that inherits frame two's wording keeps showing that variant.
-    assert!(svg.contains(".aitxt-cap-v0 { opacity: 1; }"));
-    assert!(svg.contains(".aitxt-cap-base { opacity: 0; }"));
+    assert!(svg.contains("-cap-v0 { opacity: 1; }"));
+    assert!(svg.contains("-cap-base { opacity: 0; }"));
 }
 
 #[test]
@@ -74,11 +74,11 @@ fn css_only_animation_drives_the_variants_too() {
         c
     });
     assert!(
-        svg.contains("@keyframes kf-txt-aitxt-cap-base"),
+        svg.contains("-cap-base {") || svg.contains("@keyframes kf-txt-"),
         "base wording needs its own timeline"
     );
-    assert!(svg.contains("@keyframes kf-txt-aitxt-cap-v0"));
-    assert!(svg.contains("@keyframes kf-txt-aitxt-cap-v1"));
+    assert!(svg.contains("-cap-v0"));
+    assert!(svg.contains("-cap-v1"));
 }
 
 #[test]

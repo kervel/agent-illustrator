@@ -152,7 +152,7 @@ constrain note.center_x = cs.center_x
 constrain note.center_y = cs.center_y
 
 keyframe "both" { }
-keyframe "still both" { }
+keyframe "still-both" { }
 "#,
     );
     assert!(

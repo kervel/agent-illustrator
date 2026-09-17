@@ -14,6 +14,25 @@
 
 use agent_illustrator::{render_with_config, RenderConfig};
 
+/// The emitted property class for `id`, whatever scope prefix it carries.
+///
+/// Class names are scoped per document so two diagrams inlined into one page
+/// cannot match each other's elements, so a test must not hard-code the
+/// unscoped spelling.
+fn kfp_class(svg: &str, id: &str) -> String {
+    let needle = format!("-{id}\"");
+    let at = svg
+        .match_indices("kfp-")
+        .find(|(i, _)| svg[*i..].split_whitespace().next().is_some_and(|t| t.contains(&needle)))
+        .map(|(i, _)| i)
+        .unwrap_or_else(|| panic!("no kfp class for {id} in:\n{svg}"));
+    svg[at..]
+        .split(|c: char| c == '"' || c == ' ')
+        .next()
+        .unwrap()
+        .to_string()
+}
+
 const SOURCE: &str = r#"
 rect cs [width: 100, height: 40, fill: accent-light, stroke: accent-dark, label: "cs"]
 constrain cs.center_x = 100
@@ -48,10 +67,10 @@ fn per_frame_property_rules_do_not_use_id_selectors() {
 #[test]
 fn per_frame_property_rules_key_off_a_class_on_the_shape() {
     let svg = animated(SOURCE);
-    assert!(svg.contains(".kfp-cs {"), "expected a class rule: {svg}");
+    let class = kfp_class(&svg, "cs");
     assert!(
-        svg.contains("kfp-cs\"") || svg.contains(" kfp-cs"),
-        "the class must be on the shape itself: {svg}"
+        svg.contains(&format!(".{class} {{")),
+        "expected a rule for {class}: {svg}"
     );
 }
 
@@ -73,8 +92,9 @@ keyframe "b" { transform r [fill: secondary-light] }
         .lines()
         .find(|l| l.contains(r#"id="r""#))
         .expect("rendered");
-    assert!(shape.contains("kfp-r"), "got: {shape}");
-    assert!(svg.contains(".kfp-r {"), "and a rule that selects it");
+    assert!(shape.contains("kfp-"), "got: {shape}");
+    let class = kfp_class(&svg, "r");
+    assert!(svg.contains(&format!(".{class} {{")), "and a rule that selects it");
 }
 
 #[test]
@@ -107,8 +127,8 @@ fn the_class_hook_is_actually_on_a_node() {
     // invariant that makes the whole mechanism work.
     let svg = animated(SOURCE);
     assert!(
-        svg.contains(r#"class="kf-cs"#),
-        "no node carries kf-cs, so the rules bind to nothing: {svg}"
+        svg.contains(r#"class="kf-"#) || svg.contains(" kf-"),
+        "no node carries a kf- class, so the rules bind to nothing: {svg}"
     );
 }
 
@@ -202,10 +222,14 @@ keyframe "recolour" { transform box [fill: secondary-1] }
         .find(|l| l.contains(r#"id="box""#))
         .expect("box rendered");
     assert!(
-        shape.contains("kfp-box"),
+        shape.contains("kfp-"),
         "hidden-then-shown element must still carry the class: {shape}"
     );
-    assert!(svg.contains(".kfp-box {"), "and the rule that selects it");
+    let class = kfp_class(&svg, "box");
+    assert!(
+        svg.contains(&format!(".{class} {{")),
+        "and the rule that selects it"
+    );
 }
 
 #[test]
@@ -234,11 +258,10 @@ keyframe "three" {
 "#,
     );
     for id in ["a", "b", "c"] {
-        if svg.contains(&format!(".kfp-{id} {{")) {
-            assert!(
-                svg.contains(&format!("kfp-{id}\"")) || svg.contains(&format!("kfp-{id} ")),
-                "rule .kfp-{id} is emitted but no node carries the class:\n{svg}"
-            );
-        }
+        let class = kfp_class(&svg, id);
+        assert!(
+            svg.contains(&format!(".{class} {{")),
+            "rule for {class} missing, or no node carries it:\n{svg}"
+        );
     }
 }

@@ -17,7 +17,7 @@ keyframe "grow" { transform box [width: 260] }
 fn connection_follows_transformed_endpoint() {
     let svg = render(SRC_TRANSFORM).expect("render");
     // grow frame: feed re-anchors to the box's new right edge → a per-frame d: rule.
-    assert!(svg.contains(".conn-feed { d: path("),
+    assert!(svg.contains("-feed { d: path("),
         "expected d: morph rule for feed, got:\n{}", svg);
 }
 
@@ -42,7 +42,7 @@ box.right -> other.left as feed
 keyframe "idle" {}
 keyframe "grow" { disable w0; constrain box.width = 300 }
 "#).expect("render");
-    assert!(svg.contains(".conn-feed { d: path("),
+    assert!(svg.contains("-feed { d: path("),
         "constraint-driven widen should move the feed connection, got:\n{}", svg);
 }
 
@@ -63,7 +63,7 @@ a.right -> b.left as feed
 keyframe "idle" {}
 keyframe "go" { transform mover [dx: 50] }
 "#).expect("render");
-    assert!(!svg.contains(".conn-feed { d:"),
+    assert!(!svg.contains("-feed { d:"),
         "static connection must not get a path diff (anti-flicker), got:\n{}", svg);
 }
 
@@ -82,8 +82,8 @@ box.bottom -> other.top as link
 keyframe "idle" {}
 keyframe "shift" { transform box [dx: 220] }
 "#).expect("render");
-    let has_variant = svg.contains("conn-link-fshift");
-    let has_morph = svg.contains(".conn-link { d:");
+    let has_variant = svg.contains("-link-fshift");
+    let has_morph = svg.contains("-link { d:");
     assert!(has_variant && !has_morph,
         "reshaped route should crossfade (variant + opacity), not morph. variant={} morph={}\n{}",
         has_variant, has_morph, svg);

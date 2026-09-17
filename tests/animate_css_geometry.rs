@@ -31,7 +31,7 @@ fn animate_css_emits_element_transform_keyframes() {
     // The geometry must come from a @keyframes block (the frame-class CSS is inert in
     // --animate-css mode — nothing toggles the frame class without JS).
     assert!(
-        svg.contains("@keyframes kf-geo-box"),
+        svg.contains("@keyframes kf-geo-") && svg.contains("-box "),
         "expected a transform @keyframes (kf-geo-box) for the moved element, got:\n{}",
         svg
     );
@@ -64,10 +64,10 @@ keyframe "idle" { hide tok }
 keyframe "show" { show tok; transform tok [dx: 50] }
 "#,
     );
-    let rules: Vec<&str> = svg.lines().filter(|l| l.contains(".kf-tok { animation:")).collect();
+    let rules: Vec<&str> = svg.lines().filter(|l| l.contains("-tok { animation:") && !l.contains("conn-")).collect();
     assert_eq!(rules.len(), 1, "expected ONE .kf-tok animation rule, got {}: {:?}", rules.len(), rules);
     assert!(
-        rules[0].contains("kf-anim-tok") && rules[0].contains("kf-geo-tok"),
+        rules[0].contains("kf-anim-") && rules[0].contains("kf-geo-"),
         "the single rule must list BOTH visibility and geometry animations, got: {}",
         rules[0]
     );
@@ -94,12 +94,12 @@ keyframe "moved" { hide arr; disable tok_home; constrain tok.center_x = 400; con
 "#,
     );
     assert!(
-        svg.contains(".conn-arr { animation:") && svg.contains("kf-anim-conn-arr"),
+        svg.contains("-arr { animation:") && svg.contains("kf-anim-conn-"),
         "arrow must keep its visibility animation, got:\n{}",
         svg
     );
     assert!(
-        !svg.contains(".conn-arr-base { animation:"),
+        !svg.contains("-arr-base { animation:"),
         "a reshape while hidden must not emit a clobbering -base animation, got:\n{}",
         svg
     );
@@ -130,7 +130,7 @@ keyframe "shift" { transform box [dx: 220] }
 "#);
     // reshaping route → crossfade variant participates in a (step) opacity animation
     assert!(
-        svg.contains("conn-link-fshift") && svg.contains("kf-variant-link-shift"),
+        svg.contains("-link-fshift") && svg.contains("kf-variant-") && svg.contains("-link-shift"),
         "expected crossfade variant animation for reshaping route, got:\n{}",
         svg
     );

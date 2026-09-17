@@ -14,6 +14,20 @@ pub struct SvgConfig {
 
     /// Prefix for CSS class names (e.g., "ai-" for "ai-shape")
     pub class_prefix: Option<String>,
+
+    /// Short token making this document's keyframe classes unique.
+    ///
+    /// Per-frame rules are built from names the author chose — `.frame-<kf>`
+    /// and `.kfp-<element>` — so two diagrams inlined into one page that both
+    /// name a keyframe "idle" and an element "v1" wrote rules matching each
+    /// other's elements. That is invisible in isolation: each file is correct,
+    /// `--frame` is correct, and a pixel diff of the two rendered separately
+    /// says identical. It only appears once both are inlined, which is the
+    /// documented way to use animated output.
+    ///
+    /// Empty leaves class names unscoped, which is what a single standalone
+    /// diagram wants.
+    pub scope: String,
 }
 
 impl Default for SvgConfig {
@@ -23,6 +37,7 @@ impl Default for SvgConfig {
             standalone: true,
             pretty_print: true,
             class_prefix: Some("ai-".to_string()),
+            scope: String::new(),
         }
     }
 }

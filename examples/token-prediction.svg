@@ -41,77 +41,77 @@
 .frame-prompt {
 }
 .frame-predict_on {
-  .kf-d { opacity: 1; }
-  .conn-parrow_d { opacity: 1; }
+  .kf-eea1c6c1-d { opacity: 1; }
+  .conn-eea1c6c1-parrow_d { opacity: 1; }
 }
 .frame-append_on {
-  .kf-d { opacity: 1; }
-  .kf-d { transform: translate(-273px, -150px); }
-  .kfp-d { stroke: #cdd8e3; stroke-width: 1px; }
-  .kfp-inbox { width: 246px; }
-  .conn-feed { d: path("M326 150 L477.8 150"); }
-  .conn-parrow_d-base { opacity: 0; }
-  .conn-parrow_d-fappend_on { opacity: 1; }
+  .kf-eea1c6c1-d { opacity: 1; }
+  .kf-eea1c6c1-d { transform: translate(-273px, -150px); }
+  .kfp-eea1c6c1-d { stroke: #cdd8e3; stroke-width: 1px; }
+  .kfp-eea1c6c1-inbox { width: 246px; }
+  .conn-eea1c6c1-feed { d: path("M326 150 L477.8 150"); }
+  .conn-eea1c6c1-parrow_d-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_d-fappend_on { opacity: 1; }
 }
 .frame-predict_the {
-  .kf-d { opacity: 1; }
-  .kf-d { transform: translate(-273px, -150px); }
-  .kfp-d { stroke: #cdd8e3; stroke-width: 1px; }
-  .kf-e { opacity: 1; }
-  .kfp-inbox { width: 246px; }
-  .conn-feed { d: path("M326 150 L477.8 150"); }
-  .conn-parrow_d-base { opacity: 0; }
-  .conn-parrow_d-fpredict_the { opacity: 1; }
-  .conn-parrow_e { opacity: 1; }
+  .kf-eea1c6c1-d { opacity: 1; }
+  .kf-eea1c6c1-d { transform: translate(-273px, -150px); }
+  .kfp-eea1c6c1-d { stroke: #cdd8e3; stroke-width: 1px; }
+  .kf-eea1c6c1-e { opacity: 1; }
+  .kfp-eea1c6c1-inbox { width: 246px; }
+  .conn-eea1c6c1-feed { d: path("M326 150 L477.8 150"); }
+  .conn-eea1c6c1-parrow_d-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_d-fpredict_the { opacity: 1; }
+  .conn-eea1c6c1-parrow_e { opacity: 1; }
 }
 .frame-append_the {
-  .kf-d { opacity: 1; }
-  .kf-d { transform: translate(-273px, -150px); }
-  .kfp-d { stroke: #cdd8e3; stroke-width: 1px; }
-  .kf-e { opacity: 1; }
-  .kf-e { transform: translate(-217px, -150px); }
-  .kfp-e { stroke: #cdd8e3; stroke-width: 1px; }
-  .kfp-inbox { width: 302px; }
-  .conn-feed { d: path("M382 150 L477.8 150"); }
-  .conn-parrow_d-base { opacity: 0; }
-  .conn-parrow_d-fappend_the { opacity: 1; }
-  .conn-parrow_e-base { opacity: 0; }
-  .conn-parrow_e-fappend_the { opacity: 1; }
+  .kf-eea1c6c1-d { opacity: 1; }
+  .kf-eea1c6c1-d { transform: translate(-273px, -150px); }
+  .kfp-eea1c6c1-d { stroke: #cdd8e3; stroke-width: 1px; }
+  .kf-eea1c6c1-e { opacity: 1; }
+  .kf-eea1c6c1-e { transform: translate(-217px, -150px); }
+  .kfp-eea1c6c1-e { stroke: #cdd8e3; stroke-width: 1px; }
+  .kfp-eea1c6c1-inbox { width: 302px; }
+  .conn-eea1c6c1-feed { d: path("M382 150 L477.8 150"); }
+  .conn-eea1c6c1-parrow_d-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_d-fappend_the { opacity: 1; }
+  .conn-eea1c6c1-parrow_e-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_e-fappend_the { opacity: 1; }
 }
 .frame-predict_mat {
-  .kf-d { opacity: 1; }
-  .kf-d { transform: translate(-273px, -150px); }
-  .kfp-d { stroke: #cdd8e3; stroke-width: 1px; }
-  .kf-e { opacity: 1; }
-  .kf-e { transform: translate(-217px, -150px); }
-  .kfp-e { stroke: #cdd8e3; stroke-width: 1px; }
-  .kf-f { opacity: 1; }
-  .kfp-inbox { width: 302px; }
-  .conn-feed { d: path("M382 150 L477.8 150"); }
-  .conn-parrow_d-base { opacity: 0; }
-  .conn-parrow_d-fpredict_mat { opacity: 1; }
-  .conn-parrow_e-base { opacity: 0; }
-  .conn-parrow_e-fpredict_mat { opacity: 1; }
-  .conn-parrow_f { opacity: 1; }
+  .kf-eea1c6c1-d { opacity: 1; }
+  .kf-eea1c6c1-d { transform: translate(-273px, -150px); }
+  .kfp-eea1c6c1-d { stroke: #cdd8e3; stroke-width: 1px; }
+  .kf-eea1c6c1-e { opacity: 1; }
+  .kf-eea1c6c1-e { transform: translate(-217px, -150px); }
+  .kfp-eea1c6c1-e { stroke: #cdd8e3; stroke-width: 1px; }
+  .kf-eea1c6c1-f { opacity: 1; }
+  .kfp-eea1c6c1-inbox { width: 302px; }
+  .conn-eea1c6c1-feed { d: path("M382 150 L477.8 150"); }
+  .conn-eea1c6c1-parrow_d-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_d-fpredict_mat { opacity: 1; }
+  .conn-eea1c6c1-parrow_e-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_e-fpredict_mat { opacity: 1; }
+  .conn-eea1c6c1-parrow_f { opacity: 1; }
 }
 .frame-append_mat {
-  .kf-d { opacity: 1; }
-  .kf-d { transform: translate(-273px, -150px); }
-  .kfp-d { stroke: #cdd8e3; stroke-width: 1px; }
-  .kf-e { opacity: 1; }
-  .kf-e { transform: translate(-217px, -150px); }
-  .kfp-e { stroke: #cdd8e3; stroke-width: 1px; }
-  .kf-f { opacity: 1; }
-  .kf-f { transform: translate(-161px, -150px); }
-  .kfp-f { stroke: #cdd8e3; stroke-width: 1px; }
-  .kfp-inbox { width: 358px; }
-  .conn-feed { d: path("M438 150 L477.8 150"); }
-  .conn-parrow_d-base { opacity: 0; }
-  .conn-parrow_d-fappend_mat { opacity: 1; }
-  .conn-parrow_e-base { opacity: 0; }
-  .conn-parrow_e-fappend_mat { opacity: 1; }
-  .conn-parrow_f-base { opacity: 0; }
-  .conn-parrow_f-fappend_mat { opacity: 1; }
+  .kf-eea1c6c1-d { opacity: 1; }
+  .kf-eea1c6c1-d { transform: translate(-273px, -150px); }
+  .kfp-eea1c6c1-d { stroke: #cdd8e3; stroke-width: 1px; }
+  .kf-eea1c6c1-e { opacity: 1; }
+  .kf-eea1c6c1-e { transform: translate(-217px, -150px); }
+  .kfp-eea1c6c1-e { stroke: #cdd8e3; stroke-width: 1px; }
+  .kf-eea1c6c1-f { opacity: 1; }
+  .kf-eea1c6c1-f { transform: translate(-161px, -150px); }
+  .kfp-eea1c6c1-f { stroke: #cdd8e3; stroke-width: 1px; }
+  .kfp-eea1c6c1-inbox { width: 358px; }
+  .conn-eea1c6c1-feed { d: path("M438 150 L477.8 150"); }
+  .conn-eea1c6c1-parrow_d-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_d-fappend_mat { opacity: 1; }
+  .conn-eea1c6c1-parrow_e-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_e-fappend_mat { opacity: 1; }
+  .conn-eea1c6c1-parrow_f-base { opacity: 0; }
+  .conn-eea1c6c1-parrow_f-fappend_mat { opacity: 1; }
 }
 
     /* Kapernikov Brand Stylesheet for Agent Illustrator
@@ -195,7 +195,7 @@
 
   
 /* CSS-only animation (auto-generated) */
-@keyframes kf-anim-d {
+@keyframes kf-anim-eea1c6c1-d {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
   28.6%, 42.8% { opacity: 1; }
@@ -204,7 +204,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 1; }
 }
-@keyframes kf-anim-e {
+@keyframes kf-anim-eea1c6c1-e {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -213,7 +213,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 1; }
 }
-@keyframes kf-anim-f {
+@keyframes kf-anim-eea1c6c1-f {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -222,7 +222,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 1; }
 }
-@keyframes kf-anim-parrow_d {
+@keyframes kf-anim-eea1c6c1-parrow_d {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
   28.6%, 42.8% { opacity: 0; }
@@ -231,7 +231,7 @@
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-@keyframes kf-anim-parrow_e {
+@keyframes kf-anim-eea1c6c1-parrow_e {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -240,7 +240,7 @@
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-@keyframes kf-anim-parrow_f {
+@keyframes kf-anim-eea1c6c1-parrow_f {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -249,7 +249,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 0; }
 }
-@keyframes kf-geo-d {
+@keyframes kf-geo-eea1c6c1-d {
   0% { transform: translate(0px, 0px); }
   14.29% { transform: translate(0px, 0px); }
   18.57% { transform: translate(0px, 0px); }
@@ -265,7 +265,7 @@
   90.00% { transform: translate(-273px, -150px); }
   100% { transform: translate(-273px, -150px); }
 }
-@keyframes kf-geo-e {
+@keyframes kf-geo-eea1c6c1-e {
   0% { transform: translate(0px, 0px); }
   14.29% { transform: translate(0px, 0px); }
   18.57% { transform: translate(0px, 0px); }
@@ -281,7 +281,7 @@
   90.00% { transform: translate(-217px, -150px); }
   100% { transform: translate(-217px, -150px); }
 }
-@keyframes kf-geo-f {
+@keyframes kf-geo-eea1c6c1-f {
   0% { transform: translate(0px, 0px); }
   14.29% { transform: translate(0px, 0px); }
   18.57% { transform: translate(0px, 0px); }
@@ -313,7 +313,7 @@
   90.00% { width: 358px; }
   100% { width: 358px; }
 }
-@keyframes kf-anim-conn-d {
+@keyframes kf-anim-conn-eea1c6c1-d {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
   28.6%, 42.8% { opacity: 1; }
@@ -322,7 +322,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 1; }
 }
-@keyframes kf-anim-conn-e {
+@keyframes kf-anim-conn-eea1c6c1-e {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -331,7 +331,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 1; }
 }
-@keyframes kf-anim-conn-f {
+@keyframes kf-anim-conn-eea1c6c1-f {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -340,7 +340,7 @@
   71.4%, 85.7% { opacity: 1; }
   85.7% { opacity: 1; }
 }
-@keyframes kf-anim-conn-parrow_d {
+@keyframes kf-anim-conn-eea1c6c1-parrow_d {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 1; }
   28.6%, 42.8% { opacity: 0; }
@@ -349,7 +349,7 @@
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-@keyframes kf-anim-conn-parrow_e {
+@keyframes kf-anim-conn-eea1c6c1-parrow_e {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -358,7 +358,7 @@
   71.4%, 85.7% { opacity: 0; }
   85.7% { opacity: 0; }
 }
-@keyframes kf-anim-conn-parrow_f {
+@keyframes kf-anim-conn-eea1c6c1-parrow_f {
   0.0%, 14.3% { opacity: 0; }
   14.3%, 28.6% { opacity: 0; }
   28.6%, 42.8% { opacity: 0; }
@@ -384,19 +384,19 @@
   100% { d: path("M438 150 L477.8 150"); }
 }
 #inbox { animation: kf-width-inbox 14.0s ease infinite; }
-.conn-d { animation: kf-anim-conn-d 14.0s step-end infinite; }
-.conn-e { animation: kf-anim-conn-e 14.0s step-end infinite; }
-.conn-f { animation: kf-anim-conn-f 14.0s step-end infinite; }
-.conn-feed { animation: kf-d-feed 14.0s ease infinite; }
-.conn-parrow_d { animation: kf-anim-conn-parrow_d 14.0s step-end infinite; }
-.conn-parrow_e { animation: kf-anim-conn-parrow_e 14.0s step-end infinite; }
-.conn-parrow_f { animation: kf-anim-conn-parrow_f 14.0s step-end infinite; }
-.kf-d { animation: kf-anim-d 14.0s step-end infinite, kf-geo-d 14.0s ease infinite; }
-.kf-e { animation: kf-anim-e 14.0s step-end infinite, kf-geo-e 14.0s ease infinite; }
-.kf-f { animation: kf-anim-f 14.0s step-end infinite, kf-geo-f 14.0s ease infinite; }
-.kf-parrow_d { animation: kf-anim-parrow_d 14.0s step-end infinite; }
-.kf-parrow_e { animation: kf-anim-parrow_e 14.0s step-end infinite; }
-.kf-parrow_f { animation: kf-anim-parrow_f 14.0s step-end infinite; }
+.conn-eea1c6c1-d { animation: kf-anim-conn-eea1c6c1-d 14.0s step-end infinite; }
+.conn-eea1c6c1-e { animation: kf-anim-conn-eea1c6c1-e 14.0s step-end infinite; }
+.conn-eea1c6c1-f { animation: kf-anim-conn-eea1c6c1-f 14.0s step-end infinite; }
+.conn-eea1c6c1-feed { animation: kf-d-feed 14.0s ease infinite; }
+.conn-eea1c6c1-parrow_d { animation: kf-anim-conn-eea1c6c1-parrow_d 14.0s step-end infinite; }
+.conn-eea1c6c1-parrow_e { animation: kf-anim-conn-eea1c6c1-parrow_e 14.0s step-end infinite; }
+.conn-eea1c6c1-parrow_f { animation: kf-anim-conn-eea1c6c1-parrow_f 14.0s step-end infinite; }
+.kf-eea1c6c1-d { animation: kf-anim-eea1c6c1-d 14.0s step-end infinite, kf-geo-eea1c6c1-d 14.0s ease infinite; }
+.kf-eea1c6c1-e { animation: kf-anim-eea1c6c1-e 14.0s step-end infinite, kf-geo-eea1c6c1-e 14.0s ease infinite; }
+.kf-eea1c6c1-f { animation: kf-anim-eea1c6c1-f 14.0s step-end infinite, kf-geo-eea1c6c1-f 14.0s ease infinite; }
+.kf-eea1c6c1-parrow_d { animation: kf-anim-eea1c6c1-parrow_d 14.0s step-end infinite; }
+.kf-eea1c6c1-parrow_e { animation: kf-anim-eea1c6c1-parrow_e 14.0s step-end infinite; }
+.kf-eea1c6c1-parrow_f { animation: kf-anim-eea1c6c1-parrow_f 14.0s step-end infinite; }
 </style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
@@ -404,8 +404,8 @@
     </marker>
   </defs>
   <rect id="canvas" class="ai-shape ai-rect" x="-20" y="-10" width="800" height="420" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
-  <g class="kf-inbox kf-anim">
-    <rect id="inbox" class="ai-shape ai-rect kfp-inbox" x="80" y="115" width="190" height="70" fill="#eef3f6" stroke="var(--secondary-1)" stroke-width="2"/>
+  <g class="kf-eea1c6c1-inbox kf-anim">
+    <rect id="inbox" class="ai-shape ai-rect kfp-eea1c6c1-inbox" x="80" y="115" width="190" height="70" fill="#eef3f6" stroke="var(--secondary-1)" stroke-width="2"/>
   </g>
   <rect id="a" class="ai-shape ai-rect" x="94" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
   <text class="ai-label" x="119" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="119" dy="-0"><tspan>The</tspan></tspan></text>
@@ -415,31 +415,31 @@
   <text class="ai-label" x="231" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="231" dy="-0"><tspan>sat</tspan></tspan></text>
   <rect id="llm" class="ai-shape ai-rect" x="485" y="118" width="150" height="64" fill="var(--secondary-1)" stroke="#333333" stroke-width="1.5"/>
   <text class="ai-label" x="560" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>LLM</tspan></tspan></text>
-  <g class="kf-hidden kf-d kf-anim">
-    <rect id="d" class="ai-shape ai-rect kfp-d" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+  <g class="kf-hidden kf-eea1c6c1-d kf-anim">
+    <rect id="d" class="ai-shape ai-rect kfp-eea1c6c1-d" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>on</tspan></tspan></text>
   </g>
-  <g class="kf-hidden kf-e kf-anim">
-    <rect id="e" class="ai-shape ai-rect kfp-e" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+  <g class="kf-hidden kf-eea1c6c1-e kf-anim">
+    <rect id="e" class="ai-shape ai-rect kfp-eea1c6c1-e" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>the</tspan></tspan></text>
   </g>
-  <g class="kf-hidden kf-f kf-anim">
-    <rect id="f" class="ai-shape ai-rect kfp-f" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+  <g class="kf-hidden kf-eea1c6c1-f kf-anim">
+    <rect id="f" class="ai-shape ai-rect kfp-eea1c6c1-f" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>mat</tspan></tspan></text>
   </g>
   <text id="cap" class="ai-shape ai-text" x="224.58499999999992" y="367" text-anchor="start" dominant-baseline="middle" fill="#1b2733">Predict one token, append it — then repeat.</text>
-  <text class="ai-label conn-parrow_d" x="570" y="231.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="570" dy="-0"><tspan>predicts one token</tspan></tspan></text>
-  <path class="ai-connection conn-feed conn-feed-base" d="M270 150 L477.8 150" fill="none" stroke="var(--foreground-2)" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_d conn-parrow_d-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_e conn-parrow_e-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_f conn-parrow_f-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_d conn-parrow_d-fappend_on" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_d conn-parrow_d-fpredict_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_d conn-parrow_d-fappend_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_e conn-parrow_e-fappend_the" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_d conn-parrow_d-fpredict_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_e conn-parrow_e-fpredict_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_d conn-parrow_d-fappend_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_e conn-parrow_e-fappend_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-parrow_f conn-parrow_f-fappend_mat" d="M560 182 L560 197 L399 197 L399 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <text class="ai-label conn-eea1c6c1-parrow_d" x="570" y="231.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="570" dy="-0"><tspan>predicts one token</tspan></tspan></text>
+  <path class="ai-connection conn-eea1c6c1-feed conn-eea1c6c1-feed-base" d="M270 150 L477.8 150" fill="none" stroke="var(--foreground-2)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_f conn-eea1c6c1-parrow_f-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fappend_on" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fpredict_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fappend_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-fappend_the" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fpredict_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-fpredict_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fappend_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-fappend_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-parrow_f conn-eea1c6c1-parrow_f-fappend_mat" d="M560 182 L560 197 L399 197 L399 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>

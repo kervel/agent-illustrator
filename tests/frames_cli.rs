@@ -14,7 +14,10 @@ constrain b.y = a.y
 keyframe "intro" {
   hide b
 }
-keyframe "both shown" {
+// Hyphenated, not spaced: a keyframe name becomes a CSS class, and
+// `.frame-both shown` is a descendant selector that matches nothing. The
+// expected filename below was already slugging it.
+keyframe "both-shown" {
   show b
 }
 "#;
@@ -29,7 +32,7 @@ fn write_source(dir: &std::path::Path) -> std::path::PathBuf {
 fn frame_names_are_listed_in_declaration_order() {
     assert_eq!(
         agent_illustrator::frame_names(SOURCE).expect("parse"),
-        vec!["intro".to_string(), "both shown".to_string()]
+        vec!["intro".to_string(), "both-shown".to_string()]
     );
 }
 

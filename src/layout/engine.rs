@@ -764,6 +764,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
     // First validate references
     super::validate_references(doc)?;
     validate_label_markup(&doc.statements)?;
+    validate_keyframe_names(doc)?;
     validate_disabled_constraints(doc)?;
 
     let mut result = LayoutResult::new();
@@ -3832,6 +3833,52 @@ fn collect_constraint_names(stmts: &[Spanned<Statement>], out: &mut HashSet<Stri
 
 /// A top-level `disable` naming nothing is a typo, and silently doing nothing
 /// is the failure mode this whole change exists to remove.
+/// A keyframe's name becomes a CSS class: `.frame-<name>`.
+///
+/// `keyframe "date passes"` emitted `.frame-date passes { ... }`, which CSS
+/// reads as a descendant selector, so the rule matched nothing and the frame
+/// silently did nothing — while `data-frames` looked right and `--frame
+/// "date passes"` rendered correctly, so every static check passed.
+///
+/// Rejected rather than sanitised on purpose: a silently renamed frame is a
+/// name the author then cannot use with `--frame`.
+fn validate_keyframe_names(doc: &Document) -> Result<(), LayoutError> {
+    for stmt in &doc.statements {
+        let Statement::Keyframe(kf) = &stmt.node else {
+            continue;
+        };
+        let name = &kf.name.node;
+        if name.is_empty() {
+            return Err(LayoutError::InvalidKeyframeName {
+                name: name.clone(),
+                reason: "it is empty".to_string(),
+                span: kf.name.span.clone(),
+            });
+        }
+        if let Some(bad) = name
+            .chars()
+            .find(|c| !(c.is_ascii_alphanumeric() || *c == '-' || *c == '_'))
+        {
+            return Err(LayoutError::InvalidKeyframeName {
+                name: name.clone(),
+                reason: format!(
+                    "'{bad}' is not allowed — use letters, digits, '-' or '_' \
+                     (e.g. \"date-passes\")"
+                ),
+                span: kf.name.span.clone(),
+            });
+        }
+        if name.chars().next().is_some_and(|c| c.is_ascii_digit()) {
+            return Err(LayoutError::InvalidKeyframeName {
+                name: name.clone(),
+                reason: "a CSS class cannot start with a digit".to_string(),
+                span: kf.name.span.clone(),
+            });
+        }
+    }
+    Ok(())
+}
+
 fn validate_disabled_constraints(doc: &Document) -> Result<(), LayoutError> {
     let mut disabled = HashSet::new();
     collect_disabled_constraint_names(&doc.statements, &mut disabled);

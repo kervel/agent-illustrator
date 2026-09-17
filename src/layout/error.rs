@@ -35,6 +35,13 @@ pub enum LayoutError {
     /// A label used the markup subset incorrectly. Reported rather than
     /// silently dropped: a half-parsed label renders a plausible-looking
     /// wrong picture, which is the failure this feature exists to remove.
+    #[error("keyframe name '{name}' cannot be used as a CSS class: {reason}")]
+    InvalidKeyframeName {
+        name: String,
+        reason: String,
+        span: Span,
+    },
+
     #[error("invalid label markup on '{owner}': {reason}")]
     InvalidLabel {
         owner: String,

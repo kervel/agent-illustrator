@@ -89,7 +89,7 @@ keyframe "b" {
         c
     });
     assert!(
-        animated.contains(".kf-c text { fill: var(--accent-dark); }"),
+        animated.contains("-c text { fill: var(--accent-dark); }"),
         "expected a per-frame rule for the label colour"
     );
 }

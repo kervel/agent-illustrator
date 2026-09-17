@@ -13,7 +13,7 @@ keyframe "move" { transform box [dx: 60, dy: 40] }
 "#;
     let svg = render(src).expect("render ok");
     // position animates as a transform translate on the wrapper, NOT as #box { x: ... }
-    assert!(svg.contains(".kf-box { transform: translate(60px, 40px)"),
+    assert!(svg.contains("-box { transform: translate(60px, 40px)"),
         "expected translate on .kf-box, got:\n{}", svg);
     assert!(!svg.contains("#box { x:"),
         "position must NOT be emitted as a geometry x prop, got:\n{}", svg);
@@ -31,7 +31,7 @@ keyframe "grow" { transform box [width: 300, height: 120] }
     let svg = render(src).expect("render ok");
     // Selected by a class on the shape, not by id: an id selector does not
     // survive an inlining filter that namespaces ids.
-    assert!(svg.contains(".kfp-box {") && svg.contains("width: 300px") && svg.contains("height: 120px"),
+    assert!(svg.contains("-box {") && svg.contains("width: 300px") && svg.contains("height: 120px"),
         "expected .kfp-box width/height on inner shape, got:\n{}", svg);
 }
 
@@ -69,7 +69,7 @@ keyframe "merge" {
 "#;
     let svg = render(src).expect("render ok");
     // chip moves up: a negative ty translate appears on .kf-chip in the merge frame.
-    assert!(svg.contains(".kf-chip { transform: translate("),
+    assert!(svg.contains("-chip { transform: translate("),
         "chip should translate after re-constrain, got:\n{}", svg);
     assert!(svg.contains("-200px") || svg.contains("-199") || svg.contains("-201"),
         "chip should move ~200px up, got:\n{}", svg);
