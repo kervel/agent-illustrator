@@ -74,9 +74,13 @@ constrain b.center_y = 100
 }
 
 #[test]
-fn a_visible_pin_on_a_visible_rule_still_reports() {
-    // From the reporter's fixture: 4 of 5 overlaps involve ticks and go quiet;
-    // rule-vs-pin is the deliberate survivor.
+fn a_visible_box_overlapping_a_visible_box_still_reports() {
+    // Originally this asserted that rule-vs-pin survives, as the deliberate
+    // visible-on-visible pair proving the paints-nothing exemption was not too
+    // wide. Evidence from a real deck later showed a pin centred on an axis is
+    // the IDIOM, not a defect — 6 such findings on a correct diagram — so that
+    // pair is now exempt as a structural crossing and this guard needs a pair
+    // that is genuinely a collision.
     let msgs = overlaps(
         r#"
 rect t_start [width: 1, height: 1, fill: none, stroke: none]
@@ -89,17 +93,23 @@ rect rule [height: 2, fill: foreground-2]
 constrain rule.left = t_start.center_x
 constrain rule.right = t_end.center_x
 constrain rule.center_y = t_start.center_y
-circle pin [size: 16, fill: accent-2, stroke: accent-dark, stroke_width: 2]
-constrain pin.center_x = 400
-constrain pin.center_y = rule.center_y
+rect card_a [width: 90, height: 60, fill: accent-light, stroke: accent-dark]
+constrain card_a.center_x = 400
+constrain card_a.center_y = 400
+rect card_b [width: 90, height: 60, fill: secondary-light, stroke: secondary-dark]
+constrain card_b.center_x = 440
+constrain card_b.center_y = 400
 "#,
     );
     assert_eq!(
         msgs.len(),
         1,
-        "only rule-vs-pin should survive, got: {msgs:?}"
+        "two overlapping cards are a real collision, got: {msgs:?}"
     );
-    assert!(msgs[0].contains("rule") && msgs[0].contains("pin"), "{msgs:?}");
+    assert!(
+        msgs[0].contains("card_a") && msgs[0].contains("card_b"),
+        "{msgs:?}"
+    );
 }
 
 #[test]
@@ -216,7 +226,7 @@ fn two_visible_elements_inside_a_layout_still_report() {
 rect zone [width: 400, height: 200, fill: accent-light, stroke: accent-dark]
 constrain zone.left = 0
 constrain zone.top = 0
-rect wide [width: 600, height: 30, fill: secondary-light, stroke: secondary-dark]
+rect wide [width: 600, height: 120, fill: secondary-light, stroke: secondary-dark]
 constrain wide.center_x = 100
 constrain wide.center_y = 100
 "#,

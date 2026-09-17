@@ -374,6 +374,66 @@ fn is_bare_container(elem: &ElementLayout) -> bool {
             .is_none_or(|s| s.eq_ignore_ascii_case("none"))
 }
 
+/// Aspect ratio at which a shape stops being a box and becomes a rule.
+///
+/// Well clear of ordinary shapes on purpose. A 3:1 card must not qualify, or
+/// this becomes the blanket exemption it exists to avoid.
+const RULE_ASPECT: f64 = 20.0;
+
+/// True for a long thin shape: an axis, a baseline, a vertical now-marker.
+///
+/// These are drawn ACROSS a diagram, so intersecting what they cross is their
+/// function rather than a defect. A 2px rule over a 560px bar, or a 16px pin
+/// centred on a 2px axis, is the picture working.
+///
+/// Measured on a real 8-diagram deck that was correct and shipped: 25 overlap
+/// findings, all of this shape, none actionable. That is not a signal-to-noise
+/// problem but a category nobody can leave switched on — and the deck did
+/// switch it off, which then hid a rule drawn through a bar's name and a
+/// caption grazing a card, because the near-miss rule reports under the same
+/// category.
+fn is_rule_like(elem: &ElementLayout) -> bool {
+    if is_text_shape(elem) || !is_visual_shape(elem) {
+        return false;
+    }
+    let (w, h) = (elem.bounds.width, elem.bounds.height);
+    if w <= 0.0 || h <= 0.0 {
+        return false;
+    }
+    w / h >= RULE_ASPECT || h / w >= RULE_ASPECT
+}
+
+/// True when a pair's intersection is a rule doing its job.
+///
+/// Requires the rule to CROSS: its long axis has to span past both edges of
+/// the other element. A rule that runs the full height of a bar is crossing
+/// it; one that stops halfway, or clips a corner, is a layout accident and
+/// still worth reporting.
+///
+/// Text is never exempt: a rule drawn through a label is exactly the defect
+/// this category exists to catch, and it is the one that shipped while the
+/// category was excluded.
+fn is_structural_crossing(a: &ElementLayout, b: &ElementLayout) -> bool {
+    if is_text_shape(a) || is_text_shape(b) {
+        return false;
+    }
+    crosses(a, b) || crosses(b, a)
+}
+
+/// Does `rule` span clear past `other` along its own long axis?
+fn crosses(rule: &ElementLayout, other: &ElementLayout) -> bool {
+    if !is_rule_like(rule) {
+        return false;
+    }
+    let (r, o) = (&rule.bounds, &other.bounds);
+    if r.width >= r.height {
+        // Horizontal rule: must reach past both the left and right edges.
+        r.x <= o.x && r.right() >= o.right()
+    } else {
+        r.y <= o.y && r.bottom() >= o.bottom()
+    }
+}
+
 /// True when an element paints nothing at all.
 ///
 /// `fill: none` (or no fill on a shape that defaults to none, or a zero fill
@@ -810,6 +870,11 @@ fn check_overlap_siblings(
                 continue;
             }
 
+            // A rule crossing what it rules over is the picture working.
+            if is_structural_crossing(a, b) {
+                continue;
+            }
+
             // A container that paints nothing is not something to collide
             // with — but what it draws one level down is.
             if is_drawn_inside_a_bare_region(a, b) {
@@ -937,6 +1002,11 @@ fn check_overlaps_recursive(
                 // that picked the wrong side and reported every child of a row
                 // against the canvas it sits on.
                 if paints_nothing(a) || paints_nothing(b) {
+                    continue;
+                }
+
+                // A rule crossing what it rules over is the picture working.
+                if is_structural_crossing(a, b) {
                     continue;
                 }
 
