@@ -239,3 +239,39 @@ fn a_fully_explicit_box_keeps_its_size_and_lint_reports_the_overflow() {
         warnings.iter().map(|w| w.message.clone()).collect::<Vec<_>>()
     );
 }
+
+#[test]
+fn a_span_fill_uses_the_same_colour_route_as_an_element_fill() {
+    // `<span fill=secondary-dark>` emitted the palette name raw. An unknown
+    // colour keyword is not an SVG error — it inherits — so every coloured
+    // run in markup silently rendered in the default colour, and the
+    // documented spelling was the broken one.
+    let svg = agent_illustrator::render(
+        r#"rect card [label: "t<span fill=secondary-dark>run</span>"]"#,
+    )
+    .expect("renders");
+    assert!(
+        svg.contains("var(--secondary-dark)"),
+        "a palette name must become a CSS variable, got: {svg}"
+    );
+    assert!(
+        !svg.contains(r#"fill="secondary-dark""#),
+        "the raw token must not reach the SVG: {svg}"
+    );
+}
+
+#[test]
+fn a_hex_span_fill_is_passed_through() {
+    let svg =
+        agent_illustrator::render(r#"rect card [label: "t<span fill=#ff0000>run</span>"]"#)
+            .expect("renders");
+    assert!(svg.contains(r##"fill="#ff0000""##), "got: {svg}");
+}
+
+#[test]
+fn a_css_named_span_fill_is_passed_through() {
+    // `red` is a real SVG colour and not a palette token; it must survive.
+    let svg = agent_illustrator::render(r#"rect card [label: "t<span fill=red>run</span>"]"#)
+        .expect("renders");
+    assert!(svg.contains(r#"fill="red""#), "got: {svg}");
+}

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -80 1200 580" data-frames="idle,user_prompt,system_prompt,tool_response,tool_exec,result_return,final_answer">
+  <!-- agent-illustrator 0.1.26 -->
   <style>
     :root {
     --accent-1: #2196f3;

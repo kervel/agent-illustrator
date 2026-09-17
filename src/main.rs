@@ -104,6 +104,7 @@ fn parse_lint_categories(names: &[String]) -> Vec<LintCategory> {
 #[derive(Parser)]
 #[command(name = "agent-illustrator")]
 #[command(about = "Declarative illustration language for AI agents")]
+#[command(version)]
 struct Cli {
     /// Input file (reads from stdin if not provided)
     input: Option<PathBuf>,

@@ -51,6 +51,11 @@ pub struct SvgBuilder {
     elements: Vec<String>,
     connections: Vec<String>,
     indent: usize,
+    /// Palette tokens that a bare colour name resolves to, so a
+    /// `<span fill=accent-dark>` in label markup becomes `var(--accent-dark)`
+    /// exactly as the same name would on an element. Seeded from the default
+    /// palette and widened by any stylesheet the document supplies.
+    palette_tokens: std::collections::HashSet<String>,
     /// Frame names for data-frames attribute (Feature 011)
     data_frames: Option<String>,
     /// Per-element replacement text per frame, for keyframes that rewrite an
@@ -70,6 +75,9 @@ impl SvgBuilder {
             elements: vec![],
             connections: vec![],
             indent: 1,
+            // Seeded with the default palette so a document that supplies no
+            // stylesheet still resolves the documented colour names.
+            palette_tokens: Stylesheet::default().colors.keys().cloned().collect(),
             data_frames: None,
             text_variants: std::collections::HashMap::new(),
         }
@@ -93,8 +101,24 @@ impl SvgBuilder {
         self.styles.push(css.to_string());
     }
 
+    /// Resolve a colour written in label markup the way an element's `fill:`
+    /// is resolved.
+    ///
+    /// A palette name emitted raw is not an SVG error — an unrecognised colour
+    /// keyword simply inherits — so the run rendered in the default colour and
+    /// nothing said so. Hex and real CSS colour names pass through.
+    fn markup_fill(&self, raw: &str) -> String {
+        if self.palette_tokens.contains(raw) {
+            format!("var(--{raw})")
+        } else {
+            raw.to_string()
+        }
+    }
+
     /// Add CSS custom properties from a stylesheet
     pub fn add_stylesheet(&mut self, stylesheet: &Stylesheet) {
+        self.palette_tokens
+            .extend(stylesheet.colors.keys().cloned());
         if stylesheet.colors.is_empty() {
             return;
         }
@@ -498,7 +522,10 @@ impl SvgBuilder {
                     attrs.push_str(&format!(r#" font-size="{}""#, font_size * run.scale));
                 }
                 if let Some(fill) = &run.fill {
-                    attrs.push_str(&format!(r#" fill="{}""#, escape_xml(fill)));
+                    attrs.push_str(&format!(
+                        r#" fill="{}""#,
+                        escape_xml(&self.markup_fill(fill))
+                    ));
                 }
                 body.push_str(&format!("<tspan{}>{}</tspan>", attrs, escape_xml(&run.text)));
             }
@@ -732,6 +759,15 @@ impl SvgBuilder {
         svg.push_str(&format!(
             r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{} {} {} {}"{}>"#,
             vb_x, vb_y, vb_w, vb_h, data_frames_attr
+        ));
+        svg.push_str(nl);
+        // These files get committed and rebuilt on other machines and in CI,
+        // where "which binary produced this?" is otherwise unanswerable — and
+        // behaviour differs materially between versions.
+        svg.push_str(&format!(
+            "{}<!-- agent-illustrator {} -->",
+            if nl.is_empty() { "" } else { "  " },
+            env!("CARGO_PKG_VERSION")
         ));
         svg.push_str(nl);
 
