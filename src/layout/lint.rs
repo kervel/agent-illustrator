@@ -2256,7 +2256,13 @@ fn check_contrast_recursive(elem: &ElementLayout, warnings: &mut Vec<LintWarning
             .as_ref()
             .and_then(|s| s.fill.as_ref())
             .is_some();
-        if !has_label_color {
+        // A fill painted at low opacity composites to something pale
+        // whatever its colour, so it is not a dark background for the label.
+        // Calling it dark is what drives a stylesheet to pick light text,
+        // which then lands near-white on near-white — the opposite of the
+        // problem this rule exists to prevent.
+        let washed_out = elem.styles.fill_opacity.is_some_and(|o| o < 0.5);
+        if !has_label_color && !washed_out {
             if let Some(fill) = &elem.styles.fill {
                 if let Some(dark_desc) = is_dark_fill(fill) {
                     let name = elem

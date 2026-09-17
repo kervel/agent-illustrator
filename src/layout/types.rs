@@ -753,7 +753,7 @@ impl ResolvedStyles {
                 // Hex and named colors pass through unchanged
                 ColorValue::Hex(s) | ColorValue::Named(s) => Some(s.clone()),
                 // Symbolic colors become CSS variable references
-                ColorValue::Symbolic { .. } => {
+                ColorValue::Symbolic { .. } | ColorValue::PaletteToken(_) => {
                     let token = color_value.token_string()?;
                     Some(format!("var(--{})", token))
                 }

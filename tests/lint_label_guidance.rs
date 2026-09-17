@@ -119,3 +119,39 @@ fn an_inside_label_still_reports_overflow_and_contrast() {
         "inside labels must still report contrast: {messages:?}"
     );
 }
+
+#[test]
+fn a_barely_visible_fill_is_not_treated_as_dark() {
+    // `fill: X, fill_opacity: 0.10` composites to a very pale box. Reporting
+    // it as a dark fill is what drives a stylesheet to pick light label text,
+    // which then lands near-white on near-white.
+    let messages = lint(
+        r#"rect a [width: 120, height: 40, fill: #1a1a1a, fill_opacity: 0.10, label: "swatch"]"#,
+    );
+    assert!(
+        !messages.iter().any(|m| m.contains("dark fill")),
+        "a 10% fill is not dark: {messages:?}"
+    );
+}
+
+#[test]
+fn a_solid_dark_fill_is_still_reported() {
+    let messages =
+        lint(r#"rect a [width: 120, height: 40, fill: #1a1a1a, label: "swatch"]"#);
+    assert!(
+        messages.iter().any(|m| m.contains("dark fill")),
+        "got: {messages:?}"
+    );
+}
+
+#[test]
+fn a_mostly_opaque_dark_fill_is_still_reported() {
+    // The exemption is for washes, not for a fill that is merely not solid.
+    let messages = lint(
+        r#"rect a [width: 120, height: 40, fill: #1a1a1a, fill_opacity: 0.9, label: "swatch"]"#,
+    );
+    assert!(
+        messages.iter().any(|m| m.contains("dark fill")),
+        "got: {messages:?}"
+    );
+}

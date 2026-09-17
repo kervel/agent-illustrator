@@ -128,6 +128,8 @@ Hex:      #ff0000, #f00
 Named:    red, blue, green, steelblue
 Symbolic: foreground, background, accent, text
           foreground-1, accent-dark, text-light
+          status-success, status-warning, status-error
+          — and any other token the active stylesheet defines
 
 CONSTRAINTS
 -----------

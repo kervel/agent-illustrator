@@ -33,6 +33,13 @@ pub enum ColorValue {
         variant: Option<u8>,
         lightness: Option<Lightness>,
     },
+    /// Any other hyphenated palette token, e.g. `status-success`.
+    ///
+    /// The five categories above are a closed set, but a stylesheet is an open
+    /// map — the default palette alone ships status-success, -warning and
+    /// -error, which the grammar could not spell. Validation still rejects a
+    /// token no stylesheet defines, so a typo is an error rather than silence.
+    PaletteToken(String),
 }
 
 impl ColorValue {
@@ -65,6 +72,7 @@ impl ColorValue {
                 }
                 Some(s)
             }
+            ColorValue::PaletteToken(t) => Some(t.clone()),
             _ => None,
         }
     }
@@ -73,7 +81,7 @@ impl ColorValue {
     pub fn concrete_string(&self) -> Option<&str> {
         match self {
             ColorValue::Hex(s) | ColorValue::Named(s) => Some(s.as_str()),
-            ColorValue::Symbolic { .. } => None,
+            ColorValue::Symbolic { .. } | ColorValue::PaletteToken(_) => None,
         }
     }
 }

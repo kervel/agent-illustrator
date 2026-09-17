@@ -209,12 +209,39 @@ where
             }
         });
 
+    // Any other hyphenated word, e.g. `status-success`. A stylesheet is an
+    // open map of tokens while the categories above are a closed set, so
+    // without this the palette can ship colours the language cannot name.
+    // Validation rejects a token no stylesheet defines, so this widens what
+    // can be *spelled*, not what is accepted.
+    let palette_token = identifier
+        .then(
+            just(Token::Minus)
+                .ignore_then(choice((
+                    identifier.map(|i: Spanned<Identifier>| i.node.0),
+                    number.map(|n: Spanned<f64>| format!("{}", n.node as i64)),
+                )))
+                .repeated()
+                .at_least(1)
+                .collect::<Vec<_>>(),
+        )
+        .map(|(head, tail)| {
+            let mut token = head.node.0;
+            for part in tail {
+                token.push('-');
+                token.push_str(&part);
+            }
+            StyleValue::Color(ColorValue::PaletteToken(token))
+        });
+
     let value_atom = choice((
         // Hex colors like #ff0000 or #f00
         select! { Token::HexColor(c) => StyleValue::Color(ColorValue::Hex(c)) }
             .map_with(|v, e| Spanned::new(v, span_range(&e.span()))),
         // Symbolic colors (must come before plain identifiers)
         symbolic_color.map_with(|v, e| Spanned::new(v, span_range(&e.span()))),
+        // Any other hyphenated palette token, after the structured ones.
+        palette_token.map_with(|v, e| Spanned::new(v, span_range(&e.span()))),
         // Numbers (including negative via Minus token)
         just(Token::Minus)
             .or_not()
