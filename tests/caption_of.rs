@@ -255,3 +255,79 @@ constrain cap.center_x = 50
         warnings.iter().map(|w| &w.message).collect::<Vec<_>>()
     );
 }
+
+#[test]
+fn constraining_to_a_captioned_element_names_the_cause() {
+    // A captioned element's position is computed after the solve, so anything
+    // constrained to it resolves against stale geometry. That broke loudly —
+    // which is right — but as "violated by 594px", which names the symptom.
+    // Stacking captions was the natural thing to try, so the diagnosis has to
+    // say why it cannot work.
+    let (_svg, warnings) = render_with_lint(
+        r#"
+rect v1 [width: 300, height: 56, fill: accent-light, stroke: accent-dark]
+constrain v1.center_x = 400
+constrain v1.center_y = 200
+text "first" cap [caption_of: v1, label_position: below]
+text "second" note [font_size: 12]
+constrain note.top = cap.bottom + 8
+"#,
+        RenderConfig::new().with_lint(true),
+    )
+    .expect("renders");
+    let named: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.message.contains("cap") && w.message.contains("caption"))
+        .collect();
+    assert!(
+        !named.is_empty(),
+        "a warning must say cap is captioned, got: {:?}",
+        warnings.iter().map(|w| &w.message).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn the_suggested_fix_is_to_caption_the_same_subject() {
+    let (_svg, warnings) = render_with_lint(
+        r#"
+rect v1 [width: 300, height: 56, fill: accent-light, stroke: accent-dark]
+constrain v1.center_x = 400
+constrain v1.center_y = 200
+text "first" cap [caption_of: v1, label_position: below]
+text "second" note [font_size: 12]
+constrain note.top = cap.bottom + 8
+"#,
+        RenderConfig::new().with_lint(true),
+    )
+    .expect("renders");
+    let m = warnings
+        .iter()
+        .find(|w| w.message.contains("caption"))
+        .expect("reported");
+    assert!(
+        m.message.contains("label_offset") || m.message.contains("same subject"),
+        "stacking is done by captioning the same subject with a bigger \
+         label_offset; say so: {}",
+        m.message
+    );
+}
+
+#[test]
+fn constraining_a_normal_element_to_another_is_unaffected() {
+    let (_svg, warnings) = render_with_lint(
+        r#"
+rect a [width: 60, height: 40, fill: accent-light, stroke: accent-dark]
+constrain a.center_x = 100
+constrain a.center_y = 100
+text "t" b [font_size: 12]
+constrain b.top = a.bottom + 8
+"#,
+        RenderConfig::new().with_lint(true),
+    )
+    .expect("renders");
+    assert!(
+        !warnings.iter().any(|w| w.message.contains("caption")),
+        "got: {:?}",
+        warnings.iter().map(|w| &w.message).collect::<Vec<_>>()
+    );
+}

@@ -2011,6 +2011,17 @@ fn collect_constant_constraints(
 /// tool accepts what the author wrote and does something else. `caption_of`
 /// wins because following the subject is the whole point, so the constraint is
 /// the thing to delete.
+/// Element names a constraint reads on its right-hand side.
+fn constraint_rhs_elements(expr: &ConstraintExpr) -> Vec<String> {
+    match expr {
+        ConstraintExpr::Equal { right, .. } | ConstraintExpr::EqualWithOffset { right, .. } => {
+            vec![right.element.node.leaf().0.clone()]
+        }
+        ConstraintExpr::Midpoint { a, b, .. } => vec![a.node.0.clone(), b.node.0.clone()],
+        _ => Vec::new(),
+    }
+}
+
 fn check_overridden_captions(doc: &Document, warnings: &mut Vec<LintWarning>) {
     use crate::parser::ast::StyleKey;
 
@@ -2048,6 +2059,28 @@ fn check_overridden_captions(doc: &Document, warnings: &mut Vec<LintWarning>) {
         for stmt in stmts {
             match &stmt.node {
                 Statement::Constrain(c) => {
+                    // Referencing a captioned element on the RIGHT is the
+                    // other half, and the one that breaks loudly but
+                    // unhelpfully: its position is computed after the solve,
+                    // so anything constrained to it resolves against stale
+                    // geometry and reports as "violated by 594px". Stacking
+                    // one caption under another is the natural thing to try,
+                    // so the diagnosis has to say why it cannot work.
+                    for referenced in constraint_rhs_elements(&c.expr) {
+                        if captioned.contains(&referenced) {
+                            warnings.push(LintWarning {
+                                category: LintCategory::OverriddenConstraint,
+                                message: format!(
+                                    "\"{referenced}\" is placed by caption_of, so its position \
+                                     is only known after the solve and a constraint against it \
+                                     resolves against stale geometry; to stack captions, give \
+                                     each one the same subject with a bigger label_offset"
+                                ),
+                                frames: Vec::new(),
+                                pair: None,
+                            });
+                        }
+                    }
                     if let Some(elem) = super::keyframe::get_constraint_lhs_element(&c.expr) {
                         if captioned.contains(&elem) {
                             warnings.push(LintWarning {
@@ -2998,7 +3031,9 @@ fn check_unknown_modifiers(doc: &Document, warnings: &mut Vec<LintWarning>) {
                 warnings.push(LintWarning {
                     category: LintCategory::UnknownModifier,
                     message: format!(
-                        "unknown modifier \"{}\" on {} is ignored; check the spelling against --grammar",
+                        "unknown modifier \"{}\" on {} is ignored; check the spelling against \
+                         --grammar, or `--version` — a modifier newer than the binary reads as \
+                         unknown and is silently dropped",
                         key, owner
                     ),
                     frames: Vec::new(),
