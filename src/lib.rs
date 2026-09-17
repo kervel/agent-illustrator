@@ -501,8 +501,12 @@ fn render_pipeline(
         let frame_idx = resolve_frame_index(frame_selector, &frame_states)?;
         let state = &frame_states[frame_idx];
 
-        // Apply transforms if present, then remove hidden elements
-        let mut frame_result = if !state.transforms.is_empty() {
+        // Re-solve if the frame changes geometry at all, then remove hidden
+        // elements. Not just `transforms`: a frame whose only operations are
+        // `constrain`/`disable` changes geometry too, and testing the narrower
+        // condition here silently dropped every such constraint while
+        // --animate honoured them.
+        let mut frame_result = if state.needs_resolve() {
             layout::keyframe::resolve_frame_for_static(
                 &result, state, &doc, &config.layout,
             ).unwrap_or_else(|| result.clone())

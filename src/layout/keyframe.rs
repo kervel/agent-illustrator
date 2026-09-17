@@ -113,6 +113,23 @@ pub fn extract_keyframes(doc: &Document) -> Vec<&KeyframeDecl> {
 
 /// Compute cumulative frame states from keyframe declarations.
 /// Each frame builds on the previous frame's state.
+impl FrameState {
+    /// Whether this frame changes geometry and so has to be re-solved.
+    ///
+    /// Lives here rather than at each call site because it did not: `--frame`
+    /// tested only `transforms`, so a frame whose operations were purely
+    /// `constrain`/`disable` was rendered from the base layout and every
+    /// constraint in it silently vanished — while `--animate`, which asked the
+    /// fuller question, honoured them. Adding a `transform` on an unrelated
+    /// element made the constraints start working, which is a hard thing to
+    /// diagnose from the outside.
+    pub fn needs_resolve(&self) -> bool {
+        !self.transforms.is_empty()
+            || !self.added_constraints.is_empty()
+            || !self.disabled_constraints.is_empty()
+    }
+}
+
 pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
     let mut frames = Vec::with_capacity(keyframes.len());
     let mut hidden_elements: HashSet<String> = HashSet::new();
@@ -211,10 +228,7 @@ pub fn compute_frame_diffs(
 
         // Re-solve layout for this frame (transforms + constraint cascading).
         // Also re-solve when constraints were added/disabled this frame.
-        let needs_resolve = !state.transforms.is_empty()
-            || !state.added_constraints.is_empty()
-            || !state.disabled_constraints.is_empty();
-        let solved_result = if needs_resolve {
+        let solved_result = if state.needs_resolve() {
             resolve_frame_layout(base_result, state, doc, config)
         } else {
             None

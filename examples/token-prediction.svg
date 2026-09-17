@@ -416,15 +416,15 @@
   <rect id="llm" class="ai-shape ai-rect" x="485" y="118" width="150" height="64" fill="var(--secondary-1)" stroke="#333333" stroke-width="1.5"/>
   <text class="ai-label" x="560" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>LLM</tspan></tspan></text>
   <g class="kf-hidden kf-d kf-anim">
-    <rect id="d" class="ai-shape ai-rect" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+    <rect id="d" class="ai-shape ai-rect kfp-d" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>on</tspan></tspan></text>
   </g>
   <g class="kf-hidden kf-e kf-anim">
-    <rect id="e" class="ai-shape ai-rect" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+    <rect id="e" class="ai-shape ai-rect kfp-e" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>the</tspan></tspan></text>
   </g>
   <g class="kf-hidden kf-f kf-anim">
-    <rect id="f" class="ai-shape ai-rect" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
+    <rect id="f" class="ai-shape ai-rect kfp-f" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>mat</tspan></tspan></text>
   </g>
   <text id="cap" class="ai-shape ai-text" x="224.58499999999992" y="367" text-anchor="start" dominant-baseline="middle" fill="#1b2733">Predict one token, append it — then repeat.</text>

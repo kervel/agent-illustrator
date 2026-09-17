@@ -642,53 +642,53 @@ text {
     <text id="cloud_label" class="ai-shape ai-text" x="860.55" y="58.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">LLM</text>
     <text id="gear_label" class="ai-shape ai-text" x="829.43" y="401" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--foreground-2)">Tool (bash)</text>
     <g class="kf-hidden kf-speech_bubble kf-anim">
-      <rect id="speech_bubble" class="ai-shape ai-rect" x="100" y="27" width="280" height="56" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
+      <rect id="speech_bubble" class="ai-shape ai-rect kfp-speech_bubble" x="100" y="27" width="280" height="56" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
       <text class="ai-label" x="240" y="55" text-anchor="middle" dominant-baseline="middle" font-size="16"><tspan x="240" dy="-0"><tspan>list my Python files</tspan></tspan></text>
     </g>
     <g class="kf-hidden kf-sys_envelope kf-anim">
-      <rect id="sys_envelope" class="ai-shape ai-rect" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="sys_envelope" class="ai-shape ai-rect kfp-sys_envelope" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-sys_line1 kf-anim">
-      <text id="sys_line1" class="ai-shape ai-text" x="564.3919999999999" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
+      <text id="sys_line1" class="ai-shape ai-text kfp-sys_line1" x="564.3919999999999" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
     </g>
     <g class="kf-hidden kf-sys_line2 kf-anim">
-      <text id="sys_line2" class="ai-shape ai-text" x="591.528" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
+      <text id="sys_line2" class="ai-shape ai-text kfp-sys_line2" x="591.528" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
     </g>
     <g class="kf-hidden kf-tool_call_envelope kf-anim">
-      <rect id="tool_call_envelope" class="ai-shape ai-rect" x="525" y="180" width="310" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="tool_call_envelope" class="ai-shape ai-rect kfp-tool_call_envelope" x="525" y="180" width="310" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-tc_line1 kf-anim">
-      <text id="tc_line1" class="ai-shape ai-text" x="628.864" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_call: bash</text>
+      <text id="tc_line1" class="ai-shape ai-text kfp-tc_line1" x="628.864" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_call: bash</text>
     </g>
     <g class="kf-hidden kf-tc_line2 kf-anim">
-      <text id="tc_line2" class="ai-shape ai-text" x="618.696" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
+      <text id="tc_line2" class="ai-shape ai-text kfp-tc_line2" x="618.696" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">find . -name &apos;*.py&apos;</text>
     </g>
     <g class="kf-hidden kf-exec_envelope kf-anim">
-      <rect id="exec_envelope" class="ai-shape ai-rect" x="115" y="280" width="290" height="80" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="exec_envelope" class="ai-shape ai-rect kfp-exec_envelope" x="115" y="280" width="290" height="80" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-exec_line1 kf-anim">
-      <text id="exec_line1" class="ai-shape ai-text" x="192.024" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
+      <text id="exec_line1" class="ai-shape ai-text kfp-exec_line1" x="192.024" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
     </g>
     <g class="kf-hidden kf-exec_line2 kf-anim">
-      <text id="exec_line2" class="ai-shape ai-text" x="179.95999999999998" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
+      <text id="exec_line2" class="ai-shape ai-text kfp-exec_line2" x="179.95999999999998" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
     </g>
     <g class="kf-hidden kf-result_envelope kf-anim">
-      <rect id="result_envelope" class="ai-shape ai-rect" x="535" y="180" width="290" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="result_envelope" class="ai-shape ai-rect kfp-result_envelope" x="535" y="180" width="290" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-result_line1 kf-anim">
-      <text id="result_line1" class="ai-shape ai-text" x="588.624" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_result + conversation</text>
+      <text id="result_line1" class="ai-shape ai-text kfp-result_line1" x="588.624" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">tool_result + conversation</text>
     </g>
     <g class="kf-hidden kf-result_line2 kf-anim">
-      <text id="result_line2" class="ai-shape ai-text" x="599.96" y="229" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
+      <text id="result_line2" class="ai-shape ai-text kfp-result_line2" x="599.96" y="229" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">./main.py  ./test_api.py</text>
     </g>
     <g class="kf-hidden kf-answer_envelope kf-anim">
-      <rect id="answer_envelope" class="ai-shape ai-rect" x="155" y="180" width="290" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
+      <rect id="answer_envelope" class="ai-shape ai-rect kfp-answer_envelope" x="155" y="180" width="290" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5" opacity="0.9"/>
     </g>
     <g class="kf-hidden kf-ans_line1 kf-anim">
-      <text id="ans_line1" class="ai-shape ai-text" x="223.06400000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
+      <text id="ans_line1" class="ai-shape ai-text kfp-ans_line1" x="223.06400000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
     </g>
     <g class="kf-hidden kf-ans_line2 kf-anim">
-      <text id="ans_line2" class="ai-shape ai-text" x="215.512" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
+      <text id="ans_line2" class="ai-shape ai-text kfp-ans_line2" x="215.512" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
     </g>
   </g>
   <path class="ai-connection conn-prompt_arrow conn-prompt_arrow-base" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
