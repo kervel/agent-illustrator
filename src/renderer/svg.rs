@@ -996,9 +996,19 @@ fn generate_keyframe_css(
         let class_name = format!("frame-{}", frame.name);
         css.push_str(&format!(".{} {{\n", class_name));
 
-        // Element diffs. Position + rotation + opacity animate on the wrapper group
-        // (.kf-{id}, which contains shape + label, so the label rides along); size +
-        // color animate on the inner shape (#{id}).
+        // Element diffs. Everything keys off the wrapper group's `.kf-{id}`
+        // class: position, rotation and opacity on the group itself, size and
+        // colour on the shape inside it.
+        //
+        // Not `#{id}`. The documented way to use --animate is to inline the
+        // SVG so something can flip a class on the root, and anything inlining
+        // several SVGs into one document has to namespace their ids. An id
+        // selector silently detaches when that happens — the diagram keeps
+        // stepping through its frames and merely stops changing colour, with
+        // no error and no warning, while --frame rendering stays correct
+        // because it writes attributes directly. A class survives the rewrite,
+        // and using one mechanism for every property removes the whole failure
+        // mode rather than documenting it.
         for (elem_id, diff) in &frame.element_diffs {
             if let Some(opacity) = diff.opacity {
                 css.push_str(&format!(
@@ -1035,8 +1045,10 @@ fn generate_keyframe_css(
                 props.push(format!("stroke-width: {}px", sw));
             }
             if !props.is_empty() {
+                // A CSS rule beats a presentation attribute, so this overrides
+                // the shape's own fill=/stroke= without needing !important.
                 css.push_str(&format!(
-                    "  #{} {{ {}; }}\n",
+                    "  .kfp-{} {{ {}; }}\n",
                     elem_id,
                     props.join("; ")
                 ));
@@ -1195,7 +1207,18 @@ fn render_element_inner(
     let id = element.id.as_ref().map(|i| i.0.as_str());
     let fill_override = builder.register_fill(&element.styles);
     let styles = format_styles(&element.styles, fill_override.as_deref());
-    let classes = element.styles.css_classes.clone();
+    let mut classes = element.styles.css_classes.clone();
+    // A per-frame property rule selects this class rather than the element's
+    // id, so it survives an inlining filter that namespaces ids. It goes on
+    // the SHAPE, not the wrapper group: a descendant selector would cascade a
+    // group's colour onto every child, and a child selector misses a rotated
+    // shape, which sits one <g> deeper.
+    if let Some(i) = id {
+        if kf_referenced.contains(i) {
+            classes.push(format!("kfp-{i}"));
+        }
+    }
+    let classes = classes;
 
     match &element.element_type {
         ElementType::Shape(ShapeType::Rectangle) => {

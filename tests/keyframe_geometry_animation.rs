@@ -29,8 +29,10 @@ keyframe "idle" {}
 keyframe "grow" { transform box [width: 300, height: 120] }
 "#;
     let svg = render(src).expect("render ok");
-    assert!(svg.contains("#box {") && svg.contains("width: 300px") && svg.contains("height: 120px"),
-        "expected #box width/height on inner shape, got:\n{}", svg);
+    // Selected by a class on the shape, not by id: an id selector does not
+    // survive an inlining filter that namespaces ids.
+    assert!(svg.contains(".kfp-box {") && svg.contains("width: 300px") && svg.contains("height: 120px"),
+        "expected .kfp-box width/height on inner shape, got:\n{}", svg);
 }
 
 #[test]

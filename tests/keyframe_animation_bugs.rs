@@ -101,10 +101,12 @@ keyframe "active" {
     );
 
     // The transform on the shown element must NOT be dropped: a stroke
-    // override targeting #tok3 must appear in the same frame.
+    // override targeting tok3 must appear in the same frame. The selector is
+    // a class on the shape (.kfp-tok3), not #tok3 — an id selector does not
+    // survive an inlining filter that namespaces ids.
     assert!(
-        svg.contains("#tok3 {") && svg.contains("stroke:"),
-        "expected transform stroke override #tok3 {{ stroke: ... }} to survive show, got:\n{}",
+        svg.contains(".kfp-tok3 {") && svg.contains("stroke:"),
+        "expected transform stroke override .kfp-tok3 {{ stroke: ... }} to survive show, got:\n{}",
         svg
     );
 }
