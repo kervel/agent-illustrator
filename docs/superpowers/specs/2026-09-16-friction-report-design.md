@@ -554,17 +554,27 @@ moving target. 6 pairs naturally with 4 — re-pinning a shared part is
 only useful once `include` exists — so 6 immediately before 4 gives the best
 story, but they do not depend on each other mechanically.
 
+> **Correction.** The pre-fix overlap count was first reported as 124 and is
+> actually 142. Both of us had extracted categories with a pattern like
+> `^lint: [a-z-]*:`, which requires a colon straight after the category name
+> and therefore silently drops every frame-tagged finding — those read
+> `lint: overlap [frames: …]:`. The post-fix figures (overlap 22, label 25)
+> and every conclusion drawn from them are unaffected; the improvement was
+> simply larger than recorded. Worth keeping visible: a filter that quietly
+> discarded the findings it did not match, in the middle of an exercise about
+> filters that quietly discard findings.
+
 ## Corpus
 
 The reporter is holding their 8-file deck unmodified as a pre-fix corpus, at
 `…/worktrees/mr944/presentations/76-bitemporality/diagrams/` on this machine.
-Baseline against `8277305`: overlap 124, label 33, 8/8 rendering. Recorded,
+Baseline against `8277305`: overlap 142, label 33, 8/8 rendering. Recorded,
 with the per-container split and a reproduction script, in `friction-corpus.md`
 and `friction-corpus-check.sh` at the repo root.
 
 **That corpus is perishable and this spec does not depend on it.** It lives in
 an uncommitted git worktree on one machine; it is corroboration, not a test.
-The two idioms that produce ~100 of the 124 overlap warnings are small enough
+The two idioms that produce ~100 of the 142 overlap warnings are small enough
 to state outright, and Part 2's committed fixtures are built from these rather
 than from the deck:
 
