@@ -129,7 +129,11 @@ impl fmt::Display for LintCategory {
 /// Run all lint checks on a completed layout.
 /// If the document contains keyframes, overlap checks run per-frame
 /// with hidden elements excluded.
-pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
+pub fn check(
+    result: &LayoutResult,
+    doc: &Document,
+    config: &crate::layout::LayoutConfig,
+) -> Vec<LintWarning> {
     let mut warnings = Vec::new();
     let contains_ids = collect_contains_ids(doc);
 
@@ -153,8 +157,20 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
                 hidden_elements: &state.hidden_elements,
                 hidden_connections: &state.hidden_connections,
             };
+            // Ask the frame its own question. A keyframe that moves an element
+            // changes what collides with what, so checking a later frame's
+            // visible set against frame-0 coordinates reports pairs that have
+            // moved apart and — worse — misses pairs the keyframe moved
+            // together. Falls back to the base layout when a frame cannot be
+            // re-solved, which is the old behaviour rather than no check.
+            let solved = super::keyframe::resolve_frame_for_static(result, state, doc, config);
+            let frame_result = solved.as_ref().unwrap_or(result);
             let mut frame_warnings = Vec::new();
-            check_collisions(result, &contains_ids, &scope, &mut frame_warnings);
+            check_collisions(frame_result, &contains_ids, &scope, &mut frame_warnings);
+            // The hand-placed-label rule is a collision question too: text
+            // parked in a box that is hidden whenever the text is shown is not
+            // sitting on anything.
+            check_hand_placed_labels(frame_result, doc, &mut frame_warnings, &scope);
             per_frame.push((state.name.clone(), frame_warnings));
         }
         merge_frame_warnings(per_frame, &mut warnings);
@@ -171,7 +187,11 @@ pub fn check(result: &LayoutResult, doc: &Document) -> Vec<LintWarning> {
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
     check_text_fits_its_box(result, doc, &mut warnings);
-    check_hand_placed_labels(result, doc, &mut warnings);
+    // Without keyframes this is the only pass; with them it runs per frame
+    // inside the loop above, where the visible set is known.
+    if frame_states.is_empty() {
+        check_hand_placed_labels(result, doc, &mut warnings, &FrameScope::all_visible());
+    }
     check_label_markup(doc, &mut warnings);
     check_unknown_modifiers(doc, &mut warnings);
     check_unanimatable_transform_keys(doc, &mut warnings);
@@ -3471,6 +3491,7 @@ fn check_hand_placed_labels(
     result: &LayoutResult,
     doc: &Document,
     warnings: &mut Vec<LintWarning>,
+    scope: &FrameScope<'_>,
 ) {
     let contains = collect_contains_ids(doc);
 
@@ -3483,7 +3504,18 @@ fn check_hand_placed_labels(
         lineage: Vec<String>,
     }
 
-    fn walk(elem: &ElementLayout, lineage: &[String], out: &mut Vec<Seen>) {
+    fn walk(
+        elem: &ElementLayout,
+        lineage: &[String],
+        out: &mut Vec<Seen>,
+        scope: &FrameScope<'_>,
+    ) {
+        // Text parked in a box that is hidden whenever the text is shown is
+        // not sitting on anything. A hidden element takes its whole subtree
+        // out of this frame's question.
+        if scope.hides_element(elem) {
+            return;
+        }
         let mut next = lineage.to_vec();
         if let Some(id) = &elem.id {
             next.push(id.0.clone());
@@ -3507,13 +3539,13 @@ fn check_hand_placed_labels(
             }
         }
         for child in &elem.children {
-            walk(child, &next, out);
+            walk(child, &next, out, scope);
         }
     }
 
     let mut seen = Vec::new();
     for elem in &result.root_elements {
-        walk(elem, &[], &mut seen);
+        walk(elem, &[], &mut seen, scope);
     }
 
     for shape in seen.iter().filter(|s| !s.is_text) {

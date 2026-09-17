@@ -5,6 +5,11 @@
 //! corpus emitted 74 warnings across fourteen files, including a 53px label
 //! inside a 10px circle and three elements sharing one id.
 //!
+//! The three token-prediction entries that used to live here documented a lint
+//! defect rather than an example defect: collisions were checked against
+//! frame-0 geometry. That is fixed, the entries stopped matching, and the
+//! stale-exception test below is what caught them.
+//!
 //! The six categories gated here are the ones a real 8-file corpus measured at
 //! zero false positives. The rest (`overlap`, `alignment`, `contrast`,
 //! `over-constrained`) still have a known false-positive rate and are reported
@@ -43,28 +48,6 @@ const REVIEWED: &[(&str, &str, &str)] = &[
         "Same: the bend is what connecting two differently-rotated figures \
          looks like, and straightening it would stop the file testing \
          anything.",
-    ),
-    (
-        "token-prediction.ail",
-        "labels on \"d\" and \"e\" overlap",
-        "KNOWN LINT DEFECT, not an example defect. check_collisions takes the \
-         BASE layout plus a per-frame scope carrying only visibility — it \
-         never re-solves geometry per frame. d, e and f share a home position \
-         and keyframes move them apart with disable+constrain, so lint sees \
-         frame-0 coordinates with a later frame's visibility. Rendering \
-         --frame predict_the puts d at x=262 and e at x=535: they do not \
-         overlap on screen. Every frame-scoped collision warning on a diagram \
-         that MOVES elements is unreliable for the same reason.",
-    ),
-    (
-        "token-prediction.ail",
-        "labels on \"d\" and \"f\" overlap",
-        "Same known lint defect.",
-    ),
-    (
-        "token-prediction.ail",
-        "labels on \"e\" and \"f\" overlap",
-        "Same known lint defect.",
     ),
     (
         "token-prediction.ail",
