@@ -644,6 +644,8 @@ impl ResolvedStyles {
 
         for modifier in modifiers {
             match &modifier.node.key.node {
+                // Read by the engine from the modifiers directly, not a style.
+                StyleKey::CaptionOf => {}
                 StyleKey::Fill => {
                     if let Some(spec) = Self::fill_spec_from_value(&modifier.node.value.node) {
                         styles.fill_pattern = Some(spec);

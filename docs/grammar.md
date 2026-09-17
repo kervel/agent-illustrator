@@ -115,6 +115,14 @@ Common modifiers:
                             top|center|bottom (same spellings). Also the
                             cross-axis alignment of a row's/column's children
                             (left/center/right accepted; default start)
+    caption_of: <element>   On a `text` element: attach it to a subject. It is
+                            placed the way that subject's own label would be
+                            (label_position / align / label_offset) and moves
+                            whenever the subject moves or resizes, in every
+                            frame. Use it for a caption that has to change
+                            between frames, which a shape's own label cannot do
+                            without also changing the box. A `constrain` on a
+                            captioned element is overridden — --lint says so.
     label_fill: <color>     Colour of the label text (fill colours the shape)
     rotation: <degrees>     Rotate element (clockwise)
     class: <name>           Custom CSS class (for external styling)
@@ -282,6 +290,11 @@ Labels:
     rect b [label: "based_on", label_position: below, align: end]
     rect card [label: "<b>title</b><br>second line<br><small>note</small>"]
     rect card [width: 200, label: "a long sentence that wraps to the width"]
+
+Captions that follow their subject:
+    rect v1 [width: 300, height: 56]
+    constrain v1.center_x = 400
+    text "confirmed" cap [caption_of: v1, label_position: below, align: end]
 
 Layout:
     row [gap: 20] {

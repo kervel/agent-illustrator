@@ -378,6 +378,10 @@ fn resolve_frame_layout(
 
     // Re-route connections against updated element positions
     result.connections.clear();
+    // A caption follows its subject in every frame, not just the base layout.
+    if super::engine::place_captions(&mut result, doc).is_err() {
+        return None;
+    }
     if let Err(_e) = super::routing::route_connections(&mut result, doc) {
         return None;
     }
@@ -459,7 +463,7 @@ fn constraint_target(expr: &crate::parser::ast::ConstraintExpr) -> Option<(Strin
 }
 
 /// Extract the element name from the LHS of a constraint expression.
-fn get_constraint_lhs_element(expr: &crate::parser::ast::ConstraintExpr) -> Option<String> {
+pub(crate) fn get_constraint_lhs_element(expr: &crate::parser::ast::ConstraintExpr) -> Option<String> {
     use crate::parser::ast::ConstraintExpr;
     match expr {
         ConstraintExpr::Equal { left, .. }
@@ -710,6 +714,7 @@ pub fn is_animatable(key: &StyleKey) -> bool {
         | StyleKey::Routing
         | StyleKey::Size
         | StyleKey::StrokeOpacity
+        | StyleKey::CaptionOf
         | StyleKey::ZOrder => false,
         // Anything not yet classified: treat as not animatable and say so,
         // rather than pretending it worked.

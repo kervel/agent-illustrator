@@ -358,6 +358,9 @@ pub enum StyleKey {
     Label,
     /// Position of a connection label (left, right, or center)
     LabelPosition,
+    /// `caption_of: <element>` — attach this text element to a subject, so it
+    /// is placed the way that subject's own label would be and moves with it.
+    CaptionOf,
     FontSize,
     Class,
     /// Gap between elements in a layout (can be negative for overlap)

@@ -469,6 +469,10 @@ fn render_pipeline(
     // Resolve constraints (relational positioning and offsets from `place` statements)
     layout::resolve_constraints(&mut result, &doc, skip_ref)?;
 
+    // Captions follow their subject's final geometry, so this runs after
+    // constraints and before routing (a connection may end at a caption).
+    layout::engine::place_captions(&mut result, &doc)?;
+
     // Route connections
     layout::route_connections(&mut result, &doc)?;
 

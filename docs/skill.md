@@ -393,6 +393,14 @@ Available: `foreground-1`, `foreground-2`, `foreground-3`, `accent-1`, `accent-2
 There is no bare `background` (or `foreground`, or `accent`) — every name
 carries a suffix.
 
+A caption that must change between frames is a `text` element with
+`caption_of:` — it follows its subject the way a label does, so it never needs
+re-positioning when the subject moves:
+
+```
+text "confirmed" cap [caption_of: v1, label_position: below, align: end]
+```
+
 Also available: `status-success`, `status-warning`, `status-error`. Any token a
 stylesheet defines can be named the same way, so a custom palette's own colours
 are usable directly rather than by hardcoding a hex.

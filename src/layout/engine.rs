@@ -1008,6 +1008,138 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 /// sized for one set of lines and drawn with another. `validate_label_markup`
 /// has already rejected malformed markup by the time this runs, so the
 /// fallback to literal text is unreachable in practice.
+/// Place text elements that declare a `caption_of:` subject.
+///
+/// Runs after constraints are resolved, because the point is to follow the
+/// subject's FINAL geometry: a caption positioned by hand did not move when
+/// its bar moved, which is most of what makes a keyframed diagram expensive to
+/// edit. Placement reuses the same `place_label` the subject's own label would
+/// use, so `label_position`, `align` and `label_offset` mean exactly what they
+/// mean there.
+pub fn place_captions(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
+    let captions = collect_captions(&doc.statements);
+    for (caption_id, subject_id, placement, span) in captions {
+        let Some(subject) = result.get_element_by_name(&subject_id) else {
+            let mut known: Vec<String> = result.elements.keys().cloned().collect();
+            known.sort();
+            return Err(LayoutError::undefined(&subject_id, span, known));
+        };
+        let bounds = subject.bounds;
+        let Some(caption) = result.elements.get(&caption_id) else {
+            continue;
+        };
+        let font_size = caption.styles.font_size.unwrap_or(14.0);
+        let metrics = crate::layout::text::TextMetrics {
+            width: caption.bounds.width,
+            height: caption.bounds.height,
+            line_count: 1,
+        };
+        let _ = font_size;
+        let (point, anchor) = place_label(&bounds, &placement, &metrics);
+        // The anchor decides which edge of the text the point refers to, so
+        // the box is placed from it rather than centred on it.
+        let x = match anchor {
+            TextAnchor::Start => point.x,
+            TextAnchor::Middle => point.x - metrics.width / 2.0,
+            TextAnchor::End => point.x - metrics.width,
+        };
+        let y = point.y - metrics.height / 2.0;
+        // Anchor the glyphs the way the placement does, so the emitted x
+        // means the same thing the placement computed. Without this a
+        // below-centred caption is start-anchored at its box's left edge —
+        // visually right, but impossible to reason about from the output.
+        if let Some(c) = result.elements.get_mut(&caption_id) {
+            if c.styles.align.is_none() {
+                c.styles.align = Some(anchor);
+            }
+        }
+        set_align_recursive(&mut result.root_elements, &caption_id, anchor);
+        let (dx, dy) = {
+            let c = &result.elements[&caption_id];
+            (x - c.bounds.x, y - c.bounds.y)
+        };
+        if dx != 0.0 {
+            shift_element_by_name(result, &caption_id, dx, Axis::Horizontal)?;
+        }
+        if dy != 0.0 {
+            shift_element_by_name(result, &caption_id, dy, Axis::Vertical)?;
+        }
+    }
+    result.compute_bounds();
+    Ok(())
+}
+
+/// Mirror the align onto the element in the render tree, which is what the
+/// renderer actually draws from.
+fn set_align_recursive(elems: &mut [ElementLayout], name: &str, anchor: TextAnchor) {
+    for elem in elems.iter_mut() {
+        if elem.id.as_ref().map(|i| i.0.as_str()) == Some(name) {
+            if elem.styles.align.is_none() {
+                elem.styles.align = Some(anchor);
+            }
+            return;
+        }
+        set_align_recursive(&mut elem.children, name, anchor);
+    }
+}
+
+/// `(caption id, subject id, placement, span)` for every captioned text element.
+fn collect_captions(
+    stmts: &[Spanned<Statement>],
+) -> Vec<(String, String, LabelPlacement, std::ops::Range<usize>)> {
+    let mut out = Vec::new();
+    fn walk(
+        stmts: &[Spanned<Statement>],
+        out: &mut Vec<(String, String, LabelPlacement, std::ops::Range<usize>)>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Shape(shape) => {
+                    let Some(name) = shape.name.as_ref() else {
+                        continue;
+                    };
+                    let Some(subject) = extract_caption_of(&shape.modifiers) else {
+                        continue;
+                    };
+                    let placement = LabelPlacement {
+                        // `inside` would put the caption on top of its
+                        // subject, which is the habit the label rules exist to
+                        // retire; below is the useful default.
+                        position: match extract_label_position(&shape.modifiers) {
+                            ShapeLabelPosition::Inside => ShapeLabelPosition::Below,
+                            other => other,
+                        },
+                        align: extract_align(&shape.modifiers),
+                        offset: extract_label_offset(&shape.modifiers),
+                        nudge: (0.0, 0.0),
+                    };
+                    out.push((name.node.0.clone(), subject, placement, stmt.span.clone()));
+                }
+                Statement::Layout(l) => walk(&l.children, out),
+                Statement::Group(g) => walk(&g.children, out),
+                _ => {}
+            }
+        }
+    }
+    walk(stmts, &mut out);
+    out
+}
+
+/// Read `caption_of: <element>`.
+fn extract_caption_of(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
+    modifiers.iter().find_map(|m| {
+        if !matches!(m.node.key.node, StyleKey::CaptionOf) {
+            return None;
+        }
+        match &m.node.value.node {
+            StyleValue::Identifier(id) => Some(id.0.clone()),
+            StyleValue::Keyword(k) => Some(k.clone()),
+            StyleValue::String(s) => Some(s.clone()),
+            _ => None,
+        }
+    })
+}
+
 fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichText, f64, String)> {
     let raw = extract_label(&shape.modifiers)?;
     let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);

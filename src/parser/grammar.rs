@@ -158,6 +158,7 @@ where
                 "height" => StyleKey::Height,
                 "routing" => StyleKey::Routing,
                 "label_position" => StyleKey::LabelPosition,
+                "caption_of" => StyleKey::CaptionOf,
                 "x" => StyleKey::X,
                 "y" => StyleKey::Y,
                 "stroke_dasharray" => StyleKey::StrokeDasharray,

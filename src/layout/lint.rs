@@ -197,6 +197,7 @@ pub fn check(
     check_unanimatable_transform_keys(doc, &mut warnings);
     check_unknown_colors(doc, &mut warnings);
     check_overridden_constraints(result, &mut warnings);
+    check_overridden_captions(doc, &mut warnings);
     dedup_warnings(&mut warnings);
     warnings
 }
@@ -2003,6 +2004,74 @@ fn collect_constant_constraints(
 /// it is how a file composing a shared part re-pins something in it. But a
 /// silent override hides a mistake as effectively as the hard error it
 /// replaced, so it is always reported.
+/// A caption's position comes from its subject, so a constraint on it is
+/// silently overridden.
+///
+/// Exactly the class of defect this ruleset has spent its life closing: the
+/// tool accepts what the author wrote and does something else. `caption_of`
+/// wins because following the subject is the whole point, so the constraint is
+/// the thing to delete.
+fn check_overridden_captions(doc: &Document, warnings: &mut Vec<LintWarning>) {
+    use crate::parser::ast::StyleKey;
+
+    let mut captioned: Vec<String> = Vec::new();
+    fn collect(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<String>) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Shape(shape) => {
+                    if let Some(name) = &shape.name {
+                        if shape
+                            .modifiers
+                            .iter()
+                            .any(|m| matches!(m.node.key.node, StyleKey::CaptionOf))
+                        {
+                            out.push(name.node.0.clone());
+                        }
+                    }
+                }
+                Statement::Layout(l) => collect(&l.children, out),
+                Statement::Group(g) => collect(&g.children, out),
+                _ => {}
+            }
+        }
+    }
+    collect(&doc.statements, &mut captioned);
+    if captioned.is_empty() {
+        return;
+    }
+
+    fn walk(
+        stmts: &[crate::parser::ast::Spanned<Statement>],
+        captioned: &[String],
+        warnings: &mut Vec<LintWarning>,
+    ) {
+        for stmt in stmts {
+            match &stmt.node {
+                Statement::Constrain(c) => {
+                    if let Some(elem) = super::keyframe::get_constraint_lhs_element(&c.expr) {
+                        if captioned.contains(&elem) {
+                            warnings.push(LintWarning {
+                                category: LintCategory::OverriddenConstraint,
+                                message: format!(
+                                    "\"{elem}\" is placed by caption_of, so this constrain is \
+                                     overridden; delete it, or drop caption_of and position it \
+                                     by hand"
+                                ),
+                                frames: Vec::new(),
+                                pair: None,
+                            });
+                        }
+                    }
+                }
+                Statement::Layout(l) => walk(&l.children, captioned, warnings),
+                Statement::Group(g) => walk(&g.children, captioned, warnings),
+                _ => {}
+            }
+        }
+    }
+    walk(&doc.statements, &captioned, warnings);
+}
+
 fn check_overridden_constraints(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
     // The superseded constraint never reached the solver, so `over-constrained`
     // reporting it as "violated" is describing a statement that was
