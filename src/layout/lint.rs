@@ -248,6 +248,7 @@ fn check_collisions(
     check_label_element_overlaps(result, scope, warnings);
     check_connections(result, scope, warnings);
     check_label_connection_overlaps(result, scope, warnings);
+    check_near_misses(result, scope, warnings);
 }
 
 /// Collapse per-frame warnings into one warning per distinct defect.
@@ -546,6 +547,90 @@ fn collect_contains_ids_from_stmts(
 }
 
 // ── FR2: Overlap detection ────────────────────────────────────────
+
+/// Distance at which text is close enough to a visible edge to read as
+/// struck through.
+///
+/// Deliberately tiny. The defect is glyphs touching a line, not glyphs near
+/// one; a generous threshold would fire on every caption in a dense figure and
+/// make the category unusable, which is exactly how `overlap` became something
+/// authors excluded wholesale.
+const NEAR_MISS_EPSILON: f64 = 2.0;
+
+/// Report text whose box stops just short of a visible edge.
+///
+/// `overlap` and `label` both ask whether two boxes intersect. Text abutting a
+/// 2px rule at zero overlap answers no, so nothing fires — and on screen the
+/// rule runs through the words. This is the one collision class that survived
+/// every other rule in the friction report: a caption resting on an axis, and
+/// a vertical rule drawn through a bar's name that reached a screenshot
+/// instead of the linter.
+///
+/// Scoped narrowly on purpose: only TEXT, only against something that paints,
+/// only when the two do not already intersect (that is the overlap rule's
+/// finding, and naming one defect twice is what taught authors to stop
+/// reading lint output).
+fn check_near_misses(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
+    let mut elements: Vec<OpaqueElement> = Vec::new();
+    for (i, elem) in result.root_elements.iter().enumerate() {
+        collect_visible_elements(elem, None, i, scope, &mut elements);
+    }
+
+    let mut texts: Vec<(String, BoundingBox)> = Vec::new();
+    fn collect_texts(
+        elem: &ElementLayout,
+        scope: &FrameScope<'_>,
+        out: &mut Vec<(String, BoundingBox)>,
+    ) {
+        if scope.hides_element(elem) {
+            return;
+        }
+        if is_text_shape(elem) && !paints_nothing(elem) {
+            if let Some(id) = &elem.id {
+                out.push((id.0.clone(), elem.bounds));
+            }
+        }
+        for child in &elem.children {
+            collect_texts(child, scope, out);
+        }
+    }
+    for elem in &result.root_elements {
+        collect_texts(elem, scope, &mut texts);
+    }
+
+    for (text_id, tb) in &texts {
+        for other in &elements {
+            if &other.id == text_id {
+                continue;
+            }
+            // An actual intersection is the overlap rule's to report.
+            if tb.intersects(&other.bounds) {
+                continue;
+            }
+            let gap_x = (other.bounds.x - tb.right()).max(tb.x - other.bounds.right());
+            let gap_y = (other.bounds.y - tb.bottom()).max(tb.y - other.bounds.bottom());
+            // Close on one axis while genuinely spanning the other: a rule
+            // that runs past the text, not a neighbour beside it.
+            let grazes_horizontally =
+                gap_y <= NEAR_MISS_EPSILON && gap_y >= -NEAR_MISS_EPSILON && gap_x < 0.0;
+            let grazes_vertically =
+                gap_x <= NEAR_MISS_EPSILON && gap_x >= -NEAR_MISS_EPSILON && gap_y < 0.0;
+            if !(grazes_horizontally || grazes_vertically) {
+                continue;
+            }
+            warnings.push(LintWarning {
+                category: LintCategory::Overlap,
+                message: format!(
+                    "text \"{}\" grazes the edge of \"{}\"; at this distance the glyphs read as \
+                     struck through — move it clear or give it a gap",
+                    text_id, other.id
+                ),
+                frames: Vec::new(),
+                pair: Some(sorted_pair(text_id, &other.id)),
+            });
+        }
+    }
+}
 
 fn check_overlaps(
     result: &LayoutResult,

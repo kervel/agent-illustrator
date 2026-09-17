@@ -176,8 +176,11 @@ template "npn" {
     constrain b_label.center_y = base_lead.center_y
     constrain c_label.center_x = collector_lead.center_x
     constrain c_label.bottom = collector_lead.top - 3
-    constrain e_label.center_x = emitter_lead.center_x
-    constrain e_label.top = emitter_lead.bottom + 3
+    // Beside the lead, not under it: directly below, the E lands on whatever
+    // the emitter connects to — a ground bar, in the driver's case — and
+    // reads as struck through.
+    constrain e_label.left = emitter_lead.right + 4
+    constrain e_label.center_y = emitter_lead.bottom - 4
 
     anchor base [position: base_lead.left, direction: left]
     anchor collector [position: collector_lead.top, direction: up]
