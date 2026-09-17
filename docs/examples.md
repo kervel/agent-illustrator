@@ -505,3 +505,30 @@ is literal text, so "a < b" and "Vec<String>" are safe.
 `right` — and `align:` picks the edge it lines up on. An outside label is part
 of the element's bounds, so a row or column reserves space for it and a
 caption never collides with the next element along.
+
+
+CAPTIONS THAT FOLLOW THEIR SUBJECT
+==================================
+
+A shape's own `label:` cannot differ between frames. A caption that has to
+change is a `text` element, and `caption_of:` places it the way that shape's
+label would be placed — so it follows when the subject moves or resizes, in
+every frame, instead of needing a constraint per position.
+
+row bars [gap: 60] {
+    rect v1 [width: 220, height: 48, label: "V1"]
+    rect v2 [width: 150, height: 48, label: "V2"]
+}
+text "confirmed" v1_state [caption_of: v1, label_position: below, align: end,
+                           fill: status-success]
+text "supersedes V1" v1_note [caption_of: v1, label_position: below, align: end,
+                              label_offset: 22]
+
+`label_position`, `align` and `label_offset` mean exactly what they mean for a
+shape's own label. Stack captions by giving each the same subject with a bigger
+`label_offset` — nothing can be constrained TO a captioned element, because its
+position is only known after the solve.
+
+The win is not the line count. Every place a keyframe moves a bar, it no longer
+has to remember to move the word underneath it: three scenario files in a real
+deck lost a named constraint and the `disable` that went with it.

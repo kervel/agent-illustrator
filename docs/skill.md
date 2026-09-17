@@ -144,6 +144,9 @@ IMPORTANT: Do NOT use ImageMagick `convert` or `rsvg-convert` — they don't sup
 
 After each render, verify ALL of these. If any fail, fix and re-render:
 
+0. If a documented modifier seems to do nothing, check `agent-illustrator
+   --version`: one newer than the binary reads as unknown and is silently
+   dropped. `--lint` reports it as `unknown-modifier`.
 1. Run `agent-illustrator --lint diagram.ail`. The warnings are there to prevent common mistakes, but can occasionally have false positives. `unknown-modifier` never is: it means a key you wrote is being ignored, so check the spelling.
 2. Visual check (render the svg to png). **The screenshot pass is for meaning,
    not for collisions.** `--lint` answers "do these overlap" and "does this

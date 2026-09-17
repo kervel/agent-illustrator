@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 844.23 471.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 844.23 606.5">
   <!-- agent-illustrator dev -->
   <style>
     :root {
@@ -141,5 +141,14 @@
       <rect id="wrapped" class="ai-shape ai-rect" x="234.67800000000005" y="288" width="240" height="68.5" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
       <text class="ai-label" x="354.67800000000005" y="322.25" text-anchor="middle" dominant-baseline="middle"><tspan x="354.67800000000005" dy="-17.5"><tspan>T &lt;= now confirmed_from &lt;= T &lt;</tspan></tspan><tspan x="354.67800000000005" dy="17.5"><tspan>confirmed_until, so the event is</tspan></tspan><tspan x="354.67800000000005" dy="17.5"><tspan>active</tspan></tspan></text>
     </g>
+    <g id="captioned" class="ai-container">
+      <rect id="bar" class="ai-shape ai-rect" x="10" y="410.5" width="220" height="48" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+      <text class="ai-label" x="120" y="434.5" text-anchor="middle" dominant-baseline="middle"><tspan x="120" dy="-0"><tspan>V1</tspan></tspan></text>
+      <rect id="bar2" class="ai-shape ai-rect" x="290" y="410.5" width="150" height="48" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+      <text class="ai-label" x="365" y="434.5" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>V2</tspan></tspan></text>
+    </g>
+    <text id="bar_state" class="ai-shape ai-text" x="230" y="470" text-anchor="end" dominant-baseline="middle" font-size="11" fill="var(--status-success)">confirmed</text>
+    <text id="bar_note" class="ai-shape ai-text" x="230" y="486" text-anchor="end" dominant-baseline="middle" font-size="11" fill="var(--text-3)">supersedes V1</text>
+    <text id="bar2_state" class="ai-shape ai-text" x="365" y="470" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--status-warning)">planned</text>
   </g>
 </svg>

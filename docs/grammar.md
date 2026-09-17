@@ -225,6 +225,11 @@ keyframe "name" {
     enable a_home                    Reactivate a disabled named constraint
 }
 
+Keyframe names become CSS classes (`.frame-<name>`), so they must be letters,
+digits, '-' or '_' and must not start with a digit. A name with a space is
+rejected rather than renamed, because a renamed frame is one you could not then
+pass to --frame.
+
 Keyframes are cumulative: each frame builds on the previous frame's state.
 Transforms (visual AND geometry) persist forward, merged per-property; to reset
 a property, restate it (e.g. dx: 0).
@@ -264,6 +269,9 @@ Named constraints & per-keyframe control:
     (each frame re-solves from the base layout); enable <name> restores a disabled pin.
 
 CLI flags:
+    --version          Which binary this is. Worth checking when a documented
+                       modifier seems to do nothing: one newer than the binary
+                       reads as unknown and is silently dropped.
     --frame N          Render single frame as static SVG (by index or name)
     --animate          Embed minimal JS for self-contained animated playback
 
@@ -314,6 +322,13 @@ gate on it. Categories: overlap, containment, label, connection, alignment,
 redundant-constant, reducible-bend, missing-anchor, contrast, steep-direct,
 crowded-layout, over-constrained, label-overflow, unknown-modifier,
 overridden-constraint.
+
+Two `overlap` findings are worth knowing by name. Text that stops within 2px
+of a visible edge is reported as "grazes" — at that distance the glyphs read as
+struck through, and neither an overlap nor a label check sees it because the
+boxes do not intersect. And a long thin element (20:1 or worse) that crosses
+what it spans is NOT reported: a rule over a bar, or a pin on an axis, is the
+picture working.
 
 With keyframes, collision checks re-solve each frame, so a warning names the
 frames the defect actually appears in.

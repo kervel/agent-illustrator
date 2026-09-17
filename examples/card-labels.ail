@@ -38,4 +38,28 @@ col sheet [gap: 44] {
         rect wrapped [width: 240, fill: accent-light, stroke: accent-dark, stroke_width: 2,
                       label: "T <= now confirmed_from <= T < confirmed_until, so the event is active"]
     }
+
+    // --- a caption that FOLLOWS its subject ------------------------------
+    // A shape's own `label:` cannot differ between frames. A caption that has
+    // to change is its own text element — and `caption_of:` places it the way
+    // that shape's label would be placed, so it moves when the subject moves
+    // or resizes instead of needing a constraint per position.
+    //
+    // Stack captions by giving each the same subject and a bigger
+    // label_offset: nothing can be constrained TO a captioned element,
+    // because its position is only known after the solve.
+    row captioned [gap: 60] {
+        rect bar [width: 220, height: 48, fill: secondary-light, stroke: secondary-dark,
+                  stroke_width: 2, label: "V1"]
+        rect bar2 [width: 150, height: 48, fill: accent-light, stroke: accent-dark,
+                   stroke_width: 2, label: "V2"]
+    }
+    text "confirmed" bar_state [font_size: 11, caption_of: bar,
+                                label_position: below, align: end,
+                                fill: status-success]
+    text "supersedes V1" bar_note [font_size: 11, caption_of: bar,
+                                   label_position: below, align: end,
+                                   label_offset: 22, fill: text-3]
+    text "planned" bar2_state [font_size: 11, caption_of: bar2,
+                               label_position: below, fill: status-warning]
 }
