@@ -49,6 +49,21 @@ If flakes aren't enabled by default:
 nix --extra-experimental-features 'nix-command flakes' run github:kervel/agent-illustrator
 ```
 
+#### Getting a new release
+
+Nix caches the resolved revision of a flake reference, so after a release lands
+you keep building against whatever you last fetched — silently, and for as long
+as the cache entry lives. Force a refetch once:
+
+```bash
+nix --option tarball-ttl 0 run github:kervel/agent-illustrator -- --version
+```
+
+`--version` reports the release tag for a released binary, so it is the quickest
+way to confirm which one you actually have. It is worth checking after an
+upgrade: a long-running `--watch` server keeps the binary it started with, which
+can differ from the one you get by hand.
+
 ### Pre-built Binaries
 
 Download from [GitHub Releases](https://github.com/kervel/agent-illustrator/releases):
