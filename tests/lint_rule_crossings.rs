@@ -158,3 +158,61 @@ constrain rule.center_y = 100
         w.iter().map(|x| &x.message).collect::<Vec<_>>()
     );
 }
+
+// ── the same geometry, seen by the connection rule ────────────────
+
+fn connection_crossings(source: &str) -> Vec<String> {
+    let (_svg, w) = render_with_lint(source, RenderConfig::new().with_lint(true)).expect("renders");
+    w.iter()
+        .filter(|x| x.message.contains("crosses element") || x.message.contains("overlaps element"))
+        .map(|x| x.message.clone())
+        .collect()
+}
+
+#[test]
+fn a_rule_crossing_a_connection_is_not_reported() {
+    // The overlap rule stopped reporting a rule crossing a bar; the connection
+    // rule still reported the same geometry for the same reason. A guide rule
+    // passing over a connector is as ordinary as one passing over a bar — more
+    // so, because connectors take up more of the canvas.
+    let msgs = connection_crossings(
+        r#"
+rect a [width: 80, height: 40, fill: accent-light, stroke: accent-dark]
+constrain a.center_x = 100
+constrain a.center_y = 100
+rect b [width: 80, height: 40, fill: accent-light, stroke: accent-dark]
+constrain b.center_x = 500
+constrain b.center_y = 100
+a -> b [routing: direct]
+rect nowline [width: 2, height: 200, fill: foreground-1]
+constrain nowline.center_x = 300
+constrain nowline.center_y = 100
+"#,
+    );
+    assert!(
+        msgs.is_empty(),
+        "a 2px guide rule crossing a connector is not a defect: {msgs:?}"
+    );
+}
+
+#[test]
+fn a_connection_crossing_an_ordinary_box_is_still_reported() {
+    let msgs = connection_crossings(
+        r#"
+rect a [width: 80, height: 40, fill: accent-light, stroke: accent-dark]
+constrain a.center_x = 100
+constrain a.center_y = 100
+rect b [width: 80, height: 40, fill: accent-light, stroke: accent-dark]
+constrain b.center_x = 500
+constrain b.center_y = 100
+a -> b [routing: direct]
+rect blocker [width: 90, height: 90, fill: secondary-light, stroke: secondary-dark]
+constrain blocker.center_x = 300
+constrain blocker.center_y = 100
+"#,
+    );
+    assert!(
+        !msgs.is_empty(),
+        "a connector routed straight through a box is still a defect"
+    );
+}

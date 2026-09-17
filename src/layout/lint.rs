@@ -1535,6 +1535,10 @@ fn segments_intersect(a1: &Point, a2: &Point, b1: &Point, b2: &Point) -> bool {
 struct OpaqueElement {
     id: String,
     bounds: BoundingBox,
+    /// A long thin shape — an axis, a baseline, a travelling guide rule.
+    /// A connector passing under one is as ordinary as a bar passing under
+    /// one, and the overlap rule already exempts the latter.
+    rule_like: bool,
 }
 
 fn is_visual_shape(elem: &ElementLayout) -> bool {
@@ -1579,6 +1583,7 @@ fn collect_opaque_elements_in(
         elements.push(OpaqueElement {
             id,
             bounds: elem.bounds,
+            rule_like: is_rule_like(elem),
         });
     }
 
@@ -1627,6 +1632,7 @@ fn collect_visible_elements_in(
         elements.push(OpaqueElement {
             id,
             bounds: elem.bounds,
+            rule_like: is_rule_like(elem),
         });
     }
 
@@ -1684,6 +1690,9 @@ fn check_connections(
                 if crossed.contains(&oe.id) {
                     continue;
                 }
+                if oe.rule_like {
+                    continue;
+                }
                 if oe.bounds.contains(*path_start) || oe.bounds.contains(*path_end) {
                     continue;
                 }
@@ -1709,6 +1718,15 @@ fn check_connections(
                 for oe in &opaque_elements {
                     // Skip if already reported for this connection
                     if crossed.contains(&oe.id) {
+                        continue;
+                    }
+
+                    // A guide rule passing over a connector is not a collision,
+                    // for the same reason one passing over a bar is not: it is
+                    // drawn ACROSS the diagram. The overlap rule already exempts
+                    // the bar case, and leaving the connection case in meant the
+                    // same geometry reported under a different name.
+                    if oe.rule_like {
                         continue;
                     }
 
