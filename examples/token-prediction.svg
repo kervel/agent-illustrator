@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -70 920 540" data-frames="prompt,predict_on,append_on,predict_the,append_the,predict_mat,append_mat">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -70 920 540" font-size="14" data-frames="prompt,predict_on,append_on,predict_the,append_the,predict_mat,append_mat">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -193,7 +195,114 @@
   fill: var(--text-light);
 }
 
-  
+  /* motion: settled states (auto-generated) */
+svg[data-ail-player] * { transition: none !important; }
+.frame-prompt {
+  .aid-eea1c6c1-feed { d: path("M270 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 1; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 0; }
+  .aibase-eea1c6c1-parrow_e { opacity: 1; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 0; }
+  .aibase-eea1c6c1-parrow_f { opacity: 1; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 0; }
+}
+.frame-predict_on {
+  .aid-eea1c6c1-feed { d: path("M270 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 1; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 0; }
+  .aibase-eea1c6c1-parrow_e { opacity: 1; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 0; }
+  .aibase-eea1c6c1-parrow_f { opacity: 1; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 0; }
+}
+.frame-append_on {
+  .aid-eea1c6c1-feed { d: path("M326 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 1; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 0; }
+  .aibase-eea1c6c1-parrow_e { opacity: 1; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 0; }
+  .aibase-eea1c6c1-parrow_f { opacity: 1; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 0; }
+}
+.frame-predict_the {
+  .aid-eea1c6c1-feed { d: path("M326 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 1; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 0; }
+  .aibase-eea1c6c1-parrow_e { opacity: 1; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 0; }
+  .aibase-eea1c6c1-parrow_f { opacity: 1; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 0; }
+}
+.frame-append_the {
+  .aid-eea1c6c1-feed { d: path("M382 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 1; }
+  .aibase-eea1c6c1-parrow_e { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 1; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 0; }
+  .aibase-eea1c6c1-parrow_f { opacity: 1; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 0; }
+}
+.frame-predict_mat {
+  .aid-eea1c6c1-feed { d: path("M382 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 0; }
+  .aibase-eea1c6c1-parrow_e { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 1; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 1; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 0; }
+  .aibase-eea1c6c1-parrow_f { opacity: 1; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 0; }
+}
+.frame-append_mat {
+  .aid-eea1c6c1-feed { d: path("M438 150 L477.8 150"); }
+  .aibase-eea1c6c1-parrow_d { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_on { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_the { opacity: 0; }
+  .aibase-eea1c6c1-parrow_e { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fappend_the { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_e-fpredict_mat { opacity: 0; }
+  .aivar-eea1c6c1-parrow_d-fappend_mat { opacity: 1; }
+  .aivar-eea1c6c1-parrow_e-fappend_mat { opacity: 1; }
+  .aibase-eea1c6c1-parrow_f { opacity: 0; }
+  .aivar-eea1c6c1-parrow_f-fappend_mat { opacity: 1; }
+}
+
 /* CSS-only animation (auto-generated) */
 @keyframes kf-anim-eea1c6c1-d {
   0.0%, 14.3% { opacity: 0; }
@@ -397,49 +506,86 @@
 .kf-eea1c6c1-parrow_d { animation: kf-anim-eea1c6c1-parrow_d 14.0s step-end infinite; }
 .kf-eea1c6c1-parrow_e { animation: kf-anim-eea1c6c1-parrow_e 14.0s step-end infinite; }
 .kf-eea1c6c1-parrow_f { animation: kf-anim-eea1c6c1-parrow_f 14.0s step-end infinite; }
-</style>
+]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
   </defs>
-  <rect id="canvas" class="ai-shape ai-rect" x="-20" y="-10" width="800" height="420" fill="white" stroke="none" stroke-width="1.5" opacity="0.01"/>
-  <g class="kf-eea1c6c1-inbox kf-anim">
+  <g class="kf-eea1c6c1-canvas kf-anim" opacity="0.01" style="transform-origin:380px 200px">
+    <rect id="canvas" class="ai-shape ai-rect kfp-eea1c6c1-canvas" x="-20" y="-10" width="800" height="420" fill="white" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-eea1c6c1-inbox kf-anim" style="transform-origin:175px 150px">
     <rect id="inbox" class="ai-shape ai-rect kfp-eea1c6c1-inbox" x="80" y="115" width="190" height="70" fill="#eef3f6" stroke="var(--secondary-1)" stroke-width="2"/>
   </g>
-  <rect id="a" class="ai-shape ai-rect" x="94" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
-  <text class="ai-label" x="119" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="119" dy="-0"><tspan>The</tspan></tspan></text>
-  <rect id="b" class="ai-shape ai-rect" x="150" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
-  <text class="ai-label" x="175" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="175" dy="-0"><tspan>cat</tspan></tspan></text>
-  <rect id="c" class="ai-shape ai-rect" x="206" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
-  <text class="ai-label" x="231" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="231" dy="-0"><tspan>sat</tspan></tspan></text>
-  <rect id="llm" class="ai-shape ai-rect" x="485" y="118" width="150" height="64" fill="var(--secondary-1)" stroke="#333333" stroke-width="1.5"/>
-  <text class="ai-label" x="560" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>LLM</tspan></tspan></text>
-  <g class="kf-hidden kf-eea1c6c1-d kf-anim">
+  <g class="kf-eea1c6c1-a kf-anim" style="transform-origin:119px 150px">
+    <rect id="a" class="ai-shape ai-rect kfp-eea1c6c1-a" x="94" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
+    <text class="ai-label" x="119" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="119" dy="-0"><tspan>The</tspan></tspan></text>
+  </g>
+  <g class="kf-eea1c6c1-b kf-anim" style="transform-origin:175px 150px">
+    <rect id="b" class="ai-shape ai-rect kfp-eea1c6c1-b" x="150" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
+    <text class="ai-label" x="175" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="175" dy="-0"><tspan>cat</tspan></tspan></text>
+  </g>
+  <g class="kf-eea1c6c1-c kf-anim" style="transform-origin:231px 150px">
+    <rect id="c" class="ai-shape ai-rect kfp-eea1c6c1-c" x="206" y="131" width="50" height="38" fill="#ffffff" stroke="#cdd8e3" stroke-width="1.5"/>
+    <text class="ai-label" x="231" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="231" dy="-0"><tspan>sat</tspan></tspan></text>
+  </g>
+  <g class="kf-eea1c6c1-llm kf-anim" style="transform-origin:560px 150px">
+    <rect id="llm" class="ai-shape ai-rect kfp-eea1c6c1-llm" x="485" y="118" width="150" height="64" fill="var(--secondary-1)" stroke="#333333" stroke-width="1.5"/>
+    <text class="ai-label" x="560" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>LLM</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-eea1c6c1-d kf-anim" style="transform-origin:560px 300px">
     <rect id="d" class="ai-shape ai-rect kfp-eea1c6c1-d" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>on</tspan></tspan></text>
   </g>
-  <g class="kf-hidden kf-eea1c6c1-e kf-anim">
+  <g class="kf-hidden kf-eea1c6c1-e kf-anim" style="transform-origin:560px 300px">
     <rect id="e" class="ai-shape ai-rect kfp-eea1c6c1-e" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>the</tspan></tspan></text>
   </g>
-  <g class="kf-hidden kf-eea1c6c1-f kf-anim">
+  <g class="kf-hidden kf-eea1c6c1-f kf-anim" style="transform-origin:560px 300px">
     <rect id="f" class="ai-shape ai-rect kfp-eea1c6c1-f" x="535" y="281" width="50" height="38" fill="#ffffff" stroke="var(--accent-1)" stroke-width="3"/>
     <text class="ai-label" x="560" y="300" text-anchor="middle" dominant-baseline="middle"><tspan x="560" dy="-0"><tspan>mat</tspan></tspan></text>
   </g>
-  <text id="cap" class="ai-shape ai-text" x="224.58499999999992" y="367" text-anchor="start" dominant-baseline="middle" fill="#1b2733">Predict one token, append it — then repeat.</text>
+  <g class="kf-eea1c6c1-cap kf-anim" style="transform-origin:360px 367px">
+    <text id="cap" class="ai-shape ai-text kfp-eea1c6c1-cap" x="224.58499999999992" y="367" text-anchor="start" dominant-baseline="middle" fill="#1b2733">Predict one token, append it — then repeat.</text>
+  </g>
   <text class="ai-label conn-eea1c6c1-parrow_d" x="570" y="231.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="570" dy="-0"><tspan>predicts one token</tspan></tspan></text>
-  <path class="ai-connection conn-eea1c6c1-feed conn-eea1c6c1-feed-base" d="M270 150 L477.8 150" fill="none" stroke="var(--foreground-2)" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-eea1c6c1-parrow_f conn-eea1c6c1-parrow_f-base" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-eea1c6c1-feed conn-eea1c6c1-feed-base aid-eea1c6c1-feed" d="M270 150 L477.8 150" fill="none" stroke="var(--foreground-2)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <g class="aibase-eea1c6c1-parrow_d">
+  <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-base aid-eea1c6c1-parrow_d" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  </g>
+  <g class="aibase-eea1c6c1-parrow_e">
+  <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-base aid-eea1c6c1-parrow_e" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  </g>
+  <g class="aibase-eea1c6c1-parrow_f">
+  <path class="ai-connection conn-eea1c6c1-parrow_f conn-eea1c6c1-parrow_f-base aid-eea1c6c1-parrow_f" d="M560 182 L560 273.8" fill="none" stroke="var(--accent-1)" stroke-width="2" opacity="0" marker-end="url(#ai-arrow)"/>
+  </g>
+<g class="aivar-eea1c6c1-parrow_d-fappend_on">
   <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fappend_on" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_d-fpredict_the">
   <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fpredict_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_d-fappend_the">
   <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fappend_the" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_e-fappend_the">
   <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-fappend_the" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_d-fpredict_mat">
   <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fpredict_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_e-fpredict_mat">
   <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-fpredict_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_d-fappend_mat">
   <path class="ai-connection conn-eea1c6c1-parrow_d conn-eea1c6c1-parrow_d-fappend_mat" d="M560 182 L560 197 L287 197 L287 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_e-fappend_mat">
   <path class="ai-connection conn-eea1c6c1-parrow_e conn-eea1c6c1-parrow_e-fappend_mat" d="M560 182 L560 197 L343 197 L343 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<g class="aivar-eea1c6c1-parrow_f-fappend_mat">
   <path class="ai-connection conn-eea1c6c1-parrow_f conn-eea1c6c1-parrow_f-fappend_mat" d="M560 182 L560 197 L399 197 L399 138.2" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+</g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"eea1c6c1-","frames":[{"name":"prompt","duration":0,"auto":null},{"name":"predict_on","duration":0.5,"auto":null},{"name":"append_on","duration":0.5,"auto":null},{"name":"predict_the","duration":0.5,"auto":null},{"name":"append_the","duration":0.5,"auto":null},{"name":"predict_mat","duration":0.5,"auto":null},{"name":"append_mat","duration":0.5,"auto":null}],"elements":["canvas","inbox","a","b","c","llm","d","e","f","cap","feed","parrow_d","parrow_e","parrow_f"],"channels":[[".kf-eea1c6c1-d","opacity"],[".kf-eea1c6c1-d","translate"],[".conn-eea1c6c1-parrow_d","opacity"],[".aid-eea1c6c1-feed","d"],[".kfp-eea1c6c1-inbox","width"],[".aibase-eea1c6c1-parrow_d","opacity"],[".aivar-eea1c6c1-parrow_d-fappend_on","opacity"],[".kfp-eea1c6c1-d","stroke"],[".kfp-eea1c6c1-d","stroke-width"],[".kf-eea1c6c1-e","opacity"],[".kf-eea1c6c1-e","translate"],[".aivar-eea1c6c1-parrow_d-fpredict_the","opacity"],[".conn-eea1c6c1-parrow_e","opacity"],[".aivar-eea1c6c1-parrow_d-fappend_the","opacity"],[".aibase-eea1c6c1-parrow_e","opacity"],[".aivar-eea1c6c1-parrow_e-fappend_the","opacity"],[".kfp-eea1c6c1-e","stroke"],[".kfp-eea1c6c1-e","stroke-width"],[".kf-eea1c6c1-f","opacity"],[".kf-eea1c6c1-f","translate"],[".aivar-eea1c6c1-parrow_d-fpredict_mat","opacity"],[".aivar-eea1c6c1-parrow_e-fpredict_mat","opacity"],[".conn-eea1c6c1-parrow_f","opacity"],[".aivar-eea1c6c1-parrow_d-fappend_mat","opacity"],[".aivar-eea1c6c1-parrow_e-fappend_mat","opacity"],[".aibase-eea1c6c1-parrow_f","opacity"],[".aivar-eea1c6c1-parrow_f-fappend_mat","opacity"],[".kfp-eea1c6c1-f","stroke"],[".kfp-eea1c6c1-f","stroke-width"]],"settled":[["0","0px 0px","0","path(\"M270 150 L477.8 150\")","190px","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","0","0","1","0","var(--accent-1)","3px"],["0","0px 0px","0","path(\"M270 150 L477.8 150\")","190px","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","0","0","1","0","var(--accent-1)","3px"],["1","0px 0px","1","path(\"M270 150 L477.8 150\")","190px","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","0","0","1","0","var(--accent-1)","3px"],["1","-273px -150px","0","path(\"M326 150 L477.8 150\")","246px","0","1","#cdd8e3","1px","0","0px 0px","0","0","0","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","0","0","1","0","var(--accent-1)","3px"],["1","-273px -150px","0","path(\"M326 150 L477.8 150\")","246px","0","0","#cdd8e3","1px","1","0px 0px","1","1","0","1","0","var(--accent-1)","3px","0","0px 0px","0","0","0","0","0","1","0","var(--accent-1)","3px"],["1","-273px -150px","0","path(\"M382 150 L477.8 150\")","302px","0","0","#cdd8e3","1px","1","-217px -150px","0","0","1","0","1","#cdd8e3","1px","0","0px 0px","0","0","0","0","0","1","0","var(--accent-1)","3px"],["1","-273px -150px","0","path(\"M382 150 L477.8 150\")","302px","0","0","#cdd8e3","1px","1","-217px -150px","0","0","0","0","0","#cdd8e3","1px","1","0px 0px","1","1","1","0","0","1","0","var(--accent-1)","3px"],["1","-273px -150px","0","path(\"M438 150 L477.8 150\")","358px","0","0","#cdd8e3","1px","1","-217px -150px","0","0","0","0","0","#cdd8e3","1px","1","-161px -150px","0","0","0","1","1","0","1","#cdd8e3","1px"]],"anims":[[],[{"c":0,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":2,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":1,"t":0,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.0333,"-25.731px -14.138px"],[0.0667,"-50.977px -28.009px"],[0.1,"-75.263px -41.353px"],[0.1333,"-98.155px -53.931px"],[0.1667,"-119.33px -65.566px"],[0.2,"-138.604px -76.156px"],[0.2333,"-155.932px -85.677px"],[0.2667,"-171.373px -94.161px"],[0.3,"-185.053px -101.677px"],[0.3333,"-197.127px -108.312px"],[0.3667,"-207.762px -114.155px"],[0.4,"-217.118px -119.295px"],[0.4333,"-225.341px -123.814px"],[0.4667,"-232.564px -127.782px"],[0.5,"-238.901px -131.264px"],[0.5333,"-244.453px -134.315px"],[0.5667,"-249.308px -136.982px"],[0.6,"-253.541px -139.308px"],[0.6333,"-257.217px -141.328px"],[0.6667,"-260.393px -143.073px"],[0.7,"-263.119px -144.571px"],[0.7333,"-265.437px -145.844px"],[0.7667,"-267.384px -146.914px"],[0.8,"-268.995px -147.799px"],[0.8333,"-270.297px -148.515px"],[0.8667,"-271.318px -149.076px"],[0.9,"-272.079px -149.494px"],[0.9333,"-272.601px -149.781px"],[0.9667,"-272.903px -149.947px"],[1,"-273px -150px"]]},{"c":1,"t":0.5,"d":0.001,"e":"linear","k":[[0,"-273px -150px"],[1,"-273px -150px"]]},{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"path(\"M270 150 L477.8 150\")"],[1,"path(\"M326 150 L477.8 150\")"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"190px"],[1,"246px"]]},{"c":5,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":7,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--accent-1)"],[1,"#cdd8e3"]]},{"c":8,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"3px"],[1,"1px"]]}],[{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":10,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":11,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":12,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"path(\"M326 150 L477.8 150\")"],[1,"path(\"M382 150 L477.8 150\")"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"246px"],[1,"302px"]]},{"c":10,"t":0,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.0333,"-20.452px -14.138px"],[0.0667,"-40.52px -28.009px"],[0.1,"-59.824px -41.353px"],[0.1333,"-78.021px -53.931px"],[0.1667,"-94.852px -65.566px"],[0.2,"-110.172px -76.156px"],[0.2333,"-123.946px -85.677px"],[0.2667,"-136.22px -94.161px"],[0.3,"-147.093px -101.677px"],[0.3333,"-156.691px -108.312px"],[0.3667,"-165.144px -114.155px"],[0.4,"-172.581px -119.295px"],[0.4333,"-179.117px -123.814px"],[0.4667,"-184.858px -127.782px"],[0.5,"-189.895px -131.264px"],[0.5333,"-194.309px -134.315px"],[0.5667,"-198.168px -136.982px"],[0.6,"-201.533px -139.308px"],[0.6333,"-204.455px -141.328px"],[0.6667,"-206.979px -143.073px"],[0.7,"-209.146px -144.571px"],[0.7333,"-210.988px -145.844px"],[0.7667,"-212.536px -146.914px"],[0.8,"-213.816px -147.799px"],[0.8333,"-214.852px -148.515px"],[0.8667,"-215.663px -149.076px"],[0.9,"-216.268px -149.494px"],[0.9333,"-216.683px -149.781px"],[0.9667,"-216.923px -149.947px"],[1,"-217px -150px"]]},{"c":10,"t":0.5,"d":0.001,"e":"linear","k":[[0,"-217px -150px"],[1,"-217px -150px"]]},{"c":11,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":12,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":13,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":14,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":15,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--accent-1)"],[1,"#cdd8e3"]]},{"c":17,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"3px"],[1,"1px"]]}],[{"c":13,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":15,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":18,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":19,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":20,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":21,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":22,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"path(\"M382 150 L477.8 150\")"],[1,"path(\"M438 150 L477.8 150\")"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"302px"],[1,"358px"]]},{"c":19,"t":0,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.0333,"-15.174px -14.138px"],[0.0667,"-30.063px -28.009px"],[0.1,"-44.386px -41.353px"],[0.1333,"-57.886px -53.931px"],[0.1667,"-70.374px -65.566px"],[0.2,"-81.741px -76.156px"],[0.2333,"-91.96px -85.677px"],[0.2667,"-101.066px -94.161px"],[0.3,"-109.134px -101.677px"],[0.3333,"-116.254px -108.312px"],[0.3667,"-122.526px -114.155px"],[0.4,"-128.044px -119.295px"],[0.4333,"-132.893px -123.814px"],[0.4667,"-137.153px -127.782px"],[0.5,"-140.89px -131.264px"],[0.5333,"-144.165px -134.315px"],[0.5667,"-147.028px -136.982px"],[0.6,"-149.524px -139.308px"],[0.6333,"-151.692px -141.328px"],[0.6667,"-153.565px -143.073px"],[0.7,"-155.173px -144.571px"],[0.7333,"-156.54px -145.844px"],[0.7667,"-157.688px -146.914px"],[0.8,"-158.638px -147.799px"],[0.8333,"-159.406px -148.515px"],[0.8667,"-160.008px -149.076px"],[0.9,"-160.457px -149.494px"],[0.9333,"-160.765px -149.781px"],[0.9667,"-160.943px -149.947px"],[1,"-161px -150px"]]},{"c":19,"t":0.5,"d":0.001,"e":"linear","k":[[0,"-161px -150px"],[1,"-161px -150px"]]},{"c":20,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":21,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":22,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":23,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":24,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":25,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":26,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":27,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--accent-1)"],[1,"#cdd8e3"]]},{"c":28,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"3px"],[1,"1px"]]}]]}]]></script>
 </svg>

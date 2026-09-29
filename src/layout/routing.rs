@@ -195,7 +195,15 @@ pub fn best_edges(from: &BoundingBox, to: &BoundingBox) -> (Edge, Edge) {
 
     // If primarily vertical movement (dy much larger than dx), prefer vertical connection
     // This handles cases where elements are in a column but don't perfectly overlap
-    let primarily_vertical = dy.abs() > dx.abs() * 1.5;
+    // Free space between the boxes, edge to edge, on each axis.
+    let gap_x = (to.x - from.right()).max(from.x - to.right()).max(0.0);
+    let gap_y = (to.y - from.bottom()).max(from.y - to.bottom()).max(0.0);
+    let primarily_vertical = dy.abs() > dx.abs() * 1.5
+        // Wide boxes fanning out below (a server to its laptops) are further
+        // apart vertically than sideways even when their centres are not:
+        // leave by the bottom and enter the top, rather than arriving from
+        // the side next to a title.
+        || (!v_overlap && gap_y > gap_x);
 
     if (h_overlap && !v_overlap) || primarily_vertical {
         // Stacked vertically - prefer vertical connection
@@ -883,9 +891,9 @@ pub fn route_connection_with_anchors_and_types(
     if from_edge == Edge::Right && to_edge == Edge::Left {
         let dy = (end.y - start.y).abs();
         if dy > 15.0 {
-            // Ensure the final segment is long enough for proper marker orientation
-            // Position the vertical segment so the final horizontal segment is at least MIN_FINAL_SEGMENT_LENGTH
-            let mid_x = end.x - MIN_FINAL_SEGMENT_LENGTH;
+            // Bend half way (clear of both ends' labels), but keep the final
+            // horizontal segment long enough for the arrowhead.
+            let mid_x = ((start.x + end.x) / 2.0).min(end.x - MIN_FINAL_SEGMENT_LENGTH);
             return vec![
                 start,
                 Point::new(mid_x, start.y),
@@ -1011,8 +1019,15 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
                         // Always pass resolved anchors (auto-picked or explicit) so
                         // the router can use their direction for routing.
-                        let from_anchor_opt = Some(&from_anchor);
-                        let to_anchor_opt = Some(&to_anchor);
+                        // Except for orthogonal routing without anchors: there
+                        // the edge pair (bottom -> top for a fan-out below, ...)
+                        // decides, not a ray from centre to centre, which exits
+                        // a corner and arrives sideways.
+                        let auto_ortho = routing_mode == RoutingMode::Orthogonal
+                            && conn.from.anchor.is_none()
+                            && conn.to.anchor.is_none();
+                        let from_anchor_opt = if auto_ortho { None } else { Some(&from_anchor) };
+                        let to_anchor_opt = if auto_ortho { None } else { Some(&to_anchor) };
 
                         let via_refs = extract_via_references(&conn.modifiers);
                         let via_points = resolve_via_points(&via_refs, result)?;

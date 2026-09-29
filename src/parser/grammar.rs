@@ -57,7 +57,111 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     document_parser()
         .parse(token_stream)
         .into_result()
-        .map_err(|errs| errs.into_iter().map(|e| e.into()).collect())
+        .map_err(|errs| {
+            errs.into_iter()
+                .map(|e| crate::ParseError::from(e).locate(input))
+                .collect::<Vec<_>>()
+        })
+        .and_then(|doc| {
+            expand_starred(doc).map_err(|(span, message)| {
+                vec![crate::ParseError::Syntax { span, message, expected: vec![] }.locate(input)]
+            })
+        })
+}
+
+/// `doc d* [fname: ["a", "b", "c"]]` -> d0, d1, d2, each taking the i-th item
+/// of every list-valued argument (lists zip by index; other arguments are
+/// shared). Works for shapes too: `rect bar* [width: [88, 70, 55]]`.
+fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
+    fn per_item(
+        mods: &[Spanned<StyleValue>],
+        name: &str,
+        span: &Span,
+    ) -> Result<usize, (Span, String)> {
+        let mut n: Option<usize> = None;
+        for v in mods {
+            if let StyleValue::List(items) = &v.node {
+                match n {
+                    None => n = Some(items.len()),
+                    Some(k) if k != items.len() => {
+                        return Err((
+                            v.span.clone(),
+                            format!(
+                                "'{}*': its lists have different lengths ({} and {}); every list makes one element per item, so they must match",
+                                name, k, items.len()
+                            ),
+                        ))
+                    }
+                    _ => {}
+                }
+            }
+        }
+        n.ok_or_else(|| {
+            (
+                span.clone(),
+                format!("'{}*' makes one element per item of a list argument, but it has no list (e.g. [label: [\"a\", \"b\"]])", name),
+            )
+        })
+    }
+    fn pick(v: &Spanned<StyleValue>, i: usize) -> Spanned<StyleValue> {
+        match &v.node {
+            StyleValue::List(items) => items[i].clone(),
+            _ => v.clone(),
+        }
+    }
+    fn walk(stmts: Vec<Spanned<Statement>>) -> Result<Vec<Spanned<Statement>>, (Span, String)> {
+        let mut out = Vec::with_capacity(stmts.len());
+        for st in stmts {
+            let span = st.span.clone();
+            match st.node {
+                Statement::Shape(shape) if shape.name.as_ref().is_some_and(|n| n.node.0.ends_with('*')) => {
+                    let name = shape.name.as_ref().unwrap();
+                    let base = name.node.0.trim_end_matches('*').to_string();
+                    let values: Vec<Spanned<StyleValue>> = shape.modifiers.iter().map(|m| m.node.value.clone()).collect();
+                    let n = per_item(&values, &base, &name.span)?;
+                    for i in 0..n {
+                        let mut s = shape.clone();
+                        s.name = Some(Spanned::new(Identifier::new(format!("{}{}", base, i)), name.span.clone()));
+                        for m in &mut s.modifiers {
+                            m.node.value = pick(&m.node.value, i);
+                        }
+                        out.push(Spanned::new(Statement::Shape(s), span.clone()));
+                    }
+                }
+                Statement::TemplateInstance(inst) if inst.instance_name.node.0.ends_with('*') => {
+                    let base = inst.instance_name.node.0.trim_end_matches('*').to_string();
+                    let values: Vec<Spanned<StyleValue>> = inst.arguments.iter().map(|(_, v)| v.clone()).collect();
+                    let n = per_item(&values, &base, &inst.instance_name.span)?;
+                    for i in 0..n {
+                        let mut t = inst.clone();
+                        t.instance_name = Spanned::new(Identifier::new(format!("{}{}", base, i)), inst.instance_name.span.clone());
+                        for (_, v) in &mut t.arguments {
+                            *v = pick(v, i);
+                        }
+                        out.push(Spanned::new(Statement::TemplateInstance(t), span.clone()));
+                    }
+                }
+                Statement::Layout(mut l) => {
+                    l.children = walk(l.children)?;
+                    out.push(Spanned::new(Statement::Layout(l), span));
+                }
+                Statement::Group(mut g) => {
+                    g.children = walk(g.children)?;
+                    out.push(Spanned::new(Statement::Group(g), span));
+                }
+                Statement::TemplateDecl(mut t) => {
+                    if let Some(body) = t.body.take() {
+                        t.body = Some(walk(body)?);
+                    }
+                    out.push(Spanned::new(Statement::TemplateDecl(t), span));
+                }
+                other => out.push(Spanned::new(other, span)),
+            }
+        }
+        Ok(out)
+    }
+    doc.statements = walk(doc.statements)?;
+    Ok(doc)
 }
 
 /// Helper to extract span range from chumsky's MapExtra
@@ -383,8 +487,18 @@ where
 
     // Bracketed list value: `[a, b, c]` (numbers or strings), e.g. at: [1,0],
     // col_labels: ["a","b"]. Lists contain atoms only (no nested lists).
-    let value_list = value_atom
-        .clone()
+    // `[st1.dot, st2.dot]`: a dotted name is one identifier in a list.
+    let dotted_atom = identifier
+        .then(just(Token::Dot).ignore_then(identifier).repeated().at_least(1).collect::<Vec<_>>())
+        .map_with(|(head, rest), e| {
+            let mut n = head.node.0;
+            for r in rest {
+                n.push('.');
+                n.push_str(&r.node.0);
+            }
+            Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
+        });
+    let value_list = choice((dotted_atom, value_atom.clone()))
         .separated_by(just(Token::Comma))
         .allow_trailing()
         .collect::<Vec<_>>()
@@ -450,7 +564,26 @@ where
         .map_with(|v, e| Spanned::new(v, span_range(&e.span())))
         .boxed();
 
-    let style_value = choice((value_list, call_value, value_atom)).boxed();
+    // `drawn: 60%`, and a dotted name (`drawn: st.dot`) as one identifier.
+    let percent_value = just(Token::Minus)
+        .or_not()
+        .then(number)
+        .then_ignore(just(Token::Percent))
+        .map_with(|(neg, n), e| {
+            let v = if neg.is_some() { -n.node } else { n.node };
+            Spanned::new(StyleValue::Number { value: v, unit: Some("%".to_string()) }, span_range(&e.span()))
+        });
+    let dotted_value = identifier
+        .then(just(Token::Dot).ignore_then(identifier).repeated().at_least(1).collect::<Vec<_>>())
+        .map_with(|(head, rest), e| {
+            let mut n = head.node.0;
+            for r in rest {
+                n.push('.');
+                n.push_str(&r.node.0);
+            }
+            Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
+        });
+    let style_value = choice((value_list, call_value, percent_value, dotted_value, value_atom.clone())).boxed();
 
     let modifier = style_key
         .then_ignore(just(Token::Colon))
@@ -486,9 +619,18 @@ where
     ))
     .map_with(|st, e| Spanned::new(st, span_range(&e.span())));
 
+    // `name` or `name*` (one element per item of its list-valued modifiers).
+    let starred_name = identifier
+        .then(just(Token::Star).or_not())
+        .map(|(id, star)| match star {
+            Some(_) => Spanned::new(Identifier::new(format!("{}*", id.node.0)), id.span),
+            None => id,
+        })
+        .boxed();
+
     // Shape declaration
     let shape_decl = shape_type
-        .then(identifier.or_not())
+        .then(starred_name.clone().or_not())
         .then(modifier_block.clone().or_not())
         .map(|((shape_type, name), modifiers)| ShapeDecl {
             shape_type,
@@ -541,11 +683,23 @@ where
     // Parses either:
     //   - `element` -> AnchorReference with anchor=None
     //   - `element.anchor_name` -> AnchorReference with anchor=Some
+    // `a.b.c` (a nested component, maybe with an anchor) keeps the tail in
+    // `anchor`, dotted; `motion::expand` splits it once element names are known.
     let plain_anchor_reference = identifier
-        .then(just(Token::Dot).ignore_then(anchor_name.clone()).or_not())
-        .map(|(element, anchor_opt)| match anchor_opt {
-            Some(anchor_name) => AnchorReference::with_anchor(element, anchor_name),
-            None => AnchorReference::element_only(element),
+        .then(
+            just(Token::Dot)
+                .ignore_then(anchor_name.clone())
+                .repeated()
+                .collect::<Vec<_>>(),
+        )
+        .map(|(element, rest)| {
+            if rest.is_empty() {
+                AnchorReference::element_only(element)
+            } else {
+                let span = rest[0].span.start..rest[rest.len() - 1].span.end;
+                let joined = rest.iter().map(|r| r.node.clone()).collect::<Vec<_>>().join(".");
+                AnchorReference::with_anchor(element, Spanned::new(joined, span))
+            }
         });
 
     let anchor_reference = choice((cell_anchor_reference, plain_anchor_reference)).boxed();
@@ -635,6 +789,20 @@ where
         .at_least(1)
         .collect::<Vec<_>>()
         .map_with(|segments, e| Spanned::new(ElementPath { segments }, span_range(&e.span())));
+
+    // `c.dot` as one name (a component's part): `c_dot`.
+    let joined_path = identifier
+        .then(just(Token::Dot).ignore_then(identifier).repeated().collect::<Vec<_>>())
+        .map(|(head, rest)| {
+            let mut n = head.node.0.clone();
+            let span = head.span.clone();
+            for r in rest {
+                n.push('_');
+                n.push_str(&r.node.0);
+            }
+            Spanned::new(Identifier::new(n), span)
+        })
+        .boxed();
 
     // ==================== Constraint Parser (Feature 005) ====================
 
@@ -738,9 +906,9 @@ where
         .then_ignore(just(Token::Equals))
         .then_ignore(just(Token::Midpoint))
         .then_ignore(just(Token::ParenOpen))
-        .then(identifier)
+        .then(joined_path.clone())
         .then_ignore(just(Token::Comma))
-        .then(identifier)
+        .then(joined_path.clone())
         .then_ignore(just(Token::ParenClose))
         .then(offset.clone().or_not())
         .map(|(((target, a), b), off)| ConstraintExpr::Midpoint {
@@ -1135,7 +1303,8 @@ where
         )
         .then(identifier.or_not())
         .then(modifier_block.clone().or_not())
-        .then(path_body)
+        // `path track [through: [a, b]]` has no body: it is routed after layout.
+        .then(path_body.or_not().map(|b| b.unwrap_or(PathBody { commands: vec![] })))
         .map(|(((label, name), mods), body)| {
             // Use label as name if present, otherwise use identifier
             let path_name = label.or(name);
@@ -1232,7 +1401,7 @@ where
         // where the first identifier is the template name and second is instance name.
         // Template instances will be distinguished from connections by not having ->/<- operators.
         let template_instance = identifier
-            .then(identifier)
+            .then(starred_name.clone())
             .then(modifier_block.clone().or_not())
             .try_map(|((template_name, instance_name), mods), _span| {
                 // Convert modifiers to argument list
@@ -1348,76 +1517,422 @@ where
                 }))
             });
 
-        // Keyframe operations (Feature 011)
-        let show_op = just(Token::Show)
-            .ignore_then(
-                identifier
-                    .separated_by(just(Token::Comma))
-                    .at_least(1)
-                    .collect::<Vec<_>>(),
-            )
-            .map_with(|targets, e| Spanned::new(KeyframeOp::Show(targets), span_range(&e.span())));
+        // ==================== Motion (keyframe bodies) ====================
+        // Verbs are contextual: `draw`, `fly`, `then`, ... are ordinary
+        // identifiers everywhere else, so no existing name breaks.
+        fn kw<'a, I>(name: &'static str) -> impl Parser<'a, I, (), extra::Err<Rich<'a, Token>>> + Clone
+        where
+            I: ValueInput<'a, Token = Token, Span = SimpleSpan>,
+        {
+            any()
+                .filter(move |t: &Token| matches!(t, Token::Ident(s) if s == name))
+                .ignored()
+                .labelled(name)
+        }
 
-        let hide_op = just(Token::Hide)
-            .ignore_then(
-                identifier
-                    .separated_by(just(Token::Comma))
-                    .at_least(1)
-                    .collect::<Vec<_>>(),
-            )
-            .map_with(|targets, e| Spanned::new(KeyframeOp::Hide(targets), span_range(&e.span())));
+        // A dotted name: `box`, `station.label`
+        let dotted_name = identifier
+            .separated_by(just(Token::Dot))
+            .at_least(1)
+            .collect::<Vec<_>>()
+            .map_with(|parts, e| {
+                let joined = parts.iter().map(|p| p.node.0.clone()).collect::<Vec<_>>().join(".");
+                Spanned::new(joined, span_range(&e.span()))
+            })
+            .boxed();
 
-        let transform_op = just(Token::Transform)
-            .ignore_then(identifier)
-            .then(modifier_block.clone())
-            .map_with(|(target, modifiers), e| {
-                Spanned::new(
-                    KeyframeOp::Transform {
-                        target,
-                        modifiers,
-                    },
-                    span_range(&e.span()),
+        let selector = choice((
+            kw("all")
+                .ignore_then(kw("except"))
+                .ignore_then(
+                    identifier
+                        .separated_by(just(Token::Comma))
+                        .at_least(1)
+                        .collect::<Vec<_>>(),
                 )
+                .map(|ids| Selector::AllExcept(ids.into_iter().map(|i| i.node.0).collect())),
+            just(Token::Dot)
+                .ignore_then(identifier)
+                .map(|id| Selector::Class(id.node.0)),
+            identifier
+                .then(
+                    just(Token::Dot)
+                        .ignore_then(choice((
+                            just(Token::Star).to(None),
+                            identifier.map(Some),
+                        )))
+                        .repeated()
+                        .collect::<Vec<_>>(),
+                )
+                .try_map(|(head, rest), span| {
+                    let mut name = head.node.0;
+                    let mut children = false;
+                    for (i, part) in rest.iter().enumerate() {
+                        match part {
+                            Some(id) => {
+                                name.push('.');
+                                name.push_str(&id.node.0);
+                            }
+                            None => {
+                                if i + 1 != rest.len() {
+                                    return Err(Rich::custom(span, "`.*` must end a selector"));
+                                }
+                                children = true;
+                            }
+                        }
+                    }
+                    Ok(if children { Selector::Children(name) } else { Selector::Name(name) })
+                }),
+        ))
+        .map_with(|sel, e| Spanned::new(sel, span_range(&e.span())))
+        .boxed();
+
+        let selector_list = selector
+            .clone()
+            .separated_by(just(Token::Comma))
+            .at_least(1)
+            .collect::<Vec<_>>()
+            .boxed();
+
+        // Motion option values
+        let motion_value = recursive(|mv| {
+            let num = just(Token::Minus)
+                .or_not()
+                .then(number)
+                .map(|(neg, n)| if neg.is_some() { -n.node } else { n.node });
+            choice((
+                just(Token::Vertex)
+                    .ignore_then(number)
+                    .map(|n| MotionValue::Vertex(n.node as usize)),
+                num.then_ignore(just(Token::Percent))
+                    .map(|n| MotionValue::Percent(n / 100.0)),
+                identifier
+                    .then(
+                        mv.separated_by(just(Token::Comma))
+                            .allow_trailing()
+                            .collect::<Vec<_>>()
+                            .delimited_by(just(Token::ParenOpen), just(Token::ParenClose)),
+                    )
+                    .map(|(name, args)| MotionValue::Call(name.node.0, args)),
+                // `to: station.dot`
+                identifier
+                    .then(just(Token::Dot).ignore_then(identifier).repeated().at_least(1).collect::<Vec<_>>())
+                    .map(|(head, rest)| {
+                        let mut n = head.node.0;
+                        for r in rest {
+                            n.push('.');
+                            n.push_str(&r.node.0);
+                        }
+                        MotionValue::Name(n)
+                    }),
+                value_atom.clone().map(|v| match v.node {
+                    StyleValue::Number { value, .. } => MotionValue::Number(value),
+                    StyleValue::String(s) => MotionValue::Str(s),
+                    StyleValue::Identifier(id) => MotionValue::Name(id.0),
+                    StyleValue::Keyword(k) => MotionValue::Name(k),
+                    other => MotionValue::Style(other),
+                }),
+            ))
+            .map_with(|v, e| Spanned::new(v, span_range(&e.span())))
+        })
+        .boxed();
+
+        let motion_key = choice((
+            identifier.map(|id| Spanned::new(id.node.0, id.span)),
+            just(Token::From).map_with(|_, e| Spanned::new("from".to_string(), span_range(&e.span()))),
+            just(Token::Label).map_with(|_, e| Spanned::new("label".to_string(), span_range(&e.span()))),
+            just(Token::Direction).map_with(|_, e| Spanned::new("direction".to_string(), span_range(&e.span()))),
+        ));
+
+        let motion_opt = motion_key
+            .then_ignore(just(Token::Colon))
+            .then(motion_value.clone())
+            .map_with(|(key, value), e| Spanned::new(MotionOpt { key, value }, span_range(&e.span())))
+            .boxed();
+
+        let motion_opts = motion_opt
+            .clone()
+            .separated_by(just(Token::Comma))
+            .allow_trailing()
+            .collect::<Vec<_>>()
+            .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
+            .boxed();
+
+        let opts_or_none = motion_opts.clone().or_not().map(|o| o.unwrap_or_default());
+
+        let motion_arg = choice((
+            string_literal.map(|s| Spanned::new(MotionArg::Str(s.node), s.span)),
+            just(Token::Minus)
+                .or_not()
+                .then(number)
+                .map_with(|(neg, n), e| {
+                    let v = if neg.is_some() { -n.node } else { n.node };
+                    Spanned::new(MotionArg::Number(v), span_range(&e.span()))
+                }),
+            dotted_name.clone().map(|n| Spanned::new(MotionArg::Name(n.node), n.span)),
+        ));
+
+        let motion_block = recursive(|block| {
+            let stmt = |verb: MotionVerb, opts: Vec<Spanned<MotionOpt>>| {
+                MotionNode::Stmt(MotionStmt { verb, opts, targets: vec![], partners: vec![] })
+            };
+
+            let show = just(Token::Show)
+                .ignore_then(selector_list.clone())
+                .then(opts_or_none.clone())
+                .map(move |(t, o)| stmt(MotionVerb::Show(t), o));
+            let hide = just(Token::Hide)
+                .ignore_then(selector_list.clone())
+                .then(opts_or_none.clone())
+                .map(move |(t, o)| stmt(MotionVerb::Hide(t), o));
+            let transform = just(Token::Transform)
+                .ignore_then(selector.clone())
+                .then(modifier_block.clone())
+                .map(move |(target, modifiers)| {
+                    // Timing keys ride along in the same brackets; split them
+                    // off so the state keys stay exactly what they were.
+                    let (timing, state): (Vec<_>, Vec<_>) = modifiers.into_iter().partition(|m| {
+                        matches!(&m.node.key.node, StyleKey::Custom(k) if crate::motion::is_timing_key(k))
+                    });
+                    let opts = timing
+                        .into_iter()
+                        .map(|m| {
+                            let StyleKey::Custom(k) = &m.node.key.node else { unreachable!() };
+                            let value = match &m.node.value.node {
+                                StyleValue::Number { value, .. } => MotionValue::Number(*value),
+                                StyleValue::String(s) => MotionValue::Str(s.clone()),
+                                StyleValue::Identifier(id) => MotionValue::Name(id.0.clone()),
+                                StyleValue::Keyword(k) => MotionValue::Name(k.clone()),
+                                other => MotionValue::Style(other.clone()),
+                            };
+                            Spanned::new(
+                                MotionOpt {
+                                    key: Spanned::new(k.clone(), m.node.key.span.clone()),
+                                    value: Spanned::new(value, m.node.value.span.clone()),
+                                },
+                                m.span.clone(),
+                            )
+                        })
+                        .collect();
+                    stmt(MotionVerb::Transform { target, modifiers: state }, opts)
+                });
+            let constrain = constrain_decl
+                .clone()
+                .map(move |d| stmt(MotionVerb::Constrain(d), vec![]));
+            let disable = just(Token::Disable)
+                .ignore_then(identifier.separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
+                .map(move |n| stmt(MotionVerb::Disable(n), vec![]));
+            let enable = just(Token::Enable)
+                .ignore_then(identifier.separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
+                .map(move |n| stmt(MotionVerb::Enable(n), vec![]));
+            let draw = kw("draw")
+                .ignore_then(selector_list.clone())
+                .then(opts_or_none.clone())
+                .map(move |(t, o)| stmt(MotionVerb::Draw(t), o));
+            let undraw = kw("undraw")
+                .ignore_then(selector_list.clone())
+                .then(opts_or_none.clone())
+                .map(move |(t, o)| stmt(MotionVerb::Undraw(t), o));
+            let fly_subject = choice((
+                kw("ghost")
+                    .ignore_then(selector.clone().delimited_by(just(Token::ParenOpen), just(Token::ParenClose)))
+                    .map(FlySubject::Ghost),
+                selector.clone().map(FlySubject::Proxy),
+            ));
+            let fly = kw("fly")
+                .ignore_then(fly_subject)
+                .then(just(Token::From).ignore_then(dotted_name.clone()).or_not())
+                .then_ignore(kw("to").labelled("`to` and a destination"))
+                .then(selector_list.clone().labelled("a destination after 'to'"))
+                .then(opts_or_none.clone())
+                .map(move |(((subject, from), to), o)| stmt(MotionVerb::Fly { subject, from, to }, o));
+            let mv = kw("move")
+                .ignore_then(selector.clone())
+                .then(choice((
+                    kw("home").map_with(|_, e| (Some(Spanned::new("home".to_string(), span_range(&e.span()))), None)),
+                    kw("to").ignore_then(dotted_name.clone().labelled("where to move it (an element, or `home`)")).map(|n| (Some(n), None)),
+                    kw("along").ignore_then(dotted_name.clone().labelled("a path to move along")).map(|n| (None, Some(n))),
+                )).labelled("`to <element>`, `home` or `along <path>` after `move <element>`"))
+                .then(opts_or_none.clone())
+                .map(move |((target, (to, along)), o)| stmt(MotionVerb::Move { target, to, along }, o));
+            let effect_name = any()
+                .filter(|t: &Token| {
+                    matches!(t, Token::Ident(s) if crate::motion::EFFECTS.contains(&s.as_str()))
+                })
+                .map_with(|t, e| match t {
+                    Token::Ident(s) => Spanned::new(s, span_range(&e.span())),
+                    _ => unreachable!(),
+                });
+            let effect = effect_name
+                .clone()
+                .then(selector_list.clone())
+                .then(opts_or_none.clone())
+                .map(move |((name, targets), o)| stmt(MotionVerb::Effect { name, targets }, o));
+            let lp = kw("loop")
+                .ignore_then(selector_list.clone())
+                .then(
+                    effect_name
+                        .clone()
+                        .then(just(Token::Comma).ignore_then(motion_opt.clone()).repeated().collect::<Vec<_>>())
+                        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose)),
+                )
+                .map(move |(targets, (effect, o))| stmt(MotionVerb::Loop { targets, effect }, o));
+            let count = kw("count")
+                .ignore_then(selector.clone())
+                .then(opts_or_none.clone())
+                .map(move |(t, o)| stmt(MotionVerb::Count(t), o));
+            let swap = kw("swap")
+                .ignore_then(selector.clone())
+                .then_ignore(just(Token::Arrow))
+                .then(selector.clone())
+                .then(opts_or_none.clone())
+                .map(move |((from, to), o)| stmt(MotionVerb::Swap { from, to }, o));
+            let camera = kw("camera")
+                .ignore_then(choice((
+                    kw("focus").ignore_then(dotted_name.clone()).map(Some),
+                    kw("reset").to(None),
+                )))
+                .then(opts_or_none.clone())
+                .map(move |(f, o)| stmt(MotionVerb::Camera(f), o));
+            let call = identifier
+                .then(
+                    motion_arg
+                        .clone()
+                        .separated_by(just(Token::Comma))
+                        .allow_trailing()
+                        .collect::<Vec<_>>()
+                        .delimited_by(just(Token::ParenOpen), just(Token::ParenClose)),
+                )
+                .then(opts_or_none.clone())
+                .map(move |((name, args), o)| {
+                    stmt(
+                        MotionVerb::Call { name: Spanned::new(name.node.0, name.span), args },
+                        o,
+                    )
+                });
+            let then_beat = kw("then")
+                .ignore_then(block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+                .map(MotionNode::Then);
+            let after_beat = kw("after")
+                .ignore_then(number)
+                .then(block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+                .map(|(n, b)| MotionNode::After(n.node, b));
+            let at_beat = kw("at")
+                .ignore_then(number)
+                .then(block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+                .map(|(n, b)| MotionNode::At(n.node, b));
+
+            choice((
+                then_beat,
+                after_beat,
+                at_beat,
+                show,
+                hide,
+                transform,
+                constrain,
+                disable,
+                enable,
+                draw,
+                undraw,
+                fly,
+                mv,
+                lp,
+                count,
+                swap,
+                camera,
+                effect,
+                call,
+            ))
+            .map_with(|n, e| Spanned::new(n, span_range(&e.span())))
+            .then_ignore(just(Token::Semicolon).or_not())
+            .repeated()
+            .collect::<Vec<_>>()
+        })
+        .boxed();
+
+        // `[no_resolve]`, `[auto]`, `[auto, after: 0.6]`
+        let keyframe_flag = identifier
+            .then(just(Token::Colon).ignore_then(number).or_not())
+            .try_map(|(id, val), span| match (id.node.0.as_str(), val) {
+                ("no_resolve", None) => Ok(("no_resolve", 0.0)),
+                ("auto", None) => Ok(("auto", 0.0)),
+                ("after", Some(v)) => Ok(("after", v.node)),
+                (other, _) => Err(Rich::custom(
+                    span,
+                    format!("unknown keyframe flag '{}': expected no_resolve, auto, after: <seconds>", other),
+                )),
             });
-
-        let kf_constrain_op = constrain_decl.clone()
-            .map_with(|decl, e| Spanned::new(KeyframeOp::Constrain(decl), span_range(&e.span())));
-
-        let disable_op = just(Token::Disable)
-            .ignore_then(identifier.separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
-            .map_with(|names, e| Spanned::new(KeyframeOp::Disable(names), span_range(&e.span())));
-
-        let enable_op = just(Token::Enable)
-            .ignore_then(identifier.separated_by(just(Token::Comma)).at_least(1).collect::<Vec<_>>())
-            .map_with(|names, e| Spanned::new(KeyframeOp::Enable(names), span_range(&e.span())));
-
-        let keyframe_op = choice((show_op, hide_op, transform_op, kf_constrain_op, disable_op, enable_op));
-
-        // Parse optional [no_resolve] modifier on keyframes
-        let no_resolve_flag = just(Token::BracketOpen)
-            .ignore_then(identifier.try_map(|id, span| {
-                if id.node.0 == "no_resolve" {
-                    Ok(true)
-                } else {
-                    Err(chumsky::error::Rich::custom(span, format!("expected 'no_resolve', got '{}'", id.node.0)))
-                }
-            }))
-            .then_ignore(just(Token::BracketClose));
+        let keyframe_flags = keyframe_flag
+            .separated_by(just(Token::Comma))
+            .allow_trailing()
+            .collect::<Vec<_>>()
+            .delimited_by(just(Token::BracketOpen), just(Token::BracketClose));
 
         let keyframe_decl = just(Token::Keyframe)
             .ignore_then(string_literal)
-            .then(no_resolve_flag.or_not())
-            .then(
-                keyframe_op
-                    .repeated()
-                    .collect::<Vec<_>>()
-                    .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
-            )
-            .map(|((name, no_resolve), operations)| KeyframeDecl {
-                name,
-                operations,
-                no_resolve: no_resolve.unwrap_or(false),
+            .then(keyframe_flags.or_not())
+            .then(motion_block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+            .map(|((name, flags), motion)| {
+                let flags = flags.unwrap_or_default();
+                let no_resolve = flags.iter().any(|(k, _)| *k == "no_resolve");
+                let auto_on = flags.iter().any(|(k, _)| *k == "auto");
+                let after = flags.iter().find(|(k, _)| *k == "after").map(|(_, v)| *v);
+                let auto = if auto_on || after.is_some() { Some(after.unwrap_or(0.0)) } else { None };
+                let operations = crate::motion::naive_operations(&motion);
+                KeyframeDecl { name, operations, no_resolve, motion, auto }
             });
+
+        // `motion commit(folder: element, station) { ... }`
+        let motion_param = identifier
+            .then(
+                just(Token::Colon)
+                    .ignore_then(choice((
+                        identifier,
+                        just(Token::Text).map_with(|_, e| Spanned::new(Identifier::new("text"), span_range(&e.span()))),
+                        just(Token::Path).map_with(|_, e| Spanned::new(Identifier::new("path"), span_range(&e.span()))),
+                        just(Token::Group).map_with(|_, e| Spanned::new(Identifier::new("group"), span_range(&e.span()))),
+                        just(Token::Anchor).map_with(|_, e| Spanned::new(Identifier::new("anchor"), span_range(&e.span()))),
+                    )))
+                    .or_not(),
+            )
+            .try_map(|(name, ty), span| {
+                let ty = match ty {
+                    None => MotionParamType::Element,
+                    Some(t) => MotionParamType::parse(&t.node.0).ok_or_else(|| {
+                        Rich::custom(
+                            span,
+                            format!(
+                                "unknown parameter type '{}': expected element, group, path, anchor, number or text",
+                                t.node.0
+                            ),
+                        )
+                    })?,
+                };
+                Ok((Spanned::new(name.node.0, name.span), ty))
+            });
+        let motion_macro = kw("motion")
+            .ignore_then(identifier)
+            .then(
+                motion_param
+                    .separated_by(just(Token::Comma))
+                    .allow_trailing()
+                    .collect::<Vec<_>>()
+                    .delimited_by(just(Token::ParenOpen), just(Token::ParenClose)),
+            )
+            .then(motion_block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+            .map(|((name, params), body)| {
+                Statement::MotionMacro(MotionMacroDecl {
+                    name: Spanned::new(name.node.0, name.span),
+                    params,
+                    body,
+                })
+            });
+        let motion_defaults = kw("motion")
+            .ignore_then(motion_opts.clone())
+            .map(Statement::MotionDefaults);
+        let import_stmt = kw("import")
+            .ignore_then(string_literal)
+            .map(Statement::Import);
 
         // All statements
         // Note: Order matters! More specific patterns should come first.
@@ -1447,6 +1962,9 @@ where
             constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
             keyframe_decl.map(Statement::Keyframe), // Feature 011: before templates
+            motion_macro,
+            motion_defaults,
+            import_stmt,
             file_template.clone(),
             inline_template,
             export_decl.clone().map(Statement::Export),

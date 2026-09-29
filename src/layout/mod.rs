@@ -4,6 +4,7 @@
 //! producing a LayoutResult with positioned elements and routed connections.
 
 pub mod collector;
+pub mod canvas;
 pub mod config;
 pub mod engine;
 pub mod error;
@@ -12,6 +13,7 @@ pub mod lint;
 pub mod routing;
 pub mod solver;
 pub mod text;
+pub mod through;
 pub mod transform;
 pub mod types;
 
@@ -115,7 +117,7 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Template instances define new element identifiers
             ids.insert(inst.instance_name.node.0.clone());
         }
-        Statement::Export(_) | Statement::AnchorDecl(_) | Statement::Keyframe(_) => {
+        Statement::Export(_) | Statement::AnchorDecl(_) | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {
             // Exports, anchor declarations, and keyframes don't define new element identifiers
         }
     }
@@ -202,6 +204,9 @@ fn validate_refs_in_statement(
         Statement::Export(_) | Statement::AnchorDecl(_) => {
             // Exports and anchor declarations are validated during template resolution
         }
+        Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {
+            // Macros are expanded (and their references checked) by motion::expand.
+        }
         Statement::Keyframe(kf) => {
             // Validate that all element/connection references in keyframe ops exist
             for op in &kf.operations {
@@ -233,6 +238,27 @@ fn validate_refs_in_statement(
                     crate::parser::ast::KeyframeOp::Disable(_)
                     | crate::parser::ast::KeyframeOp::Enable(_) => {
                         // These reference constraint names (not element ids); not validated here.
+                    }
+                    crate::parser::ast::KeyframeOp::Draw { target, .. }
+                    | crate::parser::ast::KeyframeOp::Pin { target, .. } => {
+                        if !defined.contains(&target.node.0) {
+                            return Err(LayoutError::UndefinedIdentifier {
+                                name: target.node.0.clone(),
+                                span: target.span.clone(),
+                                suggestions: find_similar(defined, &target.node.0, 2),
+                            });
+                        }
+                    }
+                    crate::parser::ast::KeyframeOp::Camera { focus, .. } => {
+                        if let Some(target) = focus {
+                            if !defined.contains(&target.node.0) {
+                                return Err(LayoutError::UndefinedIdentifier {
+                                    name: target.node.0.clone(),
+                                    span: target.span.clone(),
+                                    suggestions: find_similar(defined, &target.node.0, 2),
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -353,7 +379,7 @@ fn levenshtein_distance(a: &str, b: &str) -> usize {
 }
 
 /// Find similar identifiers within a maximum edit distance
-fn find_similar(defined: &HashSet<String>, target: &str, max_distance: usize) -> Vec<String> {
+pub(crate) fn find_similar(defined: &HashSet<String>, target: &str, max_distance: usize) -> Vec<String> {
     let mut candidates: Vec<(String, usize)> = defined
         .iter()
         .filter_map(|name| {
@@ -366,7 +392,8 @@ fn find_similar(defined: &HashSet<String>, target: &str, max_distance: usize) ->
         })
         .collect();
 
-    candidates.sort_by_key(|(_, d)| *d);
+    // Name breaks ties: the same typo always gets the same suggestions.
+    candidates.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     candidates
         .into_iter()
         .map(|(name, _)| name)

@@ -1,0 +1,716 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="intro,first_commit,two_more,and_another,details,broke,go_back">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+
+    /* Keyframe animation CSS (auto-generated) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+.frame-intro {
+}
+.frame-first_commit {
+  .kf-c29b8342-st1_dot { opacity: 1; }
+  .kf-c29b8342-st1_mt { opacity: 1; }
+  .kf-c29b8342-st1_nm { opacity: 1; }
+}
+.frame-two_more {
+  .aitxt-c29b8342-f_style_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_style_val-v0 { opacity: 1; }
+  .kf-c29b8342-st1_dot { opacity: 1; }
+  .kf-c29b8342-st1_mt { opacity: 1; }
+  .kf-c29b8342-st1_nm { opacity: 1; }
+  .kf-c29b8342-st2_dot { opacity: 1; }
+  .kf-c29b8342-st2_mt { opacity: 1; }
+  .kf-c29b8342-st2_nm { opacity: 1; }
+}
+.frame-and_another {
+  .aitxt-c29b8342-f_cart_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_cart_val-v0 { opacity: 1; }
+  .aitxt-c29b8342-f_style_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_style_val-v0 { opacity: 1; }
+  .kf-c29b8342-st1_dot { opacity: 1; }
+  .kf-c29b8342-st1_mt { opacity: 1; }
+  .kf-c29b8342-st1_nm { opacity: 1; }
+  .kf-c29b8342-st2_dot { opacity: 1; }
+  .kf-c29b8342-st2_mt { opacity: 1; }
+  .kf-c29b8342-st2_nm { opacity: 1; }
+  .kf-c29b8342-st3_dot { opacity: 1; }
+  .kf-c29b8342-st3_mt { opacity: 1; }
+  .kf-c29b8342-st3_nm { opacity: 1; }
+}
+.frame-details {
+  .kf-c29b8342-card { opacity: 1; }
+  .aitxt-c29b8342-f_cart_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_cart_val-v0 { opacity: 1; }
+  .aitxt-c29b8342-f_style_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_style_val-v0 { opacity: 1; }
+  .kf-c29b8342-st1_dot { opacity: 1; }
+  .kf-c29b8342-st1_mt { opacity: 1; }
+  .kf-c29b8342-st1_nm { opacity: 1; }
+  .kf-c29b8342-st2_dot { opacity: 1; }
+  .kf-c29b8342-st2_mt { opacity: 1; }
+  .kf-c29b8342-st2_nm { opacity: 1; }
+  .kf-c29b8342-st3_dot { opacity: 1; }
+  .kf-c29b8342-st3_mt { opacity: 1; }
+  .kf-c29b8342-st3_nm { opacity: 1; }
+  .kf-c29b8342-stick { opacity: 1; }
+}
+.frame-broke {
+  .kf-c29b8342-bad { opacity: 1; }
+  .aitxt-c29b8342-f_cart_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_cart_val-v0 { opacity: 1; }
+  .aitxt-c29b8342-f_style_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_style_val-v0 { opacity: 1; }
+  .aitxt-c29b8342-s_heading-base { opacity: 0; }
+  .aitxt-c29b8342-s_heading-v0 { opacity: 1; }
+  .kf-c29b8342-st1_dot { opacity: 1; }
+  .kf-c29b8342-st1_mt { opacity: 1; }
+  .kf-c29b8342-st1_nm { opacity: 1; }
+  .kf-c29b8342-st2_dot { opacity: 1; }
+  .kf-c29b8342-st2_mt { opacity: 1; }
+  .kf-c29b8342-st2_nm { opacity: 1; }
+  .kf-c29b8342-st3_dot { opacity: 1; }
+  .kfp-c29b8342-st3_dot { stroke: var(--git-lost); }
+  .kf-c29b8342-st3_mt { opacity: 1; }
+  .kf-c29b8342-st3_nm { opacity: 1; }
+  .kf-c29b8342-st3_nm text { fill: var(--git-lost); }
+}
+.frame-go_back {
+  .aitxt-c29b8342-f_style_val-base { opacity: 0; }
+  .aitxt-c29b8342-f_style_val-v0 { opacity: 1; }
+  .kf-c29b8342-ok { opacity: 1; }
+  .kf-c29b8342-ring { opacity: 1; }
+  .kf-c29b8342-ring { transform: translate(-228.76002499999993px, 0px); }
+  .aitxt-c29b8342-s_heading-base { opacity: 0; }
+  .aitxt-c29b8342-s_heading-v0 { opacity: 1; }
+  .kf-c29b8342-st1_dot { opacity: 1; }
+  .kf-c29b8342-st1_mt { opacity: 1; }
+  .kf-c29b8342-st1_nm { opacity: 1; }
+  .kf-c29b8342-st2_dot { opacity: 1; }
+  .kf-c29b8342-st2_mt { opacity: 1; }
+  .kf-c29b8342-st2_nm { opacity: 1; }
+  .kf-c29b8342-st3 { opacity: 0.28; }
+  .kf-c29b8342-st3_dot { opacity: 1; }
+  .kfp-c29b8342-st3_dot { stroke: var(--git-lost); }
+  .kf-c29b8342-st3_mt { opacity: 1; }
+  .kf-c29b8342-st3_nm { opacity: 1; }
+  .kf-c29b8342-st3_nm text { fill: var(--git-lost); }
+}
+
+    /* Palette and type for the "git for non-git people" deck. */
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+
+  /* motion: settled states (auto-generated) */
+svg[data-ail-player] * { transition: none !important; }
+.frame-intro {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 0; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+.frame-first_commit {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 1.001; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+.frame-two_more {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 0.522; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+.frame-and_another {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 0; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+.frame-details {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 0; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+.frame-broke {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 0; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+.frame-go_back {
+  .kf-c29b8342-s_badge { scale: 1 1; }
+  .aighost-c29b8342-0 { scale: 1 1; }
+  .kf-c29b8342-st1_dot { scale: 1 1; }
+  .aimask-c29b8342-track { stroke-dashoffset: 0; }
+  .aighost-c29b8342-1 { scale: 1 1; }
+  .kf-c29b8342-st2_dot { scale: 1 1; }
+  .aighost-c29b8342-2 { scale: 1 1; }
+  .kf-c29b8342-st3_dot { scale: 1 1; }
+  .kf-c29b8342-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-c29b8342-card { scale: 1 1; }
+}
+]]></style>
+  <defs>
+    <mask id="aim-c29b8342-track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-c29b8342-track aid-c29b8342-track" d="M805.80 359.00 L1015.40 359.00 L1244.16 359.00" fill="none" stroke="#fff" stroke-width="24.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-c29b8342-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-c29b8342-s">
+      <g class="kf-c29b8342-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-c29b8342-s_stage" x="0" y="0" width="1600" height="900" fill="var(--git-paper)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-c29b8342-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-c29b8342-s_badge" x="96" y="64" width="66" height="66" fill="var(--git-ink)" stroke="none" stroke-width="1.5" rx="16"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--git-paper)" font-weight="800"><tspan x="129" dy="-0"><tspan>2</tspan></tspan></text>
+      </g>
+      <g class="kf-c29b8342-s_heading kf-anim" style="transform-origin:545.83px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-c29b8342-s_heading aitxt-c29b8342-s_heading-base" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--git-ink)" font-weight="800">Git takes snapshots</text>
+        <text class="ai-shape ai-text kfp-c29b8342-s_heading aitxt-c29b8342-s_heading-v0" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--git-ink)" font-weight="800" opacity="0">Broke something? Go back</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-c29b8342-folder kf-anim" style="transform-origin:361px 359px">
+    <g id="folder" class="ai-container kfp-c29b8342-folder">
+      <g class="kf-c29b8342-folder_bg kf-anim" style="transform-origin:361px 359px">
+        <rect id="folder_bg" class="ai-shape ai-rect kfp-c29b8342-folder_bg" x="96" y="214" width="530" height="290" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="3" rx="16"/>
+      </g>
+      <g class="kf-c29b8342-folder_body kf-anim" style="transform-origin:361px 359px">
+        <g id="folder_body" class="ai-container kfp-c29b8342-folder_body">
+          <g class="kf-c29b8342-fhead kf-anim" style="transform-origin:361px 245px">
+            <rect id="fhead" class="ai-shape ai-rect kfp-c29b8342-fhead" x="101" y="219" width="520" height="52" fill="var(--git-paper2)" stroke="none" stroke-width="1.5" rx="14"/>
+            <text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text>
+          </g>
+          <g class="kf-c29b8342-f_login kf-anim" style="transform-origin:361px 309px">
+            <g id="f_login" class="ai-container kfp-c29b8342-f_login">
+              <g class="kf-c29b8342-f_login_bg kf-anim" style="transform-origin:361px 309px">
+                <rect id="f_login_bg" class="ai-shape ai-rect kfp-c29b8342-f_login_bg" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+              </g>
+              <g class="kf-c29b8342-f_login_sep kf-anim" style="transform-origin:361px 346px">
+                <rect id="f_login_sep" class="ai-shape ai-rect kfp-c29b8342-f_login_sep" x="101" y="345" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/>
+              </g>
+              <g class="kf-c29b8342-f_login_chip kf-anim" style="transform-origin:142px 309px">
+                <rect id="f_login_chip" class="ai-shape ai-rect kfp-c29b8342-f_login_chip" x="123" y="286" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/>
+                <text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text>
+              </g>
+              <g class="kf-c29b8342-f_login_fname kf-anim" style="transform-origin:229.4px 309px">
+                <rect id="f_login_fname" class="ai-shape ai-rect kfp-c29b8342-f_login_fname" x="171" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text>
+              </g>
+              <g class="kf-c29b8342-f_login_val kf-anim" style="transform-origin:548.6px 309px">
+                <rect id="f_login_val" class="ai-shape ai-rect kfp-c29b8342-f_login_val" x="490.2" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="548.6" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>84 lines</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+          <g class="kf-c29b8342-f_style kf-anim" style="transform-origin:361px 385px">
+            <rect class="aihl-c29b8342-f_style" x="95" y="341" width="532" height="88" rx="8" fill="var(--git-main)" style="opacity:0"/>
+            <g id="f_style" class="ai-container kfp-c29b8342-f_style">
+              <g class="kf-c29b8342-f_style_bg kf-anim" style="transform-origin:361px 385px">
+                <rect id="f_style_bg" class="ai-shape ai-rect kfp-c29b8342-f_style_bg" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+              </g>
+              <g class="kf-c29b8342-f_style_sep kf-anim" style="transform-origin:361px 422px">
+                <rect id="f_style_sep" class="ai-shape ai-rect kfp-c29b8342-f_style_sep" x="101" y="421" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/>
+              </g>
+              <g class="kf-c29b8342-f_style_chip kf-anim" style="transform-origin:142px 385px">
+                <rect id="f_style_chip" class="ai-shape ai-rect kfp-c29b8342-f_style_chip" x="123" y="362" width="38" height="46" fill="var(--git-branch)" stroke="var(--git-ink)" stroke-width="3" rx="6"/>
+                <text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text>
+              </g>
+              <g class="kf-c29b8342-f_style_fname kf-anim" style="transform-origin:235.7px 385px">
+                <rect id="f_style_fname" class="ai-shape ai-rect kfp-c29b8342-f_style_fname" x="171" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text>
+              </g>
+              <g class="kf-c29b8342-f_style_val kf-anim" style="transform-origin:542.3px 385px">
+                <rect id="f_style_val" class="ai-shape ai-rect kfp-c29b8342-f_style_val" x="477.6" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label aitxt-c29b8342-f_style_val-base" x="542.3" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="542.3" dy="-0"><tspan>210 lines</tspan></tspan></text>
+                <text class="ai-label aitxt-c29b8342-f_style_val-v0" x="542.3" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)" opacity="0"><tspan x="542.3" dy="-0"><tspan>246 lines</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+          <g class="kf-c29b8342-f_cart kf-anim" style="transform-origin:361px 461px">
+            <rect class="aihl-c29b8342-f_cart" x="95" y="417" width="532" height="88" rx="8" fill="var(--git-main)" style="opacity:0"/>
+            <g id="f_cart" class="ai-container kfp-c29b8342-f_cart">
+              <g class="kf-c29b8342-f_cart_bg kf-anim" style="transform-origin:361px 461px">
+                <rect id="f_cart_bg" class="ai-shape ai-rect kfp-c29b8342-f_cart_bg" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+              </g>
+              <g class="kf-c29b8342-f_cart_sep kf-anim" style="transform-origin:361px 498px">
+                <rect id="f_cart_sep" class="ai-shape ai-rect kfp-c29b8342-f_cart_sep" x="101" y="497" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/>
+              </g>
+              <g class="kf-c29b8342-f_cart_chip kf-anim" style="transform-origin:142px 461px">
+                <rect id="f_cart_chip" class="ai-shape ai-rect kfp-c29b8342-f_cart_chip" x="123" y="438" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/>
+                <text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text>
+              </g>
+              <g class="kf-c29b8342-f_cart_fname kf-anim" style="transform-origin:223.1px 461px">
+                <rect id="f_cart_fname" class="ai-shape ai-rect kfp-c29b8342-f_cart_fname" x="171" y="439.875" width="104.2" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text>
+              </g>
+              <g class="kf-c29b8342-f_cart_val kf-anim" style="transform-origin:548.6px 461px">
+                <rect id="f_cart_val" class="ai-shape ai-rect kfp-c29b8342-f_cart_val" x="490.2" y="439.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label aitxt-c29b8342-f_cart_val-base" x="548.6" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>57 lines</tspan></tspan></text>
+                <text class="ai-label aitxt-c29b8342-f_cart_val-v0" x="548.6" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)" opacity="0"><tspan x="548.6" dy="-0"><tspan>58 lines</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <rect class="aiflash-c29b8342-folder" x="96" y="214" width="530" height="290" fill="#ffffff" style="opacity:0;pointer-events:none"/>
+  </g>
+  <g class="kf-hidden kf-c29b8342-ok kf-anim" style="transform-origin:193.15px 551.75px">
+    <rect id="ok" class="ai-shape ai-rect kfp-c29b8342-ok" x="96" y="530" width="194.30890000000002" height="43.5" fill="var(--git-panel)" stroke="var(--git-ok)" stroke-width="3" rx="10"/>
+    <text class="ai-label" x="193.15445" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--git-ok)" font-weight="700"><tspan x="193.15445" dy="-0"><tspan>● checkout works</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-c29b8342-bad kf-anim" style="transform-origin:198.31px 551.75px">
+    <rect id="bad" class="ai-shape ai-rect kfp-c29b8342-bad" x="96" y="530" width="204.61150000000004" height="43.5" fill="var(--git-panel)" stroke="var(--git-lost)" stroke-width="3" rx="10"/>
+    <text class="ai-label" x="198.30575000000002" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--git-lost)" font-weight="700"><tspan x="198.30575000000002" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
+  </g>
+  <g class="kf-c29b8342-rule kf-anim" style="transform-origin:1132.65px 359px">
+    <path id="rule" class="ai-shape ai-path dots kfp-c29b8342-rule" d="M745.80 359.00 L1519.50 359.00"  fill="none" stroke="var(--git-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g class="kf-c29b8342-rule_end kf-anim" style="transform-origin:1519.5px 359px">
+    <rect id="rule_end" class="ai-shape ai-rect kfp-c29b8342-rule_end" x="1519" y="358.5" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-c29b8342-track kf-anim" style="transform-origin:1024.98px 359px">
+    <path id="track" class="ai-shape ai-path kfp-c29b8342-track" d="M805.80 359.00 L1015.40 359.00 L1244.16 359.00"  fill="none" stroke="var(--git-main)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-c29b8342-track)"/>
+  </g>
+  <g class="kf-c29b8342-stations kf-anim" style="transform-origin:1034.56px 354.63px">
+    <g id="stations" class="ai-container kfp-c29b8342-stations">
+      <g class="kf-c29b8342-st1 kf-anim" style="transform-origin:805.8px 354.63px">
+        <g id="st1" class="ai-container kfp-c29b8342-st1">
+          <g class="kf-hidden kf-c29b8342-st1_dot kf-anim" style="transform-origin:805.8px 359px">
+            <circle id="st1_dot" class="ai-shape ai-circle kfp-c29b8342-st1_dot" cx="805.8" cy="359" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
+          </g>
+          <g class="kf-hidden kf-c29b8342-st1_nm kf-anim" style="transform-origin:805.8px 301.63px">
+            <rect id="st1_nm" class="ai-shape ai-rect kfp-c29b8342-st1_nm" x="738.0528999999999" y="279.25" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="805.8" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="805.8" dy="-0"><tspan>Login page</tspan></tspan></text>
+          </g>
+          <g class="kf-hidden kf-c29b8342-st1_mt kf-anim" style="transform-origin:805.8px 412px">
+            <rect id="st1_mt" class="ai-shape ai-rect kfp-c29b8342-st1_mt" x="721" y="394" width="169.6" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="805.8" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--git-muted)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="805.8" dy="-0"><tspan>anna · Mon 09:12</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+      <g class="kf-c29b8342-st2 kf-anim" style="transform-origin:1015.4px 354.63px">
+        <g id="st2" class="ai-container kfp-c29b8342-st2">
+          <g class="kf-hidden kf-c29b8342-st2_dot kf-anim" style="transform-origin:1015.4px 359px">
+            <circle id="st2_dot" class="ai-shape ai-circle kfp-c29b8342-st2_dot" cx="1015.4" cy="359" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
+          </g>
+          <g class="kf-hidden kf-c29b8342-st2_nm kf-anim" style="transform-origin:1015.4px 301.63px">
+            <rect id="st2_nm" class="ai-shape ai-rect kfp-c29b8342-st2_nm" x="948.3532499999999" y="279.25" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1015.4" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="1015.4" dy="-0"><tspan>Dark mode</tspan></tspan></text>
+          </g>
+          <g class="kf-hidden kf-c29b8342-st2_mt kf-anim" style="transform-origin:1015.4px 412px">
+            <rect id="st2_mt" class="ai-shape ai-rect kfp-c29b8342-st2_mt" x="930.5999999999999" y="394" width="169.6" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1015.4" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--git-muted)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1015.4" dy="-0"><tspan>anna · Mon 16:40</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+      <g class="kf-c29b8342-st3 kf-anim" style="transform-origin:1244.16px 354.63px">
+        <g id="st3" class="ai-container kfp-c29b8342-st3">
+          <g class="kf-hidden kf-c29b8342-st3_dot kf-anim" style="transform-origin:1244.16px 359px">
+            <circle id="st3_dot" class="ai-shape ai-circle kfp-c29b8342-st3_dot" cx="1244.160025" cy="359" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
+          </g>
+          <g class="kf-hidden kf-c29b8342-st3_nm kf-anim" style="transform-origin:1244.16px 301.63px">
+            <rect id="st3_nm" class="ai-shape ai-rect kfp-c29b8342-st3_nm" x="1140.1999999999998" y="279.25" width="207.92005000000003" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1244.160025" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="1244.160025" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
+          </g>
+          <g class="kf-hidden kf-c29b8342-st3_mt kf-anim" style="transform-origin:1244.16px 412px">
+            <rect id="st3_mt" class="ai-shape ai-rect kfp-c29b8342-st3_mt" x="1164.160025" y="394" width="160" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1244.160025" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--git-muted)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1244.160025" dy="-0"><tspan>ben · Tue 14:03</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-c29b8342-ring kf-anim" style="transform-origin:1244.16px 359px">
+    <circle id="ring" class="ai-shape ai-circle kfp-c29b8342-ring" cx="1244.160025" cy="359" r="34" fill="none" stroke="var(--git-ink)" stroke-width="4"/>
+  </g>
+  <g class="kf-hidden kf-c29b8342-stick kf-anim" style="transform-origin:1244.16px 450px">
+    <rect id="stick" class="ai-shape ai-rect kfp-c29b8342-stick" x="1242.660025" y="436" width="3" height="28" fill="var(--git-ink)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-hidden kf-c29b8342-card kf-anim" style="transform-origin:1320px 610.38px">
+    <g id="card" class="ai-container kfp-c29b8342-card">
+      <g class="kf-c29b8342-card_bg kf-anim" style="transform-origin:1320px 610.38px">
+        <rect id="card_bg" class="ai-shape ai-rect kfp-c29b8342-card_bg" x="1098" y="464" width="444" height="292.75" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="3" rx="14"/>
+      </g>
+      <g class="kf-c29b8342-card_body kf-anim" style="transform-origin:1320px 610.38px">
+        <g id="card_body" class="ai-container kfp-c29b8342-card_body">
+          <g class="kf-c29b8342-ck kf-anim" style="transform-origin:1200.2px 509px">
+            <rect id="ck" class="ai-shape ai-rect kfp-c29b8342-ck" x="1125" y="491" width="150.4" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1133" y="509" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--git-muted)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1133" dy="-0"><tspan>COMMIT </tspan><tspan fill="var(--git-main)">3f2a9c1</tspan></tspan></text>
+          </g>
+          <g class="kf-c29b8342-cm kf-anim" style="transform-origin:1241.48px 561.25px">
+            <rect id="cm" class="ai-shape ai-rect kfp-c29b8342-cm" x="1125" y="537" width="232.95310000000003" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1133" y="561.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--git-ink)" font-weight="700"><tspan x="1133" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
+          </g>
+          <g class="kf-c29b8342-cmeta kf-anim" style="transform-origin:1301.3px 614.13px">
+            <rect id="cmeta" class="ai-shape ai-rect kfp-c29b8342-cmeta" x="1125" y="595.5" width="352.6" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1133" y="614.125" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--git-muted)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1133" dy="-0"><tspan>ben · Tue 29 Sep, 14:03 · cart.py</tspan></tspan></text>
+          </g>
+          <g class="kf-c29b8342-minus kf-anim" style="transform-origin:1320px 662px">
+            <rect id="minus" class="ai-shape ai-rect kfp-c29b8342-minus" x="1125" y="642.75" width="390" height="38.5" fill="var(--git-lost-soft)" stroke="none" stroke-width="1.5" rx="6"/>
+            <text class="ai-label" x="1133" y="662" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--git-lost)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1133" dy="-0"><tspan>-    return s</tspan></tspan></text>
+          </g>
+          <g class="kf-c29b8342-plus kf-anim" style="transform-origin:1320px 710.5px">
+            <rect id="plus" class="ai-shape ai-rect kfp-c29b8342-plus" x="1125" y="691.25" width="390" height="38.5" fill="var(--git-ok-soft)" stroke="none" stroke-width="1.5" rx="6"/>
+            <text class="ai-label" x="1133" y="710.5" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--git-ok)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1133" dy="-0"><tspan>+    return round(s, 2)</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="aighost-c29b8342-0" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="3" rx="16"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--git-paper2)" stroke="none" stroke-width="1.5" rx="14"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="490.2" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="548.6" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--git-branch)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="477.6" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="542.3" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="542.3" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="104.2" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="490.2" y="439.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="548.6" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
+  <g class="aighost-c29b8342-1" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="3" rx="16"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--git-paper2)" stroke="none" stroke-width="1.5" rx="14"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="490.2" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="548.6" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--git-branch)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="477.6" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="542.3" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="542.3" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="104.2" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="490.2" y="439.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="548.6" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
+  <g class="aighost-c29b8342-2" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="3" rx="16"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--git-paper2)" stroke="none" stroke-width="1.5" rx="14"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="490.2" y="287.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="548.6" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--git-branch)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="477.6" y="363.875" width="129.39999999999998" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="542.3" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="542.3" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--git-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--git-main)" stroke="var(--git-ink)" stroke-width="3" rx="6"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--git-panel)" font-weight="800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="104.2" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="490.2" y="439.875" width="116.8" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="548.6" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--git-ink)" font-weight="700" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="548.6" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"c29b8342-","frames":[{"name":"intro","duration":0.92,"auto":null},{"name":"first_commit","duration":1.65,"auto":null},{"name":"two_more","duration":2.15,"auto":null},{"name":"and_another","duration":2.15,"auto":0.3},{"name":"details","duration":0.65,"auto":null},{"name":"broke","duration":1.3,"auto":null},{"name":"go_back","duration":1.8,"auto":null}],"elements":["s","s_stage","s_badge","s_heading","folder","folder_bg","folder_body","fhead","f_login","f_login_bg","f_login_sep","f_login_chip","f_login_fname","f_login_val","f_style","f_style_bg","f_style_sep","f_style_chip","f_style_fname","f_style_val","f_cart","f_cart_bg","f_cart_sep","f_cart_chip","f_cart_fname","f_cart_val","ok","bad","rule","rule_end","track","stations","st1","st1_dot","st1_nm","st1_mt","st2","st2_dot","st2_nm","st2_mt","st3","st3_dot","st3_nm","st3_mt","ring","stick","card","card_bg","card_body","ck","cm","cmeta","minus","plus"],"channels":[[".kf-c29b8342-s_badge","opacity"],[".kf-c29b8342-s_badge","scale"],[".kf-c29b8342-s_heading","opacity"],[".kf-c29b8342-s_heading","translate"],[".kf-c29b8342-folder","opacity"],[".kf-c29b8342-folder","translate"],[".aiflash-c29b8342-folder","opacity"],[".aighost-c29b8342-0","translate"],[".aighost-c29b8342-0","scale"],[".aighost-c29b8342-0","opacity"],[".kf-c29b8342-st1_dot","opacity"],[".kf-c29b8342-st1_dot","scale"],[".kf-c29b8342-st1_nm","opacity"],[".kf-c29b8342-st1_nm","translate"],[".kf-c29b8342-st1_mt","opacity"],[".kf-c29b8342-st1_mt","translate"],[".aimask-c29b8342-track","stroke-dashoffset"],[".aitxt-c29b8342-f_style_val-base","opacity"],[".aitxt-c29b8342-f_style_val-base","translate"],[".aitxt-c29b8342-f_style_val-v0","opacity"],[".aitxt-c29b8342-f_style_val-v0","translate"],[".aihl-c29b8342-f_style","opacity"],[".aighost-c29b8342-1","translate"],[".aighost-c29b8342-1","scale"],[".aighost-c29b8342-1","opacity"],[".kf-c29b8342-st2_dot","opacity"],[".kf-c29b8342-st2_dot","scale"],[".kf-c29b8342-st2_nm","opacity"],[".kf-c29b8342-st2_nm","translate"],[".kf-c29b8342-st2_mt","opacity"],[".kf-c29b8342-st2_mt","translate"],[".aitxt-c29b8342-f_cart_val-base","opacity"],[".aitxt-c29b8342-f_cart_val-base","translate"],[".aitxt-c29b8342-f_cart_val-v0","opacity"],[".aitxt-c29b8342-f_cart_val-v0","translate"],[".aihl-c29b8342-f_cart","opacity"],[".aighost-c29b8342-2","translate"],[".aighost-c29b8342-2","scale"],[".aighost-c29b8342-2","opacity"],[".kf-c29b8342-st3_dot","opacity"],[".kf-c29b8342-st3_dot","scale"],[".kf-c29b8342-st3_nm","opacity"],[".kf-c29b8342-st3_nm","translate"],[".kf-c29b8342-st3_mt","opacity"],[".kf-c29b8342-st3_mt","translate"],[".kf-c29b8342-stick","opacity"],[".kf-c29b8342-stick","clip-path"],[".kf-c29b8342-card","opacity"],[".kf-c29b8342-card","scale"],[".aitxt-c29b8342-s_heading-base","opacity"],[".aitxt-c29b8342-s_heading-base","translate"],[".aitxt-c29b8342-s_heading-v0","opacity"],[".aitxt-c29b8342-s_heading-v0","translate"],[".kf-c29b8342-ok","opacity"],[".kfp-c29b8342-st3_dot","stroke"],[".kf-c29b8342-st3_nm \u003e text","fill"],[".kf-c29b8342-bad","opacity"],[".kf-c29b8342-bad","translate"],[".kf-c29b8342-ring","opacity"],[".kf-c29b8342-ring","translate"],[".kf-c29b8342-st3","opacity"]],"settled":[["0","1 1","0","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--git-main)","var(--git-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--git-main)","var(--git-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--git-main)","var(--git-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0.522","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--git-main)","var(--git-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--git-main)","var(--git-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","inset(0% 0% 0% 0%)","1","1 1","1","0px 0px","0","0px 0px","0","var(--git-main)","var(--git-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","0px 0px","1","0px 0px","0","var(--git-lost)","var(--git-lost)","1","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","0px 0px","1","0px 0px","1","var(--git-lost)","var(--git-lost)","0","0px 0px","1","-228.76px 0px","0.28"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":5,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":6,"t":0,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":7,"t":0.12,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"27.8px -6.255px"],[0.125,"55.6px -11.676px"],[0.1875,"83.4px -16.263px"],[0.25,"111.2px -20.016px"],[0.3125,"139px -22.935px"],[0.375,"166.8px -25.02px"],[0.4375,"194.6px -26.271px"],[0.5,"222.4px -26.688px"],[0.5625,"250.2px -26.271px"],[0.625,"278px -25.02px"],[0.6875,"305.8px -22.935px"],[0.75,"333.6px -20.016px"],[0.8125,"361.4px -16.263px"],[0.875,"389.2px -11.676px"],[0.9375,"417px -6.255px"],[1,"444.8px 0px"]]},{"c":7,"t":0.92,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":8,"t":0.12,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":8,"t":0.92,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":9,"t":0.12,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":9,"t":0.92,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":10,"t":0.92,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0.92,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":12,"t":1.07,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":13,"t":1.07,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":14,"t":1.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":15,"t":1.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":16,"t":0.6,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[1,"1.001"]]}],[{"c":6,"t":0.5,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":16,"t":1.1,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.522"]]},{"c":17,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":18,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":18,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":19,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":20,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":20,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":21,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":21,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":22,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"40.9px -9.202px"],[0.125,"81.8px -17.178px"],[0.1875,"122.7px -23.926px"],[0.25,"163.6px -29.448px"],[0.3125,"204.5px -33.743px"],[0.375,"245.4px -36.81px"],[0.4375,"286.3px -38.65px"],[0.5,"327.2px -39.264px"],[0.5625,"368.1px -38.65px"],[0.625,"409px -36.81px"],[0.6875,"449.9px -33.743px"],[0.75,"490.8px -29.448px"],[0.8125,"531.7px -23.926px"],[0.875,"572.6px -17.178px"],[0.9375,"613.5px -9.202px"],[1,"654.4px 0px"]]},{"c":22,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":23,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":23,"t":1.42,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":24,"t":0.62,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":24,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":25,"t":1.42,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":26,"t":1.42,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":27,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":28,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":29,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":30,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":6,"t":0.5,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":16,"t":1.1,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.522"],[1,"0"]]},{"c":31,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":32,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":32,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":34,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":34,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":35,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":36,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"55.198px -12.419px"],[0.125,"110.395px -23.183px"],[0.1875,"165.593px -32.291px"],[0.25,"220.79px -39.742px"],[0.3125,"275.988px -45.538px"],[0.375,"331.185px -49.678px"],[0.4375,"386.383px -52.162px"],[0.5,"441.58px -52.99px"],[0.5625,"496.778px -52.162px"],[0.625,"551.975px -49.678px"],[0.6875,"607.173px -45.538px"],[0.75,"662.37px -39.742px"],[0.8125,"717.568px -32.291px"],[0.875,"772.765px -23.183px"],[0.9375,"827.963px -12.419px"],[1,"883.16px 0px"]]},{"c":36,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":37,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":37,"t":1.42,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":38,"t":0.62,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":38,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":39,"t":1.42,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":1.42,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":41,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":42,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":43,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":44,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":45,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":46,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":47,"t":0.15,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":48,"t":0.15,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":40,"t":0.5,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.35 1.35"],[1,"1 1"]]},{"c":40,"t":1,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":45,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":47,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":49,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":50,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":50,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":51,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":52,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":52,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":53,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":53,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":54,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--git-main)"],[1,"var(--git-lost)"]]},{"c":55,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--git-ink)"],[1,"var(--git-lost)"]]},{"c":56,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":57,"t":0.8,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":57,"t":1.3,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]}],[{"c":6,"t":1.3,"d":0.5,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":1.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":31,"t":1.45,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":32,"t":1.45,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":32,"t":1.7,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":1.3,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":34,"t":1.3,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":34,"t":1.55,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":35,"t":1.3,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":35,"t":1.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":53,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":56,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":58,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":59,"t":0.5,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"-228.76px 0px"]]},{"c":60,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0.28"]]}]]}]]></script>
+<script><![CDATA[
+/* agent-illustrator motion player: plays the tracks compiled into an SVG.
+ * No dependencies; Web Animations API. The player has no semantics of its
+ * own: every value it sets comes from the embedded manifest.
+ *
+ *   var p = ail.player(svgElement);
+ *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
+ *   p.on('frame', function (i, name) { ... });
+ *
+ * Forward plays the segment; backward and jumps are instant and exact.
+ */
+(function (root) {
+  'use strict';
+  if (root.ail && root.ail.player) return;
+
+  function camel(p) {
+    return p.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); });
+  }
+  function mq(q) {
+    return root.matchMedia ? root.matchMedia(q) : { matches: false, addListener: function () {} };
+  }
+
+  function Player(svg, opts) {
+    opts = opts || {};
+    var node = svg.querySelector('script.ail-motion');
+    if (!node) throw new Error('ail.player: this SVG has no motion manifest');
+    var m = JSON.parse(node.textContent);
+    if (m.v !== 1) throw new Error('ail.player: unsupported manifest version ' + m.v);
+    var self = this;
+    this.svg = svg;
+    this.manifest = m;
+    this.frames = m.frames.map(function (f) { return f.name; });
+    this.frame = 0;
+    this.playing = false;
+    this._anims = [];
+    this._loops = [];
+    this._timers = [];
+    this._listeners = {};
+    this._nodes = m.channels.map(function (c) {
+      return Array.prototype.slice.call(svg.querySelectorAll(c[0]));
+    });
+    this._reduced = mq('(prefers-reduced-motion: reduce)');
+    svg.setAttribute('data-ail-player', '');
+
+    // Print shows the finished story.
+    var saved = null;
+    function toLast() { saved = self.frame; self.goTo(self.frames.length - 1); }
+    function restore() { if (saved !== null) { self.goTo(saved); saved = null; } }
+    if (root.addEventListener) {
+      root.addEventListener('beforeprint', toLast);
+      root.addEventListener('afterprint', restore);
+    }
+
+    if (opts.autoplay) {
+      this._autoplay(opts.dwell == null ? 1.6 : opts.dwell);
+    } else {
+      this.goTo(opts.frame == null ? 0 : opts.frame);
+    }
+  }
+
+  var P = Player.prototype;
+
+  P.on = function (evt, cb) {
+    (this._listeners[evt] = this._listeners[evt] || []).push(cb);
+    return this;
+  };
+  P._emit = function (evt) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    (this._listeners[evt] || []).forEach(function (cb) { cb.apply(null, args); });
+  };
+  P._index = function (i) {
+    if (typeof i === 'string') {
+      var k = this.frames.indexOf(i);
+      if (k < 0) throw new Error('ail.player: no frame named "' + i + '"');
+      return k;
+    }
+    return Math.max(0, Math.min(this.frames.length - 1, i | 0));
+  };
+  P._set = function (c, v) {
+    var prop = this.manifest.channels[c][1];
+    this._nodes[c].forEach(function (n) {
+      if (prop === 'text') n.textContent = v;
+      else n.style.setProperty(prop, v);
+    });
+  };
+  P._apply = function (row) {
+    var vals = this.manifest.settled[row];
+    for (var c = 0; c < vals.length; c++) this._set(c, vals[c]);
+  };
+  P._stop = function () {
+    this._anims.concat(this._loops).forEach(function (a) { a.cancel(); });
+    this._anims = [];
+    this._loops = [];
+    this._timers.forEach(clearTimeout);
+    this._timers = [];
+    this.playing = false;
+  };
+  P._animate = function (a, loopNow) {
+    var self = this;
+    var prop = this.manifest.channels[a.c][1];
+    if (prop === 'text') {
+      a.k.forEach(function (kv) {
+        self._timers.push(setTimeout(function () { self._set(a.c, kv[1]); },
+          (a.t + kv[0] * a.d) * 1000));
+      });
+      return;
+    }
+    var key = camel(prop);
+    var frames = a.k.map(function (kv) { var f = { offset: kv[0] }; f[key] = kv[1]; return f; });
+    var timing = {
+      delay: loopNow ? 0 : a.t * 1000,
+      duration: Math.max(a.d * 1000, 1),
+      easing: a.e,
+      fill: a.loop ? 'none' : 'forwards',
+      iterations: a.loop ? Infinity : 1
+    };
+    this._nodes[a.c].forEach(function (n) {
+      if (!n.animate) return;
+      var anim = n.animate(frames, timing);
+      (a.loop ? self._loops : self._anims).push(anim);
+    });
+  };
+  P._startLoops = function (i) {
+    var self = this;
+    this.manifest.anims[i].forEach(function (a) { if (a.loop) self._animate(a, true); });
+  };
+
+  /** Jump to frame i (index or name): instant, exact. */
+  P.goTo = function (i) {
+    i = this._index(i);
+    this._stop();
+    this._apply(i + 1);
+    this.frame = i;
+    this._startLoops(i);
+    this._emit('frame', i, this.frames[i]);
+    return this;
+  };
+
+  /** Play frame i from the state before it. */
+  P.play = function (i) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    var f = this.manifest.frames[i];
+    if (this._reduced.matches || !f.duration) {
+      this.goTo(i);
+      this._chain(i);
+      return this;
+    }
+    this._apply(i);
+    this.frame = i;
+    this.playing = true;
+    this._emit('framestart', i, this.frames[i]);
+    this.manifest.anims[i].forEach(function (a) { self._animate(a, false); });
+    this._timers.push(setTimeout(function () {
+      self._apply(i + 1);
+      self._anims.forEach(function (a) { a.cancel(); });
+      self._anims = [];
+      self.playing = false;
+      self._emit('frame', i, self.frames[i]);
+      self._chain(i);
+    }, f.duration * 1000 + 20));
+    return this;
+  };
+
+  P._chain = function (i) {
+    var self = this;
+    var nf = this.manifest.frames[i + 1];
+    if (nf && nf.auto != null) {
+      this._timers.push(setTimeout(function () { self.play(i + 1); }, nf.auto * 1000));
+    } else if (this._auto) {
+      this._auto(i);
+    }
+  };
+
+  /** Advance: play the next frame (finishing the current one first). */
+  P.next = function () {
+    if (this.playing) this.goTo(this.frame);
+    if (this.frame < this.frames.length - 1) { this.play(this.frame + 1); return true; }
+    return false;
+  };
+
+  /** Step back: instant. */
+  P.prev = function () {
+    if (this.frame > 0) { this.goTo(this.frame - 1); return true; }
+    this.goTo(0);
+    return false;
+  };
+
+  /** Freeze frame i at t seconds into it (for tests and previews). */
+  P.at = function (i, t) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    this._apply(i);
+    this.frame = i;
+    this.manifest.anims[i].forEach(function (a) {
+      var prop = self.manifest.channels[a.c][1];
+      if (prop === 'text') {
+        var cur = null;
+        a.k.forEach(function (kv) { if (a.t + kv[0] * a.d <= t + 1e-9) cur = kv[1]; });
+        if (cur !== null) self._set(a.c, cur);
+        return;
+      }
+      self._animate(a, false);
+    });
+    this._anims.concat(this._loops).forEach(function (an) { an.pause(); an.currentTime = t * 1000; });
+    return this;
+  };
+
+  P._autoplay = function (dwell) {
+    var self = this;
+    this._auto = function (i) {
+      self._timers.push(setTimeout(function () {
+        if (i < self.frames.length - 1) self.play(i + 1);
+        else { self._apply(0); self.play(0); }
+      }, dwell * 1000));
+    };
+    function manual() { self._auto = null; }
+    this.svg.addEventListener('click', function () { manual(); if (!self.next()) self.goTo(0); });
+    if (root.document) {
+      root.document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.next(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prev(); e.preventDefault(); }
+      });
+    }
+    this._apply(0);
+    this.play(0);
+  };
+
+  root.ail = root.ail || {};
+  root.ail.player = function (svg, opts) {
+    if (!svg.__ailPlayer) svg.__ailPlayer = new Player(svg, opts);
+    return svg.__ailPlayer;
+  };
+})(typeof window !== 'undefined' ? window : this);
+
+(function(){var svg=document.currentScript&&document.currentScript.closest?document.currentScript.closest('svg'):null;if(!svg){var all=document.querySelectorAll('svg[data-frames]');svg=all[all.length-1];}if(svg&&window.ail){window.ail.player(svg,{autoplay:true});}})();
+]]></script>
+</svg>

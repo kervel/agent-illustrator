@@ -65,11 +65,17 @@ pub enum LintCategory {
     LabelOverflow,
     UnknownModifier,
     OverriddenConstraint,
+    /// Content outside the element declared `canvas: true`.
+    CanvasOverflow,
+    /// Motion statements that cannot do what they say (see `motion::lint`).
+    Motion,
+    /// A number where a motion statement should name a place.
+    MotionCoordinate,
 }
 
 impl LintCategory {
     /// Every category, in the order they are documented.
-    pub const ALL: [LintCategory; 15] = [
+    pub const ALL: [LintCategory; 18] = [
         LintCategory::Overlap,
         LintCategory::Containment,
         LintCategory::Label,
@@ -85,7 +91,23 @@ impl LintCategory {
         LintCategory::LabelOverflow,
         LintCategory::UnknownModifier,
         LintCategory::OverriddenConstraint,
+        LintCategory::CanvasOverflow,
+        LintCategory::Motion,
+        LintCategory::MotionCoordinate,
     ];
+
+    /// Errors: the picture is certainly wrong (something leaves the canvas,
+    /// a modifier is ignored, text does not fit its box). `--lint` fails on
+    /// these; everything else is advice, and fails only `--lint-strict`.
+    pub fn is_error(&self) -> bool {
+        matches!(
+            self,
+            LintCategory::CanvasOverflow
+                | LintCategory::UnknownModifier
+                | LintCategory::LabelOverflow
+                | LintCategory::MotionCoordinate
+        )
+    }
 
     /// Parse a category from its kebab-case name (as printed by `Display`).
     pub fn parse(name: &str) -> Option<LintCategory> {
@@ -122,6 +144,9 @@ impl fmt::Display for LintCategory {
             LintCategory::LabelOverflow => write!(f, "label-overflow"),
             LintCategory::UnknownModifier => write!(f, "unknown-modifier"),
             LintCategory::OverriddenConstraint => write!(f, "overridden-constraint"),
+            LintCategory::CanvasOverflow => write!(f, "canvas-overflow"),
+            LintCategory::Motion => write!(f, "motion"),
+            LintCategory::MotionCoordinate => write!(f, "motion-coordinate"),
         }
     }
 }
@@ -186,6 +211,7 @@ pub fn check(
     check_crowded_layouts(doc, &mut warnings);
     check_over_constrained(result, doc, &mut warnings);
     check_label_overflow(result, &mut warnings);
+    check_station_spacing(result, doc, &mut warnings);
     check_text_fits_its_box(result, doc, &mut warnings);
     // Without keyframes this is the only pass; with them it runs per frame
     // inside the loop above, where the visible set is known.
@@ -198,6 +224,10 @@ pub fn check(
     check_unknown_colors(doc, &mut warnings);
     check_overridden_constraints(result, &mut warnings);
     check_overridden_captions(doc, &mut warnings);
+    {
+        let idx = crate::motion::expand::ElementIndex::build(doc);
+        warnings.extend(super::canvas::check(result, doc, config, &|id| idx.show(id)));
+    }
     dedup_warnings(&mut warnings);
     warnings
 }
@@ -250,6 +280,180 @@ fn check_collisions(
     check_connections(result, scope, warnings);
     check_label_connection_overlaps(result, scope, warnings);
     check_near_misses(result, scope, warnings);
+    check_routed_line_crossings(result, scope, warnings);
+    check_text_in_view(result, scope, warnings);
+}
+
+/// Neighbouring stations on a `through:` line closer than their names need.
+/// The engine makes room for them when it may move them; one pinned by a
+/// constraint, or packed in a tight row, can still end up crowded.
+fn check_station_spacing(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
+    let owner_of = super::engine::build_element_to_template_map(doc);
+    let flow = super::through::flow_parents(result);
+    for p in super::through::station_pairs(result, &owner_of, &flow, None) {
+        if p.dist < p.need - 1.0 {
+            warnings.push(LintWarning {
+                category: LintCategory::Overlap,
+                message: format!(
+                    "stations {} and {} on {} are {:.0}px apart but their names need {:.0}px; \
+                     give the line room (drop `pack: tight`, or pin them further apart), \
+                     or shorten a name",
+                    p.a, p.b, p.line, p.dist.max(0.0), p.need
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
+        }
+    }
+}
+
+/// Space two texts on one line need to read as two.
+const MIN_TEXT_GAP: f64 = 6.0;
+
+/// Default margin the renderer adds around the layout's bounds.
+const VIEWBOX_PADDING: f64 = 60.0;
+
+/// Text the image cuts off. The viewBox is the layout's bounds plus a margin;
+/// a label placed outside its box, or text on a fixed canvas, can still run
+/// past it, and the reader sees half a word.
+fn check_text_in_view(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
+    fn find_canvas(elems: &[ElementLayout]) -> Option<BoundingBox> {
+        elems.iter().find_map(|e| if is_canvas(e) { Some(e.bounds) } else { find_canvas(&e.children) })
+    }
+    // A canvas is the image: nothing outside it is shown.
+    let view = match find_canvas(&result.root_elements) {
+        Some(c) => c,
+        None => {
+            let b = &result.bounds;
+            let pad = VIEWBOX_PADDING;
+            BoundingBox::new(b.x - pad, b.y - pad, b.width + 2.0 * pad, b.height + 2.0 * pad)
+        }
+    };
+    let mut labels = Vec::new();
+    for elem in &result.root_elements {
+        collect_labels_recursive(elem, scope, &mut labels);
+    }
+    for conn in &result.connections {
+        if scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
+        if let Some(label) = &conn.label {
+            labels.push(LabelInfo {
+                owner: format!("{}→{}", conn.from_id.0, conn.to_id.0),
+                bbox: estimate_label_bbox(label),
+                parent_opacity: None,
+                on_own_fill: false,
+            });
+        }
+    }
+    for l in labels {
+        let over = [
+            view.x - l.bbox.x,
+            l.bbox.right() - view.right(),
+            view.y - l.bbox.y,
+            l.bbox.bottom() - view.bottom(),
+        ]
+        .into_iter()
+        .fold(0.0f64, f64::max);
+        if over > 1.0 {
+            warnings.push(LintWarning {
+                category: LintCategory::CanvasOverflow,
+                message: format!(
+                    "the text of \"{}\" runs {:.0}px past the edge of the image and is cut off; \
+                     wrap it (`max_width:`), shorten it, or move it inward",
+                    l.owner, over
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
+        }
+    }
+}
+
+/// A line routed through stations (`path [through: ...]`) that runs under an
+/// opaque element it does not pass through: the line disappears behind it,
+/// or it covers what is on it. Checked against the line's segments, not its
+/// bounding box (which for a diagonal covers half the slide).
+fn check_routed_line_crossings(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
+    fn visit<'a>(e: &'a ElementLayout, scope: &FrameScope<'_>, out: &mut Vec<&'a ElementLayout>) {
+        if scope.hides_element(e) {
+            return;
+        }
+        out.push(e);
+        for c in &e.children {
+            visit(c, scope, out);
+        }
+    }
+    let mut all = Vec::new();
+    for e in &result.root_elements {
+        visit(e, scope, &mut all);
+    }
+    let seg_hits = |a: Point, b: Point, r: &BoundingBox| -> bool {
+        // Sample the segment; exact enough for boxes, never a false alarm
+        // from a box the line only grazes (1px inset).
+        let r = BoundingBox::new(r.x + 1.0, r.y + 1.0, (r.width - 2.0).max(0.0), (r.height - 2.0).max(0.0));
+        let len = ((b.x - a.x).powi(2) + (b.y - a.y).powi(2)).sqrt();
+        let n = (len / 2.0).ceil().max(1.0) as usize;
+        (0..=n).any(|i| {
+            let t = i as f64 / n as f64;
+            let (x, y) = (a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+            x > r.x && x < r.right() && y > r.y && y < r.bottom()
+        })
+    };
+    let seg_dist = |a: Point, b: Point, p: Point| -> f64 {
+        let (dx, dy) = (b.x - a.x, b.y - a.y);
+        let l2 = dx * dx + dy * dy;
+        let t = if l2 == 0.0 { 0.0 } else { (((p.x - a.x) * dx + (p.y - a.y) * dy) / l2).clamp(0.0, 1.0) };
+        ((a.x + dx * t - p.x).powi(2) + (a.y + dy * t - p.y).powi(2)).sqrt()
+    };
+    for line in all.iter().filter(|e| e.is_through_path()) {
+        let Some(id) = line.id.as_ref().map(|i| i.0.clone()) else { continue };
+        let ElementType::Shape(crate::parser::ast::ShapeType::Path(decl)) = &line.element_type else { continue };
+        let Some(spec) = crate::layout::through::through_spec(&decl.modifiers) else { continue };
+        let Some(pl) = crate::motion::compile::drawable_polyline(result, &id) else { continue };
+        // Stations the line passes through, and everything inside/around them.
+        let on_line = |x: &ElementLayout| {
+            let xid = x.id.as_ref().map(|i| i.0.as_str()).unwrap_or("");
+            spec.names.iter().any(|n| n == xid || n.starts_with(&format!("{}_", xid)) || xid.starts_with(&format!("{}_", n)))
+        };
+        for other in &all {
+            if other.is_through_path() || is_canvas(other) || !other.children.is_empty() {
+                continue;
+            }
+            if !is_visual_shape(other) || !is_opaque(other) || has_see_through_fill(other) || paints_nothing(other) || on_line(other) {
+                continue;
+            }
+            // A node sitting on the line (its centre on it) is a stop drawn
+            // over the line on purpose, not something the line hides behind.
+            let c = other.bounds.center();
+            let on_centre = pl.pts.windows(2).any(|w| seg_dist(w[0], w[1], c) < 2.0);
+            if on_centre {
+                continue;
+            }
+            // A panel the whole line is drawn on is its backdrop.
+            if pl.pts.iter().all(|p| {
+                p.x >= other.bounds.x - 0.5
+                    && p.x <= other.bounds.right() + 0.5
+                    && p.y >= other.bounds.y - 0.5
+                    && p.y <= other.bounds.bottom() + 0.5
+            }) {
+                continue;
+            }
+            let hit = pl.pts.windows(2).any(|w| seg_hits(w[0], w[1], &other.bounds));
+            if hit {
+                warnings.push(LintWarning {
+                    category: LintCategory::Overlap,
+                    message: format!(
+                        "line {} runs under {}, which it does not pass through",
+                        id,
+                        other.id.as_ref().map(|i| i.0.as_str()).unwrap_or("<anon>")
+                    ),
+                    frames: Vec::new(),
+                    pair: None,
+                });
+            }
+        }
+    }
 }
 
 /// Collapse per-frame warnings into one warning per distinct defect.
@@ -348,6 +552,14 @@ fn is_callout(elem: &ElementLayout) -> bool {
 
 fn is_opaque(elem: &ElementLayout) -> bool {
     elem.styles.opacity.is_none() || elem.styles.opacity == Some(1.0)
+}
+
+/// A ring (`fill: none`) or a wash (`fill_opacity` < 1): it does not hide
+/// what is under it.
+fn has_see_through_fill(elem: &ElementLayout) -> bool {
+    elem.styles.fill_pattern.is_none()
+        && (elem.styles.fill.as_deref() == Some("none")
+            || elem.styles.fill_opacity.is_some_and(|o| o < 1.0))
 }
 
 /// Grid cells exist only so `g.cell(r, c)` has something to address; nothing
@@ -558,6 +770,10 @@ pub(crate) struct ContainsRelations {
 
 impl ContainsRelations {
     /// True when one of these two wraps the other.
+    fn is_container(&self, id: &str) -> bool {
+        self.by_container.contains_key(id)
+    }
+
     fn wraps(&self, a: Option<&str>, b: Option<&str>) -> bool {
         let (Some(a), Some(b)) = (a, b) else {
             return false;
@@ -736,6 +952,44 @@ fn reportable_overlap(
         return None;
     }
 
+    // The stage is the backdrop everything sits on, and a line routed
+    // through stations passes over them by construction.
+    if is_canvas(a) || is_canvas(b) || a.is_through_path() || b.is_through_path() {
+        return None;
+    }
+
+    // A backdrop many times the size of what it wholly contains (a stage, a
+    // panel) is not colliding with its content.
+    let area = |x: &ElementLayout| x.bounds.width * x.bounds.height;
+    // Only a plain painted shape is a backdrop: a container that paints is a
+    // zone (something landing on it is worth reporting), a bare one is
+    // handled by the bare-region rules.
+    let backdrop = |big: &ElementLayout, small: &ElementLayout| {
+        big.children.is_empty()
+            && is_visual_shape(big)
+            // A `contains` box is a highlight: its opacity decides (below).
+            && !big.id_str().is_some_and(|id| contains_ids.is_container(id))
+            && big.bounds.contains_bbox(&small.bounds)
+            && area(big) > 4.0 * area(small).max(1.0)
+    };
+    if !is_text_shape(a) && !is_text_shape(b) && (backdrop(a, b) || backdrop(b, a)) {
+        return None;
+    }
+
+    // A ring or a wash drawn around something (a "you are here" ring, a
+    // highlight behind a row) marks it; it does not collide with it.
+    let encloses = |outer: &ElementLayout, inner: &ElementLayout| {
+        outer.children.is_empty()
+            && is_visual_shape(outer)
+            && !is_text_shape(outer)
+            && has_see_through_fill(outer)
+            && outer.label.is_none()
+            && outer.bounds.contains_bbox(&inner.bounds)
+    };
+    if encloses(a, b) || encloses(b, a) {
+        return None;
+    }
+
     // Two transparent zones.
     if !is_opaque(a) && !is_opaque(b) {
         return None;
@@ -772,6 +1026,51 @@ fn reportable_overlap(
         a.bounds.right().min(b.bounds.right()) - a.bounds.x.max(b.bounds.x),
         a.bounds.bottom().min(b.bounds.bottom()) - a.bounds.y.max(b.bounds.y),
     ))
+}
+
+/// Two containers that paint nothing (components in a tight row, two grids
+/// stacked for a swap) collide only where their visible parts do. Returns
+/// true when it handled the pair.
+fn bare_pair_overlap(
+    a: &ElementLayout,
+    b: &ElementLayout,
+    scope: &FrameScope<'_>,
+    contains_ids: &ContainsRelations,
+    warnings: &mut Vec<LintWarning>,
+) -> bool {
+    if !(is_bare_container(a) && is_bare_container(b)) {
+        return false;
+    }
+    fn leaves<'e>(e: &'e ElementLayout, scope: &FrameScope<'_>, out: &mut Vec<&'e ElementLayout>) {
+        if scope.hides_element(e) || e.is_through_path() {
+            return;
+        }
+        if e.children.is_empty() {
+            if !paints_nothing(e) && !is_reference_only(e) {
+                out.push(e);
+            }
+        } else {
+            for c in &e.children {
+                leaves(c, scope, out);
+            }
+        }
+    }
+    let (mut la, mut lb) = (Vec::new(), Vec::new());
+    leaves(a, scope, &mut la);
+    leaves(b, scope, &mut lb);
+    for x in &la {
+        for y in &lb {
+            if let Some((w, h)) = reportable_overlap(x, y, contains_ids) {
+                warnings.push(overlap_warning(x.id_str().unwrap_or("?"), y.id_str().unwrap_or("?"), w, h));
+                return true;
+            }
+        }
+    }
+    true
+}
+
+fn is_canvas(e: &ElementLayout) -> bool {
+    e.styles.css_classes.iter().any(|c| c == "ai-canvas")
 }
 
 fn overlap_warning(name_a: &str, name_b: &str, w: f64, h: f64) -> LintWarning {
@@ -873,6 +1172,10 @@ fn check_overlap_siblings(
 
             // A rule crossing what it rules over is the picture working.
             if is_structural_crossing(a, b) {
+                continue;
+            }
+
+            if bare_pair_overlap(a, b, scope, contains_ids, warnings) {
                 continue;
             }
 
@@ -1008,6 +1311,10 @@ fn check_overlaps_recursive(
 
                 // A rule crossing what it rules over is the picture working.
                 if is_structural_crossing(a, b) {
+                    continue;
+                }
+
+                if bare_pair_overlap(a, b, scope, contains_ids, warnings) {
                     continue;
                 }
 
@@ -1247,6 +1554,39 @@ struct LabelInfo {
     owner: String,
     bbox: BoundingBox,
     parent_opacity: Option<f64>,
+    /// Drawn on its own opaque, filled shape (a badge): whatever edge lies
+    /// under that shape is hidden, so the label cannot straddle it.
+    on_own_fill: bool,
+}
+
+/// Like `estimate_label_bbox`, measured in the owner's face and weight the
+/// way layout measured it (a monospace label is characters x 0.6em).
+fn estimate_label_bbox_styled(label: &LabelLayout, styles: &crate::layout::types::ResolvedStyles) -> BoundingBox {
+    let base = estimate_label_bbox(label);
+    let mono = styles.font_family.as_deref().is_some_and(|f| f.to_lowercase().contains("mono"));
+    let bold = styles
+        .font_weight
+        .as_deref()
+        .is_some_and(|w| w == "bold" || w.parse::<f64>().is_ok_and(|n| n >= 600.0));
+    let font_size = label.styles.as_ref().and_then(|s| s.font_size).unwrap_or(label.font_size);
+    let width = if mono {
+        label
+            .rich
+            .lines
+            .iter()
+            .map(|l| l.iter().map(|r| r.text.chars().count() as f64 * 0.6 * font_size * r.scale).sum::<f64>())
+            .fold(0.0, f64::max)
+    } else if bold {
+        base.width * crate::layout::text::BOLD_FACTOR
+    } else {
+        return base;
+    };
+    let x = match label.anchor {
+        TextAnchor::Start => label.position.x,
+        TextAnchor::Middle => label.position.x - width / 2.0,
+        TextAnchor::End => label.position.x - width,
+    };
+    BoundingBox::new(x, base.y, width, base.height)
 }
 
 fn estimate_label_bbox(label: &LabelLayout) -> BoundingBox {
@@ -1299,9 +1639,16 @@ fn collect_labels_in(
             .unwrap_or_else(|| "<anon>".to_string())
     };
     if let Some(label) = &elem.label {
+        let bbox = estimate_label_bbox_styled(label, &elem.styles);
+        let on_own_fill = is_visual_shape(elem)
+            && is_opaque(elem)
+            && !has_see_through_fill(elem)
+            && elem.styles.fill.as_deref().is_some_and(|f| f != "none")
+            && elem.bounds.contains_bbox(&bbox);
         labels.push(LabelInfo {
+            on_own_fill,
             owner: owner(),
-            bbox: estimate_label_bbox(label),
+            bbox,
             parent_opacity: elem.styles.opacity,
         });
     }
@@ -1311,6 +1658,7 @@ fn collect_labels_in(
             owner: owner(),
             bbox: elem.bounds,
             parent_opacity: elem.styles.opacity,
+            on_own_fill: false,
         });
     }
     let children: Vec<&ElementLayout> = elem.children.iter().collect();
@@ -1338,6 +1686,7 @@ fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Ve
                 owner,
                 bbox: estimate_label_bbox(label),
                 parent_opacity: None, // connections don't have opacity
+                on_own_fill: false,
             });
         }
     }
@@ -1372,6 +1721,23 @@ fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Ve
                     frames: Vec::new(),
                     pair: None,
                 });
+            } else {
+                // Two texts on one line with no space between them read as
+                // one run ("style.css246 lines"): touching is colliding.
+                let v_overlap = a.bbox.bottom().min(b.bbox.bottom()) - a.bbox.y.max(b.bbox.y);
+                let h_gap = (b.bbox.x - a.bbox.right()).max(a.bbox.x - b.bbox.right());
+                if v_overlap > 0.5 * a.bbox.height.min(b.bbox.height) && h_gap < MIN_TEXT_GAP {
+                    warnings.push(LintWarning {
+                        category: LintCategory::Label,
+                        message: format!(
+                            "labels on \"{}\" and \"{}\" touch ({:.0}px apart on one line); \
+                             leave at least {:.0}px, or wrap one (`max_width:`)",
+                            a.owner, b.owner, h_gap.max(0.0), MIN_TEXT_GAP
+                        ),
+                        frames: Vec::new(),
+                        pair: None,
+                    });
+                }
             }
         }
     }
@@ -1403,6 +1769,7 @@ fn check_label_element_overlaps(
                 owner,
                 bbox: estimate_label_bbox(label),
                 parent_opacity: None,
+                on_own_fill: false,
             });
         }
     }
@@ -1413,7 +1780,7 @@ fn check_label_element_overlaps(
         collect_opaque_elements(elem, None, i, scope, &mut shapes);
     }
 
-    for label in &labels {
+    for label in labels.iter().filter(|l| !l.on_own_fill) {
         for shape in &shapes {
             // Skip if label belongs to this element (own label inside own box)
             if label.owner == shape.id {
@@ -1567,6 +1934,12 @@ fn collect_opaque_elements_in(
     elements: &mut Vec<OpaqueElement>,
 ) {
     if scope.hides_element(elem) {
+        return;
+    }
+    // A line routed through stations is a stroke, not a box: its bounding
+    // box (a whole diagonal's) says nothing about what it covers. The stage
+    // is the backdrop, not an obstacle.
+    if elem.is_through_path() || is_canvas(elem) {
         return;
     }
     // Only collect visual shapes (not groups/layouts) that are opaque and
@@ -1828,6 +2201,7 @@ fn check_label_connection_overlaps(
                 owner,
                 bbox: estimate_label_bbox(label),
                 parent_opacity: None,
+                on_own_fill: false,
             });
         }
     }
@@ -2307,6 +2681,37 @@ fn check_missing_anchors_in_stmts(
                         // when the path has bends (3+ points) that might be avoidable.
                         if solved.path.len() <= 2 {
                             continue;
+                        }
+                        // Unanchored orthogonal routing picks an edge pair and
+                        // draws at most one jog between them (down, across,
+                        // down). When the two boxes overlap across the flow
+                        // no L-route exists, so that jog is already the
+                        // clean route; a diagonal pair could use an L.
+                        let (fb, tb) = (
+                            result.get_element_by_name(from_name).map(|e| e.bounds),
+                            result.get_element_by_name(to_name).map(|e| e.bounds),
+                        );
+                        if solved.routing_mode == RoutingMode::Orthogonal
+                            && conn.from.anchor.is_none()
+                            && conn.to.anchor.is_none()
+                            && solved.path.len() <= 4
+                        {
+                            if let (Some(fb), Some(tb), [p0, p1, ..]) = (fb, tb, solved.path.as_slice()) {
+                                let vertical_flow = (p0.x - p1.x).abs() < 0.5;
+                                let across_overlap = if vertical_flow {
+                                    fb.x < tb.right() && tb.x < fb.right()
+                                } else {
+                                    fb.y < tb.bottom() && tb.y < fb.bottom()
+                                };
+                                // A hub fanning out to a row (or a row
+                                // fanning in) is drawn as a tree of such
+                                // jogs on purpose.
+                                let fan = result.connections.iter().filter(|c| c.from_id.0 == *from_name).count() > 1
+                                    || result.connections.iter().filter(|c| c.to_id.0 == *to_name).count() > 1;
+                                if across_overlap || fan {
+                                    continue;
+                                }
+                            }
                         }
                     }
 
@@ -2949,6 +3354,19 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "trim",         // svg templates
     "via",          // connection routing
     "padding",      // contains
+    "corner_radius", // rect rx
+    "font_weight",  // label/text weight
+    "font_family",  // label/text family
+    "through",      // path routed through elements
+    "extend",       // through-path overshoot
+    "extend_start", // through-path overshoot
+    "extend_end",   // through-path overshoot
+    "canvas",       // the stage: viewBox and overflow bounds
+    "max_width",    // labels wrap past this width
+    "spread",       // `spread: even` on a through-line
+    "drawn",        // how far a line starts drawn
+    "appears",      // keyframe an element enters in
+    "pack",         // row/col: pack members by their parts
 ];
 
 /// Report `transform` keys that are recognised but cannot be animated.
@@ -3154,10 +3572,27 @@ fn check_text_fits_its_box(
                 for (text, frame) in wordings.get(&id.0).cloned().unwrap_or_default() {
                     let rich = crate::layout::text::parse_markup(&text)
                         .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&text));
+                    // Wrapped the way the renderer wraps it (`max_width:`).
+                    let rich = label.wrap.apply(&rich, label.font_size);
                     let metrics =
                         crate::layout::text::measure_runs(&rich.lines, label.font_size);
                     let needed = metrics.width + 2.0 * 8.0;
+                    let needed_h = metrics.height + 2.0 * 4.0;
                     if needed <= elem.bounds.width + 2.0 {
+                        // Wrapped to fit the width; it may still be too tall.
+                        if needed_h > elem.bounds.height + 2.0 && elem.bounds.height > 0.0 {
+                            warnings.push(LintWarning {
+                                category: LintCategory::LabelOverflow,
+                                message: format!(
+                                    "label \"{}\" on \"{}\" wraps to {} lines and needs about {:.0}px of \
+                                     height but its box is {:.0}px; shorten the wording, or drop the \
+                                     explicit height and let the box fit itself",
+                                    text, id.0, rich.lines.len(), needed_h, elem.bounds.height
+                                ),
+                                frames: frame.into_iter().collect(),
+                                pair: None,
+                            });
+                        }
                         continue;
                     }
                     warnings.push(LintWarning {
@@ -3840,6 +4275,8 @@ fn check_hand_placed_labels(
             // an invisible sizing rect. Both exemptions are wanted.
             let labellable = is_visual_shape(elem)
                 && !is_callout(elem)
+                && !is_canvas(elem)
+                && !elem.is_through_path()
                 && is_opaque(elem)
                 && !paints_nothing(elem);
             if is_text_shape(elem) || labellable {

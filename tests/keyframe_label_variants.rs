@@ -94,9 +94,11 @@ fn a_static_frame_and_the_animated_variant_agree() {
 
 #[test]
 fn a_variant_that_overflows_its_box_is_reported() {
+    // The variant wraps to the box's width like the declared label does, so
+    // it is the box's height (one line) that it cannot fit.
     let msgs = warnings(
         r#"
-rect card [width: 200, height: 60, fill: accent-light, stroke: accent-dark, label: "short"]
+rect card [width: 200, height: 30, fill: accent-light, stroke: accent-dark, label: "short"]
 constrain card.center_x = 150
 constrain card.center_y = 60
 keyframe "a" { }
@@ -130,7 +132,7 @@ keyframe "b" { transform card [label: "also short"] }
 fn the_warning_names_the_frame_and_the_wording() {
     let msgs = warnings(
         r#"
-rect card [width: 200, height: 60, fill: accent-light, stroke: accent-dark, label: "short"]
+rect card [width: 200, height: 30, fill: accent-light, stroke: accent-dark, label: "short"]
 constrain card.center_x = 150
 constrain card.center_y = 60
 keyframe "a" { }

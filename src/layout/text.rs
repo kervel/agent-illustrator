@@ -14,7 +14,7 @@
 pub const LINE_HEIGHT_FACTOR: f64 = 1.25;
 
 /// Widening factor applied to bold runs, in place of a second advance table.
-const BOLD_FACTOR: f64 = 1.05;
+pub const BOLD_FACTOR: f64 = 1.05;
 
 /// Advance for a character with no table entry, in em.
 const FALLBACK_ADVANCE: f64 = 0.55;

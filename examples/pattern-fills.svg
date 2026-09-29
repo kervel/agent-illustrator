@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 493 357">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 493 357" font-size="14">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -112,7 +114,7 @@
   fill: var(--text-light);
 }
 
-  </style>
+  ]]></style>
   <defs>
     <pattern id="ai-pat-hatch-accent-1-transparent" patternUnits="userSpaceOnUse" width="8" height="8"><path d="M0,8 L8,0 M-1,1 L1,-1 M7,9 L9,7" stroke="var(--accent-1)" stroke-width="1" fill="none"/></pattern>
     <pattern id="ai-pat-crosshatch-accent-1-transparent" patternUnits="userSpaceOnUse" width="8" height="8"><path d="M0,8 L8,0 M-1,1 L1,-1 M7,9 L9,7 M0,0 L8,8 M-1,7 L1,9 M7,-1 L9,1" stroke="var(--accent-1)" stroke-width="1" fill="none"/></pattern>

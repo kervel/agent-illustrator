@@ -151,6 +151,11 @@ pub struct TemplateRegistry {
     base_path: Option<PathBuf>,
     /// How image href paths are emitted in SVG output
     image_href_mode: ImageHrefMode,
+    /// Parts folded into their instance (a one-shape template is drawn as
+    /// the instance itself): (the part's flattened name, the instance).
+    /// The dotted path still names them, so they take part in the
+    /// name-uniqueness check.
+    pub collapsed_parts: Vec<(String, String)>,
 }
 
 impl TemplateRegistry {
@@ -165,6 +170,7 @@ impl TemplateRegistry {
             templates: HashMap::new(),
             base_path: Some(base_path),
             image_href_mode: ImageHrefMode::default(),
+            collapsed_parts: Vec::new(),
         }
     }
 

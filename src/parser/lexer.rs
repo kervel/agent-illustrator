@@ -182,6 +182,15 @@ pub enum Token {
     ParenClose,
     #[token(",")]
     Comma,
+    /// `60%` in motion statements (`draw line [to: 60%]`).
+    #[token("%")]
+    Percent,
+    /// `docs.*` selector in motion statements.
+    #[token("*")]
+    Star,
+    /// `;` separates statements on one line inside a keyframe.
+    #[token(";")]
+    Semicolon,
     #[token(":")]
     Colon,
     #[token(".")]

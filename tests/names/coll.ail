@@ -1,0 +1,8 @@
+template "t" () {
+  rect b [width: 40, height: 20, fill: red]
+}
+t a
+rect a_b [width: 80, height: 20, fill: blue]
+constrain a_b.left = a.right + 20
+keyframe "k1" { }
+keyframe "k2" { hide a.b }

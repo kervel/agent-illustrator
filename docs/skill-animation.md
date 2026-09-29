@@ -81,6 +81,10 @@ agent-illustrator --lint --lint-exclude redundant-constant file.ail   # narrow i
 A warning tagged `[frame: x]` occurs only in that frame — render it and look.
 An untagged one is present in every frame.
 
+Then read `--timeline`: every statement, when it starts, how long, and what it
+moves from where to where. It is the cheapest way to catch a beat in the wrong
+place, before any image exists.
+
 ### Phase 5: Frame-by-Frame Verification (MANDATORY)
 
 After writing all keyframes, render EVERY frame as a static image and check each one.
@@ -98,6 +102,10 @@ done
 
 IMPORTANT: Use headless Chrome, NOT rsvg-convert. rsvg-convert does not support
 CSS custom properties (var(--color)), so all themed colors render as black.
+
+For the motion *between* frames, render contact sheets
+(`--frames-strip <frame>`: 0/25/50/75/100% in one SVG) or single stills
+(`--frame N --at 50%`).
 
 The subagent should check each frame PNG for:
 - Correct elements visible (not too many, not too few)
@@ -211,30 +219,10 @@ bring the animation to life.
 
 ### `--animate` vs `--animate-css`
 
-`--animate` embeds JS that flips a `frame-<name>` class — full motion, but only when the
-SVG is opened directly. JS does **not** run when an SVG is embedded as an `<img>` (e.g. a
-GitHub README), so use `--animate-css` there: it is a self-cycling, pure-CSS animation
-that runs in an `<img>`. It animates visibility (stepped) **and** geometry — element
-position/size and connection paths (smoothly; reshaping connectors cross-fade). Use
-`--animate-css` for SVGs you embed as images; `--animate` for standalone interactive
-viewing.
-
-### CSS Transitions
-
-Transitions are emitted by default for animated output (`0.5s ease`):
-`.kf-anim` covers transform (position/rotation) + opacity on each element's wrapper
-group; `.ai-shape` covers width/height/fill/stroke on shapes. Frames tween
-automatically — no extra CSS required.
-
-To change duration/easing, override the rules via `--stylesheet-css` (it layers on
-top of the defaults):
-
-```css
-.kf-anim  { transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out; }
-.ai-shape { transition: width 0.8s ease-in-out, height 0.8s ease-in-out; }
-```
-
-Apply with: `agent-illustrator file.ail --animate --stylesheet-css transitions.css`
+`--animate` embeds the motion player: full choreography, autoplaying, click or
+arrow keys to step, only when the SVG is opened directly (JS does not run in an
+`<img>`). For a GitHub README use `--animate-css`: a self-cycling pure-CSS
+animation of the settled frames (visibility and geometry, not the timed motion).
 
 ### Geometry Animation (Position & Size)
 
@@ -289,10 +277,241 @@ connector at its start route; reshaped/crossfaded ones animate everywhere.)
 
 ---
 
+## Part 2b: Motion (timing, choreography, verbs)
+
+Keyframes say *what* each frame looks like; motion statements say *how the
+picture gets there*. Everything below compiles to explicit tracks after layout:
+the browser player and the native renderer play the same tracks, so a frame
+reached by jumping looks exactly like the same frame reached by playing.
+**Motion statements never contain coordinates** — they name elements, anchors,
+percentages and vertices, and survive relabelling and relayout.
+
+### Motion principles
+
+1. **One focal movement per beat**, with at most one supporting movement.
+   (`--lint` reports a *busy beat*: more than 2 flights/moves/draws/swaps at once.)
+2. **Appear with a little overshoot, move with in-out, leave faster than you
+   arrive.** The defaults do this: `show` rises in (`settle`), `pop` overshoots,
+   `move`/`fly`/`draw` glide, `hide` fades in `fast`.
+3. **Backward is instant.** Stepping back or jumping lands on the exact state;
+   only forward plays.
+4. **Build the story from simple states**; a line that grows (`draw`) is the main
+   device for "this happened next".
+5. **Keep a beat under 2.5s** (`--lint` reports a *slow beat*). Split long beats,
+   and let a follow-on keyframe play on its own with `[auto]`.
+
+### Timing: every statement takes `[delay, duration, ease, stagger, order]`
+
+```
+show title [enter: rise, duration: slow, ease: settle, delay: 0.1]
+show docs.* [enter: pop, stagger: 0.08, order: random]   // start|end|center|random (seeded)
+```
+Durations: seconds or `fast | normal | slow`. Eases: `pop` (overshoot), `settle`
+(power3-out), `glide` (in-out), `snap`, `in`, `linear`. Both are **theme tokens**:
+retime a whole deck in its stylesheet CSS —
+`:root { --ail-motion-normal: .4s; --ail-ease-pop: cubic-bezier(.3,1.8,.6,1); }`.
+
+### Beats
+
+Statements in a block start together. Beats sequence them:
+```
+keyframe "commit" {
+    flash folder                                  // starts at 0
+    then { fly ghost(folder) to st1.dot }         // when everything before it has ended
+    after 0.15 { show st1.nm [enter: rise] }      // 0.15s after the previous beat STARTED
+    at 1.2 { pulse st1.dot }                      // 1.2s after the keyframe started
+}
+keyframe "next_step" [auto, after: 0.3] { ... }   // plays by itself 0.3s after the previous one
+```
+`after` chains off the previous beat's *start* (that is how beats overlap);
+`then` waits for everything before it; `at` is absolute. A keyframe's length is
+derived, never declared.
+
+### Entrances and exits
+
+```
+show x [enter: fade | pop | rise | drop | grow | wipe(left|right|up|down) | draw]
+show copy [from: original]        // appears at original's place and size, travels home
+hide x [exit: fade | shrink | fall | lift | wipe(...)]
+motion [enter: pop, exit: fade]   // diagram-wide defaults (default: rise / fade)
+```
+Declare where an element enters instead of hiding it in the first frame:
+`rect ring [..., appears: go_back]` (hidden until keyframe `go_back`, where it
+enters with the default preset unless that keyframe says `show ring [...]`), or
+`appears: later` (hidden until some statement — a `swap`, a macro — shows it).
+Frame 0's own `hide`s apply before it plays; its `show`s are entrances.
+
+### Lines that grow
+
+```
+path track [through: [st1.dot, st2.dot, st3.dot], drawn: 0, stroke: accent-1, stroke_width: 14, fill: none]
+path branch [through: [c.dot, l1.dot, l2.dot, m.dot], routing: metro, ...]   // 45-degree runs
+draw track [to: st2.dot]      // or [to: 60%], [to: vertex 2]; `draw track` = all the way
+undraw track [to: st1.dot]
+a -> b as feed
+show feed [enter: draw]       // a connection that draws itself in
+```
+A line is drawn as declared (`drawn: 0 | 60% | <element on it>`, default fully),
+and a later `draw` never changes how it starts. Drawing is cumulative across
+frames. Dashes survive (a mask does the drawing), an arrowhead appears as the tip
+arrives. Drawing to something that is not on the line is a compile error.
+`path … [through: […]]` is routed after layout through the centres it names, so
+stations stay on the line whatever moves; `extend`, `extend_start`, `extend_end`
+run it past its ends.
+
+List every station in `through:`, not just the ends. Neighbouring stations
+that sit side by side are then kept far enough apart for their names (the
+engine pushes the later one along and whatever is placed off it follows), and
+`spread: even` puts the stations of a flat run at equal steps. Pin the first
+station and the height of a run; leave the rest free. A station pinned too close,
+or packed in a `pack: tight` row, is reported by lint rather than moved.
+
+### Travel
+
+```
+fly ghost(folder) to st1.dot [scale: 0.25, arc: 0.15]   // a copy flies and vanishes; default scale fits the target
+fly ghost(hub.d4) to anna.d4, chris.d4 [stagger: 0.1]   // one copy per destination
+fly token from a to b                                    // a real (hidden) element as the traveller
+move ring to st2.dot            // persistent: dependents re-solve around it
+move d0 home                    // release a `move`
+move train along track [to: st3.dot]
+```
+
+### One-shot effects (leave nothing behind)
+
+`pulse x [scale: 1.3]`, `shake x`, `nudge x [direction: up]`, `flash x`,
+`ping x`, `highlight x [color: accent-1]`; ambient: `loop x [pulse, period: 1.2]`
+(runs while the frame is on screen). `jitter: 4` on a `show` gives each target a
+small seeded tilt (`jitter: move(6)` shifts instead) — a pile, not a table.
+
+### Text and numbers
+
+```
+transform cap [label: "Approved by Ben", swap: roll | fade | cut]
+count total [to: 14900, format: "€ {:,}"]     // {} {:,} {:.1} {:,.2}
+swap docs.* -> codes.* [via: flip, flip: pg, stagger: 0.07]   // flip only member `pg`, crossfade the rest
+swap ok -> bad [via: fade | flip | morph]
+```
+
+### Selecting many things
+
+`group.*` (its named children, in order), `.class`, `a.b.c` (a part of a nested
+component), `all except title, stage`. Paired selectors pair by index
+(`swap docs.* -> codes.*`).
+
+### Camera
+
+`camera focus card [zoom: 1.4]` / `camera reset` (persistent, animated).
+
+### Reuse: motion macros
+
+```
+import "ail:motion/git"            // built-in library; or import "deck.ail" (templates + macros)
+motion commit(src: element, station: element, track: path) {
+    snapshot(src, station)
+    after 0.6 { draw track [to: station.dot, duration: fast] }
+}
+keyframe "second" { commit(folder, st2, track) }
+```
+Parameters are typed (`element | group | path | anchor | number | text`) and
+checked; macros expand before compilation, so they seek, lint and render like
+anything else. There is no raw-SVG/JS escape hatch: extend through macros, or ask
+for a core primitive.
+
+### Tooling
+
+```bash
+agent-illustrator f.ail --timeline              # the choreography as a table: when, what, from -> to
+agent-illustrator f.ail --frame 2 --at 50%      # a still mid-motion (also 0.35s, 350ms)
+agent-illustrator f.ail --frames-strip 2 > s.svg  # contact sheet: 0/25/50/75/100%
+agent-illustrator f.ail --lint                  # includes motion lints; exits 1 on errors only
+agent-illustrator f.ail --lint-strict           # also exits 1 on warnings
+agent-illustrator f.ail --timeline-json         # the manifest (tracks) a host can inspect
+agent-illustrator --player-js > player.js       # the player, for hosts inlining the SVG
+```
+Review `--timeline` before rendering anything: it answers "does this land in
+the right beat" without images. Motion lints: motion on something hidden the whole
+frame, a flight to a hidden target, a connection whose end is hidden, slow beat,
+busy beat, and numeric coordinates in keyframes (`motion-coordinate`, an error).
+
+### The player (hosts)
+
+Every animated SVG embeds its manifest; `--animate` also embeds the player and
+autoplays. To drive it yourself:
+```js
+const p = ail.player(svgElement);   // goTo(i|name) instant; next() plays; prev() instant
+p.on('frame', (i, name) => ...);    p.frames; p.frame; p.at(i, seconds)
+```
+Hosts drive the player; they never mutate the SVG. Printing shows the last frame;
+`prefers-reduced-motion` jumps instead of playing. Hosts that flip a
+`frame-<name>` class on the SVG root still get every frame's settled state.
+
+### The stage
+
+`rect stage [width: 1600, height: 900, canvas: true]` makes the stage the
+picture's exact bounds. Anything leaving it in any frame is reported
+(`canvas-overflow`, a lint error, and a warning on every render). Let labels wrap
+instead of growing: `max_width: 240`. A row of components can pack by their
+parts (`row r [gap: 40, align: dot, pack: tight]`) so labels alternating above
+and below interleave.
+
+### Cookbook
+
+**Snapshot to a timeline** (git commit):
+```
+flash folder
+then { fly ghost(folder) to st1.dot [arc: 0.12] }
+then { show st1.dot [enter: pop]; after 0.15 { show st1.nm [enter: rise] } }
+```
+(= `snapshot(folder, st1)` from `ail:motion/git`; `commit(folder, st1, track)`
+also grows the line.)
+
+**Clone to N machines**: `show anna.hist, ben.hist, chris.hist [from: hub.hist, stagger: 0.14]`
+plus `show l_anna, l_ben, l_chris [enter: draw, stagger: 0.1]` for the links.
+
+**Push / pull**:
+```
+show ben.hist.d4 [enter: pop]; draw ben.hist.track [to: ben.hist.d4]
+then { fly ghost(ben.hist.d4) to hub.hist.d4 }
+then { show hub.hist.d4 [enter: pop] }
+then { fly ghost(hub.hist.d4) to anna.hist.d4, chris.hist.d4 }
+then { show anna.hist.d4, chris.hist.d4 [enter: pop] }
+```
+
+**Branch and merge**: a metro path through the branch stations, `drawn: 0`,
+`spread: even`; pin the first branch station (45 degrees off main) and give the
+others only its height;
+per step `draw branch [to: l1.dot]` then the station pops; to merge,
+`show gate [enter: draw]`, `draw branch`, `draw main_line`, then pop and
+`pulse` the interchange.
+
+**Merge request checklist**: rows with a hidden tick
+(`appears: later`); `transform tests [opacity: 1]` + `show tests.tick [enter: pop]`
+per check; a pending review is a highlight wash
+(`transform review.bg [opacity: 1]`), approval is
+`transform review.txt [label: "Approved by Ben", swap: fade]` + its tick.
+
+**Conflict chooser**: both versions side by side, the chosen one
+`highlight`ed then `move`d into place, the other `hide [exit: shrink]`:
+```
+highlight theirs [color: status-warning]
+then { move ours to merged_slot; hide theirs [exit: shrink] }
+```
+
+**Go back** (undo to an earlier state): `move ring to st2.dot`,
+`transform st3 [opacity: 0.28]`, `flash folder`, and roll the values back with
+`transform file.val [label: "57 lines", swap: roll]`.
+
+The full acceptance scenes are in `examples/motion/` (git-copies, git-snapshots,
+git-branches, sharing `git-deck.ail`).
+
+---
+
 ## Part 3: Gotchas
 
 1. **Orphaned connections** — If you hide element A but keep `A -> B` visible,
-   the arrow renders to nowhere. Always hide connections when hiding their endpoints.
+   the arrow renders to nowhere. Always hide connections when hiding their endpoints
+   (`--lint` reports it).
 2. **Cumulative keyframes** — Each frame builds on the previous. If you `hide X` in
    frame 2, X stays hidden in frames 3+ unless you `show X` again.
 3. **Transform persistence** — Transforms in frame N carry forward (visual AND
@@ -307,18 +526,11 @@ connector at its start route; reshaped/crossfaded ones animate everywhere.)
 5. **Element count** — Animations tend to need many elements (persistent + transient
    for each frame). Use constraint-based layout, not row/col.
 6. **Frame indexing** — `--frame N` is 0-indexed. Frame 0 is the first keyframe,
-   frame 1 is the second, etc. There is no implicit "base" frame before keyframe 0.
-7. **ViewBox consistency** — Hidden elements are omitted from the SVG (not just
-   invisible), so frames with fewer visible elements can produce a smaller viewBox,
-   causing the diagram to "jump" between frames. Fix: add an invisible canvas rect
-   that spans the full desired area and is NEVER hidden:
-   ```
-   rect canvas [width: 740, height: 420, fill: white, stroke: none, opacity: 0.01]
-   constrain canvas.center_x = 370
-   constrain canvas.center_y = 210
-   ```
-   Use `opacity: 0.01` (not 0) — zero-opacity elements may be optimized away.
-   Keep the canvas outside all keyframe `hide` directives.
+   frame 1 is the second, etc. When frame 0 plays, its `hide`s are already applied
+   and its `show`s enter.
+7. **ViewBox consistency** — Declare the stage: `rect stage [width: 1600, height: 900, canvas: true]`.
+   The viewBox is then exactly the stage in every frame, and anything that leaves it
+   is reported.
 8. **Delegate image verification to subagents** — Viewing rendered PNGs in the main
    conversation bloats context rapidly. Spawn a subagent to render frames, inspect
    the images, and return a text-only PASS/FAIL report.

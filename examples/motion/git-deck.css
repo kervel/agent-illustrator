@@ -1,0 +1,29 @@
+/* Palette and type for the "git for non-git people" deck. */
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }

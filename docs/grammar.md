@@ -124,6 +124,11 @@ Common modifiers:
                             without also changing the box. A `constrain` on a
                             captioned element is overridden — --lint says so.
     label_fill: <color>     Colour of the label text (fill colours the shape)
+    font_weight: <n|bold>   Weight of the label / text (layout measures it)
+    font_family: mono|sans|serif|"Name"   Face of the label / text
+    max_width: <number>     Label keeps its natural width up to this, then wraps
+    corner_radius: <number> Rounded corners (rect)
+    text "{param}" name     In a template: the text says a parameter's value
     rotation: <degrees>     Rotate element (clockwise)
     class: <name>           Custom CSS class (for external styling)
     z_order: <number>       Render order for groups (higher = on top)
@@ -260,6 +265,40 @@ label rides along); size animates via the shape's width/height.
     is written as a zero-length pattern ("0,0"), not `none`, if a smooth
     transition is wanted.
 
+Motion statements (full guide: --skill-animation):
+    show a, b [enter: pop|rise|drop|fade|grow|wipe(dir)|draw, from: other,
+               delay, duration, ease, stagger, order: start|end|center|random, jitter: 4]
+    hide a [exit: fade|shrink|fall|lift|wipe(dir)]
+    then { ... }        next beat: when everything before it has ended
+    after 0.2 { ... }   0.2s after the previous beat started
+    at 1.0 { ... }      1.0s after the keyframe started
+    keyframe "k" [auto, after: 0.3] { ... }   plays by itself after the previous one
+    draw line [to: elem | 60% | vertex 2]   undraw line [to: ...]
+    fly ghost(a) to b, c [scale, arc]   fly proxy from a to b
+    move a to b   move a home   move a along path [to: b]
+    pulse | shake | nudge | flash | ping | highlight  a [...]   loop a [pulse]
+    count total [to: 14900, format: "€ {:,}"]
+    transform cap [label: "...", swap: roll|fade|cut]
+    swap a -> b [via: flip|fade|morph, flip: member]
+    camera focus a [zoom: 1.4]   camera reset
+    motion name(p: element|group|path|anchor|number|text) { ... }   name(args)
+    motion [enter: pop, exit: fade]     diagram-wide defaults
+    import "file.ail" | "ail:motion/git"   templates + motion macros
+Selectors: a, a.b.c (nested parts), group.*, .class, all except a, b
+
+Declarations that serve motion:
+    [appears: keyframe | later]   hidden until then; enters there
+    path p [through: [a.dot, b.dot], routing: metro, drawn: 0|60%|elem, extend: 40]
+        stations side by side on the line get room for their names (the line
+        stretches); list every station. spread: even  -> equal steps on a flat run
+    rect stage [..., canvas: true]   the picture's bounds; leaving it is reported
+    label wrapping: max_width: 240    rows of components: [align: member, pack: tight]
+    many at once: doc d* [fname: ["a", "b", "c"]]  ->  d0, d1, d2
+
+Names: every element, named connection and keyframe name must be unique. Part b
+of instance a is `a.b` in source and `a_b` internally, so naming something a_b
+yourself clashes with it; any clash is an error that locates both declarations.
+
 Named constraints & per-keyframe control:
     constrain a.center_x = 50 as a_home   Name a constraint (handle for disable/enable)
     Inside a keyframe: constrain <expr> (adds; overrides any earlier constraint on the
@@ -273,7 +312,12 @@ CLI flags:
                        modifier seems to do nothing: one newer than the binary
                        reads as unknown and is silently dropped.
     --frame N          Render single frame as static SVG (by index or name)
-    --animate          Embed minimal JS for self-contained animated playback
+    --frame N --at T   A still T into frame N (0.35s, 350ms, 50%)
+    --frames-strip N   Contact sheet of frame N at 0/25/50/75/100%
+    --timeline         The compiled choreography as a table (--timeline-json: tracks)
+    --animate          Embed the motion player (autoplay; click/arrows step)
+    --player-js        Print the player for hosts that inline the SVG
+    --lint-strict      Like --lint, but warnings fail too (errors always do)
 
 SVG output:
     data-frames="frame1,frame2,..."    Frame names on SVG root

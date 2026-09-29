@@ -28,9 +28,7 @@ b.bottom -> c.top
 
 // Define a server template with named connection points
 template "server" {
-    rect body [width: 100, height: 60, fill: background-2]
-    text "SRV" txt [font_size: 12]
-    constrain txt.center = body.center
+    rect body [width: 100, height: 60, fill: background-2, label: "SRV", font_size: 12]
 
     // Custom anchors for network connections
     anchor input [position: body.left, direction: left]

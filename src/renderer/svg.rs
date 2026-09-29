@@ -65,6 +65,11 @@ pub struct SvgBuilder {
     /// element's words: element id -> [(frame name, text)].  CSS cannot swap
     /// text, so each variant is rendered as its own hidden `<text>` node.
     text_variants: std::collections::HashMap<String, Vec<String>>,
+    /// Motion hooks (wrappers, masks, heads, camera) when the document has
+    /// compiled motion; None renders exactly as before.
+    pub motion: Option<crate::motion::render::MotionHooks>,
+    /// Opacity to put on the next wrapper group (moved off its element).
+    pending_opacity: Option<f64>,
 }
 
 impl SvgBuilder {
@@ -85,7 +90,32 @@ impl SvgBuilder {
             palette_tokens: Stylesheet::default().colors.keys().cloned().collect(),
             data_frames: None,
             text_variants: std::collections::HashMap::new(),
+            motion: None,
+            pending_opacity: None,
         }
+    }
+
+    /// ` style="transform-origin:..."` for an element's wrapper hook, so
+    /// scale and rotate act about the element's own centre.
+    fn origin_style(&mut self, element_id: &str) -> String {
+        let origin = match self.motion.as_ref().and_then(|m| m.origins.get(element_id)) {
+            Some((x, y)) => format!(r#" style="transform-origin:{}px {}px""#, r2(*x), r2(*y)),
+            None => String::new(),
+        };
+        match self.pending_opacity.take() {
+            Some(o) => format!(r#" opacity="{}"{}"#, o, origin),
+            None => origin,
+        }
+    }
+
+    /// Add a `<mask>` that reveals a drawable up to its drawn fraction.
+    pub fn add_draw_mask(&mut self, id: &str, d: &str, stroke_width: f64, offset: f64) {
+        let s = self.scope.clone();
+        self.defs.push(format!(
+            r##"<mask id="aim-{s}{id}" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-{s}{id} aid-{s}{id}" d="{d}" fill="none" stroke="#fff" stroke-width="{w}" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:{o}"/></mask>"##,
+            w = r2(stroke_width * 1.6 + 2.0),
+            o = offset,
+        ));
     }
 
     /// Register the per-frame text variants to render alongside base text.
@@ -594,6 +624,7 @@ impl SvgBuilder {
     }
 
     /// Add a path for a connection
+    #[allow(clippy::too_many_arguments)]
     pub fn add_connection_path(
         &mut self,
         path: &[Point],
@@ -602,6 +633,8 @@ impl SvgBuilder {
         styles: &str,
         marker_end: bool,
         stroke_width: f64,
+        draw_marker: bool,
+        extra_attrs: &str,
     ) {
         let prefix = self.prefix();
         let class_list = std::iter::once(format!("{}connection", prefix))
@@ -611,20 +644,27 @@ impl SvgBuilder {
 
         let d = connection_path_d(path, routing_mode, marker_end, stroke_width);
 
-        let marker = if marker_end {
+        let marker = if marker_end && draw_marker {
             format!(r#" marker-end="url(#{prefix}arrow)""#)
         } else {
             String::new()
         };
 
         self.connections.push(format!(
-            r#"{}<path class="{}" d="{}" fill="none"{}{}/>"#,
+            r#"{}<path class="{}" d="{}" fill="none"{}{}{}/>"#,
             self.indent_str(),
             class_list,
             d,
             styles,
-            marker
+            marker,
+            extra_attrs
         ));
+    }
+
+    /// Push raw markup into the connection layer.
+    pub fn add_connection_raw(&mut self, markup: String) {
+        let indent = self.indent_str();
+        self.connections.push(format!("{}{}", indent, markup));
     }
 
     /// Add a hidden crossfade variant path for a connection whose route reshapes in a
@@ -636,6 +676,10 @@ impl SvgBuilder {
         } else {
             String::new()
         };
+        let wrap = self.motion.is_some();
+        if wrap {
+            self.connections.push(format!(r#"<g class="aivar-{}{}-f{}">"#, self.scope, id, frame));
+        }
         self.connections.push(format!(
             r#"{}<path class="{}connection conn-{}{} conn-{}{}-f{}" d="{}" fill="none" opacity="0"{}/>"#,
             self.indent_str(),
@@ -648,6 +692,9 @@ impl SvgBuilder {
             d,
             marker
         ));
+        if wrap {
+            self.connections.push("</g>".to_string());
+        }
     }
 
     /// Add a group element with optional ID and classes
@@ -683,11 +730,13 @@ impl SvgBuilder {
     /// Add a visibility group for keyframe-hidden elements.
     /// Uses a CSS class so frame CSS rules can override visibility.
     pub fn start_visibility_group(&mut self, element_id: &str) {
+        let origin = self.origin_style(element_id);
         self.elements.push(format!(
-            r#"{}<g class="kf-hidden kf-{}{} kf-anim">"#,
+            r#"{}<g class="kf-hidden kf-{}{} kf-anim"{}>"#,
             self.indent_str(),
             self.scope,
-            element_id
+            element_id,
+            origin
         ));
         self.indent += 1;
     }
@@ -696,11 +745,13 @@ impl SvgBuilder {
     /// toggled by a later keyframe. Carries `kf-{id}` (without `kf-hidden`)
     /// so a later frame's `.kf-{id} { opacity: 0 }` rule has a node to bind to.
     pub fn start_kf_class_group(&mut self, element_id: &str) {
+        let origin = self.origin_style(element_id);
         self.elements.push(format!(
-            r#"{}<g class="kf-{}{} kf-anim">"#,
+            r#"{}<g class="kf-{}{} kf-anim"{}>"#,
             self.indent_str(),
             self.scope,
-            element_id
+            element_id,
+            origin
         ));
         self.indent += 1;
     }
@@ -770,8 +821,11 @@ impl SvgBuilder {
             .as_ref()
             .map(|f| format!(r#" data-frames="{}""#, f))
             .unwrap_or_default();
+        // Text without a `font_size` is measured at 14px by layout; left
+        // unset here the browser draws it at its own default (16px), 14%
+        // wider than every box and viewBox was sized for.
         svg.push_str(&format!(
-            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{} {} {} {}"{}>"#,
+            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{} {} {} {}" font-size="14"{}>"#,
             vb_x, vb_y, vb_w, vb_h, data_frames_attr
         ));
         svg.push_str(nl);
@@ -787,14 +841,16 @@ impl SvgBuilder {
 
         // Style section for CSS custom properties
         if !self.styles.is_empty() {
-            svg.push_str("  <style>");
+            // CDATA: stylesheet CSS may carry `&` (a font URL) or `<`, which
+            // would otherwise make the SVG malformed XML.
+            svg.push_str("  <style><![CDATA[");
             svg.push_str(nl);
             for style in &self.styles {
                 svg.push_str("    ");
                 svg.push_str(style);
                 svg.push_str(nl);
             }
-            svg.push_str("  </style>");
+            svg.push_str("  ]]></style>");
             svg.push_str(nl);
         }
 
@@ -811,6 +867,15 @@ impl SvgBuilder {
             svg.push_str(nl);
         }
 
+        let camera = self.motion.as_ref().is_some_and(|m| m.camera);
+        if camera {
+            svg.push_str(&format!(
+                r#"  <g class="aicam-{}" style="transform-origin:0px 0px">"#,
+                self.scope
+            ));
+            svg.push_str(nl);
+        }
+
         // Elements
         for elem in &self.elements {
             svg.push_str(elem);
@@ -820,6 +885,10 @@ impl SvgBuilder {
         // Connections (rendered on top)
         for conn in &self.connections {
             svg.push_str(conn);
+            svg.push_str(nl);
+        }
+        if camera {
+            svg.push_str("  </g>");
             svg.push_str(nl);
         }
 
@@ -845,8 +914,10 @@ pub fn render_svg_with_keyframes(
     frame_states: &[crate::layout::keyframe::FrameState],
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
     no_frame_css: bool,
+    motion: Option<crate::motion::render::MotionHooks>,
 ) -> String {
     let mut builder = SvgBuilder::new(config.clone());
+    builder.motion = motion;
 
     // Add CSS custom properties from the stylesheet
     builder.add_stylesheet(stylesheet);
@@ -901,6 +972,15 @@ pub fn render_svg_with_keyframes(
         .flat_map(|f| f.element_diffs.iter())
         .filter(|(_, diff)| !diff.is_empty())
         .map(|(id, _)| id.clone())
+        // With motion every named element is hooked, so every shape needs
+        // its property class too.
+        .chain(
+            builder
+                .motion
+                .as_ref()
+                .map(|m| m.origins.keys().cloned().collect::<Vec<_>>())
+                .unwrap_or_default(),
+        )
         // Frame-0-hidden elements stay IN this set. They take the visibility
         // branch below, which wraps them in `kf-hidden kf-<id>` and returns
         // before the wrapper branch, so including them cannot double-wrap —
@@ -961,6 +1041,8 @@ pub fn render_svg_with_keyframes(
         }
     }
 
+    render_motion_ghosts(result, &mut builder);
+
     // Render debug overlays
     if debug {
         for element in &result.root_elements {
@@ -979,24 +1061,126 @@ fn render_element_with_visibility(
     hidden: &std::collections::HashSet<String>,
     kf_referenced: &std::collections::HashSet<String>,
 ) {
+    // With motion, the wrapper owns the element's opacity: a declared
+    // `opacity:` moves onto it (as an attribute, so class rules and the
+    // player still win), and the inner rendering carries none.
+    let moved_opacity;
+    let element = if builder.motion.is_some()
+        && element.id.is_some()
+        && element.styles.opacity.is_some_and(|o| (o - 1.0).abs() > f64::EPSILON)
+    {
+        let mut e = element.clone();
+        builder.pending_opacity = e.styles.opacity.take();
+        moved_opacity = e;
+        &moved_opacity
+    } else {
+        builder.pending_opacity = None;
+        element
+    };
     if let Some(id) = &element.id {
         if hidden.contains(&id.0) {
             // Use CSS class for hiding so frame CSS can override it
             builder.start_visibility_group(&id.0);
+            render_motion_overlays(element, builder, true);
             render_element_inner(element, builder, hidden, kf_referenced);
+            render_motion_overlays(element, builder, false);
             builder.end_group();
             return;
         }
-        if kf_referenced.contains(&id.0) {
+        if kf_referenced.contains(&id.0)
+            || builder.motion.as_ref().is_some_and(|m| m.origins.contains_key(&id.0))
+        {
             // Visible at frame 0 but toggled by a later keyframe: wrap in a
             // kf-{id} class group so the later `.kf-{id} { opacity: 0 }` binds.
             builder.start_kf_class_group(&id.0);
+            render_motion_overlays(element, builder, true);
             render_element_inner(element, builder, hidden, kf_referenced);
+            render_motion_overlays(element, builder, false);
             builder.end_group();
             return;
         }
     }
     render_element_inner(element, builder, hidden, kf_referenced);
+}
+
+/// Transient-effect nodes inside an element's wrapper: a highlight behind
+/// it (`behind`), a flash and a ping ring over it.
+fn render_motion_overlays(element: &ElementLayout, builder: &mut SvgBuilder, behind: bool) {
+    let Some(id) = element.id.as_ref().map(|i| i.0.clone()) else { return };
+    let Some(kinds) = builder.motion.as_ref().and_then(|m| m.overlays.get(&id)).cloned() else {
+        return;
+    };
+    let s = builder.scope().to_string();
+    let b = element.bounds;
+    for kind in kinds {
+        let (what, colour) = kind.split_once(':').unwrap_or((kind.as_str(), ""));
+        match (what, behind) {
+            ("highlight", true) => {
+                let pad = 6.0;
+                builder.add_raw(&format!(
+                    r#"<rect class="aihl-{s}{id}" x="{}" y="{}" width="{}" height="{}" rx="8" fill="{colour}" style="opacity:0"/>"#,
+                    r2(b.x - pad), r2(b.y - pad), r2(b.width + 2.0 * pad), r2(b.height + 2.0 * pad)
+                ));
+            }
+            ("flash", false) => builder.add_raw(&format!(
+                r#"<rect class="aiflash-{s}{id}" x="{}" y="{}" width="{}" height="{}" fill="{colour}" style="opacity:0;pointer-events:none"/>"#,
+                r2(b.x), r2(b.y), r2(b.width), r2(b.height)
+            )),
+            ("ping", false) => {
+                let c = b.center();
+                let stroke = if colour == "currentColor" {
+                    element.styles.stroke.clone().unwrap_or_else(|| "var(--foreground-1, #333)".into())
+                } else {
+                    colour.to_string()
+                };
+                builder.add_raw(&format!(
+                    r#"<circle class="aiping-{s}{id}" cx="{}" cy="{}" r="{}" fill="none" stroke="{stroke}" stroke-width="3" style="opacity:0;transform-origin:{}px {}px"/>"#,
+                    r2(c.x), r2(c.y), r2(b.width.max(b.height) / 2.0), r2(c.x), r2(c.y)
+                ));
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Ghost copies for `fly ghost(el)`: a plain re-render of the source (no
+/// ids, no hooks of its own), on top of everything, hidden until it flies.
+fn render_motion_ghosts(result: &LayoutResult, builder: &mut SvgBuilder) {
+    let Some(ghosts) = builder.motion.as_ref().map(|m| m.ghosts.clone()) else { return };
+    fn find<'a>(elems: &'a [ElementLayout], id: &str) -> Option<&'a ElementLayout> {
+        for e in elems {
+            if e.id.as_ref().is_some_and(|i| i.0 == id) {
+                return Some(e);
+            }
+            if let Some(f) = find(&e.children, id) {
+                return Some(f);
+            }
+        }
+        None
+    }
+    for (suffix, src) in ghosts {
+        let Some(el) = find(&result.root_elements, &src) else { continue };
+        let saved_motion = builder.motion.take();
+        let saved_variants = std::mem::take(&mut builder.text_variants);
+        let start = builder.elements.len();
+        let empty = std::collections::HashSet::new();
+        render_element_inner(el, builder, &empty, &empty);
+        let body: Vec<String> = builder.elements.drain(start..).collect();
+        builder.motion = saved_motion;
+        builder.text_variants = saved_variants;
+        let c = el.bounds.center();
+        let scope = builder.scope().to_string();
+        let mut markup = format!(
+            r#"<g class="aighost-{scope}{suffix}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none">"#,
+            r2(c.x),
+            r2(c.y)
+        );
+        for line in body {
+            markup.push_str(&line.trim().replace(" id=\"", " data-ghost-of=\""));
+        }
+        markup.push_str("</g>");
+        builder.add_connection_raw(markup);
+    }
 }
 
 /// Generate CSS for keyframe frame switching
@@ -1245,6 +1429,10 @@ fn render_element_inner(
 
     match &element.element_type {
         ElementType::Shape(ShapeType::Rectangle) => {
+            let styles = match element.styles.corner_radius {
+                Some(r) if r > 0.0 => format!(r#"{} rx="{}""#, styles, r),
+                _ => styles,
+            };
             render_shape_with_rotation(element, builder, |b| {
                 b.add_rect(
                     id,
@@ -1347,7 +1535,7 @@ fn render_element_inner(
                 .as_ref()
                 .map(|f| format!(r#" fill="{}""#, f))
                 .unwrap_or_default();
-            let combined_styles = format!("{}{}", font_styles, fill_style);
+            let combined_styles = format!("{}{}{}", font_styles, fill_style, font_attrs(&element.styles));
             // Without `align`, text has always started at its box's left
             // edge, and for a box sized to the text it is drawing that IS the
             // centre: left = centre - width/2. The two only diverge when the
@@ -1402,6 +1590,19 @@ fn render_element_inner(
                         &anchor,
                         &variant_classes,
                         &format!("{} opacity=\"0\"", combined_styles),
+                    );
+                }
+                if let Some(i) = id.filter(|i| b.motion.as_ref().is_some_and(|m| m.tickers.contains(*i))) {
+                    let mut tick_classes = classes.clone();
+                    tick_classes.push(format!("aitick-{}{}", scope, i));
+                    b.add_text_element(
+                        None,
+                        content,
+                        x,
+                        y,
+                        &anchor,
+                        &tick_classes,
+                        &format!(r#"{} style="opacity:0""#, combined_styles),
                     );
                 }
             });
@@ -1516,6 +1717,26 @@ fn render_element_inner(
                 return;
             }
 
+            // Lines routed through stations get round joins and caps.
+            let styles = if crate::layout::through::through_spec(&path_decl.modifiers).is_some() {
+                format!(r#"{} stroke-linejoin="round" stroke-linecap="round""#, styles)
+            } else {
+                styles
+            };
+            let drawn = id.and_then(|i| {
+                builder
+                    .motion
+                    .as_ref()
+                    .and_then(|m| m.drawables.get(i).map(|_| m.initial_offset(i)))
+            });
+            let styles = match (id, drawn) {
+                (Some(i), Some(offset)) => {
+                    let sw = element.styles.stroke_width.unwrap_or(2.0);
+                    builder.add_draw_mask(i, &d, sw, offset);
+                    format!(r#"{} mask="url(#aim-{}{})""#, styles, builder.scope(), i)
+                }
+                _ => styles,
+            };
             render_shape_with_rotation(element, builder, |b| {
                 b.add_path(id, &d, &classes, &styles);
             });
@@ -1530,6 +1751,12 @@ fn render_element_inner(
             let container_classes = std::iter::once(format!("{}container", prefix))
                 .chain(classes.iter().cloned())
                 .collect::<Vec<_>>();
+            // A container's own opacity (a template instance dimmed by a
+            // keyframe) fades everything inside it.
+            let faded = element.styles.opacity.filter(|o| (o - 1.0).abs() > f64::EPSILON);
+            if let Some(o) = faded {
+                builder.start_opacity_group(o);
+            }
             if let Some(rotation) = element.styles.rotation {
                 if rotation.abs() > f64::EPSILON {
                     let center = element.bounds.center();
@@ -1548,6 +1775,9 @@ fn render_element_inner(
             }
 
             builder.end_group();
+            if faded.is_some() {
+                builder.end_group();
+            }
         }
     }
 
@@ -1565,7 +1795,7 @@ fn render_element_inner(
                 .as_ref()
                 .map(|c| format!(r#" fill="{}""#, c))
                 .unwrap_or_default();
-            format!("{}{}", size, colour)
+            format!("{}{}{}", size, colour, font_attrs(&element.styles))
         };
         let variants = element
             .id
@@ -1600,6 +1830,17 @@ fn render_element_inner(
                 &format!("aitxt-{}{}-v{}", builder.scope(), own_id, n),
             );
         }
+        if builder.motion.as_ref().is_some_and(|m| m.tickers.contains(&own_id)) {
+            builder.add_rich_text_with_classes(
+                &label.rich,
+                label.font_size,
+                label.position.x,
+                label.position.y,
+                &label.anchor,
+                &format!(r#"{} style="opacity:0""#, font_styles),
+                &format!("aitick-{}{}", builder.scope(), own_id),
+            );
+        }
     }
 }
 
@@ -1631,6 +1872,33 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         ConnectionDirection::Forward | ConnectionDirection::Bidirectional
     );
 
+    // Motion: every path gets a `d` hook; a drawn one is masked, and its
+    // arrowhead becomes its own node that appears when the tip arrives.
+    let mut extra = String::new();
+    let mut draw_marker = true;
+    let mut head: Option<String> = None;
+    if let (Some(m), Some(c)) = (builder.motion.clone(), conn_class.as_ref()) {
+        let scope = builder.scope().to_string();
+        classes.push(format!("aid-{}{}", scope, c));
+        if m.drawables.contains_key(c) {
+            let d = connection_path_d(&conn.path, conn.routing_mode, marker_end, stroke_width);
+            builder.add_draw_mask(c, &d, stroke_width, m.initial_offset(c));
+            extra = format!(r#" mask="url(#aim-{}{})""#, scope, c);
+            if m.heads.contains(c) {
+                draw_marker = false;
+                head = m.head_d.get(c).cloned();
+            }
+        }
+    }
+
+    let base_wrap = match (&builder.motion, conn_class.as_ref()) {
+        (Some(m), Some(c)) => m.conn_variants.iter().any(|(id, _)| id == c),
+        _ => false,
+    };
+    if base_wrap {
+        let scope = builder.scope().to_string();
+        builder.add_connection_raw(format!(r#"<g class="aibase-{}{}">"#, scope, conn_class.as_ref().unwrap()));
+    }
     builder.add_connection_path(
         &conn.path,
         conn.routing_mode,
@@ -1638,7 +1906,20 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         &styles,
         marker_end,
         stroke_width,
+        draw_marker,
+        &extra,
     );
+    if base_wrap {
+        builder.add_connection_raw("</g>".to_string());
+    }
+    if let (Some(hd), Some(c)) = (head, conn_class.as_ref()) {
+        let scope = builder.scope().to_string();
+        let fill = conn.styles.stroke.clone().unwrap_or_else(|| "#333".to_string());
+        let on = builder.motion.as_ref().map(|m| m.initial_head(c)).unwrap_or(1.0);
+        builder.add_connection_raw(format!(
+            r#"<g class="conn-{scope}{c}"><path class="aihead-{scope}{c}" d="{hd}" fill="{fill}" style="opacity:{on}"/></g>"#
+        ));
+    }
 
     // Render connection label if present
     if let Some(label) = &conn.label {
@@ -2042,6 +2323,63 @@ fn path_to_d(path: &[Point]) -> String {
 }
 
 /// Escape special XML characters
+/// Insert CSS at the end of the SVG's style block (inside its CDATA).
+pub fn insert_css(svg: &mut String, css: &str) {
+    if let Some(pos) = svg.rfind("]]></style>").or_else(|| svg.rfind("</style>")) {
+        svg.insert_str(pos, css);
+    }
+}
+
+/// Replace the text of every `<text>` node carrying `class` (a sampled
+/// counter), keeping its attributes.
+pub fn replace_text_by_class(svg: &str, class: &str, text: &str) -> String {
+    let mut out = String::with_capacity(svg.len());
+    let mut rest = svg;
+    while let Some(pos) = rest.find("<text") {
+        let (before, tail) = rest.split_at(pos);
+        out.push_str(before);
+        let Some(gt) = tail.find('>') else {
+            out.push_str(tail);
+            return out;
+        };
+        let open = &tail[..=gt];
+        let has = open
+            .split("class=\"")
+            .nth(1)
+            .and_then(|c| c.split('"').next())
+            .is_some_and(|c| c.split_whitespace().any(|x| x == class));
+        if has {
+            if let Some(end) = tail.find("</text>") {
+                out.push_str(open);
+                out.push_str(&escape_xml(text));
+                out.push_str("</text>");
+                rest = &tail[end + 7..];
+                continue;
+            }
+        }
+        out.push_str(open);
+        rest = &tail[gt + 1..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// `font-weight` / `font-family` attributes for a label or text element.
+fn font_attrs(styles: &ResolvedStyles) -> String {
+    let mut s = String::new();
+    if let Some(w) = &styles.font_weight {
+        s.push_str(&format!(r#" font-weight="{}""#, escape_xml(w)));
+    }
+    if let Some(f) = &styles.font_family {
+        s.push_str(&format!(r#" font-family="{}""#, escape_xml(f)));
+    }
+    s
+}
+
+fn r2(x: f64) -> f64 {
+    (x * 100.0).round() / 100.0
+}
+
 fn escape_xml(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")
@@ -2191,6 +2529,7 @@ mod tests {
             rotation: None,
             align: None,
             label_fill: None,
+            ..Default::default()
         };
         let result = format_styles(&styles, None);
         assert!(result.contains(r##"fill="#ff0000""##));
@@ -2217,6 +2556,7 @@ mod tests {
             rotation: None,
             align: None,
             label_fill: None,
+            ..Default::default()
         };
         let result = format_styles(&styles, None);
         // Symbolic color is preserved, not flattened

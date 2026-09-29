@@ -88,6 +88,17 @@ pub fn classify_constraint(
     // Group by parent container name so all constraints from the same row/col/stack
     // are solved together coherently.
     if source.origin == super::solver::ConstraintOrigin::LayoutContainer {
+        // Aligning a row of components on a member (`align: dot`) ties parts
+        // of different instances together. That has to hold after the
+        // instances are placed, so it is solved with the global constraints.
+        let owners: HashSet<Option<&String>> = constraint
+            .element_ids()
+            .iter()
+            .map(|id| element_to_template.get(*id))
+            .collect();
+        if owners.len() > 1 && owners.iter().all(|o| o.is_some()) {
+            return ConstraintScope::Global;
+        }
         let group_key = source
             .layout_container
             .as_ref()
@@ -121,6 +132,24 @@ pub fn classify_constraint(
     if template_instances.len() == 1 {
         if let Some(Some(instance)) = template_instances.iter().next() {
             return ConstraintScope::Local((*instance).clone());
+        }
+    }
+
+    // Parts of nested components (`q` and `pg.sheet` inside the same `doc`)
+    // are local to the deepest component that contains them all.
+    if template_instances.iter().all(|t| t.is_some()) && !element_ids.is_empty() {
+        let chain = |id: &str| -> Vec<String> {
+            let mut out = Vec::new();
+            let mut cur = element_to_template.get(id);
+            while let Some(p) = cur {
+                out.push(p.clone());
+                cur = element_to_template.get(p);
+            }
+            out
+        };
+        let chains: Vec<Vec<String>> = element_ids.iter().map(|id| chain(id)).collect();
+        if let Some(common) = chains[0].iter().find(|c| chains[1..].iter().all(|ch| ch.contains(c))) {
+            return ConstraintScope::Local(common.clone());
         }
     }
 
@@ -281,6 +310,11 @@ fn collect_element_template_mapping(
             }
         }
         Statement::Layout(l) => {
+            // A named row/col inside a template belongs to it, like any
+            // other part (constraints on it are the template's own).
+            if let (Some(name), Some(template)) = (l.name.as_ref(), current_template) {
+                map.insert(name.node.0.clone(), template.to_string());
+            }
             // Layouts don't change template context, just recurse
             for child in &l.children {
                 collect_element_template_mapping(&child.node, map, current_template);
@@ -297,7 +331,7 @@ fn collect_element_template_mapping(
         | Statement::TemplateInstance(_)
         | Statement::Export(_)
         | Statement::AnchorDecl(_)
-        | Statement::Keyframe(_) => {}
+        | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {}
     }
 }
 
@@ -777,7 +811,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
             | Statement::Constraint(_)
             | Statement::Constrain(_) | Statement::DisableConstraint(_)
             | Statement::Label(_)
-            | Statement::Keyframe(_) => continue,
+            | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => continue,
             _ => {
                 let element = layout_statement(&stmt.node, position, config);
                 position.y += element.bounds.height + config.element_spacing;
@@ -915,7 +949,7 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // After template resolution, instances are replaced with their expanded content
             unreachable!("Template instances should be expanded before layout")
         }
-        Statement::Keyframe(_) => {
+        Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {
             // Keyframes are handled after layout, not during layout
             unreachable!("Keyframes should be filtered out before layout")
         }
@@ -929,7 +963,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 
     // For Line shapes, position label above the line with an offset
     // For other shapes, center the label within the shape
-    let label = resolved_label.map(|(rich, font_size, raw)| {
+    let label = resolved_label.map(|(rich, font_size, raw, wrap)| {
         // Shapes whose label is not centred on the box nudge it: a Line's
         // label rides above the stroke, a Callout's clears its pointer.
         let nudge = match &shape.shape_type.node {
@@ -946,7 +980,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
             _ => (0.0, 0.0),
         };
         let placement = LabelPlacement {
-            position: extract_label_position(&shape.modifiers),
+            position: own_label_position(&shape.modifiers),
             align: extract_align(&shape.modifiers),
             offset: extract_label_offset(&shape.modifiers),
             nudge,
@@ -963,6 +997,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
             anchor,
             placement: Some(placement),
             styles: None,
+            wrap,
         }
     });
 
@@ -1020,9 +1055,9 @@ pub fn place_captions(result: &mut LayoutResult, doc: &Document) -> Result<(), L
     let captions = collect_captions(&doc.statements);
     for (caption_id, subject_id, placement, span) in captions {
         let Some(subject) = result.get_element_by_name(&subject_id) else {
-            let mut known: Vec<String> = result.elements.keys().cloned().collect();
-            known.sort();
-            return Err(LayoutError::undefined(&subject_id, span, known));
+            let known: HashSet<String> = result.elements.keys().cloned().collect();
+            let similar = crate::layout::find_similar(&known, &subject_id, 2);
+            return Err(LayoutError::undefined(&subject_id, span, similar));
         };
         let bounds = subject.bounds;
         let Some(caption) = result.elements.get(&caption_id) else {
@@ -1140,7 +1175,9 @@ fn extract_caption_of(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
     })
 }
 
-fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichText, f64, String)> {
+fn resolve_shape_label(
+    shape: &ShapeDecl,
+) -> Option<(crate::layout::text::RichText, f64, String, crate::layout::types::LabelWrap)> {
     let raw = extract_label(&shape.modifiers)?;
     let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
     let rich = crate::layout::text::parse_markup(&raw)
@@ -1149,18 +1186,77 @@ fn resolve_shape_label(shape: &ShapeDecl) -> Option<(crate::layout::text::RichTe
     // An explicit width is a promise about what fits *inside* the box, so an
     // inside label wraps to it rather than running out through the borders.
     // A label placed outside lives in open space and is not bound by it.
-    let inside = extract_label_position(&shape.modifiers) == ShapeLabelPosition::Inside;
-    let rich = match (inside, extract_width_modifier(&shape.modifiers)) {
-        (true, Some(w)) => crate::layout::text::wrap(&rich, font_size, w - 2.0 * LABEL_INSET),
-        _ => rich,
+    // `max_width:` lets a label keep its natural width until it would pass
+    // this, then wrap: a translated or longer wording grows taller, not wider.
+    let inside = own_label_position(&shape.modifiers) == ShapeLabelPosition::Inside;
+    let factor = font_width_factor(&shape.modifiers);
+    let wrap = crate::layout::types::LabelWrap {
+        fixed: match (inside, extract_width_modifier(&shape.modifiers)) {
+            (true, Some(w)) => Some((w - 2.0 * LABEL_INSET) / factor),
+            _ => None,
+        },
+        max: extract_f64_param(&shape.modifiers, "max_width").map(|m| (m - 2.0 * LABEL_INSET) / factor),
     };
-    Some((rich, font_size, raw))
+    let rich = wrap.apply(&rich, font_size);
+    Some((rich, font_size, raw, wrap))
+}
+
+/// Advance of a monospace glyph, in em (Overpass Mono, Consolas, Menlo: 0.6).
+pub(crate) const MONO_ADVANCE: f64 = 0.6;
+
+fn is_mono(modifiers: &[Spanned<StyleModifier>]) -> bool {
+    modifiers.iter().any(|m| {
+        matches!(&m.node.key.node, StyleKey::Custom(k) if k == "font_family")
+            && match &m.node.value.node {
+                StyleValue::Keyword(w) | StyleValue::String(w) => w == "mono" || w.to_lowercase().contains("mono"),
+                StyleValue::Identifier(id) => id.0 == "mono",
+                _ => false,
+            }
+    })
+}
+
+/// A monospace label is measured exactly: characters times the advance.
+fn mono_width(rich: &crate::layout::text::RichText, font_size: f64) -> f64 {
+    rich.lines
+        .iter()
+        .map(|line| {
+            line.iter()
+                .map(|r| r.text.chars().count() as f64 * MONO_ADVANCE * font_size * r.scale)
+                .sum::<f64>()
+        })
+        .fold(0.0, f64::max)
+}
+
+/// How much wider than the default estimate a label's font runs: bold
+/// weights and monospace faces take more room per character.
+pub(crate) fn font_width_factor(modifiers: &[Spanned<StyleModifier>]) -> f64 {
+    let mut f = 1.0;
+    for m in modifiers {
+        let StyleKey::Custom(k) = &m.node.key.node else { continue };
+        let word = match &m.node.value.node {
+            StyleValue::Keyword(w) | StyleValue::String(w) => w.clone(),
+            StyleValue::Identifier(id) => id.0.clone(),
+            StyleValue::Number { value, .. } => format!("{}", value),
+            _ => continue,
+        };
+        match k.as_str() {
+            "font_weight" => {
+                let heavy = word == "bold" || word.parse::<f64>().is_ok_and(|w| w >= 600.0);
+                if heavy {
+                    f *= crate::layout::text::BOLD_FACTOR;
+                }
+            }
+            "font_family" if word == "mono" || word.to_lowercase().contains("mono") => f *= 1.25,
+            _ => {}
+        }
+    }
+    f
 }
 
 fn compute_shape_size(
     shape: &ShapeDecl,
     config: &LayoutConfig,
-    label: Option<&(crate::layout::text::RichText, f64, String)>,
+    label: Option<&(crate::layout::text::RichText, f64, String, crate::layout::types::LabelWrap)>,
 ) -> (f64, f64) {
     // Extract size modifiers from the shape
     let size = extract_size_modifier(&shape.modifiers);
@@ -1179,8 +1275,13 @@ fn compute_shape_size(
 
     // The space the label needs, measured the same way lint checks it and
     // the renderer draws it.
-    let label_metrics =
-        label.map(|(rich, font_size, _)| crate::layout::text::measure_runs(&rich.lines, *font_size));
+    let factor = font_width_factor(&shape.modifiers);
+    let mono = is_mono(&shape.modifiers);
+    let label_metrics = label.map(|(rich, font_size, _, _)| {
+        let mut m = crate::layout::text::measure_runs(&rich.lines, *font_size);
+        m.width = if mono { mono_width(rich, *font_size) } else { m.width * factor };
+        m
+    });
     let label_min_width = label_metrics.map(|m| m.width + 2.0 * LABEL_INSET);
     let label_min_height = label_metrics.map(|m| m.height + 2.0 * LABEL_INSET);
 
@@ -1202,7 +1303,11 @@ fn compute_shape_size(
             // Use font_size from modifiers if available, otherwise default to 14px
             let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
             // Approximate width: ~0.6 * font_size per character
-            let estimated_width = measure_str(content, font_size);
+            let estimated_width = if is_mono(&shape.modifiers) {
+                content.chars().count() as f64 * MONO_ADVANCE * font_size
+            } else {
+                measure_str(content, font_size) * font_width_factor(&shape.modifiers)
+            };
             // Height is approximately the font size
             (estimated_width.max(20.0), font_size)
         }
@@ -1221,8 +1326,13 @@ fn compute_shape_size(
             config.default_rect_size
         }
         ShapeType::Path(path_decl) => {
-            // Compute bounds from path vertices
-            compute_path_bounds(path_decl).unwrap_or(config.default_rect_size)
+            // A through-path takes no room: it is routed after layout.
+            if crate::layout::through::through_spec(&path_decl.modifiers).is_some() {
+                (0.0, 0.0)
+            } else {
+                // Compute bounds from path vertices
+                compute_path_bounds(path_decl).unwrap_or(config.default_rect_size)
+            }
         }
     };
 
@@ -1520,6 +1630,17 @@ fn extract_height_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> 
 
 /// Read a `label_position:` modifier. Unknown words fall back to `inside`;
 /// the linter reports them separately rather than silently moving the label.
+/// Where a shape's OWN label goes. On a caption (`caption_of:`),
+/// `label_position` says where the caption sits next to its subject; its
+/// words stay inside it.
+fn own_label_position(modifiers: &[Spanned<StyleModifier>]) -> ShapeLabelPosition {
+    if extract_caption_of(modifiers).is_some() {
+        ShapeLabelPosition::Inside
+    } else {
+        extract_label_position(modifiers)
+    }
+}
+
 fn extract_label_position(modifiers: &[Spanned<StyleModifier>]) -> ShapeLabelPosition {
     modifiers
         .iter()
@@ -2006,8 +2127,10 @@ fn layout_row(
             Point::new(x, position.y + config.container_padding),
             config,
         );
-        x += child_layout.bounds.width + spacing;
-        max_height = max_height.max(child_layout.bounds.height);
+        if !child_layout.is_through_path() {
+            x += child_layout.bounds.width + spacing;
+            max_height = max_height.max(child_layout.bounds.height);
+        }
         layouts.push(child_layout);
     }
 
@@ -2060,8 +2183,10 @@ fn layout_column(
             Point::new(position.x + config.container_padding, y),
             config,
         );
-        y += child_layout.bounds.height + spacing;
-        max_width = max_width.max(child_layout.bounds.width);
+        if !child_layout.is_through_path() {
+            y += child_layout.bounds.height + spacing;
+            max_width = max_width.max(child_layout.bounds.width);
+        }
         layouts.push(child_layout);
     }
 
@@ -3209,9 +3334,69 @@ pub fn resolve_constrain_statements(
         .flat_map(|k| local_by_instance.remove(&k).unwrap_or_default())
         .collect();
 
+    // Gaps of rows/columns holding template instances, measured from the
+    // initial flow (before internal constraints resize the instances).
+    let instances: HashSet<String> = element_to_template.values().cloned().collect();
+    let mut flow_gaps = collect_flow_gaps(&result.root_elements, &instances, &mut Vec::new());
+    // A declared `gap:` wins over one measured from the current positions:
+    // after a first solve (or a tight pack) the boxes no longer show it.
+    {
+        fn declared(stmts: &[Spanned<Statement>], out: &mut HashMap<String, f64>) {
+            for st in stmts {
+                match &st.node {
+                    Statement::Layout(l) => {
+                        if let (Some(n), Some(g)) = (&l.name, extract_gap(&l.modifiers)) {
+                            out.insert(n.node.0.clone(), g);
+                        }
+                        declared(&l.children, out);
+                    }
+                    Statement::Group(g) => declared(&g.children, out),
+                    _ => {}
+                }
+            }
+        }
+        let mut gaps = HashMap::new();
+        declared(&doc.statements, &mut gaps);
+        fn fix(elems: &[ElementLayout], path: &mut Vec<usize>, gaps: &HashMap<String, f64>, flows: &mut HashMap<Vec<usize>, Flow>) {
+            for (i, e) in elems.iter().enumerate() {
+                path.push(i);
+                if let (Some(id), Some(flow)) = (&e.id, flows.get_mut(path)) {
+                    if let Some(g) = gaps.get(&id.0) {
+                        match flow {
+                            Flow::Line(_, gap) | Flow::Tight(_, gap) => *gap = *g,
+                            Flow::Cells(_) => {}
+                        }
+                    }
+                }
+                fix(&e.children, path, gaps, flows);
+                path.pop();
+            }
+        }
+        fix(&result.root_elements, &mut Vec::new(), &gaps, &mut flow_gaps);
+    }
+
     // PASS 1: Solve internal constraints first
-    // These position children relative to each other within their groups
-    if !internal_constraints.is_empty() {
+    // These position children relative to each other within their groups.
+    //
+    // A component inside a component is solved first: the outer one places
+    // things against the inner one's box, which is only right once the inner
+    // one has settled. So constraints are solved in levels, deepest first.
+    let depth_of = |id: &str| -> usize {
+        let mut d = 0;
+        let mut cur = element_to_template.get(id);
+        while let Some(p) = cur {
+            d += 1;
+            cur = element_to_template.get(p);
+        }
+        d
+    };
+    let mut levels: std::collections::BTreeMap<usize, Vec<super::solver::LayoutConstraint>> =
+        std::collections::BTreeMap::new();
+    for c in internal_constraints {
+        let level = c.element_ids().iter().map(|id| depth_of(id)).max().unwrap_or(0);
+        levels.entry(level).or_default().push(c);
+    }
+    for (_level, internal_constraints) in levels.into_iter().rev() {
         // Collect target and referenced elements from constraints
         // This ensures only target elements can move (SUGGESTED), while reference
         // elements are fixed (REQUIRED), preventing nondeterministic pivot choices.
@@ -3265,10 +3450,58 @@ pub fn resolve_constrain_statements(
                 .cmp(&b.element_id)
                 .then(a.property.cmp(&b.property))
         });
+        // The solver does not know a container carries its children, so a
+        // child's solved position assumes its container stayed put. Once the
+        // container has been shifted, carry that shift into the child's
+        // target too, or the child is dragged back to where it was.
+        let mut parent_of: HashMap<String, String> = HashMap::new();
+        fn map_parents(elems: &[ElementLayout], parent: Option<&str>, out: &mut HashMap<String, String>) {
+            for e in elems {
+                let me = e.id.as_ref().map(|i| i.0.clone());
+                if let (Some(m), Some(p)) = (&me, parent) {
+                    out.insert(m.clone(), p.to_string());
+                }
+                map_parents(&e.children, me.as_deref().or(parent), out);
+            }
+        }
+        map_parents(&result.root_elements, None, &mut parent_of);
+        let mut container_shift: HashMap<String, (f64, f64)> = HashMap::new();
         for (var, value) in &sorted_internal {
+            let mut carried = (0.0, 0.0);
+            let mut cur = parent_of.get(&var.element_id);
+            while let Some(p) = cur {
+                if let Some((dx, dy)) = container_shift.get(p) {
+                    carried.0 += dx;
+                    carried.1 += dy;
+                }
+                cur = parent_of.get(p);
+            }
+            let value = &(**value
+                + match var.property {
+                    LayoutProperty::X => carried.0,
+                    LayoutProperty::Y => carried.1,
+                    _ => 0.0,
+                });
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
                 let delta = *value - current_value;
+                // A size solved inside a template (a `contains` box) is
+                // applied too; only positions used to be.
+                if delta.abs() > 0.001
+                    && matches!(var.property, LayoutProperty::Width | LayoutProperty::Height)
+                    && (target_vars.contains(&(var.element_id.clone(), var.property))
+                        || target_vars.contains(&(
+                            var.element_id.clone(),
+                            if var.property == LayoutProperty::Width {
+                                LayoutProperty::Right
+                            } else {
+                                LayoutProperty::Bottom
+                            },
+                        )))
+                {
+                    resize_element_by_name(result, &var.element_id, var.property, *value)?;
+                    continue;
+                }
                 if delta.abs() > 0.001
                     && matches!(var.property, LayoutProperty::X | LayoutProperty::Y)
                 {
@@ -3277,15 +3510,42 @@ pub fn resolve_constrain_statements(
                     } else {
                         Axis::Vertical
                     };
-                    // For internal constraints, shift just the element (not children)
-                    // because we're positioning siblings relative to each other
-                    shift_single_element_by_name(result, &var.element_id, delta, axis)?;
+                    // For internal constraints, shift just the element (not
+                    // children) because we're positioning siblings relative to
+                    // each other — unless the sibling is itself a container
+                    // (a component inside a component), whose parts go with it.
+                    let is_container = result
+                        .elements
+                        .get(&var.element_id)
+                        .is_some_and(|e| !e.children.is_empty());
+                    if is_container {
+                        shift_element_by_name(result, &var.element_id, delta, axis)?;
+                        let e = container_shift.entry(var.element_id.clone()).or_insert((0.0, 0.0));
+                        match axis {
+                            Axis::Horizontal => e.0 += delta,
+                            Axis::Vertical => e.1 += delta,
+                        }
+                    } else {
+                        shift_single_element_by_name(result, &var.element_id, delta, axis)?;
+                    }
                 }
             }
         }
 
         // Recompute group bounds after internal constraints
         recompute_group_bounds(result, None);
+
+        // A row or column of template instances was flowed from the sizes the
+        // instances had before their own constraints ran (every part stacked
+        // in a column), so it is spaced for boxes that no longer exist.
+        // Re-flow it from the settled sizes, keeping its gaps.
+        // Captions belong to their component's footprint: place them before
+        // re-flowing, so a row packs components by what they really cover.
+        let _ = place_captions(result, doc);
+        if reflow_containers(&mut result.root_elements, &flow_gaps, &mut Vec::new()) {
+            recompute_group_bounds(result, None);
+            result.rebuild_index();
+        }
     }
 
     // Resolve deferred anchor constraints (Feature 011)
@@ -3306,8 +3566,46 @@ pub fn resolve_constrain_statements(
     }
 
     // PASS 2: Solve external constraints
-    // These position groups relative to each other
-    if !external_constraints.is_empty() {
+    // These position groups relative to each other.
+    //
+    // Only targeted properties are applied, and moving an element moves its
+    // children — which the solver does not model. A constraint that refers
+    // to a child of something another constraint moves therefore saw the
+    // child where it *was*. Re-solving from the new positions until nothing
+    // moves (a few rounds at most) lets such chains settle.
+    // Child -> enclosing row/column/grid, for moving arrangements as a whole.
+    let mut flow_parent: HashMap<String, String> = HashMap::new();
+    fn map_flow(elems: &[ElementLayout], parent: Option<&str>, out: &mut HashMap<String, String>) {
+        for e in elems {
+            let me = e.id.as_ref().map(|i| i.0.as_str());
+            if let (Some(m), Some(p)) = (me, parent) {
+                out.insert(m.to_string(), p.to_string());
+            }
+            let is_flow = matches!(
+                e.element_type,
+                ElementType::Layout(LayoutType::Row | LayoutType::Column | LayoutType::Grid)
+            );
+            let next = if is_flow { me } else { None };
+            map_flow(&e.children, next, out);
+        }
+    }
+    map_flow(&result.root_elements, None, &mut flow_parent);
+    // Elements targeted by row/column alignment (`align: dot`) move alone.
+    let layout_targets: HashSet<String> = external_constraints
+        .iter()
+        .filter(|c| c.source().origin == super::solver::ConstraintOrigin::LayoutContainer)
+        .filter_map(|c| get_constraint_target_var(c).map(|(e, _)| e))
+        .collect();
+    // Stations on a `through:` line get room for their names once the
+    // layout has settled: the constraints are added after a first solve (the
+    // line's direction and each station's size are known then) and the
+    // external pass runs again, so everything placed off them follows.
+    let mut stations_done = false;
+    loop {
+    let mut round = 0;
+    while !external_constraints.is_empty() && round < 6 {
+        round += 1;
+        let mut max_delta: f64 = 0.0;
         // Collect the target (element_id, property) pairs from external constraints
         // We only want to move the specific property that is targeted
         let target_vars: std::collections::HashSet<(String, LayoutProperty)> = external_constraints
@@ -3410,6 +3708,7 @@ pub fn resolve_constrain_statements(
             let current = get_element_property(result, &var.element_id, var.property);
             if let Some(current_value) = current {
                 let delta = *value - current_value;
+                max_delta = max_delta.max(delta.abs());
                 if delta.abs() > 0.001 {
                     match var.property {
                         LayoutProperty::X | LayoutProperty::Y => {
@@ -3418,13 +3717,46 @@ pub fn resolve_constrain_statements(
                             } else {
                                 Axis::Vertical
                             };
+                            // A template's parts move together: pinning a
+                            // child from outside moves the whole instance, so
+                            // the relationships its internal constraints set
+                            // up survive. Moving the child alone left a
+                            // station's dot on the line and its labels behind.
+                            let mut mover = var.element_id.clone();
+                            let mut in_component = false;
+                            loop {
+                                if let Some(parent) = element_to_template.get(&mover) {
+                                    mover = parent.clone();
+                                    in_component = true;
+                                    continue;
+                                }
+                                // Only a component's part carries its row
+                                // along; a plain row member pinned on its own
+                                // (a junction offset on a track) moves alone.
+                                if !in_component {
+                                    break;
+                                }
+                                // Pinning something that sits in a row,
+                                // column or grid positions that whole
+                                // arrangement: its siblings keep their
+                                // spacing instead of being left behind.
+                                // (Not for the arrangement's own alignment,
+                                // which is about that one member.)
+                                if layout_targets.contains(&var.element_id) {
+                                    break;
+                                }
+                                match flow_parent.get(&mover) {
+                                    Some(p) => mover = p.clone(),
+                                    None => break,
+                                }
+                            }
                             if config.trace {
                                 eprintln!(
-                                    "TRACE: shifting {} by {} on {:?}",
-                                    var.element_id, delta, axis
+                                    "TRACE: shifting {} (for {}) by {} on {:?}",
+                                    mover, var.element_id, delta, axis
                                 );
                             }
-                            shift_element_by_name(result, &var.element_id, delta, axis)?;
+                            shift_element_by_name(result, &mover, delta, axis)?;
                         }
                         LayoutProperty::Width | LayoutProperty::Height => {
                             if config.trace {
@@ -3440,13 +3772,213 @@ pub fn resolve_constrain_statements(
                 }
             }
         }
+        result.compute_bounds();
+        recompute_builtin_anchors(result, None);
+        recompute_custom_anchors(result, doc, None);
+        if max_delta < 0.5 {
+            break;
+        }
+    }
+    if stations_done {
+        break;
+    }
+    stations_done = true;
+    // Pinned by the author anywhere (inside a template too): not moved.
+    let pinned_x: HashSet<String> = collector
+        .constraints
+        .iter()
+        .filter(|c| c.source().origin != super::solver::ConstraintOrigin::LayoutContainer)
+        .filter_map(get_constraint_target_var)
+        .filter(|(_, p)| matches!(p, LayoutProperty::X | LayoutProperty::CenterX | LayoutProperty::Right))
+        .map(|(e, _)| e)
+        .collect();
+    let extra = super::through::station_constraints(result, &element_to_template, &flow_parent, &pinned_x);
+    if extra.is_empty() {
+        break;
+    }
+    external_constraints.extend(extra);
     }
 
+    // Containers wrap wherever their children ended up: a child moved by an
+    // external constraint left its group's box behind otherwise, and that
+    // stale box fed the viewBox and every later reference to the group.
+    recompute_group_bounds(result, None);
     // Recompute bounds and anchors after applying constraints
     result.compute_bounds();
     recompute_builtin_anchors(result, None);
     recompute_custom_anchors(result, doc, None);
     Ok(())
+}
+
+/// Main-axis gap of each row/column (by tree path) whose children include a
+/// template instance.
+/// A container to re-flow: a row/column (main axis, gap), or a grid whose
+/// template instances are re-centred in their cells.
+#[derive(Clone)]
+enum Flow {
+    Line(bool, f64),
+    /// `pack: tight`: members pack by their parts, not their boxes.
+    Tight(bool, f64),
+    Cells(Vec<(usize, BoundingBox)>),
+}
+
+fn collect_flow_gaps(
+    elems: &[ElementLayout],
+    instances: &HashSet<String>,
+    path: &mut Vec<usize>,
+) -> HashMap<Vec<usize>, Flow> {
+    let mut out = HashMap::new();
+    for (i, e) in elems.iter().enumerate() {
+        path.push(i);
+        if let ElementType::Layout(LayoutType::Grid) = &e.element_type {
+            // Each instance sits at its cell's origin after the initial flow;
+            // find that cell so it can be centred there later.
+            let cells: Vec<BoundingBox> = e
+                .children
+                .iter()
+                .filter(|c| matches!(c.element_type, ElementType::GridCell))
+                .map(|c| c.bounds)
+                .collect();
+            let mut placed = Vec::new();
+            for (k, c) in e.children.iter().enumerate() {
+                let is_instance = c.id.as_ref().is_some_and(|id| instances.contains(&id.0));
+                if !is_instance {
+                    continue;
+                }
+                if let Some(cell) = cells.iter().find(|cell| {
+                    (cell.x - c.bounds.x).abs() < 0.5 && (cell.y - c.bounds.y).abs() < 0.5
+                }) {
+                    placed.push((k, *cell));
+                }
+            }
+            if !placed.is_empty() {
+                out.insert(path.clone(), Flow::Cells(placed));
+            }
+        }
+        if let ElementType::Layout(kind @ (LayoutType::Row | LayoutType::Column)) = &e.element_type {
+            let has_instance = e
+                .children
+                .iter()
+                .any(|c| c.id.as_ref().is_some_and(|id| instances.contains(&id.0)));
+            if has_instance && e.children.len() >= 2 {
+                let row = matches!(kind, LayoutType::Row);
+                let (a, b) = (&e.children[0].bounds, &e.children[1].bounds);
+                let gap = if row { b.x - a.right() } else { b.y - a.bottom() };
+                let tight = e.styles.css_classes.iter().any(|c| c == "ai-pack-tight");
+                out.insert(path.clone(), if tight { Flow::Tight(row, gap) } else { Flow::Line(row, gap) });
+            }
+        }
+        out.extend(collect_flow_gaps(&e.children, instances, path));
+        path.pop();
+    }
+    out
+}
+
+/// Re-flow the recorded rows/columns (innermost first). True if anything moved.
+fn reflow_containers(
+    elems: &mut [ElementLayout],
+    gaps: &HashMap<Vec<usize>, Flow>,
+    path: &mut Vec<usize>,
+) -> bool {
+    let mut moved = false;
+    for (i, e) in elems.iter_mut().enumerate() {
+        path.push(i);
+        moved |= reflow_containers(&mut e.children, gaps, path);
+        if let Some(Flow::Cells(placed)) = gaps.get(path) {
+            for (k, cell) in placed {
+                let b = e.children[*k].bounds;
+                let dx = cell.x + (cell.width - b.width) / 2.0 - b.x;
+                // Centred across, top-aligned down: components whose captions
+                // wrap to more lines still line up on their tops.
+                let dy = cell.y - b.y;
+                if dx.abs() > 0.001 {
+                    shift_element_and_children(&mut e.children[*k], dx, Axis::Horizontal);
+                    moved = true;
+                }
+                if dy.abs() > 0.001 {
+                    shift_element_and_children(&mut e.children[*k], dy, Axis::Vertical);
+                    moved = true;
+                }
+            }
+        }
+        if let Some(Flow::Tight(row, gap)) = gaps.get(path).cloned() {
+            fn leaves(e: &ElementLayout, out: &mut Vec<BoundingBox>) {
+                if e.is_through_path() {
+                    return;
+                }
+                if e.children.is_empty() {
+                    out.push(e.bounds);
+                } else {
+                    for c in &e.children {
+                        leaves(c, out);
+                    }
+                }
+            }
+            let mut placed: Vec<BoundingBox> = Vec::new();
+            for k in 0..e.children.len() {
+                let mut mine = Vec::new();
+                leaves(&e.children[k], &mut mine);
+                if k > 0 {
+                    // The closest spot where none of this member's parts
+                    // touch a part already placed in the same band.
+                    let cur = e.children[k].bounds;
+                    let mut need = f64::NEG_INFINITY;
+                    for q in &mine {
+                        for p in &placed {
+                            let (band, offset) = if row {
+                                (q.y < p.bottom() && p.y < q.bottom(), p.right() + gap - (q.x - cur.x))
+                            } else {
+                                (q.x < p.right() && p.x < q.right(), p.bottom() + gap - (q.y - cur.y))
+                            };
+                            if band {
+                                need = need.max(offset);
+                            }
+                        }
+                    }
+                    let prev = e.children[k - 1].bounds;
+                    let floor = if row { prev.x + gap } else { prev.y + gap };
+                    let target = need.max(floor);
+                    let delta = if row { target - cur.x } else { target - cur.y };
+                    if delta.abs() > 0.001 {
+                        let axis = if row { Axis::Horizontal } else { Axis::Vertical };
+                        shift_element_and_children(&mut e.children[k], delta, axis);
+                        moved = true;
+                    }
+                    mine.clear();
+                    leaves(&e.children[k], &mut mine);
+                }
+                placed.extend(mine);
+            }
+            if moved {
+                let mut b = e.children[0].bounds;
+                for c in &e.children[1..] {
+                    b = b.union(&c.bounds);
+                }
+                e.bounds = b;
+            }
+        }
+        if let Some(Flow::Line(row, gap)) = gaps.get(path).cloned() {
+            for k in 1..e.children.len() {
+                let prev = e.children[k - 1].bounds;
+                let cur = e.children[k].bounds;
+                let delta = if row { prev.right() + gap - cur.x } else { prev.bottom() + gap - cur.y };
+                if delta.abs() > 0.001 {
+                    let axis = if row { Axis::Horizontal } else { Axis::Vertical };
+                    shift_element_and_children(&mut e.children[k], delta, axis);
+                    moved = true;
+                }
+            }
+            if moved {
+                let mut b = e.children[0].bounds;
+                for c in &e.children[1..] {
+                    b = b.union(&c.bounds);
+                }
+                e.bounds = b;
+            }
+        }
+        path.pop();
+    }
+    moved
 }
 
 /// Recompute built-in anchors (top, bottom, left, right, and corners for paths)
@@ -3915,11 +4447,27 @@ fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&Ha
             .and_then(|set| elem.id.as_ref().map(|id| set.contains(&id.0)))
             .unwrap_or(false)
     {
-        let mut bounds = elem.children[0].bounds;
-        for child in &elem.children[1..] {
-            bounds = bounds.union(&child.bounds);
+        // Lines routed through siblings are drawn over the layout, not part of it.
+        let mut parts = elem.children.iter().filter(|c| !c.is_through_path());
+        if let Some(first) = parts.next() {
+            let mut bounds = first.bounds;
+            for child in parts {
+                bounds = bounds.union(&child.bounds);
+            }
+            // A row or column keeps the padding it was laid out with, so a
+            // constraint on it means the same thing before and after its
+            // box is recomputed (and re-solving a frame changes nothing).
+            if let ElementType::Layout(LayoutType::Row | LayoutType::Column | LayoutType::Grid) = elem.element_type {
+                let pad = LayoutConfig::default().container_padding;
+                bounds = BoundingBox::new(
+                    bounds.x - pad,
+                    bounds.y - pad,
+                    bounds.width + 2.0 * pad,
+                    bounds.height + 2.0 * pad,
+                );
+            }
+            elem.bounds = bounds;
         }
-        elem.bounds = bounds;
     }
 }
 
@@ -4129,13 +4677,33 @@ fn collect_layout_alignment_constraints(
                     },
                 };
 
+                // `align: dot` on a row of components lines them up on a
+                // child they all have (their dots), not on their outer boxes.
+                let align_member = l.modifiers.iter().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+                    (StyleKey::Align, StyleValue::Identifier(id)) if parse_align(&m.node.value.node).is_none() => {
+                        Some(id.0.clone())
+                    }
+                    _ => None,
+                });
+                let (cross_prop, cross_name) = match &align_member {
+                    Some(_) => match l.layout_type.node {
+                        LayoutType::Row => (super::solver::LayoutProperty::CenterY, "center_y"),
+                        _ => (super::solver::LayoutProperty::CenterX, "center_x"),
+                    },
+                    None => (cross_prop, cross_name),
+                };
+                let cross_id = |c: &str| match &align_member {
+                    Some(m) => format!("{}_{}", c, m),
+                    None => c.to_string(),
+                };
+
                 if child_ids.len() > 1 {
                     match l.layout_type.node {
                         LayoutType::Row => {
                             for i in 1..child_ids.len() {
                                 collector.constraints.push(LayoutConstraint::Equal {
-                                    left: LayoutVariable::new(&child_ids[i], cross_prop),
-                                    right: LayoutVariable::new(&child_ids[0], cross_prop),
+                                    left: LayoutVariable::new(&cross_id(&child_ids[i]), cross_prop),
+                                    right: LayoutVariable::new(&cross_id(&child_ids[0]), cross_prop),
                                     offset: 0.0,
                                     source: make_source(format!(
                                         "row alignment: {}.{} = {}.{}",
@@ -4162,8 +4730,8 @@ fn collect_layout_alignment_constraints(
                         LayoutType::Column => {
                             for i in 1..child_ids.len() {
                                 collector.constraints.push(LayoutConstraint::Equal {
-                                    left: LayoutVariable::new(&child_ids[i], cross_prop),
-                                    right: LayoutVariable::new(&child_ids[0], cross_prop),
+                                    left: LayoutVariable::new(&cross_id(&child_ids[i]), cross_prop),
+                                    right: LayoutVariable::new(&cross_id(&child_ids[0]), cross_prop),
                                     offset: 0.0,
                                     source: make_source(format!(
                                         "col alignment: {}.{} = {}.{}",

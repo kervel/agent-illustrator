@@ -27,6 +27,13 @@ pub struct FrameState {
     pub disabled_constraints: HashSet<String>,
     /// If true, skip constraint re-solving for this frame
     pub no_resolve: bool,
+    /// How far each drawable (connection or path) is drawn, cumulative.
+    /// Drawables no `draw` ever touches are absent (= fully drawn).
+    pub drawn: BTreeMap<String, crate::parser::ast::DrawTo>,
+    /// Elements pinned by `move`, cumulative: element -> where.
+    pub pins: BTreeMap<String, crate::parser::ast::PinTo>,
+    /// Camera focus (element, zoom), None = the whole diagram.
+    pub camera: Option<(String, f64)>,
 }
 
 /// Complete keyframe processing result
@@ -127,66 +134,105 @@ impl FrameState {
         !self.transforms.is_empty()
             || !self.added_constraints.is_empty()
             || !self.disabled_constraints.is_empty()
+            || !self.pins.is_empty()
+    }
+
+    /// The state before any keyframe: everything visible, nothing moved.
+    pub fn initial() -> Self {
+        FrameState {
+            name: String::new(),
+            hidden_elements: HashSet::new(),
+            hidden_connections: HashSet::new(),
+            transforms: HashMap::new(),
+            added_constraints: Vec::new(),
+            disabled_constraints: HashSet::new(),
+            no_resolve: false,
+            drawn: BTreeMap::new(),
+            pins: BTreeMap::new(),
+            camera: None,
+        }
+    }
+
+    /// Apply one state operation. Shared by the frame-state pass and the
+    /// motion compiler (which replays operations one statement at a time),
+    /// so "the state after frame N" means exactly one thing.
+    pub fn apply(&mut self, op: &KeyframeOp) {
+        match op {
+            KeyframeOp::Show(targets) => {
+                for target in targets {
+                    self.hidden_elements.remove(&target.node.0);
+                    self.hidden_connections.remove(&target.node.0);
+                }
+            }
+            KeyframeOp::Hide(targets) => {
+                for target in targets {
+                    self.hidden_elements.insert(target.node.0.clone());
+                    self.hidden_connections.insert(target.node.0.clone());
+                }
+            }
+            KeyframeOp::Transform { target, modifiers } => {
+                let entry = self.transforms.entry(target.node.0.clone()).or_default();
+                for m in modifiers {
+                    // per-property override: drop any earlier modifier with the same key
+                    entry.retain(|existing| existing.node.key.node != m.node.key.node);
+                    entry.push(m.clone());
+                }
+            }
+            KeyframeOp::Constrain(decl) => {
+                self.added_constraints.push(decl.clone());
+            }
+            KeyframeOp::Disable(names) => {
+                for n in names {
+                    self.disabled_constraints.insert(n.node.0.clone());
+                }
+            }
+            KeyframeOp::Enable(names) => {
+                for n in names {
+                    self.disabled_constraints.remove(&n.node.0);
+                }
+            }
+            KeyframeOp::Draw { target, to } => {
+                self.drawn.insert(target.node.0.clone(), to.clone());
+            }
+            KeyframeOp::Pin { target, to: crate::parser::ast::PinTo::Home } => {
+                self.pins.remove(&target.node.0);
+            }
+            KeyframeOp::Pin { target, to } => {
+                self.pins.insert(target.node.0.clone(), to.clone());
+            }
+            KeyframeOp::Camera { focus, zoom } => {
+                self.camera = focus.as_ref().map(|f| (f.node.0.clone(), *zoom));
+            }
+        }
+    }
+
+    /// Whether applying `op` needs the frame layout recomputed. Every
+    /// transform does: styles live on the solved elements too, so a colour
+    /// change that skipped this surfaced one statement (or frame) late.
+    pub fn op_changes_geometry(op: &KeyframeOp) -> bool {
+        match op {
+            KeyframeOp::Transform { .. } => true,
+            KeyframeOp::Constrain(_)
+            | KeyframeOp::Disable(_)
+            | KeyframeOp::Enable(_)
+            | KeyframeOp::Pin { .. } => true,
+            _ => false,
+        }
     }
 }
 
 pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
     let mut frames = Vec::with_capacity(keyframes.len());
-    let mut hidden_elements: HashSet<String> = HashSet::new();
-    let mut hidden_connections: HashSet<String> = HashSet::new();
-    // Cumulative transforms: element id -> merged modifiers (later keys override earlier).
-    let mut cumulative_transforms: HashMap<String, Vec<crate::parser::ast::Spanned<crate::parser::ast::StyleModifier>>> = HashMap::new();
-    // Cumulative constraint changes.
-    let mut added_constraints: Vec<crate::parser::ast::ConstrainDecl> = Vec::new();
-    let mut disabled_constraints: HashSet<String> = HashSet::new();
-
+    let mut state = FrameState::initial();
     for kf in keyframes {
-        // Apply operations cumulatively
         for op in &kf.operations {
-            match &op.node {
-                KeyframeOp::Show(targets) => {
-                    for target in targets {
-                        hidden_elements.remove(&target.node.0);
-                        hidden_connections.remove(&target.node.0);
-                    }
-                }
-                KeyframeOp::Hide(targets) => {
-                    for target in targets {
-                        hidden_elements.insert(target.node.0.clone());
-                        hidden_connections.insert(target.node.0.clone());
-                    }
-                }
-                KeyframeOp::Transform { target, modifiers } => {
-                    let entry = cumulative_transforms.entry(target.node.0.clone()).or_default();
-                    for m in modifiers {
-                        // per-property override: drop any earlier modifier with the same key
-                        entry.retain(|existing| existing.node.key.node != m.node.key.node);
-                        entry.push(m.clone());
-                    }
-                }
-                KeyframeOp::Constrain(decl) => {
-                    added_constraints.push(decl.clone());
-                }
-                KeyframeOp::Disable(names) => {
-                    for n in names { disabled_constraints.insert(n.node.0.clone()); }
-                }
-                KeyframeOp::Enable(names) => {
-                    for n in names { disabled_constraints.remove(&n.node.0); }
-                }
-            }
+            state.apply(&op.node);
         }
-
-        frames.push(FrameState {
-            name: kf.name.node.clone(),
-            hidden_elements: hidden_elements.clone(),
-            hidden_connections: hidden_connections.clone(),
-            transforms: cumulative_transforms.clone(),
-            added_constraints: added_constraints.clone(),
-            disabled_constraints: disabled_constraints.clone(),
-            no_resolve: kf.no_resolve,
-        });
+        let mut snapshot = state.clone();
+        snapshot.name = kf.name.node.clone();
+        snapshot.no_resolve = kf.no_resolve;
+        frames.push(snapshot);
     }
-
     frames
 }
 
@@ -267,7 +313,14 @@ pub fn compute_frame_diffs(
                 if hidden_in_this_frame {
                     diff.opacity = Some(0.0);
                 } else if diff.opacity.is_none() {
-                    diff.opacity = Some(1.0);
+                    // Shown at its own opacity (a declared 0.3 stays 0.3).
+                    let own = solved_elements
+                        .as_ref()
+                        .and_then(|m| m.get(id))
+                        .and_then(|e| e.styles.opacity)
+                        .or(base_elem.styles.opacity)
+                        .unwrap_or(1.0);
+                    diff.opacity = Some(own);
                 }
             }
 
@@ -360,7 +413,30 @@ fn resolve_frame_layout(
     if !state.no_resolve {
         // Build the per-frame active constraint set: drop constraints on
         // geometry-transformed elements + disabled/overridden ones, append added.
-        let modified_doc = build_active_document(doc, state);
+        let mut modified_doc = build_active_document(doc, state);
+        // Pins along a path resolve against the base geometry.
+        for (elem, to) in &state.pins {
+            if let crate::parser::ast::PinTo::Along { .. } = to {
+                if let Some(p) = crate::motion::compile::resolve_pin_point(base_result, to) {
+                    use crate::parser::ast::*;
+                    for (prop, v) in [(ConstraintProperty::CenterX, p.x), (ConstraintProperty::CenterY, p.y)] {
+                        modified_doc.statements.push(Spanned::new(
+                            Statement::Constrain(ConstrainDecl {
+                                expr: ConstraintExpr::Constant {
+                                    left: PropertyRef {
+                                        element: Spanned::new(ElementPath::simple(Identifier::new(elem.as_str()), 0..0), 0..0),
+                                        property: Spanned::new(prop, 0..0),
+                                    },
+                                    value: v,
+                                },
+                                name: None,
+                            }),
+                            0..0,
+                        ));
+                    }
+                }
+            }
+        }
 
         // Re-solve constraints using modified document.
         // Transformed positions are now baked into constraints,
@@ -380,6 +456,9 @@ fn resolve_frame_layout(
     result.connections.clear();
     // A caption follows its subject in every frame, not just the base layout.
     if super::engine::place_captions(&mut result, doc).is_err() {
+        return None;
+    }
+    if super::through::place_through_paths(&mut result).is_err() {
         return None;
     }
     if let Err(_e) = super::routing::route_connections(&mut result, doc) {
@@ -411,6 +490,11 @@ fn build_active_document(doc: &Document, state: &FrameState) -> Document {
         }
     }
 
+    // Pinned elements (`move`) release their own position constraints too.
+    for elem_id in state.pins.keys() {
+        geometry_transformed.insert(elem_id.as_str());
+    }
+
     // (b) (element, property) targets newly pinned by added constraints → override base.
     let added_targets: HashSet<(String, String)> = state.added_constraints.iter()
         .filter_map(|c| constraint_target(&c.expr))
@@ -438,6 +522,34 @@ fn build_active_document(doc: &Document, state: &FrameState) -> Document {
     // (c) append the keyframe-added constraints (active from this frame forward).
     for decl in &state.added_constraints {
         new_doc.statements.push(Spanned::new(Statement::Constrain(decl.clone()), 0..0));
+    }
+    // (d) pins: centre on the target element.
+    let pref = |elem: &str, prop: ConstraintProperty| PropertyRef {
+        element: Spanned::new(ElementPath::simple(Identifier::new(elem), 0..0), 0..0),
+        property: Spanned::new(prop, 0..0),
+    };
+    for (elem, to) in &state.pins {
+        match to {
+            PinTo::Element(target) => {
+                for prop in [ConstraintProperty::CenterX, ConstraintProperty::CenterY] {
+                    new_doc.statements.push(Spanned::new(
+                        Statement::Constrain(ConstrainDecl {
+                            expr: ConstraintExpr::Equal {
+                                left: pref(elem, prop.clone()),
+                                right: pref(target, prop),
+                            },
+                            name: None,
+                        }),
+                        0..0,
+                    ));
+                }
+            }
+            PinTo::Home => {}
+            PinTo::Along { .. } => {
+                // Resolved to fixed points against the base layout by
+                // resolve_frame_layout, which has the geometry.
+            }
+        }
     }
     new_doc
 }
@@ -532,6 +644,7 @@ fn set_element_text(elem: &mut ElementLayout, text: &str) {
                 // flattened wording would leave the old words on screen.
                 let rich = crate::layout::text::parse_markup(text)
                     .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));
+                let rich = label.wrap.apply(&rich, label.font_size);
                 label.text = rich.plain();
                 label.source = text.to_string();
                 label.rich = rich;
@@ -961,6 +1074,8 @@ keyframe "grow" { transform box [width: 260] }
                 Spanned::new(KeyframeOp::Disable(vec![make_id("a_home")]), 0..0),
             ],
             no_resolve: false,
+            motion: vec![],
+            auto: None,
         };
         let states = compute_frame_states(&[&kf]);
         assert!(states[0].disabled_constraints.contains("a_home"));
@@ -996,6 +1111,8 @@ keyframe "grow" { transform box [width: 260] }
                 .map(|op| Spanned::new(op, 0..0))
                 .collect(),
             no_resolve: false,
+            motion: vec![],
+            auto: None,
         }
     }
 

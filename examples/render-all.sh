@@ -34,3 +34,16 @@ for ail in "$SCRIPT_DIR"/*.ail; do
         rm -f "$svg"
     fi
 done
+
+# Motion scenes (the git deck): their own stylesheet, animated.
+for ail in "$SCRIPT_DIR"/motion/git-*.ail; do
+    name="$(basename "$ail" .ail)"
+    [ "$name" = "git-deck" ] && continue
+    svg="$SCRIPT_DIR/motion/$name.svg"
+    if cargo run -- "$ail" --stylesheet-css "$SCRIPT_DIR/motion/git-deck.css" --animate > "$svg" 2>/dev/null; then
+        echo "OK  motion/$name.svg"
+    else
+        echo "FAIL motion/$name.ail (skipped)"
+        rm -f "$svg"
+    fi
+done

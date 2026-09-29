@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-154.042 -50 514.042 407.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-154.042 -50 514.042 412.5" font-size="14">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -112,7 +114,7 @@
   fill: var(--text-light);
 }
 
-  </style>
+  ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
@@ -132,10 +134,10 @@
     </g>
     <text id="mylbl" class="ai-shape ai-text" x="-81.596" y="116" text-anchor="start" dominant-baseline="middle" font-size="14">Inline Label</text>
   </g>
-  <rect id="standalone" class="ai-shape ai-rect" x="0" y="204" width="124.962" height="33.5" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-  <text class="ai-label" x="62.481" y="220.75" text-anchor="middle" dominant-baseline="middle"><tspan x="62.481" dy="-0"><tspan>Standalone Label</tspan></tspan></text>
-  <rect id="source" class="ai-shape ai-rect" x="0" y="267.5" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-  <rect id="target" class="ai-shape ai-rect" x="220" y="267.5" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-  <text class="ai-label" x="150" y="272.5" text-anchor="middle" dominant-baseline="middle" fill="var(--accent-1)" font-size="12"><tspan x="150" dy="-0"><tspan>Connection Label</tspan></tspan></text>
-  <path class="ai-connection" d="M80 282.5 L212.8 282.5" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <rect id="standalone" class="ai-shape ai-rect" x="0" y="209" width="124.962" height="33.5" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+  <text class="ai-label" x="62.481" y="225.75" text-anchor="middle" dominant-baseline="middle"><tspan x="62.481" dy="-0"><tspan>Standalone Label</tspan></tspan></text>
+  <rect id="source" class="ai-shape ai-rect" x="0" y="272.5" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+  <rect id="target" class="ai-shape ai-rect" x="220" y="272.5" width="80" height="30" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+  <text class="ai-label" x="150" y="277.5" text-anchor="middle" dominant-baseline="middle" fill="var(--accent-1)" font-size="12"><tspan x="150" dy="-0"><tspan>Connection Label</tspan></tspan></text>
+  <path class="ai-connection" d="M80 287.5 L212.8 287.5" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

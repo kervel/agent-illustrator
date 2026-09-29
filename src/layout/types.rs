@@ -584,6 +584,12 @@ pub struct ResolvedStyles {
     /// widest wording and every narrower one sits in slack the author never
     /// asked for — so text in it centres instead of hugging the left edge.
     pub width_is_derived: bool,
+    /// Rounded corners for rectangles (`corner_radius: 12`).
+    pub corner_radius: Option<f64>,
+    /// `font_weight: bold | 600` for labels and text.
+    pub font_weight: Option<String>,
+    /// `font_family: mono | sans | "Some Font"` for labels and text.
+    pub font_family: Option<String>,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -626,6 +632,9 @@ impl ResolvedStyles {
             rotation: None,
             align: None,
             label_fill: None,
+            corner_radius: None,
+            font_weight: None,
+            font_family: None,
         }
     }
 
@@ -734,6 +743,47 @@ impl ResolvedStyles {
                 | StyleKey::Dy
                 | StyleKey::Scale
                 | StyleKey::Custom(_) => {
+                    if let (StyleKey::Custom(k), StyleValue::Number { value, .. }) =
+                        (&modifier.node.key.node, &modifier.node.value.node)
+                    {
+                        if k == "corner_radius" {
+                            styles.corner_radius = Some(value.max(0.0));
+                        }
+                        if k == "font_weight" {
+                            styles.font_weight = Some(format!("{}", value));
+                        }
+                    }
+                    if matches!(&modifier.node.key.node, StyleKey::Custom(k) if k == "pack")
+                        && matches!(&modifier.node.value.node, StyleValue::Identifier(v) if v.0 == "tight")
+                    {
+                        styles.css_classes.push("ai-pack-tight".to_string());
+                    }
+                    if matches!(&modifier.node.key.node, StyleKey::Custom(k) if k == "canvas")
+                        && !matches!(&modifier.node.value.node, StyleValue::Keyword(v) if v == "false")
+                        && !matches!(&modifier.node.value.node, StyleValue::Identifier(v) if v.0 == "false")
+                    {
+                        // Marks the stage for lint (a backdrop, never a collision).
+                        styles.css_classes.push("ai-canvas".to_string());
+                    }
+                    if let StyleKey::Custom(k) = &modifier.node.key.node {
+                        let word = match &modifier.node.value.node {
+                            StyleValue::Keyword(w) | StyleValue::String(w) => Some(w.clone()),
+                            StyleValue::Identifier(id) => Some(id.0.clone()),
+                            _ => None,
+                        };
+                        match (k.as_str(), word) {
+                            ("font_weight", Some(w)) => styles.font_weight = Some(w),
+                            ("font_family", Some(f)) => {
+                                styles.font_family = Some(match f.as_str() {
+                                    "mono" => "var(--font-mono, ui-monospace, monospace)".to_string(),
+                                    "sans" => "var(--font-sans, sans-serif)".to_string(),
+                                    "serif" => "var(--font-serif, serif)".to_string(),
+                                    other => other.to_string(),
+                                })
+                            }
+                            _ => {}
+                        }
+                    }
                     // Labels, label position, gap, size, routing, role, and position modifiers
                     // handled separately in layout engine; dx/dy/scale are keyframe-only
                     // geometry transforms applied in the keyframe engine; custom keys ignored
@@ -845,6 +895,9 @@ impl ResolvedStyles {
             rotation: other.rotation.or(self.rotation),
             align: other.align.or(self.align),
             label_fill: other.label_fill.clone().or_else(|| self.label_fill.clone()),
+            corner_radius: other.corner_radius.or(self.corner_radius),
+            font_weight: other.font_weight.clone().or_else(|| self.font_weight.clone()),
+            font_family: other.font_family.clone().or_else(|| self.font_family.clone()),
         }
     }
 }
@@ -1004,6 +1057,34 @@ pub struct LabelLayout {
     pub placement: Option<LabelPlacement>,
     /// Optional styles for the label (used when referencing a styled element)
     pub styles: Option<ResolvedStyles>,
+    /// How the declared label was wrapped, so a keyframe's new wording
+    /// wraps the same way instead of running out of its box.
+    pub wrap: LabelWrap,
+}
+
+/// A label's wrapping rule: `fixed` wraps always (an inside label in a box
+/// of explicit width), `max` only past the label's natural width
+/// (`max_width:`). Both are in measuring units (already divided by the
+/// font's width factor).
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct LabelWrap {
+    pub fixed: Option<f64>,
+    pub max: Option<f64>,
+}
+
+impl LabelWrap {
+    pub fn apply(&self, rich: &crate::layout::text::RichText, font_size: f64) -> crate::layout::text::RichText {
+        let mut rich = match self.fixed {
+            Some(w) => crate::layout::text::wrap(rich, font_size, w),
+            None => rich.clone(),
+        };
+        if let Some(max) = self.max {
+            if crate::layout::text::measure_runs(&rich.lines, font_size).width > max {
+                rich = crate::layout::text::wrap(&rich, font_size, max);
+            }
+        }
+        rich
+    }
 }
 
 impl LabelLayout {
@@ -1024,6 +1105,7 @@ impl LabelLayout {
             anchor,
             placement: None,
             styles: None,
+            wrap: LabelWrap::default(),
         }
     }
 
@@ -1074,6 +1156,19 @@ pub struct ElementLayout {
     /// Z-order for controlling render order (higher values render on top).
     /// Only meaningful on root-level groups. Default is 0.
     pub z_order: i32,
+}
+
+impl ElementLayout {
+    /// A `path [through: ...]`: its geometry comes after layout, from the
+    /// elements it passes through, so it takes no room in any container.
+    pub fn is_through_path(&self) -> bool {
+        match &self.element_type {
+            ElementType::Shape(crate::parser::ast::ShapeType::Path(d)) => {
+                crate::layout::through::through_spec(&d.modifiers).is_some()
+            }
+            _ => false,
+        }
+    }
 }
 
 impl ElementLayout {
@@ -1239,6 +1334,10 @@ impl LayoutResult {
 /// Recursively collect bounds from leaf elements (those without children).
 /// This avoids using container bounds which may be stale after constraint solving.
 fn collect_leaf_bounds(element: &ElementLayout, bounds: &mut Option<BoundingBox>) {
+    if element.is_through_path() && element.bounds.width == 0.0 && element.bounds.height == 0.0 {
+        // A line routed through stations, not yet routed: no geometry yet.
+        return;
+    }
     if element.children.is_empty() {
         *bounds = Some(match bounds {
             Some(b) => b.union(&element.bounds),

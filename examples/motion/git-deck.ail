@@ -1,0 +1,22 @@
+// Shared parts of the git deck: `import "git-deck.ail"`.
+import "ail:motion/git"
+
+// The slide itself: a 16:9 stage, the scene number, the scene title.
+template "slide" (num: "1", title: "Title") {
+    rect stage [width: 1600, height: 900, fill: git-paper, stroke: none, canvas: true]
+    rect badge [width: 66, height: 66, fill: git-ink, stroke: none, corner_radius: 16,
+                label: num, label_fill: git-paper, font_size: 38, font_weight: 800]
+    text "{title}" heading [font_size: 60, font_weight: 800, fill: git-ink, align: start]
+    constrain stage.left = 0
+    constrain stage.top = 0
+    constrain badge.left = stage.left + 96
+    constrain badge.top = stage.top + 64
+    constrain heading.left = badge.right + 22
+    constrain heading.center_y = badge.center_y
+}
+
+// How every slide opens: the number pops, the title rises.
+motion slide_in(s: element) {
+    show s.badge [enter: pop]
+    after 0.12 { show s.heading [enter: rise, duration: slow] }
+}

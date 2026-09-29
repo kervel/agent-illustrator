@@ -157,6 +157,12 @@ pub enum Statement {
     /// Top-level `disable a_home, b_home`: release named constraints written
     /// elsewhere, for a file composing a shared part it does not own.
     DisableConstraint(Vec<Spanned<Identifier>>),
+    /// `motion name(params) { ... }`: a reusable motion verb.
+    MotionMacro(MotionMacroDecl),
+    /// `motion [enter: pop, exit: fade]`: diagram-wide motion defaults.
+    MotionDefaults(Vec<Spanned<MotionOpt>>),
+    /// `import "motion/git.ail"`: bring in another file's motion macros.
+    Import(Spanned<String>),
 }
 
 /// Shape declaration
@@ -286,9 +292,208 @@ pub struct GroupDecl {
 #[derive(Debug, Clone, PartialEq)]
 pub struct KeyframeDecl {
     pub name: Spanned<String>,
+    /// Flat state operations, in source order. Derived from `motion` (the
+    /// parser fills it for plain names; `motion::expand` regenerates it once
+    /// selectors and macros are resolved). Everything that only cares about
+    /// *state* (static `--frame`, lint) reads this.
     pub operations: Vec<Spanned<KeyframeOp>>,
     /// If true, skip constraint re-solving for this keyframe
     pub no_resolve: bool,
+    /// The timed statement tree: beats, verbs, timing options. The motion
+    /// compiler reads this to place every state change in time.
+    pub motion: Vec<Spanned<MotionNode>>,
+    /// `[auto]` / `[auto, after: 0.6]`: play straight after the previous
+    /// keyframe finishes, after this many seconds, without a click.
+    pub auto: Option<f64>,
+}
+
+/// One node of a keyframe's motion tree.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MotionNode {
+    Stmt(MotionStmt),
+    /// `then { ... }`: starts when everything before it in the block has ended.
+    Then(Vec<Spanned<MotionNode>>),
+    /// `after 0.2 { ... }`: starts this long after the previous beat started.
+    After(f64, Vec<Spanned<MotionNode>>),
+    /// `at 0.4 { ... }`: starts this long after the keyframe starts.
+    At(f64, Vec<Spanned<MotionNode>>),
+}
+
+/// A motion statement: a verb, what it acts on, and its `[...]` options.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MotionStmt {
+    pub verb: MotionVerb,
+    pub opts: Vec<Spanned<MotionOpt>>,
+    /// Resolved element ids the statement acts on, in stagger order.
+    /// Filled by `motion::expand`; empty straight out of the parser.
+    pub targets: Vec<String>,
+    /// For `swap a -> b`: the ids each target turns into (pairwise).
+    pub partners: Vec<String>,
+}
+
+/// `key: value` inside a motion statement's brackets.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MotionOpt {
+    pub key: Spanned<String>,
+    pub value: Spanned<MotionValue>,
+}
+
+/// Values a motion option can take. There is deliberately no way to write a
+/// coordinate: positions come from names, anchors, percentages and vertices.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MotionValue {
+    /// Plain number: seconds, a scale factor, a count.
+    Number(f64),
+    /// `60%`, stored as 0.6.
+    Percent(f64),
+    /// A name: an element, a token (`pop`, `fast`), a keyword (`random`).
+    Name(String),
+    Str(String),
+    /// `wipe(left)`, `highlight(accent-1)`.
+    Call(String, Vec<Spanned<MotionValue>>),
+    /// `vertex 2`
+    Vertex(usize),
+    /// Anything a style modifier accepts (colours), for `highlight` etc.
+    Style(StyleValue),
+}
+
+/// What a motion statement acts on.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Selector {
+    /// `box`, or `station.label` (a template child)
+    Name(String),
+    /// `docs.*`: the named children of a group
+    Children(String),
+    /// `.station`: every element carrying `class: station`
+    Class(String),
+    /// `all except title, canvas`
+    AllExcept(Vec<String>),
+}
+
+impl Selector {
+    pub fn describe(&self) -> String {
+        match self {
+            Selector::Name(n) => n.clone(),
+            Selector::Children(n) => format!("{}.*", n),
+            Selector::Class(c) => format!(".{}", c),
+            Selector::AllExcept(v) => format!("all except {}", v.join(", ")),
+        }
+    }
+}
+
+/// The thing `fly` moves.
+#[derive(Debug, Clone, PartialEq)]
+pub enum FlySubject {
+    /// `ghost(el)`: a temporary copy of `el`, removed when it lands.
+    Ghost(Spanned<Selector>),
+    /// A named proxy element, visible only while it travels.
+    Proxy(Spanned<Selector>),
+}
+
+/// Arguments to a motion macro call.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MotionArg {
+    Name(String),
+    Number(f64),
+    Str(String),
+}
+
+/// Parameter type of a motion macro.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MotionParamType {
+    Element,
+    Group,
+    Path,
+    Anchor,
+    Number,
+    Text,
+}
+
+impl MotionParamType {
+    pub fn parse(s: &str) -> Option<Self> {
+        Some(match s {
+            "element" => Self::Element,
+            "group" => Self::Group,
+            "path" => Self::Path,
+            "anchor" => Self::Anchor,
+            "number" => Self::Number,
+            "text" => Self::Text,
+            _ => return None,
+        })
+    }
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::Element => "element",
+            Self::Group => "group",
+            Self::Path => "path",
+            Self::Anchor => "anchor",
+            Self::Number => "number",
+            Self::Text => "text",
+        }
+    }
+}
+
+/// `motion commit(folder: element, station: element) { ... }`
+#[derive(Debug, Clone, PartialEq)]
+pub struct MotionMacroDecl {
+    pub name: Spanned<String>,
+    pub params: Vec<(Spanned<String>, MotionParamType)>,
+    pub body: Vec<Spanned<MotionNode>>,
+}
+
+/// The motion verbs.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MotionVerb {
+    Show(Vec<Spanned<Selector>>),
+    Hide(Vec<Spanned<Selector>>),
+    Transform {
+        target: Spanned<Selector>,
+        modifiers: Vec<Spanned<StyleModifier>>,
+    },
+    Constrain(ConstrainDecl),
+    Disable(Vec<Spanned<Identifier>>),
+    Enable(Vec<Spanned<Identifier>>),
+    /// `draw a, b [to: ...]`
+    Draw(Vec<Spanned<Selector>>),
+    /// `undraw a [to: ...]`
+    Undraw(Vec<Spanned<Selector>>),
+    /// `fly ghost(el) to target` / `fly proxy from a to b` /
+    /// `fly ghost(el) to a, b, c` (one ghost per destination)
+    Fly {
+        subject: FlySubject,
+        from: Option<Spanned<String>>,
+        to: Vec<Spanned<Selector>>,
+    },
+    /// `move el to target` / `move el along path [from:, to:]`
+    Move {
+        target: Spanned<Selector>,
+        to: Option<Spanned<String>>,
+        along: Option<Spanned<String>>,
+    },
+    /// `pulse x`, `shake x`, `flash x`, `ping x`, `highlight x`, `nudge x`
+    Effect {
+        name: Spanned<String>,
+        targets: Vec<Spanned<Selector>>,
+    },
+    /// `loop x [pulse]`
+    Loop {
+        targets: Vec<Spanned<Selector>>,
+        effect: Spanned<String>,
+    },
+    /// `count total [to: 14900, format: "..."]`
+    Count(Spanned<Selector>),
+    /// `swap a -> b [via: flip]`
+    Swap {
+        from: Spanned<Selector>,
+        to: Spanned<Selector>,
+    },
+    /// `camera focus el [zoom: 1.4]` / `camera reset`
+    Camera(Option<Spanned<String>>),
+    /// `commit(project, st2)`
+    Call {
+        name: Spanned<String>,
+        args: Vec<Spanned<MotionArg>>,
+    },
 }
 
 /// Keyframe operation (Feature 011)
@@ -309,6 +514,44 @@ pub enum KeyframeOp {
     Disable(Vec<Spanned<Identifier>>),
     /// Reactivate previously disabled named constraints.
     Enable(Vec<Spanned<Identifier>>),
+    /// Set how much of a connection or path is drawn (from this frame on).
+    Draw {
+        target: Spanned<Identifier>,
+        to: DrawTo,
+    },
+    /// Pin an element's centre to another element's centre (from this frame
+    /// on). The element's own position constraints are released, as for a
+    /// geometry `transform`, so dependents cascade.
+    Pin {
+        target: Spanned<Identifier>,
+        to: PinTo,
+    },
+    /// Point the camera at an element (None = reset).
+    Camera {
+        focus: Option<Spanned<Identifier>>,
+        zoom: f64,
+    },
+}
+
+/// How far a drawable is drawn.
+#[derive(Debug, Clone, PartialEq)]
+pub enum DrawTo {
+    /// 0.0 ..= 1.0 of the length
+    Fraction(f64),
+    /// The point on the line nearest this element's centre.
+    Element(String),
+    /// A vertex of the line (0-based).
+    Vertex(usize),
+}
+
+/// Where a pinned element goes.
+#[derive(Debug, Clone, PartialEq)]
+pub enum PinTo {
+    /// `move el home`: release the pin, back to the laid-out position.
+    Home,
+    Element(String),
+    /// A point along a path, resolved against the base layout.
+    Along { path: String, at: DrawTo },
 }
 
 /// Position constraint
@@ -628,7 +871,9 @@ impl ConstraintProperty {
 
     /// Whether this property denotes a point (both axes) rather than a scalar.
     pub fn is_point(&self) -> bool {
-        matches!(self, Self::Anchor(_))
+        // `a.center = b.center` means both axes; treating it as a scalar
+        // silently aligned only x.
+        matches!(self, Self::Anchor(_) | Self::Center)
     }
 
     /// The horizontal-coordinate property of the point this reference denotes.

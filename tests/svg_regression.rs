@@ -29,7 +29,7 @@ fn normalize_svg_for_comparison(svg: &str) -> String {
             in_style = true;
             continue;
         }
-        if trimmed.starts_with("</style>") {
+        if trimmed.ends_with("</style>") {
             in_style = false;
             continue;
         }

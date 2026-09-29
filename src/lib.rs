@@ -13,6 +13,7 @@
 
 pub mod error;
 pub mod layout;
+pub mod motion;
 pub mod parser;
 pub mod renderer;
 pub mod stylesheet;
@@ -107,6 +108,13 @@ pub struct RenderConfig {
     /// `kf-*` / `conn-*` classes and `data-frames` are still emitted; an
     /// external runtime drives transitions by toggling the SVG's class.
     pub no_frame_css: bool,
+    /// With `frame`: sample the motion this far into that frame
+    /// (`0.35s`, `0.35`, or `50%`) instead of rendering its settled state.
+    pub at: Option<String>,
+    /// Output the motion timeline as text instead of SVG.
+    pub timeline: bool,
+    /// Output the motion manifest (tracks) as JSON instead of SVG.
+    pub timeline_json: bool,
 }
 
 impl Default for RenderConfig {
@@ -126,6 +134,9 @@ impl Default for RenderConfig {
             animate: false,
             animate_css: false,
             no_frame_css: false,
+            at: None,
+            timeline: false,
+            timeline_json: false,
         }
     }
 }
@@ -351,8 +362,50 @@ fn extract_template_rotations(doc: &Document) -> std::collections::HashMap<Strin
 /// assert!(svg.contains("<svg"));
 /// ```
 pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, RenderError> {
-    let (svg, _) = render_pipeline(source, config)?;
+    let (svg, _) = render_pipeline(source, config).map_err(|e| locate_error(e, source))?;
     Ok(svg)
+}
+
+/// Point an error that knows its span at the source: `line L, column C`,
+/// the line itself, a caret, and any suggestions.
+fn locate_error(e: RenderError, source: &str) -> RenderError {
+    let (name, span, suggestions) = match &e {
+        RenderError::Layout(LayoutError::UndefinedIdentifier { name, span, suggestions })
+        | RenderError::Layout(LayoutError::PathNotFound { path: name, span, suggestions }) => {
+            (name.clone(), span.clone(), suggestions.clone())
+        }
+        _ => return e,
+    };
+    if span.end > source.len() || span.start >= span.end {
+        let hint = if suggestions.is_empty() {
+            String::new()
+        } else {
+            format!(" (did you mean {}?)", suggestions.join(", "))
+        };
+        return RenderError::Layout(LayoutError::validation_error(&format!(
+            "undefined identifier '{}'{}",
+            name, hint
+        )));
+    }
+    let start = span.start;
+    let line_start = source[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    let line_end = source[start..].find('\n').map(|i| start + i).unwrap_or(source.len());
+    let col = source[line_start..start].chars().count() + 1;
+    let width = source[start..span.end.min(line_end)].chars().count().max(1);
+    let hint = if suggestions.is_empty() {
+        String::new()
+    } else {
+        format!("\n  did you mean: {}?", suggestions.join(", "))
+    };
+    RenderError::Layout(LayoutError::validation_error(&format!(
+        "{}: undefined identifier '{}'\n  {}\n  {}{}{}",
+        line_col(source, start),
+        name,
+        &source[line_start..line_end],
+        " ".repeat(col - 1),
+        "^".repeat(width),
+        hint
+    )))
 }
 
 /// Render DSL source to SVG with lint checking.
@@ -362,7 +415,7 @@ pub fn render_with_lint(
     source: &str,
     config: RenderConfig,
 ) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {
-    render_pipeline(source, config)
+    render_pipeline(source, config).map_err(|e| locate_error(e, source))
 }
 
 /// Internal shared render pipeline.
@@ -384,6 +437,65 @@ fn document_scope(source: &str) -> String {
     format!("{:08x}-", (hash >> 32) as u32)
 }
 
+/// A contact sheet of one keyframe: the frame sampled at 0, 25, 50, 75 and
+/// 100% of its duration, side by side, each labelled. One SVG, no browser
+/// needed to produce it.
+pub fn render_frames_strip(source: &str, config: RenderConfig, frame: &str) -> Result<String, RenderError> {
+    let base_scope = if config.svg.scope.is_empty() { document_scope(source) } else { config.svg.scope.clone() };
+    let mut cells = Vec::new();
+    for (i, pct) in [0, 25, 50, 75, 100].iter().enumerate() {
+        let mut c = config.clone();
+        c.frame = Some(frame.to_string());
+        c.at = Some(format!("{}%", pct));
+        c.animate = false;
+        // Each still needs its own class scope: their style blocks all land
+        // in one document.
+        c.svg.scope = format!("{}s{}-", base_scope, i);
+        let svg = render_with_config(source, c)?;
+        cells.push((*pct, svg));
+    }
+    // Every still has the same viewBox; read it from the first.
+    let vb = cells[0]
+        .1
+        .split("viewBox=\"")
+        .nth(1)
+        .and_then(|r| r.split('"').next())
+        .unwrap_or("0 0 100 100")
+        .to_string();
+    let nums: Vec<f64> = vb.split_whitespace().filter_map(|x| x.parse().ok()).collect();
+    let (w, h) = if nums.len() == 4 { (nums[2], nums[3]) } else { (100.0, 100.0) };
+    let cell_w = 480.0;
+    let cell_h = cell_w * h / w.max(1.0);
+    let label_h = 28.0;
+    let gap = 16.0;
+    let total_w = 5.0 * cell_w + 4.0 * gap;
+    let mut out = format!(
+        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {} {}" font-family="sans-serif">"#,
+        total_w,
+        cell_h + label_h
+    );
+    out.push('\n');
+    for (i, (pct, svg)) in cells.iter().enumerate() {
+        let x = i as f64 * (cell_w + gap);
+        let inner = svg
+            .trim_start_matches(|c| c != '<')
+            .trim_start_matches(r#"<?xml version="1.0" encoding="UTF-8"?>"#)
+            .trim();
+        let inner = inner.replacen("<svg ", &format!(r#"<svg x="{}" y="{}" width="{}" height="{}" "#, x, label_h, cell_w, cell_h), 1);
+        out.push_str(&format!(
+            r##"<text x="{}" y="20" font-size="16" fill="#555">frame {} at {}%</text>"##,
+            x + 4.0,
+            frame,
+            pct
+        ));
+        out.push('\n');
+        out.push_str(&inner);
+        out.push('\n');
+    }
+    out.push_str("</svg>\n");
+    Ok(out)
+}
+
 fn render_pipeline(
     source: &str,
     mut config: RenderConfig,
@@ -394,11 +506,20 @@ fn render_pipeline(
     // Parse the source
     let doc = parse(source)?;
 
+    // Imported components and motion macros join the document first.
+    let doc = motion::expand::inline_imports(
+        doc,
+        &motion::expand::ImportContext { base_path: config.template_base_path.as_deref() },
+    )?;
+
     // Extract rotation modifiers from template instances BEFORE resolution
     // (template instances are converted to groups during resolution, losing their modifiers)
     let template_rotations = extract_template_rotations(&doc);
 
+    let instances = template_instance_spans(&doc.statements);
+
     // Resolve templates if enabled
+    let mut collapsed_parts = Vec::new();
     let doc = if config.resolve_templates {
         let mut registry = if let Some(base) = &config.template_base_path {
             TemplateRegistry::with_base_path(base.clone())
@@ -406,10 +527,20 @@ fn render_pipeline(
             TemplateRegistry::new()
         };
         registry.set_image_href_mode(config.image_href_mode);
-        resolve_templates(doc, &mut registry)?
+        let doc = resolve_templates(doc, &mut registry)?;
+        collapsed_parts = std::mem::take(&mut registry.collapsed_parts);
+        doc
     } else {
         doc
     };
+
+    check_unique_names(&instances, &collapsed_parts, &doc, source)?;
+
+    // Resolve motion macros and selectors; regenerate keyframe operations.
+    let doc = motion::expand::expand(
+        doc,
+        &motion::expand::ImportContext { base_path: config.template_base_path.as_deref() },
+    )?;
 
     // Desugar point-constraints (e.g. `a.tip = b.top - 4`) into scalar component
     // constraints before layout and the constraint solver see them.
@@ -420,14 +551,38 @@ fn render_pipeline(
     let doc = layout::keyframe::size_text_for_keyframe_wordings(doc);
 
     // Validate color references against stylesheet
-    validate_colors(&doc, &config.stylesheet)?;
+    // Tokens a custom stylesheet declares (`--git-main: #2346D8`) are
+    // palette colours too.
+    let mut palette = config.stylesheet.clone();
+    if let Some(css) = &config.custom_css {
+        for (name, value) in motion::tokens::css_custom_properties(css) {
+            if !name.starts_with("ail-") {
+                palette.colors.entry(name).or_insert(value);
+            }
+        }
+    }
+    validate_colors(&doc, &palette)?;
+    // Render with the widened palette too, so label markup
+    // (`<span fill=git-branch>`) resolves CSS-declared tokens.
+    config.stylesheet = palette;
 
     // Create layout config with trace flag propagated
     let mut layout_config = config.layout.clone();
     layout_config.trace = config.trace;
 
     // Compute layout
-    let mut result = layout::compute(&doc, &layout_config)?;
+    let mut result = layout::compute(&doc, &layout_config).map_err(|e| match e {
+        // Suggest names the way the author writes them (`l1.dot`).
+        LayoutError::UndefinedIdentifier { name, span, suggestions } => {
+            let idx = motion::expand::ElementIndex::build(&doc);
+            LayoutError::UndefinedIdentifier {
+                name,
+                span,
+                suggestions: suggestions.iter().map(|s| idx.show(s)).collect(),
+            }
+        }
+        other => other,
+    })?;
 
     // Resolve constrain statements first (constraint-solver based positioning)
     // This must run before place statements so that offsets are applied after alignment
@@ -472,6 +627,18 @@ fn render_pipeline(
     // Captions follow their subject's final geometry, so this runs after
     // constraints and before routing (a connection may end at a caption).
     layout::engine::place_captions(&mut result, &doc)?;
+    layout::through::place_through_paths(&mut result)?;
+
+    // With keyframes, every frame is re-solved from this layout, so it must
+    // be a fixed point of solving: settle it once more from its own output.
+    // (Captions and re-flowed rows only reach their final size after the
+    // first pass; without this, re-solving an unchanged frame moved things.)
+    if !layout::keyframe::extract_keyframes(&doc).is_empty() && template_rotations.is_empty() {
+        layout::resolve_constrain_statements(&mut result, &doc, &layout_config)?;
+        layout::resolve_constraints(&mut result, &doc, skip_ref)?;
+        layout::engine::place_captions(&mut result, &doc)?;
+        layout::through::place_through_paths(&mut result)?;
+    }
 
     // Route connections
     layout::route_connections(&mut result, &doc)?;
@@ -505,8 +672,20 @@ fn render_pipeline(
     let lint_warnings = if config.lint {
         layout::lint::check(&result, &doc, &config.layout)
     } else {
+        // Leaving the canvas is never silent, lint or not.
+        let idx = motion::expand::ElementIndex::build(&doc);
+        for w in layout::canvas::check(&result, &doc, &config.layout, &|id| idx.show(id)) {
+            eprintln!("warning: {}{}", w.message, w.frame_suffix());
+        }
         Vec::new()
     };
+
+    // The stage decides the picture's bounds.
+    let canvas = layout::canvas::canvas_id(&doc);
+    if let Some(c) = &canvas {
+        layout::canvas::apply(&mut result, c);
+        config.svg.viewbox_padding = 0.0;
+    }
 
     // Mutual exclusion check (Feature 011)
     if config.frame.is_some() && config.animate {
@@ -514,9 +693,99 @@ fn render_pipeline(
             "--frame and --animate are mutually exclusive",
         )));
     }
+    if config.at.is_some() && config.frame.is_none() {
+        return Err(RenderError::Layout(layout::LayoutError::validation_error(
+            "--at needs --frame N (which keyframe to sample)",
+        )));
+    }
+
+    // Motion: compile every keyframe's statements into tracks.
+    let tokens = motion::tokens::MotionTokens::from_styles(
+        &config.stylesheet.colors,
+        config.custom_css.as_deref(),
+    );
+    let compiled = if frame_states.is_empty() {
+        None
+    } else {
+        let input = motion::compile::CompileInput {
+            doc: &doc,
+            base: &result,
+            layout_config: &config.layout,
+            tokens: &tokens,
+            scope: &config.svg.scope,
+            text_variants: renderer::svg::collect_text_variants(&frame_diffs),
+            conn_variants: frame_diffs
+                .iter()
+                .flat_map(|f| {
+                    f.connection_diffs
+                        .iter()
+                        .filter(|(_, d)| d.path.is_some() && !d.morphable)
+                        .map(|(id, _)| (id.clone(), f.name.clone()))
+                        .collect::<Vec<_>>()
+                })
+                .collect(),
+        };
+        Some(motion::compile::compile(&input).map_err(|e| {
+            RenderError::Layout(layout::LayoutError::validation_error(&format!(
+                "{} (at {})",
+                e.message,
+                line_col(source, e.span.start)
+            )))
+        })?)
+    };
+
+    // Motion lints need the compiled tracks.
+    let mut lint_warnings = lint_warnings;
+    if config.lint {
+        if let Some(m) = &compiled {
+            lint_warnings.extend(motion::lint::check(m, &doc, &frame_states, &result));
+        }
+    }
+
+    if config.timeline || config.timeline_json {
+        let Some(m) = &compiled else {
+            return Err(RenderError::Layout(layout::LayoutError::validation_error(
+                "--timeline requires keyframes in the input",
+            )));
+        };
+        let text = if config.timeline {
+            motion::render::timeline_text(m, &tokens)
+        } else {
+            motion::render::manifest_json(m, &tokens, &all_element_names(&result))
+        };
+        return Ok((text, lint_warnings));
+    }
 
     // Generate SVG with stylesheet
-    let svg = if let Some(frame_selector) = &config.frame {
+    let svg = if let (Some(frame_selector), Some(at)) = (&config.frame, &config.at) {
+        // A mid-motion still: base markup with hooks, every channel pinned to
+        // its sampled value.
+        let m = compiled.as_ref().ok_or_else(|| {
+            RenderError::Layout(layout::LayoutError::validation_error(
+                "--at requires keyframes in the input",
+            ))
+        })?;
+        let frame_idx = resolve_frame_index(frame_selector, &frame_states)?;
+        let t = parse_at(at, m.frames[frame_idx].duration)?;
+        let hooks = motion::render::MotionHooks::from_motion(m, &result);
+        let mut svg = render_svg_with_keyframes(
+            &result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+            &frame_states,
+            &frame_diffs,
+            true,
+            Some(hooks),
+        );
+        let css = motion::render::sampled_css(m, frame_idx, t, &tokens);
+        renderer::svg::insert_css(&mut svg, &css);
+        for (sel, text) in motion::render::sampled_texts(m, frame_idx, t, &tokens) {
+            svg = renderer::svg::replace_text_by_class(&svg, sel.trim_start_matches('.'), &text);
+        }
+        svg
+    } else if let Some(frame_selector) = &config.frame {
         // Single frame rendering: find the frame, render as static SVG
         if frame_states.is_empty() {
             return Err(RenderError::Layout(layout::LayoutError::validation_error(
@@ -542,6 +811,11 @@ fn render_pipeline(
         frame_result.connections.retain(|c| {
             c.name.as_ref().is_none_or(|n| !state.hidden_connections.contains(&n.0))
         });
+        // Drawn lines stop where they are drawn to.
+        motion::render::truncate_drawn(&mut frame_result, state, &doc);
+        if let Some(c) = &canvas {
+            layout::canvas::apply(&mut frame_result, c);
+        }
 
         render_svg_with_stylesheet(
             &frame_result,
@@ -551,6 +825,9 @@ fn render_pipeline(
             config.debug,
         )
     } else if !frame_diffs.is_empty() {
+        let hooks = compiled
+            .as_ref()
+            .map(|m| motion::render::MotionHooks::from_motion(m, &result));
         let mut svg = render_svg_with_keyframes(
             &result,
             &config.svg,
@@ -560,15 +837,22 @@ fn render_pipeline(
             &frame_states,
             &frame_diffs,
             config.no_frame_css,
+            hooks,
         );
 
-        // Inject animation: JS (--animate) or CSS-only (--animate-css)
-        if config.animate {
-            let js = generate_animate_js(&frame_states);
+        if let Some(m) = &compiled {
+            let names: Vec<String> = frame_states.iter().map(|s| s.name.clone()).collect();
+            let css = motion::render::settled_css(m, &names, &config.svg.scope);
+            renderer::svg::insert_css(&mut svg, &css);
+            let manifest = motion::render::manifest_json(m, &tokens, &all_element_names(&result));
+            let scripts = motion::render::embed(&manifest, config.animate, config.animate);
             if let Some(pos) = svg.rfind("</svg>") {
-                svg.insert_str(pos, &js);
+                svg.insert_str(pos, &scripts);
             }
-        } else if config.animate_css {
+        }
+
+        // CSS-only animation (--animate-css)
+        if config.animate_css {
             let conn_meta = renderer::svg::build_conn_meta(&result);
             let mut base_dims: std::collections::HashMap<String, (f64, f64)> = std::collections::HashMap::new();
             collect_base_dims(&result.root_elements, &mut base_dims);
@@ -581,9 +865,7 @@ fn render_pipeline(
                 }
             }
             let css = generate_animate_css(&frame_states, &frame_diffs, &conn_meta, &base_dims, &base_conn_d, &config.svg.scope);
-            if let Some(pos) = svg.rfind("</style>") {
-                svg.insert_str(pos, &css);
-            }
+            renderer::svg::insert_css(&mut svg, &css);
         }
 
         svg
@@ -598,6 +880,183 @@ fn render_pipeline(
     };
 
     Ok((svg, lint_warnings))
+}
+
+/// Top-level template instances and where they are written.
+fn template_instance_spans(stmts: &[parser::ast::Spanned<parser::ast::Statement>]) -> Vec<(String, parser::ast::Span)> {
+    use parser::ast::Statement;
+    let mut out = Vec::new();
+    for s in stmts {
+        match &s.node {
+            Statement::TemplateInstance(t) => out.push((t.instance_name.node.0.clone(), t.instance_name.span.clone())),
+            Statement::Layout(l) => out.extend(template_instance_spans(&l.children)),
+            Statement::Group(g) => out.extend(template_instance_spans(&g.children)),
+            _ => {}
+        }
+    }
+    out
+}
+
+/// Every element name must be unique once templates are flattened.
+///
+/// A part is named `instance_part` (`a.b` is `a_b`), so an element the
+/// author calls `a_b` and part `b` of instance `a` are the same name; two
+/// declarations of one name used to collapse silently into one element, and
+/// whatever addressed the other (a constraint, `hide a.b`, a host's CSS)
+/// quietly hit the survivor. Any repeated name is an error naming both.
+fn check_unique_names(
+    instances: &[(String, parser::ast::Span)],
+    collapsed_parts: &[(String, String)],
+    doc: &Document,
+    source: &str,
+) -> Result<(), RenderError> {
+    use parser::ast::{Span, Spanned, Statement};
+    // (name, span, the top-level instance it is a part of)
+    type Decl = (String, Span, Option<String>);
+    fn walk(stmts: &[Spanned<Statement>], owner: Option<&str>, out: &mut Vec<Decl>) {
+        for s in stmts {
+            let own = owner.map(str::to_string);
+            match &s.node {
+                Statement::Shape(d) => {
+                    if let Some(n) = &d.name {
+                        out.push((n.node.0.clone(), n.span.clone(), own));
+                    }
+                }
+                Statement::Layout(l) => {
+                    if let Some(n) = &l.name {
+                        out.push((n.node.0.clone(), n.span.clone(), own));
+                    }
+                    walk(&l.children, owner, out);
+                }
+                Statement::Group(g) => {
+                    if let Some(n) = &g.name {
+                        out.push((n.node.0.clone(), n.span.clone(), own));
+                    }
+                    // The outermost instance owns everything inside it.
+                    let inner = match (owner, g.is_template_instance, &g.name) {
+                        (None, true, Some(n)) => Some(n.node.0.as_str()),
+                        _ => owner,
+                    };
+                    walk(&g.children, inner, out);
+                }
+                // A named connection is addressed like an element (`hide c`).
+                Statement::Connection(conns) => {
+                    for c in conns {
+                        if let Some(n) = &c.name {
+                            out.push((n.node.0.clone(), n.span.clone(), own.clone()));
+                        }
+                    }
+                }
+                Statement::Label(inner) => walk(
+                    std::slice::from_ref(&Spanned::new((**inner).clone(), s.span.clone())),
+                    owner,
+                    out,
+                ),
+                _ => {}
+            }
+        }
+    }
+    let mut decls: Vec<Decl> = Vec::new();
+    walk(&doc.statements, None, &mut decls);
+    // A part folded into its instance is not drawn under its own name, but
+    // `inst.part` still resolves to that name: it is taken all the same.
+    for (part, inst) in collapsed_parts {
+        if let Some((_, span, owner)) = decls.iter().find(|(n, _, _)| n == inst).cloned() {
+            let owner = owner.unwrap_or_else(|| inst.clone());
+            decls.push((part.clone(), span, Some(owner)));
+        }
+    }
+    let at = |name: &str| instances.iter().find(|(i, _)| i == name).map(|(_, sp)| sp.clone());
+    // A part is described by its dotted path and located at the instance
+    // that made it (its own span points into the template).
+    let describe = |(name, span, owner): &Decl| -> String {
+        match owner {
+            Some(inst) if name.len() > inst.len() + 1 && name.starts_with(&format!("{}_", inst)) => format!(
+                "part `{}.{}` of template instance `{}` ({})",
+                inst,
+                &name[inst.len() + 1..],
+                inst,
+                line_col(source, at(inst).unwrap_or_else(|| span.clone()).start)
+            ),
+            Some(inst) => format!("`{}` inside template instance `{}` ({})", name, inst,
+                line_col(source, at(inst).unwrap_or_else(|| span.clone()).start)),
+            None => format!("`{}` ({})", name, line_col(source, span.start)),
+        }
+    };
+    // Keyframe names become `.frame-<name>` selectors and manifest frames.
+    let mut frames: std::collections::HashMap<&str, &Span> = std::collections::HashMap::new();
+    for st in &doc.statements {
+        if let Statement::Keyframe(k) = &st.node {
+            if let Some(first) = frames.insert(k.name.node.as_str(), &k.name.span) {
+                return Err(RenderError::Layout(layout::LayoutError::validation_error(&format!(
+                    "two keyframes are both named \"{}\" ({} and {}); rename one",
+                    k.name.node,
+                    line_col(source, first.start),
+                    line_col(source, k.name.span.start)
+                ))));
+            }
+        }
+    }
+    let mut seen: std::collections::HashMap<&str, &Decl> = std::collections::HashMap::new();
+    for d in &decls {
+        if let Some(first) = seen.get(d.0.as_str()) {
+            return Err(RenderError::Layout(layout::LayoutError::validation_error(&format!(
+                "two elements are both named `{}`: {} and {}. Every name must be unique \
+                 (part `b` of instance `a` is named `a_b` internally); rename one",
+                d.0,
+                describe(first),
+                describe(d)
+            ))));
+        }
+        seen.insert(&d.0, d);
+    }
+    Ok(())
+}
+
+/// `line:col` of a byte offset, for error messages.
+fn line_col(source: &str, offset: usize) -> String {
+    let before = &source[..offset.min(source.len())];
+    let line = before.matches('\n').count() + 1;
+    let col = before.rfind('\n').map(|i| offset - i).unwrap_or(offset + 1);
+    format!("line {}, column {}", line, col)
+}
+
+/// Parse `--at`: `0.35s`, `0.35`, `350ms` or `50%` (of the frame's duration).
+fn parse_at(at: &str, duration: f64) -> Result<f64, RenderError> {
+    let a = at.trim();
+    let bad = || {
+        RenderError::Layout(layout::LayoutError::validation_error(&format!(
+            "--at '{}': expected seconds (0.35s), milliseconds (350ms) or a percentage (50%)",
+            at
+        )))
+    };
+    if let Some(p) = a.strip_suffix('%') {
+        return p.trim().parse::<f64>().map(|v| v / 100.0 * duration).map_err(|_| bad());
+    }
+    if let Some(ms) = a.strip_suffix("ms") {
+        return ms.trim().parse::<f64>().map(|v| v / 1000.0).map_err(|_| bad());
+    }
+    a.strip_suffix('s').unwrap_or(a).trim().parse::<f64>().map_err(|_| bad())
+}
+
+/// Every element and connection name, for the manifest.
+fn all_element_names(result: &layout::LayoutResult) -> Vec<String> {
+    fn walk(elems: &[layout::ElementLayout], out: &mut Vec<String>) {
+        for e in elems {
+            if let Some(id) = &e.id {
+                out.push(id.0.clone());
+            }
+            walk(&e.children, out);
+        }
+    }
+    let mut out = Vec::new();
+    walk(&result.root_elements, &mut out);
+    for c in &result.connections {
+        if let Some(n) = &c.name {
+            out.push(n.0.clone());
+        }
+    }
+    out
 }
 
 /// Names of the keyframes declared in `source`, in declaration order.
@@ -1002,34 +1461,6 @@ fn generate_animate_css(
     }
 
     css
-}
-
-/// Generate minimal JS for animated playback
-fn generate_animate_js(frame_states: &[layout::keyframe::FrameState]) -> String {
-    let frame_names: Vec<&str> = frame_states.iter().map(|s| s.name.as_str()).collect();
-    format!(
-        r#"<script>
-(function() {{
-  var frames = {:?};
-  var current = 0;
-  var svg = document.querySelector('svg[data-frames]');
-  function showFrame(i) {{
-    frames.forEach(function(f) {{ svg.classList.remove('frame-' + f); }});
-    svg.classList.add('frame-' + frames[i]);
-  }}
-  showFrame(0);
-  svg.addEventListener('click', function() {{
-    current = (current + 1) % frames.length;
-    showFrame(current);
-  }});
-  setInterval(function() {{
-    current = (current + 1) % frames.length;
-    showFrame(current);
-  }}, 2000);
-}})();
-</script>"#,
-        frame_names
-    )
 }
 
 #[cfg(test)]

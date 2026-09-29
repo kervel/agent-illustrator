@@ -153,6 +153,10 @@ struct Cli {
     #[arg(long)]
     lint: bool,
 
+    /// With --lint: also fail (exit 1) on warnings, not only on errors
+    #[arg(long)]
+    lint_strict: bool,
+
     /// Only report these lint categories (comma-separated, repeatable).
     /// Run --lint-categories to list the valid names.
     #[arg(long, value_delimiter = ',')]
@@ -175,6 +179,30 @@ struct Cli {
     /// Render a single keyframe as a static SVG (by index or name)
     #[arg(long)]
     frame: Option<String>,
+
+    /// With --frame: render a mid-motion still this far into that frame,
+    /// sampled from the same tracks the browser player uses
+    /// (`0.35s`, `350ms`, or `50%` of the frame's duration)
+    #[arg(long, value_name = "T")]
+    at: Option<String>,
+
+    /// Render a contact sheet of one keyframe (by index or name), sampled at
+    /// 0/25/50/75/100% of its duration
+    #[arg(long, value_name = "FRAME")]
+    frames_strip: Option<String>,
+
+    /// Print the compiled motion as a readable table (per frame: start,
+    /// duration, ease, statement, target, and each property's from -> to)
+    #[arg(long)]
+    timeline: bool,
+
+    /// Print the compiled motion manifest (tracks) as JSON
+    #[arg(long)]
+    timeline_json: bool,
+
+    /// Print the motion player JavaScript (for hosts embedding inline SVG)
+    #[arg(long)]
+    player_js: bool,
 
     /// Render every keyframe as a static SVG into this directory,
     /// as <NN>-<name>.svg. The directory is created if needed.
@@ -258,6 +286,11 @@ fn main() {
         return;
     }
 
+    if cli.player_js {
+        print!("{}", agent_illustrator::motion::render::PLAYER_JS);
+        return;
+    }
+
     if cli.lint_categories {
         for category in LintCategory::ALL {
             println!("{}", category);
@@ -333,12 +366,15 @@ fn main() {
         .with_stylesheet(stylesheet)
         .with_debug(cli.debug)
         .with_trace(cli.trace)
-        .with_lint(cli.lint)
+        .with_lint(cli.lint || cli.lint_strict)
         .with_image_href_mode(cli.image_href.into());
     config.frame = cli.frame.clone();
     config.animate = cli.animate;
     config.animate_css = cli.animate_css;
     config.no_frame_css = cli.no_frame_css;
+    config.at = cli.at.clone();
+    config.timeline = cli.timeline;
+    config.timeline_json = cli.timeline_json;
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }
@@ -365,6 +401,17 @@ fn main() {
         return;
     }
 
+    if let Some(frame) = &cli.frames_strip {
+        match agent_illustrator::render_frames_strip(&source, config, frame) {
+            Ok(svg) => print!("{}", svg),
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+
     if let Some(dir) = &cli.frames_to_dir {
         if cli.frame.is_some() || cli.animate || cli.animate_css {
             eprintln!("Error: --frames-to-dir cannot be combined with --frame or --animate");
@@ -374,10 +421,12 @@ fn main() {
         return;
     }
 
-    if cli.lint {
+    let lint = cli.lint || cli.lint_strict;
+    if lint {
         match render_with_lint(&source, config) {
-            Ok((svg, lint_warnings)) => {
-                println!("{}", svg);
+            Ok((_svg, lint_warnings)) => {
+                // Lint is a report: the SVG is not printed, so `--lint` can
+                // gate a build without anyone redirecting stdout.
                 let total = lint_warnings.len();
                 let shown: Vec<_> = lint_warnings
                     .iter()
@@ -402,16 +451,14 @@ fn main() {
                         );
                     }
                     let hidden = total - shown.len();
-                    if hidden > 0 {
-                        eprintln!(
-                            "lint: {} warning(s), {} filtered out",
-                            shown.len(),
-                            hidden
-                        );
-                    } else {
-                        eprintln!("lint: {} warning(s)", shown.len());
+                    let errors = shown.iter().filter(|w| w.category.is_error()).count();
+                    let warnings = shown.len() - errors;
+                    let filtered = if hidden > 0 { format!(", {} filtered out", hidden) } else { String::new() };
+                    eprintln!("lint: {} error(s), {} warning(s){}", errors, warnings, filtered);
+                    // Errors fail the build; warnings only with --lint-strict.
+                    if errors > 0 || cli.lint_strict {
+                        std::process::exit(1);
                     }
-                    std::process::exit(1);
                 }
             }
             Err(e) => {

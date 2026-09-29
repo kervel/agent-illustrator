@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 415 594.5">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 -60 415 578.5" font-size="14">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -112,7 +114,7 @@
   fill: var(--text-light);
 }
 
-  </style>
+  ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
@@ -123,29 +125,29 @@
   <rect id="c" class="ai-shape ai-rect" x="70" y="100" width="80" height="40" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
   <g id="srv1" class="ai-container">
     <rect id="srv1_body" class="ai-shape ai-rect" x="0" y="200" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
-    <text id="srv1_txt" class="ai-shape ai-text" x="37.664" y="270" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+    <text class="ai-label" x="50" y="230" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="50" dy="-0"><tspan>SRV</tspan></tspan></text>
   </g>
   <g id="srv2" class="ai-container">
     <rect id="srv2_body" class="ai-shape ai-rect" x="180" y="200" width="100" height="60" fill="var(--background-2)" stroke="#333333" stroke-width="1.5"/>
-    <text id="srv2_txt" class="ai-shape ai-text" x="217.664" y="270" text-anchor="start" dominant-baseline="middle" font-size="12">SRV</text>
+    <text class="ai-label" x="230" y="230" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="230" dy="-0"><tspan>SRV</tspan></tspan></text>
   </g>
   <g id="alice" class="ai-container">
-    <circle id="alice_head" class="ai-shape ai-circle" cx="15" cy="368" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
-    <rect id="alice_body" class="ai-shape ai-rect" x="0" y="384" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
+    <circle id="alice_head" class="ai-shape ai-circle" cx="15" cy="352" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
+    <rect id="alice_body" class="ai-shape ai-rect" x="0" y="368" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
   </g>
   <g id="bob" class="ai-container">
-    <circle id="bob_head" class="ai-shape ai-circle" cx="145" cy="368" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
-    <rect id="bob_body" class="ai-shape ai-rect" x="130" y="384" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
+    <circle id="bob_head" class="ai-shape ai-circle" cx="145" cy="352" r="12" fill="#f2c9a0" stroke="#333" stroke-width="1.5"/>
+    <rect id="bob_body" class="ai-shape ai-rect" x="130" y="368" width="30" height="40" fill="#4a6fa5" stroke="#333" stroke-width="1.5"/>
   </g>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="80" cy="474" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="top_via" class="ai-shape ai-circle" cx="80" cy="306" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="80" y="464" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="80" dy="-0"><tspan>request</tspan></tspan></text>
-  <text class="ai-label" x="80" y="316" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="80" dy="-0"><tspan>response</tspan></tspan></text>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="80" cy="458" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="80" cy="290" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="80" y="448" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="80" dy="-0"><tspan>request</tspan></tspan></text>
+  <text class="ai-label" x="80" y="300" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="80" dy="-0"><tspan>response</tspan></tspan></text>
   <path class="ai-connection" d="M80 20 L110 20 L110 64 L132.8 64" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M40 40 L40 70 L110 70 L110 92.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M180 84 L180 92 L110 92 L110 92.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M110 140 L110 155 L-15 155 L-15 230 L-7.2 230" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M100 230 L172.8 230" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M15 424 C15.000000000000002 451.33536577809457 52.66463422190546 474 80 474 C107.33536577809454 474 145 451.33536577809457 145 431.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M145 356 C145 328.66463422190543 107.33536577809454 306 80 306 C52.66463422190546 306 14.999999999999995 328.66463422190543 14.999999999999998 348.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M15 408 C15.000000000000002 435.33536577809457 52.66463422190546 458 80 458 C107.33536577809454 458 145 435.33536577809457 145 415.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M145 340 C145 312.66463422190543 107.33536577809454 290 80 290 C52.66463422190546 290 14.999999999999995 312.66463422190543 14.999999999999998 332.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

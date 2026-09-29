@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-78.35 -56 697.8000000000001 439">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-78.35 -56 697.8000000000001 439" font-size="14">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -100,7 +102,7 @@
   fill: var(--text-light);
 }
 
-  </style>
+  ]]></style>
   <g id="vcc_12v" class="ai-container">
     <rect id="vcc_12v_rail" class="ai-shape ai-rect" x="420" y="20" width="60" height="4" fill="var(--secondary-dark)" stroke="none" stroke-width="1.5"/>
   </g>

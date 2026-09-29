@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -64.5 252 220">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -69.5 262 230" font-size="14">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -112,7 +114,7 @@
   fill: var(--text-light);
 }
 
-  </style>
+  ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
@@ -131,17 +133,17 @@
   <g id="bob" class="ai-container">
     <g class="ai-container">
       <g id="bob_head_stack" class="ai-container">
-        <circle id="bob_head" class="ai-shape ai-circle" cx="129" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
-        <path id="bob_hair" class="ai-shape ai-path" d="M120.00 35.00 A9.00 9.00 0 0 1 138.00 35.00 L138.00 35.00 L133.00 33.00 L129.00 35.00 L126.00 34.00 L120.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
+        <circle id="bob_head" class="ai-shape ai-circle" cx="139" cy="35" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <path id="bob_hair" class="ai-shape ai-path" d="M130.00 35.00 A9.00 9.00 0 0 1 148.00 35.00 L148.00 35.00 L143.00 33.00 L139.00 35.00 L136.00 34.00 L130.00 35.00 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
-      <path id="bob_torso" class="ai-shape ai-path" d="M116.00 57.00 A13.00 13.00 0 0 1 142.00 57.00 L142.00 65.00 L116.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
-      <path id="bob_collar" class="ai-shape ai-path" d="M126.00 44.33 A14.00 14.00 0 0 1 132.00 44.33 L129.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
+      <path id="bob_torso" class="ai-shape ai-path" d="M126.00 57.00 A13.00 13.00 0 0 1 152.00 57.00 L152.00 65.00 L126.00 65.00 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
+      <path id="bob_collar" class="ai-shape ai-path" d="M136.00 44.33 A14.00 14.00 0 0 1 142.00 44.33 L139.00 50.33 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="76" cy="95" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="top_via" class="ai-shape ai-circle" cx="76" cy="-4" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="76" y="85" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="76" dy="-0"><tspan>request</tspan></tspan></text>
-  <text class="ai-label" x="76" y="6" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="76" dy="-0"><tspan>response</tspan></tspan></text>
-  <path class="ai-connection" d="M23 69 C23 88.67796285752726 56.322037142472745 95 76 95 C95.67796285752726 95 129 88.67796285752726 129 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M129 22 C129 2.3220371424727446 95.67796285752726 -4 76 -4 C56.322037142472745 -4 22.999999999999996 2.3220371424727446 23 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="81" cy="100" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <circle id="top_via" class="ai-shape ai-circle" cx="81" cy="-9" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="81" y="90" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="81" dy="-0"><tspan>request</tspan></tspan></text>
+  <text class="ai-label" x="81" y="1" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="81" dy="-0"><tspan>response</tspan></tspan></text>
+  <path class="ai-connection" d="M23 69 C23 90.92157739660985 59.07842260339015 100 81 100 C102.92157739660985 100 139 90.92157739660985 139 76.2" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M139 22 C139 0.07842260339015539 102.92157739660985 -9 81 -9 C59.07842260339015 -9 22.999999999999996 0.07842260339015539 23 14.8" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

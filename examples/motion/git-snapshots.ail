@@ -1,0 +1,170 @@
+/* Scene 2 of the git deck: "Git takes snapshots" -> "Broke something? Go back".
+   Render: agent-illustrator --stylesheet-css git-deck.css --animate git-snapshots.ail
+
+   STORYBOARD
+     intro        badge pops, title rises, the project folder settles in
+     first_commit the folder flashes; a snapshot of it flies onto the timeline and becomes station 1
+     two_more     style.css grows (246 lines) -> snapshot 2; the line grows to station 2
+     and_another  (plays on by itself) cart.py changes (58 lines) -> snapshot 3
+     details      a commit card opens under the latest station
+     broke        the title swaps; checkout breaks: station 3 turns red and pulses, the status shakes
+     go_back      a ring steps back one station; station 3 fades; the folder flashes and cart.py rolls back
+*/
+
+import "git-deck.ail"
+
+// ---------------------------------------------------------------- parts
+
+template "file_row" (kind: "py", tint: git-main, name: "file", value: "0 lines") {
+    rect bg [width: 520, height: 76, fill: none, stroke: none]
+    rect sep [width: 520, height: 2, fill: git-rule, stroke: none]
+    rect chip [width: 38, height: 46, fill: tint, stroke: git-ink, stroke_width: 3, corner_radius: 6,
+               label: kind, label_fill: git-panel, font_size: 14, font_weight: 800]
+    rect fname [fill: none, stroke: none, label: name, font_size: 21, font_family: mono, label_fill: git-ink,
+               max_width: 190, align: start]
+    rect val [fill: none, stroke: none, label: value, font_size: 21, font_family: mono, font_weight: 700, label_fill: git-ink]
+    constrain sep.left = bg.left
+    constrain sep.bottom = bg.bottom
+    constrain chip.left = bg.left + 22
+    constrain chip.center_y = bg.center_y
+    constrain fname.left = chip.right + 10
+    constrain fname.center_y = bg.center_y
+    constrain val.right = bg.right - 14
+    constrain val.center_y = bg.center_y
+}
+
+template "station" (name: "Station", meta: "") {
+    circle dot [size: 38, fill: git-panel, stroke: git-main, stroke_width: 8, appears: later]
+    rect nm [appears: later, fill: none, stroke: none, label: name, font_size: 23, font_weight: 700, label_fill: git-ink, max_width: 240]
+    rect mt [appears: later, fill: none, stroke: none, label: meta, font_size: 16, font_family: mono, label_fill: git-muted, max_width: 240]
+    constrain nm.center_x = dot.center_x
+    constrain nm.bottom = dot.top - 16
+    constrain mt.center_x = dot.center_x
+    constrain mt.top = dot.bottom + 16
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "2", title: "Git takes snapshots"]
+
+// The project folder
+group folder {
+    rect folder_bg [fill: git-panel, stroke: git-ink, stroke_width: 3, corner_radius: 16]
+    col folder_body [gap: 0] {
+        rect fhead [width: 520, height: 52, fill: git-paper2, stroke: none, corner_radius: 14,
+                    label: "webshop", align: start, font_size: 21, font_weight: 700, label_fill: git-ink]
+        file_row f_login [kind: "py", tint: git-main, name: "login.py", value: "84 lines"]
+        file_row f_style [kind: "css", tint: git-branch, name: "style.css", value: "210 lines"]
+        file_row f_cart [kind: "py", tint: git-main, name: "cart.py", value: "57 lines"]
+    }
+}
+constrain folder_bg contains folder_body [padding: 0]
+constrain folder_body.left = s.stage.left + 96
+constrain folder_body.top = s.stage.top + 214
+
+// Status under the folder: one of the two is on stage at a time.
+rect ok [appears: broke, fill: git-panel, stroke: git-ok, stroke_width: 3, corner_radius: 10,
+         label: "● checkout works", label_fill: git-ok, font_size: 22, font_weight: 700]
+rect bad [appears: later, fill: git-panel, stroke: git-lost, stroke_width: 3, corner_radius: 10,
+          label: "● checkout broken", label_fill: git-lost, font_size: 22, font_weight: 700]
+constrain ok.left = folder_body.left
+constrain ok.top = folder_body.bottom + 26
+constrain bad.left = ok.left
+constrain bad.center_y = ok.center_y
+
+// The timeline: a dotted rule, the line that grows, and the stations on it.
+path rule [through: [st1.dot, rule_end], stroke: git-rule, stroke_width: 5, fill: none,
+           stroke_dasharray: "1,16", extend_start: 60, class: dots]
+rect rule_end [width: 1, height: 1, fill: none, stroke: none]
+constrain rule_end.right = s.stage.right - 80
+constrain rule_end.center_y = st1.dot.center_y
+path track [through: [st1.dot, st2.dot, st3.dot], stroke: git-main, stroke_width: 14, fill: none]
+row stations [gap: 40, align: dot] {
+    station st1 [name: "Login page", meta: "anna · Mon 09:12"]
+    station st2 [name: "Dark mode", meta: "anna · Mon 16:40"]
+    station st3 [name: "Fix price rounding", meta: "ben · Tue 14:03"]
+}
+constrain stations.left = folder_body.right + 90
+constrain st1.dot.center_y = folder_body.center_y
+
+// A ring that marks where the project is now.
+circle ring [size: 68, fill: none, stroke: git-ink, stroke_width: 4, appears: go_back]
+constrain ring.center = st3.dot.center
+
+// The commit behind station 3.
+rect stick [width: 3, fill: git-ink, stroke: none, appears: details]
+group card [appears: details] {
+    rect card_bg [fill: git-panel, stroke: git-ink, stroke_width: 3, corner_radius: 14]
+    col card_body [gap: 10] {
+        rect ck [fill: none, stroke: none, font_size: 16, font_family: mono, label_fill: git-muted,
+                 label: "COMMIT <span fill=git-main>3f2a9c1</span>", align: start]
+        rect cm [fill: none, stroke: none, font_size: 26, font_weight: 700, label_fill: git-ink,
+                 label: "Fix price rounding", align: start, max_width: 400]
+        rect cmeta [fill: none, stroke: none, font_size: 17, font_family: mono, label_fill: git-muted,
+                    label: "ben · Tue 29 Sep, 14:03 · cart.py", align: start, max_width: 400]
+        rect minus [width: 390, fill: git-lost-soft, stroke: none, corner_radius: 6, font_size: 18,
+                    font_family: mono, label_fill: git-lost, label: "-    return s", align: start]
+        rect plus [width: 390, fill: git-ok-soft, stroke: none, corner_radius: 6, font_size: 18,
+                   font_family: mono, label_fill: git-ok, label: "+    return round(s, 2)", align: start]
+    }
+}
+constrain card_bg contains card_body [padding: 22]
+constrain card_body.right = s.stage.right - 80
+constrain card_body.top = st3.mt.bottom + 56
+constrain stick.center_x = st3.dot.center_x
+constrain stick.top = st3.mt.bottom + 6
+constrain stick.bottom = card_body.top - 22
+
+// ---------------------------------------------------------------- motion
+
+keyframe "intro" {
+    slide_in(s)
+    after 0.1 { show folder [enter: rise] }
+}
+
+keyframe "first_commit" {
+    commit(folder, st1, track)
+}
+
+keyframe "two_more" {
+    change(f_style, "246 lines")
+    then { commit(folder, st2, track) }
+}
+
+keyframe "and_another" [auto, after: 0.3] {
+    change(f_cart, "58 lines")
+    then { commit(folder, st3, track) }
+}
+
+keyframe "details" {
+    show stick [enter: wipe(down), duration: fast]
+    after 0.15 { show card [enter: pop] }
+}
+
+keyframe "broke" {
+    transform s.heading [label: "Broke something? Go back", swap: roll]
+    hide card, stick
+    show ok [enter: fade]
+    after 0.5 {
+        transform st3.dot [stroke: git-lost]
+        transform st3.nm [label_fill: git-lost]
+        pulse st3.dot [scale: 1.35]
+    }
+    after 0.25 {
+        swap ok -> bad [via: fade, duration: fast]
+        shake bad [delay: 0.05]
+    }
+}
+
+keyframe "go_back" {
+    show ring [enter: fade]
+    then {
+        move ring to st2.dot [duration: slow]
+        transform st3 [opacity: 0.28, delay: 0.2]
+    }
+    then {
+        flash folder
+        change(f_cart, "57 lines")
+        swap bad -> ok [via: fade, duration: fast]
+    }
+}

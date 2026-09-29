@@ -1,0 +1,153 @@
+/* Scene 4 of the git deck: "Branches and merge requests".
+   Render: agent-illustrator --stylesheet-css git-deck.css --animate git-branches.ail
+
+   STORYBOARD
+     main     the main line draws to "Price fix"; its stations pop
+     branch   feature/checkout branches off at 45 degrees; "New checkout", then "Card payments"
+     hotfix   main moves on: "Hotfix" lands on main under "Card payments"
+     review   a merge request opens: tests pass; Ben asks for a coupon test
+     fixed    the branch grows to "Review fixes"; the review turns into "Approved by Ben"
+     merge    the gate opens, the branch runs into the interchange and main carries on past it
+*/
+
+import "git-deck.ail"
+
+// A station: a ring on the line with its name above or below.
+template "stn" (name: "Station", side: below, tint: git-main, d: 38, w: 8) {
+    circle dot [size: d, fill: git-panel, stroke: tint, stroke_width: w, appears: later]
+    rect nm [caption_of: dot, label_position: side, label_offset: 8, label: name, font_size: 23,
+             font_weight: 700, label_fill: git-ink, fill: none, stroke: none, max_width: 200, appears: later]
+}
+
+// A check on the merge request: a tick and what it checks.
+template "check" (says: "check") {
+    rect bg [fill: git-warn, fill_opacity: 0.28, stroke: none, corner_radius: 8, opacity: 0]
+    row item [gap: 10, align: center] {
+        circle tick [size: 28, fill: git-ok, stroke: none, label: "✓", label_fill: git-panel,
+                     font_size: 17, font_weight: 800, appears: later]
+        rect txt [fill: none, stroke: none, label: says, font_size: 19, font_weight: 600,
+                  label_fill: git-ink, align: start, max_width: 200]
+    }
+    constrain bg contains item [padding: 4]
+}
+
+slide s [num: "4", title: "Branches and merge requests"]
+
+// The two lines, drawn under their stations.
+// Stations on a line get room for their names; the branch's flat run
+// stretches to fit and spreads its stations evenly.
+path main_line [through: [a.dot, b.dot, c.dot, hotfix.dot, merged.dot], extend_start: 100, extend_end: 90,
+                drawn: 0, stroke: git-main, stroke_width: 16, fill: none]
+path branch [through: [c.dot, l1.dot, l2.dot, l3.dot, merged.dot], routing: metro, spread: even, drawn: 0,
+             stroke: git-branch, stroke_width: 16, fill: none]
+
+row mains [gap: 50, align: dot] {
+    stn a [name: "Login page"]
+    stn b [name: "Dark mode"]
+    stn c [name: "Price fix"]
+}
+stn l1 [name: "New checkout", tint: git-branch, side: above]
+stn l2 [name: "Card payments", tint: git-branch, side: above]
+stn l3 [name: "Review fixes", tint: git-branch, side: above]
+stn hotfix [name: "Hotfix"]
+stn merged [name: "Merged", tint: git-ink, d: 56, w: 9]
+
+constrain mains.left = s.stage.left + 100
+constrain a.dot.center_y = s.stage.top + 580
+constrain l1.dot.center_x = c.dot.center_x + 230
+constrain l1.dot.center_y = a.dot.center_y - 230
+constrain l2.dot.center_y = l1.dot.center_y
+constrain l3.dot.center_y = l1.dot.center_y
+constrain hotfix.dot.center_x = l2.dot.center_x
+constrain hotfix.dot.center_y = a.dot.center_y
+constrain merged.dot.center_x = l3.dot.center_x + 230
+constrain merged.dot.center_y = a.dot.center_y
+
+rect main_tag [label: "main", fill: git-main, label_fill: git-panel, stroke: none, corner_radius: 18,
+               font_family: mono, font_weight: 600, font_size: 18, appears: later]
+rect branch_tag [label: "feature/checkout", fill: git-branch, label_fill: git-panel, stroke: none,
+                 corner_radius: 18, font_family: mono, font_weight: 600, font_size: 18, appears: later]
+constrain main_tag.left = a.dot.left - 70
+constrain main_tag.bottom = a.dot.top - 34
+constrain branch_tag.right = c.dot.left - 20
+constrain branch_tag.center_y = midpoint(c.dot, l1.dot)
+
+// The merge request, hanging over the interchange.
+group mr [appears: review] {
+    rect mr_bg [fill: git-panel, stroke: git-ink, stroke_width: 3, corner_radius: 14]
+    col mr_body [gap: 8] {
+        rect mr_kind [fill: none, stroke: none, font_size: 16, font_family: mono, label_fill: git-muted,
+                      label: "MERGE REQUEST <span fill=git-main>!42</span>", align: start]
+        rect mr_title [fill: none, stroke: none, font_size: 26, font_weight: 700, label_fill: git-ink,
+                       label: "New checkout", align: start, max_width: 250]
+        check tests [says: "218 tests passed", opacity: 0.3]
+        check review [says: "Ben: “add a test for coupons”", opacity: 0.3]
+    }
+}
+constrain mr_bg contains mr_body [padding: 20]
+constrain mr_body.right = s.stage.right - 60
+constrain mr_body.top = s.stage.top + 150
+gate_top.bottom -- merged.dot.top as gate [stroke: git-ink, stroke_width: 3, stroke_dasharray: "6,6",
+                                       routing: direct, appears: merge]
+
+// The gate drops straight from the card's bottom edge onto the interchange.
+rect gate_top [width: 1, height: 1, fill: none, stroke: none]
+constrain gate_top.center_x = merged.dot.center_x
+constrain gate_top.bottom = mr_body.bottom + 20
+
+// ---------------------------------------------------------------- motion
+
+motion station(st: element) {
+    show st.dot [enter: pop]
+    after 0.15 { show st.nm [enter: rise] }
+}
+
+keyframe "main" {
+    slide_in(s)
+    at 0.25 { draw main_line [to: c.dot, duration: slow] }
+    at 0.3 { show main_tag [enter: pop] }
+    at 0.35 { station(a) }
+    at 0.51 { station(b) }
+    at 0.67 { station(c) }
+}
+
+keyframe "branch" {
+    draw branch [to: l1.dot, duration: 0.6]
+    after 0.2 { show branch_tag [enter: pop] }
+    after 0.3 { station(l1) }
+    after 0.4 { draw branch [to: l2.dot, duration: fast] }
+    after 0.3 { station(l2) }
+}
+
+keyframe "hotfix" {
+    draw main_line [to: hotfix.dot, duration: 0.6]
+    after 0.5 { station(hotfix) }
+}
+
+keyframe "review" {
+    show mr [enter: pop]
+    after 0.6 {
+        transform tests [opacity: 1, duration: 0.2]
+        show tests.tick [enter: pop]
+    }
+    after 0.5 { transform review [opacity: 1]; transform review.bg [opacity: 1] }
+}
+
+keyframe "fixed" {
+    draw branch [to: l3.dot, duration: fast]
+    after 0.3 { station(l3) }
+    after 0.5 {
+        transform review.txt [label: "Approved by Ben", swap: fade]
+        transform review.bg [opacity: 0]
+    }
+    after 0.1 { show review.tick [enter: pop] }
+}
+
+keyframe "merge" {
+    show gate [enter: draw, duration: fast]
+    after 0.15 { draw branch [duration: 0.6] }
+    after 0.1 { draw main_line [duration: slow] }
+    after 0.35 { transform mr_bg [stroke: git-ok] }
+    after 0.05 { station(merged) }
+    after 0.45 { pulse merged.dot [scale: 1.2] }
+}

@@ -1,0 +1,70 @@
+// Scene 3 attempt, written from scratch by the workshop session to test ergonomics.
+import "ail:motion/git"
+
+template "history" () {
+    row dots [gap: 26] {
+        circle d1 [size: 18, fill: git-panel, stroke: git-main, stroke_width: 4]
+        circle d2 [size: 18, fill: git-panel, stroke: git-main, stroke_width: 4]
+        circle d3 [size: 18, fill: git-panel, stroke: git-main, stroke_width: 4]
+        circle d4 [size: 18, fill: git-panel, stroke: git-main, stroke_width: 4]
+    }
+    path h_track [through: [d1, d4], drawn: d3, stroke: git-main, stroke_width: 4, fill: none]
+}
+
+template "machine" (title: "Laptop", w: 300) {
+    rect m_bg [width: w, height: 150, fill: git-panel, stroke: git-ink, stroke_width: 3, corner_radius: 16]
+    rect m_head [width: w, height: 50, fill: git-paper2, stroke: none, corner_radius: 14,
+                 label: title, align: start, font_size: 21, font_weight: 700, label_fill: git-ink]
+    history hist
+    constrain m_head.top = m_bg.top
+    constrain m_head.left = m_bg.left
+    constrain hist.center_x = m_bg.center_x
+    constrain hist.center_y = m_bg.center_y + 25
+}
+
+rect stage [width: 1600, height: 900, fill: git-paper, stroke: none]
+constrain stage.left = 0
+constrain stage.top = 0
+
+machine hub [title: "GitLab", w: 320]
+constrain hub.center_x = stage.center_x
+constrain hub.top = stage.top + 196
+
+row laptops [gap: 200] {
+    machine anna [title: "Anna’s laptop"]
+    machine ben [title: "Ben’s laptop"]
+    machine chris [title: "Chris’s laptop"]
+}
+constrain laptops.center_x = stage.center_x
+constrain laptops.top = hub.bottom + 200
+
+hub -> anna as l_anna [stroke: git-rule, stroke_width: 5]
+hub -> ben as l_ben [stroke: git-rule, stroke_width: 5]
+hub -> chris as l_chris [stroke: git-rule, stroke_width: 5]
+
+keyframe "intro" {
+    hide anna.hist, ben.hist, chris.hist, l_anna, l_ben, l_chris
+    hide hub.hist.d4, anna.hist.d4, ben.hist.d4, chris.hist.d4
+    show hub [enter: pop]
+    after 0.2 { show laptops.* [enter: rise, stagger: 0.08] }
+}
+
+keyframe "clone" {
+    show l_anna, l_ben, l_chris [enter: draw, stagger: 0.1]
+    after 0.2 { show anna.hist, ben.hist, chris.hist [from: hub.hist, stagger: 0.14, ease: glide] }
+}
+
+keyframe "push_pull" {
+    show ben.hist.d4 [enter: pop]
+    draw ben.hist.h_track [to: ben.hist.d4]
+    then { fly ghost(ben.hist.d4) to hub.hist.d4 [ease: glide] }
+    then {
+        show hub.hist.d4 [enter: pop]
+        draw hub.hist.h_track [to: hub.hist.d4]
+    }
+    then { fly ghost(hub.hist.d4) to anna.hist.d4, chris.hist.d4 [ease: glide] }
+    then {
+        show anna.hist.d4, chris.hist.d4 [enter: pop]
+        draw anna.hist.h_track, chris.hist.h_track [to: 100%]
+    }
+}

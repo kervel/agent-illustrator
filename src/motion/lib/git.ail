@@ -1,0 +1,27 @@
+// Standard motion macros for git decks: `import "ail:motion/git"`.
+//
+// snapshot(src, station)  the source flashes, a copy of it flies onto the
+//                         timeline and becomes the station (dot + labels)
+// change(file, value)     a file row's value rolls to a new text, the row glows
+// commit(src, station, track)
+//                         snapshot, with the line growing to the new station
+// Stations are expected to have children `dot`, `nm` (name) and `mt` (meta).
+
+motion snapshot(src: element, station: element) {
+    flash src [duration: 0.4]
+    after 0.12 { fly ghost(src) to station.dot [arc: 0.12, duration: slow] }
+    then {
+        show station.dot [enter: pop]
+        after 0.15 { show station.nm, station.mt [enter: rise, stagger: 0.08] }
+    }
+}
+
+motion change(file: element, value: text) {
+    transform file.val [label: value, swap: roll]
+    highlight file [color: git-main]
+}
+
+motion commit(src: element, station: element, track: path) {
+    snapshot(src, station)
+    after 0.6 { draw track [to: station.dot, duration: fast] }
+}

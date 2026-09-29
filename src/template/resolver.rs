@@ -361,8 +361,12 @@ fn resolve_ail_template(
                 // Exports are metadata, skip during expansion
                 continue;
             }
-            Statement::TemplateInstance(nested_inst) => {
-                // Recursively expand nested template instances
+            Statement::TemplateInstance(_) => {
+                // A component inside a component: its name is scoped by the
+                // outer instance (`hub_hist`, addressed as `hub.hist`), and its
+                // arguments may use the outer template's parameters.
+                let scoped = substitute_parameters(stmt.clone(), param_values, instance_name);
+                let Statement::TemplateInstance(nested_inst) = &scoped.node else { unreachable!() };
                 let nested_expanded =
                     resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
                 expanded.extend(nested_expanded);
@@ -379,6 +383,9 @@ fn resolve_ail_template(
     // If there's only one shape, rename it to the instance name
     if expanded.len() == 1 {
         if let Statement::Shape(mut shape) = expanded[0].node.clone() {
+            if let Some(part) = &shape.name {
+                registry.collapsed_parts.push((part.node.0.clone(), instance_name.to_string()));
+            }
             shape.name = Some(Spanned::new(Identifier::new(instance_name), span.clone()));
             return Ok(vec![Spanned::new(Statement::Shape(shape), span.clone())]);
         }
@@ -413,8 +420,12 @@ fn resolve_inline_template(
                 // Anchors are processed separately and attached to the group
                 continue;
             }
-            Statement::TemplateInstance(nested_inst) => {
-                // Recursively expand nested template instances
+            Statement::TemplateInstance(_) => {
+                // A component inside a component: its name is scoped by the
+                // outer instance (`hub_hist`, addressed as `hub.hist`), and its
+                // arguments may use the outer template's parameters.
+                let scoped = substitute_parameters(stmt.clone(), param_values, instance_name);
+                let Statement::TemplateInstance(nested_inst) = &scoped.node else { unreachable!() };
                 let nested_expanded =
                     resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
                 expanded.extend(nested_expanded);
@@ -440,6 +451,9 @@ fn resolve_inline_template(
     if expanded.len() == 1 && prefixed_anchors.is_empty() {
         // Rename the single element to the instance name
         if let Statement::Shape(mut shape) = expanded[0].node.clone() {
+            if let Some(part) = &shape.name {
+                registry.collapsed_parts.push((part.node.0.clone(), instance_name.to_string()));
+            }
             shape.name = Some(Spanned::new(Identifier::new(instance_name), span.clone()));
             return Ok(vec![Spanned::new(Statement::Shape(shape), span.clone())]);
         }
@@ -538,8 +552,61 @@ fn substitute_parameters(
                     name.node = Identifier::new(format!("{}_{}", prefix, name.node.0));
                 }
             }
+            // `text "{name}" t`: a template's text can say its parameters.
+            if let ShapeType::Text { ref mut content } = shape.shape_type.node {
+                for (k, v) in params {
+                    let needle = format!("{{{}}}", k);
+                    if content.contains(&needle) {
+                        let text = match v {
+                            StyleValue::String(s) | StyleValue::Keyword(s) => s.clone(),
+                            StyleValue::Number { value, .. } => format!("{}", value),
+                            StyleValue::Identifier(id) => id.0.clone(),
+                            _ => continue,
+                        };
+                        *content = content.replace(&needle, &text);
+                    }
+                }
+            }
             // Substitute parameters in modifiers
             shape.modifiers = substitute_modifiers(&shape.modifiers, params);
+            // A line routed through siblings names them: scope those names too.
+            let scope_list = |mods: &mut Vec<Spanned<StyleModifier>>| {
+                for m in mods.iter_mut() {
+                    // `caption_of: dot` names a sibling inside the template.
+                    if matches!(&m.node.key.node, StyleKey::CaptionOf) {
+                        if let StyleValue::Identifier(id) = &m.node.value.node {
+                            let local = id.0.replace('.', "_");
+                            m.node.value.node = StyleValue::Identifier(Identifier::new(format!("{}_{}", prefix, local)));
+                        }
+                        continue;
+                    }
+                    if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "drawn") {
+                        if let StyleValue::Identifier(id) = &m.node.value.node {
+                            if id.0 != "none" {
+                                let local = id.0.replace('.', "_");
+                                m.node.value.node = StyleValue::Identifier(Identifier::new(format!("{}_{}", prefix, local)));
+                            }
+                        }
+                        continue;
+                    }
+                    if !matches!(&m.node.key.node, StyleKey::Custom(k) if k == "through") {
+                        continue;
+                    }
+                    if let StyleValue::List(items) = &mut m.node.value.node {
+                        for it in items.iter_mut() {
+                            if let StyleValue::Identifier(id) = &it.node {
+                                let local = id.0.replace('.', "_");
+                                it.node = StyleValue::Identifier(Identifier::new(format!("{}_{}", prefix, local)));
+                            }
+                        }
+                    }
+                }
+            };
+            scope_list(&mut shape.modifiers);
+            if let ShapeType::Path(ref mut path_decl) = shape.shape_type.node {
+                path_decl.modifiers = substitute_modifiers(&path_decl.modifiers, params);
+                scope_list(&mut path_decl.modifiers);
+            }
             Spanned::new(Statement::Shape(shape), stmt.span)
         }
         Statement::Layout(mut layout) => {
@@ -589,6 +656,24 @@ fn substitute_parameters(
                 Statement::Constrain(ConstrainDecl { expr: new_expr, name: decl.name.clone() }),
                 stmt.span,
             )
+        }
+        Statement::TemplateInstance(mut inst) => {
+            inst.instance_name.node = Identifier::new(format!("{}_{}", prefix, inst.instance_name.node.0));
+            inst.arguments = inst
+                .arguments
+                .into_iter()
+                .map(|(k, v)| {
+                    let v = match &v.node {
+                        StyleValue::Identifier(id) => match params.get(id.as_str()) {
+                            Some(p) => Spanned::new(p.clone(), v.span.clone()),
+                            None => v,
+                        },
+                        _ => v,
+                    };
+                    (k, v)
+                })
+                .collect();
+            Spanned::new(Statement::TemplateInstance(inst), stmt.span)
         }
         // Other statements pass through
         _ => stmt,

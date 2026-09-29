@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 630 424.5685424949238">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 630 444.5685424949238" font-size="14">
   <!-- agent-illustrator dev -->
-  <style>
+  <style><![CDATA[
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -18,6 +18,8 @@
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -112,7 +114,7 @@
   fill: var(--text-light);
 }
 
-  </style>
+  ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
@@ -126,7 +128,7 @@
           <circle cx="30" cy="18" r="12" fill="#666"/>
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
         </g>
-        <rect id="label_bg" class="ai-shape ai-rect" x="15" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="alice_name" class="ai-shape ai-rect" x="15" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
         <text class="ai-label" x="50" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="50" dy="-0"><tspan>Alice</tspan></tspan></text>
       </g>
     </g>
@@ -137,7 +139,7 @@
           <circle cx="30" cy="18" r="12" fill="#666"/>
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
         </g>
-        <rect id="label_bg" class="ai-shape ai-rect" x="235" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="bob_name" class="ai-shape ai-rect" x="235" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
         <text class="ai-label" x="270" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="270" dy="-0"><tspan>Bob</tspan></tspan></text>
       </g>
     </g>
@@ -148,38 +150,38 @@
           <circle cx="30" cy="18" r="12" fill="#666"/>
           <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
         </g>
-        <rect id="label_bg" class="ai-shape ai-rect" x="455" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="charlie_name" class="ai-shape ai-rect" x="455" y="79" width="70" height="20" fill="none" stroke="none" stroke-width="1.5"/>
         <text class="ai-label" x="490" y="89" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="490" dy="-0"><tspan>Charlie</tspan></tspan></text>
       </g>
     </g>
   </g>
   <g id="logo_section" class="ai-container">
-    <image id="company_logo" class="ai-raster-image" href="assets/logo.png" x="170" y="139" width="200" height="50"/>
-    <text id="logo_label" class="ai-shape ai-text" x="229.99" y="202" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
+    <image id="company_logo" class="ai-raster-image" href="assets/logo.png" x="170" y="149" width="200" height="50"/>
+    <text id="logo_label" class="ai-shape ai-text" x="229.99" y="212" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">PNG raster image</text>
   </g>
   <g id="rotated_icons" class="ai-container">
-    <g id="i0" class="ai-svg-embed" transform="translate(155.85786437626905, 251.2842712474619) scale(1, 0.8163265306122449) translate(-10, -6)">
+    <g id="i0" class="ai-svg-embed" transform="translate(155.85786437626905, 266.2842712474619) scale(1, 0.8163265306122449) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
-    <g id="i15" class="ai-svg-embed" transform="translate(211.36296694843728, 246.7893738196301) scale(1.2247448713915887, 0.9997917317482368) rotate(15 20 24.5) translate(-10, -6)">
+    <g id="i15" class="ai-svg-embed" transform="translate(211.36296694843728, 261.7893738196301) scale(1.2247448713915887, 0.9997917317482368) rotate(15 20 24.5) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
-    <g id="i30" class="ai-svg-embed" transform="translate(268.53735630058026, 243.96376317177314) scale(1.3660254037844386, 1.1151227785995415) rotate(30 20 24.5) translate(-10, -6)">
+    <g id="i30" class="ai-svg-embed" transform="translate(268.53735630058026, 258.96376317177317) scale(1.3660254037844386, 1.1151227785995415) rotate(30 20 24.5) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
-    <g id="i45" class="ai-svg-embed" transform="translate(327.57359312880715, 243) scale(1.4142135623730951, 1.1544600509168124) rotate(45 20 24.5) translate(-10, -6)">
+    <g id="i45" class="ai-svg-embed" transform="translate(327.57359312880715, 258) scale(1.4142135623730951, 1.1544600509168124) rotate(45 20 24.5) translate(-10, -6)">
       <!-- Simple person icon: head + shoulders -->
       <circle cx="30" cy="18" r="12" fill="#666"/>
       <path d="M10 55 Q10 35 30 35 Q50 35 50 55" fill="#666"/>
     </g>
   </g>
-  <text id="rotation_label" class="ai-shape ai-text" x="201.34499999999997" y="314.5685424949238" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
+  <text id="rotation_label" class="ai-shape ai-text" x="201.34499999999997" y="334.5685424949238" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--text-3)">Rotation: 0, 15, 30, 45 degrees</text>
   <text class="ai-label" x="155" y="35" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="155" dy="-0"><tspan>works with</tspan></tspan></text>
   <text class="ai-label" x="375" y="35" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="375" dy="-0"><tspan>mentors</tspan></tspan></text>
   <path class="ai-connection" d="M79 45 L223.8 45" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
