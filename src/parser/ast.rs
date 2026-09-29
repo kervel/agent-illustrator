@@ -664,6 +664,46 @@ pub enum StyleKey {
     Custom(String),
 }
 
+impl StyleKey {
+    /// The key as written in source (`font_size`, `label_fill`, ...).
+    pub fn source_name(&self) -> String {
+        match self {
+            StyleKey::Fill => "fill",
+            StyleKey::Stroke => "stroke",
+            StyleKey::StrokeWidth => "stroke_width",
+            StyleKey::Opacity => "opacity",
+            StyleKey::FillOpacity => "fill_opacity",
+            StyleKey::StrokeOpacity => "stroke_opacity",
+            StyleKey::Label => "label",
+            StyleKey::LabelPosition => "label_position",
+            StyleKey::CaptionOf => "caption_of",
+            StyleKey::FontSize => "font_size",
+            StyleKey::Class => "class",
+            StyleKey::Gap => "gap",
+            StyleKey::Size => "size",
+            StyleKey::Width => "width",
+            StyleKey::Height => "height",
+            StyleKey::Routing => "routing",
+            StyleKey::Role => "role",
+            StyleKey::X => "x",
+            StyleKey::Y => "y",
+            StyleKey::StrokeDasharray => "stroke_dasharray",
+            StyleKey::Rotation => "rotation",
+            StyleKey::LabelAt => "label_at",
+            StyleKey::LabelOffset => "label_offset",
+            StyleKey::ZOrder => "z_order",
+            StyleKey::Pointer => "pointer",
+            StyleKey::Dx => "dx",
+            StyleKey::Dy => "dy",
+            StyleKey::Scale => "scale",
+            StyleKey::Align => "align",
+            StyleKey::LabelFill => "label_fill",
+            StyleKey::Custom(s) => return s.clone(),
+        }
+        .to_string()
+    }
+}
+
 /// Style values
 #[derive(Debug, Clone, PartialEq)]
 pub enum StyleValue {

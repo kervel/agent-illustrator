@@ -423,10 +423,13 @@ pub fn template_source(name: &str, spec: &CodeSpec, inserts: &[Insert]) -> Strin
     let mut stack: Vec<String> = Vec::new();
     if let Some(t) = &spec.title {
         s.push_str(&format!(
-            "    rect title [width: {w}, height: 46, fill: code-title-bg, stroke: none, corner_radius: 11, \
-             label: {l}, font_size: 19, font_weight: 700, label_fill: code-title, align: start]\n",
+            "    rect title [width: {w}, height: {h}, fill: code-title-bg, stroke: none, corner_radius: 11, \
+             label: {l}, font_size: {f}, font_weight: 700, label_fill: code-title, align: start]\n",
             w = width,
-            l = lit(t)
+            l = lit(t),
+            // The title grows with the code (19px at the default 17).
+            f = (fs * 19.0 / 17.0).round(),
+            h = (fs * 46.0 / 17.0).round()
         ));
         s.push_str(&format!("    rect title_rule [width: {}, height: 3, fill: code-frame, stroke: none]\n", width));
         stack.push("title".into());

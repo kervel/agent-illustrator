@@ -2,8 +2,8 @@
    Render: agent-illustrator --stylesheet-css git-deck.css --animate git-merge.ail
 
    STORYBOARD
-     two       Anna's and Ben's copies of cart.py: Ben changed line 1, Anna line 8
-     combine   both slide into the middle and become one merged file; a tick pops
+     two       Anna's and Ben's copies of cart.py side by side: Ben changed line 1, Anna line 8
+     combine   both fly into the middle and become one merged file, large; a tick pops
      conflict  line 8 was changed by both: it opens into a conflict, a card asks
      choose    keep Anna's: the conflict closes, her line 8 comes back, the tick returns
 */
@@ -12,44 +12,45 @@ import "git-deck.ail"
 
 slide s [num: "5", title: "Git combines the changes"]
 
-code anna [lang: python, title: "<span fill=role-series-1>●</span>  cart.py · Anna", marks: "8:role-series-1-soft",
+code anna [lang: python, font_size: 18, title: "<span fill=role-series-1>●</span>  cart.py · Anna", marks: "8:role-series-1-soft",
            source: "def total(cart):\n    s = 0\n    for item in cart:\n        s += item.price * item.qty\n    return round(s, 2)\n\ndef shipping(total):\n    return 0 if total > 40 else 4.95"]
 code merged [lang: python, title: "cart.py · merged", marks: "1:role-series-2-soft, 8:role-series-1-soft",
-             appears: later,
+             appears: later, font_size: 24,
              source: "def total(cart, coupon=None):\n    s = 0\n    for item in cart:\n        s += item.price * item.qty\n    return round(s, 2)\n\ndef shipping(total):\n    return 0 if total > 40 else 4.95"]
-code ben [lang: python, title: "<span fill=role-series-2>●</span>  cart.py · Ben", marks: "1:role-series-2-soft",
+code ben [lang: python, font_size: 18, title: "<span fill=role-series-2>●</span>  cart.py · Ben", marks: "1:role-series-2-soft",
           source: "def total(cart, coupon=None):\n    s = 0\n    for item in cart:\n        s += item.price * item.qty\n    return round(s, 2)\n\ndef shipping(total):\n    return 0 if total > 50 else 4.95"]
 
-constrain merged.bg.center_x = s.stage.center_x
-constrain merged.bg.top = s.stage.top + 200
-constrain anna.bg.right = merged.bg.left - 14
-constrain anna.bg.top = merged.bg.top
-constrain ben.bg.left = merged.bg.right + 14
-constrain ben.bg.top = merged.bg.top
+// The two copies side by side; the merged file, larger, takes their place.
+constrain anna.bg.right = s.stage.center_x - 20
+constrain anna.bg.top = s.stage.top + 200
+constrain ben.bg.left = s.stage.center_x + 20
+constrain ben.bg.top = s.stage.top + 200
+constrain merged.bg.left = s.stage.left + 272   // merged file + card centred on the stage
+constrain merged.bg.top = s.stage.top + 170
 
 // The tick on the merged file's corner.
-circle ok [size: 44, fill: role-ok, stroke: role-backdrop, stroke_width: 3, label: "✓", label_fill: role-surface,
+circle ok [size: 52, fill: role-ok, stroke: role-backdrop, stroke_width: 3, label: "✓", label_fill: role-surface,
            font_size: 24, font_weight: 800, appears: later, overlaps: merged]
 constrain ok.center_x = merged.bg.left + 2
 constrain ok.center_y = merged.bg.top + 2
 
-// The choice, under the merged file (it follows the file as it grows).
+// The choice, beside the merged file, level with the conflict.
 group card [appears: later] {
     rect card_bg [fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
     col card_body [gap: 14, align: center] {
-        rect card_t [fill: none, stroke: none, label: "Same line, two versions", font_size: 25, font_weight: 700,
+        rect card_t [fill: none, stroke: none, label: "Same line, two versions", font_size: 28, font_weight: 700,
                      label_fill: role-ink]
         row choices [gap: 14] {
-            rect keep_anna [label: "Keep Anna’s", font_family: mono, font_size: 19, font_weight: 600, label_fill: role-ink,
+            rect keep_anna [label: "Keep Anna’s", font_family: mono, font_size: 22, font_weight: 600, label_fill: role-ink,
                             fill: role-surface, stroke: role-series-1, stroke_width: 3, corner_radius: 10]
-            rect keep_ben [label: "Keep Ben’s", font_family: mono, font_size: 19, font_weight: 600, label_fill: role-ink,
+            rect keep_ben [label: "Keep Ben’s", font_family: mono, font_size: 22, font_weight: 600, label_fill: role-ink,
                            fill: role-surface, stroke: role-series-2, stroke_width: 3, corner_radius: 10]
         }
     }
 }
 constrain card_bg contains card_body [padding: 22]
-constrain card_body.center_x = merged.bg.center_x
-constrain card_body.top = merged.bg.bottom + 48
+constrain card_body.left = merged.bg.right + 70
+constrain card_body.center_y = merged.line7.bottom + 60
 
 // ---------------------------------------------------------------- motion
 

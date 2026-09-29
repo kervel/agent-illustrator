@@ -565,46 +565,46 @@ svg[data-ail-player] * { transition: none !important; }
   <g class="kf-hidden kf-5c4c8f27-stick kf-anim" style="transform-origin:1252.35px 450px">
     <rect id="stick" class="ai-shape ai-rect kfp-5c4c8f27-stick" x="1250.852" y="436" width="3" height="28" fill="var(--role-ink)" stroke="none" stroke-width="1.5"/>
   </g>
-  <g class="kf-hidden kf-5c4c8f27-card kf-anim" style="transform-origin:1312.5px 605.88px">
+  <g class="kf-hidden kf-5c4c8f27-card kf-anim" style="transform-origin:1301.5px 607.88px">
     <g id="card" class="ai-container kfp-5c4c8f27-card">
-      <g class="kf-5c4c8f27-card_bg kf-anim" style="transform-origin:1312.5px 605.88px">
-        <rect id="card_bg" class="ai-shape ai-rect kfp-5c4c8f27-card_bg" x="1083" y="464" width="459" height="283.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      <g class="kf-5c4c8f27-card_bg kf-anim" style="transform-origin:1301.5px 607.88px">
+        <rect id="card_bg" class="ai-shape ai-rect kfp-5c4c8f27-card_bg" x="1061" y="464" width="481" height="287.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
       </g>
-      <g class="kf-5c4c8f27-card_body kf-anim" style="transform-origin:1312.5px 605.88px">
+      <g class="kf-5c4c8f27-card_body kf-anim" style="transform-origin:1301.5px 607.88px">
         <g id="card_body" class="ai-container kfp-5c4c8f27-card_body">
-          <g class="kf-5c4c8f27-ck kf-anim" style="transform-origin:1186.99px 509px">
-            <rect id="ck" class="ai-shape ai-rect kfp-5c4c8f27-ck" x="1110" y="491" width="153.984" height="36" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="1118" y="509" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1118" dy="-0"><tspan>COMMIT </tspan><tspan fill="var(--role-primary)">3f2a9c1</tspan></tspan></text>
+          <g class="kf-5c4c8f27-ck kf-anim" style="transform-origin:1164.99px 509px">
+            <rect id="ck" class="ai-shape ai-rect kfp-5c4c8f27-ck" x="1088" y="491" width="153.984" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1096" y="509" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>COMMIT </tspan><tspan fill="var(--role-primary)">3f2a9c1</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-cm kf-anim" style="transform-origin:1226.48px 561.25px">
-            <rect id="cm" class="ai-shape ai-rect kfp-5c4c8f27-cm" x="1110" y="537" width="232.9531" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="1118" y="561.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1118" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
+          <g class="kf-5c4c8f27-cm kf-anim" style="transform-origin:1204.48px 561.25px">
+            <rect id="cm" class="ai-shape ai-rect kfp-5c4c8f27-cm" x="1088" y="537" width="232.9531" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1096" y="561.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1096" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-cmeta kf-anim" style="transform-origin:1290.79px 614.13px">
-            <rect id="cmeta" class="ai-shape ai-rect kfp-5c4c8f27-cmeta" x="1110" y="595.5" width="361.576" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="1118" y="614.125" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1118" dy="-0"><tspan>ben · Tue 29 Sep, 14:03 · cart.py</tspan></tspan></text>
+          <g class="kf-5c4c8f27-cmeta kf-anim" style="transform-origin:1268.79px 614.13px">
+            <rect id="cmeta" class="ai-shape ai-rect kfp-5c4c8f27-cmeta" x="1088" y="595.5" width="361.576" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1096" y="614.125" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>ben · Tue 29 Sep, 14:03 · cart.py</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-diff_rule kf-anim" style="transform-origin:1310px 643.75px">
-            <rect id="diff_rule" class="ai-shape ai-rect kfp-5c4c8f27-diff_rule" x="1110" y="642.75" width="400" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+          <g class="kf-5c4c8f27-diff_rule kf-anim" style="transform-origin:1288px 643.75px">
+            <rect id="diff_rule" class="ai-shape ai-rect kfp-5c4c8f27-diff_rule" x="1088" y="642.75" width="400" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
           </g>
-          <g class="kf-5c4c8f27-diff kf-anim" style="transform-origin:1312.5px 687.75px">
+          <g class="kf-5c4c8f27-diff kf-anim" style="transform-origin:1301.5px 689.75px">
             <g id="diff" class="ai-container kfp-5c4c8f27-diff">
-              <g class="kf-5c4c8f27-diff_bg kf-anim" style="transform-origin:1312.5px 687.75px">
-                <rect id="diff_bg" class="ai-shape ai-rect kfp-5c4c8f27-diff_bg" x="1110" y="654.75" width="405" height="66" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-5c4c8f27-diff_bg kf-anim" style="transform-origin:1301.5px 689.75px">
+                <rect id="diff_bg" class="ai-shape ai-rect kfp-5c4c8f27-diff_bg" x="1088" y="654.75" width="427" height="70" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-diff_top_pad kf-anim" style="transform-origin:1312.5px 657.75px">
-                <rect id="diff_top_pad" class="ai-shape ai-rect kfp-5c4c8f27-diff_top_pad" x="1113" y="657.75" width="399" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-5c4c8f27-diff_top_pad kf-anim" style="transform-origin:1301.5px 657.75px">
+                <rect id="diff_top_pad" class="ai-shape ai-rect kfp-5c4c8f27-diff_top_pad" x="1091" y="657.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-diff_line1 kf-anim" style="transform-origin:1312.5px 671.75px">
-                <rect id="diff_line1" class="ai-shape ai-rect kfp-5c4c8f27-diff_line1" x="1113" y="657.75" width="399" height="28" fill="var(--code-del-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
-                <text class="ai-label" x="1121" y="671.75" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1121" dy="-0"><tspan fill="var(--code-del-strong)">- </tspan><tspan fill="var(--code-del)">    return </tspan><tspan font-weight="bold" fill="var(--code-del-strong)">s</tspan></tspan></text>
+              <g class="kf-5c4c8f27-diff_line1 kf-anim" style="transform-origin:1301.5px 672.75px">
+                <rect id="diff_line1" class="ai-shape ai-rect kfp-5c4c8f27-diff_line1" x="1091" y="657.75" width="421" height="30" fill="var(--code-del-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
+                <text class="ai-label" x="1099" y="672.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-del-strong)">- </tspan><tspan fill="var(--code-del)">    return </tspan><tspan font-weight="bold" fill="var(--code-del-strong)">s</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-diff_line2 kf-anim" style="transform-origin:1312.5px 703.75px">
-                <rect id="diff_line2" class="ai-shape ai-rect kfp-5c4c8f27-diff_line2" x="1113" y="689.75" width="399" height="28" fill="var(--code-add-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
-                <text class="ai-label" x="1121" y="703.75" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1121" dy="-0"><tspan fill="var(--code-add-strong)">+ </tspan><tspan fill="var(--code-add)">    return </tspan><tspan font-weight="bold" fill="var(--code-add-strong)">round(s, 2)</tspan></tspan></text>
+              <g class="kf-5c4c8f27-diff_line2 kf-anim" style="transform-origin:1301.5px 706.75px">
+                <rect id="diff_line2" class="ai-shape ai-rect kfp-5c4c8f27-diff_line2" x="1091" y="691.75" width="421" height="30" fill="var(--code-add-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
+                <text class="ai-label" x="1099" y="706.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-add-strong)">+ </tspan><tspan fill="var(--code-add)">    return </tspan><tspan font-weight="bold" fill="var(--code-add-strong)">round(s, 2)</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-diff_bottom_pad kf-anim" style="transform-origin:1312.5px 717.75px">
-                <rect id="diff_bottom_pad" class="ai-shape ai-rect kfp-5c4c8f27-diff_bottom_pad" x="1113" y="717.75" width="399" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-5c4c8f27-diff_bottom_pad kf-anim" style="transform-origin:1301.5px 721.75px">
+                <rect id="diff_bottom_pad" class="ai-shape ai-rect kfp-5c4c8f27-diff_bottom_pad" x="1091" y="721.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
             </g>
           </g>

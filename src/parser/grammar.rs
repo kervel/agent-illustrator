@@ -1450,24 +1450,13 @@ where
                 let arguments: Vec<(Spanned<Identifier>, Spanned<StyleValue>)> = mods
                     .unwrap_or_default()
                     .into_iter()
-                    .filter_map(|m| {
-                        // Convert StyleKey to Identifier
-                        let key_str = match &m.node.key.node {
-                            StyleKey::Fill => "fill".to_string(),
-                            StyleKey::Stroke => "stroke".to_string(),
-                            StyleKey::StrokeWidth => "stroke_width".to_string(),
-                            StyleKey::Size => "size".to_string(),
-                            StyleKey::Width => "width".to_string(),
-                            StyleKey::Height => "height".to_string(),
-                            StyleKey::Label => "label".to_string(),
-                            StyleKey::Rotation => "rotation".to_string(),
-                            StyleKey::Custom(s) => s.clone(),
-                            _ => return None,
-                        };
-                        Some((
-                            Spanned::new(Identifier::new(key_str), m.node.key.span),
+                    .map(|m| {
+                        // Every key: one left out here was silently dropped
+                        // (`code c [font_size: 24]` did nothing).
+                        (
+                            Spanned::new(Identifier::new(m.node.key.node.source_name()), m.node.key.span),
                             m.node.value,
-                        ))
+                        )
                     })
                     .collect();
 

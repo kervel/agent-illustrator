@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.1
+
+- Template instances pass every argument through. Arguments whose key is a
+  built-in style key (`font_size`, `opacity`, `label_fill`, `align`, ...) were
+  silently dropped unless they were one of fill/stroke/stroke_width/size/
+  width/height/label/rotation: `code c [font_size: 24]` did nothing.
+- A code block's title bar scales with its `font_size`.
+- Scene 5 (examples/motion/git-merge.ail) reworked for slides: the copies side
+  by side, then the merged file large (24px code) with the choice beside it;
+  at 1200x675 cropped the code reads at 22px (the copies at 17px).
+
 ## v0.2.0
 
 ### Code, artwork, themes (the author/integrator round)
