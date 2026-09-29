@@ -1202,7 +1202,6 @@ fn resolve_shape_label(
 }
 
 /// Advance of a monospace glyph, in em (Overpass Mono, Consolas, Menlo: 0.6).
-pub(crate) const MONO_ADVANCE: f64 = 0.6;
 
 fn is_mono(modifiers: &[Spanned<StyleModifier>]) -> bool {
     modifiers.iter().any(|m| {
@@ -1221,7 +1220,7 @@ fn mono_width(rich: &crate::layout::text::RichText, font_size: f64) -> f64 {
         .iter()
         .map(|line| {
             line.iter()
-                .map(|r| r.text.chars().count() as f64 * MONO_ADVANCE * font_size * r.scale)
+                .map(|r| r.text.chars().count() as f64 * crate::layout::text::mono_advance() * font_size * r.scale)
                 .sum::<f64>()
         })
         .fold(0.0, f64::max)
@@ -1304,7 +1303,7 @@ fn compute_shape_size(
             let font_size = extract_font_size(&shape.modifiers).unwrap_or(14.0);
             // Approximate width: ~0.6 * font_size per character
             let estimated_width = if is_mono(&shape.modifiers) {
-                content.chars().count() as f64 * MONO_ADVANCE * font_size
+                content.chars().count() as f64 * crate::layout::text::mono_advance() * font_size
             } else {
                 measure_str(content, font_size) * font_width_factor(&shape.modifiers)
             };

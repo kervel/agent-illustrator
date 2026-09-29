@@ -16,6 +16,8 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
+mod serve;
+
 use agent_illustrator::{
     frame_names, render_with_config, render_with_lint, ImageHrefMode, LintCategory, RenderConfig,
     Stylesheet,
@@ -113,9 +115,10 @@ struct Cli {
     #[arg(short, long)]
     stylesheet: Option<PathBuf>,
 
-    /// CSS file to inject into the SVG <style> block
+    /// CSS file to inject into the SVG <style> block. Repeat to layer them
+    /// in order (a theme, then deck overrides): later files win.
     #[arg(long)]
-    stylesheet_css: Option<PathBuf>,
+    stylesheet_css: Vec<PathBuf>,
 
     /// Debug mode: show container bounds and element IDs
     #[arg(short, long)]
@@ -212,6 +215,34 @@ struct Cli {
     /// List the keyframe names in the input and exit
     #[arg(long)]
     list_frames: bool,
+
+    /// List the click steps and exit: one line per step, its index and its
+    /// frames (the frame a click plays, then any `[auto]` frames that follow
+    /// by themselves). A host needs one fragment per step.
+    #[arg(long)]
+    list_steps: bool,
+
+    /// Make the picture the content, not the stage: the union of what every
+    /// frame shows, plus this margin (default 24). One box for all frames, so
+    /// nothing jumps; for embedding under a host's own header.
+    #[arg(long, value_name = "PAD", num_args = 0..=1, default_missing_value = "24")]
+    crop_to_content: Option<f64>,
+
+    /// Live preview in the browser: the real player, arrow keys step, a
+    /// scrubber for the current frame, reload on save (the file, its folder,
+    /// the stylesheets). Default port 8420.
+    #[arg(long, value_name = "PORT", num_args = 0..=1, default_missing_value = "8420")]
+    serve: Option<u16>,
+
+    /// Write an HTML page showing click-step STEP (its frame and the [auto]
+    /// frames after it) sampled every --film-every seconds by the browser
+    /// player: a film strip for spotting flicker and jumps.
+    #[arg(long, value_name = "STEP")]
+    film: Option<usize>,
+
+    /// Sampling interval for --film, in seconds.
+    #[arg(long, value_name = "SECONDS", default_value = "0.05")]
+    film_every: f64,
 
     /// Embed minimal JS for self-contained animated playback
     #[arg(long)]
@@ -350,15 +381,13 @@ fn main() {
     };
 
     // Load custom CSS
-    let custom_css = match &cli.stylesheet_css {
-        Some(path) => match fs::read_to_string(path) {
-            Ok(css) => Some(css),
-            Err(e) => {
-                eprintln!("Error loading CSS '{}': {}", path.display(), e);
-                std::process::exit(1);
-            }
-        },
-        None => None,
+    // Several stylesheets layer in order (later wins).
+    let custom_css = match serve::load_css(&cli.stylesheet_css) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
     };
 
     // Render with stylesheet, debug mode, and trace mode
@@ -373,6 +402,7 @@ fn main() {
     config.animate_css = cli.animate_css;
     config.no_frame_css = cli.no_frame_css;
     config.at = cli.at.clone();
+    config.crop = cli.crop_to_content;
     config.timeline = cli.timeline;
     config.timeline_json = cli.timeline_json;
     if let Some(css) = custom_css {
@@ -383,6 +413,47 @@ fn main() {
         if let Some(parent) = path.parent() {
             config = config.with_template_base_path(parent.to_path_buf());
         }
+    }
+
+    if let Some(port) = cli.serve {
+        let Some(input) = cli.input.clone() else {
+            eprintln!("Error: --serve needs an input file (it watches it for changes)");
+            std::process::exit(2);
+        };
+        if let Err(e) = serve::serve(input, cli.stylesheet_css.clone(), config, port) {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+        return;
+    }
+
+    if let Some(step) = cli.film {
+        let mut c = config;
+        c.animate = true;
+        match render_with_config(&source, c) {
+            Ok(svg) => print!("{}", serve::film(&svg, step, cli.film_every.max(0.01))),
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+
+    if cli.list_steps {
+        match agent_illustrator::step_frames(&source) {
+            Ok(steps) if steps.is_empty() => eprintln!("no keyframes in input"),
+            Ok(steps) => {
+                for (i, frames) in steps.iter().enumerate() {
+                    println!("{}\t{}", i, frames.join(" "));
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        return;
     }
 
     if cli.list_frames {
@@ -520,6 +591,11 @@ fn print_skill() {
 
 fn print_skill_animation() {
     print!("{}", include_str!("../docs/skill-animation.md"));
+    // The built-in library ships in the binary; show it, contract and all.
+    print!(
+        "\n## Appendix: the built-in `ail:motion/git` library\n\n```\n{}```\n",
+        include_str!("motion/lib/git.ail")
+    );
 }
 
 fn print_skill_find_clipart() {

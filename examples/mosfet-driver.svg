@@ -3,39 +3,82 @@
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --accent-light: #e3f2fd;
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
     --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
     --background-light: #ffffff;
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --foreground-light: #e0e0e0;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
     --kpv-amber: #FFB31B;
     --kpv-burgundy: #5a322b;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --secondary-light: #fff3e0;
-    --status-error: #f44336;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --text-1: #333333;
-    --text-2: #666666;
-    --text-3: #999999;
-    --text-dark: #1a1a1a;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #f6dedb;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
     --text-light: #ffffff;
   }
-
-    /* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
+  .ai-on-dark { fill: var(--text-light); }
+    
+/* /home/kervel/projects/agent-illustrator/examples/../stylesheets/kapernikov-schematic.css */
+/* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */
 
@@ -83,6 +126,31 @@
   --status-success: #1E9F49;     /* Emerald */
   --status-warning: #DD8028;     /* Tangerine */
   --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
 }
 
 /* Typography */
@@ -101,7 +169,6 @@
 [fill="var(--foreground-dark)"] + .ai-label {
   fill: var(--text-light);
 }
-
   ]]></style>
   <g id="vcc_12v" class="ai-container">
     <rect id="vcc_12v_rail" class="ai-shape ai-rect" x="420" y="20" width="60" height="4" fill="var(--secondary-dark)" stroke="none" stroke-width="1.5"/>
@@ -173,7 +240,7 @@
   </g>
   <g id="gpio" class="ai-container">
     <rect id="gpio_body" class="ai-shape ai-rect" x="5" y="80" width="50" height="20" fill="var(--accent-2)" stroke="var(--accent-1)" stroke-width="1.5"/>
-    <text class="ai-label" x="30" y="90" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="30" dy="-0"><tspan>GPIO_4</tspan></tspan></text>
+    <text class="ai-label ai-on-dark" x="30" y="90" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="30" dy="-0"><tspan>GPIO_4</tspan></tspan></text>
   </g>
   <g id="r_base" class="ai-container">
     <rect id="r_base_body" class="ai-shape ai-rect" x="80" y="82" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
@@ -182,16 +249,16 @@
     <rect id="r_base_right_lead" class="ai-shape ai-rect" x="120" y="89" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="r_led" class="ai-container" transform="rotate(90 30 150)">
-    <rect id="r_led_body" class="ai-shape ai-rect" x="10.000000000000004" y="142" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="30.000000000000004" y="150" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="30.000000000000004" dy="-0"><tspan>330Ω</tspan></tspan></text>
-    <rect id="r_led_left_lead" class="ai-shape ai-rect" x="0.000000000000003552713678800501" y="149" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="r_led_body" class="ai-shape ai-rect" x="10" y="142" width="40" height="16" fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
+    <text class="ai-label" x="30" y="150" text-anchor="middle" dominant-baseline="middle" font-size="10"><tspan x="30" dy="-0"><tspan>330Ω</tspan></tspan></text>
+    <rect id="r_led_left_lead" class="ai-shape ai-rect" x="0" y="149" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <rect id="r_led_right_lead" class="ai-shape ai-rect" x="50" y="149" width="10" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="status_led" class="ai-container">
     <path id="status_led_triangle" class="ai-shape ai-path" d="M20.00 225.00 L40.00 225.00 L30.00 243.00 Z"  fill="none" stroke="var(--foreground-1)" stroke-width="2"/>
-    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="18.000000000000007" y="246" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="29.000000000000007" y="210" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
-    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="29.000000000000007" y="248" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_bar" class="ai-shape ai-rect" x="18" y="246" width="24" height="2" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_anode_lead" class="ai-shape ai-rect" x="29" y="210" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
+    <rect id="status_led_cathode_lead" class="ai-shape ai-rect" x="29" y="248" width="2" height="15" fill="var(--foreground-1)" stroke="none" stroke-width="1.5"/>
     <path id="status_led_arrow1" class="ai-shape ai-path" d="M44.00 235.00 L54.00 227.00"  fill="none" stroke="green" stroke-width="1.5"/>
     <path id="status_led_head1" class="ai-shape ai-path" d="M54.00 227.00 L50.00 227.00 L54.00 231.00 Z"  fill="green" stroke="none" stroke-width="1.5"/>
     <path id="status_led_arrow2" class="ai-shape ai-path" d="M44.00 245.00 L54.00 237.00"  fill="none" stroke="green" stroke-width="1.5"/>
@@ -208,15 +275,15 @@
     <rect id="gnd_driver_line3" class="ai-shape ai-rect" x="194" y="320" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="gnd_led" class="ai-container">
-    <rect id="gnd_led_line1" class="ai-shape ai-rect" x="10.000000000000007" y="306" width="40" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
-    <rect id="gnd_led_line2" class="ai-shape ai-rect" x="17.000000000000007" y="313" width="26" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
-    <rect id="gnd_led_line3" class="ai-shape ai-rect" x="24.000000000000007" y="320" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_led_line1" class="ai-shape ai-rect" x="10" y="306" width="40" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_led_line2" class="ai-shape ai-rect" x="17" y="313" width="26" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
+    <rect id="gnd_led_line3" class="ai-shape ai-rect" x="24" y="320" width="12" height="3" fill="var(--foreground-2)" stroke="none" stroke-width="1.5"/>
   </g>
   <text id="label_12v" class="ai-shape ai-text" x="435.822" y="10" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--secondary-dark)">+12V</text>
   <text id="label_5v" class="ai-shape ai-text" x="189.158" y="10" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--secondary-dark)">+5V</text>
   <text id="domain_12v" class="ai-shape ai-text" x="490" y="22" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--secondary-dark)">Load</text>
   <text id="domain_5v" class="ai-shape ai-text" x="240" y="22" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--accent-1)">Gate Drive</text>
-  <text id="status_label" class="ai-shape ai-text" x="-18.349999999999994" y="236.5" text-anchor="start" dominant-baseline="middle" font-size="10" fill="green">Status</text>
+  <text id="status_label" class="ai-shape ai-text" x="-18.35" y="236.5" text-anchor="start" dominant-baseline="middle" font-size="10" fill="green">Status</text>
   <text id="flyback_label" class="ai-shape ai-text" x="525" y="94" text-anchor="start" dominant-baseline="middle" font-size="10" fill="var(--foreground-2)">Flyback</text>
   <path class="ai-connection" d="M450 28 L450 54" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
   <path class="ai-connection" d="M450 134 L450 190" fill="none" stroke="var(--secondary-dark)" stroke-width="2"/>
@@ -233,6 +300,6 @@
   <path class="ai-connection" d="M59 90 L70 90" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M130 90 L147 90 L147 254 L164 254" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
   <path class="ai-connection" d="M30 104 L30 120" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M30.000000000000007 180 L30.000000000000007 210" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
-  <path class="ai-connection" d="M30.000000000000007 263 L30.000000000000007 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M30 180 L30 210" fill="none" stroke="var(--accent-2)" stroke-width="1.5"/>
+  <path class="ai-connection" d="M30 263 L30 302" fill="none" stroke="var(--foreground-2)" stroke-width="1.5"/>
 </svg>

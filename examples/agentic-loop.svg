@@ -3,38 +3,79 @@
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --accent-light: #e3f2fd;
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
     --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
     --background-light: #ffffff;
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --foreground-light: #e0e0e0;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
     --kpv-amber: #FFB31B;
     --kpv-burgundy: #5a322b;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --secondary-light: #fff3e0;
-    --status-error: #f44336;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --text-1: #333333;
-    --text-2: #666666;
-    --text-3: #999999;
-    --text-dark: #1a1a1a;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #f6dedb;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
     --text-light: #ffffff;
   }
-
+  .ai-on-dark { fill: var(--text-light); }
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
@@ -62,8 +103,9 @@
   .kf-56310c3d-resp2_env { opacity: 0.3; }
   .conn-56310c3d-recv_resp2 { opacity: 1; }
 }
-
-    /* Kapernikov Brand Stylesheet for Agent Illustrator
+    
+/* /home/kervel/projects/agent-illustrator/examples/../stylesheets/kapernikov.css */
+/* Kapernikov Brand Stylesheet for Agent Illustrator
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */
 
@@ -111,6 +153,31 @@
   --status-success: #1E9F49;     /* Emerald */
   --status-warning: #DD8028;     /* Tangerine */
   --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
 }
 
 /* Typography */
@@ -141,9 +208,23 @@
 [fill="var(--foreground-dark)"] + .ai-label {
   fill: var(--text-light);
 }
-
   /* motion: settled states (auto-generated) */
 svg[data-ail-player] * { transition: none !important; }
+.kf-56310c3d-req1_env { opacity: 0; }
+.kf-56310c3d-req1_env { translate: 0px 0px; }
+.conn-56310c3d-send_req1 { opacity: 0; }
+.kf-56310c3d-resp1_env { opacity: 0; }
+.kf-56310c3d-resp1_env { translate: 0px 0px; }
+.conn-56310c3d-recv_resp1 { opacity: 0; }
+.kf-56310c3d-exec_env { opacity: 0; }
+.kf-56310c3d-exec_env { translate: 0px 0px; }
+.conn-56310c3d-exec_tool { opacity: 0; }
+.kf-56310c3d-req2_env { opacity: 0; }
+.kf-56310c3d-req2_env { translate: 0px 0px; }
+.conn-56310c3d-send_req2 { opacity: 0; }
+.kf-56310c3d-resp2_env { opacity: 0; }
+.kf-56310c3d-resp2_env { translate: 0px 0px; }
+.conn-56310c3d-recv_resp2 { opacity: 0; }
 ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
@@ -191,5 +272,5 @@ svg[data-ail-player] * { transition: none !important; }
   <path class="ai-connection conn-56310c3d-exec_tool conn-56310c3d-exec_tool-base aid-56310c3d-exec_tool" d="M120 95 L120 220 L520 220 L520 334.2" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-56310c3d-send_req2 conn-56310c3d-send_req2-base aid-56310c3d-send_req2" d="M610 380 L625 380 L625 60 L620.8 60" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-56310c3d-recv_resp2 conn-56310c3d-recv_resp2-base aid-56310c3d-recv_resp2" d="M520 95 L520 220 L120 220 L120 334.2" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"56310c3d-","frames":[{"name":"startup","duration":0,"auto":null},{"name":"request","duration":0.5,"auto":null},{"name":"tool_call","duration":0.5,"auto":null},{"name":"execute","duration":0.5,"auto":null},{"name":"return","duration":0.5,"auto":null},{"name":"respond","duration":0.5,"auto":null}],"elements":["cli","llm","tool","user","req1_env","resp1_env","exec_env","req2_env","resp2_env","send_req1","recv_resp1","exec_tool","send_req2","recv_resp2"],"channels":[[".kf-56310c3d-req1_env","opacity"],[".kf-56310c3d-req1_env","translate"],[".conn-56310c3d-send_req1","opacity"],[".kf-56310c3d-resp1_env","opacity"],[".kf-56310c3d-resp1_env","translate"],[".conn-56310c3d-recv_resp1","opacity"],[".kf-56310c3d-exec_env","opacity"],[".kf-56310c3d-exec_env","translate"],[".conn-56310c3d-exec_tool","opacity"],[".kf-56310c3d-req2_env","opacity"],[".kf-56310c3d-req2_env","translate"],[".conn-56310c3d-send_req2","opacity"],[".kf-56310c3d-resp2_env","opacity"],[".kf-56310c3d-resp2_env","translate"],[".conn-56310c3d-recv_resp2","opacity"]],"settled":[["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0.3","0px 0px","1","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0.3","0px 0px","1","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0.2","0px 0px","1","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0.3","0px 0px","1","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0.3","0px 0px","1"]],"anims":[[],[{"c":0,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":2,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":0,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.3"],[1,"0"]]},{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":5,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":3,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.3"],[1,"0"]]},{"c":5,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.2"]]},{"c":7,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":8,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":6,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.2"],[1,"0"]]},{"c":8,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":10,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":11,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":9,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.3"],[1,"0"]]},{"c":11,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":12,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":13,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":14,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}]]}]]></script>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"56310c3d-","frames":[{"name":"startup","duration":0,"auto":null,"title":null,"note":null},{"name":"request","duration":0.5,"auto":null,"title":null,"note":null},{"name":"tool_call","duration":0.5,"auto":null,"title":null,"note":null},{"name":"execute","duration":0.5,"auto":null,"title":null,"note":null},{"name":"return","duration":0.5,"auto":null,"title":null,"note":null},{"name":"respond","duration":0.5,"auto":null,"title":null,"note":null}],"elements":["cli","llm","tool","user","req1_env","resp1_env","exec_env","req2_env","resp2_env","send_req1","recv_resp1","exec_tool","send_req2","recv_resp2"],"channels":[[".kf-56310c3d-req1_env","opacity"],[".kf-56310c3d-req1_env","translate"],[".conn-56310c3d-send_req1","opacity"],[".kf-56310c3d-resp1_env","opacity"],[".kf-56310c3d-resp1_env","translate"],[".conn-56310c3d-recv_resp1","opacity"],[".kf-56310c3d-exec_env","opacity"],[".kf-56310c3d-exec_env","translate"],[".conn-56310c3d-exec_tool","opacity"],[".kf-56310c3d-req2_env","opacity"],[".kf-56310c3d-req2_env","translate"],[".conn-56310c3d-send_req2","opacity"],[".kf-56310c3d-resp2_env","opacity"],[".kf-56310c3d-resp2_env","translate"],[".conn-56310c3d-recv_resp2","opacity"]],"settled":[["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0.3","0px 0px","1","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0.3","0px 0px","1","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0.2","0px 0px","1","0","0px 0px","0","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0.3","0px 0px","1","0","0px 0px","0"],["0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0","0px 0px","0","0.3","0px 0px","1"]],"anims":[[],[{"c":0,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":2,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":0,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.3"],[1,"0"]]},{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":5,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":3,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.3"],[1,"0"]]},{"c":5,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.2"]]},{"c":7,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":8,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":6,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.2"],[1,"0"]]},{"c":8,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":10,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":11,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":9,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.3"],[1,"0"]]},{"c":11,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":12,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.3"]]},{"c":13,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":14,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}]]}]]></script>
 </svg>

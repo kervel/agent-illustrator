@@ -11,6 +11,7 @@
 //! assert!(svg.contains("<svg"));
 //! ```
 
+pub mod code;
 pub mod error;
 pub mod layout;
 pub mod motion;
@@ -111,6 +112,9 @@ pub struct RenderConfig {
     /// With `frame`: sample the motion this far into that frame
     /// (`0.35s`, `0.35`, or `50%`) instead of rendering its settled state.
     pub at: Option<String>,
+    /// `--crop-to-content [pad]`: the picture is the union of what any frame
+    /// shows (plus this margin), not the stage or the whole layout.
+    pub crop: Option<f64>,
     /// Output the motion timeline as text instead of SVG.
     pub timeline: bool,
     /// Output the motion manifest (tracks) as JSON instead of SVG.
@@ -135,6 +139,7 @@ impl Default for RenderConfig {
             animate_css: false,
             no_frame_css: false,
             at: None,
+            crop: None,
             timeline: false,
             timeline_json: false,
         }
@@ -369,6 +374,24 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
 /// Point an error that knows its span at the source: `line L, column C`,
 /// the line itself, a caret, and any suggestions.
 fn locate_error(e: RenderError, source: &str) -> RenderError {
+    if let RenderError::Layout(LayoutError::Located { message, span }) = &e {
+        if span.end <= source.len() && span.start < span.end {
+            let start = span.start;
+            let line_start = source[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
+            let line_end = source[start..].find('\n').map(|i| start + i).unwrap_or(source.len());
+            let col = source[line_start..start].chars().count() + 1;
+            let width = source[start..span.end.min(line_end)].chars().count().max(1);
+            return RenderError::Layout(LayoutError::validation_error(&format!(
+                "{}: {}\n  {}\n  {}{}",
+                line_col(source, start),
+                message,
+                &source[line_start..line_end],
+                " ".repeat(col - 1),
+                "^".repeat(width)
+            )));
+        }
+        return RenderError::Layout(LayoutError::validation_error(message));
+    }
     let (name, span, suggestions) = match &e {
         RenderError::Layout(LayoutError::UndefinedIdentifier { name, span, suggestions })
         | RenderError::Layout(LayoutError::PathNotFound { path: name, span, suggestions }) => {
@@ -516,6 +539,24 @@ fn render_pipeline(
     // (template instances are converted to groups during resolution, losing their modifiers)
     let template_rotations = extract_template_rotations(&doc);
 
+    // The monospace advance of the deck's face (`--ail-mono-advance`).
+    layout::text::set_mono_advance(0.6);
+    if let Some(css) = &config.custom_css {
+        for (name, value) in motion::tokens::css_custom_properties(css) {
+            if name == "ail-mono-advance" {
+                if let Ok(v) = value.trim().parse::<f64>() {
+                    layout::text::set_mono_advance(v);
+                }
+            }
+        }
+    }
+    // `code` blocks become generated templates of ordinary parts.
+    let doc = {
+        let aliases = doc.aliases;
+        let statements = code::expand_code_blocks(doc.statements, config.template_base_path.as_deref())
+            .map_err(|(span, message)| RenderError::Layout(LayoutError::Located { message, span }))?;
+        Document { statements, aliases }
+    };
     let instances = template_instance_spans(&doc.statements);
 
     // Resolve templates if enabled
@@ -557,7 +598,9 @@ fn render_pipeline(
     if let Some(css) = &config.custom_css {
         for (name, value) in motion::tokens::css_custom_properties(css) {
             if !name.starts_with("ail-") {
-                palette.colors.entry(name).or_insert(value);
+                // The stylesheet's value wins: it is what the page shows,
+                // and colour decisions (light text on dark fills) read it.
+                palette.colors.insert(name, value);
             }
         }
     }
@@ -626,6 +669,7 @@ fn render_pipeline(
 
     // Captions follow their subject's final geometry, so this runs after
     // constraints and before routing (a connection may end at a caption).
+    result.snap_geometry();
     layout::engine::place_captions(&mut result, &doc)?;
     layout::through::place_through_paths(&mut result)?;
 
@@ -636,12 +680,14 @@ fn render_pipeline(
     if !layout::keyframe::extract_keyframes(&doc).is_empty() && template_rotations.is_empty() {
         layout::resolve_constrain_statements(&mut result, &doc, &layout_config)?;
         layout::resolve_constraints(&mut result, &doc, skip_ref)?;
+        result.snap_geometry();
         layout::engine::place_captions(&mut result, &doc)?;
         layout::through::place_through_paths(&mut result)?;
     }
 
     // Route connections
     layout::route_connections(&mut result, &doc)?;
+    result.snap_geometry();
 
     // Debug output
     if config.debug {
@@ -684,6 +730,38 @@ fn render_pipeline(
     let canvas = layout::canvas::canvas_id(&doc);
     if let Some(c) = &canvas {
         layout::canvas::apply(&mut result, c);
+        config.svg.viewbox_padding = 0.0;
+    }
+    // Or what the frames show: one box for all of them, so nothing jumps.
+    let crop_box = config.crop.map(|pad| {
+        let mut layouts: Vec<(LayoutResult, Option<&std::collections::HashSet<String>>)> = Vec::new();
+        if frame_states.is_empty() {
+            layouts.push((result.clone(), None));
+        }
+        for st in &frame_states {
+            let r = layout::keyframe::resolve_frame_for_static(&result, st, &doc, &config.layout)
+                .unwrap_or_else(|| result.clone());
+            layouts.push((r, Some(&st.hidden_elements)));
+        }
+        let mut union: Option<layout::types::BoundingBox> = None;
+        for (r, hidden) in &layouts {
+            let roots = match hidden {
+                Some(h) => filter_visible_elements(&r.root_elements, h),
+                None => r.root_elements.clone(),
+            };
+            content_bounds(&roots, &mut union);
+            for c in &r.connections {
+                for p in &c.path {
+                    let b = layout::types::BoundingBox::new(p.x, p.y, 0.0, 0.0);
+                    union = Some(union.map_or(b, |u| u.union(&b)));
+                }
+            }
+        }
+        let u = union.unwrap_or(result.bounds);
+        layout::types::BoundingBox::new(u.x - pad, u.y - pad, u.width + 2.0 * pad, u.height + 2.0 * pad)
+    });
+    if let Some(b) = crop_box {
+        result.bounds = b;
         config.svg.viewbox_padding = 0.0;
     }
 
@@ -815,6 +893,9 @@ fn render_pipeline(
         motion::render::truncate_drawn(&mut frame_result, state, &doc);
         if let Some(c) = &canvas {
             layout::canvas::apply(&mut frame_result, c);
+        }
+        if let Some(b) = crop_box {
+            frame_result.bounds = b;
         }
 
         render_svg_with_stylesheet(
@@ -1013,6 +1094,29 @@ fn check_unique_names(
     Ok(())
 }
 
+/// Union of what the leaves draw: not the stage (a canvas is the backdrop,
+/// cropping is about content), not invisible helpers (fill and stroke none,
+/// no label).
+fn content_bounds(elems: &[layout::types::ElementLayout], out: &mut Option<layout::types::BoundingBox>) {
+    for e in elems {
+        if e.styles.css_classes.iter().any(|c| c == "ai-canvas") {
+            continue;
+        }
+        if !e.children.is_empty() {
+            content_bounds(&e.children, out);
+            continue;
+        }
+        let none = |v: &Option<String>| v.as_deref() == Some("none");
+        if none(&e.styles.fill) && none(&e.styles.stroke) && e.label.is_none() {
+            continue;
+        }
+        if e.bounds.width <= 0.0 && e.bounds.height <= 0.0 {
+            continue;
+        }
+        *out = Some(out.map_or(e.bounds, |u| u.union(&e.bounds)));
+    }
+}
+
 /// `line:col` of a byte offset, for error messages.
 fn line_col(source: &str, offset: usize) -> String {
     let before = &source[..offset.min(source.len())];
@@ -1069,6 +1173,21 @@ pub fn frame_names(source: &str) -> Result<Vec<String>, RenderError> {
         .iter()
         .map(|kf| kf.name.node.clone())
         .collect())
+}
+
+/// What each click shows: a keyframe and the `[auto]` keyframes that play on
+/// after it by themselves, in order. The same grouping as the player's
+/// `steps`; a host that turns clicks into fragments needs one per step.
+pub fn step_frames(source: &str) -> Result<Vec<Vec<String>>, RenderError> {
+    let doc = parse(source)?;
+    let mut steps: Vec<Vec<String>> = Vec::new();
+    for (i, kf) in layout::keyframe::extract_keyframes(&doc).iter().enumerate() {
+        match steps.last_mut() {
+            Some(step) if i > 0 && kf.auto.is_some() => step.push(kf.name.node.clone()),
+            _ => steps.push(vec![kf.name.node.clone()]),
+        }
+    }
+    Ok(steps)
 }
 
 /// Resolve a frame selector (index or name) to an index

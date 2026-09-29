@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="two,combine,conflict,choose">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe animation CSS (auto-generated) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+.frame-two {
+  .kf-91ee4170-card_bg { transform: translate(0px, -140px); }
+  .kf-91ee4170-card_body { transform: translate(0px, -140px); }
+  .kf-91ee4170-card_t { transform: translate(0px, -140px); }
+  .kf-91ee4170-choices { transform: translate(0px, -140px); }
+  .kf-91ee4170-keep_anna { transform: translate(0px, -140px); }
+  .kf-91ee4170-keep_ben { transform: translate(0px, -140px); }
+  .kfp-91ee4170-merged_bg { height: 295px; }
+  .kf-91ee4170-merged_bottom_pad { transform: translate(0px, -140px); }
+  .kf-91ee4170-merged_line8 { transform: translate(0px, -140px); }
+}
+.frame-combine {
+  .kf-91ee4170-anna { opacity: 0; }
+  .kf-91ee4170-anna_bg { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_bottom_pad { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line1 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line2 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line3 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line4 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line5 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line6 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line7 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line8 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_title { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_title_rule { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_title_square { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_top_pad { transform: translate(461px, 0px); }
+  .kf-91ee4170-ben { opacity: 0; }
+  .kf-91ee4170-ben_bg { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_bottom_pad { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line1 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line2 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line3 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line4 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line5 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line6 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line7 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line8 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_title { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_title_rule { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_title_square { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_top_pad { transform: translate(-461px, 0px); }
+  .kf-91ee4170-card_bg { transform: translate(0px, -140px); }
+  .kf-91ee4170-card_body { transform: translate(0px, -140px); }
+  .kf-91ee4170-card_t { transform: translate(0px, -140px); }
+  .kf-91ee4170-choices { transform: translate(0px, -140px); }
+  .kf-91ee4170-keep_anna { transform: translate(0px, -140px); }
+  .kf-91ee4170-keep_ben { transform: translate(0px, -140px); }
+  .kf-91ee4170-merged { opacity: 1; }
+  .kfp-91ee4170-merged { height: 295px; }
+  .kfp-91ee4170-merged_bg { height: 295px; }
+  .kf-91ee4170-merged_bottom_pad { transform: translate(0px, -140px); }
+  .kf-91ee4170-merged_line8 { transform: translate(0px, -140px); }
+  .kf-91ee4170-ok { opacity: 1; }
+}
+.frame-conflict {
+  .kf-91ee4170-anna { opacity: 0; }
+  .kf-91ee4170-anna_bg { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_bottom_pad { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line1 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line2 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line3 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line4 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line5 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line6 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line7 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_line8 { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_title { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_title_rule { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_title_square { transform: translate(461px, 56px); }
+  .kf-91ee4170-anna_top_pad { transform: translate(461px, 56px); }
+  .kf-91ee4170-ben { opacity: 0; }
+  .kf-91ee4170-ben_bg { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_bottom_pad { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line1 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line2 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line3 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line4 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line5 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line6 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line7 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_line8 { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_title { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_title_rule { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_title_square { transform: translate(-461px, 56px); }
+  .kf-91ee4170-ben_top_pad { transform: translate(-461px, 56px); }
+  .kf-91ee4170-card { opacity: 1; }
+  .kf-91ee4170-card { transform: translate(0px, -28px); }
+  .kf-91ee4170-card_bg { transform: translate(0px, -28px); }
+  .kf-91ee4170-card_body { transform: translate(0px, -28px); }
+  .kf-91ee4170-card_t { transform: translate(0px, -28px); }
+  .kf-91ee4170-choices { transform: translate(0px, -28px); }
+  .kf-91ee4170-keep_anna { transform: translate(0px, -28px); }
+  .kf-91ee4170-keep_ben { transform: translate(0px, -28px); }
+  .kf-91ee4170-merged { opacity: 1; }
+  .kfp-91ee4170-merged { height: 407px; }
+  .kfp-91ee4170-merged_bg { height: 407px; }
+  .kf-91ee4170-merged_bottom_pad { transform: translate(0px, -28px); }
+  .kf-91ee4170-merged_conflict1 { opacity: 1; }
+  .kf-91ee4170-merged_conflict2 { opacity: 1; }
+  .kf-91ee4170-merged_conflict3 { opacity: 1; }
+  .kf-91ee4170-merged_conflict4 { opacity: 1; }
+  .kf-91ee4170-merged_conflict5 { opacity: 1; }
+  .kf-91ee4170-merged_line8 { opacity: 0; }
+}
+.frame-choose {
+  .kf-91ee4170-anna { opacity: 0; }
+  .kf-91ee4170-anna_bg { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_bottom_pad { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line1 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line2 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line3 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line4 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line5 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line6 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line7 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_line8 { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_title { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_title_rule { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_title_square { transform: translate(461px, 0px); }
+  .kf-91ee4170-anna_top_pad { transform: translate(461px, 0px); }
+  .kf-91ee4170-ben { opacity: 0; }
+  .kf-91ee4170-ben_bg { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_bottom_pad { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line1 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line2 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line3 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line4 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line5 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line6 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line7 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_line8 { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_title { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_title_rule { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_title_square { transform: translate(-461px, 0px); }
+  .kf-91ee4170-ben_top_pad { transform: translate(-461px, 0px); }
+  .kf-91ee4170-card_bg { transform: translate(0px, -140px); }
+  .kf-91ee4170-card_body { transform: translate(0px, -140px); }
+  .kf-91ee4170-card_t { transform: translate(0px, -140px); }
+  .kf-91ee4170-choices { transform: translate(0px, -140px); }
+  .kf-91ee4170-keep_anna { transform: translate(0px, -140px); }
+  .kfp-91ee4170-keep_anna { fill: var(--role-series-1); }
+  .kf-91ee4170-keep_anna text { fill: var(--role-surface); }
+  .kf-91ee4170-keep_ben { opacity: 0.35; }
+  .kf-91ee4170-keep_ben { transform: translate(0px, -140px); }
+  .kf-91ee4170-merged { opacity: 1; }
+  .kfp-91ee4170-merged { height: 295px; }
+  .kfp-91ee4170-merged_bg { height: 295px; }
+  .kf-91ee4170-merged_bottom_pad { transform: translate(0px, -140px); }
+  .kf-91ee4170-merged_line8 { transform: translate(0px, -140px); }
+  .kf-91ee4170-ok { opacity: 1; }
+}
+    /* /home/kervel/projects/agent-illustrator/examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+  /* motion: settled states (auto-generated) */
+svg[data-ail-player] * { transition: none !important; }
+.kf-91ee4170-s_badge { opacity: 1; }
+.kf-91ee4170-s_badge { scale: 1 1; }
+.kf-91ee4170-s_heading { opacity: 1; }
+.kf-91ee4170-s_heading { translate: 0px 0px; }
+.kf-91ee4170-anna { opacity: 1; }
+.kf-91ee4170-anna { translate: 0px 0px; }
+.kf-91ee4170-ben { opacity: 1; }
+.kf-91ee4170-ben { translate: 0px 0px; }
+.kf-91ee4170-merged { opacity: 0; }
+.kf-91ee4170-merged { scale: 1 1; }
+.kf-91ee4170-ok { opacity: 0; }
+.kf-91ee4170-ok { scale: 1 1; }
+.kf-91ee4170-merged_line8 { opacity: 1; }
+.kf-91ee4170-merged_line8 { clip-path: inset(0% 0% 0% 0%); }
+.kf-91ee4170-card { translate: 0px -140px; }
+.kf-91ee4170-merged_bottom_pad { translate: 0px -140px; }
+.kfp-91ee4170-merged_bg { height: 295px; }
+.kfp-91ee4170-merged_line8 { height: 28px; }
+.kf-91ee4170-merged_conflict1 { opacity: 0; }
+.kf-91ee4170-merged_conflict1 { clip-path: inset(0% 0% 0% 0%); }
+.kf-91ee4170-merged_conflict2 { translate: 0px -28px; }
+.kf-91ee4170-merged_conflict3 { translate: 0px -56px; }
+.kf-91ee4170-merged_conflict4 { translate: 0px -84px; }
+.kf-91ee4170-merged_conflict5 { translate: 0px -112px; }
+.kf-91ee4170-merged_line8 { translate: 0px -140px; }
+.kfp-91ee4170-merged_conflict1 { height: 0px; }
+.kf-91ee4170-merged_conflict2 { opacity: 0; }
+.kf-91ee4170-merged_conflict2 { clip-path: inset(0% 0% 0% 0%); }
+.kfp-91ee4170-merged_conflict2 { height: 0px; }
+.kf-91ee4170-merged_conflict3 { opacity: 0; }
+.kf-91ee4170-merged_conflict3 { clip-path: inset(0% 0% 0% 0%); }
+.kfp-91ee4170-merged_conflict3 { height: 0px; }
+.kf-91ee4170-merged_conflict4 { opacity: 0; }
+.kf-91ee4170-merged_conflict4 { clip-path: inset(0% 0% 0% 0%); }
+.kfp-91ee4170-merged_conflict4 { height: 0px; }
+.kf-91ee4170-merged_conflict5 { opacity: 0; }
+.kf-91ee4170-merged_conflict5 { clip-path: inset(0% 0% 0% 0%); }
+.kfp-91ee4170-merged_conflict5 { height: 0px; }
+.kf-91ee4170-card { opacity: 0; }
+.kf-91ee4170-card { scale: 1 1; }
+.kf-91ee4170-keep_anna > text { fill: var(--role-ink); }
+.kfp-91ee4170-keep_anna { fill: var(--role-surface); }
+.kf-91ee4170-keep_ben { opacity: 1; }
+.frame-two {
+  .kf-91ee4170-s_badge { scale: 1 1; }
+  .kf-91ee4170-merged { scale: 1 1; }
+  .kf-91ee4170-ok { scale: 1 1; }
+  .kf-91ee4170-merged_line8 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict1 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict2 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict3 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict4 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict5 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-card { scale: 1 1; }
+}
+.frame-combine {
+  .kf-91ee4170-s_badge { scale: 1 1; }
+  .kf-91ee4170-merged { scale: 1 1; }
+  .kf-91ee4170-ok { scale: 1 1; }
+  .kf-91ee4170-merged_line8 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict1 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict2 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict3 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict4 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict5 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-card { scale: 1 1; }
+}
+.frame-conflict {
+  .kf-91ee4170-s_badge { scale: 1 1; }
+  .kf-91ee4170-merged { scale: 1 1; }
+  .kf-91ee4170-ok { scale: 1 1; }
+  .kf-91ee4170-merged_line8 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict1 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict2 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict3 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict4 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict5 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-card { scale: 1 1; }
+}
+.frame-choose {
+  .kf-91ee4170-s_badge { scale: 1 1; }
+  .kf-91ee4170-merged { scale: 1 1; }
+  .kf-91ee4170-ok { scale: 1 1; }
+  .kf-91ee4170-merged_line8 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict1 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict2 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict3 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict4 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-merged_conflict5 { clip-path: inset(0% 0% 0% 0%); }
+  .kf-91ee4170-card { scale: 1 1; }
+}
+]]></style>
+  <g class="kf-91ee4170-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-91ee4170-s">
+      <g class="kf-91ee4170-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-91ee4170-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-91ee4170-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>5</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-s_heading kf-anim" style="transform-origin:548.17px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-91ee4170-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Git combines the changes</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-91ee4170-anna kf-anim" style="transform-origin:339px 347.5px">
+    <g id="anna" class="ai-container kfp-91ee4170-anna">
+      <g class="kf-91ee4170-anna_bg kf-anim" style="transform-origin:339px 347.5px">
+        <rect id="anna_bg" class="ai-shape ai-rect kfp-91ee4170-anna_bg" x="115.5" y="200" width="447" height="295" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-91ee4170-anna_title kf-anim" style="transform-origin:339px 226px">
+        <rect id="anna_title" class="ai-shape ai-rect kfp-91ee4170-anna_title" x="118.5" y="203" width="441" height="46" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+        <text class="ai-label" x="126.5" y="226" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--code-title)" style="font-weight:700"><tspan x="126.5" dy="-0"><tspan fill="var(--role-series-1)">●</tspan><tspan>  cart.py · Anna</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_title_rule kf-anim" style="transform-origin:339px 250.5px">
+        <rect id="anna_title_rule" class="ai-shape ai-rect kfp-91ee4170-anna_title_rule" x="118.5" y="249" width="441" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-anna_top_pad kf-anim" style="transform-origin:339px 256px">
+        <rect id="anna_top_pad" class="ai-shape ai-rect kfp-91ee4170-anna_top_pad" x="118.5" y="252" width="441" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-anna_line1 kf-anim" style="transform-origin:339px 274px">
+        <rect id="anna_line1" class="ai-shape ai-rect kfp-91ee4170-anna_line1" x="118.5" y="260" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="274" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart):</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line2 kf-anim" style="transform-origin:339px 302px">
+        <rect id="anna_line2" class="ai-shape ai-rect kfp-91ee4170-anna_line2" x="118.5" y="288" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="302" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line3 kf-anim" style="transform-origin:339px 330px">
+        <rect id="anna_line3" class="ai-shape ai-rect kfp-91ee4170-anna_line3" x="118.5" y="316" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="330" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line4 kf-anim" style="transform-origin:339px 358px">
+        <rect id="anna_line4" class="ai-shape ai-rect kfp-91ee4170-anna_line4" x="118.5" y="344" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="358" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line5 kf-anim" style="transform-origin:339px 386px">
+        <rect id="anna_line5" class="ai-shape ai-rect kfp-91ee4170-anna_line5" x="118.5" y="372" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="386" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line6 kf-anim" style="transform-origin:339px 414px">
+        <rect id="anna_line6" class="ai-shape ai-rect kfp-91ee4170-anna_line6" x="118.5" y="400" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="414" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">6  </tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line7 kf-anim" style="transform-origin:339px 442px">
+        <rect id="anna_line7" class="ai-shape ai-rect kfp-91ee4170-anna_line7" x="118.5" y="428" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="442" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_line8 kf-anim" style="transform-origin:339px 470px">
+        <rect id="anna_line8" class="ai-shape ai-rect kfp-91ee4170-anna_line8" x="118.5" y="456" width="441" height="28" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="126.5" y="470" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="126.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-anna_bottom_pad kf-anim" style="transform-origin:339px 488px">
+        <rect id="anna_bottom_pad" class="ai-shape ai-rect kfp-91ee4170-anna_bottom_pad" x="118.5" y="484" width="441" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-anna_title_square kf-anim" style="transform-origin:339px 243px">
+        <rect id="anna_title_square" class="ai-shape ai-rect kfp-91ee4170-anna_title_square" x="118.5" y="237" width="441" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-91ee4170-merged kf-anim" style="transform-origin:800px 417.5px">
+    <g id="merged" class="ai-container kfp-91ee4170-merged">
+      <g class="kf-91ee4170-merged_bg kf-anim" style="transform-origin:800px 417.5px">
+        <rect id="merged_bg" class="ai-shape ai-rect kfp-91ee4170-merged_bg" x="576.5" y="200" width="447" height="435" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-91ee4170-merged_title kf-anim" style="transform-origin:800px 226px">
+        <rect id="merged_title" class="ai-shape ai-rect kfp-91ee4170-merged_title" x="579.5" y="203" width="441" height="46" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+        <text class="ai-label" x="587.5" y="226" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--code-title)" style="font-weight:700"><tspan x="587.5" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_title_rule kf-anim" style="transform-origin:800px 250.5px">
+        <rect id="merged_title_rule" class="ai-shape ai-rect kfp-91ee4170-merged_title_rule" x="579.5" y="249" width="441" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-merged_top_pad kf-anim" style="transform-origin:800px 256px">
+        <rect id="merged_top_pad" class="ai-shape ai-rect kfp-91ee4170-merged_top_pad" x="579.5" y="252" width="441" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-merged_line1 kf-anim" style="transform-origin:800px 274px">
+        <rect id="merged_line1" class="ai-shape ai-rect kfp-91ee4170-merged_line1" x="579.5" y="260" width="441" height="28" fill="var(--role-series-2-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="274" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart, coupon=</tspan><tspan fill="var(--code-keyword)">None</tspan><tspan>):</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line2 kf-anim" style="transform-origin:800px 302px">
+        <rect id="merged_line2" class="ai-shape ai-rect kfp-91ee4170-merged_line2" x="579.5" y="288" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="302" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line3 kf-anim" style="transform-origin:800px 330px">
+        <rect id="merged_line3" class="ai-shape ai-rect kfp-91ee4170-merged_line3" x="579.5" y="316" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="330" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line4 kf-anim" style="transform-origin:800px 358px">
+        <rect id="merged_line4" class="ai-shape ai-rect kfp-91ee4170-merged_line4" x="579.5" y="344" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="358" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line5 kf-anim" style="transform-origin:800px 386px">
+        <rect id="merged_line5" class="ai-shape ai-rect kfp-91ee4170-merged_line5" x="579.5" y="372" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="386" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line6 kf-anim" style="transform-origin:800px 414px">
+        <rect id="merged_line6" class="ai-shape ai-rect kfp-91ee4170-merged_line6" x="579.5" y="400" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="414" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">6  </tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line7 kf-anim" style="transform-origin:800px 442px">
+        <rect id="merged_line7" class="ai-shape ai-rect kfp-91ee4170-merged_line7" x="579.5" y="428" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="442" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-91ee4170-merged_conflict1 kf-anim" style="transform-origin:800px 470px">
+        <rect id="merged_conflict1" class="ai-shape ai-rect conflict kfp-91ee4170-merged_conflict1" x="579.5" y="456" width="441" height="28" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="470" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">   </tspan><tspan>&lt;&lt;&lt;&lt;&lt;&lt;&lt; anna</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-91ee4170-merged_conflict2 kf-anim" style="transform-origin:800px 498px">
+        <rect id="merged_conflict2" class="ai-shape ai-rect conflict kfp-91ee4170-merged_conflict2" x="579.5" y="484" width="441" height="28" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="498" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">   </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-91ee4170-merged_conflict3 kf-anim" style="transform-origin:800px 526px">
+        <rect id="merged_conflict3" class="ai-shape ai-rect conflict kfp-91ee4170-merged_conflict3" x="579.5" y="512" width="441" height="28" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="526" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">   </tspan><tspan>=======</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-91ee4170-merged_conflict4 kf-anim" style="transform-origin:800px 554px">
+        <rect id="merged_conflict4" class="ai-shape ai-rect conflict kfp-91ee4170-merged_conflict4" x="579.5" y="540" width="441" height="28" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="554" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">   </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">60</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-91ee4170-merged_conflict5 kf-anim" style="transform-origin:800px 582px">
+        <rect id="merged_conflict5" class="ai-shape ai-rect conflict kfp-91ee4170-merged_conflict5" x="579.5" y="568" width="441" height="28" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="582" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">   </tspan><tspan>&gt;&gt;&gt;&gt;&gt;&gt;&gt; ben</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_line8 kf-anim" style="transform-origin:800px 610px">
+        <rect id="merged_line8" class="ai-shape ai-rect kfp-91ee4170-merged_line8" x="579.5" y="596" width="441" height="28" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="587.5" y="610" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="587.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-merged_bottom_pad kf-anim" style="transform-origin:800px 628px">
+        <rect id="merged_bottom_pad" class="ai-shape ai-rect kfp-91ee4170-merged_bottom_pad" x="579.5" y="624" width="441" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-merged_title_square kf-anim" style="transform-origin:800px 243px">
+        <rect id="merged_title_square" class="ai-shape ai-rect kfp-91ee4170-merged_title_square" x="579.5" y="237" width="441" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-91ee4170-ben kf-anim" style="transform-origin:1261px 347.5px">
+    <g id="ben" class="ai-container kfp-91ee4170-ben">
+      <g class="kf-91ee4170-ben_bg kf-anim" style="transform-origin:1261px 347.5px">
+        <rect id="ben_bg" class="ai-shape ai-rect kfp-91ee4170-ben_bg" x="1037.5" y="200" width="447" height="295" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-91ee4170-ben_title kf-anim" style="transform-origin:1261px 226px">
+        <rect id="ben_title" class="ai-shape ai-rect kfp-91ee4170-ben_title" x="1040.5" y="203" width="441" height="46" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+        <text class="ai-label" x="1048.5" y="226" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--code-title)" style="font-weight:700"><tspan x="1048.5" dy="-0"><tspan fill="var(--role-series-2)">●</tspan><tspan>  cart.py · Ben</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_title_rule kf-anim" style="transform-origin:1261px 250.5px">
+        <rect id="ben_title_rule" class="ai-shape ai-rect kfp-91ee4170-ben_title_rule" x="1040.5" y="249" width="441" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-ben_top_pad kf-anim" style="transform-origin:1261px 256px">
+        <rect id="ben_top_pad" class="ai-shape ai-rect kfp-91ee4170-ben_top_pad" x="1040.5" y="252" width="441" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-ben_line1 kf-anim" style="transform-origin:1261px 274px">
+        <rect id="ben_line1" class="ai-shape ai-rect kfp-91ee4170-ben_line1" x="1040.5" y="260" width="441" height="28" fill="var(--role-series-2-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="274" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart, coupon=</tspan><tspan fill="var(--code-keyword)">None</tspan><tspan>):</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line2 kf-anim" style="transform-origin:1261px 302px">
+        <rect id="ben_line2" class="ai-shape ai-rect kfp-91ee4170-ben_line2" x="1040.5" y="288" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="302" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line3 kf-anim" style="transform-origin:1261px 330px">
+        <rect id="ben_line3" class="ai-shape ai-rect kfp-91ee4170-ben_line3" x="1040.5" y="316" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="330" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line4 kf-anim" style="transform-origin:1261px 358px">
+        <rect id="ben_line4" class="ai-shape ai-rect kfp-91ee4170-ben_line4" x="1040.5" y="344" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="358" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line5 kf-anim" style="transform-origin:1261px 386px">
+        <rect id="ben_line5" class="ai-shape ai-rect kfp-91ee4170-ben_line5" x="1040.5" y="372" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="386" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line6 kf-anim" style="transform-origin:1261px 414px">
+        <rect id="ben_line6" class="ai-shape ai-rect kfp-91ee4170-ben_line6" x="1040.5" y="400" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="414" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">6  </tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line7 kf-anim" style="transform-origin:1261px 442px">
+        <rect id="ben_line7" class="ai-shape ai-rect kfp-91ee4170-ben_line7" x="1040.5" y="428" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="442" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_line8 kf-anim" style="transform-origin:1261px 470px">
+        <rect id="ben_line8" class="ai-shape ai-rect kfp-91ee4170-ben_line8" x="1040.5" y="456" width="441" height="28" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1048.5" y="470" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1048.5" dy="-0"><tspan font-size="13.600000000000001" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">50</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-91ee4170-ben_bottom_pad kf-anim" style="transform-origin:1261px 488px">
+        <rect id="ben_bottom_pad" class="ai-shape ai-rect kfp-91ee4170-ben_bottom_pad" x="1040.5" y="484" width="441" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-91ee4170-ben_title_square kf-anim" style="transform-origin:1261px 243px">
+        <rect id="ben_title_square" class="ai-shape ai-rect kfp-91ee4170-ben_title_square" x="1040.5" y="237" width="441" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-91ee4170-ok kf-anim" style="transform-origin:578.5px 202px">
+    <circle id="ok" class="ai-shape ai-circle kfp-91ee4170-ok" cx="578.5" cy="202" r="22" fill="var(--role-ok)" stroke="var(--role-backdrop)" stroke-width="3"/>
+    <text class="ai-label" x="578.5" y="202" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:800"><tspan x="578.5" dy="-0"><tspan>✓</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-91ee4170-card kf-anim" style="transform-origin:800px 743.5px">
+    <g id="card" class="ai-container kfp-91ee4170-card">
+      <g class="kf-91ee4170-card_bg kf-anim" style="transform-origin:800px 743.5px">
+        <rect id="card_bg" class="ai-shape ai-rect kfp-91ee4170-card_bg" x="622.108" y="661" width="355.784" height="165" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-91ee4170-card_body kf-anim" style="transform-origin:800px 743.5px">
+        <g id="card_body" class="ai-container kfp-91ee4170-card_body">
+          <g class="kf-91ee4170-card_t kf-anim" style="transform-origin:800px 711.63px">
+            <rect id="card_t" class="ai-shape ai-rect kfp-91ee4170-card_t" x="653.4131" y="688" width="293.1738" height="47.25" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="800" y="711.625" text-anchor="middle" dominant-baseline="middle" font-size="25" fill="var(--role-ink)" style="font-weight:700"><tspan x="800" dy="-0"><tspan>Same line, two versions</tspan></tspan></text>
+          </g>
+          <g class="kf-91ee4170-choices kf-anim" style="transform-origin:800px 774.13px">
+            <g id="choices" class="ai-container kfp-91ee4170-choices">
+              <g class="kf-91ee4170-keep_anna kf-anim" style="transform-origin:726.48px 774.13px">
+                <rect id="keep_anna" class="ai-shape ai-rect kfp-91ee4170-keep_anna" x="654.108" y="754.25" width="144.744" height="39.75" fill="var(--role-surface)" stroke="var(--role-series-1)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
+                <text class="ai-label" x="726.48" y="774.125" text-anchor="middle" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="726.48" dy="-0"><tspan>Keep Anna’s</tspan></tspan></text>
+              </g>
+              <g class="kf-91ee4170-keep_ben kf-anim" style="transform-origin:879.37px 774.13px">
+                <rect id="keep_ben" class="ai-shape ai-rect kfp-91ee4170-keep_ben" x="812.852" y="754.25" width="133.04" height="39.75" fill="var(--role-surface)" stroke="var(--role-series-2)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
+                <text class="ai-label" x="879.372" y="774.125" text-anchor="middle" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="879.372" dy="-0"><tspan>Keep Ben’s</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"91ee4170-","frames":[{"name":"two","duration":0.92,"auto":null,"title":null,"note":null},{"name":"combine","duration":1.55,"auto":null,"title":null,"note":null},{"name":"conflict","duration":1,"auto":null,"title":null,"note":null},{"name":"choose","duration":1.3,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","anna","anna_bg","anna_title","anna_title_rule","anna_top_pad","anna_line1","anna_line2","anna_line3","anna_line4","anna_line5","anna_line6","anna_line7","anna_line8","anna_bottom_pad","anna_title_square","merged","merged_bg","merged_title","merged_title_rule","merged_top_pad","merged_line1","merged_line2","merged_line3","merged_line4","merged_line5","merged_line6","merged_line7","merged_conflict1","merged_conflict2","merged_conflict3","merged_conflict4","merged_conflict5","merged_line8","merged_bottom_pad","merged_title_square","ben","ben_bg","ben_title","ben_title_rule","ben_top_pad","ben_line1","ben_line2","ben_line3","ben_line4","ben_line5","ben_line6","ben_line7","ben_line8","ben_bottom_pad","ben_title_square","ok","card","card_bg","card_body","card_t","choices","keep_anna","keep_ben"],"channels":[[".kf-91ee4170-s_badge","opacity"],[".kf-91ee4170-s_badge","scale"],[".kf-91ee4170-s_heading","opacity"],[".kf-91ee4170-s_heading","translate"],[".kf-91ee4170-anna","opacity"],[".kf-91ee4170-anna","translate"],[".kf-91ee4170-ben","opacity"],[".kf-91ee4170-ben","translate"],[".kf-91ee4170-merged","opacity"],[".kf-91ee4170-merged","scale"],[".kf-91ee4170-ok","opacity"],[".kf-91ee4170-ok","scale"],[".kf-91ee4170-merged_line8","opacity"],[".kf-91ee4170-merged_line8","clip-path"],[".kf-91ee4170-card","translate"],[".kf-91ee4170-merged_bottom_pad","translate"],[".kfp-91ee4170-merged_bg","height"],[".kfp-91ee4170-merged_line8","height"],[".kf-91ee4170-merged_conflict1","opacity"],[".kf-91ee4170-merged_conflict1","clip-path"],[".kf-91ee4170-merged_conflict2","translate"],[".kf-91ee4170-merged_conflict3","translate"],[".kf-91ee4170-merged_conflict4","translate"],[".kf-91ee4170-merged_conflict5","translate"],[".kf-91ee4170-merged_line8","translate"],[".kfp-91ee4170-merged_conflict1","height"],[".kf-91ee4170-merged_conflict2","opacity"],[".kf-91ee4170-merged_conflict2","clip-path"],[".kfp-91ee4170-merged_conflict2","height"],[".kf-91ee4170-merged_conflict3","opacity"],[".kf-91ee4170-merged_conflict3","clip-path"],[".kfp-91ee4170-merged_conflict3","height"],[".kf-91ee4170-merged_conflict4","opacity"],[".kf-91ee4170-merged_conflict4","clip-path"],[".kfp-91ee4170-merged_conflict4","height"],[".kf-91ee4170-merged_conflict5","opacity"],[".kf-91ee4170-merged_conflict5","clip-path"],[".kfp-91ee4170-merged_conflict5","height"],[".kf-91ee4170-card","opacity"],[".kf-91ee4170-card","scale"],[".kf-91ee4170-keep_anna \u003e text","fill"],[".kfp-91ee4170-keep_anna","fill"],[".kf-91ee4170-keep_ben","opacity"]],"settled":[["0","1 1","0","0px 0px","0","0px 0px","0","0px 0px","0","1 1","0","1 1","1","inset(0% 0% 0% 0%)","0px -140px","0px -140px","295px","28px","0","inset(0% 0% 0% 0%)","0px -28px","0px -56px","0px -84px","0px -112px","0px -140px","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","1 1","var(--role-ink)","var(--role-surface)","1"],["1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","0","1 1","0","1 1","1","inset(0% 0% 0% 0%)","0px -140px","0px -140px","295px","28px","0","inset(0% 0% 0% 0%)","0px -28px","0px -56px","0px -84px","0px -112px","0px -140px","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","1 1","var(--role-ink)","var(--role-surface)","1"],["1","1 1","1","0px 0px","0","461px 0px","0","-461px 0px","1","1 1","1","1 1","1","inset(0% 0% 0% 0%)","0px -140px","0px -140px","295px","28px","0","inset(0% 0% 0% 0%)","0px -28px","0px -56px","0px -84px","0px -112px","0px -140px","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","1 1","var(--role-ink)","var(--role-surface)","1"],["1","1 1","1","0px 0px","0","461px 56px","0","-461px 56px","1","1 1","0","1 1","0","inset(0% 0% 0% 0%)","0px -28px","0px -28px","407px","0px","1","inset(0% 0% 0% 0%)","0px 0px","0px 0px","0px 0px","0px 0px","0px 0px","28px","1","inset(0% 0% 0% 0%)","28px","1","inset(0% 0% 0% 0%)","28px","1","inset(0% 0% 0% 0%)","28px","1","inset(0% 0% 0% 0%)","28px","1","1 1","var(--role-ink)","var(--role-surface)","1"],["1","1 1","1","0px 0px","0","461px 0px","0","-461px 0px","1","1 1","1","1 1","1","inset(0% 0% 0% 0%)","0px -140px","0px -140px","295px","28px","0","inset(0% 0% 0% 0%)","0px -28px","0px -56px","0px -84px","0px -112px","0px -140px","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","inset(0% 0% 0% 0%)","0px","0","1 1","var(--role-surface)","var(--role-series-1)","0.35"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.25,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[1,"1"]]},{"c":5,"t":0.25,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":6,"t":0.35,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[1,"1"]]},{"c":7,"t":0.35,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":4,"t":0.65,"d":0.1,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":5,"t":0,"d":0.7,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"461px 0px"]]},{"c":6,"t":0.65,"d":0.1,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":7,"t":0,"d":0.7,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"-461px 0px"]]},{"c":8,"t":0.66,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0.66,"d":0.55,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":10,"t":1.05,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":11,"t":1.05,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":5,"t":0.1,"d":0.75,"e":"linear","k":[[0,"461px 0px"],[0.0222,"461px -2.187px"],[0.0444,"461px -4.26px"],[0.0667,"461px -6.119px"],[0.0889,"461px -5.543px"],[0.1111,"461px -4.977px"],[0.1333,"461px -4.432px"],[0.1556,"461px -2.695px"],[0.1778,"461px -0.991px"],[0.2,"461px 0.649px"],[0.2222,"461px 3.227px"],[0.2444,"461px 5.756px"],[0.2667,"461px 8.189px"],[0.2889,"461px 11.376px"],[0.3111,"461px 14.503px"],[0.3333,"461px 17.511px"],[0.3556,"461px 21.138px"],[0.3778,"461px 24.698px"],[0.4,"461px 28.122px"],[0.4222,"461px 31.349px"],[0.4444,"461px 34.334px"],[0.4667,"461px 37.052px"],[0.4889,"461px 39.495px"],[0.5111,"461px 41.672px"],[0.5333,"461px 43.601px"],[0.5556,"461px 45.303px"],[0.5778,"461px 46.802px"],[0.6,"461px 48.121px"],[0.6222,"461px 49.281px"],[0.6444,"461px 50.299px"],[0.6667,"461px 51.192px"],[0.6889,"461px 51.975px"],[0.7111,"461px 52.66px"],[0.7333,"461px 53.257px"],[0.7556,"461px 53.775px"],[0.7778,"461px 54.223px"],[0.8,"461px 54.607px"],[0.8222,"461px 54.934px"],[0.8444,"461px 55.208px"],[0.8667,"461px 55.435px"],[0.8889,"461px 55.619px"],[0.9111,"461px 55.763px"],[0.9333,"461px 55.87px"],[0.9556,"461px 55.944px"],[0.9778,"461px 55.986px"],[1,"461px 56px"]]},{"c":5,"t":0.85,"d":0.001,"e":"linear","k":[[0,"461px 56px"],[1,"461px 56px"]]},{"c":7,"t":0.1,"d":0.75,"e":"linear","k":[[0,"-461px 0px"],[0.0222,"-461px -2.187px"],[0.0444,"-461px -4.26px"],[0.0667,"-461px -6.119px"],[0.0889,"-461px -5.543px"],[0.1111,"-461px -4.977px"],[0.1333,"-461px -4.432px"],[0.1556,"-461px -2.695px"],[0.1778,"-461px -0.991px"],[0.2,"-461px 0.649px"],[0.2222,"-461px 3.227px"],[0.2444,"-461px 5.756px"],[0.2667,"-461px 8.189px"],[0.2889,"-461px 11.376px"],[0.3111,"-461px 14.503px"],[0.3333,"-461px 17.511px"],[0.3556,"-461px 21.138px"],[0.3778,"-461px 24.698px"],[0.4,"-461px 28.122px"],[0.4222,"-461px 31.349px"],[0.4444,"-461px 34.334px"],[0.4667,"-461px 37.052px"],[0.4889,"-461px 39.495px"],[0.5111,"-461px 41.672px"],[0.5333,"-461px 43.601px"],[0.5556,"-461px 45.303px"],[0.5778,"-461px 46.802px"],[0.6,"-461px 48.121px"],[0.6222,"-461px 49.281px"],[0.6444,"-461px 50.299px"],[0.6667,"-461px 51.192px"],[0.6889,"-461px 51.975px"],[0.7111,"-461px 52.66px"],[0.7333,"-461px 53.257px"],[0.7556,"-461px 53.775px"],[0.7778,"-461px 54.223px"],[0.8,"-461px 54.607px"],[0.8222,"-461px 54.934px"],[0.8444,"-461px 55.208px"],[0.8667,"-461px 55.435px"],[0.8889,"-461px 55.619px"],[0.9111,"-461px 55.763px"],[0.9333,"-461px 55.87px"],[0.9556,"-461px 55.944px"],[0.9778,"-461px 55.986px"],[1,"-461px 56px"]]},{"c":7,"t":0.85,"d":0.001,"e":"linear","k":[[0,"-461px 56px"],[1,"-461px 56px"]]},{"c":10,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":11,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":11,"t":0.2,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":12,"t":0.1,"d":0.3,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":13,"t":0.1,"d":0.3,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 100% 0%)"]]},{"c":13,"t":0.4,"d":0.001,"e":"linear","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":14,"t":0.1,"d":0.75,"e":"linear","k":[[0,"0px -140px"],[0.0222,"0px -144.374px"],[0.0444,"0px -148.52px"],[0.0667,"0px -152.239px"],[0.0889,"0px -151.085px"],[0.1111,"0px -149.954px"],[0.1333,"0px -148.865px"],[0.1556,"0px -145.39px"],[0.1778,"0px -141.981px"],[0.2,"0px -138.702px"],[0.2222,"0px -133.546px"],[0.2444,"0px -128.487px"],[0.2667,"0px -123.621px"],[0.2889,"0px -117.248px"],[0.3111,"0px -110.994px"],[0.3333,"0px -104.979px"],[0.3556,"0px -97.724px"],[0.3778,"0px -90.605px"],[0.4,"0px -83.757px"],[0.4222,"0px -77.302px"],[0.4444,"0px -71.331px"],[0.4667,"0px -65.896px"],[0.4889,"0px -61.01px"],[0.5111,"0px -56.656px"],[0.5333,"0px -52.799px"],[0.5556,"0px -49.394px"],[0.5778,"0px -46.395px"],[0.6,"0px -43.757px"],[0.6222,"0px -41.439px"],[0.6444,"0px -39.402px"],[0.6667,"0px -37.615px"],[0.6889,"0px -36.049px"],[0.7111,"0px -34.68px"],[0.7333,"0px -33.487px"],[0.7556,"0px -32.45px"],[0.7778,"0px -31.555px"],[0.8,"0px -30.786px"],[0.8222,"0px -30.133px"],[0.8444,"0px -29.583px"],[0.8667,"0px -29.129px"],[0.8889,"0px -28.762px"],[0.9111,"0px -28.474px"],[0.9333,"0px -28.26px"],[0.9556,"0px -28.112px"],[0.9778,"0px -28.027px"],[1,"0px -28px"]]},{"c":14,"t":0.85,"d":0.001,"e":"linear","k":[[0,"0px -28px"],[1,"0px -28px"]]},{"c":15,"t":0.1,"d":0.75,"e":"linear","k":[[0,"0px -140px"],[0.0222,"0px -144.374px"],[0.0444,"0px -148.52px"],[0.0667,"0px -152.239px"],[0.0889,"0px -151.085px"],[0.1111,"0px -149.954px"],[0.1333,"0px -148.865px"],[0.1556,"0px -145.39px"],[0.1778,"0px -141.981px"],[0.2,"0px -138.702px"],[0.2222,"0px -133.546px"],[0.2444,"0px -128.487px"],[0.2667,"0px -123.621px"],[0.2889,"0px -117.248px"],[0.3111,"0px -110.994px"],[0.3333,"0px -104.979px"],[0.3556,"0px -97.724px"],[0.3778,"0px -90.605px"],[0.4,"0px -83.757px"],[0.4222,"0px -77.302px"],[0.4444,"0px -71.331px"],[0.4667,"0px -65.896px"],[0.4889,"0px -61.01px"],[0.5111,"0px -56.656px"],[0.5333,"0px -52.799px"],[0.5556,"0px -49.394px"],[0.5778,"0px -46.395px"],[0.6,"0px -43.757px"],[0.6222,"0px -41.439px"],[0.6444,"0px -39.402px"],[0.6667,"0px -37.615px"],[0.6889,"0px -36.049px"],[0.7111,"0px -34.68px"],[0.7333,"0px -33.487px"],[0.7556,"0px -32.45px"],[0.7778,"0px -31.555px"],[0.8,"0px -30.786px"],[0.8222,"0px -30.133px"],[0.8444,"0px -29.583px"],[0.8667,"0px -29.129px"],[0.8889,"0px -28.762px"],[0.9111,"0px -28.474px"],[0.9333,"0px -28.26px"],[0.9556,"0px -28.112px"],[0.9778,"0px -28.027px"],[1,"0px -28px"]]},{"c":15,"t":0.85,"d":0.001,"e":"linear","k":[[0,"0px -28px"],[1,"0px -28px"]]},{"c":16,"t":0.1,"d":0.75,"e":"linear","k":[[0,"295px"],[0.0222,"290.626px"],[0.0444,"286.48px"],[0.0667,"282.761px"],[0.0889,"283.915px"],[0.1111,"285.046px"],[0.1333,"286.135px"],[0.1556,"289.61px"],[0.1778,"293.019px"],[0.2,"296.298px"],[0.2222,"301.454px"],[0.2444,"306.513px"],[0.2667,"311.379px"],[0.2889,"317.752px"],[0.3111,"324.006px"],[0.3333,"330.021px"],[0.3556,"337.276px"],[0.3778,"344.395px"],[0.4,"351.243px"],[0.4222,"357.698px"],[0.4444,"363.669px"],[0.4667,"369.104px"],[0.4889,"373.99px"],[0.5111,"378.344px"],[0.5333,"382.201px"],[0.5556,"385.606px"],[0.5778,"388.605px"],[0.6,"391.243px"],[0.6222,"393.561px"],[0.6444,"395.598px"],[0.6667,"397.385px"],[0.6889,"398.951px"],[0.7111,"400.32px"],[0.7333,"401.513px"],[0.7556,"402.55px"],[0.7778,"403.445px"],[0.8,"404.214px"],[0.8222,"404.867px"],[0.8444,"405.417px"],[0.8667,"405.871px"],[0.8889,"406.238px"],[0.9111,"406.526px"],[0.9333,"406.74px"],[0.9556,"406.888px"],[0.9778,"406.973px"],[1,"407px"]]},{"c":16,"t":0.85,"d":0.001,"e":"linear","k":[[0,"407px"],[1,"407px"]]},{"c":17,"t":0.1,"d":0.3,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"28px"],[1,"0px"]]},{"c":18,"t":0.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":19,"t":0.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":20,"t":0.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px -28px"],[1,"0px 0px"]]},{"c":21,"t":0.15,"d":0.55,"e":"linear","k":[[0,"0px -56px"],[0.0303,"0px -53.361px"],[0.0606,"0px -50.772px"],[0.0909,"0px -48.281px"],[0.1212,"0px -43.73px"],[0.1515,"0px -39.265px"],[0.1818,"0px -34.97px"],[0.2121,"0px -30.922px"],[0.2424,"0px -27.177px"],[0.2727,"0px -23.768px"],[0.303,"0px -20.704px"],[0.3333,"0px -17.973px"],[0.3636,"0px -15.554px"],[0.3939,"0px -13.418px"],[0.4242,"0px -11.538px"],[0.4545,"0px -9.883px"],[0.4848,"0px -8.429px"],[0.5152,"0px -7.151px"],[0.5455,"0px -6.031px"],[0.5758,"0px -5.049px"],[0.6061,"0px -4.19px"],[0.6364,"0px -3.441px"],[0.6667,"0px -2.791px"],[0.697,"0px -2.23px"],[0.7273,"0px -1.747px"],[0.7576,"0px -1.338px"],[0.7879,"0px -0.993px"],[0.8182,"0px -0.708px"],[0.8485,"0px -0.478px"],[0.8788,"0px -0.297px"],[0.9091,"0px -0.163px"],[0.9394,"0px -0.071px"],[0.9697,"0px -0.017px"],[1,"0px 0px"]]},{"c":21,"t":0.7,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":22,"t":0.15,"d":0.6,"e":"linear","k":[[0,"0px -84px"],[0.0278,"0px -81.361px"],[0.0556,"0px -78.772px"],[0.0833,"0px -76.281px"],[0.1111,"0px -71.73px"],[0.1389,"0px -67.265px"],[0.1667,"0px -62.97px"],[0.1944,"0px -57.035px"],[0.2222,"0px -51.212px"],[0.25,"0px -45.61px"],[0.2778,"0px -40.33px"],[0.3056,"0px -35.446px"],[0.3333,"0px -31px"],[0.3611,"0px -27.003px"],[0.3889,"0px -23.441px"],[0.4167,"0px -20.286px"],[0.4444,"0px -17.501px"],[0.4722,"0px -15.048px"],[0.5,"0px -12.89px"],[0.5278,"0px -10.993px"],[0.5556,"0px -9.327px"],[0.5833,"0px -7.865px"],[0.6111,"0px -6.585px"],[0.6389,"0px -5.465px"],[0.6667,"0px -4.488px"],[0.6944,"0px -3.64px"],[0.7222,"0px -2.908px"],[0.75,"0px -2.279px"],[0.7778,"0px -1.745px"],[0.8056,"0px -1.295px"],[0.8333,"0px -0.924px"],[0.8611,"0px -0.623px"],[0.8889,"0px -0.388px"],[0.9167,"0px -0.212px"],[0.9444,"0px -0.092px"],[0.9722,"0px -0.022px"],[1,"0px 0px"]]},{"c":22,"t":0.75,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":23,"t":0.15,"d":0.65,"e":"linear","k":[[0,"0px -112px"],[0.0256,"0px -109.361px"],[0.0513,"0px -106.772px"],[0.0769,"0px -104.281px"],[0.1026,"0px -99.73px"],[0.1282,"0px -95.265px"],[0.1538,"0px -90.97px"],[0.1795,"0px -85.035px"],[0.2051,"0px -79.212px"],[0.2308,"0px -73.61px"],[0.2564,"0px -66.672px"],[0.2821,"0px -59.865px"],[0.3077,"0px -53.317px"],[0.3333,"0px -47.144px"],[0.359,"0px -41.435px"],[0.3846,"0px -36.238px"],[0.4103,"0px -31.566px"],[0.4359,"0px -27.402px"],[0.4615,"0px -23.714px"],[0.4872,"0px -20.458px"],[0.5128,"0px -17.59px"],[0.5385,"0px -15.068px"],[0.5641,"0px -12.851px"],[0.5897,"0px -10.903px"],[0.6154,"0px -9.194px"],[0.641,"0px -7.697px"],[0.6667,"0px -6.388px"],[0.6923,"0px -5.247px"],[0.7179,"0px -4.256px"],[0.7436,"0px -3.399px"],[0.7692,"0px -2.664px"],[0.7949,"0px -2.039px"],[0.8205,"0px -1.514px"],[0.8462,"0px -1.08px"],[0.8718,"0px -0.729px"],[0.8974,"0px -0.454px"],[0.9231,"0px -0.248px"],[0.9487,"0px -0.108px"],[0.9744,"0px -0.026px"],[1,"0px 0px"]]},{"c":23,"t":0.8,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":24,"t":0.15,"d":0.7,"e":"linear","k":[[0,"0px -140px"],[0.0238,"0px -137.361px"],[0.0476,"0px -134.772px"],[0.0714,"0px -132.281px"],[0.0952,"0px -127.73px"],[0.119,"0px -123.265px"],[0.1429,"0px -118.97px"],[0.1667,"0px -113.035px"],[0.1905,"0px -107.212px"],[0.2143,"0px -101.61px"],[0.2381,"0px -94.672px"],[0.2619,"0px -87.865px"],[0.2857,"0px -81.317px"],[0.3095,"0px -73.653px"],[0.3333,"0px -66.133px"],[0.3571,"0px -58.899px"],[0.381,"0px -52.08px"],[0.4048,"0px -45.773px"],[0.4286,"0px -40.032px"],[0.4524,"0px -34.87px"],[0.4762,"0px -30.271px"],[0.5,"0px -26.196px"],[0.5238,"0px -22.6px"],[0.5476,"0px -19.432px"],[0.5714,"0px -16.645px"],[0.5952,"0px -14.196px"],[0.619,"0px -12.045px"],[0.6429,"0px -10.157px"],[0.6667,"0px -8.503px"],[0.6905,"0px -7.057px"],[0.7143,"0px -5.796px"],[0.7381,"0px -4.701px"],[0.7619,"0px -3.755px"],[0.7857,"0px -2.943px"],[0.8095,"0px -2.253px"],[0.8333,"0px -1.673px"],[0.8571,"0px -1.193px"],[0.881,"0px -0.805px"],[0.9048,"0px -0.501px"],[0.9286,"0px -0.274px"],[0.9524,"0px -0.119px"],[0.9762,"0px -0.029px"],[1,"0px 0px"]]},{"c":24,"t":0.85,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":25,"t":0.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px"],[1,"28px"]]},{"c":26,"t":0.2,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":27,"t":0.2,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":28,"t":0.2,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px"],[1,"28px"]]},{"c":29,"t":0.25,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":30,"t":0.25,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":31,"t":0.25,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px"],[1,"28px"]]},{"c":32,"t":0.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":33,"t":0.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":34,"t":0.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px"],[1,"28px"]]},{"c":35,"t":0.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":36,"t":0.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":37,"t":0.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px"],[1,"28px"]]},{"c":38,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":39,"t":0.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":5,"t":0.35,"d":0.65,"e":"linear","k":[[0,"461px 56px"],[0.0256,"461px 42.929px"],[0.0513,"461px 30.832px"],[0.0769,"461px 20.461px"],[0.1026,"461px 12.058px"],[0.1282,"461px 5.455px"],[0.1538,"461px 0.329px"],[0.1795,"461px -3.632px"],[0.2051,"461px -6.68px"],[0.2308,"461px -9.011px"],[0.2564,"461px -8.161px"],[0.2821,"461px -7.328px"],[0.3077,"461px -6.526px"],[0.3333,"461px -5.771px"],[0.359,"461px -5.072px"],[0.3846,"461px -4.436px"],[0.4103,"461px -3.864px"],[0.4359,"461px -3.354px"],[0.4615,"461px -2.903px"],[0.4872,"461px -2.504px"],[0.5128,"461px -2.153px"],[0.5385,"461px -1.844px"],[0.5641,"461px -1.573px"],[0.5897,"461px -1.335px"],[0.6154,"461px -1.125px"],[0.641,"461px -0.942px"],[0.6667,"461px -0.782px"],[0.6923,"461px -0.642px"],[0.7179,"461px -0.521px"],[0.7436,"461px -0.416px"],[0.7692,"461px -0.326px"],[0.7949,"461px -0.25px"],[0.8205,"461px -0.185px"],[0.8462,"461px -0.132px"],[0.8718,"461px -0.089px"],[0.8974,"461px -0.056px"],[0.9231,"461px -0.03px"],[0.9487,"461px -0.013px"],[0.9744,"461px -0.003px"],[1,"461px 0px"]]},{"c":5,"t":1,"d":0.001,"e":"linear","k":[[0,"461px 0px"],[1,"461px 0px"]]},{"c":7,"t":0.35,"d":0.65,"e":"linear","k":[[0,"-461px 56px"],[0.0256,"-461px 42.929px"],[0.0513,"-461px 30.832px"],[0.0769,"-461px 20.461px"],[0.1026,"-461px 12.058px"],[0.1282,"-461px 5.455px"],[0.1538,"-461px 0.329px"],[0.1795,"-461px -3.632px"],[0.2051,"-461px -6.68px"],[0.2308,"-461px -9.011px"],[0.2564,"-461px -8.161px"],[0.2821,"-461px -7.328px"],[0.3077,"-461px -6.526px"],[0.3333,"-461px -5.771px"],[0.359,"-461px -5.072px"],[0.3846,"-461px -4.436px"],[0.4103,"-461px -3.864px"],[0.4359,"-461px -3.354px"],[0.4615,"-461px -2.903px"],[0.4872,"-461px -2.504px"],[0.5128,"-461px -2.153px"],[0.5385,"-461px -1.844px"],[0.5641,"-461px -1.573px"],[0.5897,"-461px -1.335px"],[0.6154,"-461px -1.125px"],[0.641,"-461px -0.942px"],[0.6667,"-461px -0.782px"],[0.6923,"-461px -0.642px"],[0.7179,"-461px -0.521px"],[0.7436,"-461px -0.416px"],[0.7692,"-461px -0.326px"],[0.7949,"-461px -0.25px"],[0.8205,"-461px -0.185px"],[0.8462,"-461px -0.132px"],[0.8718,"-461px -0.089px"],[0.8974,"-461px -0.056px"],[0.9231,"-461px -0.03px"],[0.9487,"-461px -0.013px"],[0.9744,"-461px -0.003px"],[1,"-461px 0px"]]},{"c":7,"t":1,"d":0.001,"e":"linear","k":[[0,"-461px 0px"],[1,"-461px 0px"]]},{"c":10,"t":0.8,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0.8,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":12,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":13,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":14,"t":0.35,"d":0.65,"e":"linear","k":[[0,"0px -28px"],[0.0256,"0px -54.142px"],[0.0513,"0px -78.336px"],[0.0769,"0px -99.079px"],[0.1026,"0px -115.884px"],[0.1282,"0px -129.091px"],[0.1538,"0px -139.342px"],[0.1795,"0px -147.263px"],[0.2051,"0px -153.361px"],[0.2308,"0px -158.021px"],[0.2564,"0px -156.323px"],[0.2821,"0px -154.656px"],[0.3077,"0px -153.053px"],[0.3333,"0px -151.542px"],[0.359,"0px -150.144px"],[0.3846,"0px -148.872px"],[0.4103,"0px -147.728px"],[0.4359,"0px -146.708px"],[0.4615,"0px -145.806px"],[0.4872,"0px -145.008px"],[0.5128,"0px -144.306px"],[0.5385,"0px -143.689px"],[0.5641,"0px -143.119px"],[0.5897,"0px -142.562px"],[0.6154,"0px -142.008px"],[0.641,"0px -141.448px"],[0.6667,"0px -140.874px"],[0.6923,"0px -140.277px"],[0.7179,"0px -139.646px"],[0.7436,"0px -138.97px"],[0.7692,"0px -138.236px"],[0.7949,"0px -137.424px"],[0.8205,"0px -136.508px"],[0.8462,"0px -135.443px"],[0.8718,"0px -134.147px"],[0.8974,"0px -132.408px"],[0.9231,"0px -128.061px"],[0.9487,"0px -140.026px"],[0.9744,"0px -140.006px"],[1,"0px -140px"]]},{"c":14,"t":1,"d":0.001,"e":"linear","k":[[0,"0px -140px"],[1,"0px -140px"]]},{"c":15,"t":0.35,"d":0.65,"e":"linear","k":[[0,"0px -28px"],[0.0256,"0px -54.142px"],[0.0513,"0px -78.336px"],[0.0769,"0px -99.079px"],[0.1026,"0px -115.884px"],[0.1282,"0px -129.091px"],[0.1538,"0px -139.342px"],[0.1795,"0px -147.263px"],[0.2051,"0px -153.361px"],[0.2308,"0px -158.021px"],[0.2564,"0px -156.323px"],[0.2821,"0px -154.656px"],[0.3077,"0px -153.053px"],[0.3333,"0px -151.542px"],[0.359,"0px -150.144px"],[0.3846,"0px -148.872px"],[0.4103,"0px -147.728px"],[0.4359,"0px -146.708px"],[0.4615,"0px -145.806px"],[0.4872,"0px -145.008px"],[0.5128,"0px -144.306px"],[0.5385,"0px -143.689px"],[0.5641,"0px -143.146px"],[0.5897,"0px -142.669px"],[0.6154,"0px -142.251px"],[0.641,"0px -141.884px"],[0.6667,"0px -141.564px"],[0.6923,"0px -141.285px"],[0.7179,"0px -141.042px"],[0.7436,"0px -140.832px"],[0.7692,"0px -140.652px"],[0.7949,"0px -140.499px"],[0.8205,"0px -140.371px"],[0.8462,"0px -140.264px"],[0.8718,"0px -140.178px"],[0.8974,"0px -140.111px"],[0.9231,"0px -140.061px"],[0.9487,"0px -140.026px"],[0.9744,"0px -140.006px"],[1,"0px -140px"]]},{"c":15,"t":1,"d":0.001,"e":"linear","k":[[0,"0px -140px"],[1,"0px -140px"]]},{"c":16,"t":0.35,"d":0.65,"e":"linear","k":[[0,"407px"],[0.0256,"380.858px"],[0.0513,"356.664px"],[0.0769,"335.921px"],[0.1026,"319.116px"],[0.1282,"305.909px"],[0.1538,"295.658px"],[0.1795,"287.737px"],[0.2051,"281.639px"],[0.2308,"276.979px"],[0.2564,"278.677px"],[0.2821,"280.344px"],[0.3077,"281.947px"],[0.3333,"283.458px"],[0.359,"284.856px"],[0.3846,"286.128px"],[0.4103,"287.272px"],[0.4359,"288.292px"],[0.4615,"289.194px"],[0.4872,"289.992px"],[0.5128,"290.694px"],[0.5385,"291.311px"],[0.5641,"291.854px"],[0.5897,"292.331px"],[0.6154,"292.749px"],[0.641,"293.116px"],[0.6667,"293.436px"],[0.6923,"293.715px"],[0.7179,"293.958px"],[0.7436,"294.168px"],[0.7692,"294.348px"],[0.7949,"294.501px"],[0.8205,"294.629px"],[0.8462,"294.736px"],[0.8718,"294.822px"],[0.8974,"294.889px"],[0.9231,"294.939px"],[0.9487,"294.974px"],[0.9744,"294.994px"],[1,"295px"]]},{"c":16,"t":1,"d":0.001,"e":"linear","k":[[0,"295px"],[1,"295px"]]},{"c":17,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px"],[1,"28px"]]},{"c":18,"t":0.51,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":19,"t":0.51,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 100% 0%)"]]},{"c":19,"t":0.76,"d":0.001,"e":"linear","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":20,"t":0.51,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 0px"],[1,"0px -28px"]]},{"c":21,"t":0.47,"d":0.29,"e":"linear","k":[[0,"0px 0px"],[0.0556,"0px -10.117px"],[0.1111,"0px -19.527px"],[0.1667,"0px -27.673px"],[0.2222,"0px -34.345px"],[0.2778,"0px -39.645px"],[0.3333,"0px -43.799px"],[0.3889,"0px -47.038px"],[0.4444,"0px -49.556px"],[0.5,"0px -51.502px"],[0.5556,"0px -52.991px"],[0.6111,"0px -54.108px"],[0.6667,"0px -54.919px"],[0.7222,"0px -55.477px"],[0.7778,"0px -55.82px"],[0.8333,"0px -55.98px"],[0.8889,"0px -56px"],[0.9444,"0px -56px"],[1,"0px -56px"]]},{"c":21,"t":0.76,"d":0.001,"e":"linear","k":[[0,"0px -56px"],[1,"0px -56px"]]},{"c":22,"t":0.43,"d":0.33,"e":"linear","k":[[0,"0px 0px"],[0.05,"0px -15.532px"],[0.1,"0px -29.929px"],[0.15,"0px -42.308px"],[0.2,"0px -52.371px"],[0.25,"0px -60.304px"],[0.3,"0px -66.479px"],[0.35,"0px -71.264px"],[0.4,"0px -74.958px"],[0.45,"0px -77.791px"],[0.5,"0px -79.937px"],[0.55,"0px -81.526px"],[0.6,"0px -82.658px"],[0.65,"0px -83.409px"],[0.7,"0px -83.839px"],[0.75,"0px -83.997px"],[0.8,"0px -84px"],[0.85,"0px -84px"],[0.9,"0px -84px"],[0.95,"0px -84px"],[1,"0px -84px"]]},{"c":22,"t":0.76,"d":0.001,"e":"linear","k":[[0,"0px -84px"],[1,"0px -84px"]]},{"c":23,"t":0.39,"d":0.37,"e":"linear","k":[[0,"0px 0px"],[0.0435,"0px -20.203px"],[0.087,"0px -39.002px"],[0.1304,"0px -55.279px"],[0.1739,"0px -68.619px"],[0.2174,"0px -79.22px"],[0.2609,"0px -87.532px"],[0.3043,"0px -94.016px"],[0.3478,"0px -99.058px"],[0.3913,"0px -102.958px"],[0.4348,"0px -105.942px"],[0.4783,"0px -108.184px"],[0.5217,"0px -109.814px"],[0.5652,"0px -110.936px"],[0.6087,"0px -111.629px"],[0.6522,"0px -111.957px"],[0.6957,"0px -112px"],[0.7391,"0px -112px"],[0.7826,"0px -112px"],[0.8261,"0px -112px"],[0.8696,"0px -112px"],[0.913,"0px -112px"],[0.9565,"0px -112px"],[1,"0px -112px"]]},{"c":23,"t":0.76,"d":0.001,"e":"linear","k":[[0,"0px -112px"],[1,"0px -112px"]]},{"c":24,"t":0.35,"d":0.41,"e":"linear","k":[[0,"0px 0px"],[0.04,"0px -25.734px"],[0.08,"0px -49.61px"],[0.12,"0px -70.173px"],[0.16,"0px -86.922px"],[0.2,"0px -100.152px"],[0.24,"0px -110.468px"],[0.28,"0px -118.475px"],[0.32,"0px -124.667px"],[0.36,"0px -129.427px"],[0.4,"0px -133.04px"],[0.44,"0px -135.726px"],[0.48,"0px -137.648px"],[0.52,"0px -138.936px"],[0.56,"0px -139.69px"],[0.6,"0px -139.989px"],[0.64,"0px -140px"],[0.68,"0px -140px"],[0.72,"0px -140px"],[0.76,"0px -140px"],[0.8,"0px -140px"],[0.84,"0px -140px"],[0.88,"0px -140px"],[0.92,"0px -140px"],[0.96,"0px -140px"],[1,"0px -140px"]]},{"c":24,"t":0.76,"d":0.001,"e":"linear","k":[[0,"0px -140px"],[1,"0px -140px"]]},{"c":25,"t":0.51,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"28px"],[1,"0px"]]},{"c":26,"t":0.47,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":27,"t":0.47,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 100% 0%)"]]},{"c":27,"t":0.72,"d":0.001,"e":"linear","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":28,"t":0.47,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"28px"],[1,"0px"]]},{"c":29,"t":0.43,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":30,"t":0.43,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 100% 0%)"]]},{"c":30,"t":0.68,"d":0.001,"e":"linear","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":31,"t":0.43,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"28px"],[1,"0px"]]},{"c":32,"t":0.39,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":33,"t":0.39,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 100% 0%)"]]},{"c":33,"t":0.64,"d":0.001,"e":"linear","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":34,"t":0.39,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"28px"],[1,"0px"]]},{"c":35,"t":0.35,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":36,"t":0.35,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 100% 0%)"]]},{"c":36,"t":0.6,"d":0.001,"e":"linear","k":[[0,"inset(0% 0% 0% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":37,"t":0.35,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"28px"],[1,"0px"]]},{"c":38,"t":0.7,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":40,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-ink)"],[1,"var(--role-surface)"]]},{"c":41,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-surface)"],[1,"var(--role-series-1)"]]},{"c":42,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0.35"]]}]]}]]></script>
+<script><![CDATA[
+/* agent-illustrator motion player: plays the tracks compiled into an SVG.
+ * No dependencies; Web Animations API. The player has no semantics of its
+ * own: every value it sets comes from the embedded manifest.
+ *
+ *   var p = ail.player(svgElement);        // shows frame 0, settled
+ *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
+ *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
+ *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
+ *
+ * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
+ * "...", note: "..."]`); a title holds until a later frame sets another, a
+ * note belongs to its step. Both come with every 'step' event:
+ *   p.on('step', function (k, meta) { header.textContent = meta.title; });
+ *
+ * A step is what one click shows: a frame and the `[auto]` frames that play
+ * on after it by themselves. Hosts that advance on clicks use the step API
+ * and never need to know which frames are automatic; `p.steps` lists each
+ * step's first frame (also `agent-illustrator --list-steps`).
+ *
+ * Forward plays the segment; backward and jumps are instant and exact.
+ */
+(function (root) {
+  'use strict';
+  if (root.ail && root.ail.player) return;
+
+  function camel(p) {
+    return p.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); });
+  }
+  function mq(q) {
+    return root.matchMedia ? root.matchMedia(q) : { matches: false, addListener: function () {} };
+  }
+
+  function Player(svg, opts) {
+    opts = opts || {};
+    var node = svg.querySelector('script.ail-motion');
+    if (!node) throw new Error('ail.player: this SVG has no motion manifest');
+    var m = JSON.parse(node.textContent);
+    if (m.v !== 1) throw new Error('ail.player: unsupported manifest version ' + m.v);
+    var self = this;
+    this.svg = svg;
+    this.manifest = m;
+    this.frames = m.frames.map(function (f) { return f.name; });
+    this.steps = [];
+    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
+    this.frame = 0;
+    this.playing = false;
+    this._anims = [];
+    this._loops = [];
+    this._timers = [];
+    this._listeners = {};
+    this._nodes = m.channels.map(function (c) {
+      return Array.prototype.slice.call(svg.querySelectorAll(c[0]));
+    });
+    this._reduced = mq('(prefers-reduced-motion: reduce)');
+    svg.setAttribute('data-ail-player', '');
+
+    // Print shows the finished story.
+    var saved = null;
+    function toLast() { saved = self.frame; self.goTo(self.frames.length - 1); }
+    function restore() { if (saved !== null) { self.goTo(saved); saved = null; } }
+    if (root.addEventListener) {
+      root.addEventListener('beforeprint', toLast);
+      root.addEventListener('afterprint', restore);
+    }
+
+    if (opts.autoplay) {
+      this._autoplay(opts.dwell == null ? 1.6 : opts.dwell);
+    } else {
+      this.goTo(opts.frame == null ? 0 : opts.frame);
+    }
+  }
+
+  var P = Player.prototype;
+
+  P.on = function (evt, cb) {
+    (this._listeners[evt] = this._listeners[evt] || []).push(cb);
+    return this;
+  };
+  P._emit = function (evt) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    (this._listeners[evt] || []).forEach(function (cb) { cb.apply(null, args); });
+  };
+  P._index = function (i) {
+    if (typeof i === 'string') {
+      var k = this.frames.indexOf(i);
+      if (k < 0) throw new Error('ail.player: no frame named "' + i + '"');
+      return k;
+    }
+    return Math.max(0, Math.min(this.frames.length - 1, i | 0));
+  };
+  P._set = function (c, v) {
+    var prop = this.manifest.channels[c][1];
+    this._nodes[c].forEach(function (n) {
+      if (prop === 'text') n.textContent = v;
+      else n.style.setProperty(prop, v);
+    });
+  };
+  P._apply = function (row) {
+    var vals = this.manifest.settled[row];
+    for (var c = 0; c < vals.length; c++) this._set(c, vals[c]);
+  };
+  P._stop = function () {
+    this._anims.concat(this._loops).forEach(function (a) { a.cancel(); });
+    this._anims = [];
+    this._loops = [];
+    this._timers.forEach(clearTimeout);
+    this._timers = [];
+    this.playing = false;
+  };
+  P._animate = function (a, loopNow) {
+    var self = this;
+    var prop = this.manifest.channels[a.c][1];
+    if (prop === 'text') {
+      a.k.forEach(function (kv) {
+        self._timers.push(setTimeout(function () { self._set(a.c, kv[1]); },
+          (a.t + kv[0] * a.d) * 1000));
+      });
+      return;
+    }
+    var key = camel(prop);
+    var frames = a.k.map(function (kv) { var f = { offset: kv[0] }; f[key] = kv[1]; return f; });
+    var timing = {
+      delay: loopNow ? 0 : a.t * 1000,
+      duration: Math.max(a.d * 1000, 1),
+      easing: a.e,
+      fill: a.loop ? 'none' : 'forwards',
+      iterations: a.loop ? Infinity : 1
+    };
+    this._nodes[a.c].forEach(function (n) {
+      if (!n.animate) return;
+      var anim = n.animate(frames, timing);
+      (a.loop ? self._loops : self._anims).push(anim);
+    });
+  };
+  P._startLoops = function (i) {
+    var self = this;
+    this.manifest.anims[i].forEach(function (a) { if (a.loop) self._animate(a, true); });
+  };
+
+  /** Jump to frame i (index or name): instant, exact. */
+  P.goTo = function (i) {
+    i = this._index(i);
+    this._stop();
+    this._apply(i + 1);
+    this.frame = i;
+    this._startLoops(i);
+    this._emit('frame', i, this.frames[i]);
+    return this;
+  };
+
+  /** Play frame i from the state before it. */
+  P.play = function (i) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    var f = this.manifest.frames[i];
+    if (this._reduced.matches || !f.duration) {
+      this.goTo(i);
+      this._chain(i);
+      return this;
+    }
+    this._apply(i);
+    this.frame = i;
+    this.playing = true;
+    this._emit('framestart', i, this.frames[i]);
+    this.manifest.anims[i].forEach(function (a) { self._animate(a, false); });
+    this._timers.push(setTimeout(function () {
+      self._apply(i + 1);
+      self._anims.forEach(function (a) { a.cancel(); });
+      self._anims = [];
+      self.playing = false;
+      self._emit('frame', i, self.frames[i]);
+      self._chain(i);
+    }, f.duration * 1000 + 20));
+    return this;
+  };
+
+  P._chain = function (i) {
+    var self = this;
+    var nf = this.manifest.frames[i + 1];
+    if (nf && nf.auto != null) {
+      this._timers.push(setTimeout(function () { self.play(i + 1); }, nf.auto * 1000));
+    } else if (this._auto) {
+      this._auto(i);
+    }
+  };
+
+  /** The step frame i belongs to. */
+  P._stepOf = function (i) {
+    var k = 0;
+    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
+    return k;
+  };
+  /** Last frame of step k: its own frame and the automatic ones after it. */
+  P._stepEnd = function (k) {
+    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
+  };
+  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
+  /** Host metadata at step k: the latest title set up to its end, its notes. */
+  P.meta = function (k) {
+    if (k == null) k = this.step;
+    var fr = this.manifest.frames, title = null, notes = [];
+    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
+    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
+    return { title: title, note: notes.length ? notes.join('\n') : null };
+  };
+  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
+  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
+
+  /** Jump to the end of step k (its automatic frames included): instant. */
+  P.goToStep = function (k) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
+    this.goTo(this._stepEnd(k));
+    this._emit('step', k, this.meta(k));
+    return this;
+  };
+
+  /** One click: finish the current step, then play the next one through. */
+  P.nextStep = function () {
+    var k = this.step;
+    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
+    if (k + 1 < this.steps.length) {
+      this.play(this.steps[k + 1]);
+      this._emit('step', k + 1, this.meta(k + 1));
+      return true;
+    }
+    return false;
+  };
+
+  /** One click back: the end of the previous step, instantly. */
+  P.prevStep = function () {
+    var k = this.step;
+    if (k > 0) { this.goToStep(k - 1); return true; }
+    this.goToStep(0);
+    return false;
+  };
+
+  /** Advance: play the next frame (finishing the current one first). */
+  P.next = function () {
+    if (this.playing) this.goTo(this.frame);
+    if (this.frame < this.frames.length - 1) { this.play(this.frame + 1); return true; }
+    return false;
+  };
+
+  /** Step back: instant. */
+  P.prev = function () {
+    if (this.frame > 0) { this.goTo(this.frame - 1); return true; }
+    this.goTo(0);
+    return false;
+  };
+
+  /** Freeze frame i at t seconds into it (for tests and previews). */
+  P.at = function (i, t) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    this._apply(i);
+    this.frame = i;
+    this.manifest.anims[i].forEach(function (a) {
+      var prop = self.manifest.channels[a.c][1];
+      if (prop === 'text') {
+        var cur = null;
+        a.k.forEach(function (kv) { if (a.t + kv[0] * a.d <= t + 1e-9) cur = kv[1]; });
+        if (cur !== null) self._set(a.c, cur);
+        return;
+      }
+      self._animate(a, false);
+    });
+    this._anims.concat(this._loops).forEach(function (an) { an.pause(); an.currentTime = t * 1000; });
+    return this;
+  };
+
+  P._autoplay = function (dwell) {
+    var self = this;
+    this._auto = function (i) {
+      self._timers.push(setTimeout(function () {
+        if (i < self.frames.length - 1) self.play(i + 1);
+        else { self._apply(0); self.play(0); }
+      }, dwell * 1000));
+    };
+    function manual() { self._auto = null; }
+    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
+    if (root.document) {
+      root.document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
+      });
+    }
+    this._apply(0);
+    this.play(0);
+  };
+
+  root.ail = root.ail || {};
+  root.ail.player = function (svg, opts) {
+    if (!svg.__ailPlayer) svg.__ailPlayer = new Player(svg, opts);
+    return svg.__ailPlayer;
+  };
+})(typeof window !== 'undefined' ? window : this);
+
+(function(){var svg=document.currentScript&&document.currentScript.closest?document.currentScript.closest('svg'):null;if(!svg){var all=document.querySelectorAll('svg[data-frames]');svg=all[all.length-1];}if(svg&&window.ail){window.ail.player(svg,{autoplay:true});}})();
+]]></script>
+</svg>

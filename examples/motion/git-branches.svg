@@ -2,6 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="main,branch,hotfix,review,fixed,merge">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
     :root {
     --accent-1: #2196f3;
     --accent-2: #e3f2fd;
@@ -13,6 +14,25 @@
     --background-3: #eeeeee;
     --background-dark: #333333;
     --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
     --font-mono: 'Overpass Mono', Consolas, monospace;
     --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
     --foreground-1: #333333;
@@ -35,6 +55,28 @@
     --git-paper2: #F4F6F8;
     --git-rule: #CBD1DA;
     --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -49,7 +91,7 @@
     --text-dark: #1a1a1a;
     --text-light: #ffffff;
   }
-
+  .ai-on-dark { fill: var(--text-light); }
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
@@ -58,72 +100,71 @@
 .frame-main {
 }
 .frame-branch {
-  .kf-03ceb24c-branch_tag { opacity: 1; }
-  .kf-03ceb24c-l1_dot { opacity: 1; }
-  .kf-03ceb24c-l1_nm { opacity: 1; }
-  .kf-03ceb24c-l2_dot { opacity: 1; }
-  .kf-03ceb24c-l2_nm { opacity: 1; }
+  .kf-98b54573-branch_tag { opacity: 1; }
+  .kf-98b54573-l1_dot { opacity: 1; }
+  .kf-98b54573-l1_nm { opacity: 1; }
+  .kf-98b54573-l2_dot { opacity: 1; }
+  .kf-98b54573-l2_nm { opacity: 1; }
 }
 .frame-hotfix {
-  .kf-03ceb24c-branch_tag { opacity: 1; }
-  .kf-03ceb24c-hotfix_dot { opacity: 1; }
-  .kf-03ceb24c-hotfix_nm { opacity: 1; }
-  .kf-03ceb24c-l1_dot { opacity: 1; }
-  .kf-03ceb24c-l1_nm { opacity: 1; }
-  .kf-03ceb24c-l2_dot { opacity: 1; }
-  .kf-03ceb24c-l2_nm { opacity: 1; }
+  .kf-98b54573-branch_tag { opacity: 1; }
+  .kf-98b54573-hotfix_dot { opacity: 1; }
+  .kf-98b54573-hotfix_nm { opacity: 1; }
+  .kf-98b54573-l1_dot { opacity: 1; }
+  .kf-98b54573-l1_nm { opacity: 1; }
+  .kf-98b54573-l2_dot { opacity: 1; }
+  .kf-98b54573-l2_nm { opacity: 1; }
 }
 .frame-review {
-  .kf-03ceb24c-branch_tag { opacity: 1; }
-  .kf-03ceb24c-hotfix_dot { opacity: 1; }
-  .kf-03ceb24c-hotfix_nm { opacity: 1; }
-  .kf-03ceb24c-l1_dot { opacity: 1; }
-  .kf-03ceb24c-l1_nm { opacity: 1; }
-  .kf-03ceb24c-l2_dot { opacity: 1; }
-  .kf-03ceb24c-l2_nm { opacity: 1; }
-  .kf-03ceb24c-mr { opacity: 1; }
-  .kf-03ceb24c-review_bg { opacity: 1; }
-  .kf-03ceb24c-tests_tick { opacity: 1; }
+  .kf-98b54573-branch_tag { opacity: 1; }
+  .kf-98b54573-hotfix_dot { opacity: 1; }
+  .kf-98b54573-hotfix_nm { opacity: 1; }
+  .kf-98b54573-l1_dot { opacity: 1; }
+  .kf-98b54573-l1_nm { opacity: 1; }
+  .kf-98b54573-l2_dot { opacity: 1; }
+  .kf-98b54573-l2_nm { opacity: 1; }
+  .kf-98b54573-mr { opacity: 1; }
+  .kf-98b54573-review_bg { opacity: 1; }
+  .kf-98b54573-tests_tick { opacity: 1; }
 }
 .frame-fixed {
-  .kf-03ceb24c-branch_tag { opacity: 1; }
-  .kf-03ceb24c-hotfix_dot { opacity: 1; }
-  .kf-03ceb24c-hotfix_nm { opacity: 1; }
-  .kf-03ceb24c-l1_dot { opacity: 1; }
-  .kf-03ceb24c-l1_nm { opacity: 1; }
-  .kf-03ceb24c-l2_dot { opacity: 1; }
-  .kf-03ceb24c-l2_nm { opacity: 1; }
-  .kf-03ceb24c-l3_dot { opacity: 1; }
-  .kf-03ceb24c-l3_nm { opacity: 1; }
-  .kf-03ceb24c-mr { opacity: 1; }
-  .kf-03ceb24c-review_tick { opacity: 1; }
-  .aitxt-03ceb24c-review_txt-base { opacity: 0; }
-  .aitxt-03ceb24c-review_txt-v0 { opacity: 1; }
-  .kf-03ceb24c-tests_tick { opacity: 1; }
+  .kf-98b54573-branch_tag { opacity: 1; }
+  .kf-98b54573-hotfix_dot { opacity: 1; }
+  .kf-98b54573-hotfix_nm { opacity: 1; }
+  .kf-98b54573-l1_dot { opacity: 1; }
+  .kf-98b54573-l1_nm { opacity: 1; }
+  .kf-98b54573-l2_dot { opacity: 1; }
+  .kf-98b54573-l2_nm { opacity: 1; }
+  .kf-98b54573-l3_dot { opacity: 1; }
+  .kf-98b54573-l3_nm { opacity: 1; }
+  .kf-98b54573-mr { opacity: 1; }
+  .kf-98b54573-review_tick { opacity: 1; }
+  .aitxt-98b54573-review_txt-base { opacity: 0; }
+  .aitxt-98b54573-review_txt-v0 { opacity: 1; }
+  .kf-98b54573-tests_tick { opacity: 1; }
 }
 .frame-merge {
-  .kf-03ceb24c-branch_tag { opacity: 1; }
-  .kf-03ceb24c-hotfix_dot { opacity: 1; }
-  .kf-03ceb24c-hotfix_nm { opacity: 1; }
-  .kf-03ceb24c-l1_dot { opacity: 1; }
-  .kf-03ceb24c-l1_nm { opacity: 1; }
-  .kf-03ceb24c-l2_dot { opacity: 1; }
-  .kf-03ceb24c-l2_nm { opacity: 1; }
-  .kf-03ceb24c-l3_dot { opacity: 1; }
-  .kf-03ceb24c-l3_nm { opacity: 1; }
-  .kf-03ceb24c-merged_dot { opacity: 1; }
-  .kf-03ceb24c-merged_nm { opacity: 1; }
-  .kf-03ceb24c-mr { opacity: 1; }
-  .kfp-03ceb24c-mr_bg { stroke: var(--git-ok); }
-  .kf-03ceb24c-review_tick { opacity: 1; }
-  .aitxt-03ceb24c-review_txt-base { opacity: 0; }
-  .aitxt-03ceb24c-review_txt-v0 { opacity: 1; }
-  .kf-03ceb24c-tests_tick { opacity: 1; }
-  .conn-03ceb24c-gate { opacity: 1; }
+  .kf-98b54573-branch_tag { opacity: 1; }
+  .kf-98b54573-hotfix_dot { opacity: 1; }
+  .kf-98b54573-hotfix_nm { opacity: 1; }
+  .kf-98b54573-l1_dot { opacity: 1; }
+  .kf-98b54573-l1_nm { opacity: 1; }
+  .kf-98b54573-l2_dot { opacity: 1; }
+  .kf-98b54573-l2_nm { opacity: 1; }
+  .kf-98b54573-l3_dot { opacity: 1; }
+  .kf-98b54573-l3_nm { opacity: 1; }
+  .kf-98b54573-merged_dot { opacity: 1; }
+  .kf-98b54573-merged_nm { opacity: 1; }
+  .kf-98b54573-mr { opacity: 1; }
+  .kfp-98b54573-mr_bg { stroke: var(--role-ok); }
+  .kf-98b54573-review_tick { opacity: 1; }
+  .aitxt-98b54573-review_txt-base { opacity: 0; }
+  .aitxt-98b54573-review_txt-v0 { opacity: 1; }
+  .kf-98b54573-tests_tick { opacity: 1; }
+  .conn-98b54573-gate { opacity: 1; }
 }
-
-    /* Palette and type for the "git for non-git people" deck. */
-@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    /* /home/kervel/projects/agent-illustrator/examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
 :root {
   --git-paper: #E9ECF0;
   --git-paper2: #F4F6F8;
@@ -132,6 +173,25 @@
   --git-muted: #5F6780;
   --git-rule: #CBD1DA;
   --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
   --git-branch: #C92C76;
   --git-anna: #0E8A8A;
   --git-ben: #E07A12;
@@ -144,6 +204,8 @@
   --ail-motion-fast: .25s;
   --ail-motion-normal: .5s;
   --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
   --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
   --font-mono: 'Overpass Mono', Consolas, monospace;
 }
@@ -151,320 +213,386 @@
 svg { font-family: var(--font-sans); }
 .dots { stroke-linecap: round; }
 text { white-space: pre; }
-
   /* motion: settled states (auto-generated) */
 svg[data-ail-player] * { transition: none !important; }
+.kf-98b54573-s_badge { opacity: 1; }
+.kf-98b54573-s_badge { scale: 1 1; }
+.kf-98b54573-s_heading { opacity: 1; }
+.kf-98b54573-s_heading { translate: 0px 0px; }
+.aimask-98b54573-main_line { stroke-dashoffset: 0.676; }
+.kf-98b54573-main_tag { opacity: 1; }
+.kf-98b54573-main_tag { scale: 1 1; }
+.kf-98b54573-a_dot { opacity: 1; }
+.kf-98b54573-a_dot { scale: 1 1; }
+.kf-98b54573-a_nm { opacity: 1; }
+.kf-98b54573-a_nm { translate: 0px 0px; }
+.kf-98b54573-b_dot { opacity: 1; }
+.kf-98b54573-b_dot { scale: 1 1; }
+.kf-98b54573-b_nm { opacity: 1; }
+.kf-98b54573-b_nm { translate: 0px 0px; }
+.kf-98b54573-c_dot { opacity: 1; }
+.kf-98b54573-c_dot { scale: 1 1; }
+.kf-98b54573-c_nm { opacity: 1; }
+.kf-98b54573-c_nm { translate: 0px 0px; }
+.aimask-98b54573-branch { stroke-dashoffset: 1.001; }
+.kf-98b54573-branch_tag { opacity: 0; }
+.kf-98b54573-branch_tag { scale: 1 1; }
+.kf-98b54573-l1_dot { opacity: 0; }
+.kf-98b54573-l1_dot { scale: 1 1; }
+.kf-98b54573-l1_nm { opacity: 0; }
+.kf-98b54573-l1_nm { translate: 0px 0px; }
+.kf-98b54573-l2_dot { opacity: 0; }
+.kf-98b54573-l2_dot { scale: 1 1; }
+.kf-98b54573-l2_nm { opacity: 0; }
+.kf-98b54573-l2_nm { translate: 0px 0px; }
+.kf-98b54573-hotfix_dot { opacity: 0; }
+.kf-98b54573-hotfix_dot { scale: 1 1; }
+.kf-98b54573-hotfix_nm { opacity: 0; }
+.kf-98b54573-hotfix_nm { translate: 0px 0px; }
+.kf-98b54573-mr { opacity: 0; }
+.kf-98b54573-mr { scale: 1 1; }
+.kf-98b54573-tests_tick { opacity: 0; }
+.kf-98b54573-tests_tick { scale: 1 1; }
+.kf-98b54573-review_bg { opacity: 0; }
+.kf-98b54573-l3_dot { opacity: 0; }
+.kf-98b54573-l3_dot { scale: 1 1; }
+.kf-98b54573-l3_nm { opacity: 0; }
+.kf-98b54573-l3_nm { translate: 0px 0px; }
+.aitxt-98b54573-review_txt-base { opacity: 1; }
+.aitxt-98b54573-review_txt-v0 { opacity: 0; }
+.kf-98b54573-review_tick { opacity: 0; }
+.kf-98b54573-review_tick { scale: 1 1; }
+.conn-98b54573-gate { opacity: 0; }
+.aimask-98b54573-gate { stroke-dashoffset: 0; }
+.kfp-98b54573-mr_bg { stroke: var(--role-ink); }
+.kf-98b54573-merged_dot { opacity: 0; }
+.kf-98b54573-merged_dot { scale: 1 1; }
+.kf-98b54573-merged_nm { opacity: 0; }
+.kf-98b54573-merged_nm { translate: 0px 0px; }
 .frame-main {
-  .kf-03ceb24c-s_badge { scale: 1 1; }
-  .aimask-03ceb24c-main_line { stroke-dashoffset: 0.676; }
-  .kf-03ceb24c-main_tag { scale: 1 1; }
-  .kf-03ceb24c-a_dot { scale: 1 1; }
-  .kf-03ceb24c-b_dot { scale: 1 1; }
-  .kf-03ceb24c-c_dot { scale: 1 1; }
-  .aimask-03ceb24c-branch { stroke-dashoffset: 1.001; }
-  .kf-03ceb24c-branch_tag { scale: 1 1; }
-  .kf-03ceb24c-l1_dot { scale: 1 1; }
-  .kf-03ceb24c-l2_dot { scale: 1 1; }
-  .kf-03ceb24c-hotfix_dot { scale: 1 1; }
-  .kf-03ceb24c-mr { scale: 1 1; }
-  .kf-03ceb24c-tests_tick { scale: 1 1; }
-  .kf-03ceb24c-l3_dot { scale: 1 1; }
-  .kf-03ceb24c-review_tick { scale: 1 1; }
-  .aimask-03ceb24c-gate { stroke-dashoffset: 0; }
-  .kf-03ceb24c-merged_dot { scale: 1 1; }
+  .kf-98b54573-s_badge { scale: 1 1; }
+  .aimask-98b54573-main_line { stroke-dashoffset: 0.676; }
+  .kf-98b54573-main_tag { scale: 1 1; }
+  .kf-98b54573-a_dot { scale: 1 1; }
+  .kf-98b54573-b_dot { scale: 1 1; }
+  .kf-98b54573-c_dot { scale: 1 1; }
+  .aimask-98b54573-branch { stroke-dashoffset: 1.001; }
+  .kf-98b54573-branch_tag { scale: 1 1; }
+  .kf-98b54573-l1_dot { scale: 1 1; }
+  .kf-98b54573-l2_dot { scale: 1 1; }
+  .kf-98b54573-hotfix_dot { scale: 1 1; }
+  .kf-98b54573-mr { scale: 1 1; }
+  .kf-98b54573-tests_tick { scale: 1 1; }
+  .kf-98b54573-l3_dot { scale: 1 1; }
+  .kf-98b54573-review_tick { scale: 1 1; }
+  .aimask-98b54573-gate { stroke-dashoffset: 0; }
+  .kf-98b54573-merged_dot { scale: 1 1; }
 }
 .frame-branch {
-  .kf-03ceb24c-s_badge { scale: 1 1; }
-  .aimask-03ceb24c-main_line { stroke-dashoffset: 0.676; }
-  .kf-03ceb24c-main_tag { scale: 1 1; }
-  .kf-03ceb24c-a_dot { scale: 1 1; }
-  .kf-03ceb24c-b_dot { scale: 1 1; }
-  .kf-03ceb24c-c_dot { scale: 1 1; }
-  .aimask-03ceb24c-branch { stroke-dashoffset: 0.5; }
-  .kf-03ceb24c-branch_tag { scale: 1 1; }
-  .kf-03ceb24c-l1_dot { scale: 1 1; }
-  .kf-03ceb24c-l2_dot { scale: 1 1; }
-  .kf-03ceb24c-hotfix_dot { scale: 1 1; }
-  .kf-03ceb24c-mr { scale: 1 1; }
-  .kf-03ceb24c-tests_tick { scale: 1 1; }
-  .kf-03ceb24c-l3_dot { scale: 1 1; }
-  .kf-03ceb24c-review_tick { scale: 1 1; }
-  .aimask-03ceb24c-gate { stroke-dashoffset: 0; }
-  .kf-03ceb24c-merged_dot { scale: 1 1; }
+  .kf-98b54573-s_badge { scale: 1 1; }
+  .aimask-98b54573-main_line { stroke-dashoffset: 0.676; }
+  .kf-98b54573-main_tag { scale: 1 1; }
+  .kf-98b54573-a_dot { scale: 1 1; }
+  .kf-98b54573-b_dot { scale: 1 1; }
+  .kf-98b54573-c_dot { scale: 1 1; }
+  .aimask-98b54573-branch { stroke-dashoffset: 0.5; }
+  .kf-98b54573-branch_tag { scale: 1 1; }
+  .kf-98b54573-l1_dot { scale: 1 1; }
+  .kf-98b54573-l2_dot { scale: 1 1; }
+  .kf-98b54573-hotfix_dot { scale: 1 1; }
+  .kf-98b54573-mr { scale: 1 1; }
+  .kf-98b54573-tests_tick { scale: 1 1; }
+  .kf-98b54573-l3_dot { scale: 1 1; }
+  .kf-98b54573-review_tick { scale: 1 1; }
+  .aimask-98b54573-gate { stroke-dashoffset: 0; }
+  .kf-98b54573-merged_dot { scale: 1 1; }
 }
 .frame-hotfix {
-  .kf-03ceb24c-s_badge { scale: 1 1; }
-  .aimask-03ceb24c-main_line { stroke-dashoffset: 0.37; }
-  .kf-03ceb24c-main_tag { scale: 1 1; }
-  .kf-03ceb24c-a_dot { scale: 1 1; }
-  .kf-03ceb24c-b_dot { scale: 1 1; }
-  .kf-03ceb24c-c_dot { scale: 1 1; }
-  .aimask-03ceb24c-branch { stroke-dashoffset: 0.5; }
-  .kf-03ceb24c-branch_tag { scale: 1 1; }
-  .kf-03ceb24c-l1_dot { scale: 1 1; }
-  .kf-03ceb24c-l2_dot { scale: 1 1; }
-  .kf-03ceb24c-hotfix_dot { scale: 1 1; }
-  .kf-03ceb24c-mr { scale: 1 1; }
-  .kf-03ceb24c-tests_tick { scale: 1 1; }
-  .kf-03ceb24c-l3_dot { scale: 1 1; }
-  .kf-03ceb24c-review_tick { scale: 1 1; }
-  .aimask-03ceb24c-gate { stroke-dashoffset: 0; }
-  .kf-03ceb24c-merged_dot { scale: 1 1; }
+  .kf-98b54573-s_badge { scale: 1 1; }
+  .aimask-98b54573-main_line { stroke-dashoffset: 0.37; }
+  .kf-98b54573-main_tag { scale: 1 1; }
+  .kf-98b54573-a_dot { scale: 1 1; }
+  .kf-98b54573-b_dot { scale: 1 1; }
+  .kf-98b54573-c_dot { scale: 1 1; }
+  .aimask-98b54573-branch { stroke-dashoffset: 0.5; }
+  .kf-98b54573-branch_tag { scale: 1 1; }
+  .kf-98b54573-l1_dot { scale: 1 1; }
+  .kf-98b54573-l2_dot { scale: 1 1; }
+  .kf-98b54573-hotfix_dot { scale: 1 1; }
+  .kf-98b54573-mr { scale: 1 1; }
+  .kf-98b54573-tests_tick { scale: 1 1; }
+  .kf-98b54573-l3_dot { scale: 1 1; }
+  .kf-98b54573-review_tick { scale: 1 1; }
+  .aimask-98b54573-gate { stroke-dashoffset: 0; }
+  .kf-98b54573-merged_dot { scale: 1 1; }
 }
 .frame-review {
-  .kf-03ceb24c-s_badge { scale: 1 1; }
-  .aimask-03ceb24c-main_line { stroke-dashoffset: 0.37; }
-  .kf-03ceb24c-main_tag { scale: 1 1; }
-  .kf-03ceb24c-a_dot { scale: 1 1; }
-  .kf-03ceb24c-b_dot { scale: 1 1; }
-  .kf-03ceb24c-c_dot { scale: 1 1; }
-  .aimask-03ceb24c-branch { stroke-dashoffset: 0.5; }
-  .kf-03ceb24c-branch_tag { scale: 1 1; }
-  .kf-03ceb24c-l1_dot { scale: 1 1; }
-  .kf-03ceb24c-l2_dot { scale: 1 1; }
-  .kf-03ceb24c-hotfix_dot { scale: 1 1; }
-  .kf-03ceb24c-mr { scale: 1 1; }
-  .kf-03ceb24c-tests_tick { scale: 1 1; }
-  .kf-03ceb24c-l3_dot { scale: 1 1; }
-  .kf-03ceb24c-review_tick { scale: 1 1; }
-  .aimask-03ceb24c-gate { stroke-dashoffset: 0; }
-  .kf-03ceb24c-merged_dot { scale: 1 1; }
+  .kf-98b54573-s_badge { scale: 1 1; }
+  .aimask-98b54573-main_line { stroke-dashoffset: 0.37; }
+  .kf-98b54573-main_tag { scale: 1 1; }
+  .kf-98b54573-a_dot { scale: 1 1; }
+  .kf-98b54573-b_dot { scale: 1 1; }
+  .kf-98b54573-c_dot { scale: 1 1; }
+  .aimask-98b54573-branch { stroke-dashoffset: 0.5; }
+  .kf-98b54573-branch_tag { scale: 1 1; }
+  .kf-98b54573-l1_dot { scale: 1 1; }
+  .kf-98b54573-l2_dot { scale: 1 1; }
+  .kf-98b54573-hotfix_dot { scale: 1 1; }
+  .kf-98b54573-mr { scale: 1 1; }
+  .kf-98b54573-tests_tick { scale: 1 1; }
+  .kf-98b54573-l3_dot { scale: 1 1; }
+  .kf-98b54573-review_tick { scale: 1 1; }
+  .aimask-98b54573-gate { stroke-dashoffset: 0; }
+  .kf-98b54573-merged_dot { scale: 1 1; }
 }
 .frame-fixed {
-  .kf-03ceb24c-s_badge { scale: 1 1; }
-  .aimask-03ceb24c-main_line { stroke-dashoffset: 0.37; }
-  .kf-03ceb24c-main_tag { scale: 1 1; }
-  .kf-03ceb24c-a_dot { scale: 1 1; }
-  .kf-03ceb24c-b_dot { scale: 1 1; }
-  .kf-03ceb24c-c_dot { scale: 1 1; }
-  .aimask-03ceb24c-branch { stroke-dashoffset: 0.311; }
-  .kf-03ceb24c-branch_tag { scale: 1 1; }
-  .kf-03ceb24c-l1_dot { scale: 1 1; }
-  .kf-03ceb24c-l2_dot { scale: 1 1; }
-  .kf-03ceb24c-hotfix_dot { scale: 1 1; }
-  .kf-03ceb24c-mr { scale: 1 1; }
-  .kf-03ceb24c-tests_tick { scale: 1 1; }
-  .kf-03ceb24c-l3_dot { scale: 1 1; }
-  .kf-03ceb24c-review_tick { scale: 1 1; }
-  .aimask-03ceb24c-gate { stroke-dashoffset: 0; }
-  .kf-03ceb24c-merged_dot { scale: 1 1; }
+  .kf-98b54573-s_badge { scale: 1 1; }
+  .aimask-98b54573-main_line { stroke-dashoffset: 0.37; }
+  .kf-98b54573-main_tag { scale: 1 1; }
+  .kf-98b54573-a_dot { scale: 1 1; }
+  .kf-98b54573-b_dot { scale: 1 1; }
+  .kf-98b54573-c_dot { scale: 1 1; }
+  .aimask-98b54573-branch { stroke-dashoffset: 0.311; }
+  .kf-98b54573-branch_tag { scale: 1 1; }
+  .kf-98b54573-l1_dot { scale: 1 1; }
+  .kf-98b54573-l2_dot { scale: 1 1; }
+  .kf-98b54573-hotfix_dot { scale: 1 1; }
+  .kf-98b54573-mr { scale: 1 1; }
+  .kf-98b54573-tests_tick { scale: 1 1; }
+  .kf-98b54573-l3_dot { scale: 1 1; }
+  .kf-98b54573-review_tick { scale: 1 1; }
+  .aimask-98b54573-gate { stroke-dashoffset: 0; }
+  .kf-98b54573-merged_dot { scale: 1 1; }
 }
 .frame-merge {
-  .kf-03ceb24c-s_badge { scale: 1 1; }
-  .aimask-03ceb24c-main_line { stroke-dashoffset: 0; }
-  .kf-03ceb24c-main_tag { scale: 1 1; }
-  .kf-03ceb24c-a_dot { scale: 1 1; }
-  .kf-03ceb24c-b_dot { scale: 1 1; }
-  .kf-03ceb24c-c_dot { scale: 1 1; }
-  .aimask-03ceb24c-branch { stroke-dashoffset: 0; }
-  .kf-03ceb24c-branch_tag { scale: 1 1; }
-  .kf-03ceb24c-l1_dot { scale: 1 1; }
-  .kf-03ceb24c-l2_dot { scale: 1 1; }
-  .kf-03ceb24c-hotfix_dot { scale: 1 1; }
-  .kf-03ceb24c-mr { scale: 1 1; }
-  .kf-03ceb24c-tests_tick { scale: 1 1; }
-  .kf-03ceb24c-l3_dot { scale: 1 1; }
-  .kf-03ceb24c-review_tick { scale: 1 1; }
-  .aimask-03ceb24c-gate { stroke-dashoffset: 0; }
-  .kf-03ceb24c-merged_dot { scale: 1 1; }
+  .kf-98b54573-s_badge { scale: 1 1; }
+  .aimask-98b54573-main_line { stroke-dashoffset: 0; }
+  .kf-98b54573-main_tag { scale: 1 1; }
+  .kf-98b54573-a_dot { scale: 1 1; }
+  .kf-98b54573-b_dot { scale: 1 1; }
+  .kf-98b54573-c_dot { scale: 1 1; }
+  .aimask-98b54573-branch { stroke-dashoffset: 0; }
+  .kf-98b54573-branch_tag { scale: 1 1; }
+  .kf-98b54573-l1_dot { scale: 1 1; }
+  .kf-98b54573-l2_dot { scale: 1 1; }
+  .kf-98b54573-hotfix_dot { scale: 1 1; }
+  .kf-98b54573-mr { scale: 1 1; }
+  .kf-98b54573-tests_tick { scale: 1 1; }
+  .kf-98b54573-l3_dot { scale: 1 1; }
+  .kf-98b54573-review_tick { scale: 1 1; }
+  .aimask-98b54573-gate { stroke-dashoffset: 0; }
+  .kf-98b54573-merged_dot { scale: 1 1; }
 }
 ]]></style>
   <defs>
-    <mask id="aim-03ceb24c-main_line" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-03ceb24c-main_line aid-03ceb24c-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.6761673032084567"/></mask>
-    <mask id="aim-03ceb24c-branch" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-03ceb24c-branch aid-03ceb24c-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
-    <mask id="aim-03ceb24c-gate" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-03ceb24c-gate aid-03ceb24c-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-98b54573-main_line" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-98b54573-main_line aid-98b54573-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.6761673032084567"/></mask>
+    <mask id="aim-98b54573-branch" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-98b54573-branch aid-98b54573-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
+    <mask id="aim-98b54573-gate" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-98b54573-gate aid-98b54573-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
   </defs>
-  <g class="kf-03ceb24c-s kf-anim" style="transform-origin:800px 450px">
-    <g id="s" class="ai-container kfp-03ceb24c-s">
-      <g class="kf-03ceb24c-s_stage kf-anim" style="transform-origin:800px 450px">
-        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-03ceb24c-s_stage" x="0" y="0" width="1600" height="900" fill="var(--git-paper)" stroke="none" stroke-width="1.5"/>
+  <g class="kf-98b54573-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-98b54573-s">
+      <g class="kf-98b54573-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-98b54573-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
       </g>
-      <g class="kf-03ceb24c-s_badge kf-anim" style="transform-origin:129px 97px">
-        <rect id="s_badge" class="ai-shape ai-rect kfp-03ceb24c-s_badge" x="96" y="64" width="66" height="66" fill="var(--git-ink)" stroke="none" stroke-width="1.5" rx="16"/>
-        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--git-paper)" font-weight="800"><tspan x="129" dy="-0"><tspan>4</tspan></tspan></text>
+      <g class="kf-98b54573-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-98b54573-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>4</tspan></tspan></text>
       </g>
-      <g class="kf-03ceb24c-s_heading kf-anim" style="transform-origin:605.94px 97px">
-        <text id="s_heading" class="ai-shape ai-text kfp-03ceb24c-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--git-ink)" font-weight="800">Branches and merge requests</text>
+      <g class="kf-98b54573-s_heading kf-anim" style="transform-origin:605.94px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-98b54573-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Branches and merge requests</text>
       </g>
     </g>
   </g>
-  <g class="kf-03ceb24c-main_line kf-anim" style="transform-origin:771.84px 580px">
-    <path id="main_line" class="ai-shape ai-path kfp-03ceb24c-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--git-main)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-03ceb24c-main_line)"/>
+  <g class="kf-98b54573-main_line kf-anim" style="transform-origin:771.84px 580px">
+    <path id="main_line" class="ai-shape ai-path kfp-98b54573-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--role-primary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-98b54573-main_line)"/>
   </g>
-  <g class="kf-03ceb24c-branch kf-anim" style="transform-origin:953.23px 465px">
-    <path id="branch" class="ai-shape ai-path kfp-03ceb24c-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--git-branch)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-03ceb24c-branch)"/>
+  <g class="kf-98b54573-branch kf-anim" style="transform-origin:953.23px 465px">
+    <path id="branch" class="ai-shape ai-path kfp-98b54573-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--role-secondary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-98b54573-branch)"/>
   </g>
-  <g class="kf-03ceb24c-mains kf-anim" style="transform-origin:340.73px 606.38px">
-    <g id="mains" class="ai-container kfp-03ceb24c-mains">
-      <g class="kf-03ceb24c-a kf-anim" style="transform-origin:172.75px 606.38px">
-        <g id="a" class="ai-container kfp-03ceb24c-a">
-          <g class="kf-03ceb24c-a_dot kf-anim" style="transform-origin:172.75px 580px">
-            <circle id="a_dot" class="ai-shape ai-circle kfp-03ceb24c-a_dot" cx="172.7471" cy="580" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
+  <g class="kf-98b54573-mains kf-anim" style="transform-origin:340.73px 606.38px">
+    <g id="mains" class="ai-container kfp-98b54573-mains">
+      <g class="kf-98b54573-a kf-anim" style="transform-origin:172.75px 606.38px">
+        <g id="a" class="ai-container kfp-98b54573-a">
+          <g class="kf-98b54573-a_dot kf-anim" style="transform-origin:172.75px 580px">
+            <circle id="a_dot" class="ai-shape ai-circle kfp-98b54573-a_dot" cx="172.7471" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
           </g>
-          <g class="kf-03ceb24c-a_nm kf-anim" style="transform-origin:172.75px 629.38px">
-            <rect id="a_nm" class="ai-shape ai-rect kfp-03ceb24c-a_nm" x="104.99999999999999" y="607" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="172.7471" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="172.7471" dy="-0"><tspan>Login page</tspan></tspan></text>
+          <g class="kf-98b54573-a_nm kf-anim" style="transform-origin:172.75px 629.38px">
+            <rect id="a_nm" class="ai-shape ai-rect kfp-98b54573-a_nm" x="105" y="607" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="172.7471" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="172.7471" dy="-0"><tspan>Login page</tspan></tspan></text>
           </g>
         </g>
       </g>
-      <g class="kf-03ceb24c-b kf-anim" style="transform-origin:357.54px 606.38px">
-        <g id="b" class="ai-container kfp-03ceb24c-b">
-          <g class="kf-03ceb24c-b_dot kf-anim" style="transform-origin:357.54px 580px">
-            <circle id="b_dot" class="ai-shape ai-circle kfp-03ceb24c-b_dot" cx="357.54095" cy="580" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
+      <g class="kf-98b54573-b kf-anim" style="transform-origin:357.54px 606.38px">
+        <g id="b" class="ai-container kfp-98b54573-b">
+          <g class="kf-98b54573-b_dot kf-anim" style="transform-origin:357.54px 580px">
+            <circle id="b_dot" class="ai-shape ai-circle kfp-98b54573-b_dot" cx="357.541" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
           </g>
-          <g class="kf-03ceb24c-b_nm kf-anim" style="transform-origin:357.54px 629.38px">
-            <rect id="b_nm" class="ai-shape ai-rect kfp-03ceb24c-b_nm" x="290.4942" y="607" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="357.54095" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="357.54095" dy="-0"><tspan>Dark mode</tspan></tspan></text>
-          </g>
-        </g>
-      </g>
-      <g class="kf-03ceb24c-c kf-anim" style="transform-origin:525.53px 606.38px">
-        <g id="c" class="ai-container kfp-03ceb24c-c">
-          <g class="kf-03ceb24c-c_dot kf-anim" style="transform-origin:525.53px 580px">
-            <circle id="c_dot" class="ai-shape ai-circle kfp-03ceb24c-c_dot" cx="525.5264" cy="580" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
-          </g>
-          <g class="kf-03ceb24c-c_nm kf-anim" style="transform-origin:525.53px 629.38px">
-            <rect id="c_nm" class="ai-shape ai-rect kfp-03ceb24c-c_nm" x="474.5877" y="607" width="101.8774" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="525.5264" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="525.5264" dy="-0"><tspan>Price fix</tspan></tspan></text>
+          <g class="kf-98b54573-b_nm kf-anim" style="transform-origin:357.54px 629.38px">
+            <rect id="b_nm" class="ai-shape ai-rect kfp-98b54573-b_nm" x="290.4942" y="607" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="357.5411" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="357.5411" dy="-0"><tspan>Dark mode</tspan></tspan></text>
           </g>
         </g>
       </g>
-    </g>
-  </g>
-  <g class="kf-03ceb24c-l1 kf-anim" style="transform-origin:755.53px 323.63px">
-    <g id="l1" class="ai-container kfp-03ceb24c-l1">
-      <g class="kf-hidden kf-03ceb24c-l1_dot kf-anim" style="transform-origin:755.53px 350px">
-        <circle id="l1_dot" class="ai-shape ai-circle kfp-03ceb24c-l1_dot" cx="755.5264" cy="350" r="19" fill="var(--git-panel)" stroke="var(--git-branch)" stroke-width="8"/>
-      </g>
-      <g class="kf-hidden kf-03ceb24c-l1_nm kf-anim" style="transform-origin:755.53px 300.63px">
-        <rect id="l1_nm" class="ai-shape ai-rect kfp-03ceb24c-l1_nm" x="671.6954" y="278.25" width="167.66200000000003" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="755.5264" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="755.5264" dy="-0"><tspan>New checkout</tspan></tspan></text>
-      </g>
-    </g>
-  </g>
-  <g class="kf-03ceb24c-l2 kf-anim" style="transform-origin:953.23px 323.63px">
-    <g id="l2" class="ai-container kfp-03ceb24c-l2">
-      <g class="kf-hidden kf-03ceb24c-l2_dot kf-anim" style="transform-origin:953.23px 350px">
-        <circle id="l2_dot" class="ai-shape ai-circle kfp-03ceb24c-l2_dot" cx="953.2259" cy="350" r="19" fill="var(--git-panel)" stroke="var(--git-branch)" stroke-width="8"/>
-      </g>
-      <g class="kf-hidden kf-03ceb24c-l2_nm kf-anim" style="transform-origin:953.23px 300.63px">
-        <rect id="l2_nm" class="ai-shape ai-rect kfp-03ceb24c-l2_nm" x="863.3574" y="278.25" width="179.73700000000002" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="953.2259" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="953.2259" dy="-0"><tspan>Card payments</tspan></tspan></text>
-      </g>
-    </g>
-  </g>
-  <g class="kf-03ceb24c-l3 kf-anim" style="transform-origin:1150.93px 323.63px">
-    <g id="l3" class="ai-container kfp-03ceb24c-l3">
-      <g class="kf-hidden kf-03ceb24c-l3_dot kf-anim" style="transform-origin:1150.93px 350px">
-        <circle id="l3_dot" class="ai-shape ai-circle kfp-03ceb24c-l3_dot" cx="1150.9254" cy="350" r="19" fill="var(--git-panel)" stroke="var(--git-branch)" stroke-width="8"/>
-      </g>
-      <g class="kf-hidden kf-03ceb24c-l3_nm kf-anim" style="transform-origin:1150.93px 300.63px">
-        <rect id="l3_nm" class="ai-shape ai-rect kfp-03ceb24c-l3_nm" x="1075.1605000000002" y="278.25" width="151.5298" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="1150.9254" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="1150.9254" dy="-0"><tspan>Review fixes</tspan></tspan></text>
-      </g>
-    </g>
-  </g>
-  <g class="kf-03ceb24c-hotfix kf-anim" style="transform-origin:953.23px 606.38px">
-    <g id="hotfix" class="ai-container kfp-03ceb24c-hotfix">
-      <g class="kf-hidden kf-03ceb24c-hotfix_dot kf-anim" style="transform-origin:953.23px 580px">
-        <circle id="hotfix_dot" class="ai-shape ai-circle kfp-03ceb24c-hotfix_dot" cx="953.2259" cy="580" r="19" fill="var(--git-panel)" stroke="var(--git-main)" stroke-width="8"/>
-      </g>
-      <g class="kf-hidden kf-03ceb24c-hotfix_nm kf-anim" style="transform-origin:953.23px 629.38px">
-        <rect id="hotfix_nm" class="ai-shape ai-rect kfp-03ceb24c-hotfix_nm" x="913.2259" y="607" width="80" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="953.2259" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="953.2259" dy="-0"><tspan>Hotfix</tspan></tspan></text>
-      </g>
-    </g>
-  </g>
-  <g class="kf-03ceb24c-merged kf-anim" style="transform-origin:1380.93px 606.38px">
-    <g id="merged" class="ai-container kfp-03ceb24c-merged">
-      <g class="kf-hidden kf-03ceb24c-merged_dot kf-anim" style="transform-origin:1380.93px 580px">
-        <circle id="merged_dot" class="ai-shape ai-circle kfp-03ceb24c-merged_dot" cx="1380.9254" cy="580" r="28" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="9"/>
-      </g>
-      <g class="kf-hidden kf-03ceb24c-merged_nm kf-anim" style="transform-origin:1380.93px 638.38px">
-        <rect id="merged_nm" class="ai-shape ai-rect kfp-03ceb24c-merged_nm" x="1331.99115" y="616" width="97.8685" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="1380.9254" y="638.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--git-ink)" font-weight="700"><tspan x="1380.9254" dy="-0"><tspan>Merged</tspan></tspan></text>
-      </g>
-    </g>
-  </g>
-  <g class="kf-03ceb24c-main_tag kf-anim" style="transform-origin:123.75px 507.75px">
-    <rect id="main_tag" class="ai-shape ai-rect kfp-03ceb24c-main_tag" x="83.74709999999999" y="488.5" width="80" height="38.5" fill="var(--git-main)" stroke="none" stroke-width="1.5" rx="18"/>
-    <text class="ai-label" x="123.74709999999999" y="507.75" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--git-panel)" font-weight="600" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="123.74709999999999" dy="-0"><tspan>main</tspan></tspan></text>
-  </g>
-  <g class="kf-hidden kf-03ceb24c-branch_tag kf-anim" style="transform-origin:392.13px 465px">
-    <rect id="branch_tag" class="ai-shape ai-rect kfp-03ceb24c-branch_tag" x="297.7264" y="445.75" width="188.79999999999998" height="38.5" fill="var(--git-branch)" stroke="none" stroke-width="1.5" rx="18"/>
-    <text class="ai-label" x="392.1264" y="465" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--git-panel)" font-weight="600" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="392.1264" dy="-0"><tspan>feature/checkout</tspan></tspan></text>
-  </g>
-  <g class="kf-hidden kf-03ceb24c-mr kf-anim" style="transform-origin:1414.16px 278.88px">
-    <g id="mr" class="ai-container kfp-03ceb24c-mr">
-      <g class="kf-03ceb24c-mr_bg kf-anim" style="transform-origin:1414.16px 278.88px">
-        <rect id="mr_bg" class="ai-shape ai-rect kfp-03ceb24c-mr_bg" x="1268.3252499999999" y="130" width="291.67475" height="297.75" fill="var(--git-panel)" stroke="var(--git-ink)" stroke-width="3" rx="14"/>
-      </g>
-      <g class="kf-03ceb24c-mr_body kf-anim" style="transform-origin:1414.16px 278.88px">
-        <g id="mr_body" class="ai-container kfp-03ceb24c-mr_body">
-          <g class="kf-03ceb24c-mr_kind kf-anim" style="transform-origin:1382.93px 173px">
-            <rect id="mr_kind" class="ai-shape ai-rect kfp-03ceb24c-mr_kind" x="1293.3252499999999" y="155" width="179.2" height="36" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="1301.3252499999999" y="173" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--git-muted)" font-family="var(--font-mono, ui-monospace, monospace)"><tspan x="1301.3252499999999" dy="-0"><tspan>MERGE REQUEST </tspan><tspan fill="var(--git-main)">!42</tspan></tspan></text>
+      <g class="kf-98b54573-c kf-anim" style="transform-origin:525.53px 606.38px">
+        <g id="c" class="ai-container kfp-98b54573-c">
+          <g class="kf-98b54573-c_dot kf-anim" style="transform-origin:525.53px 580px">
+            <circle id="c_dot" class="ai-shape ai-circle kfp-98b54573-c_dot" cx="525.5264" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
           </g>
-          <g class="kf-03ceb24c-mr_title kf-anim" style="transform-origin:1387.05px 223.25px">
-            <rect id="mr_title" class="ai-shape ai-rect kfp-03ceb24c-mr_title" x="1293.3252499999999" y="199" width="187.44400000000005" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
-            <text class="ai-label" x="1301.3252499999999" y="223.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--git-ink)" font-weight="700"><tspan x="1301.3252499999999" dy="-0"><tspan>New checkout</tspan></tspan></text>
+          <g class="kf-98b54573-c_nm kf-anim" style="transform-origin:525.53px 629.38px">
+            <rect id="c_nm" class="ai-shape ai-rect kfp-98b54573-c_nm" x="474.5877" y="607" width="101.8774" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="525.5264" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="525.5264" dy="-0"><tspan>Price fix</tspan></tspan></text>
           </g>
-          <g class="kf-03ceb24c-tests kf-anim" style="transform-origin:1404.74px 284.38px">
-            <g id="tests" class="ai-container kfp-03ceb24c-tests">
-              <g class="kf-03ceb24c-tests_bg kf-anim" opacity="0" style="transform-origin:1404.74px 284.38px">
-                <rect id="tests_bg" class="ai-shape ai-rect kfp-03ceb24c-tests_bg" x="1293.3252499999999" y="255.5" width="222.82200000000003" height="57.75" fill="var(--git-warn)" stroke="none" stroke-width="1.5" fill-opacity="0.28" rx="8"/>
-              </g>
-              <g class="kf-03ceb24c-tests_item kf-anim" style="transform-origin:1404.74px 284.38px">
-                <g id="tests_item" class="ai-container kfp-03ceb24c-tests_item">
-                  <g class="kf-hidden kf-03ceb24c-tests_tick kf-anim" style="transform-origin:1316.33px 284.38px">
-                    <circle id="tests_tick" class="ai-shape ai-circle kfp-03ceb24c-tests_tick" cx="1316.3252499999999" cy="284.375" r="14" fill="var(--git-ok)" stroke="none" stroke-width="1.5"/>
-                    <text class="ai-label" x="1316.3252499999999" y="284.375" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--git-panel)" font-weight="800"><tspan x="1316.3252499999999" dy="-0"><tspan>✓</tspan></tspan></text>
-                  </g>
-                  <g class="kf-03ceb24c-tests_txt kf-anim" style="transform-origin:1423.74px 284.38px">
-                    <rect id="tests_txt" class="ai-shape ai-rect kfp-03ceb24c-tests_txt" x="1340.3252499999999" y="264.5" width="166.82200000000003" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
-                    <text class="ai-label" x="1348.3252499999999" y="284.375" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--git-ink)" font-weight="600"><tspan x="1348.3252499999999" dy="-0"><tspan>218 tests passed</tspan></tspan></text>
-                  </g>
-                </g>
-              </g>
-            </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-98b54573-l1 kf-anim" style="transform-origin:755.53px 323.63px">
+    <g id="l1" class="ai-container kfp-98b54573-l1">
+      <g class="kf-hidden kf-98b54573-l1_dot kf-anim" style="transform-origin:755.53px 350px">
+        <circle id="l1_dot" class="ai-shape ai-circle kfp-98b54573-l1_dot" cx="755.5264" cy="350" r="19" fill="var(--role-surface)" stroke="var(--role-secondary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-98b54573-l1_nm kf-anim" style="transform-origin:755.53px 300.63px">
+        <rect id="l1_nm" class="ai-shape ai-rect kfp-98b54573-l1_nm" x="671.6954" y="278.25" width="167.662" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="755.5264" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="755.5264" dy="-0"><tspan>New checkout</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-98b54573-l2 kf-anim" style="transform-origin:953.23px 323.63px">
+    <g id="l2" class="ai-container kfp-98b54573-l2">
+      <g class="kf-hidden kf-98b54573-l2_dot kf-anim" style="transform-origin:953.23px 350px">
+        <circle id="l2_dot" class="ai-shape ai-circle kfp-98b54573-l2_dot" cx="953.2259" cy="350" r="19" fill="var(--role-surface)" stroke="var(--role-secondary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-98b54573-l2_nm kf-anim" style="transform-origin:953.23px 300.63px">
+        <rect id="l2_nm" class="ai-shape ai-rect kfp-98b54573-l2_nm" x="863.3574" y="278.25" width="179.737" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="953.2259" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="953.2259" dy="-0"><tspan>Card payments</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-98b54573-l3 kf-anim" style="transform-origin:1150.93px 323.63px">
+    <g id="l3" class="ai-container kfp-98b54573-l3">
+      <g class="kf-hidden kf-98b54573-l3_dot kf-anim" style="transform-origin:1150.93px 350px">
+        <circle id="l3_dot" class="ai-shape ai-circle kfp-98b54573-l3_dot" cx="1150.9254" cy="350" r="19" fill="var(--role-surface)" stroke="var(--role-secondary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-98b54573-l3_nm kf-anim" style="transform-origin:1150.93px 300.63px">
+        <rect id="l3_nm" class="ai-shape ai-rect kfp-98b54573-l3_nm" x="1075.1605" y="278.25" width="151.5298" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1150.9254" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1150.9254" dy="-0"><tspan>Review fixes</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-98b54573-hotfix kf-anim" style="transform-origin:953.23px 606.38px">
+    <g id="hotfix" class="ai-container kfp-98b54573-hotfix">
+      <g class="kf-hidden kf-98b54573-hotfix_dot kf-anim" style="transform-origin:953.23px 580px">
+        <circle id="hotfix_dot" class="ai-shape ai-circle kfp-98b54573-hotfix_dot" cx="953.2259" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-98b54573-hotfix_nm kf-anim" style="transform-origin:953.23px 629.38px">
+        <rect id="hotfix_nm" class="ai-shape ai-rect kfp-98b54573-hotfix_nm" x="913.2259" y="607" width="80" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="953.2259" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="953.2259" dy="-0"><tspan>Hotfix</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-98b54573-merged kf-anim" style="transform-origin:1380.93px 606.38px">
+    <g id="merged" class="ai-container kfp-98b54573-merged">
+      <g class="kf-hidden kf-98b54573-merged_dot kf-anim" style="transform-origin:1380.93px 580px">
+        <circle id="merged_dot" class="ai-shape ai-circle kfp-98b54573-merged_dot" cx="1380.9254" cy="580" r="28" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="9"/>
+      </g>
+      <g class="kf-hidden kf-98b54573-merged_nm kf-anim" style="transform-origin:1380.93px 638.38px">
+        <rect id="merged_nm" class="ai-shape ai-rect kfp-98b54573-merged_nm" x="1331.9912" y="616" width="97.8685" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1380.9254" y="638.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1380.9254" dy="-0"><tspan>Merged</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-98b54573-main_tag kf-anim" style="transform-origin:123.75px 507.75px">
+    <rect id="main_tag" class="ai-shape ai-rect kfp-98b54573-main_tag" x="83.7471" y="488.5" width="80" height="38.5" fill="var(--role-primary)" stroke="none" stroke-width="1.5" rx="18" style="rx:18px;ry:18px"/>
+    <text class="ai-label" x="123.7471" y="507.75" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-surface)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="123.7471" dy="-0"><tspan>main</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-98b54573-branch_tag kf-anim" style="transform-origin:389.82px 465px">
+    <rect id="branch_tag" class="ai-shape ai-rect kfp-98b54573-branch_tag" x="293.1184" y="445.75" width="193.408" height="38.5" fill="var(--role-secondary)" stroke="none" stroke-width="1.5" rx="18" style="rx:18px;ry:18px"/>
+    <text class="ai-label" x="389.8224" y="465" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-surface)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="389.8224" dy="-0"><tspan>feature/checkout</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-98b54573-mr kf-anim" style="transform-origin:1414.16px 278.88px">
+    <g id="mr" class="ai-container kfp-98b54573-mr">
+      <g class="kf-98b54573-mr_bg kf-anim" style="transform-origin:1414.16px 278.88px">
+        <rect id="mr_bg" class="ai-shape ai-rect kfp-98b54573-mr_bg" x="1268.3252" y="130" width="291.6748" height="297.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-98b54573-mr_body kf-anim" style="transform-origin:1414.16px 278.88px">
+        <g id="mr_body" class="ai-container kfp-98b54573-mr_body">
+          <g class="kf-98b54573-mr_kind kf-anim" style="transform-origin:1385.1px 173px">
+            <rect id="mr_kind" class="ai-shape ai-rect kfp-98b54573-mr_kind" x="1293.3252" y="155" width="183.552" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1301.3252" y="173" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1301.3252" dy="-0"><tspan>MERGE REQUEST </tspan><tspan fill="var(--role-primary)">!42</tspan></tspan></text>
           </g>
-          <g class="kf-03ceb24c-review kf-anim" style="transform-origin:1414.16px 362px">
-            <g id="review" class="ai-container kfp-03ceb24c-review">
-              <g class="kf-03ceb24c-review_bg kf-anim" opacity="0" style="transform-origin:1414.16px 362px">
-                <rect id="review_bg" class="ai-shape ai-rect kfp-03ceb24c-review_bg" x="1293.3252499999999" y="321.25" width="241.67475000000005" height="81.5" fill="var(--git-warn)" stroke="none" stroke-width="1.5" fill-opacity="0.28" rx="8"/>
+          <g class="kf-98b54573-mr_title kf-anim" style="transform-origin:1387.05px 223.25px">
+            <rect id="mr_title" class="ai-shape ai-rect kfp-98b54573-mr_title" x="1293.3252" y="199" width="187.444" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1301.3252" y="223.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1301.3252" dy="-0"><tspan>New checkout</tspan></tspan></text>
+          </g>
+          <g class="kf-98b54573-tests kf-anim" style="transform-origin:1404.74px 284.38px">
+            <g id="tests" class="ai-container kfp-98b54573-tests">
+              <g class="kf-98b54573-tests_bg kf-anim" opacity="0" style="transform-origin:1404.74px 284.38px">
+                <rect id="tests_bg" class="ai-shape ai-rect kfp-98b54573-tests_bg" x="1293.3252" y="255.5" width="222.822" height="57.75" fill="var(--role-warn)" stroke="none" stroke-width="1.5" fill-opacity="0.28" rx="8" style="rx:8px;ry:8px"/>
               </g>
-              <g class="kf-03ceb24c-review_item kf-anim" style="transform-origin:1414.16px 362px">
-                <g id="review_item" class="ai-container kfp-03ceb24c-review_item">
-                  <g class="kf-hidden kf-03ceb24c-review_tick kf-anim" style="transform-origin:1316.33px 362px">
-                    <circle id="review_tick" class="ai-shape ai-circle kfp-03ceb24c-review_tick" cx="1316.3252499999999" cy="362" r="14" fill="var(--git-ok)" stroke="none" stroke-width="1.5"/>
-                    <text class="ai-label" x="1316.3252499999999" y="362" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--git-panel)" font-weight="800"><tspan x="1316.3252499999999" dy="-0"><tspan>✓</tspan></tspan></text>
+              <g class="kf-98b54573-tests_item kf-anim" style="transform-origin:1404.74px 284.38px">
+                <g id="tests_item" class="ai-container kfp-98b54573-tests_item">
+                  <g class="kf-hidden kf-98b54573-tests_tick kf-anim" style="transform-origin:1316.33px 284.38px">
+                    <circle id="tests_tick" class="ai-shape ai-circle kfp-98b54573-tests_tick" cx="1316.3252" cy="284.375" r="14" fill="var(--role-ok)" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label" x="1316.3252" y="284.375" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-surface)" style="font-weight:800"><tspan x="1316.3252" dy="-0"><tspan>✓</tspan></tspan></text>
                   </g>
-                  <g class="kf-03ceb24c-review_txt kf-anim" style="transform-origin:1433.16px 362px">
-                    <rect id="review_txt" class="ai-shape ai-rect kfp-03ceb24c-review_txt" x="1340.3252499999999" y="330.25" width="185.67475000000005" height="63.5" fill="none" stroke="none" stroke-width="1.5"/>
-                    <text class="ai-label aitxt-03ceb24c-review_txt-base" x="1348.3252499999999" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--git-ink)" font-weight="600"><tspan x="1348.3252499999999" dy="-11.875"><tspan>Ben: “add a test for</tspan></tspan><tspan x="1348.3252499999999" dy="23.75"><tspan>coupons”</tspan></tspan></text>
-                    <text class="ai-label aitxt-03ceb24c-review_txt-v0" x="1348.3252499999999" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--git-ink)" font-weight="600" opacity="0"><tspan x="1348.3252499999999" dy="-0"><tspan>Approved by Ben</tspan></tspan></text>
+                  <g class="kf-98b54573-tests_txt kf-anim" style="transform-origin:1423.74px 284.38px">
+                    <rect id="tests_txt" class="ai-shape ai-rect kfp-98b54573-tests_txt" x="1340.3252" y="264.5" width="166.822" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label" x="1348.3252" y="284.375" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600"><tspan x="1348.3252" dy="-0"><tspan>218 tests passed</tspan></tspan></text>
                   </g>
                 </g>
               </g>
             </g>
           </g>
+          <g class="kf-98b54573-review kf-anim" style="transform-origin:1414.16px 362px">
+            <g id="review" class="ai-container kfp-98b54573-review">
+              <g class="kf-98b54573-review_bg kf-anim" opacity="0" style="transform-origin:1414.16px 362px">
+                <rect id="review_bg" class="ai-shape ai-rect kfp-98b54573-review_bg" x="1293.3252" y="321.25" width="241.6748" height="81.5" fill="var(--role-warn)" stroke="none" stroke-width="1.5" fill-opacity="0.28" rx="8" style="rx:8px;ry:8px"/>
+              </g>
+              <g class="kf-98b54573-review_item kf-anim" style="transform-origin:1414.16px 362px">
+                <g id="review_item" class="ai-container kfp-98b54573-review_item">
+                  <g class="kf-hidden kf-98b54573-review_tick kf-anim" style="transform-origin:1316.33px 362px">
+                    <circle id="review_tick" class="ai-shape ai-circle kfp-98b54573-review_tick" cx="1316.3252" cy="362" r="14" fill="var(--role-ok)" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label" x="1316.3252" y="362" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-surface)" style="font-weight:800"><tspan x="1316.3252" dy="-0"><tspan>✓</tspan></tspan></text>
+                  </g>
+                  <g class="kf-98b54573-review_txt kf-anim" style="transform-origin:1433.16px 362px">
+                    <rect id="review_txt" class="ai-shape ai-rect kfp-98b54573-review_txt" x="1340.3252" y="330.25" width="185.6748" height="63.5" fill="none" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label aitxt-98b54573-review_txt-base" x="1348.3252" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600"><tspan x="1348.3252" dy="-11.875"><tspan>Ben: “add a test for</tspan></tspan><tspan x="1348.3252" dy="23.75"><tspan>coupons”</tspan></tspan></text>
+                    <g class="ai-label-variants" fill="var(--role-ink)">
+                      <text class="ai-label aitxt-98b54573-review_txt-v0" x="1348.3252" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" opacity="0" style="font-weight:600"><tspan x="1348.3252" dy="-0"><tspan>Approved by Ben</tspan></tspan></text>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
         </g>
       </g>
     </g>
   </g>
-  <g class="kf-03ceb24c-gate_top kf-anim" style="transform-origin:1380.93px 427.25px">
-    <rect id="gate_top" class="ai-shape ai-rect kfp-03ceb24c-gate_top" x="1380.4254" y="426.75" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <g class="kf-98b54573-gate_top kf-anim" style="transform-origin:1380.93px 427.25px">
+    <rect id="gate_top" class="ai-shape ai-rect kfp-98b54573-gate_top" x="1380.4254" y="426.75" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
   </g>
-  <path class="ai-connection conn-03ceb24c-gate conn-03ceb24c-gate-base aid-03ceb24c-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="var(--git-ink)" stroke-width="3" stroke-dasharray="6,6" opacity="0" mask="url(#aim-03ceb24c-gate)"/>
-<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"03ceb24c-","frames":[{"name":"main","duration":1.32,"auto":null},{"name":"branch","duration":1.85,"auto":null},{"name":"hotfix","duration":1.15,"auto":null},{"name":"review","duration":1.6,"auto":null},{"name":"fixed","duration":1.4,"auto":null},{"name":"merge","duration":1.6,"auto":null}],"elements":["s","s_stage","s_badge","s_heading","main_line","branch","mains","a","a_dot","a_nm","b","b_dot","b_nm","c","c_dot","c_nm","l1","l1_dot","l1_nm","l2","l2_dot","l2_nm","l3","l3_dot","l3_nm","hotfix","hotfix_dot","hotfix_nm","merged","merged_dot","merged_nm","main_tag","branch_tag","mr","mr_bg","mr_body","mr_kind","mr_title","tests","tests_bg","tests_item","tests_tick","tests_txt","review","review_bg","review_item","review_tick","review_txt","gate_top","gate"],"channels":[[".kf-03ceb24c-s_badge","opacity"],[".kf-03ceb24c-s_badge","scale"],[".kf-03ceb24c-s_heading","opacity"],[".kf-03ceb24c-s_heading","translate"],[".aimask-03ceb24c-main_line","stroke-dashoffset"],[".kf-03ceb24c-main_tag","opacity"],[".kf-03ceb24c-main_tag","scale"],[".kf-03ceb24c-a_dot","opacity"],[".kf-03ceb24c-a_dot","scale"],[".kf-03ceb24c-a_nm","opacity"],[".kf-03ceb24c-a_nm","translate"],[".kf-03ceb24c-b_dot","opacity"],[".kf-03ceb24c-b_dot","scale"],[".kf-03ceb24c-b_nm","opacity"],[".kf-03ceb24c-b_nm","translate"],[".kf-03ceb24c-c_dot","opacity"],[".kf-03ceb24c-c_dot","scale"],[".kf-03ceb24c-c_nm","opacity"],[".kf-03ceb24c-c_nm","translate"],[".aimask-03ceb24c-branch","stroke-dashoffset"],[".kf-03ceb24c-branch_tag","opacity"],[".kf-03ceb24c-branch_tag","scale"],[".kf-03ceb24c-l1_dot","opacity"],[".kf-03ceb24c-l1_dot","scale"],[".kf-03ceb24c-l1_nm","opacity"],[".kf-03ceb24c-l1_nm","translate"],[".kf-03ceb24c-l2_dot","opacity"],[".kf-03ceb24c-l2_dot","scale"],[".kf-03ceb24c-l2_nm","opacity"],[".kf-03ceb24c-l2_nm","translate"],[".kf-03ceb24c-hotfix_dot","opacity"],[".kf-03ceb24c-hotfix_dot","scale"],[".kf-03ceb24c-hotfix_nm","opacity"],[".kf-03ceb24c-hotfix_nm","translate"],[".kf-03ceb24c-mr","opacity"],[".kf-03ceb24c-mr","scale"],[".kf-03ceb24c-tests_tick","opacity"],[".kf-03ceb24c-tests_tick","scale"],[".kf-03ceb24c-review_bg","opacity"],[".kf-03ceb24c-l3_dot","opacity"],[".kf-03ceb24c-l3_dot","scale"],[".kf-03ceb24c-l3_nm","opacity"],[".kf-03ceb24c-l3_nm","translate"],[".aitxt-03ceb24c-review_txt-base","opacity"],[".aitxt-03ceb24c-review_txt-v0","opacity"],[".kf-03ceb24c-review_tick","opacity"],[".kf-03ceb24c-review_tick","scale"],[".conn-03ceb24c-gate","opacity"],[".aimask-03ceb24c-gate","stroke-dashoffset"],[".kfp-03ceb24c-mr_bg","stroke"],[".kf-03ceb24c-merged_dot","opacity"],[".kf-03ceb24c-merged_dot","scale"],[".kf-03ceb24c-merged_nm","opacity"],[".kf-03ceb24c-merged_nm","translate"]],"settled":[["0","1 1","0","0px 0px","1.001","0","1 1","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","0px 0px","1.001","0","1 1","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--git-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.676","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1.001","0","1 1","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--git-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.676","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.5","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0","1 1","0","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--git-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.37","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.5","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--git-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.37","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.5","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","1 1","1","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--git-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.37","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.311","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","1 1","0","1","1 1","1","0px 0px","0","1","1","1 1","0","0","var(--git-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","1 1","0","1","1 1","1","0px 0px","0","1","1","1 1","1","0","var(--git-ok)","1","1 1","1","0px 0px"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.25,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.676"]]},{"c":5,"t":0.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":6,"t":0.3,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":7,"t":0.35,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":8,"t":0.35,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":9,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":10,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":11,"t":0.51,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":12,"t":0.51,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":13,"t":0.66,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":14,"t":0.66,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":15,"t":0.67,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0.67,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":17,"t":0.82,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":18,"t":0.82,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":19,"t":0,"d":0.6,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.689"]]},{"c":19,"t":0.9,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.689"],[1,"0.5"]]},{"c":20,"t":0.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":21,"t":0.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":22,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":23,"t":0.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":24,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":25,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":26,"t":1.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":27,"t":1.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":28,"t":1.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":29,"t":1.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":4,"t":0,"d":0.6,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.676"],[1,"0.37"]]},{"c":30,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":31,"t":0.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":32,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":33,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":34,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":36,"t":0.6,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":37,"t":0.6,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":38,"t":1.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":19,"t":0,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.5"],[1,"0.311"]]},{"c":38,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":39,"t":0.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":0.3,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":41,"t":0.45,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":42,"t":0.45,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":43,"t":0.8,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":44,"t":0.925,"d":0.375,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":45,"t":0.9,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":46,"t":0.9,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":4,"t":0.25,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.37"],[1,"0"]]},{"c":19,"t":0.15,"d":0.6,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.311"],[1,"0"]]},{"c":47,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":48,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":48,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":49,"t":0.6,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--git-ink)"],[1,"var(--git-ok)"]]},{"c":50,"t":0.65,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":51,"t":0.65,"d":0.95,"e":"linear","k":[[0,"0 0"],[0.0172,"0.144 0.144"],[0.0345,"0.277 0.277"],[0.0517,"0.398 0.398"],[0.069,"0.508 0.508"],[0.0862,"0.606 0.606"],[0.1034,"0.694 0.694"],[0.1207,"0.772 0.772"],[0.1379,"0.84 0.84"],[0.1552,"0.899 0.899"],[0.1724,"0.949 0.949"],[0.1897,"0.99 0.99"],[0.2069,"1.024 1.024"],[0.2241,"1.051 1.051"],[0.2414,"1.071 1.071"],[0.2586,"1.085 1.085"],[0.2759,"1.093 1.093"],[0.2931,"1.097 1.097"],[0.3103,"1.097 1.097"],[0.3276,"1.094 1.094"],[0.3448,"1.088 1.088"],[0.3621,"1.079 1.079"],[0.3793,"1.069 1.069"],[0.3966,"1.058 1.058"],[0.4138,"1.047 1.047"],[0.431,"1.036 1.036"],[0.4483,"1.026 1.026"],[0.4655,"1.016 1.016"],[0.4828,"1.009 1.009"],[0.5,"1.004 1.004"],[0.5172,"1.003 1.003"],[0.5345,"1.005 1.005"],[0.5517,"1.008 1.008"],[0.569,"1.013 1.013"],[0.5862,"1.019 1.019"],[0.6034,"1.027 1.027"],[0.6207,"1.037 1.037"],[0.6379,"1.05 1.05"],[0.6552,"1.066 1.066"],[0.6724,"1.085 1.085"],[0.6897,"1.109 1.109"],[0.7069,"1.138 1.138"],[0.7241,"1.173 1.173"],[0.7414,"1.19 1.19"],[0.7586,"1.154 1.154"],[0.7759,"1.122 1.122"],[0.7931,"1.096 1.096"],[0.8103,"1.074 1.074"],[0.8276,"1.057 1.057"],[0.8448,"1.043 1.043"],[0.8621,"1.032 1.032"],[0.8793,"1.023 1.023"],[0.8966,"1.016 1.016"],[0.9138,"1.011 1.011"],[0.931,"1.006 1.006"],[0.9483,"1.003 1.003"],[0.9655,"1.001 1.001"],[0.9828,"1 1"],[1,"1 1"]]},{"c":51,"t":1.6,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":52,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":53,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}]]}]]></script>
+  <path class="ai-connection conn-98b54573-gate conn-98b54573-gate-base aid-98b54573-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="var(--role-ink)" stroke-width="3" stroke-dasharray="6,6" opacity="0" mask="url(#aim-98b54573-gate)"/>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"98b54573-","frames":[{"name":"main","duration":1.32,"auto":null,"title":null,"note":null},{"name":"branch","duration":1.85,"auto":null,"title":null,"note":null},{"name":"hotfix","duration":1.15,"auto":null,"title":null,"note":null},{"name":"review","duration":1.6,"auto":null,"title":null,"note":null},{"name":"fixed","duration":1.4,"auto":null,"title":null,"note":null},{"name":"merge","duration":1.6,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","main_line","branch","mains","a","a_dot","a_nm","b","b_dot","b_nm","c","c_dot","c_nm","l1","l1_dot","l1_nm","l2","l2_dot","l2_nm","l3","l3_dot","l3_nm","hotfix","hotfix_dot","hotfix_nm","merged","merged_dot","merged_nm","main_tag","branch_tag","mr","mr_bg","mr_body","mr_kind","mr_title","tests","tests_bg","tests_item","tests_tick","tests_txt","review","review_bg","review_item","review_tick","review_txt","gate_top","gate"],"channels":[[".kf-98b54573-s_badge","opacity"],[".kf-98b54573-s_badge","scale"],[".kf-98b54573-s_heading","opacity"],[".kf-98b54573-s_heading","translate"],[".aimask-98b54573-main_line","stroke-dashoffset"],[".kf-98b54573-main_tag","opacity"],[".kf-98b54573-main_tag","scale"],[".kf-98b54573-a_dot","opacity"],[".kf-98b54573-a_dot","scale"],[".kf-98b54573-a_nm","opacity"],[".kf-98b54573-a_nm","translate"],[".kf-98b54573-b_dot","opacity"],[".kf-98b54573-b_dot","scale"],[".kf-98b54573-b_nm","opacity"],[".kf-98b54573-b_nm","translate"],[".kf-98b54573-c_dot","opacity"],[".kf-98b54573-c_dot","scale"],[".kf-98b54573-c_nm","opacity"],[".kf-98b54573-c_nm","translate"],[".aimask-98b54573-branch","stroke-dashoffset"],[".kf-98b54573-branch_tag","opacity"],[".kf-98b54573-branch_tag","scale"],[".kf-98b54573-l1_dot","opacity"],[".kf-98b54573-l1_dot","scale"],[".kf-98b54573-l1_nm","opacity"],[".kf-98b54573-l1_nm","translate"],[".kf-98b54573-l2_dot","opacity"],[".kf-98b54573-l2_dot","scale"],[".kf-98b54573-l2_nm","opacity"],[".kf-98b54573-l2_nm","translate"],[".kf-98b54573-hotfix_dot","opacity"],[".kf-98b54573-hotfix_dot","scale"],[".kf-98b54573-hotfix_nm","opacity"],[".kf-98b54573-hotfix_nm","translate"],[".kf-98b54573-mr","opacity"],[".kf-98b54573-mr","scale"],[".kf-98b54573-tests_tick","opacity"],[".kf-98b54573-tests_tick","scale"],[".kf-98b54573-review_bg","opacity"],[".kf-98b54573-l3_dot","opacity"],[".kf-98b54573-l3_dot","scale"],[".kf-98b54573-l3_nm","opacity"],[".kf-98b54573-l3_nm","translate"],[".aitxt-98b54573-review_txt-base","opacity"],[".aitxt-98b54573-review_txt-v0","opacity"],[".kf-98b54573-review_tick","opacity"],[".kf-98b54573-review_tick","scale"],[".conn-98b54573-gate","opacity"],[".aimask-98b54573-gate","stroke-dashoffset"],[".kfp-98b54573-mr_bg","stroke"],[".kf-98b54573-merged_dot","opacity"],[".kf-98b54573-merged_dot","scale"],[".kf-98b54573-merged_nm","opacity"],[".kf-98b54573-merged_nm","translate"]],"settled":[["0","1 1","0","0px 0px","1.001","0","1 1","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","0px 0px","1.001","0","1 1","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--role-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.676","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1.001","0","1 1","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--role-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.676","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.5","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0","1 1","0","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--role-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.37","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.5","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0","1 1","0","1 1","0","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--role-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.37","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.5","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","1 1","1","0","1 1","0","0px 0px","1","0","0","1 1","0","0","var(--role-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0.37","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0.311","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","1 1","0","1","1 1","1","0px 0px","0","1","1","1 1","0","0","var(--role-ink)","0","1 1","0","0px 0px"],["1","1 1","1","0px 0px","0","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","0","1","1 1","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","1 1","1","1 1","0","1","1 1","1","0px 0px","0","1","1","1 1","1","0","var(--role-ok)","1","1 1","1","0px 0px"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.25,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.676"]]},{"c":5,"t":0.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":6,"t":0.3,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":7,"t":0.35,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":8,"t":0.35,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":9,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":10,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":11,"t":0.51,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":12,"t":0.51,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":13,"t":0.66,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":14,"t":0.66,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":15,"t":0.67,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0.67,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":17,"t":0.82,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":18,"t":0.82,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":19,"t":0,"d":0.6,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.689"]]},{"c":19,"t":0.9,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.689"],[1,"0.5"]]},{"c":20,"t":0.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":21,"t":0.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":22,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":23,"t":0.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":24,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":25,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":26,"t":1.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":27,"t":1.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":28,"t":1.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":29,"t":1.35,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":4,"t":0,"d":0.6,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.676"],[1,"0.37"]]},{"c":30,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":31,"t":0.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":32,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":33,"t":0.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":34,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":36,"t":0.6,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":37,"t":0.6,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":38,"t":1.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":19,"t":0,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.5"],[1,"0.311"]]},{"c":38,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":39,"t":0.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":0.3,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":41,"t":0.45,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":42,"t":0.45,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":43,"t":0.8,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":44,"t":0.925,"d":0.375,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":45,"t":0.9,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":46,"t":0.9,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":4,"t":0.25,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.37"],[1,"0"]]},{"c":19,"t":0.15,"d":0.6,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.311"],[1,"0"]]},{"c":47,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":48,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":48,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":49,"t":0.6,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-ink)"],[1,"var(--role-ok)"]]},{"c":50,"t":0.65,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":51,"t":0.65,"d":0.95,"e":"linear","k":[[0,"0 0"],[0.0172,"0.144 0.144"],[0.0345,"0.277 0.277"],[0.0517,"0.398 0.398"],[0.069,"0.508 0.508"],[0.0862,"0.606 0.606"],[0.1034,"0.694 0.694"],[0.1207,"0.772 0.772"],[0.1379,"0.84 0.84"],[0.1552,"0.899 0.899"],[0.1724,"0.949 0.949"],[0.1897,"0.99 0.99"],[0.2069,"1.024 1.024"],[0.2241,"1.051 1.051"],[0.2414,"1.071 1.071"],[0.2586,"1.085 1.085"],[0.2759,"1.093 1.093"],[0.2931,"1.097 1.097"],[0.3103,"1.097 1.097"],[0.3276,"1.094 1.094"],[0.3448,"1.088 1.088"],[0.3621,"1.079 1.079"],[0.3793,"1.069 1.069"],[0.3966,"1.058 1.058"],[0.4138,"1.047 1.047"],[0.431,"1.036 1.036"],[0.4483,"1.026 1.026"],[0.4655,"1.016 1.016"],[0.4828,"1.009 1.009"],[0.5,"1.004 1.004"],[0.5172,"1.003 1.003"],[0.5345,"1.005 1.005"],[0.5517,"1.008 1.008"],[0.569,"1.013 1.013"],[0.5862,"1.019 1.019"],[0.6034,"1.027 1.027"],[0.6207,"1.037 1.037"],[0.6379,"1.05 1.05"],[0.6552,"1.066 1.066"],[0.6724,"1.085 1.085"],[0.6897,"1.109 1.109"],[0.7069,"1.138 1.138"],[0.7241,"1.173 1.173"],[0.7414,"1.19 1.19"],[0.7586,"1.154 1.154"],[0.7759,"1.122 1.122"],[0.7931,"1.096 1.096"],[0.8103,"1.074 1.074"],[0.8276,"1.057 1.057"],[0.8448,"1.043 1.043"],[0.8621,"1.032 1.032"],[0.8793,"1.023 1.023"],[0.8966,"1.016 1.016"],[0.9138,"1.011 1.011"],[0.931,"1.006 1.006"],[0.9483,"1.003 1.003"],[0.9655,"1.001 1.001"],[0.9828,"1 1"],[1,"1 1"]]},{"c":51,"t":1.6,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":52,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":53,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}]]}]]></script>
 <script><![CDATA[
 /* agent-illustrator motion player: plays the tracks compiled into an SVG.
  * No dependencies; Web Animations API. The player has no semantics of its
  * own: every value it sets comes from the embedded manifest.
  *
- *   var p = ail.player(svgElement);
+ *   var p = ail.player(svgElement);        // shows frame 0, settled
+ *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
  *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
- *   p.on('frame', function (i, name) { ... });
+ *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
+ *
+ * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
+ * "...", note: "..."]`); a title holds until a later frame sets another, a
+ * note belongs to its step. Both come with every 'step' event:
+ *   p.on('step', function (k, meta) { header.textContent = meta.title; });
+ *
+ * A step is what one click shows: a frame and the `[auto]` frames that play
+ * on after it by themselves. Hosts that advance on clicks use the step API
+ * and never need to know which frames are automatic; `p.steps` lists each
+ * step's first frame (also `agent-illustrator --list-steps`).
  *
  * Forward plays the segment; backward and jumps are instant and exact.
  */
@@ -489,6 +617,8 @@ svg[data-ail-player] * { transition: none !important; }
     this.svg = svg;
     this.manifest = m;
     this.frames = m.frames.map(function (f) { return f.name; });
+    this.steps = [];
+    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
     this.frame = 0;
     this.playing = false;
     this._anims = [];
@@ -632,6 +762,56 @@ svg[data-ail-player] * { transition: none !important; }
     }
   };
 
+  /** The step frame i belongs to. */
+  P._stepOf = function (i) {
+    var k = 0;
+    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
+    return k;
+  };
+  /** Last frame of step k: its own frame and the automatic ones after it. */
+  P._stepEnd = function (k) {
+    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
+  };
+  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
+  /** Host metadata at step k: the latest title set up to its end, its notes. */
+  P.meta = function (k) {
+    if (k == null) k = this.step;
+    var fr = this.manifest.frames, title = null, notes = [];
+    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
+    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
+    return { title: title, note: notes.length ? notes.join('\n') : null };
+  };
+  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
+  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
+
+  /** Jump to the end of step k (its automatic frames included): instant. */
+  P.goToStep = function (k) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
+    this.goTo(this._stepEnd(k));
+    this._emit('step', k, this.meta(k));
+    return this;
+  };
+
+  /** One click: finish the current step, then play the next one through. */
+  P.nextStep = function () {
+    var k = this.step;
+    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
+    if (k + 1 < this.steps.length) {
+      this.play(this.steps[k + 1]);
+      this._emit('step', k + 1, this.meta(k + 1));
+      return true;
+    }
+    return false;
+  };
+
+  /** One click back: the end of the previous step, instantly. */
+  P.prevStep = function () {
+    var k = this.step;
+    if (k > 0) { this.goToStep(k - 1); return true; }
+    this.goToStep(0);
+    return false;
+  };
+
   /** Advance: play the next frame (finishing the current one first). */
   P.next = function () {
     if (this.playing) this.goTo(this.frame);
@@ -676,11 +856,11 @@ svg[data-ail-player] * { transition: none !important; }
       }, dwell * 1000));
     };
     function manual() { self._auto = null; }
-    this.svg.addEventListener('click', function () { manual(); if (!self.next()) self.goTo(0); });
+    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
     if (root.document) {
       root.document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.next(); e.preventDefault(); }
-        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prev(); e.preventDefault(); }
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
       });
     }
     this._apply(0);

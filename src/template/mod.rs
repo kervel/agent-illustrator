@@ -19,6 +19,7 @@
 
 mod registry;
 mod resolver;
+pub mod svg_parts;
 
 pub use registry::{TemplateDefinition, TemplateError, TemplateRegistry};
 pub use resolver::{resolve_templates, ResolutionContext};

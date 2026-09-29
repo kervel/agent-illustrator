@@ -127,8 +127,11 @@ pub fn resolve_templates(
         }
     }
 
+    let mut aliases = doc.aliases;
+    aliases.extend(registry.collapsed_parts.iter().cloned());
     Ok(Document {
         statements: resolved_statements,
+        aliases,
     })
 }
 
@@ -262,6 +265,50 @@ fn resolve_svg_template(
         (true, Some((mx, my, w, h))) => ((w, h), (mx, my)),
         _ => (def.svg_dimensions.unwrap_or((100.0, 100.0)), (0.0, 0.0)),
     };
+
+    // A file whose elements carry ids is a component: one part per id.
+    if let Some(parts) = super::svg_parts::analyze(&content) {
+        let (tw, th) = (width, height);
+        let explicit = |k: StyleKey| {
+            instance_modifiers.iter().find(|m| m.node.key.node == k).and_then(|m| match &m.node.value.node {
+                StyleValue::Number { value, .. } => Some(*value),
+                _ => None,
+            })
+        };
+        let scale = explicit(StyleKey::Width)
+            .map(|w| w / tw)
+            .or_else(|| explicit(StyleKey::Height).map(|h| h / th))
+            .unwrap_or(1.0);
+        let mut values = Vec::new();
+        let mut group_modifiers = Vec::new();
+        for m in instance_modifiers {
+            match &m.node.key.node {
+                StyleKey::Width | StyleKey::Height => {}
+                StyleKey::Custom(k) if k == "trim" => {}
+                StyleKey::Custom(k) if parts.vars.contains(k) => {
+                    let css = crate::layout::types::ResolvedStyles::color_to_css(&m.node.value.node)
+                        .or_else(|| match &m.node.value.node {
+                            StyleValue::String(s) => Some(s.clone()),
+                            _ => None,
+                        });
+                    if let Some(css) = css {
+                        values.push((k.clone(), css));
+                    }
+                }
+                _ => group_modifiers.push(m.clone()),
+            }
+        }
+        return Ok(super::svg_parts::instance_statements(
+            &parts,
+            &content,
+            instance_name,
+            (offset_x, offset_y, tw, th),
+            scale,
+            &values,
+            group_modifiers,
+            span,
+        ));
+    }
 
     let shape = ShapeDecl {
         shape_type: Spanned::new(

@@ -1,6 +1,77 @@
 # Changelog
 
-## Unreleased
+## v0.2.0
+
+### Code, artwork, themes (the author/integrator round)
+- `code` blocks: `code c [lang: python, source: "..." | file: "x.py", lines: "3-8"]`
+  with syntax highlighting (syntect: python, js/ts, css, sh, json, yaml and the
+  other Sublime syntaxes), line numbers, a title bar, `marks:` tints, and diff
+  mode (`diff: "-a\n+b"`: tinted -/+ rows, the changed part marked). Lines are
+  parts (`c.line4`, `c.line[4]`, `c.lines[8..12]`); `transform c.line1 [source:
+  "..."]` re-highlights; `remove` / `insert c after line 7 [...]` /
+  `show x [enter: expand]` open and close lines with the block and everything
+  below following. Theme tokens `code-*`.
+- SVG file templates with parts: every drawable element with an `id` is a part
+  (`d.fold`, `d.bar3`), nested as in the file, usable in constraints, anchors
+  and motion; CSS variables in the file are instance arguments; ids are
+  namespaced per instance; a part's paint can be transformed.
+- Colour roles (`role-primary`, `role-ink`, `role-surface`, `role-ok-soft`,
+  `role-series-1`, ...) mapped by themes; `ail:motion/git` and the example scenes
+  use roles only and render unedited in git-deck.css and kapernikov.css.
+- Keyframe host metadata `[title: "...", note: "..."]` in the manifest; the
+  player's step events carry them (`p.meta(k)`).
+- `--crop-to-content [pad]`, `--stylesheet-css` repeatable (layered),
+  `--serve [port]` live preview, `--film STEP` browser film strip.
+- `collapsed: true`, `overlaps: <element>`, `hide [exit: collapse]`,
+  `show [enter: expand]`, `--ail-mono-advance` stylesheet token.
+
+### Fixes in this round
+- A stylesheet's `@import` (web fonts) is now the first rule of the SVG's style
+  block; it used to come after the generated rules and was ignored, so decks
+  never got their font.
+- `font_family` / `font_weight` and `corner_radius` are inline styles: a
+  stylesheet's `.ai-label { font-family }` or `.ai-rect { rx }` no longer beats
+  what an element asks for (mono labels came out in the brand face).
+- Moving a component releases constraints that place it through a part
+  (`anna.bg.right = ...`); a size-only transform keeps position constraints.
+- Custom stylesheet colour values override the default palette's for colour
+  decisions (light text on dark fills).
+
+
+### Fixes from the discoverability review and the reveal-deck integration
+- Swapped labels (`transform x [label: ..., swap: ...]`) render their variants in
+  a wrapper `<g class="ai-label-variants">` that carries their colour, so a
+  host rule like `[fill=dark] + .ai-label` no longer turns them white on white.
+  Labels on a dark fill (judged by the fill's actual colour in the active
+  palette) get class `ai-on-dark` and light text from a generated rule, the
+  base text and every variant alike. Under the default stylesheet, labels on
+  dark shapes are now light (e.g. the railway examples' stations).
+- Output is deterministic: solved coordinates are rounded to 1e-4 px before
+  anything is derived from them (the solver's hash-ordered pivoting used to
+  change the last bits from run to run).
+- The player has a step API (`steps`, `step`, `nextStep`, `prevStep`,
+  `goToStep`, `on('step')`): a step is a click frame plus the `[auto]` frames
+  after it. `--list-steps` prints them. Built-in clicks/arrows step.
+- Without a player the animated SVG shows frame 0 as it ends (moves and draws
+  included), for no-JS hosts, `<img>` and print.
+- Lint: a `draw` that shrinks a line (usually a line declared without
+  `drawn: 0`).
+- Station spacing counts a station's own `label:`; the crowding hint says what
+  to change (row gap vs free x).
+- `f.val` names the only part of a one-shape template (it was undefined).
+- A reserved word used as a name (`path line`, `rect row`) is an error at the
+  name; it used to vanish silently into a second declaration.
+- `ail:motion/git` ships templates its macros fit (`git_station`, `git_file`),
+  uses `accent-1` instead of a deck-only colour, and is printed at the end of
+  `--skill-animation`. A macro argument missing a part is explained at the call.
+- Docs: geometry animation by name (`move`) instead of `dx`/`dy`; grammar lint
+  section, colours, `font_size` default, `center`, keyframe flags, list
+  arguments, reserved words, new CLI flags; `--skill` points to motion;
+  `--examples` motion example is self-contained.
+- Golden frames: every settled frame of the three example scenes is compared
+  with a reviewed SVG (`tests/golden/motion`, `AIL_UPDATE_GOLDEN=1` regenerates).
+
+## v0.1.32
 
 ### Motion (new)
 - Motion is first-class: `keyframe` blocks take motion statements (`show`, `hide`,

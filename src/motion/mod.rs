@@ -197,7 +197,38 @@ fn base_stmt_ops(
     partners: &[Spanned<Identifier>],
 ) -> Vec<KeyframeOp> {
     let all = || targets.to_vec();
+    // `show x [enter: expand]` / `hide x [exit: collapse]`: the element also
+    // opens to its laid-out height or closes to nothing, and what is stacked
+    // below it (a code line under a code line) moves with it.
+    let height = |value: StyleValue| -> Vec<KeyframeOp> {
+        targets
+            .iter()
+            .map(|t| {
+                let span = t.span.clone();
+                KeyframeOp::Transform {
+                    target: t.clone(),
+                    modifiers: vec![Spanned::new(
+                        StyleModifier {
+                            key: Spanned::new(StyleKey::Height, span.clone()),
+                            value: Spanned::new(value.clone(), span.clone()),
+                        },
+                        span,
+                    )],
+                }
+            })
+            .collect()
+    };
     match verb {
+        MotionVerb::Show(_) if opt_name(opts, "enter") == Some("expand") => {
+            let mut ops = vec![KeyframeOp::Show(all())];
+            ops.extend(height(StyleValue::Keyword("initial".into())));
+            ops
+        }
+        MotionVerb::Hide(_) if opt_name(opts, "exit") == Some("collapse") => {
+            let mut ops = vec![KeyframeOp::Hide(all())];
+            ops.extend(height(StyleValue::Number { value: 0.0, unit: None }));
+            ops
+        }
         MotionVerb::Show(_) => vec![KeyframeOp::Show(all())],
         MotionVerb::Hide(_) => vec![KeyframeOp::Hide(all())],
         MotionVerb::Transform { modifiers, .. } => targets
@@ -271,7 +302,8 @@ fn base_stmt_ops(
         MotionVerb::Fly { .. }
         | MotionVerb::Effect { .. }
         | MotionVerb::Loop { .. }
-        | MotionVerb::Call { .. } => vec![],
+        | MotionVerb::Call { .. }
+        | MotionVerb::Insert { .. } => vec![],
     }
 }
 

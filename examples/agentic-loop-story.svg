@@ -13,11 +13,52 @@
     --background-3: #eeeeee;
     --background-dark: #333333;
     --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
     --foreground-1: #333333;
     --foreground-2: #666666;
     --foreground-3: #999999;
     --foreground-dark: #1a1a1a;
     --foreground-light: #e0e0e0;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #ffebee;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e8f5e9;
+    --role-primary: var(--accent-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--secondary-1);
+    --role-series-1: #0e8a8a;
+    --role-series-1-soft: #d6eeee;
+    --role-series-2: #e07a12;
+    --role-series-2-soft: #fbe6d2;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fff8e1;
     --secondary-1: #ff9800;
     --secondary-2: #fff3e0;
     --secondary-3: #ffe0b2;
@@ -32,7 +73,7 @@
     --text-dark: #1a1a1a;
     --text-light: #ffffff;
   }
-
+  .ai-on-dark { fill: var(--text-light); }
     /* Keyframe animation CSS (auto-generated) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
@@ -76,8 +117,9 @@
   .conn-77d0d05f-final_to_cli { opacity: 1; }
   .conn-77d0d05f-final_to_user { opacity: 1; }
 }
-
-    /* Modern styling for agentic-loop animation */
+    
+/* /home/kervel/projects/agent-illustrator/examples/../stylesheets/agentic-loop-story.css */
+/* Modern styling for agentic-loop animation */
 
 /* Smooth transitions between frames */
 svg * {
@@ -108,9 +150,48 @@ text {
 .ai-connection {
     transition: opacity 0.4s ease-in-out;
 }
-
   /* motion: settled states (auto-generated) */
 svg[data-ail-player] * { transition: none !important; }
+.kf-77d0d05f-speech_bubble { opacity: 0; }
+.kf-77d0d05f-speech_bubble { translate: 0px 0px; }
+.conn-77d0d05f-prompt_arrow { opacity: 0; }
+.conn-77d0d05f-req_arrow { opacity: 0; }
+.kf-77d0d05f-sys_envelope { opacity: 0; }
+.kf-77d0d05f-sys_envelope { translate: 0px 0px; }
+.kf-77d0d05f-sys_line1 { opacity: 0; }
+.kf-77d0d05f-sys_line1 { translate: 0px 0px; }
+.kf-77d0d05f-sys_line2 { opacity: 0; }
+.kf-77d0d05f-sys_line2 { translate: 0px 0px; }
+.conn-77d0d05f-resp_arrow { opacity: 0; }
+.kf-77d0d05f-tool_call_envelope { opacity: 0; }
+.kf-77d0d05f-tool_call_envelope { translate: 0px 0px; }
+.kf-77d0d05f-tc_line1 { opacity: 0; }
+.kf-77d0d05f-tc_line1 { translate: 0px 0px; }
+.kf-77d0d05f-tc_line2 { opacity: 0; }
+.kf-77d0d05f-tc_line2 { translate: 0px 0px; }
+.conn-77d0d05f-exec_arrow { opacity: 0; }
+.kf-77d0d05f-exec_envelope { opacity: 0; }
+.kf-77d0d05f-exec_envelope { translate: 0px 0px; }
+.kf-77d0d05f-exec_line1 { opacity: 0; }
+.kf-77d0d05f-exec_line1 { translate: 0px 0px; }
+.kf-77d0d05f-exec_line2 { opacity: 0; }
+.kf-77d0d05f-exec_line2 { translate: 0px 0px; }
+.conn-77d0d05f-return_to_cli { opacity: 0; }
+.conn-77d0d05f-return_to_cloud { opacity: 0; }
+.kf-77d0d05f-result_envelope { opacity: 0; }
+.kf-77d0d05f-result_envelope { translate: 0px 0px; }
+.kf-77d0d05f-result_line1 { opacity: 0; }
+.kf-77d0d05f-result_line1 { translate: 0px 0px; }
+.kf-77d0d05f-result_line2 { opacity: 0; }
+.kf-77d0d05f-result_line2 { translate: 0px 0px; }
+.conn-77d0d05f-final_to_cli { opacity: 0; }
+.conn-77d0d05f-final_to_user { opacity: 0; }
+.kf-77d0d05f-answer_envelope { opacity: 0; }
+.kf-77d0d05f-answer_envelope { translate: 0px 0px; }
+.kf-77d0d05f-ans_line1 { opacity: 0; }
+.kf-77d0d05f-ans_line1 { translate: 0px 0px; }
+.kf-77d0d05f-ans_line2 { opacity: 0; }
+.kf-77d0d05f-ans_line2 { translate: 0px 0px; }
 
 /* CSS-only animation (auto-generated) */
 @keyframes kf-anim-77d0d05f-ans_line1 {
@@ -670,7 +751,7 @@ svg[data-ail-player] * { transition: none !important; }
         <rect id="sys_envelope" class="ai-shape ai-rect kfp-77d0d05f-sys_envelope" x="510" y="171" width="340" height="88" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
       </g>
       <g class="kf-hidden kf-77d0d05f-sys_line1 kf-anim" style="transform-origin:680px 197px">
-        <text id="sys_line1" class="ai-shape ai-text kfp-77d0d05f-sys_line1" x="564.3919999999999" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
+        <text id="sys_line1" class="ai-shape ai-text kfp-77d0d05f-sys_line1" x="564.392" y="197" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-2)">[system] You are Claude Code...</text>
       </g>
       <g class="kf-hidden kf-77d0d05f-sys_line2 kf-anim" style="transform-origin:680px 227px">
         <text id="sys_line2" class="ai-shape ai-text kfp-77d0d05f-sys_line2" x="591.528" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">[user] list my Python files</text>
@@ -691,7 +772,7 @@ svg[data-ail-player] * { transition: none !important; }
         <text id="exec_line1" class="ai-shape ai-text kfp-77d0d05f-exec_line1" x="192.024" y="302" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--accent-dark)">$ find . -name &apos;*.py&apos;</text>
       </g>
       <g class="kf-hidden kf-77d0d05f-exec_line2 kf-anim" style="transform-origin:260px 332px">
-        <text id="exec_line2" class="ai-shape ai-text kfp-77d0d05f-exec_line2" x="179.95999999999998" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
+        <text id="exec_line2" class="ai-shape ai-text kfp-77d0d05f-exec_line2" x="179.96" y="332" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">./main.py  ./test_api.py</text>
       </g>
       <g class="kf-hidden kf-77d0d05f-result_envelope kf-anim" opacity="0.9" style="transform-origin:680px 215px">
         <rect id="result_envelope" class="ai-shape ai-rect kfp-77d0d05f-result_envelope" x="535" y="180" width="290" height="70" fill="var(--accent-light)" stroke="none" stroke-width="1.5"/>
@@ -706,7 +787,7 @@ svg[data-ail-player] * { transition: none !important; }
         <rect id="answer_envelope" class="ai-shape ai-rect kfp-77d0d05f-answer_envelope" x="155" y="180" width="290" height="70" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
       </g>
       <g class="kf-hidden kf-77d0d05f-ans_line1 kf-anim" style="transform-origin:300px 201px">
-        <text id="ans_line1" class="ai-shape ai-text kfp-77d0d05f-ans_line1" x="223.06400000000002" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
+        <text id="ans_line1" class="ai-shape ai-text kfp-77d0d05f-ans_line1" x="223.064" y="201" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--foreground-1)">I found 2 Python files:</text>
       </g>
       <g class="kf-hidden kf-77d0d05f-ans_line2 kf-anim" style="transform-origin:300px 227px">
         <text id="ans_line2" class="ai-shape ai-text kfp-77d0d05f-ans_line2" x="215.512" y="227" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--secondary-dark)">main.py and test_api.py</text>
@@ -716,10 +797,10 @@ svg[data-ail-player] * { transition: none !important; }
   <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-base aid-77d0d05f-prompt_arrow" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-req_arrow conn-77d0d05f-req_arrow-base aid-77d0d05f-req_arrow" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-resp_arrow conn-77d0d05f-resp_arrow-base aid-77d0d05f-resp_arrow" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-base aid-77d0d05f-exec_arrow" d="M480 165 C480 317.9705854077836 672.0294145922164 330 814.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-base aid-77d0d05f-return_to_cli" d="M825 330 C672.0294145922164 330 480 317.9705854077836 480 175.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-base aid-77d0d05f-exec_arrow" d="M480 165 C480 317.9706 672.0294 330 814.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-base aid-77d0d05f-return_to_cli" d="M825 330 C672.0294 330 480 317.9706 480 175.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-base aid-77d0d05f-return_to_cloud" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-final_to_cli conn-77d0d05f-final_to_cli-base aid-77d0d05f-final_to_cli" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-final_to_user conn-77d0d05f-final_to_user-base aid-77d0d05f-final_to_user" d="M418 115 L178.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"77d0d05f-","frames":[{"name":"idle","duration":0,"auto":null},{"name":"user_prompt","duration":0.5,"auto":null},{"name":"system_prompt","duration":0.5,"auto":null},{"name":"tool_response","duration":0.5,"auto":null},{"name":"tool_exec","duration":0.5,"auto":null},{"name":"result_return","duration":0.5,"auto":null},{"name":"final_answer","duration":0.5,"auto":null}],"elements":["diagram","canvas","user_icon","cli_icon","cloud_icon","gear_icon","user_label","cli_label","cloud_label","gear_label","speech_bubble","sys_envelope","sys_line1","sys_line2","tool_call_envelope","tc_line1","tc_line2","exec_envelope","exec_line1","exec_line2","result_envelope","result_line1","result_line2","answer_envelope","ans_line1","ans_line2","prompt_arrow","req_arrow","resp_arrow","exec_arrow","return_to_cli","return_to_cloud","final_to_cli","final_to_user"],"channels":[[".kf-77d0d05f-speech_bubble","opacity"],[".kf-77d0d05f-speech_bubble","translate"],[".conn-77d0d05f-prompt_arrow","opacity"],[".conn-77d0d05f-req_arrow","opacity"],[".kf-77d0d05f-sys_envelope","opacity"],[".kf-77d0d05f-sys_envelope","translate"],[".kf-77d0d05f-sys_line1","opacity"],[".kf-77d0d05f-sys_line1","translate"],[".kf-77d0d05f-sys_line2","opacity"],[".kf-77d0d05f-sys_line2","translate"],[".conn-77d0d05f-resp_arrow","opacity"],[".kf-77d0d05f-tool_call_envelope","opacity"],[".kf-77d0d05f-tool_call_envelope","translate"],[".kf-77d0d05f-tc_line1","opacity"],[".kf-77d0d05f-tc_line1","translate"],[".kf-77d0d05f-tc_line2","opacity"],[".kf-77d0d05f-tc_line2","translate"],[".conn-77d0d05f-exec_arrow","opacity"],[".kf-77d0d05f-exec_envelope","opacity"],[".kf-77d0d05f-exec_envelope","translate"],[".kf-77d0d05f-exec_line1","opacity"],[".kf-77d0d05f-exec_line1","translate"],[".kf-77d0d05f-exec_line2","opacity"],[".kf-77d0d05f-exec_line2","translate"],[".conn-77d0d05f-return_to_cli","opacity"],[".conn-77d0d05f-return_to_cloud","opacity"],[".kf-77d0d05f-result_envelope","opacity"],[".kf-77d0d05f-result_envelope","translate"],[".kf-77d0d05f-result_line1","opacity"],[".kf-77d0d05f-result_line1","translate"],[".kf-77d0d05f-result_line2","opacity"],[".kf-77d0d05f-result_line2","translate"],[".conn-77d0d05f-final_to_cli","opacity"],[".conn-77d0d05f-final_to_user","opacity"],[".kf-77d0d05f-answer_envelope","opacity"],[".kf-77d0d05f-answer_envelope","translate"],[".kf-77d0d05f-ans_line1","opacity"],[".kf-77d0d05f-ans_line1","translate"],[".kf-77d0d05f-ans_line2","opacity"],[".kf-77d0d05f-ans_line2","translate"]],"settled":[["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["1","0px 0px","1","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","1","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","1","1","0.9","0px 0px","1","0px 0px","1","0px 0px"]],"anims":[[],[{"c":0,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":2,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":0,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":5,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":7,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":8,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":3,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":4,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":6,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":8,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":10,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":12,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":13,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":14,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":15,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":10,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":11,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":13,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":15,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":17,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":18,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":19,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":20,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":21,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":22,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":23,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":17,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":18,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":20,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":22,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":24,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":25,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":26,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":27,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":28,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":29,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":30,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":31,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":24,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":25,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":26,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":28,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":30,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":32,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":33,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":34,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":36,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":37,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":38,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":39,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}]]}]]></script>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"77d0d05f-","frames":[{"name":"idle","duration":0,"auto":null,"title":null,"note":null},{"name":"user_prompt","duration":0.5,"auto":null,"title":null,"note":null},{"name":"system_prompt","duration":0.5,"auto":null,"title":null,"note":null},{"name":"tool_response","duration":0.5,"auto":null,"title":null,"note":null},{"name":"tool_exec","duration":0.5,"auto":null,"title":null,"note":null},{"name":"result_return","duration":0.5,"auto":null,"title":null,"note":null},{"name":"final_answer","duration":0.5,"auto":null,"title":null,"note":null}],"elements":["diagram","canvas","user_icon","cli_icon","cloud_icon","gear_icon","user_label","cli_label","cloud_label","gear_label","speech_bubble","sys_envelope","sys_line1","sys_line2","tool_call_envelope","tc_line1","tc_line2","exec_envelope","exec_line1","exec_line2","result_envelope","result_line1","result_line2","answer_envelope","ans_line1","ans_line2","prompt_arrow","req_arrow","resp_arrow","exec_arrow","return_to_cli","return_to_cloud","final_to_cli","final_to_user"],"channels":[[".kf-77d0d05f-speech_bubble","opacity"],[".kf-77d0d05f-speech_bubble","translate"],[".conn-77d0d05f-prompt_arrow","opacity"],[".conn-77d0d05f-req_arrow","opacity"],[".kf-77d0d05f-sys_envelope","opacity"],[".kf-77d0d05f-sys_envelope","translate"],[".kf-77d0d05f-sys_line1","opacity"],[".kf-77d0d05f-sys_line1","translate"],[".kf-77d0d05f-sys_line2","opacity"],[".kf-77d0d05f-sys_line2","translate"],[".conn-77d0d05f-resp_arrow","opacity"],[".kf-77d0d05f-tool_call_envelope","opacity"],[".kf-77d0d05f-tool_call_envelope","translate"],[".kf-77d0d05f-tc_line1","opacity"],[".kf-77d0d05f-tc_line1","translate"],[".kf-77d0d05f-tc_line2","opacity"],[".kf-77d0d05f-tc_line2","translate"],[".conn-77d0d05f-exec_arrow","opacity"],[".kf-77d0d05f-exec_envelope","opacity"],[".kf-77d0d05f-exec_envelope","translate"],[".kf-77d0d05f-exec_line1","opacity"],[".kf-77d0d05f-exec_line1","translate"],[".kf-77d0d05f-exec_line2","opacity"],[".kf-77d0d05f-exec_line2","translate"],[".conn-77d0d05f-return_to_cli","opacity"],[".conn-77d0d05f-return_to_cloud","opacity"],[".kf-77d0d05f-result_envelope","opacity"],[".kf-77d0d05f-result_envelope","translate"],[".kf-77d0d05f-result_line1","opacity"],[".kf-77d0d05f-result_line1","translate"],[".kf-77d0d05f-result_line2","opacity"],[".kf-77d0d05f-result_line2","translate"],[".conn-77d0d05f-final_to_cli","opacity"],[".conn-77d0d05f-final_to_user","opacity"],[".kf-77d0d05f-answer_envelope","opacity"],[".kf-77d0d05f-answer_envelope","translate"],[".kf-77d0d05f-ans_line1","opacity"],[".kf-77d0d05f-ans_line1","translate"],[".kf-77d0d05f-ans_line2","opacity"],[".kf-77d0d05f-ans_line2","translate"]],"settled":[["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["1","0px 0px","1","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","1","1","0.9","0px 0px","1","0px 0px","1","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px"],["0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0px 0px","0","0px 0px","0","0px 0px","0","0","0","0px 0px","0","0px 0px","0","0px 0px","1","1","0.9","0px 0px","1","0px 0px","1","0px 0px"]],"anims":[[],[{"c":0,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":2,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]}],[{"c":0,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":4,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":5,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":7,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":8,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":3,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":4,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":6,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":8,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":10,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":12,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":13,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":14,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":15,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":10,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":11,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":13,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":15,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":17,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":18,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":19,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":20,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":21,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":22,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":23,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":17,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":18,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":20,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":22,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":24,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":25,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":26,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":27,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":28,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":29,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":30,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":31,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":24,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":25,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":26,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.9"],[1,"0"]]},{"c":28,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":30,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":32,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":33,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":34,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0.9"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":36,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":37,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":38,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":39,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}]]}]]></script>
 </svg>

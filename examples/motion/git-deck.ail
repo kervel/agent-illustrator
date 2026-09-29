@@ -3,10 +3,10 @@ import "ail:motion/git"
 
 // The slide itself: a 16:9 stage, the scene number, the scene title.
 template "slide" (num: "1", title: "Title") {
-    rect stage [width: 1600, height: 900, fill: git-paper, stroke: none, canvas: true]
-    rect badge [width: 66, height: 66, fill: git-ink, stroke: none, corner_radius: 16,
-                label: num, label_fill: git-paper, font_size: 38, font_weight: 800]
-    text "{title}" heading [font_size: 60, font_weight: 800, fill: git-ink, align: start]
+    rect stage [width: 1600, height: 900, fill: role-backdrop, stroke: none, canvas: true]
+    rect badge [width: 66, height: 66, fill: role-ink, stroke: none, corner_radius: 16,
+                label: num, label_fill: role-backdrop, font_size: 38, font_weight: 800]
+    text "{title}" heading [font_size: 60, font_weight: 800, fill: role-ink, align: start]
     constrain stage.left = 0
     constrain stage.top = 0
     constrain badge.left = stage.left + 96

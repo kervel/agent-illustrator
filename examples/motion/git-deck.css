@@ -8,6 +8,25 @@
   --git-muted: #5F6780;
   --git-rule: #CBD1DA;
   --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
   --git-branch: #C92C76;
   --git-anna: #0E8A8A;
   --git-ben: #E07A12;
@@ -20,6 +39,8 @@
   --ail-motion-fast: .25s;
   --ail-motion-normal: .5s;
   --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
   --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
   --font-mono: 'Overpass Mono', Consolas, monospace;
 }

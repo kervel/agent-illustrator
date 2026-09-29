@@ -13,6 +13,22 @@
 /// Multiplier from font size to the distance between consecutive baselines.
 pub const LINE_HEIGHT_FACTOR: f64 = 1.25;
 
+thread_local! {
+    static MONO_ADVANCE: std::cell::Cell<f64> = const { std::cell::Cell::new(0.6) };
+}
+
+/// Advance of a monospace glyph, in em. 0.6 fits most monospace faces
+/// (Menlo, Consolas, DejaVu); a stylesheet whose face differs says so with
+/// `--ail-mono-advance: 0.616` (Overpass Mono) and layout measures by it.
+pub fn mono_advance() -> f64 {
+    MONO_ADVANCE.with(|c| c.get())
+}
+
+/// Set for the current render (see `mono_advance`).
+pub fn set_mono_advance(v: f64) {
+    MONO_ADVANCE.with(|c| c.set(v));
+}
+
 /// Widening factor applied to bold runs, in place of a second advance table.
 pub const BOLD_FACTOR: f64 = 1.05;
 

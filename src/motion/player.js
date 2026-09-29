@@ -2,9 +2,20 @@
  * No dependencies; Web Animations API. The player has no semantics of its
  * own: every value it sets comes from the embedded manifest.
  *
- *   var p = ail.player(svgElement);
+ *   var p = ail.player(svgElement);        // shows frame 0, settled
+ *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
  *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
- *   p.on('frame', function (i, name) { ... });
+ *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
+ *
+ * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
+ * "...", note: "..."]`); a title holds until a later frame sets another, a
+ * note belongs to its step. Both come with every 'step' event:
+ *   p.on('step', function (k, meta) { header.textContent = meta.title; });
+ *
+ * A step is what one click shows: a frame and the `[auto]` frames that play
+ * on after it by themselves. Hosts that advance on clicks use the step API
+ * and never need to know which frames are automatic; `p.steps` lists each
+ * step's first frame (also `agent-illustrator --list-steps`).
  *
  * Forward plays the segment; backward and jumps are instant and exact.
  */
@@ -29,6 +40,8 @@
     this.svg = svg;
     this.manifest = m;
     this.frames = m.frames.map(function (f) { return f.name; });
+    this.steps = [];
+    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
     this.frame = 0;
     this.playing = false;
     this._anims = [];
@@ -172,6 +185,56 @@
     }
   };
 
+  /** The step frame i belongs to. */
+  P._stepOf = function (i) {
+    var k = 0;
+    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
+    return k;
+  };
+  /** Last frame of step k: its own frame and the automatic ones after it. */
+  P._stepEnd = function (k) {
+    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
+  };
+  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
+  /** Host metadata at step k: the latest title set up to its end, its notes. */
+  P.meta = function (k) {
+    if (k == null) k = this.step;
+    var fr = this.manifest.frames, title = null, notes = [];
+    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
+    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
+    return { title: title, note: notes.length ? notes.join('\n') : null };
+  };
+  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
+  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
+
+  /** Jump to the end of step k (its automatic frames included): instant. */
+  P.goToStep = function (k) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
+    this.goTo(this._stepEnd(k));
+    this._emit('step', k, this.meta(k));
+    return this;
+  };
+
+  /** One click: finish the current step, then play the next one through. */
+  P.nextStep = function () {
+    var k = this.step;
+    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
+    if (k + 1 < this.steps.length) {
+      this.play(this.steps[k + 1]);
+      this._emit('step', k + 1, this.meta(k + 1));
+      return true;
+    }
+    return false;
+  };
+
+  /** One click back: the end of the previous step, instantly. */
+  P.prevStep = function () {
+    var k = this.step;
+    if (k > 0) { this.goToStep(k - 1); return true; }
+    this.goToStep(0);
+    return false;
+  };
+
   /** Advance: play the next frame (finishing the current one first). */
   P.next = function () {
     if (this.playing) this.goTo(this.frame);
@@ -216,11 +279,11 @@
       }, dwell * 1000));
     };
     function manual() { self._auto = null; }
-    this.svg.addEventListener('click', function () { manual(); if (!self.next()) self.goTo(0); });
+    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
     if (root.document) {
       root.document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.next(); e.preventDefault(); }
-        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prev(); e.preventDefault(); }
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
       });
     }
     this._apply(0);

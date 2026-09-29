@@ -30,11 +30,14 @@ pub struct ElementIndex {
     /// How to write each id: the dotted path through its components
     /// (`anna_hist_d4` is `anna.hist.d4`).
     pub display: HashMap<String, String>,
+    /// A part folded into its instance -> the instance (`f_val` -> `f`).
+    pub aliases: HashMap<String, String>,
 }
 
 impl ElementIndex {
     pub fn build(doc: &Document) -> Self {
         let mut idx = ElementIndex::default();
+        idx.aliases = doc.aliases.iter().cloned().collect();
         for stmt in &doc.statements {
             if let Some(id) = idx.visit(&stmt.node) {
                 idx.top.push(id);
@@ -167,7 +170,11 @@ impl ElementIndex {
 
     /// `station.label` -> `station_label` (a template child), else as written.
     fn member(&self, dotted: &str) -> String {
-        dotted.replace('.', "_")
+        let joined = dotted.replace('.', "_");
+        match self.aliases.get(&joined) {
+            Some(inst) if !self.ids.contains(&joined) => inst.clone(),
+            _ => joined,
+        }
     }
 
     fn resolve(&self, sel: &Spanned<Selector>) -> Result<Vec<String>, LayoutError> {
@@ -184,6 +191,18 @@ impl ElementIndex {
                 } else {
                     Err(missing(n))
                 }
+            }
+            Selector::Lines(c, a, b) => {
+                let mut out = Vec::new();
+                for i in (*a).min(*b)..=(*a).max(*b) {
+                    let name = format!("{}.line{}", c, i);
+                    let id = self.member(&name);
+                    if !self.ids.contains(&id) {
+                        return Err(missing(&name));
+                    }
+                    out.push(id);
+                }
+                Ok(out)
             }
             Selector::Children(n) => {
                 let id = self.member(n);
@@ -353,8 +372,9 @@ pub fn inline_imports(doc: Document, ctx: &ImportContext) -> Result<Document, La
         Ok(())
     }
     let mut out = Vec::new();
+    let aliases = doc.aliases;
     inline(doc.statements, ctx, &mut HashSet::new(), &mut out, true)?;
-    Ok(Document { statements: out })
+    Ok(Document { statements: out, aliases })
 }
 
 /// Bindings of macro parameters to call arguments.
@@ -382,6 +402,7 @@ fn subst_sel(sel: &Spanned<Selector>, env: &HashMap<String, Bound>) -> Spanned<S
         Selector::Children(n) => Selector::Children(subst_name(n, env)),
         Selector::Class(c) => Selector::Class(c.clone()),
         Selector::AllExcept(v) => Selector::AllExcept(v.iter().map(|n| subst_name(n, env)).collect()),
+        Selector::Lines(c, a, b) => Selector::Lines(subst_name(c, env), *a, *b),
     };
     Spanned::new(node, sel.span.clone())
 }
@@ -495,6 +516,7 @@ fn subst_stmt(s: &MotionStmt, env: &HashMap<String, Bound>) -> MotionStmt {
             effect: effect.clone(),
         },
         MotionVerb::Count(t) => MotionVerb::Count(subst_sel(t, env)),
+        MotionVerb::Insert { code, after } => MotionVerb::Insert { code: code.clone(), after: *after },
         MotionVerb::Swap { from, to } => MotionVerb::Swap {
             from: subst_sel(from, env),
             to: subst_sel(to, env),
@@ -663,7 +685,7 @@ impl Expander<'_> {
                         for (p, a) in m.params.iter().zip(args) {
                             inner.insert(p.0.node.clone(), self.check_arg(name, p, a)?);
                         }
-                        let body = self.expand_block(&m.body, &inner, depth + 1)?;
+                        let body = self.expand_block(&m.body, &inner, depth + 1).map_err(|e| explain_macro_part(e, name))?;
                         // Options on the call (`commit(a, b) [delay: 0.2]`)
                         // are not threaded into the body: a macro is its own
                         // choreography. Wrap to keep the body's beats local.
@@ -772,6 +794,13 @@ impl Expander<'_> {
             }
             MotionVerb::Constrain(_) | MotionVerb::Disable(_) | MotionVerb::Enable(_) => {}
             MotionVerb::Call { .. } => unreachable!("calls are expanded before resolution"),
+            MotionVerb::Insert { code, .. } => {
+                return Err(LayoutError::UndefinedIdentifier {
+                    name: format!("{} (insert works on a `code` block)", code.node),
+                    span: code.span.clone(),
+                    suggestions: vec![],
+                })
+            }
         }
         Ok(s)
     }
@@ -853,8 +882,18 @@ fn collect_appears(stmts: &[Spanned<Statement>], out: &mut Vec<(String, Spanned<
             }
             _ => continue,
         };
-        if let (Some(id), Some(f)) = (id, appears_of(mods)) {
-            out.push((id, f));
+        let collapsed = mods.iter().any(|m| {
+            matches!(&m.node.key.node, StyleKey::Custom(k) if k == "collapsed")
+                && matches!(&m.node.value.node, StyleValue::Identifier(i) if i.0 == "true")
+        });
+        if let Some(id) = id {
+            if collapsed {
+                // `collapsed: true`: takes no room and is hidden until a
+                // `show [enter: expand]` (or an `insert`) opens it.
+                out.push((id, Spanned::new("later:collapsed".to_string(), st.span.clone())));
+            } else if let Some(f) = appears_of(mods) {
+                out.push((id, f));
+            }
         }
         collect_appears(kids, out);
     }
@@ -904,8 +943,16 @@ fn apply_appears(doc: &mut Document, idx: &ElementIndex) -> Result<(), LayoutErr
         .collect();
     for (id, frame) in decls {
         // `appears: later`: hidden from the start; a statement brings it on.
-        if frame.node == "later" {
+        if frame.node == "later" || frame.node == "later:collapsed" {
             let span = frame.span.clone();
+            let opts = if frame.node == "later:collapsed" {
+                vec![Spanned::new(
+                    MotionOpt { key: Spanned::new("exit".to_string(), span.clone()), value: Spanned::new(MotionValue::Name("collapse".into()), span.clone()) },
+                    span.clone(),
+                )]
+            } else {
+                vec![]
+            };
             if let Some(Statement::Keyframe(kf)) = doc
                 .statements
                 .iter_mut()
@@ -917,7 +964,7 @@ fn apply_appears(doc: &mut Document, idx: &ElementIndex) -> Result<(), LayoutErr
                     Spanned::new(
                         MotionNode::Stmt(MotionStmt {
                             verb: MotionVerb::Hide(vec![Spanned::new(Selector::Name(id.clone()), span.clone())]),
-                            opts: vec![],
+                            opts,
                             targets: vec![id.clone()],
                             partners: vec![],
                         }),
@@ -996,7 +1043,11 @@ pub fn atom_state_ops(s: &MotionStmt, i: usize, span: &Span) -> Vec<KeyframeOp> 
 /// The internal name of a dotted path, if it names an element.
 fn join_path(segments: &[&str], idx: &ElementIndex) -> Option<String> {
     let joined = segments.join("_");
-    idx.ids.contains(&joined).then_some(joined)
+    if idx.ids.contains(&joined) {
+        return Some(joined);
+    }
+    // A one-shape template is drawn as its instance: `f.val` is `f`.
+    idx.aliases.get(&joined).cloned()
 }
 
 fn canonical_path(path: &mut Spanned<ElementPath>, idx: &ElementIndex) {
@@ -1088,5 +1139,36 @@ fn canonicalize_statements(stmts: &mut [Spanned<Statement>], idx: &ElementIndex)
             Statement::MotionMacro(m) => canonical_motion(&mut m.body, idx),
             _ => {}
         }
+    }
+}
+
+/// `commit(folder, st, track)` where `st` has no `dot`: the body fails on
+/// `st.dot`, which the author never wrote. Say which macro wanted which part
+/// of which argument, at the call.
+fn explain_macro_part(e: LayoutError, name: &Spanned<String>) -> LayoutError {
+    // Already explained by a macro this one calls: point at this call (the
+    // outermost is the one the author wrote) and say how it got there.
+    if let LayoutError::Located { message, .. } = &e {
+        if message.contains("() uses a part `") {
+            return LayoutError::Located {
+                message: format!("{}() -> {}", name.node, message),
+                span: name.span.clone(),
+            };
+        }
+        return e;
+    }
+    let LayoutError::UndefinedIdentifier { name: missing, .. } = &e else { return e };
+    let Some((head, part)) = missing.rsplit_once('.') else { return e };
+    let hint = if ["snapshot", "change", "commit"].contains(&name.node.as_str()) {
+        " (the templates in `ail:motion/git` have the parts its macros use: git_station, git_file)"
+    } else {
+        ""
+    };
+    LayoutError::Located {
+        message: format!(
+            "{}() uses a part `{}` of `{}`, and `{}` has none; pass an element that has one{}",
+            name.node, part, head, head, hint
+        ),
+        span: name.span.clone(),
     }
 }

@@ -123,6 +123,39 @@ pub fn check(
             ));
         }
 
+        // A `draw` that retracts a line: it was drawn further already (often
+        // a line declared without `drawn: 0`, so it starts complete).
+        for (ci, curve) in &f.curves {
+            if m.channels[*ci].prop != crate::motion::compile::Prop::DashOffset {
+                continue;
+            }
+            let first = |v: &crate::motion::compile::Val| match v {
+                crate::motion::compile::Val::V(x) => x.first().copied(),
+                _ => None,
+            };
+            let mut at = first(&m.settled[fi][*ci]);
+            for t in &curve.tweens {
+                let from = t.from.as_ref().and_then(first).or(at);
+                let to = first(&t.to);
+                at = to.or(at);
+                let (Some(from), Some(to)) = (from, to) else { continue };
+                let a = &f.atoms[t.atom];
+                if a.kind == "draw" && to > from + 1e-3 {
+                    out.push(warn(
+                        LintCategory::Motion,
+                        &f.name,
+                        format!(
+                            "draw {} shrinks it from {:.0}% to {:.0}% drawn: it was already drawn further. \
+                             Declare the line `drawn: 0` if it should start empty, or use `undraw` to retract it on purpose",
+                            show(&a.target_id),
+                            100.0 * (1.0 - from),
+                            (100.0 * (1.0 - to)).max(0.0)
+                        ),
+                    ));
+                }
+            }
+        }
+
         let mut seen: HashSet<(String, String)> = HashSet::new();
         for a in &f.atoms {
             // Moving something nobody can see.

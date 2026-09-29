@@ -1,11 +1,48 @@
 // Standard motion macros for git decks: `import "ail:motion/git"`.
+// Print this file with `agent-illustrator --skill-animation` (at the end).
 //
+// MACROS
 // snapshot(src, station)  the source flashes, a copy of it flies onto the
 //                         timeline and becomes the station (dot + labels)
 // change(file, value)     a file row's value rolls to a new text, the row glows
 // commit(src, station, track)
 //                         snapshot, with the line growing to the new station
-// Stations are expected to have children `dot`, `nm` (name) and `mt` (meta).
+//
+// WHAT THEY EXPECT
+// station: parts `dot`, `nm` (name) and `mt` (meta), hidden until the
+//          commit (`appears: later`)            -> template git_station
+// file:    a part `val` holding the value text  -> template git_file
+// track:   a path through the stations, `drawn: 0`
+// src:     anything (a folder panel, a group of git_file rows)
+// Your own templates work too, as long as they have these parts.
+// Colours: roles only (role-primary, role-surface, role-muted); a theme maps
+// them to its palette (`--role-primary: var(--secondary-1)`).
+
+// A commit on the timeline: a ring, its name above, who/when below.
+template "git_station" (name: "Commit", meta: "", tint: role-primary) {
+    circle dot [size: 38, fill: role-surface, stroke: tint, stroke_width: 8, appears: later]
+    rect nm [fill: none, stroke: none, label: name, font_size: 22, font_weight: 700,
+             max_width: 240, appears: later]
+    rect mt [fill: none, stroke: none, label: meta, font_size: 15, font_family: mono,
+             label_fill: role-muted, max_width: 240, appears: later]
+    constrain nm.center_x = dot.center_x
+    constrain nm.bottom = dot.top - 14
+    constrain mt.center_x = dot.center_x
+    constrain mt.top = dot.bottom + 14
+}
+
+// A file in a project folder: its name, and a value (size, status) on the right.
+template "git_file" (name: "file.txt", value: "0 lines") {
+    rect bg [width: 440, height: 56, fill: none, stroke: none]
+    rect fname [fill: none, stroke: none, label: name, font_size: 19, font_family: mono,
+                max_width: 250, align: start]
+    rect val [fill: none, stroke: none, label: value, font_size: 19, font_family: mono,
+              font_weight: 700]
+    constrain fname.left = bg.left + 16
+    constrain fname.center_y = bg.center_y
+    constrain val.right = bg.right - 16
+    constrain val.center_y = bg.center_y
+}
 
 motion snapshot(src: element, station: element) {
     flash src [duration: 0.4]
@@ -18,7 +55,7 @@ motion snapshot(src: element, station: element) {
 
 motion change(file: element, value: text) {
     transform file.val [label: value, swap: roll]
-    highlight file [color: git-main]
+    highlight file [color: role-primary]
 }
 
 motion commit(src: element, station: element, track: path) {

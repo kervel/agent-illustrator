@@ -12,32 +12,19 @@ import "git-deck.ail"
 
 // ---------------------------------------------------------------- parts
 
-// A page: a sheet with a folded corner and six lines of text.
-template "page" (b1: git-rule, b2: git-rule, b3: git-rule, b4: git-rule, b5: git-rule, b6: git-rule) {
-    rect sheet [width: 120, height: 156, fill: git-panel, stroke: git-ink, stroke_width: 3, corner_radius: 8]
-    path fold [fill: git-rule, stroke: git-ink, stroke_width: 3] {
-        vertex a [x: 0, y: 0]
-        line_to b [x: 28, y: 28]
-        line_to c [x: 0, y: 28]
-        close
-    }
-    col lines [gap: 12] {
-        rect l* [width: [88, 70, 55, 70, 88, 55], height: 9, fill: [b1, b2, b3, b4, b5, b6],
-                 stroke: none, corner_radius: 4]
-    }
-    constrain fold.right = sheet.right
-    constrain fold.top = sheet.top
-    constrain lines.left = sheet.left + 16
-    constrain lines.top = sheet.top + 34
-}
+// The pages are artwork (assets/*.svg): a sheet with a folded corner and six
+// bars. Each id in the file is a part (pg.sheet, pg.fold, pg.bar3); the
+// CSS variables b1..b6 in the file colour the bars per instance.
+template "docx" from "assets/docx.svg"
+template "codefile" from "assets/code.svg"
 
 // A document: a page, its file name, and a "?" that pops in later.
 template "doc" (fname: "report.docx") {
-    page pg
+    docx pg
     rect name [fill: none, stroke: none, label: fname, font_size: 17, font_family: mono,
-               label_fill: git-ink, max_width: 250]
-    circle q [size: 46, fill: git-warn, stroke: git-ink, stroke_width: 3, label: "?", font_size: 28,
-              font_weight: 800, label_fill: git-ink, class: q, appears: later]
+               label_fill: role-ink, max_width: 250]
+    circle q [size: 46, fill: role-warn, stroke: role-ink, stroke_width: 3, label: "?", font_size: 28,
+              font_weight: 800, label_fill: role-ink, class: q, appears: later]
     constrain name.center_x = pg.center_x
     constrain name.top = pg.bottom + 12
     constrain q.left = pg.sheet.left - 8
@@ -45,10 +32,10 @@ template "doc" (fname: "report.docx") {
 }
 
 // A code file: the same page, its lines coloured and indented like code.
-template "code" (fname: "main.py", c1: git-main, c2: git-ok, c3: git-branch) {
-    page pg [b1: c1, b3: c2, b5: c3]
+template "code" (fname: "main.py", c1: role-primary, c2: role-ok, c3: role-secondary) {
+    codefile pg [b1: c1, b3: c2, b5: c3]
     rect name [fill: none, stroke: none, label: fname, font_size: 17, font_family: mono,
-               label_fill: git-ink, max_width: 250]
+               label_fill: role-ink, max_width: 250]
     constrain name.center_x = pg.center_x
     constrain name.top = pg.bottom + 12
 }
@@ -68,8 +55,8 @@ constrain docs.top = s.stage.top + 200
 grid codes [cols: 4, gap: 60, cell_width: 280, cell_height: 220] {
     code k* [fname: ["login.py", "cart.py", "checkout.js", "style.css",
                      "orders_api.py", "README.md", "test_cart.py", "Dockerfile"],
-             c1: [git-main, git-ok, git-branch, git-main, git-ok, git-branch, git-main, git-ok],
-             c3: [git-branch, git-main, git-ok, git-branch, git-main, git-ok, git-branch, git-main]]
+             c1: [role-primary, role-ok, role-secondary, role-primary, role-ok, role-secondary, role-primary, role-ok],
+             c3: [role-secondary, role-primary, role-ok, role-secondary, role-primary, role-ok, role-secondary, role-primary]]
 }
 constrain codes.left = docs.left
 constrain codes.top = docs.top
@@ -78,8 +65,8 @@ constrain codes.top = docs.top
 rect hub [width: 1, height: 1, fill: none, stroke: none]
 constrain hub.center = docs.center
 
-rect caption [fill: none, stroke: none, font_size: 40, font_weight: 800, label_fill: git-ink, appears: code,
-              label: "4,000 files <span fill=git-branch>×</span> 30 developers <span fill=git-branch>×</span> every day"]
+rect caption [fill: none, stroke: none, font_size: 40, font_weight: 800, label_fill: role-ink, appears: code,
+              label: "4,000 files <span fill=role-secondary>×</span> 30 developers <span fill=role-secondary>×</span> every day"]
 constrain caption.center_x = s.stage.center_x
 constrain caption.top = docs.bottom + 40
 

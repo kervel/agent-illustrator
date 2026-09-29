@@ -188,6 +188,8 @@ pub struct FrameMotion {
     pub name: String,
     pub duration: f64,
     pub auto: Option<f64>,
+    pub title: Option<String>,
+    pub note: Option<String>,
     pub atoms: Vec<Atom>,
     pub curves: BTreeMap<usize, Curve>,
 }
@@ -830,6 +832,7 @@ fn verb_name(v: &MotionVerb) -> &'static str {
         MotionVerb::Swap { .. } => "swap",
         MotionVerb::Camera(_) => "camera",
         MotionVerb::Call { .. } => "call",
+        MotionVerb::Insert { .. } => "insert",
     }
 }
 
@@ -1215,6 +1218,8 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
             name: kf.name.node.clone(),
             duration,
             auto: kf.auto,
+            title: kf.title.clone(),
+            note: kf.note.clone(),
             atoms: Vec::new(),
             curves: BTreeMap::new(),
         };
@@ -1511,6 +1516,13 @@ impl<'a> Compiler<'a> {
                 } else {
                     match enter_name.as_str() {
                         "fade" | "none" => {}
+                        // expand: the height tween comes from the state
+                        // change; the content is revealed top-down with it, so
+                        // nothing spills out of a box that is still opening.
+                        "expand" => {
+                            let clip = ChKey { sel: wrap.clone(), prop: Prop::ClipPath };
+                            self.tween(fm, &clip, Tween { start, dur: t.dur, ease: t.ease, from: Some(wipe_hidden("down")), to: Val::V(vec![0.0; 4]), atom });
+                        }
                         "rise" | "drop" => {
                             let dy = if enter_name == "rise" { dist } else { -dist };
                             self.tween(fm, &tr_key, Tween {
@@ -1532,7 +1544,7 @@ impl<'a> Compiler<'a> {
                         "draw" => {}
                         other => {
                             return Err(CompileError {
-                                message: format!("unknown enter preset '{}': use fade, pop, rise, drop, grow, wipe(left|right|up|down) or draw", other),
+                                message: format!("unknown enter preset '{}': use fade, pop, rise, drop, grow, expand, wipe(left|right|up|down) or draw", other),
                                 span: fm.atoms[atom].span.clone(),
                             })
                         }
@@ -1566,6 +1578,10 @@ impl<'a> Compiler<'a> {
                 let e_in = tokens.ease("in").unwrap_or(Ease::Linear);
                 match exit_name.as_str() {
                     "fade" | "none" => {}
+                    // collapse: the content is wiped up as the box closes.
+                    "collapse" => self.overlay(fm, wrap.clone(), Prop::ClipPath, Overlay {
+                        start, dur: t.dur, ease: t.ease, keys: vec![Val::V(vec![0.0; 4]), wipe_hidden("down")], mode: Mode::Abs, looping: false, atom,
+                    }),
                     "shrink" => self.overlay(fm, wrap.clone(), Prop::Scale, Overlay {
                         start, dur: t.dur, ease: e_in, keys: vec![Val::xy(1.0, 1.0), Val::xy(0.0, 0.0)], mode: Mode::Mul, looping: false, atom,
                     }),
@@ -1583,7 +1599,7 @@ impl<'a> Compiler<'a> {
                     }
                     other => {
                         return Err(CompileError {
-                            message: format!("unknown exit preset '{}': use fade, shrink, fall, lift or wipe(left|right|up|down)", other),
+                            message: format!("unknown exit preset '{}': use fade, shrink, fall, lift, collapse or wipe(left|right|up|down)", other),
                             span: fm.atoms[atom].span.clone(),
                         })
                     }

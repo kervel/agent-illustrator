@@ -295,10 +295,14 @@ fn check_station_spacing(result: &LayoutResult, doc: &Document, warnings: &mut V
             warnings.push(LintWarning {
                 category: LintCategory::Overlap,
                 message: format!(
-                    "stations {} and {} on {} are {:.0}px apart but their names need {:.0}px; \
-                     give the line room (drop `pack: tight`, or pin them further apart), \
+                    "stations {} and {} on {} are {:.0}px apart but their names need {:.0}px; {}, \
                      or shorten a name",
-                    p.a, p.b, p.line, p.dist.max(0.0), p.need
+                    p.a, p.b, p.line, p.dist.max(0.0), p.need,
+                    if p.same_flow {
+                        "they share a row: raise its `gap:` (or drop `pack: tight`)"
+                    } else {
+                        "leave their x free so the line can stretch, or pin them further apart"
+                    }
                 ),
                 frames: Vec::new(),
                 pair: None,
@@ -766,6 +770,9 @@ fn is_text_shape_straddle(text: &ElementLayout, shape: &ElementLayout) -> bool {
 #[derive(Default)]
 pub(crate) struct ContainsRelations {
     by_container: HashMap<String, HashSet<String>>,
+    /// `overlaps: x` on an element: it sits on x on purpose (a badge on a
+    /// card's corner).
+    overlaps: HashMap<String, HashSet<String>>,
 }
 
 impl ContainsRelations {
@@ -780,6 +787,15 @@ impl ContainsRelations {
         };
         self.by_container.get(a).is_some_and(|c| c.contains(b))
             || self.by_container.get(b).is_some_and(|c| c.contains(a))
+            || self.declared_overlap(a, b)
+            || self.declared_overlap(b, a)
+    }
+
+    /// `a [overlaps: x]` where `b` is x or a part of x.
+    fn declared_overlap(&self, a: &str, b: &str) -> bool {
+        self.overlaps
+            .get(a)
+            .is_some_and(|xs| xs.iter().any(|x| b == x || b.starts_with(&format!("{}_", x))))
     }
 
 }
@@ -795,6 +811,31 @@ fn collect_contains_ids_from_stmts(
     relations: &mut ContainsRelations,
 ) {
     for stmt in stmts {
+        let mods = match &stmt.node {
+            Statement::Shape(sh) => Some((sh.name.as_ref(), &sh.modifiers)),
+            Statement::Group(g) => Some((g.name.as_ref(), &g.modifiers)),
+            Statement::Layout(l) => Some((l.name.as_ref(), &l.modifiers)),
+            _ => None,
+        };
+        if let Some((Some(name), mods)) = mods {
+            for m in mods {
+                if !matches!(&m.node.key.node, crate::parser::ast::StyleKey::Custom(k) if k == "overlaps") {
+                    continue;
+                }
+                let names: Vec<String> = match &m.node.value.node {
+                    crate::parser::ast::StyleValue::Identifier(i) => vec![i.0.replace('.', "_")],
+                    crate::parser::ast::StyleValue::List(v) => v
+                        .iter()
+                        .filter_map(|x| match &x.node {
+                            crate::parser::ast::StyleValue::Identifier(i) => Some(i.0.replace('.', "_")),
+                            _ => None,
+                        })
+                        .collect(),
+                    _ => vec![],
+                };
+                relations.overlaps.entry(name.node.0.clone()).or_default().extend(names);
+            }
+        }
         match &stmt.node {
             Statement::Constrain(c) => {
                 if let ConstraintExpr::Contains {
@@ -1574,7 +1615,7 @@ fn estimate_label_bbox_styled(label: &LabelLayout, styles: &crate::layout::types
             .rich
             .lines
             .iter()
-            .map(|l| l.iter().map(|r| r.text.chars().count() as f64 * 0.6 * font_size * r.scale).sum::<f64>())
+            .map(|l| l.iter().map(|r| r.text.chars().count() as f64 * crate::layout::text::mono_advance() * font_size * r.scale).sum::<f64>())
             .fold(0.0, f64::max)
     } else if bold {
         base.width * crate::layout::text::BOLD_FACTOR
@@ -2959,7 +3000,14 @@ fn check_crowded_layouts_in_stmts(
                         })
                         .count();
 
-                    if child_count > 8 {
+                    // A code block's lines are one column by nature.
+                    let is_code = l.children.iter().any(|c| match &c.node {
+                        Statement::Shape(sh) => sh.modifiers.iter().any(|m| {
+                            matches!(&m.node.key.node, crate::parser::ast::StyleKey::Custom(k) if k == "code_lang")
+                        }),
+                        _ => false,
+                    });
+                    if child_count > 8 && !is_code {
                         let layout_name = l
                             .name
                             .as_ref()
@@ -3364,6 +3412,9 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "canvas",       // the stage: viewBox and overflow bounds
     "max_width",    // labels wrap past this width
     "spread",       // `spread: even` on a through-line
+    "code_lang",    // a code line's language (generated by `code`)
+    "collapsed",    // `collapsed: true`: no room, hidden, until expanded
+    "overlaps",     // `overlaps: card`: sits on card on purpose (a corner badge)
     "drawn",        // how far a line starts drawn
     "appears",      // keyframe an element enters in
     "pack",         // row/col: pack members by their parts
@@ -3935,7 +3986,7 @@ mod tests {
     }
 
     fn make_doc(stmts: Vec<crate::parser::ast::Spanned<Statement>>) -> Document {
-        Document { statements: stmts }
+        Document { statements: stmts, aliases: Vec::new() }
     }
 
     #[test]

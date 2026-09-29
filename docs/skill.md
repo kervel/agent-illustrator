@@ -33,6 +33,13 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
 | Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
 | Colouring the words on a shape | `label_fill:` | `fill:` (that is the shape) |
+| A label that must not widen its box | `max_width: 240` (wraps past it) | a hand-broken `<br>` guess |
+| Content kept inside a slide area | `rect stage [..., canvas: true]` (leaving it is an error) | checking by eye |
+| A transit/metro line through stations | `path p [through: [a, b, c], routing: metro]` (names get room) | a hand-drawn path |
+| Moving something in a keyframe | `move x to y` / `move x home` | `transform x [dx: ...]` |
+| Source code or a diff | `code c [lang: python, source: "..."]`, `code d [diff: "-a\n+b"]` | mono rects with hand-coloured spans |
+| A designed icon you can animate by part | `template "x" from "x.svg"` with ids in the file (`d.fold`) | a stack of rects |
+| Colours that survive a change of theme | roles: `role-primary`, `role-ink`, `role-surface` | palette slots in reusable files |
 
 `grid` is not only for heatmaps: it is the general alignment scaffold. Empty
 cells are fine — place content by coordinate, address cells as `g.cell(r, c)`.
@@ -449,6 +456,10 @@ Create animated sequences where elements appear/disappear across frames.
 3. Run `--frames-to-dir out/` to write every frame as a static SVG, then look at
    each one (`--list-frames` prints the names; `--frame <name>` renders one)
 4. Use `--animate` for self-contained playback, or add external CSS transitions
+
+Timed motion (draw a line, fly a copy, pulse, beats with `then` / `after` /
+`at`, entrances, the `--animate` player, stills with `--at`, the built-in
+`ail:motion/git` macros) is a whole skill of its own: read `--skill-animation`.
 
 ### Syntax
 ```

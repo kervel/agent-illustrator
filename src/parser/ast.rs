@@ -123,6 +123,10 @@ impl std::fmt::Display for Identifier {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Document {
     pub statements: Vec<Spanned<Statement>>,
+    /// Part names folded into their instance: `(part, instance)`. A
+    /// one-shape template is drawn as the instance itself, but `inst.part`
+    /// still names it. Filled by template resolution.
+    pub aliases: Vec<(String, String)>,
 }
 
 /// Top-level statement in a document
@@ -305,6 +309,10 @@ pub struct KeyframeDecl {
     /// `[auto]` / `[auto, after: 0.6]`: play straight after the previous
     /// keyframe finishes, after this many seconds, without a click.
     pub auto: Option<f64>,
+    /// `[title: "..."]`: what a host shows as the slide title from this
+    /// keyframe on (a deck header); `[note: "..."]`: its speaker notes.
+    pub title: Option<String>,
+    pub note: Option<String>,
 }
 
 /// One node of a keyframe's motion tree.
@@ -368,6 +376,8 @@ pub enum Selector {
     Class(String),
     /// `all except title, canvas`
     AllExcept(Vec<String>),
+    /// `c.lines[8..12]`: lines 8 to 12 of code block `c` (inclusive)
+    Lines(String, usize, usize),
 }
 
 impl Selector {
@@ -377,6 +387,7 @@ impl Selector {
             Selector::Children(n) => format!("{}.*", n),
             Selector::Class(c) => format!(".{}", c),
             Selector::AllExcept(v) => format!("all except {}", v.join(", ")),
+            Selector::Lines(c, a, b) => format!("{}.lines[{}..{}]", c, a, b),
         }
     }
 }
@@ -494,6 +505,10 @@ pub enum MotionVerb {
         name: Spanned<String>,
         args: Vec<Spanned<MotionArg>>,
     },
+    /// `insert c after line 7 [source: "...", as: conflict]`: new lines in a
+    /// code block, collapsed until this statement opens them. Rewritten into
+    /// a `show [enter: expand]` when the code block is generated.
+    Insert { code: Spanned<String>, after: usize },
 }
 
 /// Keyframe operation (Feature 011)

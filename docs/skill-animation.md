@@ -226,30 +226,36 @@ animation of the settled frames (visibility and geometry, not the timed motion).
 
 ### Geometry Animation (Position & Size)
 
-`transform` inside a keyframe can move and resize elements:
+Say *where* something goes by name, never by a number. Numbers break the moment
+a label is translated or the layout shifts; names keep working.
 
 ```
-keyframe "grow" {
-    transform box [width: 340, dx: -50]   // grow wider + recenter
-    transform chip [dx: 0, dy: -180]      // move up
+keyframe "merge" {
+    move chip to slot_b                    // chip travels to slot_b's centre
+    transform box [width: 340]             // sizes are fine as numbers
+}
+keyframe "reset" {
+    move chip home                         // back to where the layout put it
 }
 ```
 
-- **Position** (`x`/`y`/`dx`/`dy`) and **rotation** tween via a `transform` on the
-  element's wrapper group, so the element's label moves with it. `dx`/`dy` are
-  offsets from the laid-out (frame-0) position.
+- `move x to y` / `move x home` / `move x along path` move an element (and its
+  label) by name. `fly ghost(x) to y` sends a copy instead (see Travel below).
 - **Size** (`width`/`height`/`scale`) tweens via the shape's geometry; `scale` is
-  about the center.
+  about the centre.
+- `x`/`y`/`dx`/`dy` in a `transform` still work in a plain state keyframe (show/
+  hide/transform only), but lint warns; in a keyframe that uses motion (beats,
+  timing options, draw/fly/move/effects) they are an error (`motion-coordinate`).
 
 To make the solver place dependents relative to a moved element, change the active
-constraints in the keyframe — name the original constraint and `disable` it, then add
-the new one:
+constraints in the keyframe: name the original constraint and `disable` it, then add
+a new one *relative to another element*:
 
 ```
-constrain chip.center_y = 300 as chip_home
+constrain chip.center_y = lane_a.center_y as chip_home
 keyframe "merge" {
     disable chip_home
-    constrain chip.center_y = 120        // re-pin; solver moves chip, it tweens
+    constrain chip.center_y = lane_b.center_y   // re-pin by name; chip tweens there
 }
 keyframe "reset" {
     enable chip_home                     // restore the original pin; chip tweens back
@@ -259,6 +265,8 @@ keyframe "reset" {
 Without this, the always-solved constraints pull elements back to their frame-0
 positions. Children constrained relative to a resized/moved parent cascade to new
 solved positions and each tweens (the box-of-chips grows and recenters as a unit).
+(`constrain chip.center_y = 120` inside a keyframe also works, but lint warns: it
+pins to a coordinate.)
 
 **Under-constrained elements.** Each frame is re-solved from the frame-0 base layout,
 so an element with no active constraint (e.g. you `disable`d its pin without re-pinning,
@@ -428,7 +436,14 @@ agent-illustrator f.ail --lint                  # includes motion lints; exits 1
 agent-illustrator f.ail --lint-strict           # also exits 1 on warnings
 agent-illustrator f.ail --timeline-json         # the manifest (tracks) a host can inspect
 agent-illustrator --player-js > player.js       # the player, for hosts inlining the SVG
+agent-illustrator f.ail --serve                  # live preview: arrow keys step, scrubber, reload on save
+agent-illustrator f.ail --film 3 > film.html     # step 3 sampled every 50ms by the real player
+agent-illustrator f.ail --crop-to-content 24 --animate   # picture = what the frames show (for embedding)
+agent-illustrator f.ail --stylesheet-css theme.css --stylesheet-css deck.css   # layered, later wins
 ```
+`--serve` and `--film` run the browser player itself: use them for what a host
+will really show (flicker, a jump between steps); `--at` and `--frames-strip`
+are the native renderer, which the golden tests check against.
 Review `--timeline` before rendering anything: it answers "does this land in
 the right beat" without images. Motion lints: motion on something hidden the whole
 frame, a flight to a hidden target, a connection whose end is hidden, slow beat,
@@ -439,12 +454,20 @@ busy beat, and numeric coordinates in keyframes (`motion-coordinate`, an error).
 Every animated SVG embeds its manifest; `--animate` also embeds the player and
 autoplays. To drive it yourself:
 ```js
-const p = ail.player(svgElement);   // goTo(i|name) instant; next() plays; prev() instant
-p.on('frame', (i, name) => ...);    p.frames; p.frame; p.at(i, seconds)
+const p = ail.player(svgElement);   // shows frame 0, settled
+p.nextStep(); p.prevStep();         // one click: plays a frame and any [auto] frames after it
+p.goToStep(k);                      // instant: the end of step k (fragments shown = k)
+p.steps; p.step;                    // each step's first frame; the current step
+p.goTo(i|name); p.next(); p.prev(); // frame by frame, if you really need it
+p.on('step', k => ...); p.on('frame', (i, name) => ...); p.at(i, seconds)
 ```
-Hosts drive the player; they never mutate the SVG. Printing shows the last frame;
-`prefers-reduced-motion` jumps instead of playing. Hosts that flip a
-`frame-<name>` class on the SVG root still get every frame's settled state.
+A *step* is what one click shows. Hosts that advance on clicks (a slide deck
+with fragments) use steps and never need to know which frames are `[auto]`;
+`agent-illustrator --list-steps file.ail` prints them, one line per step.
+Hosts drive the player; they never mutate the SVG. Without any player (no JS, an
+`<img>`, print) the SVG shows frame 0 as it ends. Printing with a player shows
+the last frame; `prefers-reduced-motion` jumps instead of playing. Hosts that
+flip a `frame-<name>` class on the SVG root still get every frame's settled state.
 
 ### The stage
 
@@ -454,6 +477,54 @@ picture's exact bounds. Anything leaving it in any frame is reported
 instead of growing: `max_width: 240`. A row of components can pack by their
 parts (`row r [gap: 40, align: dot, pack: tight]`) so labels alternating above
 and below interleave.
+
+### Themes: roles, not colours
+
+A scene that uses only roles (`role-primary`, `role-ink`, `role-surface`,
+`role-ok-soft`, `role-series-1` ...; see --grammar COLORS) renders unedited in
+any theme: the theme's stylesheet maps each role once (`--role-primary:
+var(--secondary-1);`). `ail:motion/git` uses roles only. Pick palette slots
+(`accent-1`) only in a one-off diagram.
+
+### Code on a slide
+
+```
+code merged [lang: python, title: "cart.py · merged", marks: "8:role-series-1-soft",
+             source: "def total(cart):\n    ...\n    return 0 if total > 40 else 4.95"]
+keyframe "conflict" {
+    remove merged.line8
+    at 0.1 { insert merged after line 7 [name: conflict, tint: role-warn-soft, stagger: 0.05,
+             source: "<<<<<<< anna\n    return 0 if total > 40 else 4.95\n=======\n    ...\n>>>>>>> ben"] }
+}
+keyframe "resolve" {
+    remove .conflict [stagger: 0.04, order: end]
+    at 0.15 { show merged.line8 [enter: expand] }
+}
+```
+Lines are parts (`merged.line4`, `merged.lines[3..5]`): highlight one with
+`transform merged.line4 [fill: role-warn-soft]`, change one with `transform
+merged.line1 [source: "def total(cart, coupon=None):", swap: roll]`. The block
+grows and shrinks with its lines, and what is constrained below it follows. A diff:
+`code d [diff: "-    return s\n+    return round(s, 2)", frame: false]`. Full scene:
+examples/motion/git-merge.ail.
+
+### Artwork with parts
+
+An SVG file whose elements have ids is a component: `template "docx" from
+"docx.svg"` gives every instance the parts `d.sheet`, `d.fold`, `d.bar3`, to
+anchor to (`constrain q.center_x = d.sheet.left`), animate (`pulse d.fold`,
+`transform d.bar3 [stroke: role-error]`) and flip (`swap a -> b [via: flip]`).
+Draw colours as CSS variables with a fallback: `var(--role-ink, #111)` follows
+the theme, `var(--b1, #ccc)` is an instance argument (`docx d [b1:
+role-primary]`). Example artwork: examples/motion/assets/*.svg, used by
+git-copies.ail.
+
+### A deck host's header and notes
+
+`keyframe "broke" [title: "Broke something? Go back", note: "..."]`: the title
+holds from that step on, notes belong to their step. The player hands both to the
+host with every step (`p.on('step', (k, m) => header.textContent = m.title)`),
+forward and backward.
 
 ### Cookbook
 
@@ -516,7 +587,7 @@ git-branches, sharing `git-deck.ail`).
    frame 2, X stays hidden in frames 3+ unless you `show X` again.
 3. **Transform persistence** — Transforms in frame N carry forward (visual AND
    geometry), merged per-property. To reset a property in a later frame, restate it
-   explicitly (e.g. `transform elem [opacity: 1.0]`, or `dx: 0`).
+   explicitly (e.g. `transform elem [opacity: 1.0]`, or `move elem home`).
 3b. **Labels and resize** — Position animation moves an element's label with it (both
    live in the same wrapper group). But a *labeled* element that itself resizes
    (width/height) does not re-center its own label. Resize unlabeled frames/boxes;

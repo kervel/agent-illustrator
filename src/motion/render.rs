@@ -90,6 +90,17 @@ pub fn settled_css(m: &Motion, frame_names: &[String], prefix_scope: &str) -> St
     let _ = prefix_scope;
     let mut css = String::from("/* motion: settled states (auto-generated) */\n");
     css.push_str("svg[data-ail-player] * { transition: none !important; }\n");
+    // Without a player or a frame class (a no-JS host, print, an <img>) the
+    // picture is frame 0 as it ends: where frame 0 moved things, how far it
+    // drew lines. `.frame-*` rules and the player's inline styles override.
+    if m.settled.len() > 1 {
+        for (c, k) in m.channels.iter().enumerate() {
+            if k.prop == Prop::Text {
+                continue;
+            }
+            css.push_str(&format!("{} {{ {}: {}; }}\n", k.sel, k.prop.css(), k.prop.format(&m.settled[1][c])));
+        }
+    }
     for (i, name) in frame_names.iter().enumerate() {
         let mut rules = String::new();
         for (c, k) in m.channels.iter().enumerate() {
@@ -313,11 +324,14 @@ pub fn manifest_json(m: &Motion, tokens: &MotionTokens, elements: &[String]) -> 
         if i > 0 {
             j.push(',');
         }
+        let opt = |s: &Option<String>| s.as_deref().map(js_str).unwrap_or_else(|| "null".into());
         j.push_str(&format!(
-            "{{\"name\":{},\"duration\":{},\"auto\":{}}}",
+            "{{\"name\":{},\"duration\":{},\"auto\":{},\"title\":{},\"note\":{}}}",
             js_str(&f.name),
             num(f.duration),
-            f.auto.map(num).unwrap_or_else(|| "null".into())
+            f.auto.map(num).unwrap_or_else(|| "null".into()),
+            opt(&f.title),
+            opt(&f.note)
         ));
     }
     j.push_str("],\"elements\":[");

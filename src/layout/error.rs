@@ -9,6 +9,10 @@ use super::solver::SolverError;
 /// Errors that can occur during layout computation
 #[derive(Debug, Error)]
 pub enum LayoutError {
+    /// A message about a place in the source; shown with its line and a caret.
+    #[error("{message}")]
+    Located { message: String, span: Span },
+
     /// Reference to an undefined element identifier
     #[error("undefined identifier '{name}'")]
     UndefinedIdentifier {

@@ -59,6 +59,8 @@ pub struct SvgBuilder {
     /// exactly as the same name would on an element. Seeded from the default
     /// palette and widened by any stylesheet the document supplies.
     palette_tokens: std::collections::HashSet<String>,
+    /// Token -> value, to tell a dark fill from a light one by its colour.
+    palette_values: std::collections::HashMap<String, String>,
     /// Frame names for data-frames attribute (Feature 011)
     data_frames: Option<String>,
     /// Per-element replacement text per frame, for keyframes that rewrite an
@@ -88,6 +90,7 @@ impl SvgBuilder {
             // Seeded with the default palette so a document that supplies no
             // stylesheet still resolves the documented colour names.
             palette_tokens: Stylesheet::default().colors.keys().cloned().collect(),
+            palette_values: Stylesheet::default().colors.clone().into_iter().collect(),
             data_frames: None,
             text_variants: std::collections::HashMap::new(),
             motion: None,
@@ -159,6 +162,8 @@ impl SvgBuilder {
     pub fn add_stylesheet(&mut self, stylesheet: &Stylesheet) {
         self.palette_tokens
             .extend(stylesheet.colors.keys().cloned());
+        self.palette_values
+            .extend(stylesheet.colors.iter().map(|(k, v)| (k.clone(), v.clone())));
         if stylesheet.colors.is_empty() {
             return;
         }
@@ -171,6 +176,10 @@ impl SvgBuilder {
             css.push_str(&format!("    --{}: {};\n", token, value));
         }
         css.push_str("  }\n");
+        // A label on a dark fill is marked `on-dark` by the renderer, from
+        // the fill's actual colour: base text and every swapped-in variant
+        // alike, which an adjacent-sibling rule cannot reach.
+        css.push_str(&format!("  .{}on-dark {{ fill: var(--text-light); }}\n", self.prefix()));
         // Apply font-family to text elements if defined
         if stylesheet.colors.contains_key("font-family") {
             let prefix = self.prefix();
@@ -182,7 +191,25 @@ impl SvgBuilder {
         self.styles.push(css);
     }
 
-    fn prefix(&self) -> String {
+    /// Whether a fill is dark enough to need light text on it.
+    pub(crate) fn is_dark(&self, fill: &str) -> bool {
+        // Follow `var(--role-primary)` -> `var(--accent-1)` -> `#2196f3`.
+        let mut value = fill.trim().to_string();
+        for _ in 0..8 {
+            let token = value
+                .strip_prefix("var(--")
+                .and_then(|t| t.strip_suffix(')'))
+                .map(|t| t.split(',').next().unwrap_or(t).trim().to_string())
+                .unwrap_or_else(|| value.clone());
+            match self.palette_values.get(&token) {
+                Some(v) if *v != value => value = v.trim().to_string(),
+                _ => break,
+            }
+        }
+        hex_luminance(&value).is_some_and(|l| l < 0.3)
+    }
+
+    pub(crate) fn prefix(&self) -> String {
         self.config.class_prefix.clone().unwrap_or_default()
     }
 
@@ -260,7 +287,7 @@ impl SvgBuilder {
             y,
             w,
             h,
-            styles
+            merge_style_attrs(styles)
         ));
     }
 
@@ -580,7 +607,7 @@ impl SvgBuilder {
             x,
             y,
             anchor_str,
-            styles,
+            merge_style_attrs(styles),
             body
         ));
     }
@@ -618,7 +645,7 @@ impl SvgBuilder {
             x,
             y,
             anchor_str,
-            styles,
+            merge_style_attrs(styles),
             escape_xml(text)
         ));
     }
@@ -711,6 +738,17 @@ impl SvgBuilder {
         self.indent += 1;
     }
 
+    /// Open a group with classes and extra raw attributes (e.g. ` fill="..."`).
+    pub fn start_group_attrs(&mut self, classes: &[String], attrs: &str) {
+        self.elements.push(format!(
+            "{}<g class=\"{}\"{}>",
+            self.indent_str(),
+            classes.join(" "),
+            attrs
+        ));
+        self.indent += 1;
+    }
+
     /// Close a group element
     pub fn end_group(&mut self) {
         self.indent = self.indent.saturating_sub(1);
@@ -763,6 +801,17 @@ impl SvgBuilder {
         classes: &[String],
         transform: &str,
     ) {
+        self.start_group_with_transform_attrs(id, classes, transform, "")
+    }
+
+    /// Like `start_group_with_transform`, with raw extra attributes.
+    pub fn start_group_with_transform_attrs(
+        &mut self,
+        id: Option<&str>,
+        classes: &[String],
+        transform: &str,
+        extra: &str,
+    ) {
         let id_attr = id.map(|i| format!(r#" id="{}""#, i)).unwrap_or_default();
         let class_attr = if classes.is_empty() {
             String::new()
@@ -776,11 +825,12 @@ impl SvgBuilder {
         };
 
         self.elements.push(format!(
-            "{}<g{}{}{}>",
+            "{}<g{}{}{}{}>",
             self.indent_str(),
             id_attr,
             class_attr,
-            transform_attr
+            transform_attr,
+            extra
         ));
         self.indent += 1;
     }
@@ -845,9 +895,21 @@ impl SvgBuilder {
             // would otherwise make the SVG malformed XML.
             svg.push_str("  <style><![CDATA[");
             svg.push_str(nl);
+            // `@import` (a stylesheet's web fonts) only counts before every
+            // other rule; a custom stylesheet is appended after the generated
+            // palette, so lift its imports to the top of the block.
+            let is_import = |l: &str| l.trim_start().starts_with("@import");
             for style in &self.styles {
+                for l in style.lines().filter(|l| is_import(l)) {
+                    svg.push_str("    ");
+                    svg.push_str(l.trim());
+                    svg.push_str(nl);
+                }
+            }
+            for style in &self.styles {
+                let rest: Vec<&str> = style.lines().filter(|l| !is_import(l)).collect();
                 svg.push_str("    ");
-                svg.push_str(style);
+                svg.push_str(&rest.join("\n"));
                 svg.push_str(nl);
             }
             svg.push_str("  ]]></style>");
@@ -1429,8 +1491,11 @@ fn render_element_inner(
 
     match &element.element_type {
         ElementType::Shape(ShapeType::Rectangle) => {
+            // Inline style, not the `rx` attribute: a stylesheet's
+            // `.ai-rect { rx: 4 }` would beat the attribute and square off a
+            // rounded tag the author asked for.
             let styles = match element.styles.corner_radius {
-                Some(r) if r > 0.0 => format!(r#"{} rx="{}""#, styles, r),
+                Some(r) if r > 0.0 => format!(r#"{} rx="{r}" style="rx:{r}px;ry:{r}px""#, styles),
                 _ => styles,
             };
             render_shape_with_rotation(element, builder, |b| {
@@ -1660,7 +1725,14 @@ fn render_element_inner(
                 )
             };
 
-            builder.start_group_with_transform(id, &embed_classes, &transform);
+            // A part of an SVG file template draws with the colours set here
+            // (its own element says `inherit`), so `transform d.bar3 [stroke:
+            // ...]` and motion can recolour it.
+            let paint = [("fill", &element.styles.fill), ("stroke", &element.styles.stroke)]
+                .iter()
+                .filter_map(|(k, v)| v.as_ref().map(|v| format!(r#" {}="{}""#, k, escape_xml(v))))
+                .collect::<String>();
+            builder.start_group_with_transform_attrs(id, &embed_classes, &transform, &paint);
 
             // Strip SVG wrapper and embed inner content
             let inner = strip_svg_wrapper(content);
@@ -1783,19 +1855,33 @@ fn render_element_inner(
 
     // Render label if present
     if let Some(label) = &element.label {
-        let font_styles = {
-            let size = element
-                .styles
-                .font_size
-                .map(|fs| format!(r#" font-size="{}""#, fs))
-                .unwrap_or_default();
-            let colour = element
-                .styles
-                .label_fill
-                .as_ref()
-                .map(|c| format!(r#" fill="{}""#, c))
-                .unwrap_or_default();
-            format!("{}{}{}", size, colour, font_attrs(&element.styles))
+        let size = element
+            .styles
+            .font_size
+            .map(|fs| format!(r#" font-size="{}""#, fs))
+            .unwrap_or_default();
+        let colour = element
+            .styles
+            .label_fill
+            .as_ref()
+            .map(|c| format!(r#" fill="{}""#, c))
+            .unwrap_or_default();
+        let font_styles = format!("{}{}{}", size, colour, font_attrs(&element.styles));
+        // Without a colour of its own, a label drawn on a dark fill is light.
+        let inside = label
+            .placement
+            .as_ref()
+            .is_none_or(|p| p.position == crate::layout::types::ShapeLabelPosition::Inside);
+        let washed_out = element.styles.fill_opacity.is_some_and(|o| o < 0.5);
+        let on_dark = inside
+            && element.styles.label_fill.is_none()
+            && !washed_out
+            && element.styles.fill.as_deref().is_some_and(|f| builder.is_dark(f));
+        let dark_class = if on_dark { format!("{}on-dark", builder.prefix()) } else { String::new() };
+        let with = |a: &str, b: &str| match (a.is_empty(), b.is_empty()) {
+            (true, _) => b.to_string(),
+            (_, true) => a.to_string(),
+            _ => format!("{} {}", a, b),
         };
         let variants = element
             .id
@@ -1815,31 +1901,42 @@ fn render_element_inner(
             label.position.y,
             &label.anchor,
             &font_styles,
-            &base_classes,
+            &with(&base_classes, &dark_class),
         );
-        for (n, text) in variants.iter().enumerate() {
-            let rich = crate::layout::text::parse_markup(text)
-                .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));
-            builder.add_rich_text_with_classes(
-                &rich,
-                label.font_size,
-                label.position.x,
-                label.position.y,
-                &label.anchor,
-                &format!("{} opacity=\"0\"", font_styles),
-                &format!("aitxt-{}{}-v{}", builder.scope(), own_id, n),
-            );
-        }
-        if builder.motion.as_ref().is_some_and(|m| m.tickers.contains(&own_id)) {
-            builder.add_rich_text_with_classes(
-                &label.rich,
-                label.font_size,
-                label.position.x,
-                label.position.y,
-                &label.anchor,
-                &format!(r#"{} style="opacity:0""#, font_styles),
-                &format!("aitick-{}{}", builder.scope(), own_id),
-            );
+        let ticker = builder.motion.as_ref().is_some_and(|m| m.tickers.contains(&own_id));
+        if !variants.is_empty() || ticker {
+            // The swapped-in texts share one wrapper that carries their
+            // colour, so none of them follows a sibling with a `fill`
+            // attribute: a host rule like `[fill=dark] + .ai-label` is meant
+            // for a label right after its shape, and would otherwise turn a
+            // variant white on a white card.
+            let inner = format!("{}{}", size, font_attrs(&element.styles));
+            builder.start_group_attrs(&[format!("{}label-variants", builder.prefix())], &colour);
+            for (n, text) in variants.iter().enumerate() {
+                let rich = crate::layout::text::parse_markup(text)
+                    .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));
+                builder.add_rich_text_with_classes(
+                    &rich,
+                    label.font_size,
+                    label.position.x,
+                    label.position.y,
+                    &label.anchor,
+                    &format!("{} opacity=\"0\"", inner),
+                    &with(&format!("aitxt-{}{}-v{}", builder.scope(), own_id, n), &dark_class),
+                );
+            }
+            if ticker {
+                builder.add_rich_text_with_classes(
+                    &label.rich,
+                    label.font_size,
+                    label.position.x,
+                    label.position.y,
+                    &label.anchor,
+                    &format!(r#"{} style="opacity:0""#, inner),
+                    &with(&format!("aitick-{}{}", builder.scope(), own_id), &dark_class),
+                );
+            }
+            builder.end_group();
         }
     }
 }
@@ -2365,15 +2462,44 @@ pub fn replace_text_by_class(svg: &str, class: &str, text: &str) -> String {
 }
 
 /// `font-weight` / `font-family` attributes for a label or text element.
+/// The face and weight an element asks for, as an inline style: a
+/// stylesheet's `.ai-label { font-family: ... }` would beat a presentation
+/// attribute, and `font_family: mono` would silently come out in the brand
+/// face (and be measured as mono by layout).
 fn font_attrs(styles: &ResolvedStyles) -> String {
-    let mut s = String::new();
+    let mut decl = Vec::new();
     if let Some(w) = &styles.font_weight {
-        s.push_str(&format!(r#" font-weight="{}""#, escape_xml(w)));
+        decl.push(format!("font-weight:{}", w));
     }
     if let Some(f) = &styles.font_family {
-        s.push_str(&format!(r#" font-family="{}""#, escape_xml(f)));
+        decl.push(format!("font-family:{}", f));
     }
-    s
+    if decl.is_empty() {
+        String::new()
+    } else {
+        format!(r#" style="{}""#, escape_xml(&decl.join(";")))
+    }
+}
+
+/// Fold every ` style="..."` in an attribute string into one (an element
+/// may get a font style and an initial `opacity:0`; two style attributes is
+/// not XML).
+fn merge_style_attrs(attrs: &str) -> String {
+    let mut rest = attrs;
+    let mut out = String::new();
+    let mut decls: Vec<String> = Vec::new();
+    while let Some(i) = rest.find(" style=\"") {
+        out.push_str(&rest[..i]);
+        let after = &rest[i + 8..];
+        let Some(end) = after.find('"') else { break };
+        decls.push(after[..end].trim_end_matches(';').to_string());
+        rest = &after[end + 1..];
+    }
+    out.push_str(rest);
+    if !decls.is_empty() {
+        out.push_str(&format!(r#" style="{}""#, decls.join(";")));
+    }
+    out
 }
 
 fn r2(x: f64) -> f64 {
@@ -2684,4 +2810,25 @@ mod tests {
         assert!(svg.contains(r#"id="a""#));
         assert!(svg.contains(r#"id="b""#));
     }
+}
+
+/// Relative luminance (0 black .. 1 white) of a `#rgb` / `#rrggbb` colour.
+fn hex_luminance(hex: &str) -> Option<f64> {
+    let h = hex.strip_prefix('#')?;
+    let (r, g, b) = match h.len() {
+        3 => {
+            let d = |i: usize| u8::from_str_radix(&h[i..i + 1].repeat(2), 16).ok();
+            (d(0)?, d(1)?, d(2)?)
+        }
+        6 => {
+            let d = |i: usize| u8::from_str_radix(&h[i..i + 2], 16).ok();
+            (d(0)?, d(2)?, d(4)?)
+        }
+        _ => return None,
+    };
+    let lin = |c: u8| {
+        let c = c as f64 / 255.0;
+        if c <= 0.03928 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+    };
+    Some(0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b))
 }

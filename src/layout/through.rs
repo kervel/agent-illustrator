@@ -210,6 +210,19 @@ fn station_extent(result: &LayoutResult, name: &str, parts_of: &HashMap<&str, Ve
     let el = result.elements.get(name)?;
     let mut half = el.bounds.width / 2.0;
     let mut height = el.bounds.height;
+    // A station's own `label:` (a circle with its name below it) is its
+    // name just as much as a separate caption part is.
+    if let Some(l) = &el.label {
+        let m = crate::layout::text::measure_runs(&l.rich.lines, l.font_size);
+        half = half.max(m.width / 2.0);
+        let outside = l
+            .placement
+            .as_ref()
+            .is_some_and(|p| p.position != crate::layout::ShapeLabelPosition::Inside);
+        if outside {
+            height += m.height;
+        }
+    }
     if let Some(parts) = owner_of.get(name).and_then(|o| parts_of.get(o.as_str())) {
         for p in parts {
             if *p == name {
@@ -242,6 +255,11 @@ pub fn station_pairs(
     let mut parts_of: HashMap<&str, Vec<&str>> = HashMap::new();
     for (part, owner) in owner_of {
         parts_of.entry(owner.as_str()).or_default().push(part.as_str());
+    }
+    // Sorted: the sizes are summed, and HashMap order would change the last
+    // bits of every position from run to run.
+    for v in parts_of.values_mut() {
+        v.sort_unstable();
     }
     let mut ids: Vec<&String> = result.elements.keys().collect();
     ids.sort();

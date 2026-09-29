@@ -534,33 +534,40 @@ has to remember to move the word underneath it: three scenario files in a real
 deck lost a named constraint and the `disable` that went with it.
 
 
-EXAMPLE: First-class motion (the git deck acceptance scenes)
--------------------------------------------------------------
-Full files: examples/motion/git-copies.ail, git-snapshots.ail, git-branches.ail
-(shared parts in git-deck.ail). The core of scene 2:
+EXAMPLE: First-class motion (commits on a timeline)
+---------------------------------------------------
+Self-contained: the built-in library brings the macros AND templates they fit
+(`git_station`, `git_file`; its full text is at the end of --skill-animation).
+Renders as is with --animate; lint clean.
 
-import "git-deck.ail"                       // slide template + ail:motion/git macros
+import "ail:motion/git"
 
-slide s [num: "2", title: "Git takes snapshots"]
-path track [through: [st1.dot, st2.dot, st3.dot], drawn: 0, stroke: git-main, stroke_width: 14, fill: none]
-row stations [gap: 40, align: dot] {
-    station st1 [name: "Login page", meta: "anna · Mon 09:12"]
-    station st2 [name: "Dark mode", meta: "anna · Mon 16:40"]
-    station st3 [name: "Fix price rounding", meta: "ben · Tue 14:03"]
+group folder {
+    rect folder_bg [fill: background-1, stroke: foreground-1, stroke_width: 2, corner_radius: 10]
+    col files [gap: 0] {
+        git_file f_login [name: "login.py", value: "84 lines"]
+        git_file f_cart [name: "cart.py", value: "57 lines"]
+    }
 }
-circle ring [size: 68, fill: none, stroke: git-ink, stroke_width: 4, appears: go_back]
-constrain ring.center = st3.dot.center
+constrain folder_bg contains files [padding: 8]
 
-keyframe "first_commit" { commit(folder, st1, track) }   // flash, fly a copy, pop the station
-keyframe "two_more" {
-    change(f_style, "246 lines")                         // the value rolls, the row glows
-    then { commit(folder, st2, track) }                  // ... and the line grows to st2
+path track [through: [c1.dot, c2.dot], drawn: 0, stroke: accent-1, stroke_width: 12, fill: none]
+row history [gap: 60, align: dot] {
+    git_station c1 [name: "Login page", meta: "anna · Mon"]
+    git_station c2 [name: "Fix cart", meta: "ben · Tue"]
 }
-keyframe "go_back" {
-    show ring [enter: fade]
-    then { move ring to st2.dot [duration: slow]; transform st3 [opacity: 0.28, delay: 0.2] }
-    then { flash folder; change(f_cart, "57 lines") }
+constrain history.left = folder.right + 80
+constrain c1.dot.center_y = folder.center_y
+
+keyframe "start" { }
+keyframe "first" { commit(folder, c1, track) }     // flash, fly a copy, pop the station, grow the line
+keyframe "second" {
+    change(f_cart, "58 lines")                      // the value rolls, the row glows
+    then { commit(folder, c2, track) }
 }
+
+Bigger scenes (slides, branches, a merge request, going back in history) are in
+the repository: examples/motion/git-copies.ail, git-snapshots.ail, git-branches.ail.
 
 No coordinates in any motion statement: stations, lines and flights are found by
 name, so relabelling or moving things never touches the choreography. Check it

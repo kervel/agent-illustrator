@@ -135,6 +135,13 @@ pub struct AnchorSet {
 }
 
 impl AnchorSet {
+    /// Round every anchor point (see `LayoutResult::snap_geometry`).
+    pub fn snap(&mut self) {
+        for a in self.anchors.values_mut() {
+            a.position = Point::new(snap(a.position.x), snap(a.position.y));
+        }
+    }
+
     /// Create an empty anchor set
     pub fn new() -> Self {
         Self {
@@ -1235,6 +1242,41 @@ impl LayoutResult {
 
     /// Rebuild the elements index from root_elements tree.
     /// Call after modifying root_elements directly (e.g., keyframe transforms).
+    /// Round every solved coordinate to 1e-4 px.
+    ///
+    /// The constraint solver's pivot order follows hash order, so the same
+    /// input solved twice can differ in the last bits (827.094 vs
+    /// 827.0939999999973). Rounded before anything is derived from them
+    /// (captions, routed lines, connections), the output is the same file
+    /// on every run: golden tests can compare it, and re-rendered examples
+    /// only change when something really changed.
+    pub fn snap_geometry(&mut self) {
+        fn walk(e: &mut ElementLayout) {
+            let b = e.bounds;
+            e.bounds = BoundingBox::new(snap(b.x), snap(b.y), snap(b.width), snap(b.height));
+            if let Some(l) = &mut e.label {
+                l.position = Point::new(snap(l.position.x), snap(l.position.y));
+            }
+            e.anchors.snap();
+            for c in &mut e.children {
+                walk(c);
+            }
+        }
+        for e in &mut self.root_elements {
+            walk(e);
+        }
+        for c in &mut self.connections {
+            for p in &mut c.path {
+                *p = Point::new(snap(p.x), snap(p.y));
+            }
+            if let Some(l) = &mut c.label {
+                l.position = Point::new(snap(l.position.x), snap(l.position.y));
+            }
+        }
+        self.rebuild_index();
+        self.compute_bounds();
+    }
+
     pub fn rebuild_index(&mut self) {
         self.elements.clear();
         let roots = self.root_elements.clone();
@@ -2045,4 +2087,10 @@ mod tests {
         assert_eq!(combined.width, 30.0);
         assert_eq!(combined.height, 90.0);
     }
+}
+
+/// A coordinate rounded to 1e-4 px (and never `-0`).
+pub fn snap(v: f64) -> f64 {
+    let r = (v * 1e4).round() / 1e4;
+    if r == 0.0 { 0.0 } else { r }
 }

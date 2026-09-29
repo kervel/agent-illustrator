@@ -43,8 +43,44 @@ fn is_lightness_modifier(ident: &str) -> Option<Lightness> {
 }
 
 /// Parse DSL source code into an AST
+/// `rect line` / `path row [...]`: a reserved word where a name goes. The
+/// grammar reads it as a second, unnamed declaration, so the name silently
+/// vanishes and every later `line` is a parse error far away from the cause.
+fn reserved_word_as_name(input: &str) -> Option<crate::ParseError> {
+    use crate::parser::lexer::Token;
+    let toks: Vec<(Token, std::ops::Range<usize>)> = crate::parser::lexer::lex(input).collect();
+    let declares = |t: &Token| {
+        matches!(
+            t,
+            Token::Rect | Token::Circle | Token::Ellipse | Token::Polygon | Token::Line | Token::Path
+                | Token::Callout | Token::Group | Token::Row | Token::Col | Token::Grid | Token::Stack
+        )
+    };
+    for w in toks.windows(2) {
+        let ((a, sa), (b, sb)) = (&w[0], &w[1]);
+        if !declares(a) || input[sa.end..sb.start].contains('\n') {
+            continue;
+        }
+        if let Some(word) = crate::error::keyword_spelling(b) {
+            return Some(crate::ParseError::Syntax {
+                span: sb.clone(),
+                message: format!(
+                    "`{}` is a reserved word and cannot name an element; call it something else \
+                     (e.g. `{}_1`, `track`)",
+                    word, word
+                ),
+                expected: vec![],
+            });
+        }
+    }
+    None
+}
+
 pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     let len = input.len();
+    if let Some(e) = reserved_word_as_name(input) {
+        return Err(vec![e.locate(input)]);
+    }
 
     // Create a logos lexer and convert to token stream
     let token_iter = crate::parser::lexer::lex(input).map(|(tok, span)| (tok, span.into()));
@@ -319,7 +355,13 @@ where
     // without this the palette can ship colours the language cannot name.
     // Validation rejects a token no stylesheet defines, so this widens what
     // can be *spelled*, not what is accepted.
-    let palette_token = identifier
+    // `role` is also a keyword (`[role: label]`); as a token head it names
+    // a colour role (`role-primary`).
+    let token_head = choice((
+        just(Token::Role).map_with(|_, e| Spanned::new(Identifier::new("role"), span_range(&e.span()))),
+        identifier,
+    ));
+    let palette_token = token_head
         .then(
             just(Token::Minus)
                 .ignore_then(choice((
@@ -1560,11 +1602,40 @@ where
                         .ignore_then(choice((
                             just(Token::Star).to(None),
                             identifier.map(Some),
+                            // `c.line[4]`: `line` is a keyword elsewhere.
+                            just(Token::Line).map_with(|_, e| {
+                                Some(Spanned::new(Identifier::new("line"), span_range(&e.span())))
+                            }),
                         )))
                         .repeated()
                         .collect::<Vec<_>>(),
                 )
-                .try_map(|(head, rest), span| {
+                // `c.line[4]`, `c.lines[8..12]`: lines of a code block.
+                .then(
+                    number
+                        .then(just(Token::Dot).then(just(Token::Dot)).ignore_then(number).or_not())
+                        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
+                        .or_not(),
+                )
+                .try_map(|((head, rest), index), span| {
+                    if let Some((a, b)) = index {
+                        let parts: Vec<String> = std::iter::once(head.node.0.clone())
+                            .chain(rest.iter().filter_map(|p| p.as_ref().map(|i| i.node.0.clone())))
+                            .collect();
+                        let last = parts.last().cloned().unwrap_or_default();
+                        if parts.len() < 2 || (last != "line" && last != "lines") {
+                            return Err(Rich::custom(
+                                span,
+                                "an index goes on a code block's lines: `c.line[4]` or `c.lines[8..12]`",
+                            ));
+                        }
+                        let code = parts[..parts.len() - 1].join(".");
+                        let a = a.node as usize;
+                        return Ok(match b {
+                            Some(b) => Selector::Lines(code, a, b.node as usize),
+                            None => Selector::Name(format!("{}.line{}", code, a)),
+                        });
+                    }
                     let mut name = head.node.0;
                     let mut children = false;
                     for (i, part) in rest.iter().enumerate() {
@@ -1685,6 +1756,31 @@ where
                 .ignore_then(selector_list.clone())
                 .then(opts_or_none.clone())
                 .map(move |(t, o)| stmt(MotionVerb::Hide(t), o));
+            // `remove c.lines[8..12]`: hide and close up the room they took.
+            let remove = kw("remove")
+                .ignore_then(selector_list.clone())
+                .then(opts_or_none.clone())
+                .map_with(move |(t, mut o), e| {
+                    if !o.iter().any(|x: &Spanned<MotionOpt>| x.node.key.node == "exit") {
+                        let sp = span_range(&e.span());
+                        o.push(Spanned::new(
+                            MotionOpt {
+                                key: Spanned::new("exit".to_string(), sp.clone()),
+                                value: Spanned::new(MotionValue::Name("collapse".into()), sp.clone()),
+                            },
+                            sp,
+                        ));
+                    }
+                    stmt(MotionVerb::Hide(t), o)
+                });
+            // `insert c after line 7 [source: "...", as: conflict]`
+            let insert = kw("insert")
+                .ignore_then(dotted_name.clone().labelled("the code block to insert into"))
+                .then_ignore(kw("after").labelled("`after line <n>`"))
+                .then_ignore(just(Token::Line).labelled("`line <n>`"))
+                .then(number.labelled("a line number"))
+                .then(opts_or_none.clone())
+                .map(move |((code, after), o)| stmt(MotionVerb::Insert { code, after: after.node as usize }, o));
             let transform = just(Token::Transform)
                 .ignore_then(selector.clone())
                 .then(modifier_block.clone())
@@ -1828,6 +1924,8 @@ where
                 at_beat,
                 show,
                 hide,
+                remove,
+                insert,
                 transform,
                 constrain,
                 disable,
@@ -1851,15 +1949,35 @@ where
         .boxed();
 
         // `[no_resolve]`, `[auto]`, `[auto, after: 0.6]`
+        // `[title: "...", note: "..."]`: host metadata (a deck's header, notes).
+        #[derive(Clone)]
+        enum FlagVal {
+            None,
+            Num(f64),
+            Str(String),
+        }
         let keyframe_flag = identifier
-            .then(just(Token::Colon).ignore_then(number).or_not())
+            .then(
+                just(Token::Colon)
+                    .ignore_then(choice((
+                        number.map(|n| FlagVal::Num(n.node)),
+                        string_literal.map(|s| FlagVal::Str(s.node)),
+                    )))
+                    .or_not()
+                    .map(|v| v.unwrap_or(FlagVal::None)),
+            )
             .try_map(|(id, val), span| match (id.node.0.as_str(), val) {
-                ("no_resolve", None) => Ok(("no_resolve", 0.0)),
-                ("auto", None) => Ok(("auto", 0.0)),
-                ("after", Some(v)) => Ok(("after", v.node)),
+                ("no_resolve", FlagVal::None) => Ok(("no_resolve", 0.0, None)),
+                ("auto", FlagVal::None) => Ok(("auto", 0.0, None)),
+                ("after", FlagVal::Num(v)) => Ok(("after", v, None)),
+                ("title", FlagVal::Str(s)) => Ok(("title", 0.0, Some(s))),
+                ("note", FlagVal::Str(s)) => Ok(("note", 0.0, Some(s))),
                 (other, _) => Err(Rich::custom(
                     span,
-                    format!("unknown keyframe flag '{}': expected no_resolve, auto, after: <seconds>", other),
+                    format!(
+                        "unknown keyframe flag '{}': expected no_resolve, auto, after: <seconds>, title: \"...\", note: \"...\"",
+                        other
+                    ),
                 )),
             });
         let keyframe_flags = keyframe_flag
@@ -1874,12 +1992,14 @@ where
             .then(motion_block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
             .map(|((name, flags), motion)| {
                 let flags = flags.unwrap_or_default();
-                let no_resolve = flags.iter().any(|(k, _)| *k == "no_resolve");
-                let auto_on = flags.iter().any(|(k, _)| *k == "auto");
-                let after = flags.iter().find(|(k, _)| *k == "after").map(|(_, v)| *v);
+                let no_resolve = flags.iter().any(|(k, _, _)| *k == "no_resolve");
+                let auto_on = flags.iter().any(|(k, _, _)| *k == "auto");
+                let after = flags.iter().find(|(k, _, _)| *k == "after").map(|(_, v, _)| *v);
                 let auto = if auto_on || after.is_some() { Some(after.unwrap_or(0.0)) } else { None };
+                let text = |key: &str| flags.iter().find(|(k, _, _)| *k == key).and_then(|(_, _, s)| s.clone());
+                let (title, note) = (text("title"), text("note"));
                 let operations = crate::motion::naive_operations(&motion);
-                KeyframeDecl { name, operations, no_resolve, motion, auto }
+                KeyframeDecl { name, operations, no_resolve, motion, auto, title, note }
             });
 
         // `motion commit(folder: element, station) { ... }`
@@ -1989,7 +2109,7 @@ where
         .repeated()
         .collect()
         .then_ignore(end())
-        .map(|statements| Document { statements })
+        .map(|statements| Document { statements, aliases: Vec::new() })
 }
 
 #[cfg(test)]

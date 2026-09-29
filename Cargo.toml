@@ -14,6 +14,8 @@ clap = { version = "4", features = ["derive"] }
 kasuari = "0.4"
 base64 = "0.22.1"
 usvg = "0.47.0"
+syntect = { version = "5.3.0", default-features = false, features = ["default-syntaxes", "regex-fancy", "parsing"] }
+roxmltree = "0.21"
 
 [dev-dependencies]
 insta = "1.39"

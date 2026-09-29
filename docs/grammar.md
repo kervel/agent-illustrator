@@ -124,6 +124,9 @@ Common modifiers:
                             without also changing the box. A `constrain` on a
                             captioned element is overridden — --lint says so.
     label_fill: <color>     Colour of the label text (fill colours the shape)
+    font_size: <number>     Size of the label / text in px (default 14; the
+                            SVG root says font-size="14", so a stylesheet
+                            cannot silently change what layout measured)
     font_weight: <n|bold>   Weight of the label / text (layout measures it)
     font_family: mono|sans|serif|"Name"   Face of the label / text
     max_width: <number>     Label keeps its natural width up to this, then wraps
@@ -139,10 +142,22 @@ COLORS
 ------
 Hex:      #ff0000, #f00
 Named:    red, blue, green, steelblue
-Symbolic: foreground, background, accent, text
-          foreground-1, accent-dark, text-light
+Symbolic: always with a number or shade (there is no bare `foreground`):
+          foreground-1..3, background-1..3, accent-1..3, secondary-1..3,
+          text-1..3, and -light / -dark of each (accent-dark, text-light)
           status-success, status-warning, status-error
           — and any other token the active stylesheet defines
+Roles:    what a colour is FOR. Reusable scenes and libraries use only these, so
+          the same file renders in any theme; a stylesheet maps them
+          (`--role-primary: var(--secondary-1);`):
+          role-primary, role-secondary (the two main line/accent colours),
+          role-ink, role-muted (text), role-rule (dividers, idle lines),
+          role-surface, role-surface-2 (cards, panels), role-backdrop (stage),
+          role-ok, role-error, role-warn (+ -soft tints: role-ok-soft ...),
+          role-series-1..4 (+ -soft): people or categories told apart by colour
+Code:     code-keyword, code-string, code-comment, code-number, code-function,
+          code-key, code-plain, code-ln, code-bg, code-frame, code-title(-bg),
+          code-add, code-del (+ -bg, -strong), code-mark-bg: defaults are roles
 
 CONSTRAINTS
 -----------
@@ -165,7 +180,8 @@ composes a shared part it does not own.
 Contains: container grows to surround listed elements with padding.
           Container width/height become flexible; position may shift.
 
-Properties: left, right, top, bottom, center_x, center_y, width, height
+Properties: left, right, top, bottom, center_x, center_y, width, height,
+            center (both axes: `constrain ring.center = st3.dot.center`)
 
 TEMPLATES
 ---------
@@ -188,6 +204,19 @@ Raster images require explicit dimensions:
 
 All file-based templates support modifiers like width, height, rotation:
     icon logo [width: 100, height: 100, rotation: 45]
+
+SVG files with ids are components. Every drawable element with an `id` is a part
+of each instance, laid out where the artwork has it: `d.sheet`, `d.fold`,
+`d.bar3` work in constraints, anchors, `overlaps:` and every motion verb (a
+`transform d.bar3 [stroke: role-error]` recolours it). Parts nest as the file
+nests them (moving `d.bars` moves `d.bar3`). Colours in the file may use CSS
+variables: theme tokens follow the deck (`fill="var(--role-surface, #fff)"`),
+any other variable is an instance argument:
+    template "docx" from "assets/docx.svg"   <!-- stroke="var(--b1, #ccc)" inside -->
+    docx d [b1: role-primary]                 d.bar1 drawn in the deck's primary
+    circle q [overlaps: d]                    constrain q.center_x = d.sheet.left
+Ids are prefixed per instance (gradients and clip paths keep working); `width:`
+scales the whole instance. XML comments in the file must not contain `--`.
 
 Wrap file templates in inline templates to add anchors:
     template "avatar_img" from "avatar.png"
@@ -286,6 +315,24 @@ Motion statements (full guide: --skill-animation):
     import "file.ail" | "ail:motion/git"   templates + motion macros
 Selectors: a, a.b.c (nested parts), group.*, .class, all except a, b
 
+CODE BLOCKS
+    code c [lang: python, source: "def f():\n    return 1"]   highlighted, numbered lines
+    code c [file: "cart.py", lines: "3-8"]                   from a file (lang from its extension)
+    code d [diff: "-    return s\n+    return round(s, 2)"]  -/+ rows, tinted, changed part bold
+    options: title: "cart.py · merged" (markup ok), line_numbers: false, font_size: 17,
+             marks: "1:role-series-2-soft, 8:role-warn-soft", frame: false (no panel),
+             min_chars: 40, appears: later
+    Languages: python, js/ts, css, sh, json, yaml, rust, go, java, c, html, sql, ... (syntect)
+    Lines are parts: c.line4 (also c.line[4]); c.lines[8..12] selects a range.
+    transform c.line1 [source: "def total(cart, coupon=None):", swap: roll]  re-highlights
+    remove c.lines[8..12]            hide and close the room they took (hide [exit: collapse])
+    show c.line8 [enter: expand]     open it again
+    insert c after line 7 [name: conflict, tint: role-warn-soft, source: "<<<<<<< anna\n..."]
+                                     new unnumbered lines c.conflict1..N (class conflict),
+                                     collapsed until this statement opens them
+    Width is measured in monospace: --ail-mono-advance: 0.616 in the stylesheet
+    for a face wider than the usual 0.6em (Overpass Mono).
+
 Declarations that serve motion:
     [appears: keyframe | later]   hidden until then; enters there
     path p [through: [a.dot, b.dot], routing: metro, drawn: 0|60%|elem, extend: 40]
@@ -294,6 +341,15 @@ Declarations that serve motion:
     rect stage [..., canvas: true]   the picture's bounds; leaving it is reported
     label wrapping: max_width: 240    rows of components: [align: member, pack: tight]
     many at once: doc d* [fname: ["a", "b", "c"]]  ->  d0, d1, d2
+                  (templates and plain shapes alike; list-valued arguments zip
+                  by index: rect l* [width: [88, 70], fill: [red, blue]])
+    keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
+                  the previous one; [no_resolve] keeps the previous frame's
+                  layout (no constraint re-solve) for a pure style change;
+                  [title: "...", note: "..."] host metadata: a deck's header
+                  from this step on, and its speaker notes (player: p.meta(k))
+    collapsed: true   no room and hidden until `show x [enter: expand]`
+    overlaps: card    sits on card on purpose (a corner badge): no overlap finding
 
 Names: every element, named connection and keyframe name must be unique. Part b
 of instance a is `a.b` in source and `a_b` internally, so naming something a_b
@@ -312,12 +368,21 @@ CLI flags:
                        modifier seems to do nothing: one newer than the binary
                        reads as unknown and is silently dropped.
     --frame N          Render single frame as static SVG (by index or name)
+    --frames-to-dir D  Every frame as D/NN-name.svg (--list-frames: just names)
+    --list-steps       One line per click step: its frame, then its [auto] frames
     --frame N --at T   A still T into frame N (0.35s, 350ms, 50%)
     --frames-strip N   Contact sheet of frame N at 0/25/50/75/100%
     --timeline         The compiled choreography as a table (--timeline-json: tracks)
     --animate          Embed the motion player (autoplay; click/arrows step)
     --player-js        Print the player for hosts that inline the SVG
     --lint-strict      Like --lint, but warnings fail too (errors always do)
+    --stylesheet-css F Repeat to layer stylesheets in order (theme, then deck): later wins
+    --crop-to-content [PAD]  The picture is what the frames show (union of all
+                       frames, + PAD, default 24), not the stage: for embedding
+    --serve [PORT]     Live preview (default 8420): the real player, arrow keys
+                       step, a scrubber, reload on save
+    --film STEP        HTML page: that click step sampled every 50ms (--film-every)
+                       by the browser player, for spotting flicker and jumps
 
 SVG output:
     data-frames="frame1,frame2,..."    Frame names on SVG root
@@ -328,7 +393,10 @@ SVG output:
 
 RESERVED IDENTIFIERS
 --------------------
-Cannot use as element names: left, right, top, bottom, x, y, width, height
+Cannot use as element names: left, right, top, bottom, x, y, width, height,
+and the keywords: rect, circle, ellipse, polygon, line, path, text, icon,
+callout, row, col, grid, stack, group, label, template, anchor, ... (a name
+that is a keyword is a parse error that says so).
 
 EXAMPLES
 --------
@@ -361,11 +429,25 @@ Connections:
 
 LINT
 ----
-`--lint` reports likely defects and exits 1 when it finds any, so a build can
-gate on it. Categories: overlap, containment, label, connection, alignment,
+`--lint` reports likely defects and exits 1 when it finds an error (text cut
+off, content leaving the canvas, an unknown modifier, a label overflowing its
+box, a coordinate in motion); warnings alone exit 0. `--lint-strict` exits 1 on
+any finding, so a build can gate on it. `--lint-categories` lists the
+categories: overlap, containment, label, connection, alignment,
 redundant-constant, reducible-bend, missing-anchor, contrast, steep-direct,
 crowded-layout, over-constrained, label-overflow, unknown-modifier,
-overridden-constraint.
+overridden-constraint, canvas-overflow, motion, motion-coordinate.
+
+What the newer checks say and what to do:
+    "... is cut off"            text runs past the image edge: wrap (max_width),
+                                shorten, or move it inward
+    "labels ... touch"          two texts on one line < 6px apart: add a gap or wrap
+    "line L runs under X"       a through: line passes behind a box it does not
+                                stop at: move the box or route the line
+    "stations ... names need"   neighbouring stations too close for their names:
+                                leave their x free (the line stretches), raise the
+                                row gap, or shorten a name
+    "two elements are both named"  (error) rename one; part b of instance a is a_b
 
 Two `overlap` findings are worth knowing by name. Text that stops within 2px
 of a visible edge is reported as "grazes" — at that distance the glyphs read as

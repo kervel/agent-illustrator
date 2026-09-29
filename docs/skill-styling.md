@@ -103,9 +103,9 @@ text {
 }
 ```
 
-To apply the monospace class to specific elements, use `css_class`:
+To apply the monospace class to specific elements, use `class:`:
 ```
-text "find . -name '*.py'" cmd [font_size: 11, fill: accent-dark, css_class: code-text]
+text "find . -name '*.py'" cmd [font_size: 11, fill: accent-dark, class: code-text]
 ```
 
 ### Transitions (for animations)

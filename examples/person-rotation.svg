@@ -1,41 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-109.80093711332488 -101.92579408863537 615.3283172990622 458.7673306179182" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-109.8009 -101.92580000000001 615.3283 458.7673" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --accent-light: #e3f2fd;
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
     --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
     --background-light: #ffffff;
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --foreground-light: #e0e0e0;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
     --kpv-amber: #FFB31B;
     --kpv-burgundy: #5a322b;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --secondary-light: #fff3e0;
-    --status-error: #f44336;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --text-1: #333333;
-    --text-2: #666666;
-    --text-3: #999999;
-    --text-dark: #1a1a1a;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #f6dedb;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
     --text-light: #ffffff;
   }
-
-    /* Kapernikov Brand Stylesheet for Agent Illustrator
+  .ai-on-dark { fill: var(--text-light); }
+    
+/* /home/kervel/projects/agent-illustrator/examples/../stylesheets/kapernikov.css */
+/* Kapernikov Brand Stylesheet for Agent Illustrator
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */
 
@@ -83,6 +126,31 @@
   --status-success: #1E9F49;     /* Emerald */
   --status-warning: #DD8028;     /* Tangerine */
   --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
 }
 
 /* Typography */
@@ -113,7 +181,6 @@
 [fill="var(--foreground-dark)"] + .ai-label {
   fill: var(--text-light);
 }
-
   ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
@@ -153,27 +220,27 @@
   <g id="p270" class="ai-container" transform="rotate(270 32.5 224)">
     <g class="ai-container">
       <g id="p270_head_stack" class="ai-container">
-        <circle id="p270_head" class="ai-shape ai-circle" cx="31.500000000000004" cy="221.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <circle id="p270_head" class="ai-shape ai-circle" cx="31.5" cy="221.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
         <path id="p270_hair" class="ai-shape ai-path" d="M22.50 221.50 A9.00 9.00 0 0 1 40.50 221.50 L40.50 221.50 L35.50 219.50 L31.50 221.50 L28.50 220.50 L22.50 221.50 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
       <path id="p270_torso" class="ai-shape ai-path" d="M18.50 243.50 A13.00 13.00 0 0 1 44.50 243.50 L44.50 251.50 L18.50 251.50 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
       <path id="p270_collar" class="ai-shape ai-path" d="M28.50 230.83 A14.00 14.00 0 0 1 34.50 230.83 L31.50 236.83 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
-  <g id="p45" class="ai-container" transform="rotate(45 209.34493141924173 224)">
+  <g id="p45" class="ai-container" transform="rotate(45 209.34495 224.00005000000002)">
     <g class="ai-container">
       <g id="p45_head_stack" class="ai-container">
-        <circle id="p45_head" class="ai-shape ai-circle" cx="208.34493141924173" cy="221.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <circle id="p45_head" class="ai-shape ai-circle" cx="208.3449" cy="221.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
         <path id="p45_hair" class="ai-shape ai-path" d="M199.34 221.50 A9.00 9.00 0 0 1 217.34 221.50 L217.34 221.50 L212.34 219.50 L208.34 221.50 L205.34 220.50 L199.34 221.50 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
       <path id="p45_torso" class="ai-shape ai-path" d="M195.34 243.50 A13.00 13.00 0 0 1 221.34 243.50 L221.34 251.50 L195.34 251.50 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
       <path id="p45_collar" class="ai-shape ai-path" d="M205.34 230.83 A14.00 14.00 0 0 1 211.34 230.83 L208.34 236.83 Z"  fill="#ffffff" stroke="none" stroke-width="1.5"/>
     </g>
   </g>
-  <g id="p135" class="ai-container" transform="rotate(135 388.03479425772514 224.00000000000003)">
+  <g id="p135" class="ai-container" transform="rotate(135 388.03485 224.00005000000002)">
     <g class="ai-container">
       <g id="p135_head_stack" class="ai-container">
-        <circle id="p135_head" class="ai-shape ai-circle" cx="387.03479425772514" cy="221.49999999999994" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
+        <circle id="p135_head" class="ai-shape ai-circle" cx="387.0348" cy="221.5" r="9" fill="#f2c9a0" stroke="#333" stroke-width="1"/>
         <path id="p135_hair" class="ai-shape ai-path" d="M378.03 221.50 A9.00 9.00 0 0 1 396.03 221.50 L396.03 221.50 L391.03 219.50 L387.03 221.50 L384.03 220.50 L378.03 221.50 Z"  fill="#2b1b0e" stroke="#333333" stroke-width="1.5"/>
       </g>
       <path id="p135_torso" class="ai-shape ai-path" d="M374.03 243.50 A13.00 13.00 0 0 1 400.03 243.50 L400.03 251.50 L374.03 251.50 Z"  fill="#4a6fa5" stroke="#333" stroke-width="1"/>
@@ -181,21 +248,21 @@
     </g>
   </g>
   <circle id="top_via" class="ai-shape ai-circle" cx="186.5" cy="-19" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="bottom_via" class="ai-shape ai-circle" cx="210.26739712886257" cy="278" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <text class="ai-label" x="223.3859841649357" y="-25.762676032063393" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="223.3859841649357" dy="-0"><tspan>crowns</tspan></tspan></text>
-  <text class="ai-label" x="147.23406382499925" y="-23.965414309719847" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="147.23406382499925" dy="-0"><tspan>feet</tspan></tspan></text>
-  <text class="ai-label" x="193.61199361346848" y="267.72342014238376" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="193.61199361346848" dy="-0"><tspan>crowns</tspan></tspan></text>
-  <text class="ai-label" x="246.2543377027301" y="266.8739705132893" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="246.2543377027301" dy="-0"><tspan>feet</tspan></tspan></text>
-  <path class="ai-connection" d="M23 22 C22.99999999999999 -34.187434340587025 130.53295954233465 -23.97173613417166 186.5 -19 C247.23464207716378 -13.604742145702271 351 121.97381040705554 351 68.2" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M23 69 C23.000000000000004 130.89260411749083 125.12678113819845 -10.998596936420922 186.5 -19 C241.95648061772027 -26.230020881080375 351 -41.92579408863538 351 6.8" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M17.000000000000004 225 C-49.80093711332488 225 143.47557795414838 276.8963286038567 210.26739712886257 278 C275.0653461343575 279.0707245846837 445.5273801857373 280.07837236563904 404.79322497184637 239.3442171517481" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M64 225 C115.85787357217845 225 158.43467295222302 279.6148547477874 210.26739712886257 278 C268.2858845592277 276.1924270550188 325.42286595145225 159.97385813135404 361.3768686069923 195.92786078689406" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <circle id="bottom_via" class="ai-shape ai-circle" cx="210.2674" cy="278" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="223.386" y="-25.7627" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="223.386" dy="-0"><tspan>crowns</tspan></tspan></text>
+  <text class="ai-label" x="147.2341" y="-23.9654" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="147.2341" dy="-0"><tspan>feet</tspan></tspan></text>
+  <text class="ai-label" x="193.612" y="267.7234" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="193.612" dy="-0"><tspan>crowns</tspan></tspan></text>
+  <text class="ai-label" x="246.2543" y="266.874" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="246.2543" dy="-0"><tspan>feet</tspan></tspan></text>
+  <path class="ai-connection" d="M23 22 C23 -34.1874 130.533 -23.9717 186.5 -19 C247.2346 -13.6047 351 121.9738 351 68.2" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M23 69 C23 130.8926 125.1268 -10.9986 186.5 -19 C241.9565 -26.23 351 -41.9258 351 6.8" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M17 225 C-49.8009 225 143.4756 276.8963 210.2674 278 C275.0654 279.0707 445.5274 280.0783 404.79326882454313 239.34416882454312" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M64 225 C115.8579 225 158.4347 279.6149 210.2674 278 C268.2859 276.1924 325.4228 159.9738 361.37683117545686 195.92783117545687" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M36 54.5 L51 54.5 L51 16.5 L171.5 16.5 L171.5 24.3" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection" d="M171.5 57.5 L171.5 72.5 L379 72.5 L379 28.5 L371.2 28.5" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M49.5 212 L49.5 197 L172.42462120245875 197 L172.42462120245875 226.1213203435596 L180.22462120245876 226.1213203435596" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M205.809397513309 244.50609665440987 L220.809397513309 244.50609665440987 L220.809397513309 187.07968978321702 L385.91347391416554 187.07968978321702 L385.91347391416554 194.87968978321703" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M36 54.5 C90.97526716624486 54.5 171.5 -23.475267166244862 171.5 24.3" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M171.5 57.5 C171.5 135.36886412424417 441.86886412424417 28.5 371.2 28.5" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M49.5 212 C49.49999999999999 156.5417449649383 148.2097129943936 186.9064121354945 182.33345237791562 221.03015151901647" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M205.809397513309 244.50609665440987 C258.144837388182 296.84153652928285 438.2489137890385 149.74424990834402 391.0046427387087 196.9885209586739" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M49.5 212 L49.5 197 L172.4246 197 L172.4246 226.1213 L180.2246 226.1213" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M205.8094 244.5061 L220.8094 244.5061 L220.8094 187.0797 L385.9135 187.0797 L385.9135 194.8797" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M36 54.5 C90.9753 54.5 171.5 -23.4753 171.5 24.3" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M171.5 57.5 C171.5 135.3689 441.8689 28.5 371.2 28.5" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M49.5 212 C49.5 156.5418 148.2097 186.9064 182.33343117545687 221.03013117545686" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M205.8094 244.5061 C258.1448 296.8415 438.2489 149.7443 391.00466882454316 196.98853117545687" fill="none" stroke="#8e24aa" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

@@ -451,6 +451,7 @@ fn resolve_frame_layout(
 
     // Recompute bounds after all position changes
     result.compute_bounds();
+    result.snap_geometry();
 
     // Re-route connections against updated element positions
     result.connections.clear();
@@ -464,6 +465,7 @@ fn resolve_frame_layout(
     if let Err(_e) = super::routing::route_connections(&mut result, doc) {
         return None;
     }
+    result.snap_geometry();
 
     Some(result)
 }
@@ -478,15 +480,24 @@ fn build_active_document(doc: &Document, state: &FrameState) -> Document {
     use crate::parser::ast::*;
 
     // (a) elements with geometry transforms — their own positioning constraints drop.
+    // A position transform releases the element's position constraints; a
+    // size-only one (a code line collapsing to height 0) keeps them, so the
+    // element still follows what it is attached to.
     let mut geometry_transformed: HashSet<&str> = HashSet::new();
+    let mut size_transformed: HashSet<&str> = HashSet::new();
     for (elem_id, modifiers) in &state.transforms {
-        let has_geometry = modifiers.iter().any(|m| matches!(
+        let moves = modifiers.iter().any(|m| matches!(
             m.node.key.node,
-            StyleKey::X | StyleKey::Y | StyleKey::Width | StyleKey::Height
-                | StyleKey::Dx | StyleKey::Dy | StyleKey::Scale
+            StyleKey::X | StyleKey::Y | StyleKey::Dx | StyleKey::Dy
         ));
-        if has_geometry {
+        let sizes = modifiers.iter().any(|m| matches!(
+            m.node.key.node,
+            StyleKey::Width | StyleKey::Height | StyleKey::Scale
+        ));
+        if moves {
             geometry_transformed.insert(elem_id.as_str());
+        } else if sizes {
+            size_transformed.insert(elem_id.as_str());
         }
     }
 
@@ -506,6 +517,17 @@ fn build_active_document(doc: &Document, state: &FrameState) -> Document {
             // drop if its LHS element is geometry-transformed
             if let Some(elem) = get_constraint_lhs_element(&c.expr) {
                 if geometry_transformed.contains(elem.as_str()) { return false; }
+                // Moving a component moves all of it: a constraint that
+                // places it through one of its parts (`anna.bg.right = ...`)
+                // is released too.
+                if geometry_transformed.iter().any(|g| elem.starts_with(&format!("{}_", g))) {
+                    return false;
+                }
+                if size_transformed.contains(elem.as_str())
+                    && constraint_target(&c.expr).is_some_and(|(_, p)| p == "Width" || p == "Height")
+                {
+                    return false;
+                }
             }
             // drop if named and disabled
             if let Some(name) = &c.name {
@@ -1076,6 +1098,8 @@ keyframe "grow" { transform box [width: 260] }
             no_resolve: false,
             motion: vec![],
             auto: None,
+            title: None,
+            note: None,
         };
         let states = compute_frame_states(&[&kf]);
         assert!(states[0].disabled_constraints.contains("a_home"));
@@ -1113,6 +1137,8 @@ keyframe "grow" { transform box [width: 260] }
             no_resolve: false,
             motion: vec![],
             auto: None,
+            title: None,
+            note: None,
         }
     }
 
