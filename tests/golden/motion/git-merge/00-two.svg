@@ -199,4 +199,5 @@ text { white-space: pre; }
     <rect id="ben_bottom_pad" class="ai-shape ai-rect" x="823" y="503" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
     <rect id="ben_title_square" class="ai-shape ai-rect" x="823" y="240" width="465" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
   </g>
+  <rect id="beside" class="ai-shape ai-rect" x="272" y="170" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
 </svg>

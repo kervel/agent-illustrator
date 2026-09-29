@@ -25,7 +25,12 @@ constrain anna.bg.right = s.stage.center_x - 20
 constrain anna.bg.top = s.stage.top + 200
 constrain ben.bg.left = s.stage.center_x + 20
 constrain ben.bg.top = s.stage.top + 200
-constrain merged.bg.left = s.stage.left + 272   // merged file + card centred on the stage
+// Centred on its own; while the choice card is up, it makes room (the file
+// and the card together are centred then).
+constrain merged.bg.center_x = s.stage.center_x as merged_centred
+rect beside [width: 1, height: 1, fill: none, stroke: none]
+constrain beside.left = s.stage.left + 272
+constrain beside.top = s.stage.top + 170
 constrain merged.bg.top = s.stage.top + 170
 
 // The tick on the merged file's corner.
@@ -69,6 +74,8 @@ keyframe "combine" {
 
 keyframe "conflict" {
     hide ok [exit: shrink, duration: 0.2]
+    disable merged_centred
+    constrain merged.bg.left = beside.left as merged_beside
     at 0.1 { remove merged.line8 [duration: 0.3] }
     at 0.15 {
         insert merged after line 7 [name: conflict, tint: role-warn-soft, stagger: 0.05,
@@ -83,5 +90,6 @@ keyframe "choose" {
     at 0.35 { remove .conflict [stagger: 0.04, order: end] }
     at 0.5 { show merged.line8 [enter: expand] }
     at 0.7 { hide card [exit: fall] }
+    at 0.75 { disable merged_beside; enable merged_centred }
     at 0.8 { show ok [enter: pop] }
 }
