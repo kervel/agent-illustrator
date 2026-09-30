@@ -58,7 +58,7 @@ jobs:
         run: |
           BIN=target/${{ matrix.target }}/release/agent-illustrator
           file $BIN
-          file $BIN | grep -Eq 'static(-pie)? linked' || { echo "not a static binary"; exit 1; }
+          file $BIN | grep -Eq 'static(ally|-pie)? linked' || { echo "not a static binary"; exit 1; }
           cd examples/motion
           ../../$BIN --lint git-history.ail
           ../../$BIN --stylesheet-css git-deck.css --frame push --at 50% --png -o /tmp/still.png git-history.ail

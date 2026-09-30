@@ -24,7 +24,7 @@ jobs:
       - name: Static binary, no browser, whole loop
         run: |
           BIN=$PWD/target/x86_64-unknown-linux-musl/release/agent-illustrator
-          file $BIN | grep -Eq 'static(-pie)? linked' || { file $BIN; echo "not a static binary"; exit 1; }
+          file $BIN | grep -Eq 'static(ally|-pie)? linked' || { file $BIN; echo "not a static binary"; exit 1; }
           mkdir /tmp/w && cp $BIN examples/motion/git-history.ail examples/motion/git-deck.ail examples/motion/git-deck.css /tmp/w/
           docker run --rm --network none -v /tmp/w:/w -w /w alpine:latest sh -c '
             set -e
