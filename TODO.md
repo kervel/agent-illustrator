@@ -44,6 +44,27 @@ Agents with long prior context skip steps in the skill doc. Consider:
 - Moving examples/grammar to appendix sections the agent can fetch on demand
 - Identifying which steps get skipped most and making them more prominent
 
+### Residual flip flash on a GPU desktop (parked, 2026-09-30)
+Frank still sees an occasional brief flash mid-way through the opening half of
+`swap a -> b [via: flip]` (examples/motion/git-copies.ail, "code" step) in
+desktop Chrome with a GPU (Intel Iris Xe, Mesa, Wayland), on v0.2.3.
+Not reproduced so far:
+- headless Chrome, every painted frame (CDP screencast, ~17ms apart): 0 flashes
+- headed, GPU-accelerated Chrome (ANGLE / Mesa Iris Xe, same machine), CDP
+  screencast: 0 in 98 frames
+- 3x Playwright recordVideo at 25fps: 0
+The detector (a slot's content box >10px larger than in both neighbouring
+frames) catches the v0.2.2 flash but only sees box size: a brightness or
+stale-layer flash would slip past it.
+Hypotheses:
+- compositor hand-off of the individual `scale` property on an SVG `<g>`
+  mid-animation: try animating a CSS `transform` (or the SVG `transform`
+  attribute) instead of `scale`
+- a cancel/commit or re-settle of channels while other staggered animations
+  still run
+- the name crossfade (`d*.name` / `k*.name` opacity) overlapping the opening half
+Next step: ask Frank for a phone video of the flash.
+
 ## Low Priority / Won't Do
 
 ### z-index control
