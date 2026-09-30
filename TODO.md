@@ -47,6 +47,11 @@ CI. No browser dependency may enter the main binary.
 - Particles: no, by design (not a diagramming need; no semantic meaning).
 
 
+### Built-in icon set (`ail:icons`) — deferred (Frank, 2026-09-30)
+Not a bad idea, but we don't yet know what a good set is. Collect the objects
+real scenes keep needing (so far: person, laptop, server, cloud, document,
+code file, database, container box) and decide once the pattern is clear.
+
 ### Tight group box as a constraint subject (deferred from v0.2.5)
 `constrain [merged, card].center_x = s.stage.center_x`: centre two elements
 together. `contains` only emits inequalities, so a helper box is loose (the
