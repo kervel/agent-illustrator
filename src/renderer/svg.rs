@@ -1828,11 +1828,14 @@ fn render_element_body(
             // SVG transforms apply right-to-left, so: rotate around center, then scale, then translate
             let transform = if let Some(rotation) = element.styles.rotation {
                 if rotation.abs() > f64::EPSILON {
-                    let cx = intrinsic_width.unwrap_or(element.bounds.width) / 2.0;
-                    let cy = intrinsic_height.unwrap_or(element.bounds.height) / 2.0;
+                    // Turn in page space about the pivot (the centre unless
+                    // `pivot:` says otherwise): the same point the player
+                    // turns it about, and no skew when the artwork is
+                    // scaled unevenly.
+                    let p = element.pivot_point();
                     format!(
-                        "translate({}, {}) scale({}, {}) rotate({} {} {}){}",
-                        element.bounds.x, element.bounds.y, scale_x, scale_y, rotation, cx, cy, offset_tf
+                        "rotate({} {} {}) translate({}, {}) scale({}, {}){}",
+                        rotation, p.x, p.y, element.bounds.x, element.bounds.y, scale_x, scale_y, offset_tf
                     )
                 } else {
                     format!(

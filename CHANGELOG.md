@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.16
+
+- Fix: a part of SVG artwork turned about the wrong point. Part overrides
+  (`barrier gate [arm.pivot: left]`) now reach SVG-file templates as they do
+  inline ones, and static frames and stills rotate an embedded part in page
+  space about its pivot (the same point as the player; no skew when the
+  artwork is scaled unevenly). A merge gate's arm now swings up from its post.
+- Part overrides (`part.key: value`) are no longer reported as unknown
+  modifiers.
+
 ## v0.2.15
 
 - Fix: the first keyframe applied all its changes before it started, so what

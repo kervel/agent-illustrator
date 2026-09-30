@@ -197,8 +197,24 @@ fn resolve_instance(
 
     let result = match def.source_type {
         crate::parser::ast::TemplateSourceType::Svg => {
-            // For SVG templates, create an SvgEmbed shape
-            resolve_svg_template(&def, instance_name, span, registry, &instance_modifiers)
+            // For SVG templates, create an SvgEmbed shape; `arm.pivot: left`
+            // on the instance reaches its part `arm` as for any component.
+            resolve_svg_template(&def, instance_name, span, registry, &instance_modifiers).map(|mut stmts| {
+                let overrides: Vec<(String, String, Spanned<StyleValue>)> = instance_modifiers
+                    .iter()
+                    .filter_map(|m| match &m.node.key.node {
+                        StyleKey::Custom(k) if k.contains('.') => {
+                            let (part, key) = k.split_once('.').unwrap();
+                            Some((format!("{}_{}", instance_name, part), key.to_string(), m.node.value.clone()))
+                        }
+                        _ => None,
+                    })
+                    .collect();
+                if !overrides.is_empty() {
+                    override_parts(&mut stmts, &overrides);
+                }
+                stmts
+            })
         }
         crate::parser::ast::TemplateSourceType::Ail => {
             // For AIL templates, load and resolve the external file

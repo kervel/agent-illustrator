@@ -533,3 +533,28 @@ fn a_filled_box_is_outlined_not_underlined() {
     let t = timeline(src);
     assert!(t.contains(".aiaco-") && !t.contains(".aiacu-"), "{t}");
 }
+
+#[test]
+fn an_artwork_part_turns_about_its_pivot_in_player_and_stills() {
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    let src = "template \"barrier\" from \"assets/barrier.svg\"\nbarrier gate [width: 200, height: 96, arm.pivot: left]\n\
+               keyframe \"z\" { }\nkeyframe \"a\" { transform gate.arm [rotation: -80] }";
+    let cfg = |f: fn(&mut RenderConfig)| {
+        let mut c = RenderConfig::new().with_template_base_path(dir.clone());
+        f(&mut c);
+        render_with_config(src, c).unwrap()
+    };
+    let player = cfg(|c| c.animate = true);
+    let origin = player.split("gate_arm kf-anim\" style=\"transform-origin:").nth(1).unwrap();
+    let (ox, rest) = origin.split_once("px ").unwrap();
+    let oy = rest.split("px").next().unwrap();
+    let still = cfg(|c| c.frame = Some("a".into()));
+    let rot = still.split("id=\"gate_arm\"").nth(1).unwrap();
+    let r = rot.split("rotate(").nth(1).unwrap().split(')').next().unwrap();
+    let v: Vec<f64> = r.split_whitespace().map(|x| x.parse().unwrap()).collect();
+    assert_eq!(v[0], -80.0);
+    assert!((v[1] - ox.parse::<f64>().unwrap()).abs() < 0.05 && (v[2] - oy.parse::<f64>().unwrap()).abs() < 0.05,
+        "the still turns about the player's origin: rotate({r}) vs origin {ox} {oy}");
+    let lint = agent_illustrator::render_with_lint(src, RenderConfig::new().with_template_base_path(dir.clone()).with_lint(true)).unwrap().1;
+    assert!(lint.is_empty(), "part overrides are not unknown modifiers: {:?}", lint.iter().map(|w| &w.message).collect::<Vec<_>>());
+}
