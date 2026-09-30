@@ -84,7 +84,7 @@ keyframe "one_file" {
 }
 
 keyframe "copies" {
-    show docs.* [from: d0, stagger: 0.1, duration: slow, jitter: 4]
+    show docs.* [from: d0, stagger: 0.1, duration: slow, jitter: rotate(4)]
     move d0 home [duration: slow, ease: glide]
     at 1.2 {
         show .q [enter: pop, stagger: 0.05, order: random]

@@ -766,31 +766,9 @@ fn render_pipeline(
         config.svg.viewbox_padding = 0.0;
     }
     // Or what the frames show: one box for all of them, so nothing jumps.
+    let stage = canvas.as_ref().map(|_| result.bounds);
     let crop_box = config.crop.map(|pad| {
-        let mut layouts: Vec<(LayoutResult, Option<&std::collections::HashSet<String>>)> = Vec::new();
-        if frame_states.is_empty() {
-            layouts.push((result.clone(), None));
-        }
-        for st in &frame_states {
-            let r = layout::keyframe::resolve_frame_for_static(&result, st, &doc, &config.layout)
-                .unwrap_or_else(|| result.clone());
-            layouts.push((r, Some(&st.hidden_elements)));
-        }
-        let mut union: Option<layout::types::BoundingBox> = None;
-        for (r, hidden) in &layouts {
-            let roots = match hidden {
-                Some(h) => filter_visible_elements(&r.root_elements, h),
-                None => r.root_elements.clone(),
-            };
-            content_bounds(&roots, &mut union);
-            for c in &r.connections {
-                for p in &c.path {
-                    let b = layout::types::BoundingBox::new(p.x, p.y, 0.0, 0.0);
-                    union = Some(union.map_or(b, |u| u.union(&b)));
-                }
-            }
-        }
-        let u = union.unwrap_or(result.bounds);
+        let u = frames_content_box(&result, &frame_states, &doc, &config.layout).unwrap_or(result.bounds);
         layout::types::BoundingBox::new(u.x - pad, u.y - pad, u.width + 2.0 * pad, u.height + 2.0 * pad)
     });
     if let Some(b) = crop_box {
@@ -863,7 +841,40 @@ fn render_pipeline(
             return Err(RenderError::Layout(layout::LayoutError::validation_error("--states requires keyframes in the input")));
         }
         let display = motion::expand::ElementIndex::build(&doc).display;
-        return Ok((motion::storyboard::states_text(&doc, &frame_states, &result, &display), lint_warnings));
+        let mut text = motion::storyboard::states_text(&doc, &frame_states, &result, &display, compiled.as_ref());
+        // How much of the stage the story uses.
+        if let (Some(stage), Some(c)) = (stage, frames_content_box(&result, &frame_states, &doc, &config.layout)) {
+            let (fw, fh) = (c.width / stage.width, c.height / stage.height);
+            // Off-centre (top-heavy), or using under half of the stage.
+            let off_x = ((c.x + c.width / 2.0) - (stage.x + stage.width / 2.0)).abs() / stage.width;
+            let off_y = ((c.y + c.height / 2.0) - (stage.y + stage.height / 2.0)).abs() / stage.height;
+            if off_x > 0.08 || off_y > 0.08 || fw < 0.5 || fh < 0.5 {
+                let cy = (c.y + c.height / 2.0 - stage.y) / stage.height;
+                let cx = (c.x + c.width / 2.0 - stage.x) / stage.width;
+                let mut how = Vec::new();
+                if off_y > 0.08 {
+                    how.push(if cy < 0.5 { "sits high" } else { "sits low" });
+                }
+                if off_x > 0.08 {
+                    how.push(if cx < 0.5 { "sits left" } else { "sits right" });
+                }
+                if fw < 0.5 || fh < 0.5 {
+                    how.push("uses under half of the stage");
+                }
+                text.push_str(&format!(
+                    "\nnote: the content {} (x {:.0}-{:.0}, y {:.0}-{:.0} of {:.0}x{:.0}): centre it on the \
+                     stage, or embed with --crop-to-content\n",
+                    how.join(" and "),
+                    c.x - stage.x,
+                    c.x + c.width - stage.x,
+                    c.y - stage.y,
+                    c.y + c.height - stage.y,
+                    stage.width,
+                    stage.height
+                ));
+            }
+        }
+        return Ok((text, lint_warnings));
     }
     if config.timeline || config.timeline_json {
         let Some(m) = &compiled else {
@@ -1172,6 +1183,38 @@ fn check_unique_names(
 /// Union of what the leaves draw: not the stage (a canvas is the backdrop,
 /// cropping is about content), not invisible helpers (fill and stroke none,
 /// no label).
+/// What the frames show, all of them together: one box, so nothing jumps.
+fn frames_content_box(
+    result: &LayoutResult,
+    frame_states: &[layout::keyframe::FrameState],
+    doc: &Document,
+    config: &layout::LayoutConfig,
+) -> Option<layout::types::BoundingBox> {
+    let mut layouts: Vec<(LayoutResult, Option<&std::collections::HashSet<String>>)> = Vec::new();
+    if frame_states.is_empty() {
+        layouts.push((result.clone(), None));
+    }
+    for st in frame_states {
+        let r = layout::keyframe::resolve_frame_for_static(result, st, doc, config).unwrap_or_else(|| result.clone());
+        layouts.push((r, Some(&st.hidden_elements)));
+    }
+    let mut union: Option<layout::types::BoundingBox> = None;
+    for (r, hidden) in &layouts {
+        let roots = match hidden {
+            Some(h) => filter_visible_elements(&r.root_elements, h),
+            None => r.root_elements.clone(),
+        };
+        content_bounds(&roots, &mut union);
+        for c in &r.connections {
+            for p in &c.path {
+                let b = layout::types::BoundingBox::new(p.x, p.y, 0.0, 0.0);
+                union = Some(union.map_or(b, |u| u.union(&b)));
+            }
+        }
+    }
+    union
+}
+
 fn content_bounds(elems: &[layout::types::ElementLayout], out: &mut Option<layout::types::BoundingBox>) {
     for e in elems {
         if e.styles.css_classes.iter().any(|c| c == "ai-canvas") {

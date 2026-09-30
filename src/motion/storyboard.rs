@@ -41,7 +41,13 @@ fn draw_text(d: &DrawTo, show: &dyn Fn(&str) -> String) -> String {
     }
 }
 
-pub fn states_text(doc: &Document, states: &[FrameState], result: &LayoutResult, display: &HashMap<String, String>) -> String {
+pub fn states_text(
+    doc: &Document,
+    states: &[FrameState],
+    result: &LayoutResult,
+    display: &HashMap<String, String>,
+    motion: Option<&crate::motion::compile::Motion>,
+) -> String {
     let show = |id: &str| display.get(id).cloned().unwrap_or_else(|| id.to_string());
     let kfs = crate::layout::keyframe::extract_keyframes(doc);
     // Click steps: a frame and the [auto] frames after it.
@@ -99,15 +105,33 @@ pub fn states_text(doc: &Document, states: &[FrameState], result: &LayoutResult,
     let ends: Vec<&FrameState> = steps.iter().map(|s| &states[*s.last().unwrap()]).collect();
 
     let mut out = String::new();
+    // How long each click plays: its frames and the pauses of the [auto]
+    // ones that follow.
+    let step_secs = |s: &[usize]| -> Option<f64> {
+        let m = motion?;
+        Some(s.iter().enumerate().map(|(j, i)| {
+            let f = m.frames.get(*i).map(|f| f.duration).unwrap_or(0.0);
+            let pause = if j > 0 { kfs[*i].auto.unwrap_or(0.0) } else { 0.0 };
+            f + pause
+        }).sum())
+    };
     out.push_str("steps:\n");
+    let names_w = steps.iter().map(|s| s.iter().map(|i| kfs[*i].name.node.as_str()).collect::<Vec<_>>().join(" + ").len()).max().unwrap_or(0);
     for (k, s) in steps.iter().enumerate() {
         let names: Vec<&str> = s.iter().map(|i| kfs[*i].name.node.as_str()).collect();
         let title = s.iter().filter_map(|i| kfs[*i].title.as_deref()).last();
+        // Slow as the lint means it: one frame over 2.5s.
+        let slow = motion.is_some_and(|m| s.iter().any(|i| m.frames.get(*i).is_some_and(|f| f.duration > 2.5)));
+        let secs = step_secs(s)
+            .map(|t| format!("  {:>5.2}s{}", t, if slow { " (slow)" } else { "" }))
+            .unwrap_or_default();
         out.push_str(&format!(
-            "  {:>2}  {}{}\n",
+            "  {:>2}  {:w$}{}{}\n",
             k,
             names.join(" + "),
-            title.map(|t| format!("   title: {:?}", t)).unwrap_or_default()
+            secs,
+            title.map(|t| format!("   title: {:?}", t)).unwrap_or_default(),
+            w = names_w
         ));
     }
     out.push_str("\nvisible at the end of each step (● shown, · hidden):\n");

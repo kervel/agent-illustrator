@@ -7,6 +7,101 @@ Create keyframe animations in Agent Illustrator. Read `--skill` first for genera
 Use this sub-skill when creating **multi-frame animated diagrams** — sequences where
 elements appear, disappear, or transform over time. Not needed for static diagrams.
 
+## Your first scene in 10 minutes
+
+A whole scene: a stage, one component, keyframes timed by events. Copy it,
+change it, and check it with the four commands below. The rest of this skill
+is the reference.
+
+```ail
+/* STORYBOARD
+     start   a server and three laptops
+     clone   the links draw; each laptop gets the history when its link arrives
+     push    Ben commits; the commit travels up to the server
+     pull    and down to Anna and Chris: everyone has the same history
+*/
+
+// The stage: the picture's exact bounds. Leaving it is a lint error.
+rect stage [width: 1200, height: 675, fill: role-backdrop, stroke: none, canvas: true]
+constrain stage.left = 0
+constrain stage.top = 0
+
+// A component: a window with a header bar, and a history of commits.
+template "machine" (title: "Laptop") {
+    rect bg [width: 260, height: 130, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+    rect head [width: 260, height: 42, fill: role-surface-2, stroke: none, clip: bg,
+               label: title, align: start, font_size: 20, font_weight: 700]
+    row hist [gap: 24, align: center] {
+        circle c1 [size: 20, fill: role-surface, stroke: role-primary, stroke_width: 5]
+        circle c2 [size: 20, fill: role-surface, stroke: role-primary, stroke_width: 5]
+        circle c3 [size: 20, fill: role-surface, stroke: role-primary, stroke_width: 5, appears: later]
+    }
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+    constrain hist.center_x = bg.center_x
+    constrain hist.center_y = bg.center_y + 20
+}
+
+machine server [title: "Server"]
+row laptops [gap: 80] {
+    machine anna [title: "Anna", hist.appears: later]
+    machine ben [title: "Ben", hist.appears: later]
+    machine chris [title: "Chris", hist.appears: later]
+}
+constrain server.center_x = stage.center_x
+constrain server.top = stage.top + 130
+constrain laptops.center_x = stage.center_x
+constrain laptops.top = server.bottom + 150
+
+server.bottom -> anna.top as l_anna [stroke: role-rule, stroke_width: 4, appears: later]
+server.bottom -> ben.top as l_ben [stroke: role-rule, stroke_width: 4, appears: later]
+server.bottom -> chris.top as l_chris [stroke: role-rule, stroke_width: 4, appears: later]
+
+keyframe "start" [title: "Everyone has the full history"] {
+    show server [enter: pop]
+    when server shown { show laptops.* [enter: rise, stagger: 0.1] }
+}
+
+keyframe "clone" {
+    show l_anna, l_ben, l_chris [enter: draw, stagger: 0.1]
+    when l_anna shown { show anna.hist [from: server.hist] }
+    when l_ben shown { show ben.hist [from: server.hist] }
+    when l_chris shown { show chris.hist [from: server.hist] }
+}
+
+keyframe "push" {
+    show ben.c3 [enter: pop]
+    when ben.c3 shown { show server.c3 [from: ben.c3, duration: slow] }
+}
+
+keyframe "pull" {
+    show anna.c3, chris.c3 [from: server.c3, duration: slow, stagger: 0.1]
+}
+```
+
+```bash
+agent-illustrator --lint first.ail      # what to fix: overlaps, text that doesn't fit, timing
+agent-illustrator --states first.ail    # per click step: what shows, hides, changes (and how long)
+agent-illustrator --serve first.ail     # live preview in a browser: arrow keys step, reloads on save
+agent-illustrator --animate first.ail > first.svg   # the result, with a click-to-step player
+```
+
+What to notice:
+- **Names, not coordinates.** `constrain laptops.top = server.bottom + 150`;
+  the row spaces the laptops; `ben.c3` is the part `c3` of instance `ben`.
+- **Say it once at the element.** `appears: later` means "not there at the
+  start"; the verb that brings it on says when and how (`show … [from: …]`
+  flies it in from another element). `hist.appears: later` does that for one
+  part of one instance.
+- **Time by what things wait for.** `when l_anna shown { … }` starts when that
+  link has drawn in; `when ben.c3 shown` when the commit has popped up.
+- **A header bar is clipped to its frame** (`clip: bg`), so it follows the
+  rounded corners and never covers the border.
+- **Each keyframe is one click.** `[title: …]` goes to a deck host's header.
+
+A fuller version of this scene, with a caption per step:
+`examples/motion/git-history.ail`.
+
 ---
 
 ## Part 1: Animation Harness (MANDATORY)
@@ -416,8 +511,9 @@ move train along track [to: st3.dot]
 
 `pulse x [scale: 1.3]`, `shake x`, `nudge x [direction: up]`, `flash x`,
 `ping x`, `highlight x [color: accent-1]`; ambient: `loop x [pulse, period: 1.2]`
-(runs while the frame is on screen). `jitter: 4` on a `show` gives each target a
-small seeded tilt (`jitter: move(6)` shifts instead) — a pile, not a table.
+(runs while the frame is on screen). `jitter: rotate(4)` on a `show` gives each
+target a small seeded tilt of up to 4 degrees (`jitter: move(6)` shifts by up
+to 6px instead; a bare `jitter: 4` means rotate) — a pile, not a table.
 
 ### Text and numbers
 
@@ -573,6 +669,23 @@ any theme: the theme's stylesheet maps each role once (`--role-primary:
 var(--secondary-1);`). `ail:motion/git` uses roles only. Pick palette slots
 (`accent-1`) only in a one-off diagram.
 
+### Windows and panels
+
+A box with a header bar (a machine, a folder, a file window): draw the bar as
+a plain rect and clip it to the frame, so it follows the frame's rounded
+corners and never covers its border:
+```
+template "machine" (title: "Laptop") {
+    rect bg [width: 300, height: 150, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 16]
+    rect head [width: 300, height: 48, fill: role-surface-2, stroke: none, clip: bg,
+               label: title, align: start]
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+}
+```
+In a `col` of rows under a header, `col body [gap: 0, padding: 0]` puts them
+flush with the frame. Code blocks' title bars do this already.
+
 ### Code on a slide
 
 ```
@@ -629,14 +742,24 @@ also grows the line.)
 **Clone to N machines**: `show anna.hist, ben.hist, chris.hist [from: hub.hist, stagger: 0.14]`
 plus `show l_anna, l_ben, l_chris [enter: draw, stagger: 0.1]` for the links.
 
-**Push / pull**:
+**Push / pull**: the commit itself travels and stays (a ghost that lands and
+then a dot that pops reads as "arrive, vanish, reappear"); the line grows to
+meet it as it lands:
 ```
-show ben.hist.d4 [enter: pop]; draw ben.hist.track [to: ben.hist.d4]
-then { fly ghost(ben.hist.d4) to hub.hist.d4 }
-then { show hub.hist.d4 [enter: pop] }
-then { fly ghost(hub.hist.d4) to anna.hist.d4, chris.hist.d4 }
-then { show anna.hist.d4, chris.hist.d4 [enter: pop] }
+keyframe "push" {
+    show hub.hist.d4 [from: ben.hist.d4, duration: slow]
+    draw hub.hist.track [to: hub.hist.d4, duration: slow]
+}
+keyframe "pull" {
+    show anna.hist.d4, chris.hist.d4 [from: hub.hist.d4, duration: slow, stagger: 0.1]
+    draw anna.hist.track [to: anna.hist.d4, duration: slow]
+    at 0.1 { draw chris.hist.track [to: chris.hist.d4, duration: slow] }
+}
 ```
+(Full scene: examples/motion/git-history.ail. The station lint counts a
+`[from:]` entrance as arriving when it lands.) A `fly ghost(...)` is for a
+copy that leaves the original where it was and is not itself kept (a
+snapshot).
 
 **Branch and merge**: a metro path through the branch stations, `drawn: 0`,
 `spread: even`; pin the first branch station (45 degrees off main) and give the

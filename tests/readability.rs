@@ -349,3 +349,46 @@ fn lint_messages_name_parts_with_dots() {
     let w = lint(src);
     assert!(w.iter().any(|m| m.contains("hub.bg.left")) && !w.iter().any(|m| m.contains("hub_bg")), "{w:?}");
 }
+
+#[test]
+fn a_through_line_runs_under_its_stations_whatever_the_order() {
+    let src = "row dots [gap: 30] { circle d1 [size: 20]\n circle d2 [size: 20] }\n\
+               path track [through: [d1, d2], stroke_width: 4, fill: none]";
+    let svg = render(src);
+    assert!(svg.find(r#"id="track""#).unwrap() < svg.find(r#"id="d1""#).unwrap(), "track drawn first");
+    let above = src.replace("fill: none]", "fill: none, z_order: 1]");
+    let svg = render(&above);
+    assert!(svg.find(r#"id="track""#).unwrap() > svg.find(r#"id="d2""#).unwrap(), "z_order: 1 puts it on top");
+}
+
+#[test]
+fn a_flight_in_arrives_when_it_lands() {
+    let src = r#"
+row r [gap: 200] { circle a [size: 20]
+ circle b [size: 20, appears: later] }
+path l [through: [a, b], drawn: a, stroke_width: 4, fill: none]
+keyframe "k" { }
+keyframe "j" { show b [from: a, duration: slow]
+ draw l [to: b, duration: slow] }
+"#;
+    let early: Vec<String> = lint(src).into_iter().filter(|m| m.contains("only reaches it")).collect();
+    assert!(early.is_empty(), "{early:?}");
+}
+
+#[test]
+fn a_clipped_header_stays_inside_its_frame() {
+    let src = "rect bg [width: 300, height: 150, stroke_width: 4, corner_radius: 16]\n\
+               rect head [width: 300, height: 48, fill: red, stroke: none, clip: bg]\n\
+               constrain head.top = bg.top\nconstrain head.left = bg.left";
+    let svg = render(src);
+    assert!(svg.contains(r#"<clipPath id="ai-clip-head"><rect x="2" y="2" width="296" height="146" rx="14" ry="14"/>"#), "{svg}");
+    assert!(svg.contains(r#"clip-path="url(#ai-clip-head)""#));
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+}
+
+#[test]
+fn a_column_without_padding_is_flush() {
+    let svg = render("col c [gap: 0, padding: 0] { rect a [width: 50, height: 20]\n rect b [width: 50, height: 20] }\nconstrain c.left = 0\nconstrain c.top = 0");
+    assert_eq!(attr(&svg, "a", "x"), 0.0);
+    assert_eq!(attr(&svg, "a", "y"), 0.0);
+}

@@ -819,7 +819,8 @@ fn collect_contains_ids_from_stmts(
         };
         if let Some((Some(name), mods)) = mods {
             for m in mods {
-                if !matches!(&m.node.key.node, crate::parser::ast::StyleKey::Custom(k) if k == "overlaps") {
+                // `clip: bg` draws inside bg: on it by design.
+                if !matches!(&m.node.key.node, crate::parser::ast::StyleKey::Custom(k) if k == "overlaps" || k == "clip") {
                     continue;
                 }
                 let names: Vec<String> = match &m.node.value.node {
@@ -3397,6 +3398,7 @@ fn check_unknown_colors(doc: &Document, warnings: &mut Vec<LintWarning>) {
 /// keys that are not `StyleKey` variants but are still consumed somewhere.
 const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "at",           // grid placement
+    "clip",         // drawn inside another element's shape
     "cell_width",   // grid
     "cell_height",  // grid
     "cols",         // grid

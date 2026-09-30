@@ -756,6 +756,14 @@ fn substitute_parameters(
                         }
                         continue;
                     }
+                    // `clip: bg` names the sibling whose shape it is drawn inside.
+                    if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "clip") {
+                        if let StyleValue::Identifier(id) = &m.node.value.node {
+                            let local = id.0.replace('.', "_");
+                            m.node.value.node = StyleValue::Identifier(Identifier::new(format!("{}_{}", prefix, local)));
+                        }
+                        continue;
+                    }
                     if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "drawn") {
                         if let StyleValue::Identifier(id) = &m.node.value.node {
                             if id.0 != "none" {

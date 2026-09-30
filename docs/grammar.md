@@ -136,7 +136,13 @@ Common modifiers:
     text "{param}" name     In a template: the text says a parameter's value
     rotation: <degrees>     Rotate element (clockwise)
     class: <name>           Custom CSS class (for external styling)
-    z_order: <number>       Render order for groups (higher = on top)
+    clip: <element>         Draw only inside that element's shape (within its stroke,
+                            following its corner_radius): a window's header bar is a
+                            plain rect [clip: bg] and never covers the border
+    padding: <number>       On row/col: room between its edge and its children
+                            (default 5); `padding: 0` puts them flush
+    z_order: <number>       Render order among siblings (higher = on top; default 0,
+                            a `through:` line -1 so it runs under its stations)
     routing: direct         Diagonal line (vs default orthogonal)
     routing: curved         Smooth curve (for loops, crossings)
 
@@ -309,7 +315,8 @@ label rides along); size animates via the shape's width/height.
 
 Motion statements (full guide: --skill-animation):
     show a, b [enter: pop|rise|drop|fade|grow|wipe(dir)|draw, from: other,
-               delay, duration, ease, stagger, order: start|end|center|random, jitter: 4]
+               delay, duration, ease, stagger, order: start|end|center|random,
+               jitter: rotate(4) (degrees) | move(6) (px)]
     hide a [exit: fade|shrink|fall|lift|wipe(dir)]
     when line reaches a.dot { ... }   when a line being drawn passes a.dot
     when a shown | hidden | arrives + 0.1 { ... }   when a's latest entrance / exit /

@@ -329,7 +329,10 @@ fn appears_before_line(m: &Motion, base: &LayoutResult, out: &mut Vec<LintWarnin
                     Val::V(v) => 1.0 - v.first().copied().unwrap_or(0.0),
                     _ => 1.0,
                 };
-                if drawn(a.start) + 0.01 >= at {
+                // `show x [from: y]` flies in: it is at the station when it
+                // lands, not when it sets off.
+                let lands = if a.verb.contains("from:") { a.start + a.dur } else { a.start };
+                if drawn(lands) + 0.01 >= at {
                     continue;
                 }
                 let arrives = (0..=((f.duration - a.start) / 0.01).ceil() as usize)
@@ -351,7 +354,7 @@ fn appears_before_line(m: &Motion, base: &LayoutResult, out: &mut Vec<LintWarnin
                             format!(
                                 "{} appears at {:.2}s but {} only reaches it at {:.2}s: time it on the line \
                                  (`{} {{ ... }}`)",
-                                show(&a.target_id), a.start, show(line), t, fix
+                                show(&a.target_id), lands, show(line), t, fix
                             )
                         }
                         None => format!(

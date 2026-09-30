@@ -143,6 +143,12 @@ svg { font-family: var(--font-sans); }
 .dots { stroke-linecap: round; }
 text { white-space: pre; }
   ]]></style>
+  <defs>
+    <clipPath id="ai-clip-hub_head"><rect x="651.5" y="151.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-anna_head"><rect x="201.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-ben_head"><rect x="651.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-chris_head"><rect x="1101.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+  </defs>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
     <rect id="s_badge" class="ai-shape ai-rect" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
@@ -151,35 +157,43 @@ text { white-space: pre; }
   </g>
   <g id="hub" class="ai-container">
     <rect id="hub_bg" class="ai-shape ai-rect" x="650" y="150" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
-    <rect id="hub_head" class="ai-shape ai-rect" x="650" y="150" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
-    <text class="ai-label" x="658" y="174" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>GitLab</tspan></tspan></text>
+    <g clip-path="url(#ai-clip-hub_head)">
+      <rect id="hub_head" class="ai-shape ai-rect" x="650" y="150" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="658" y="174" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>GitLab</tspan></tspan></text>
+    </g>
     <circle id="hub_tag" class="ai-shape ai-circle" cx="924" cy="174" r="8" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="2"/>
     <g id="hub_hist" class="ai-container">
+      <path id="hub_hist_track" class="ai-shape ai-path" d="M716.00 247.00 L772.00 247.00 L828.00 247.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
       <g id="hub_hist_dots" class="ai-container">
         <circle id="hub_hist_d1" class="ai-shape ai-circle" cx="716" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
         <circle id="hub_hist_d2" class="ai-shape ai-circle" cx="772" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
         <circle id="hub_hist_d3" class="ai-shape ai-circle" cx="828" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
       </g>
-      <path id="hub_hist_track" class="ai-shape ai-path" d="M716.00 247.00 L772.00 247.00 L828.00 247.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
     </g>
   </g>
   <g id="laptops" class="ai-container">
     <g id="anna" class="ai-container">
       <rect id="anna_bg" class="ai-shape ai-rect" x="200" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
-      <rect id="anna_head" class="ai-shape ai-rect" x="200" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
-      <text class="ai-label" x="208" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="208" dy="-0"><tspan>Anna’s laptop</tspan></tspan></text>
+      <g clip-path="url(#ai-clip-anna_head)">
+        <rect id="anna_head" class="ai-shape ai-rect" x="200" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="208" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="208" dy="-0"><tspan>Anna’s laptop</tspan></tspan></text>
+      </g>
       <circle id="anna_tag" class="ai-shape ai-circle" cx="474" cy="519" r="8" fill="var(--role-series-1)" stroke="var(--role-ink)" stroke-width="2"/>
     </g>
     <g id="ben" class="ai-container">
       <rect id="ben_bg" class="ai-shape ai-rect" x="650" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
-      <rect id="ben_head" class="ai-shape ai-rect" x="650" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
-      <text class="ai-label" x="658" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>Ben’s laptop</tspan></tspan></text>
+      <g clip-path="url(#ai-clip-ben_head)">
+        <rect id="ben_head" class="ai-shape ai-rect" x="650" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="658" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>Ben’s laptop</tspan></tspan></text>
+      </g>
       <circle id="ben_tag" class="ai-shape ai-circle" cx="924" cy="519" r="8" fill="var(--role-series-2)" stroke="var(--role-ink)" stroke-width="2"/>
     </g>
     <g id="chris" class="ai-container">
       <rect id="chris_bg" class="ai-shape ai-rect" x="1100" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
-      <rect id="chris_head" class="ai-shape ai-rect" x="1100" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
-      <text class="ai-label" x="1108" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="1108" dy="-0"><tspan>Chris’s laptop</tspan></tspan></text>
+      <g clip-path="url(#ai-clip-chris_head)">
+        <rect id="chris_head" class="ai-shape ai-rect" x="1100" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1108" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="1108" dy="-0"><tspan>Chris’s laptop</tspan></tspan></text>
+      </g>
       <circle id="chris_tag" class="ai-shape ai-circle" cx="1374" cy="519" r="8" fill="var(--role-series-3)" stroke="var(--role-ink)" stroke-width="2"/>
     </g>
   </g>

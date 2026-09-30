@@ -423,9 +423,12 @@ pub fn template_source(name: &str, spec: &CodeSpec, inserts: &[Insert]) -> Strin
     let mut stack: Vec<String> = Vec::new();
     if let Some(t) = &spec.title {
         s.push_str(&format!(
-            "    rect title [width: {w}, height: {h}, fill: code-title-bg, stroke: none, corner_radius: 11, \
+            "    rect title [width: {w}, height: {h}, fill: code-title-bg, stroke: none, {shape}\
              label: {l}, font_size: {f}, font_weight: 700, label_fill: code-title, align: start]\n",
             w = width,
+            // In a frame, the bar is cut to the frame's rounded inside; on
+            // its own, it rounds its own corners.
+            shape = if spec.frame { "clip: bg, " } else { "corner_radius: 11, " },
             l = lit(t),
             // The title grows with the code (19px at the default 17).
             f = (fs * 19.0 / 17.0).round(),
@@ -473,7 +476,7 @@ pub fn template_source(name: &str, spec: &CodeSpec, inserts: &[Insert]) -> Strin
          \x20   constrain bg.right = {f}.right + 3\n    constrain bg.bottom = bottom_pad.bottom + 3\n",
         f = first
     ));
-    if spec.title.is_some() {
+    if spec.title.is_some() && !spec.frame {
         // Square off the title bar's lower corners (only the top is rounded).
         s.push_str(&format!(
             "    rect title_square [width: {}, height: 12, fill: code-title-bg, stroke: none]\n\

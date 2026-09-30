@@ -143,6 +143,11 @@ svg { font-family: var(--font-sans); }
 .dots { stroke-linecap: round; }
 text { white-space: pre; }
   ]]></style>
+  <defs>
+    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+  </defs>
+  <path id="rule" class="ai-shape ai-path dots" d="M737.85 354.00 L1520.00 354.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
+  <path id="track" class="ai-shape ai-path" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
     <rect id="s_badge" class="ai-shape ai-rect" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
@@ -150,87 +155,87 @@ text { white-space: pre; }
     <text id="s_heading" class="ai-shape ai-text" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Git takes snapshots</text>
   </g>
   <g id="folder" class="ai-container">
-    <rect id="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+    <rect id="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="520" height="280" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
     <g id="folder_body" class="ai-container">
-      <rect id="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
-      <text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text>
+      <g clip-path="url(#ai-clip-fhead)">
+        <rect id="fhead" class="ai-shape ai-rect" x="96" y="214" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="104" y="240" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="104" dy="-0"><tspan>webshop</tspan></tspan></text>
+      </g>
       <g id="f_login" class="ai-container">
-        <rect id="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
-        <rect id="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
-        <rect id="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
-        <text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text>
-        <rect id="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text>
-        <rect id="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text>
+        <rect id="f_login_bg" class="ai-shape ai-rect" x="96" y="266" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="f_login_sep" class="ai-shape ai-rect" x="96" y="340" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+        <rect id="f_login_chip" class="ai-shape ai-rect" x="118" y="281" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
+        <text class="ai-label" x="137" y="304" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="137" dy="-0"><tspan>py</tspan></tspan></text>
+        <rect id="f_login_fname" class="ai-shape ai-rect" x="166" y="282.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="174" y="304" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="174" dy="-0"><tspan>login.py</tspan></tspan></text>
+        <rect id="f_login_val" class="ai-shape ai-rect" x="482.512" y="282.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="542.256" y="304" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="542.256" dy="-0"><tspan>84 lines</tspan></tspan></text>
       </g>
       <g id="f_style" class="ai-container">
-        <rect id="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
-        <rect id="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
-        <rect id="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
-        <text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text>
-        <rect id="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text>
-        <rect id="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>246 lines</tspan></tspan></text>
+        <rect id="f_style_bg" class="ai-shape ai-rect" x="96" y="342" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="f_style_sep" class="ai-shape ai-rect" x="96" y="416" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+        <rect id="f_style_chip" class="ai-shape ai-rect" x="118" y="357" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
+        <text class="ai-label" x="137" y="380" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="137" dy="-0"><tspan>css</tspan></tspan></text>
+        <rect id="f_style_fname" class="ai-shape ai-rect" x="166" y="358.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="174" y="380" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="174" dy="-0"><tspan>style.css</tspan></tspan></text>
+        <rect id="f_style_val" class="ai-shape ai-rect" x="469.576" y="358.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="535.788" y="380" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="535.788" dy="-0"><tspan>246 lines</tspan></tspan></text>
       </g>
       <g id="f_cart" class="ai-container">
-        <rect id="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
-        <rect id="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
-        <rect id="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
-        <text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text>
-        <rect id="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text>
-        <rect id="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-        <text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>58 lines</tspan></tspan></text>
+        <rect id="f_cart_bg" class="ai-shape ai-rect" x="96" y="418" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="f_cart_sep" class="ai-shape ai-rect" x="96" y="492" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+        <rect id="f_cart_chip" class="ai-shape ai-rect" x="118" y="433" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
+        <text class="ai-label" x="137" y="456" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="137" dy="-0"><tspan>py</tspan></tspan></text>
+        <rect id="f_cart_fname" class="ai-shape ai-rect" x="166" y="434.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="174" y="456" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="174" dy="-0"><tspan>cart.py</tspan></tspan></text>
+        <rect id="f_cart_val" class="ai-shape ai-rect" x="482.512" y="434.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="542.256" y="456" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="542.256" dy="-0"><tspan>58 lines</tspan></tspan></text>
       </g>
     </g>
   </g>
-  <path id="rule" class="ai-shape ai-path dots" d="M747.85 359.00 L1520.00 359.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
-  <rect id="rule_end" class="ai-shape ai-rect ai-point" x="1520" y="359" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-  <path id="track" class="ai-shape ai-path" d="M807.85 359.00 L1021.54 359.00 L1252.35 359.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect id="rule_end" class="ai-shape ai-rect ai-point" x="1520" y="354" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
   <g id="stations" class="ai-container">
     <g id="st1" class="ai-container">
-      <circle id="st1_dot" class="ai-shape ai-circle" cx="807.848" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
-      <rect id="st1_nm" class="ai-shape ai-rect" x="740.1009" y="279.25" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="807.848" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="807.848" dy="-0"><tspan>Login page</tspan></tspan></text>
-      <rect id="st1_mt" class="ai-shape ai-rect" x="721" y="394" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="807.848" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="807.848" dy="-0"><tspan>anna · Mon 09:12</tspan></tspan></text>
+      <circle id="st1_dot" class="ai-shape ai-circle" cx="797.848" cy="354" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      <rect id="st1_nm" class="ai-shape ai-rect" x="730.1009" y="274.25" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="797.848" y="296.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="797.848" dy="-0"><tspan>Login page</tspan></tspan></text>
+      <rect id="st1_mt" class="ai-shape ai-rect" x="711" y="389" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="797.848" y="407" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="797.848" dy="-0"><tspan>anna · Mon 09:12</tspan></tspan></text>
     </g>
     <g id="st2" class="ai-container">
-      <circle id="st2_dot" class="ai-shape ai-circle" cx="1021.544" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
-      <rect id="st2_nm" class="ai-shape ai-rect" x="954.4972" y="279.25" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1021.544" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1021.544" dy="-0"><tspan>Dark mode</tspan></tspan></text>
-      <rect id="st2_mt" class="ai-shape ai-rect" x="934.696" y="394" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1021.544" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1021.544" dy="-0"><tspan>anna · Mon 16:40</tspan></tspan></text>
+      <circle id="st2_dot" class="ai-shape ai-circle" cx="1011.544" cy="354" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      <rect id="st2_nm" class="ai-shape ai-rect" x="944.4972" y="274.25" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1011.544" y="296.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1011.544" dy="-0"><tspan>Dark mode</tspan></tspan></text>
+      <rect id="st2_mt" class="ai-shape ai-rect" x="924.696" y="389" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1011.544" y="407" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1011.544" dy="-0"><tspan>anna · Mon 16:40</tspan></tspan></text>
     </g>
     <g id="st3" class="ai-container">
-      <circle id="st3_dot" class="ai-shape ai-circle" cx="1252.352" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
-      <rect id="st3_nm" class="ai-shape ai-rect" x="1148.392" y="279.25" width="207.9201" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1252.352" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1252.352" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
-      <rect id="st3_mt" class="ai-shape ai-rect" x="1170.432" y="394" width="163.84" height="36" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1252.352" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1252.352" dy="-0"><tspan>ben · Tue 14:03</tspan></tspan></text>
+      <circle id="st3_dot" class="ai-shape ai-circle" cx="1242.352" cy="354" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      <rect id="st3_nm" class="ai-shape ai-rect" x="1138.392" y="274.25" width="207.9201" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1242.352" y="296.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1242.352" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
+      <rect id="st3_mt" class="ai-shape ai-rect" x="1160.432" y="389" width="163.84" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1242.352" y="407" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1242.352" dy="-0"><tspan>ben · Tue 14:03</tspan></tspan></text>
     </g>
   </g>
-  <rect id="stick" class="ai-shape ai-rect" x="1250.852" y="436" width="3" height="28" fill="var(--role-ink)" stroke="none" stroke-width="1.5"/>
+  <rect id="stick" class="ai-shape ai-rect" x="1240.852" y="431" width="3" height="28" fill="var(--role-ink)" stroke="none" stroke-width="1.5"/>
   <g id="card" class="ai-container">
-    <rect id="card_bg" class="ai-shape ai-rect" x="1061" y="464" width="481" height="287.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+    <rect id="card_bg" class="ai-shape ai-rect" x="1061" y="459" width="481" height="287.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
     <g id="card_body" class="ai-container">
-      <rect id="ck" class="ai-shape ai-rect" x="1088" y="491" width="153.984" height="36" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1096" y="509" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>COMMIT </tspan><tspan fill="var(--role-primary)">3f2a9c1</tspan></tspan></text>
-      <rect id="cm" class="ai-shape ai-rect" x="1088" y="537" width="232.9531" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1096" y="561.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1096" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
-      <rect id="cmeta" class="ai-shape ai-rect" x="1088" y="595.5" width="361.576" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1096" y="614.125" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>ben · Tue 29 Sep, 14:03 · cart.py</tspan></tspan></text>
-      <rect id="diff_rule" class="ai-shape ai-rect" x="1088" y="642.75" width="400" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+      <rect id="ck" class="ai-shape ai-rect" x="1088" y="486" width="153.984" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1096" y="504" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>COMMIT </tspan><tspan fill="var(--role-primary)">3f2a9c1</tspan></tspan></text>
+      <rect id="cm" class="ai-shape ai-rect" x="1088" y="532" width="232.9531" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1096" y="556.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1096" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
+      <rect id="cmeta" class="ai-shape ai-rect" x="1088" y="590.5" width="361.576" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1096" y="609.125" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>ben · Tue 29 Sep, 14:03 · cart.py</tspan></tspan></text>
+      <rect id="diff_rule" class="ai-shape ai-rect" x="1088" y="637.75" width="400" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
       <g id="diff" class="ai-container">
-        <rect id="diff_bg" class="ai-shape ai-rect" x="1088" y="654.75" width="427" height="70" fill="none" stroke="none" stroke-width="1.5"/>
-        <rect id="diff_top_pad" class="ai-shape ai-rect" x="1091" y="657.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-        <rect id="diff_line1" class="ai-shape ai-rect" x="1091" y="657.75" width="421" height="30" fill="var(--code-del-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
-        <text class="ai-label" x="1099" y="672.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-del-strong)">- </tspan><tspan fill="var(--code-del)">    return </tspan><tspan font-weight="bold" fill="var(--code-del-strong)">s</tspan></tspan></text>
-        <rect id="diff_line2" class="ai-shape ai-rect" x="1091" y="691.75" width="421" height="30" fill="var(--code-add-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
-        <text class="ai-label" x="1099" y="706.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-add-strong)">+ </tspan><tspan fill="var(--code-add)">    return </tspan><tspan font-weight="bold" fill="var(--code-add-strong)">round(s, 2)</tspan></tspan></text>
-        <rect id="diff_bottom_pad" class="ai-shape ai-rect" x="1091" y="721.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="diff_bg" class="ai-shape ai-rect" x="1088" y="649.75" width="427" height="70" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="diff_top_pad" class="ai-shape ai-rect" x="1091" y="652.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+        <rect id="diff_line1" class="ai-shape ai-rect" x="1091" y="652.75" width="421" height="30" fill="var(--code-del-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
+        <text class="ai-label" x="1099" y="667.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-del-strong)">- </tspan><tspan fill="var(--code-del)">    return </tspan><tspan font-weight="bold" fill="var(--code-del-strong)">s</tspan></tspan></text>
+        <rect id="diff_line2" class="ai-shape ai-rect" x="1091" y="686.75" width="421" height="30" fill="var(--code-add-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
+        <text class="ai-label" x="1099" y="701.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-add-strong)">+ </tspan><tspan fill="var(--code-add)">    return </tspan><tspan font-weight="bold" fill="var(--code-add-strong)">round(s, 2)</tspan></tspan></text>
+        <rect id="diff_bottom_pad" class="ai-shape ai-rect" x="1091" y="716.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
       </g>
     </g>
   </g>

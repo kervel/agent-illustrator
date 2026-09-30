@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.8
+
+- `clip: bg`: a part is drawn only inside another element's shape, within its
+  stroke and following its rounded corners. A window's header bar is a plain
+  rect that never covers the border and leaves no corner notch. Code blocks'
+  title bars use it; git-history's machines and git-snapshots' folder too.
+- `padding: 0` on a row/column: children flush with its edge (default 5).
+- A `through:` line runs under the stations it passes through, whatever the
+  declaration order; `z_order:` now works on any shape among its siblings.
+- The station lint counts `show x [from: y]` as arriving when it lands.
+- Push/pull recipe (and git-history): the commit itself flies and stays while
+  the line grows to meet it, instead of a ghost that lands and a dot that pops.
+- `--states`: each step's duration (marked slow past 2.5s a frame), and a note
+  when the content sits off-centre on the stage or uses under half of it.
+- `jitter: rotate(4)` (degrees) / `move(6)` (px) documented; a bare number
+  means rotate.
+- --skill-animation opens with "your first scene in 10 minutes", a complete
+  scene checked by a test.
+
 ## v0.2.7
 
 - `--animate-css` now plays the compiled choreography (draws, pops, flights,

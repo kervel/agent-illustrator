@@ -597,6 +597,12 @@ pub struct ResolvedStyles {
     pub font_weight: Option<String>,
     /// `font_family: mono | sans | "Some Font"` for labels and text.
     pub font_family: Option<String>,
+    /// `clip: bg`: drawn only inside that element's shape (within its
+    /// stroke, following its rounded corners): a window's header bar.
+    pub clip: Option<String>,
+    /// `padding: 0` on a row/column: room between its edge and its
+    /// children (default: the layout's container padding).
+    pub padding: Option<f64>,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -642,6 +648,8 @@ impl ResolvedStyles {
             corner_radius: None,
             font_weight: None,
             font_family: None,
+            clip: None,
+            padding: None,
         }
     }
 
@@ -758,6 +766,16 @@ impl ResolvedStyles {
                         }
                         if k == "font_weight" {
                             styles.font_weight = Some(format!("{}", value));
+                        }
+                        if k == "padding" {
+                            styles.padding = Some(value.max(0.0));
+                        }
+                    }
+                    if let (StyleKey::Custom(k), StyleValue::Identifier(id)) =
+                        (&modifier.node.key.node, &modifier.node.value.node)
+                    {
+                        if k == "clip" {
+                            styles.clip = Some(id.0.replace('.', "_"));
                         }
                     }
                     if matches!(&modifier.node.key.node, StyleKey::Custom(k) if k == "pack")
@@ -903,6 +921,8 @@ impl ResolvedStyles {
             align: other.align.or(self.align),
             label_fill: other.label_fill.clone().or_else(|| self.label_fill.clone()),
             corner_radius: other.corner_radius.or(self.corner_radius),
+            clip: other.clip.clone().or_else(|| self.clip.clone()),
+            padding: other.padding.or(self.padding),
             font_weight: other.font_weight.clone().or_else(|| self.font_weight.clone()),
             font_family: other.font_family.clone().or_else(|| self.font_family.clone()),
         }

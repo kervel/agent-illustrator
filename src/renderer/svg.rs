@@ -72,6 +72,9 @@ pub struct SvgBuilder {
     pub motion: Option<crate::motion::render::MotionHooks>,
     /// Opacity to put on the next wrapper group (moved off its element).
     pending_opacity: Option<f64>,
+    /// `clip:` targets: element id -> the inside of its shape (x, y, w, h,
+    /// corner radius), within its stroke.
+    clip_targets: std::collections::HashMap<String, (f64, f64, f64, f64, f64)>,
 }
 
 impl SvgBuilder {
@@ -95,6 +98,7 @@ impl SvgBuilder {
             text_variants: std::collections::HashMap::new(),
             motion: None,
             pending_opacity: None,
+            clip_targets: std::collections::HashMap::new(),
         }
     }
 
@@ -749,6 +753,41 @@ impl SvgBuilder {
         self.indent += 1;
     }
 
+    /// Every element's inside (within its stroke), for `clip:`.
+    pub fn set_clip_targets(&mut self, elems: &[ElementLayout]) {
+        fn walk(elems: &[ElementLayout], out: &mut std::collections::HashMap<String, (f64, f64, f64, f64, f64)>) {
+            for e in elems {
+                if let Some(id) = &e.id {
+                    let b = &e.bounds;
+                    let has_stroke = e.styles.stroke.as_deref().is_none_or(|s| s != "none");
+                    let sw = if has_stroke { e.styles.stroke_width.unwrap_or(1.5) } else { 0.0 };
+                    let rx = e.styles.corner_radius.unwrap_or(0.0);
+                    let half = sw / 2.0;
+                    out.insert(
+                        id.0.clone(),
+                        (b.x + half, b.y + half, (b.width - sw).max(0.0), (b.height - sw).max(0.0), (rx - half).max(0.0)),
+                    );
+                }
+                walk(&e.children, out);
+            }
+        }
+        self.clip_targets.clear();
+        walk(elems, &mut self.clip_targets);
+    }
+
+    /// Open a group clipped to the inside of element `target`; false when
+    /// there is no such element (nothing to close).
+    pub fn start_clip(&mut self, owner: &str, target: &str) -> bool {
+        let Some(&(x, y, w, h, r)) = self.clip_targets.get(target) else { return false };
+        let id = format!("{}clip-{}", self.prefix(), owner);
+        self.defs.push(format!(
+            r#"<clipPath id="{id}"><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" ry="{r}"/></clipPath>"#
+        ));
+        self.elements.push(format!(r#"{}<g clip-path="url(#{id})">"#, self.indent_str()));
+        self.indent += 1;
+        true
+    }
+
     /// Close a group element
     pub fn end_group(&mut self) {
         self.indent = self.indent.saturating_sub(1);
@@ -1055,6 +1094,7 @@ pub fn render_svg_with_keyframes(
 
     builder.set_text_variants(collect_text_variants(frame_diffs));
 
+    builder.set_clip_targets(&result.root_elements);
     let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
     sorted_elements.sort_by_key(|e| e.z_order);
     for element in &sorted_elements {
@@ -1401,6 +1441,7 @@ pub fn render_svg_with_stylesheet(
     }
 
     // Render all root elements, sorted by z_order (stable sort preserves document order)
+    builder.set_clip_targets(&result.root_elements);
     let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
     sorted_elements.sort_by_key(|e| e.z_order);
     for element in &sorted_elements {
@@ -1468,6 +1509,23 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
 
 /// Render a single element to the builder with visibility checks for children
 fn render_element_inner(
+    element: &ElementLayout,
+    builder: &mut SvgBuilder,
+    hidden: &std::collections::HashSet<String>,
+    kf_referenced: &std::collections::HashSet<String>,
+) {
+    // `clip: bg`: the element (and its label) only inside bg's shape.
+    let clipped = match (&element.styles.clip, &element.id) {
+        (Some(target), Some(id)) => builder.start_clip(&id.0, target),
+        _ => false,
+    };
+    render_element_body(element, builder, hidden, kf_referenced);
+    if clipped {
+        builder.end_group();
+    }
+}
+
+fn render_element_body(
     element: &ElementLayout,
     builder: &mut SvgBuilder,
     hidden: &std::collections::HashSet<String>,
@@ -1841,8 +1899,11 @@ fn render_element_inner(
                 builder.start_group(id, &container_classes);
             }
 
-            // Render children (with visibility checks for keyframe animations)
-            for child in &element.children {
+            // Render children (with visibility checks for keyframe
+            // animations), lowest z_order first; ties keep document order.
+            let mut children: Vec<&ElementLayout> = element.children.iter().collect();
+            children.sort_by_key(|c| c.z_order);
+            for child in children {
                 render_element_with_visibility(child, builder, hidden, kf_referenced);
             }
 

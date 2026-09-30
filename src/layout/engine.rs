@@ -1022,10 +1022,24 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     let element_type = ElementType::Shape(effective_shape_type);
     // Feature 009: Compute anchors based on shape type (callouts also get `tip`)
     let anchors = AnchorSet::for_element_type(&element_type, &bounds);
+    // `z_order: N` puts a shape above (or below) its siblings; a line
+    // `through:` stations runs under them unless told otherwise.
+    let z_order = shape
+        .modifiers
+        .iter()
+        .find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+            (StyleKey::ZOrder, StyleValue::Number { value, .. }) => Some(*value as i32),
+            _ => None,
+        })
+        .unwrap_or_else(|| {
+            let through = matches!(&shape.shape_type.node, ShapeType::Path(_))
+                && super::through::through_spec(&shape.modifiers).is_some();
+            if through { -1 } else { 0 }
+        });
 
     ElementLayout {
         id,
-        z_order: 0,
+        z_order,
         element_type,
         bounds,
         styles,
@@ -1845,10 +1859,12 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
     let gap = extract_gap(&layout.modifiers);
     // Cross-axis alignment of the children (default: start).
     let align = extract_align(&layout.modifiers);
+    // `padding: 0`: children to the edge (a window's header bar).
+    let pad = ResolvedStyles::from_modifiers(&layout.modifiers).padding.unwrap_or(config.container_padding);
 
     let (mut children, bounds) = match layout.layout_type.node {
-        LayoutType::Row => layout_row(&layout.children, position, config, gap, align),
-        LayoutType::Column => layout_column(&layout.children, position, config, gap, align),
+        LayoutType::Row => layout_row(&layout.children, position, config, gap, align, pad),
+        LayoutType::Column => layout_column(&layout.children, position, config, gap, align, pad),
         LayoutType::Grid => layout_grid(layout, position, config, gap),
         LayoutType::Stack => layout_stack(&layout.children, position, config),
     };
@@ -1911,7 +1927,7 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
     // Groups default to column layout (no gap override)
     // Filter out Label statements from layout children
     let (mut children, bounds) =
-        layout_column(&group.children, position, config, None, extract_align(&group.modifiers));
+        layout_column(&group.children, position, config, None, extract_align(&group.modifiers), config.container_padding);
 
     let styles = ResolvedStyles::from_modifiers(&group.modifiers);
 
@@ -2131,9 +2147,10 @@ fn layout_row(
     config: &LayoutConfig,
     gap_override: Option<f64>,
     align: Option<TextAnchor>,
+    pad: f64,
 ) -> (Vec<ElementLayout>, BoundingBox) {
     let mut layouts = vec![];
-    let mut x = position.x + config.container_padding;
+    let mut x = position.x + pad;
     let mut max_height = 0.0f64;
 
     // Use gap override if provided, otherwise use default element spacing
@@ -2155,7 +2172,7 @@ fn layout_row(
 
         let child_layout = layout_statement(
             &child.node,
-            Point::new(x, position.y + config.container_padding),
+            Point::new(x, position.y + pad),
             config,
         );
         if !child_layout.is_through_path() {
@@ -2166,11 +2183,11 @@ fn layout_row(
     }
 
     let total_width = if layouts.is_empty() {
-        config.container_padding * 2.0
+        pad * 2.0
     } else {
-        x - position.x - spacing + config.container_padding
+        x - position.x - spacing + pad
     };
-    let total_height = max_height + 2.0 * config.container_padding;
+    let total_height = max_height + 2.0 * pad;
 
     // A row's cross axis is vertical: children line up against the tallest one.
     align_cross_axis(&mut layouts, align, max_height, true);
@@ -2187,9 +2204,10 @@ fn layout_column(
     config: &LayoutConfig,
     gap_override: Option<f64>,
     align: Option<TextAnchor>,
+    pad: f64,
 ) -> (Vec<ElementLayout>, BoundingBox) {
     let mut layouts = vec![];
-    let mut y = position.y + config.container_padding;
+    let mut y = position.y + pad;
     let mut max_width = 0.0f64;
 
     // Use gap override if provided, otherwise use default element spacing
@@ -2211,7 +2229,7 @@ fn layout_column(
 
         let child_layout = layout_statement(
             &child.node,
-            Point::new(position.x + config.container_padding, y),
+            Point::new(position.x + pad, y),
             config,
         );
         if !child_layout.is_through_path() {
@@ -2221,11 +2239,11 @@ fn layout_column(
         layouts.push(child_layout);
     }
 
-    let total_width = max_width + 2.0 * config.container_padding;
+    let total_width = max_width + 2.0 * pad;
     let total_height = if layouts.is_empty() {
-        config.container_padding * 2.0
+        pad * 2.0
     } else {
-        y - position.y - spacing + config.container_padding
+        y - position.y - spacing + pad
     };
 
     // A column's cross axis is horizontal: children line up against the widest one.
@@ -4489,7 +4507,7 @@ fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&Ha
             // constraint on it means the same thing before and after its
             // box is recomputed (and re-solving a frame changes nothing).
             if let ElementType::Layout(LayoutType::Row | LayoutType::Column | LayoutType::Grid) = elem.element_type {
-                let pad = LayoutConfig::default().container_padding;
+                let pad = elem.styles.padding.unwrap_or(LayoutConfig::default().container_padding);
                 bounds = BoundingBox::new(
                     bounds.x - pad,
                     bounds.y - pad,

@@ -20,6 +20,33 @@ Connection labels always sit at the midpoint, causing collisions when paths cros
 
 ## Medium Priority
 
+### Sandbox: the static binary is the whole loop (next, from the deck review)
+PNG output via resvg (`--frame N [--at T] --png`, `--frames-to-dir --png`,
+`--frames-strip --png`, `--scale`); bundled sans + mono fonts and `@font-face`
+data URIs from stylesheets, with a clear report on fallback; CI check that the
+default build is a static musl binary; prebuilt static linux x86_64/aarch64
+binaries on every release with a one-line install; a "verifying without a
+browser" section in --skill and --skill-animation.
+
+### Flicker check: a maintainer tool, outside the binary (lowest priority)
+The flip flashes of v0.2.2/v0.2.3 only showed in a headed GPU Chrome: CDP
+`Page.startScreencast` (everyNthFrame 1) plus a per-region check (frame i
+differs from i-1 and i+1 while those two agree). Build it as
+`tools/flicker-check/` (Node + Playwright or a separate crate), taking an SVG
+or the `--serve` page; keep the v0.2.3 regression as a known-positive fixture.
+Run it when the player or the track export changes (release checklist), not in
+CI. No browser dependency may enter the main binary.
+
+### The long tail (decided, not planned)
+- 3D card flip (perspective rotateY): no, by design. The native renderer and
+  the player must agree frame by frame; the 2D flip does that.
+- Spring/physics easing: later, as named eases (a spring is a cubic
+  approximation away from `pop`).
+- Per-character text (typing): later, as an `enter: type` preset on text.
+- Masks/reveal wipes on arbitrary shapes: later; `wipe(dir)` covers boxes.
+- Particles: no, by design (not a diagramming need; no semantic meaning).
+
+
 ### Tight group box as a constraint subject (deferred from v0.2.5)
 `constrain [merged, card].center_x = s.stage.center_x`: centre two elements
 together. `contains` only emits inequalities, so a helper box is loose (the

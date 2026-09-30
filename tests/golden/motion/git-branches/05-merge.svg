@@ -143,14 +143,14 @@ svg { font-family: var(--font-sans); }
 .dots { stroke-linecap: round; }
 text { white-space: pre; }
   ]]></style>
+  <path id="main_line" class="ai-shape ai-path" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--role-primary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
+  <path id="branch" class="ai-shape ai-path" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--role-secondary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
     <rect id="s_badge" class="ai-shape ai-rect" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
     <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>4</tspan></tspan></text>
     <text id="s_heading" class="ai-shape ai-text" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Branches and merge requests</text>
   </g>
-  <path id="main_line" class="ai-shape ai-path" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--role-primary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
-  <path id="branch" class="ai-shape ai-path" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--role-secondary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
   <g id="mains" class="ai-container">
     <g id="a" class="ai-container">
       <circle id="a_dot" class="ai-shape ai-circle" cx="172.7471" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>

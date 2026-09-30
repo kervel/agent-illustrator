@@ -50,8 +50,8 @@ slide s [num: "2", title: "Git takes snapshots"]
 // The project folder
 group folder {
     rect folder_bg [fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 16]
-    col folder_body [gap: 0] {
-        rect fhead [width: 520, height: 52, fill: role-surface-2, stroke: none, corner_radius: 14,
+    col folder_body [gap: 0, padding: 0] {
+        rect fhead [width: 520, height: 52, fill: role-surface-2, stroke: none, clip: folder_bg,
                     label: "webshop", align: start, font_size: 21, font_weight: 700, label_fill: role-ink]
         file_row f_login [kind: "py", tint: role-primary, name: "login.py", value: "84 lines"]
         file_row f_style [kind: "css", tint: role-secondary, name: "style.css", value: "210 lines"]

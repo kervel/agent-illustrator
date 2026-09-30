@@ -219,6 +219,11 @@ text { white-space: pre; }
 .kfp-4daa88cb-merged_line8 { animation: ailfilm19 13.08s linear infinite; }
 @media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
 ]]></style>
+  <defs>
+    <clipPath id="ai-clip-anna_title"><rect x="310.5" y="201.5" width="468" height="311" rx="12.5" ry="12.5"/></clipPath>
+    <clipPath id="ai-clip-merged_title"><rect x="494" y="171.5" width="612" height="607" rx="12.5" ry="12.5"/></clipPath>
+    <clipPath id="ai-clip-ben_title"><rect x="821.5" y="201.5" width="468" height="311" rx="12.5" ry="12.5"/></clipPath>
+  </defs>
   <g class="kf-4daa88cb-s kf-anim" style="transform-origin:800px 450px">
     <g id="s" class="ai-container kfp-4daa88cb-s">
       <g class="kf-4daa88cb-s_stage kf-anim" style="transform-origin:800px 450px">
@@ -239,8 +244,10 @@ text { white-space: pre; }
         <rect id="anna_bg" class="ai-shape ai-rect kfp-4daa88cb-anna_bg" x="309" y="200" width="471" height="314" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
       </g>
       <g class="kf-4daa88cb-anna_title kf-anim" style="transform-origin:544.5px 227.5px">
-        <rect id="anna_title" class="ai-shape ai-rect kfp-4daa88cb-anna_title" x="312" y="203" width="465" height="49" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
-        <text class="ai-label" x="320" y="227.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--code-title)" style="font-weight:700"><tspan x="320" dy="-0"><tspan fill="var(--role-series-1)">●</tspan><tspan>  cart.py · Anna</tspan></tspan></text>
+        <g clip-path="url(#ai-clip-anna_title)">
+          <rect id="anna_title" class="ai-shape ai-rect kfp-4daa88cb-anna_title" x="312" y="203" width="465" height="49" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+          <text class="ai-label" x="320" y="227.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--code-title)" style="font-weight:700"><tspan x="320" dy="-0"><tspan fill="var(--role-series-1)">●</tspan><tspan>  cart.py · Anna</tspan></tspan></text>
+        </g>
       </g>
       <g class="kf-4daa88cb-anna_title_rule kf-anim" style="transform-origin:544.5px 253.5px">
         <rect id="anna_title_rule" class="ai-shape ai-rect kfp-4daa88cb-anna_title_rule" x="312" y="252" width="465" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
@@ -283,9 +290,6 @@ text { white-space: pre; }
       <g class="kf-4daa88cb-anna_bottom_pad kf-anim" style="transform-origin:544.5px 507px">
         <rect id="anna_bottom_pad" class="ai-shape ai-rect kfp-4daa88cb-anna_bottom_pad" x="312" y="503" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
       </g>
-      <g class="kf-4daa88cb-anna_title_square kf-anim" style="transform-origin:544.5px 246px">
-        <rect id="anna_title_square" class="ai-shape ai-rect kfp-4daa88cb-anna_title_square" x="312" y="240" width="465" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
-      </g>
     </g>
   </g>
   <g class="kf-hidden kf-4daa88cb-merged kf-anim" style="transform-origin:800px 475px">
@@ -294,8 +298,10 @@ text { white-space: pre; }
         <rect id="merged_bg" class="ai-shape ai-rect kfp-4daa88cb-merged_bg" x="492.5" y="170" width="615" height="610" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
       </g>
       <g class="kf-4daa88cb-merged_title kf-anim" style="transform-origin:800px 205.5px">
-        <rect id="merged_title" class="ai-shape ai-rect kfp-4daa88cb-merged_title" x="495.5" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
-        <text class="ai-label" x="503.5" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="503.5" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+        <g clip-path="url(#ai-clip-merged_title)">
+          <rect id="merged_title" class="ai-shape ai-rect kfp-4daa88cb-merged_title" x="495.5" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+          <text class="ai-label" x="503.5" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="503.5" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+        </g>
       </g>
       <g class="kf-4daa88cb-merged_title_rule kf-anim" style="transform-origin:800px 239.5px">
         <rect id="merged_title_rule" class="ai-shape ai-rect kfp-4daa88cb-merged_title_rule" x="495.5" y="238" width="609" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
@@ -358,9 +364,6 @@ text { white-space: pre; }
       <g class="kf-4daa88cb-merged_bottom_pad kf-anim" style="transform-origin:800px 773px">
         <rect id="merged_bottom_pad" class="ai-shape ai-rect kfp-4daa88cb-merged_bottom_pad" x="495.5" y="769" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
       </g>
-      <g class="kf-4daa88cb-merged_title_square kf-anim" style="transform-origin:800px 232px">
-        <rect id="merged_title_square" class="ai-shape ai-rect kfp-4daa88cb-merged_title_square" x="495.5" y="226" width="609" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
-      </g>
     </g>
   </g>
   <g class="kf-4daa88cb-ben kf-anim" style="transform-origin:1055.5px 357px">
@@ -369,8 +372,10 @@ text { white-space: pre; }
         <rect id="ben_bg" class="ai-shape ai-rect kfp-4daa88cb-ben_bg" x="820" y="200" width="471" height="314" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
       </g>
       <g class="kf-4daa88cb-ben_title kf-anim" style="transform-origin:1055.5px 227.5px">
-        <rect id="ben_title" class="ai-shape ai-rect kfp-4daa88cb-ben_title" x="823" y="203" width="465" height="49" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
-        <text class="ai-label" x="831" y="227.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--code-title)" style="font-weight:700"><tspan x="831" dy="-0"><tspan fill="var(--role-series-2)">●</tspan><tspan>  cart.py · Ben</tspan></tspan></text>
+        <g clip-path="url(#ai-clip-ben_title)">
+          <rect id="ben_title" class="ai-shape ai-rect kfp-4daa88cb-ben_title" x="823" y="203" width="465" height="49" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+          <text class="ai-label" x="831" y="227.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--code-title)" style="font-weight:700"><tspan x="831" dy="-0"><tspan fill="var(--role-series-2)">●</tspan><tspan>  cart.py · Ben</tspan></tspan></text>
+        </g>
       </g>
       <g class="kf-4daa88cb-ben_title_rule kf-anim" style="transform-origin:1055.5px 253.5px">
         <rect id="ben_title_rule" class="ai-shape ai-rect kfp-4daa88cb-ben_title_rule" x="823" y="252" width="465" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
@@ -412,9 +417,6 @@ text { white-space: pre; }
       </g>
       <g class="kf-4daa88cb-ben_bottom_pad kf-anim" style="transform-origin:1055.5px 507px">
         <rect id="ben_bottom_pad" class="ai-shape ai-rect kfp-4daa88cb-ben_bottom_pad" x="823" y="503" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
-      </g>
-      <g class="kf-4daa88cb-ben_title_square kf-anim" style="transform-origin:1055.5px 246px">
-        <rect id="ben_title_square" class="ai-shape ai-rect kfp-4daa88cb-ben_title_square" x="823" y="240" width="465" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
       </g>
     </g>
   </g>

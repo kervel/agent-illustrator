@@ -143,6 +143,9 @@ svg { font-family: var(--font-sans); }
 .dots { stroke-linecap: round; }
 text { white-space: pre; }
   ]]></style>
+  <defs>
+    <clipPath id="ai-clip-merged_title"><rect x="273.5" y="171.5" width="612" height="567" rx="12.5" ry="12.5"/></clipPath>
+  </defs>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
     <rect id="s_badge" class="ai-shape ai-rect" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
@@ -151,8 +154,10 @@ text { white-space: pre; }
   </g>
   <g id="merged" class="ai-container">
     <rect id="merged_bg" class="ai-shape ai-rect" x="272" y="170" width="615" height="570" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
-    <rect id="merged_title" class="ai-shape ai-rect" x="275" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
-    <text class="ai-label" x="283" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="283" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+    <g clip-path="url(#ai-clip-merged_title)">
+      <rect id="merged_title" class="ai-shape ai-rect" x="275" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="283" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="283" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+    </g>
     <rect id="merged_title_rule" class="ai-shape ai-rect" x="275" y="238" width="609" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
     <rect id="merged_top_pad" class="ai-shape ai-rect" x="275" y="241" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
     <rect id="merged_line1" class="ai-shape ai-rect" x="275" y="249" width="609" height="40" fill="var(--role-series-2-soft)" stroke="none" stroke-width="1.5"/>
@@ -180,7 +185,6 @@ text { white-space: pre; }
     <rect id="merged_conflict5" class="ai-shape ai-rect conflict" x="275" y="689" width="609" height="40" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
     <text class="ai-label" x="283" y="709" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="283" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">   </tspan><tspan>&gt;&gt;&gt;&gt;&gt;&gt;&gt; ben</tspan></tspan></text>
     <rect id="merged_bottom_pad" class="ai-shape ai-rect" x="275" y="729" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="merged_title_square" class="ai-shape ai-rect" x="275" y="226" width="609" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="card" class="ai-container">
     <rect id="card_bg" class="ai-shape ai-rect" x="935" y="502.75" width="394.592" height="172.5" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
