@@ -718,6 +718,9 @@ Draw colours as CSS variables with a fallback: `var(--role-ink, #111)` follows
 the theme, `var(--b1, #ccc)` is an instance argument (`docx d [b1:
 role-primary]`). Example artwork: examples/motion/assets/*.svg, used by
 git-copies.ail.
+Never paint the background colour to fake a hole (a backdrop-coloured
+triangle over a page's corner): on another background it shows. Cut the
+shape instead (the sheet in docx.svg is a path with its corner cut off).
 
 ### A deck host's header and notes
 

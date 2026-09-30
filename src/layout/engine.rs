@@ -1031,11 +1031,7 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
             (StyleKey::ZOrder, StyleValue::Number { value, .. }) => Some(*value as i32),
             _ => None,
         })
-        .unwrap_or_else(|| {
-            let through = matches!(&shape.shape_type.node, ShapeType::Path(_))
-                && super::through::through_spec(&shape.modifiers).is_some();
-            if through { -1 } else { 0 }
-        });
+        .unwrap_or(0);
 
     ElementLayout {
         id,

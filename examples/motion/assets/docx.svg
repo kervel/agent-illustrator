@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 162" width="126" height="162">
   <title>Document</title>
   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-       Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
-  <rect id="sheet" x="1.5" y="1.5" width="123" height="159" rx="8"
-        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+       Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+       The sheet has its corner cut off, so the background shows behind the fold. -->
+  <path id="sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z"
+        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3" stroke-linejoin="round"/>
   <g id="fold">
-    <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
     <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
     <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
           stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>

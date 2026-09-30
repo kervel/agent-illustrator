@@ -324,22 +324,22 @@ text { white-space: pre; }
         <g id="d0" class="ai-container kfp-bf445348-d0">
           <g class="kf-bf445348-d0_pg kf-anim" style="transform-origin:292.7px 305px">
             <g id="d0_pg" class="ai-container kfp-bf445348-d0_pg">
-              <g class="kf-bf445348-d0_pg_art kf-anim" style="transform-origin:293.45px 304.25px">
-                <g id="d0_pg_art" class="ai-svg-embed kfp-bf445348-d0_pg_art" transform="translate(231.202, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d0_pg_art kf-anim" style="transform-origin:292.7px 305px">
+                <g id="d0_pg_art" class="ai-svg-embed kfp-bf445348-d0_pg_art" transform="translate(231.202, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d0_pg_sheet kf-anim" style="transform-origin:292.7px 305px">
                 <g id="d0_pg_sheet" class="ai-svg-embed kfp-bf445348-d0_pg_sheet" transform="translate(229.702, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d0_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d0_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d0_pg_fold kf-anim" style="transform-origin:338.95px 240.75px">
                 <g id="d0_pg_fold" class="ai-svg-embed kfp-bf445348-d0_pg_fold" transform="translate(322.202, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="d0_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -396,22 +396,22 @@ text { white-space: pre; }
         <g id="d1" class="ai-container kfp-bf445348-d1">
           <g class="kf-bf445348-d1_pg kf-anim" style="transform-origin:630px 305px">
             <g id="d1_pg" class="ai-container kfp-bf445348-d1_pg">
-              <g class="kf-bf445348-d1_pg_art kf-anim" style="transform-origin:630.75px 304.25px">
-                <g id="d1_pg_art" class="ai-svg-embed kfp-bf445348-d1_pg_art" transform="translate(568.5, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d1_pg_art kf-anim" style="transform-origin:630px 305px">
+                <g id="d1_pg_art" class="ai-svg-embed kfp-bf445348-d1_pg_art" transform="translate(568.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d1_pg_sheet kf-anim" style="transform-origin:630px 305px">
                 <g id="d1_pg_sheet" class="ai-svg-embed kfp-bf445348-d1_pg_sheet" transform="translate(567, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d1_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d1_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d1_pg_fold kf-anim" style="transform-origin:676.25px 240.75px">
                 <g id="d1_pg_fold" class="ai-svg-embed kfp-bf445348-d1_pg_fold" transform="translate(659.5, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="d1_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -468,22 +468,22 @@ text { white-space: pre; }
         <g id="d2" class="ai-container kfp-bf445348-d2">
           <g class="kf-bf445348-d2_pg kf-anim" style="transform-origin:970px 305px">
             <g id="d2_pg" class="ai-container kfp-bf445348-d2_pg">
-              <g class="kf-bf445348-d2_pg_art kf-anim" style="transform-origin:970.75px 304.25px">
-                <g id="d2_pg_art" class="ai-svg-embed kfp-bf445348-d2_pg_art" transform="translate(908.5, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d2_pg_art kf-anim" style="transform-origin:970px 305px">
+                <g id="d2_pg_art" class="ai-svg-embed kfp-bf445348-d2_pg_art" transform="translate(908.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d2_pg_sheet kf-anim" style="transform-origin:970px 305px">
                 <g id="d2_pg_sheet" class="ai-svg-embed kfp-bf445348-d2_pg_sheet" transform="translate(907, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d2_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d2_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d2_pg_fold kf-anim" style="transform-origin:1016.25px 240.75px">
                 <g id="d2_pg_fold" class="ai-svg-embed kfp-bf445348-d2_pg_fold" transform="translate(999.5, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="d2_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -540,22 +540,22 @@ text { white-space: pre; }
         <g id="d3" class="ai-container kfp-bf445348-d3">
           <g class="kf-bf445348-d3_pg kf-anim" style="transform-origin:1310px 305px">
             <g id="d3_pg" class="ai-container kfp-bf445348-d3_pg">
-              <g class="kf-bf445348-d3_pg_art kf-anim" style="transform-origin:1310.75px 304.25px">
-                <g id="d3_pg_art" class="ai-svg-embed kfp-bf445348-d3_pg_art" transform="translate(1248.5, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d3_pg_art kf-anim" style="transform-origin:1310px 305px">
+                <g id="d3_pg_art" class="ai-svg-embed kfp-bf445348-d3_pg_art" transform="translate(1248.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d3_pg_sheet kf-anim" style="transform-origin:1310px 305px">
                 <g id="d3_pg_sheet" class="ai-svg-embed kfp-bf445348-d3_pg_sheet" transform="translate(1247, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d3_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d3_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d3_pg_fold kf-anim" style="transform-origin:1356.25px 240.75px">
                 <g id="d3_pg_fold" class="ai-svg-embed kfp-bf445348-d3_pg_fold" transform="translate(1339.5, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="d3_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -612,22 +612,22 @@ text { white-space: pre; }
         <g id="d4" class="ai-container kfp-bf445348-d4">
           <g class="kf-bf445348-d4_pg kf-anim" style="transform-origin:290px 585px">
             <g id="d4_pg" class="ai-container kfp-bf445348-d4_pg">
-              <g class="kf-bf445348-d4_pg_art kf-anim" style="transform-origin:290.75px 584.25px">
-                <g id="d4_pg_art" class="ai-svg-embed kfp-bf445348-d4_pg_art" transform="translate(228.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d4_pg_art kf-anim" style="transform-origin:290px 585px">
+                <g id="d4_pg_art" class="ai-svg-embed kfp-bf445348-d4_pg_art" transform="translate(228.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d4_pg_sheet kf-anim" style="transform-origin:290px 585px">
                 <g id="d4_pg_sheet" class="ai-svg-embed kfp-bf445348-d4_pg_sheet" transform="translate(227, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d4_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d4_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d4_pg_fold kf-anim" style="transform-origin:336.25px 520.75px">
                 <g id="d4_pg_fold" class="ai-svg-embed kfp-bf445348-d4_pg_fold" transform="translate(319.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="d4_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -684,22 +684,22 @@ text { white-space: pre; }
         <g id="d5" class="ai-container kfp-bf445348-d5">
           <g class="kf-bf445348-d5_pg kf-anim" style="transform-origin:630px 585px">
             <g id="d5_pg" class="ai-container kfp-bf445348-d5_pg">
-              <g class="kf-bf445348-d5_pg_art kf-anim" style="transform-origin:630.75px 584.25px">
-                <g id="d5_pg_art" class="ai-svg-embed kfp-bf445348-d5_pg_art" transform="translate(568.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d5_pg_art kf-anim" style="transform-origin:630px 585px">
+                <g id="d5_pg_art" class="ai-svg-embed kfp-bf445348-d5_pg_art" transform="translate(568.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d5_pg_sheet kf-anim" style="transform-origin:630px 585px">
                 <g id="d5_pg_sheet" class="ai-svg-embed kfp-bf445348-d5_pg_sheet" transform="translate(567, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d5_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d5_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d5_pg_fold kf-anim" style="transform-origin:676.25px 520.75px">
                 <g id="d5_pg_fold" class="ai-svg-embed kfp-bf445348-d5_pg_fold" transform="translate(659.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="d5_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -756,22 +756,22 @@ text { white-space: pre; }
         <g id="d6" class="ai-container kfp-bf445348-d6">
           <g class="kf-bf445348-d6_pg kf-anim" style="transform-origin:970px 585px">
             <g id="d6_pg" class="ai-container kfp-bf445348-d6_pg">
-              <g class="kf-bf445348-d6_pg_art kf-anim" style="transform-origin:970.75px 584.25px">
-                <g id="d6_pg_art" class="ai-svg-embed kfp-bf445348-d6_pg_art" transform="translate(908.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d6_pg_art kf-anim" style="transform-origin:970px 585px">
+                <g id="d6_pg_art" class="ai-svg-embed kfp-bf445348-d6_pg_art" transform="translate(908.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d6_pg_sheet kf-anim" style="transform-origin:970px 585px">
                 <g id="d6_pg_sheet" class="ai-svg-embed kfp-bf445348-d6_pg_sheet" transform="translate(907, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d6_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d6_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d6_pg_fold kf-anim" style="transform-origin:1016.25px 520.75px">
                 <g id="d6_pg_fold" class="ai-svg-embed kfp-bf445348-d6_pg_fold" transform="translate(999.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="d6_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -828,22 +828,22 @@ text { white-space: pre; }
         <g id="d7" class="ai-container kfp-bf445348-d7">
           <g class="kf-bf445348-d7_pg kf-anim" style="transform-origin:1310px 585px">
             <g id="d7_pg" class="ai-container kfp-bf445348-d7_pg">
-              <g class="kf-bf445348-d7_pg_art kf-anim" style="transform-origin:1310.75px 584.25px">
-                <g id="d7_pg_art" class="ai-svg-embed kfp-bf445348-d7_pg_art" transform="translate(1248.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-d7_pg_art kf-anim" style="transform-origin:1310px 585px">
+                <g id="d7_pg_art" class="ai-svg-embed kfp-bf445348-d7_pg_art" transform="translate(1248.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Document</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-d7_pg_sheet kf-anim" style="transform-origin:1310px 585px">
                 <g id="d7_pg_sheet" class="ai-svg-embed kfp-bf445348-d7_pg_sheet" transform="translate(1247, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="d7_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="d7_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-d7_pg_fold kf-anim" style="transform-origin:1356.25px 520.75px">
                 <g id="d7_pg_fold" class="ai-svg-embed kfp-bf445348-d7_pg_fold" transform="translate(1339.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="d7_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -904,22 +904,22 @@ text { white-space: pre; }
         <g id="k0" class="ai-container kfp-bf445348-k0">
           <g class="kf-bf445348-k0_pg kf-anim" style="transform-origin:292.7px 305px">
             <g id="k0_pg" class="ai-container kfp-bf445348-k0_pg">
-              <g class="kf-bf445348-k0_pg_art kf-anim" style="transform-origin:293.45px 304.25px">
-                <g id="k0_pg_art" class="ai-svg-embed kfp-bf445348-k0_pg_art" transform="translate(231.202, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k0_pg_art kf-anim" style="transform-origin:292.7px 305px">
+                <g id="k0_pg_art" class="ai-svg-embed kfp-bf445348-k0_pg_art" transform="translate(231.202, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k0_pg_sheet kf-anim" style="transform-origin:292.7px 305px">
                 <g id="k0_pg_sheet" class="ai-svg-embed kfp-bf445348-k0_pg_sheet" transform="translate(229.702, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k0_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k0_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k0_pg_fold kf-anim" style="transform-origin:338.95px 240.75px">
                 <g id="k0_pg_fold" class="ai-svg-embed kfp-bf445348-k0_pg_fold" transform="translate(322.202, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="k0_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -972,22 +972,22 @@ text { white-space: pre; }
         <g id="k1" class="ai-container kfp-bf445348-k1">
           <g class="kf-bf445348-k1_pg kf-anim" style="transform-origin:630px 305px">
             <g id="k1_pg" class="ai-container kfp-bf445348-k1_pg">
-              <g class="kf-bf445348-k1_pg_art kf-anim" style="transform-origin:630.75px 304.25px">
-                <g id="k1_pg_art" class="ai-svg-embed kfp-bf445348-k1_pg_art" transform="translate(568.5, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k1_pg_art kf-anim" style="transform-origin:630px 305px">
+                <g id="k1_pg_art" class="ai-svg-embed kfp-bf445348-k1_pg_art" transform="translate(568.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k1_pg_sheet kf-anim" style="transform-origin:630px 305px">
                 <g id="k1_pg_sheet" class="ai-svg-embed kfp-bf445348-k1_pg_sheet" transform="translate(567, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k1_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k1_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k1_pg_fold kf-anim" style="transform-origin:676.25px 240.75px">
                 <g id="k1_pg_fold" class="ai-svg-embed kfp-bf445348-k1_pg_fold" transform="translate(659.5, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="k1_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1040,22 +1040,22 @@ text { white-space: pre; }
         <g id="k2" class="ai-container kfp-bf445348-k2">
           <g class="kf-bf445348-k2_pg kf-anim" style="transform-origin:970px 305px">
             <g id="k2_pg" class="ai-container kfp-bf445348-k2_pg">
-              <g class="kf-bf445348-k2_pg_art kf-anim" style="transform-origin:970.75px 304.25px">
-                <g id="k2_pg_art" class="ai-svg-embed kfp-bf445348-k2_pg_art" transform="translate(908.5, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k2_pg_art kf-anim" style="transform-origin:970px 305px">
+                <g id="k2_pg_art" class="ai-svg-embed kfp-bf445348-k2_pg_art" transform="translate(908.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k2_pg_sheet kf-anim" style="transform-origin:970px 305px">
                 <g id="k2_pg_sheet" class="ai-svg-embed kfp-bf445348-k2_pg_sheet" transform="translate(907, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k2_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k2_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k2_pg_fold kf-anim" style="transform-origin:1016.25px 240.75px">
                 <g id="k2_pg_fold" class="ai-svg-embed kfp-bf445348-k2_pg_fold" transform="translate(999.5, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="k2_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1108,22 +1108,22 @@ text { white-space: pre; }
         <g id="k3" class="ai-container kfp-bf445348-k3">
           <g class="kf-bf445348-k3_pg kf-anim" style="transform-origin:1310px 305px">
             <g id="k3_pg" class="ai-container kfp-bf445348-k3_pg">
-              <g class="kf-bf445348-k3_pg_art kf-anim" style="transform-origin:1310.75px 304.25px">
-                <g id="k3_pg_art" class="ai-svg-embed kfp-bf445348-k3_pg_art" transform="translate(1248.5, 224) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k3_pg_art kf-anim" style="transform-origin:1310px 305px">
+                <g id="k3_pg_art" class="ai-svg-embed kfp-bf445348-k3_pg_art" transform="translate(1248.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k3_pg_sheet kf-anim" style="transform-origin:1310px 305px">
                 <g id="k3_pg_sheet" class="ai-svg-embed kfp-bf445348-k3_pg_sheet" transform="translate(1247, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k3_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k3_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k3_pg_fold kf-anim" style="transform-origin:1356.25px 240.75px">
                 <g id="k3_pg_fold" class="ai-svg-embed kfp-bf445348-k3_pg_fold" transform="translate(1339.5, 224) scale(1, 1) translate(-92.5, -0)">
                   <g id="k3_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1176,22 +1176,22 @@ text { white-space: pre; }
         <g id="k4" class="ai-container kfp-bf445348-k4">
           <g class="kf-bf445348-k4_pg kf-anim" style="transform-origin:290px 585px">
             <g id="k4_pg" class="ai-container kfp-bf445348-k4_pg">
-              <g class="kf-bf445348-k4_pg_art kf-anim" style="transform-origin:290.75px 584.25px">
-                <g id="k4_pg_art" class="ai-svg-embed kfp-bf445348-k4_pg_art" transform="translate(228.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k4_pg_art kf-anim" style="transform-origin:290px 585px">
+                <g id="k4_pg_art" class="ai-svg-embed kfp-bf445348-k4_pg_art" transform="translate(228.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k4_pg_sheet kf-anim" style="transform-origin:290px 585px">
                 <g id="k4_pg_sheet" class="ai-svg-embed kfp-bf445348-k4_pg_sheet" transform="translate(227, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k4_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k4_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k4_pg_fold kf-anim" style="transform-origin:336.25px 520.75px">
                 <g id="k4_pg_fold" class="ai-svg-embed kfp-bf445348-k4_pg_fold" transform="translate(319.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="k4_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1244,22 +1244,22 @@ text { white-space: pre; }
         <g id="k5" class="ai-container kfp-bf445348-k5">
           <g class="kf-bf445348-k5_pg kf-anim" style="transform-origin:630px 585px">
             <g id="k5_pg" class="ai-container kfp-bf445348-k5_pg">
-              <g class="kf-bf445348-k5_pg_art kf-anim" style="transform-origin:630.75px 584.25px">
-                <g id="k5_pg_art" class="ai-svg-embed kfp-bf445348-k5_pg_art" transform="translate(568.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k5_pg_art kf-anim" style="transform-origin:630px 585px">
+                <g id="k5_pg_art" class="ai-svg-embed kfp-bf445348-k5_pg_art" transform="translate(568.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k5_pg_sheet kf-anim" style="transform-origin:630px 585px">
                 <g id="k5_pg_sheet" class="ai-svg-embed kfp-bf445348-k5_pg_sheet" transform="translate(567, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k5_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k5_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k5_pg_fold kf-anim" style="transform-origin:676.25px 520.75px">
                 <g id="k5_pg_fold" class="ai-svg-embed kfp-bf445348-k5_pg_fold" transform="translate(659.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="k5_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1312,22 +1312,22 @@ text { white-space: pre; }
         <g id="k6" class="ai-container kfp-bf445348-k6">
           <g class="kf-bf445348-k6_pg kf-anim" style="transform-origin:970px 585px">
             <g id="k6_pg" class="ai-container kfp-bf445348-k6_pg">
-              <g class="kf-bf445348-k6_pg_art kf-anim" style="transform-origin:970.75px 584.25px">
-                <g id="k6_pg_art" class="ai-svg-embed kfp-bf445348-k6_pg_art" transform="translate(908.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k6_pg_art kf-anim" style="transform-origin:970px 585px">
+                <g id="k6_pg_art" class="ai-svg-embed kfp-bf445348-k6_pg_art" transform="translate(908.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k6_pg_sheet kf-anim" style="transform-origin:970px 585px">
                 <g id="k6_pg_sheet" class="ai-svg-embed kfp-bf445348-k6_pg_sheet" transform="translate(907, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k6_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k6_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k6_pg_fold kf-anim" style="transform-origin:1016.25px 520.75px">
                 <g id="k6_pg_fold" class="ai-svg-embed kfp-bf445348-k6_pg_fold" transform="translate(999.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="k6_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
@@ -1380,22 +1380,22 @@ text { white-space: pre; }
         <g id="k7" class="ai-container kfp-bf445348-k7">
           <g class="kf-bf445348-k7_pg kf-anim" style="transform-origin:1310px 585px">
             <g id="k7_pg" class="ai-container kfp-bf445348-k7_pg">
-              <g class="kf-bf445348-k7_pg_art kf-anim" style="transform-origin:1310.75px 584.25px">
-                <g id="k7_pg_art" class="ai-svg-embed kfp-bf445348-k7_pg_art" transform="translate(1248.5, 504) scale(1, 1) translate(-1.5, -0)">
+              <g class="kf-bf445348-k7_pg_art kf-anim" style="transform-origin:1310px 585px">
+                <g id="k7_pg_art" class="ai-svg-embed kfp-bf445348-k7_pg_art" transform="translate(1248.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
                   <title>Code file</title>
                   <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
-                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
+                  Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
+                  The sheet has its corner cut off, so the background shows behind the fold. -->
                 </g>
               </g>
               <g class="kf-bf445348-k7_pg_sheet kf-anim" style="transform-origin:1310px 585px">
                 <g id="k7_pg_sheet" class="ai-svg-embed kfp-bf445348-k7_pg_sheet" transform="translate(1247, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
-                  <rect id="k7_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
+                  <path id="k7_pg__sheet" d="M9.5 1.5 H94 L124.5 32 V152.5 a8 8 0 0 1 -8 8 H9.5 a8 8 0 0 1 -8 -8 V9.5 a8 8 0 0 1 8 -8 Z" stroke-width="3" stroke-linejoin="round" fill="inherit" stroke="inherit"/>
                 </g>
               </g>
               <g class="kf-bf445348-k7_pg_fold kf-anim" style="transform-origin:1356.25px 520.75px">
                 <g id="k7_pg_fold" class="ai-svg-embed kfp-bf445348-k7_pg_fold" transform="translate(1339.5, 504) scale(1, 1) translate(-92.5, -0)">
                   <g id="k7_pg__fold">
-                  <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
                   <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5" fill="none" stroke="var(--role-ink, #14171f)"
                   stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>

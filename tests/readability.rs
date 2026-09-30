@@ -392,3 +392,16 @@ fn a_column_without_padding_is_flush() {
     assert_eq!(attr(&svg, "a", "x"), 0.0);
     assert_eq!(attr(&svg, "a", "y"), 0.0);
 }
+
+#[test]
+fn a_through_line_stays_above_a_backdrop_declared_before_it() {
+    // v0.2.8 sent through-lines to the back of everything: under the slide's
+    // opaque stage, so every git scene lost its lines.
+    let src = "rect stage [width: 800, height: 400, fill: white, canvas: true]\nconstrain stage.left = 0\nconstrain stage.top = 0\n\
+               row dots [gap: 60] { circle a [size: 20]\n circle b [size: 20] }\n\
+               path track [through: [a, b], stroke_width: 6, fill: none]";
+    let svg = render(src);
+    let at = |id: &str| svg.find(&format!(r#"id="{id}""#)).unwrap();
+    assert!(at("stage") < at("track"), "the line is painted over the stage");
+    assert!(at("track") < at("a"), "and under its stations");
+}

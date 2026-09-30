@@ -27,7 +27,45 @@ use agent_illustrator::{
 ///
 /// One command instead of a shell loop over hand-copied frame names, so
 /// checking that every frame renders correctly stays a single step.
-fn write_all_frames(source: &str, config: RenderConfig, dir: &std::path::Path) {
+/// Rasterise to PNG (notes on fonts go to stderr).
+fn to_png(svg: &str, scale: f32) -> Vec<u8> {
+    match agent_illustrator::raster::svg_to_png(svg, scale) {
+        Ok(r) => {
+            for n in r.notes {
+                eprintln!("png: {}", n);
+            }
+            r.png
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
+/// Print the SVG, or with `--png` write the picture (to FILE, or stdout).
+fn emit(svg: &str, png: &Option<Option<PathBuf>>, scale: f32) {
+    match png {
+        None => print!("{}", svg),
+        Some(target) => {
+            let bytes = to_png(svg, scale);
+            match target {
+                Some(path) => {
+                    if let Err(e) = fs::write(path, bytes) {
+                        eprintln!("Error writing '{}': {}", path.display(), e);
+                        std::process::exit(1);
+                    }
+                }
+                None => {
+                    use std::io::Write;
+                    let _ = std::io::stdout().write_all(&bytes);
+                }
+            }
+        }
+    }
+}
+
+fn write_all_frames(source: &str, config: RenderConfig, dir: &std::path::Path, png: Option<f32>) {
     let names = match frame_names(source) {
         Ok(names) => names,
         Err(e) => {
@@ -57,8 +95,11 @@ fn write_all_frames(source: &str, config: RenderConfig, dir: &std::path::Path) {
             }
         };
 
-        let path = dir.join(format!("{:02}-{}.svg", i, sanitize_filename(name)));
-        if let Err(e) = fs::write(&path, svg) {
+        let (path, bytes) = match png {
+            Some(scale) => (dir.join(format!("{:02}-{}.png", i, sanitize_filename(name))), to_png(&svg, scale)),
+            None => (dir.join(format!("{:02}-{}.svg", i, sanitize_filename(name))), svg.into_bytes()),
+        };
+        if let Err(e) = fs::write(&path, bytes) {
             eprintln!("Error writing '{}': {}", path.display(), e);
             std::process::exit(1);
         }
@@ -217,6 +258,17 @@ struct Cli {
     /// as <NN>-<name>.svg. The directory is created if needed.
     #[arg(long, value_name = "DIR")]
     frames_to_dir: Option<PathBuf>,
+
+    /// Write a PNG instead of the SVG: to FILE, or to stdout. Works with
+    /// --frame (and --at), --frames-strip and --frames-to-dir (one PNG per
+    /// frame). Uses the fonts bundled in the binary and any @font-face the
+    /// stylesheet embeds as a data URI; no browser needed.
+    #[arg(long, value_name = "FILE", num_args = 0..=1)]
+    png: Option<Option<PathBuf>>,
+
+    /// Zoom for --png (2 = twice the size, for checking details)
+    #[arg(long, default_value_t = 1.0)]
+    scale: f32,
 
     /// List the keyframe names in the input and exit
     #[arg(long)]
@@ -482,7 +534,7 @@ fn main() {
 
     if let Some(frame) = &cli.frames_strip {
         match agent_illustrator::render_frames_strip(&source, config, frame) {
-            Ok(svg) => print!("{}", svg),
+            Ok(svg) => emit(&svg, &cli.png, cli.scale),
             Err(e) => {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
@@ -496,7 +548,7 @@ fn main() {
             eprintln!("Error: --frames-to-dir cannot be combined with --frame or --animate");
             std::process::exit(2);
         }
-        write_all_frames(&source, config, dir);
+        write_all_frames(&source, config, dir, cli.png.as_ref().map(|_| cli.scale));
         return;
     }
 
@@ -548,7 +600,11 @@ fn main() {
     } else {
         match render_with_config(&source, config) {
             Ok(svg) => {
-                println!("{}", svg);
+                if cli.png.is_some() {
+                    emit(&svg, &cli.png, cli.scale);
+                } else {
+                    println!("{}", svg);
+                }
             }
             Err(e) => {
                 eprintln!("Error: {}", e);

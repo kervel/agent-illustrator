@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.9
+
+- Fix (v0.2.8 regression): `through:` lines disappeared behind a slide's
+  stage in every git scene (the README images, the no-JS/GitLab view, frames).
+  A through-line is no longer sent to the back: it keeps its place and moves
+  only just under the first sibling that holds one of its stations. A test
+  pins "over the stage, under its stations".
+- `--png [FILE]` (with `--frame`, `--at`, `--frames-strip`, `--frames-to-dir`)
+  and `--scale`: PNG output without a browser. The SVG's CSS (custom
+  properties, class rules, individual transforms, `pathLength` dashes) is
+  flattened and rendered with resvg, with Overpass and Overpass Mono bundled
+  (OFL) and `@font-face` data URIs from the stylesheet; a missing font is
+  reported. First version: static musl builds, prebuilt binaries and docs
+  follow.
+- The document icons of git-copies have a really cut corner (no backdrop
+  triangle); docs say artwork must never paint the background to fake a hole.
+
 ## v0.2.8
 
 - `clip: bg`: a part is drawn only inside another element's shape, within its

@@ -244,12 +244,6 @@ text { white-space: pre; }
     <mask id="aim-8ba2ce6e-branch" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-8ba2ce6e-branch aid-8ba2ce6e-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
     <mask id="aim-8ba2ce6e-gate" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-8ba2ce6e-gate aid-8ba2ce6e-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
   </defs>
-  <g class="kf-8ba2ce6e-main_line kf-anim" style="transform-origin:771.84px 580px">
-    <path id="main_line" class="ai-shape ai-path kfp-8ba2ce6e-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--role-primary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-8ba2ce6e-main_line)"/>
-  </g>
-  <g class="kf-8ba2ce6e-branch kf-anim" style="transform-origin:953.23px 465px">
-    <path id="branch" class="ai-shape ai-path kfp-8ba2ce6e-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--role-secondary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-8ba2ce6e-branch)"/>
-  </g>
   <g class="kf-8ba2ce6e-s kf-anim" style="transform-origin:800px 450px">
     <g id="s" class="ai-container kfp-8ba2ce6e-s">
       <g class="kf-8ba2ce6e-s_stage kf-anim" style="transform-origin:800px 450px">
@@ -263,6 +257,12 @@ text { white-space: pre; }
         <text id="s_heading" class="ai-shape ai-text kfp-8ba2ce6e-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Branches and merge requests</text>
       </g>
     </g>
+  </g>
+  <g class="kf-8ba2ce6e-main_line kf-anim" style="transform-origin:771.84px 580px">
+    <path id="main_line" class="ai-shape ai-path kfp-8ba2ce6e-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--role-primary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-8ba2ce6e-main_line)"/>
+  </g>
+  <g class="kf-8ba2ce6e-branch kf-anim" style="transform-origin:953.23px 465px">
+    <path id="branch" class="ai-shape ai-path kfp-8ba2ce6e-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--role-secondary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-8ba2ce6e-branch)"/>
   </g>
   <g class="kf-8ba2ce6e-mains kf-anim" style="transform-origin:340.73px 606.38px">
     <g id="mains" class="ai-container kfp-8ba2ce6e-mains">

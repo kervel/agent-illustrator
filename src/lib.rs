@@ -12,6 +12,7 @@
 //! ```
 
 pub mod code;
+pub mod raster;
 pub mod error;
 pub mod layout;
 pub mod motion;

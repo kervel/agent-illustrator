@@ -146,8 +146,6 @@ text { white-space: pre; }
   <defs>
     <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
   </defs>
-  <path id="rule" class="ai-shape ai-path dots" d="M737.85 354.00 L1520.00 354.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
-  <path id="track" class="ai-shape ai-path" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
     <rect id="s_badge" class="ai-shape ai-rect" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
@@ -193,7 +191,9 @@ text { white-space: pre; }
       </g>
     </g>
   </g>
+  <path id="rule" class="ai-shape ai-path dots" d="M737.85 354.00 L1520.00 354.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
   <rect id="rule_end" class="ai-shape ai-rect ai-point" x="1520" y="354" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  <path id="track" class="ai-shape ai-path" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
   <g id="stations" class="ai-container">
     <g id="st1" class="ai-container">
       <circle id="st1_dot" class="ai-shape ai-circle" cx="797.848" cy="354" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>

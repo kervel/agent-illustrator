@@ -393,18 +393,12 @@ svg[data-ail-player] * { transition: none !important; }
 }
 ]]></style>
   <defs>
+    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
     <mask id="aim-f8126697-track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-f8126697-track aid-f8126697-track" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00" fill="none" stroke="#fff" stroke-width="24.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
     <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
     <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
     <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
   </defs>
-  <g class="kf-f8126697-rule kf-anim" style="transform-origin:1128.92px 354px">
-    <path id="rule" class="ai-shape ai-path dots kfp-f8126697-rule" d="M737.85 354.00 L1520.00 354.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
-  </g>
-  <g class="kf-f8126697-track kf-anim" style="transform-origin:1020.1px 354px">
-    <path id="track" class="ai-shape ai-path kfp-f8126697-track" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-f8126697-track)"/>
-  </g>
   <g class="kf-f8126697-s kf-anim" style="transform-origin:800px 450px">
     <g id="s" class="ai-container kfp-f8126697-s">
       <g class="kf-f8126697-s_stage kf-anim" style="transform-origin:800px 450px">
@@ -519,8 +513,14 @@ svg[data-ail-player] * { transition: none !important; }
       <text class="ai-label aitxt-f8126697-status-v0" x="198.3058" y="541.75" text-anchor="middle" dominant-baseline="middle" font-size="22" opacity="0" style="font-weight:700"><tspan x="198.3058" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
     </g>
   </g>
+  <g class="kf-f8126697-rule kf-anim" style="transform-origin:1128.92px 354px">
+    <path id="rule" class="ai-shape ai-path dots kfp-f8126697-rule" d="M737.85 354.00 L1520.00 354.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
   <g class="kf-f8126697-rule_end kf-anim" style="transform-origin:1520px 354px">
     <rect id="rule_end" class="ai-shape ai-rect ai-point kfp-f8126697-rule_end" x="1520" y="354" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-f8126697-track kf-anim" style="transform-origin:1020.1px 354px">
+    <path id="track" class="ai-shape ai-path kfp-f8126697-track" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-f8126697-track)"/>
   </g>
   <g class="kf-f8126697-stations kf-anim" style="transform-origin:1028.66px 349.63px">
     <g id="stations" class="ai-container kfp-f8126697-stations">

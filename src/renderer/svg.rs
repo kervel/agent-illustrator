@@ -1095,9 +1095,7 @@ pub fn render_svg_with_keyframes(
     builder.set_text_variants(collect_text_variants(frame_diffs));
 
     builder.set_clip_targets(&result.root_elements);
-    let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
-    sorted_elements.sort_by_key(|e| e.z_order);
-    for element in &sorted_elements {
+    for element in render_order(&result.root_elements) {
         render_element_with_visibility(element, &mut builder, frame0_hidden, &kf_referenced);
     }
 
@@ -1442,9 +1440,7 @@ pub fn render_svg_with_stylesheet(
 
     // Render all root elements, sorted by z_order (stable sort preserves document order)
     builder.set_clip_targets(&result.root_elements);
-    let mut sorted_elements: Vec<&ElementLayout> = result.root_elements.iter().collect();
-    sorted_elements.sort_by_key(|e| e.z_order);
-    for element in &sorted_elements {
+    for element in render_order(&result.root_elements) {
         render_element(element, &mut builder);
     }
 
@@ -1505,6 +1501,36 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
         &std::collections::HashSet::new(),
         &std::collections::HashSet::new(),
     );
+}
+
+/// Siblings in paint order: by `z_order` (ties keep document order), and a
+/// `through:` line without its own z_order just before the first sibling
+/// that holds one of its stations, so it runs under them and nowhere lower
+/// (never under a backdrop declared before it).
+fn render_order(elems: &[ElementLayout]) -> Vec<&ElementLayout> {
+    let mut v: Vec<&ElementLayout> = elems.iter().collect();
+    v.sort_by_key(|e| e.z_order);
+    fn holds(e: &ElementLayout, ids: &[String]) -> bool {
+        e.id.as_ref().is_some_and(|i| ids.contains(&i.0)) || e.children.iter().any(|c| holds(c, ids))
+    }
+    let mut i = 0;
+    while i < v.len() {
+        let e = v[i];
+        let stations = match &e.element_type {
+            ElementType::Shape(ShapeType::Path(d)) if e.z_order == 0 => {
+                crate::layout::through::through_spec(&d.modifiers).map(|s| s.names)
+            }
+            _ => None,
+        };
+        if let Some(ids) = stations {
+            if let Some(j) = (0..i).find(|&j| v[j].z_order == 0 && holds(v[j], &ids)) {
+                let line = v.remove(i);
+                v.insert(j, line);
+            }
+        }
+        i += 1;
+    }
+    v
 }
 
 /// Render a single element to the builder with visibility checks for children
@@ -1901,9 +1927,7 @@ fn render_element_body(
 
             // Render children (with visibility checks for keyframe
             // animations), lowest z_order first; ties keep document order.
-            let mut children: Vec<&ElementLayout> = element.children.iter().collect();
-            children.sort_by_key(|c| c.z_order);
-            for child in children {
+            for child in render_order(&element.children) {
                 render_element_with_visibility(child, builder, hidden, kf_referenced);
             }
 
