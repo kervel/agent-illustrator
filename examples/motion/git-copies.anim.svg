@@ -92,75 +92,11 @@
     --text-light: #ffffff;
   }
   .ai-on-dark { fill: var(--text-light); }
-    /* Keyframe animation CSS (auto-generated) */
+    /* Keyframe CSS suppressed (--no-frame-css) */
 .kf-hidden { opacity: 0; }
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
 .ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
 .ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
-.frame-one_file {
-  .kf-72eefa49-d0 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_name { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_art { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bar1 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bar2 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bar3 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bar4 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bar5 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bar6 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_bars { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_fold { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-d0_pg_sheet { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_name { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_art { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bar1 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bar2 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bar3 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bar4 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bar5 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bar6 { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_bars { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_fold { transform: translate(510px, 150.625px); }
-  .kf-72eefa49-k0_pg_sheet { transform: translate(510px, 150.625px); }
-}
-.frame-copies {
-  .kf-72eefa49-d0 { transform: rotate(1.9432deg); }
-  .kf-72eefa49-d0_q { opacity: 1; }
-  .kf-72eefa49-d1 { opacity: 1; }
-  .kf-72eefa49-d1 { transform: rotate(2.9192deg); }
-  .kf-72eefa49-d1_q { opacity: 1; }
-  .kf-72eefa49-d2 { opacity: 1; }
-  .kf-72eefa49-d2 { transform: rotate(-0.7664deg); }
-  .kf-72eefa49-d2_q { opacity: 1; }
-  .kf-72eefa49-d3 { opacity: 1; }
-  .kf-72eefa49-d3 { transform: rotate(-3.0664deg); }
-  .kf-72eefa49-d3_q { opacity: 1; }
-  .kf-72eefa49-d4 { opacity: 1; }
-  .kf-72eefa49-d4 { transform: rotate(3.4528deg); }
-  .kf-72eefa49-d4_q { opacity: 1; }
-  .kf-72eefa49-d5 { opacity: 1; }
-  .kf-72eefa49-d5 { transform: rotate(0.5076deg); }
-  .kf-72eefa49-d5_q { opacity: 1; }
-  .kf-72eefa49-d6 { opacity: 1; }
-  .kf-72eefa49-d6 { transform: rotate(1.6196000000000002deg); }
-  .kf-72eefa49-d6_q { opacity: 1; }
-  .kf-72eefa49-d7 { opacity: 1; }
-  .kf-72eefa49-d7 { transform: rotate(-0.19640000000000013deg); }
-  .kf-72eefa49-d7_q { opacity: 1; }
-}
-.frame-code {
-  .kf-72eefa49-caption { opacity: 1; }
-  .kf-72eefa49-d0 { opacity: 0; }
-  .kf-72eefa49-k0 { opacity: 1; }
-  .kf-72eefa49-k1 { opacity: 1; }
-  .kf-72eefa49-k2 { opacity: 1; }
-  .kf-72eefa49-k3 { opacity: 1; }
-  .kf-72eefa49-k4 { opacity: 1; }
-  .kf-72eefa49-k5 { opacity: 1; }
-  .kf-72eefa49-k6 { opacity: 1; }
-  .kf-72eefa49-k7 { opacity: 1; }
-}
     /* examples/motion/git-deck.css */
 /* Palette and type for the "git for non-git people" deck. */
 :root {
@@ -211,208 +147,162 @@
 svg { font-family: var(--font-sans); }
 .dots { stroke-linecap: round; }
 text { white-space: pre; }
-  /* motion: settled states (auto-generated) */
-svg[data-ail-player] * { transition: none !important; }
-.kf-72eefa49-s_badge { opacity: 1; }
-.kf-72eefa49-s_badge { scale: 1 1; }
-.kf-72eefa49-s_heading { opacity: 1; }
-.kf-72eefa49-s_heading { translate: 0px 0px; }
-.kf-72eefa49-d0 { opacity: 1; }
-.kf-72eefa49-d0 { scale: 1 1; }
-.kf-72eefa49-d0 { rotate: 0deg; }
-.kf-72eefa49-d1 { opacity: 0; }
-.kf-72eefa49-d1 { translate: 0px 0px; }
-.kf-72eefa49-d1 { scale: 1 1; }
-.kf-72eefa49-d1 { rotate: 0deg; }
-.kf-72eefa49-d2 { opacity: 0; }
-.kf-72eefa49-d2 { translate: 0px 0px; }
-.kf-72eefa49-d2 { scale: 1 1; }
-.kf-72eefa49-d2 { rotate: 0deg; }
-.kf-72eefa49-d3 { opacity: 0; }
-.kf-72eefa49-d3 { translate: 0px 0px; }
-.kf-72eefa49-d3 { scale: 1 1; }
-.kf-72eefa49-d3 { rotate: 0deg; }
-.kf-72eefa49-d4 { opacity: 0; }
-.kf-72eefa49-d4 { translate: 0px 0px; }
-.kf-72eefa49-d4 { scale: 1 1; }
-.kf-72eefa49-d4 { rotate: 0deg; }
-.kf-72eefa49-d5 { opacity: 0; }
-.kf-72eefa49-d5 { translate: 0px 0px; }
-.kf-72eefa49-d5 { scale: 1 1; }
-.kf-72eefa49-d5 { rotate: 0deg; }
-.kf-72eefa49-d6 { opacity: 0; }
-.kf-72eefa49-d6 { translate: 0px 0px; }
-.kf-72eefa49-d6 { scale: 1 1; }
-.kf-72eefa49-d6 { rotate: 0deg; }
-.kf-72eefa49-d7 { opacity: 0; }
-.kf-72eefa49-d7 { translate: 0px 0px; }
-.kf-72eefa49-d7 { scale: 1 1; }
-.kf-72eefa49-d7 { rotate: 0deg; }
-.kf-72eefa49-d0 { translate: 510px 150.625px; }
-.kf-72eefa49-k0 { translate: 510px 150.625px; }
-.kf-72eefa49-d0_q { opacity: 0; }
-.kf-72eefa49-d0_q { scale: 1 1; }
-.kf-72eefa49-d1_q { opacity: 0; }
-.kf-72eefa49-d1_q { scale: 1 1; }
-.kf-72eefa49-d2_q { opacity: 0; }
-.kf-72eefa49-d2_q { scale: 1 1; }
-.kf-72eefa49-d3_q { opacity: 0; }
-.kf-72eefa49-d3_q { scale: 1 1; }
-.kf-72eefa49-d4_q { opacity: 0; }
-.kf-72eefa49-d4_q { scale: 1 1; }
-.kf-72eefa49-d5_q { opacity: 0; }
-.kf-72eefa49-d5_q { scale: 1 1; }
-.kf-72eefa49-d6_q { opacity: 0; }
-.kf-72eefa49-d6_q { scale: 1 1; }
-.kf-72eefa49-d7_q { opacity: 0; }
-.kf-72eefa49-d7_q { scale: 1 1; }
-.kf-72eefa49-k0 { opacity: 0; }
-.kf-72eefa49-d0_pg { scale: 1 1; }
-.kf-72eefa49-k0_pg { scale: 1 1; }
-.kf-72eefa49-d0_name { opacity: 1; }
-.kf-72eefa49-k0_name { opacity: 1; }
-.kf-72eefa49-k1 { opacity: 0; }
-.kf-72eefa49-d1_pg { scale: 1 1; }
-.kf-72eefa49-k1_pg { scale: 1 1; }
-.kf-72eefa49-d1_name { opacity: 1; }
-.kf-72eefa49-k1_name { opacity: 1; }
-.kf-72eefa49-k2 { opacity: 0; }
-.kf-72eefa49-d2_pg { scale: 1 1; }
-.kf-72eefa49-k2_pg { scale: 1 1; }
-.kf-72eefa49-d2_name { opacity: 1; }
-.kf-72eefa49-k2_name { opacity: 1; }
-.kf-72eefa49-k3 { opacity: 0; }
-.kf-72eefa49-d3_pg { scale: 1 1; }
-.kf-72eefa49-k3_pg { scale: 1 1; }
-.kf-72eefa49-d3_name { opacity: 1; }
-.kf-72eefa49-k3_name { opacity: 1; }
-.kf-72eefa49-k4 { opacity: 0; }
-.kf-72eefa49-d4_pg { scale: 1 1; }
-.kf-72eefa49-k4_pg { scale: 1 1; }
-.kf-72eefa49-d4_name { opacity: 1; }
-.kf-72eefa49-k4_name { opacity: 1; }
-.kf-72eefa49-k5 { opacity: 0; }
-.kf-72eefa49-d5_pg { scale: 1 1; }
-.kf-72eefa49-k5_pg { scale: 1 1; }
-.kf-72eefa49-d5_name { opacity: 1; }
-.kf-72eefa49-k5_name { opacity: 1; }
-.kf-72eefa49-k6 { opacity: 0; }
-.kf-72eefa49-d6_pg { scale: 1 1; }
-.kf-72eefa49-k6_pg { scale: 1 1; }
-.kf-72eefa49-d6_name { opacity: 1; }
-.kf-72eefa49-k6_name { opacity: 1; }
-.kf-72eefa49-k7 { opacity: 0; }
-.kf-72eefa49-d7_pg { scale: 1 1; }
-.kf-72eefa49-k7_pg { scale: 1 1; }
-.kf-72eefa49-d7_name { opacity: 1; }
-.kf-72eefa49-k7_name { opacity: 1; }
-.kf-72eefa49-caption { opacity: 0; }
-.kf-72eefa49-caption { translate: 0px 0px; }
-.frame-one_file {
-  .kf-72eefa49-s_badge { scale: 1 1; }
-  .kf-72eefa49-d0 { scale: 1 1; }
-  .kf-72eefa49-d1 { scale: 1 1; }
-  .kf-72eefa49-d2 { scale: 1 1; }
-  .kf-72eefa49-d3 { scale: 1 1; }
-  .kf-72eefa49-d4 { scale: 1 1; }
-  .kf-72eefa49-d5 { scale: 1 1; }
-  .kf-72eefa49-d6 { scale: 1 1; }
-  .kf-72eefa49-d7 { scale: 1 1; }
-  .kf-72eefa49-d0_q { scale: 1 1; }
-  .kf-72eefa49-d1_q { scale: 1 1; }
-  .kf-72eefa49-d2_q { scale: 1 1; }
-  .kf-72eefa49-d3_q { scale: 1 1; }
-  .kf-72eefa49-d4_q { scale: 1 1; }
-  .kf-72eefa49-d5_q { scale: 1 1; }
-  .kf-72eefa49-d6_q { scale: 1 1; }
-  .kf-72eefa49-d7_q { scale: 1 1; }
-  .kf-72eefa49-d0_pg { scale: 1 1; }
-  .kf-72eefa49-k0_pg { scale: 1 1; }
-  .kf-72eefa49-d1_pg { scale: 1 1; }
-  .kf-72eefa49-k1_pg { scale: 1 1; }
-  .kf-72eefa49-d2_pg { scale: 1 1; }
-  .kf-72eefa49-k2_pg { scale: 1 1; }
-  .kf-72eefa49-d3_pg { scale: 1 1; }
-  .kf-72eefa49-k3_pg { scale: 1 1; }
-  .kf-72eefa49-d4_pg { scale: 1 1; }
-  .kf-72eefa49-k4_pg { scale: 1 1; }
-  .kf-72eefa49-d5_pg { scale: 1 1; }
-  .kf-72eefa49-k5_pg { scale: 1 1; }
-  .kf-72eefa49-d6_pg { scale: 1 1; }
-  .kf-72eefa49-k6_pg { scale: 1 1; }
-  .kf-72eefa49-d7_pg { scale: 1 1; }
-  .kf-72eefa49-k7_pg { scale: 1 1; }
-}
-.frame-copies {
-  .kf-72eefa49-s_badge { scale: 1 1; }
-  .kf-72eefa49-d0 { scale: 1 1; }
-  .kf-72eefa49-d1 { scale: 1 1; }
-  .kf-72eefa49-d2 { scale: 1 1; }
-  .kf-72eefa49-d3 { scale: 1 1; }
-  .kf-72eefa49-d4 { scale: 1 1; }
-  .kf-72eefa49-d5 { scale: 1 1; }
-  .kf-72eefa49-d6 { scale: 1 1; }
-  .kf-72eefa49-d7 { scale: 1 1; }
-  .kf-72eefa49-d0_q { scale: 1 1; }
-  .kf-72eefa49-d1_q { scale: 1 1; }
-  .kf-72eefa49-d2_q { scale: 1 1; }
-  .kf-72eefa49-d3_q { scale: 1 1; }
-  .kf-72eefa49-d4_q { scale: 1 1; }
-  .kf-72eefa49-d5_q { scale: 1 1; }
-  .kf-72eefa49-d6_q { scale: 1 1; }
-  .kf-72eefa49-d7_q { scale: 1 1; }
-  .kf-72eefa49-d0_pg { scale: 1 1; }
-  .kf-72eefa49-k0_pg { scale: 1 1; }
-  .kf-72eefa49-d1_pg { scale: 1 1; }
-  .kf-72eefa49-k1_pg { scale: 1 1; }
-  .kf-72eefa49-d2_pg { scale: 1 1; }
-  .kf-72eefa49-k2_pg { scale: 1 1; }
-  .kf-72eefa49-d3_pg { scale: 1 1; }
-  .kf-72eefa49-k3_pg { scale: 1 1; }
-  .kf-72eefa49-d4_pg { scale: 1 1; }
-  .kf-72eefa49-k4_pg { scale: 1 1; }
-  .kf-72eefa49-d5_pg { scale: 1 1; }
-  .kf-72eefa49-k5_pg { scale: 1 1; }
-  .kf-72eefa49-d6_pg { scale: 1 1; }
-  .kf-72eefa49-k6_pg { scale: 1 1; }
-  .kf-72eefa49-d7_pg { scale: 1 1; }
-  .kf-72eefa49-k7_pg { scale: 1 1; }
-}
-.frame-code {
-  .kf-72eefa49-s_badge { scale: 1 1; }
-  .kf-72eefa49-d0 { scale: 1 1; }
-  .kf-72eefa49-d1 { scale: 1 1; }
-  .kf-72eefa49-d2 { scale: 1 1; }
-  .kf-72eefa49-d3 { scale: 1 1; }
-  .kf-72eefa49-d4 { scale: 1 1; }
-  .kf-72eefa49-d5 { scale: 1 1; }
-  .kf-72eefa49-d6 { scale: 1 1; }
-  .kf-72eefa49-d7 { scale: 1 1; }
-  .kf-72eefa49-d0_q { scale: 1 1; }
-  .kf-72eefa49-d1_q { scale: 1 1; }
-  .kf-72eefa49-d2_q { scale: 1 1; }
-  .kf-72eefa49-d3_q { scale: 1 1; }
-  .kf-72eefa49-d4_q { scale: 1 1; }
-  .kf-72eefa49-d5_q { scale: 1 1; }
-  .kf-72eefa49-d6_q { scale: 1 1; }
-  .kf-72eefa49-d7_q { scale: 1 1; }
-  .kf-72eefa49-d0_pg { scale: 1 1; }
-  .kf-72eefa49-k0_pg { scale: 1 1; }
-  .kf-72eefa49-d1_pg { scale: 1 1; }
-  .kf-72eefa49-k1_pg { scale: 1 1; }
-  .kf-72eefa49-d2_pg { scale: 1 1; }
-  .kf-72eefa49-k2_pg { scale: 1 1; }
-  .kf-72eefa49-d3_pg { scale: 1 1; }
-  .kf-72eefa49-k3_pg { scale: 1 1; }
-  .kf-72eefa49-d4_pg { scale: 1 1; }
-  .kf-72eefa49-k4_pg { scale: 1 1; }
-  .kf-72eefa49-d5_pg { scale: 1 1; }
-  .kf-72eefa49-k5_pg { scale: 1 1; }
-  .kf-72eefa49-d6_pg { scale: 1 1; }
-  .kf-72eefa49-k6_pg { scale: 1 1; }
-  .kf-72eefa49-d7_pg { scale: 1 1; }
-  .kf-72eefa49-k7_pg { scale: 1 1; }
-}
+  /* motion: the whole story as CSS (auto-generated) */
+@keyframes ailfilm0 { 0% { opacity: 0; } 3.7559% { opacity: 0; } 5.9468% { opacity: 0.933; } 6.2598% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm1 { 0% { scale: 0 0; } 3.7559% { scale: 0 0; } 4.0689% { scale: 0.281 0.281; } 4.3818% { scale: 0.515 0.515; } 4.6948% { scale: 0.703 0.703; } 5.0078% { scale: 0.849 0.849; } 5.3208% { scale: 0.957 0.957; } 5.6338% { scale: 1.03 1.03; } 5.9468% { scale: 1.075 1.075; } 6.2598% { scale: 1.095 1.095; } 6.5728% { scale: 1.097 1.097; } 6.8858% { scale: 1.085 1.085; } 7.8247% { scale: 1.021 1.021; } 8.1377% { scale: 1.006 1.006; } 9.0767% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm2 { 0% { opacity: 0; } 4.6948% { opacity: 0; } 5.0078% { opacity: 0.047; } 5.6338% { opacity: 0.276; } 5.9468% { opacity: 0.38; } 6.2598% { opacity: 0.473; } 6.5728% { opacity: 0.556; } 6.8858% { opacity: 0.628; } 7.1987% { opacity: 0.689; } 7.8247% { opacity: 0.787; } 8.4507% { opacity: 0.858; } 9.0767% { opacity: 0.909; } 10.0156% { opacity: 0.959; } 11.2676% { opacity: 0.992; } 12.3944% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm3 { 0% { translate: 0px 0px; } 4.6948% { translate: 0px 0px; } 5.0078% { translate: 0px 11.433px; } 6.2598% { translate: 0px 6.32px; } 7.5117% { translate: 0px 3.094px; } 9.0767% { translate: 0px 1.092px; } 11.5806% { translate: 0px 0.048px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm4 { 0% { opacity: 0; } 5.6338% { opacity: 0; } 7.8247% { opacity: 0.933; } 8.1377% { opacity: 1; } 64.6322% { opacity: 1; } 64.9452% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm5 { 0% { scale: 1 1; } 5.3208% { scale: 1 1; } 5.6338% { scale: 0 0; } 5.9468% { scale: 0.281 0.281; } 6.2598% { scale: 0.515 0.515; } 6.5728% { scale: 0.703 0.703; } 6.8858% { scale: 0.849 0.849; } 7.1987% { scale: 0.957 0.957; } 7.5117% { scale: 1.03 1.03; } 7.8247% { scale: 1.075 1.075; } 8.1377% { scale: 1.095 1.095; } 8.4507% { scale: 1.097 1.097; } 8.7637% { scale: 1.085 1.085; } 9.7027% { scale: 1.021 1.021; } 10.0156% { scale: 1.006 1.006; } 10.9546% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm6 { 0% { rotate: 0deg; } 25.5399% { rotate: 0deg; } 28.3568% { rotate: 1.496deg; } 34.3036% { rotate: 1.943deg; } 99.9906% { rotate: 1.943deg; } }
+@keyframes ailfilm7 { 0% { opacity: 0; } 26.4789% { opacity: 0; } 27.1049% { opacity: 0.232; } 27.4178% { opacity: 0.339; } 27.7308% { opacity: 0.437; } 28.0438% { opacity: 0.524; } 28.3568% { opacity: 0.6; } 28.6698% { opacity: 0.666; } 28.9828% { opacity: 0.722; } 29.6088% { opacity: 0.811; } 30.2347% { opacity: 0.875; } 31.1737% { opacity: 0.939; } 32.1127% { opacity: 0.976; } 33.3646% { opacity: 0.998; } 65.2582% { opacity: 1; } 65.5712% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm8 { 0% { translate: 0px 0px; } 26.1659% { translate: 0px 0px; } 26.4789% { translate: 170px 150.625px; } 26.7919% { translate: 150.007px 132.911px; } 27.1049% { translate: 130.602px 115.717px; } 27.4178% { translate: 112.348px 99.543px; } 27.7308% { translate: 95.692px 84.786px; } 28.0438% { translate: 80.879px 71.661px; } 28.3568% { translate: 67.949px 60.205px; } 28.6698% { translate: 56.798px 50.324px; } 28.9828% { translate: 47.247px 41.862px; } 29.2958% { translate: 39.097px 34.641px; } 29.6088% { translate: 32.155px 28.491px; } 29.9218% { translate: 26.25px 23.259px; } 30.2347% { translate: 21.234px 18.814px; } 30.5477% { translate: 16.982px 15.046px; } 30.8607% { translate: 13.39px 11.863px; } 31.4867% { translate: 7.85px 6.956px; } 32.1127% { translate: 4.076px 3.611px; } 32.7387% { translate: 1.683px 1.491px; } 33.6776% { translate: 0.095px 0.084px; } 38.3725% { translate: 0px 0px; } 38.6854% { translate: -1.2px 0px; } 39.3114% { translate: -9.2px 0px; } 39.6244% { translate: -9.84px 0px; } 40.2504% { translate: 4.56px 0px; } 40.5634% { translate: 8.04px 0px; } 41.1894% { translate: -2.36px 0px; } 41.5023% { translate: -5.1px 0px; } 42.1283% { translate: 0.9px 0px; } 42.4413% { translate: 2.7px 0px; } 43.3803% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm9 { 0% { scale: 1 1; } 26.1659% { scale: 1 1; } 26.4789% { scale: 0.84 0.84; } 28.0438% { scale: 0.924 0.924; } 29.2958% { scale: 0.963 0.963; } 31.1737% { scale: 0.99 0.99; } 34.6166% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm10 { 0% { rotate: 0deg; } 26.4789% { rotate: 0deg; } 28.6698% { rotate: 1.944deg; } 32.1127% { rotate: 2.849deg; } 99.9906% { rotate: 2.919deg; } }
+@keyframes ailfilm11 { 0% { opacity: 0; } 27.4178% { opacity: 0; } 28.0438% { opacity: 0.232; } 28.3568% { opacity: 0.339; } 28.6698% { opacity: 0.437; } 28.9828% { opacity: 0.524; } 29.2958% { opacity: 0.6; } 29.6088% { opacity: 0.666; } 29.9218% { opacity: 0.722; } 30.5477% { opacity: 0.811; } 31.1737% { opacity: 0.875; } 32.1127% { opacity: 0.939; } 33.0516% { opacity: 0.976; } 34.3036% { opacity: 0.998; } 65.8842% { opacity: 1; } 66.1972% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm12 { 0% { translate: 0px 0px; } 27.1049% { translate: 0px 0px; } 27.4178% { translate: -170px 150.625px; } 27.7308% { translate: -150.007px 132.911px; } 28.0438% { translate: -130.602px 115.717px; } 28.3568% { translate: -112.348px 99.543px; } 28.6698% { translate: -95.692px 84.786px; } 28.9828% { translate: -80.879px 71.661px; } 29.2958% { translate: -67.949px 60.205px; } 29.6088% { translate: -56.798px 50.324px; } 29.9218% { translate: -47.247px 41.862px; } 30.2347% { translate: -39.097px 34.641px; } 30.5477% { translate: -32.155px 28.491px; } 30.8607% { translate: -26.25px 23.259px; } 31.1737% { translate: -21.234px 18.814px; } 31.4867% { translate: -16.982px 15.046px; } 31.7997% { translate: -13.39px 11.863px; } 32.4257% { translate: -7.85px 6.956px; } 33.0516% { translate: -4.076px 3.611px; } 33.6776% { translate: -1.683px 1.491px; } 34.6166% { translate: -0.095px 0.084px; } 39.6244% { translate: 0px 0px; } 39.9374% { translate: -2.8px 0px; } 40.5634% { translate: -10.8px 0px; } 40.8764% { translate: -6.96px 0px; } 41.5023% { translate: 7.44px 0px; } 41.8153% { translate: 5.96px 0px; } 42.4413% { translate: -4.44px 0px; } 42.7543% { translate: -3.9px 0px; } 43.3803% { translate: 2.1px 0px; } 43.6933% { translate: 2.3px 0px; } 44.3192% { translate: 0.3px 0px; } 45.5399% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm13 { 0% { scale: 1 1; } 27.1049% { scale: 1 1; } 27.4178% { scale: 0.635 0.635; } 28.3568% { scale: 0.759 0.759; } 28.9828% { scale: 0.827 0.827; } 29.9218% { scale: 0.899 0.899; } 30.8607% { scale: 0.944 0.944; } 32.1127% { scale: 0.978 0.978; } 33.9906% { scale: 0.998 0.998; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm14 { 0% { rotate: 0deg; } 28.0438% { rotate: -0.178deg; } 33.9906% { rotate: -0.762deg; } 99.9906% { rotate: -0.766deg; } }
+@keyframes ailfilm15 { 0% { opacity: 0; } 28.3568% { opacity: 0; } 28.9828% { opacity: 0.232; } 29.2958% { opacity: 0.339; } 29.6088% { opacity: 0.437; } 29.9218% { opacity: 0.524; } 30.2347% { opacity: 0.6; } 30.5477% { opacity: 0.666; } 30.8607% { opacity: 0.722; } 31.4867% { opacity: 0.811; } 32.1127% { opacity: 0.875; } 33.0516% { opacity: 0.939; } 33.9906% { opacity: 0.976; } 35.2426% { opacity: 0.998; } 66.5102% { opacity: 1; } 66.8232% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm16 { 0% { translate: 0px 0px; } 28.0438% { translate: 0px 0px; } 28.3568% { translate: -510px 150.625px; } 28.6698% { translate: -450.022px 132.911px; } 28.9828% { translate: -391.806px 115.717px; } 29.2958% { translate: -337.043px 99.543px; } 29.6088% { translate: -287.076px 84.786px; } 29.9218% { translate: -242.637px 71.661px; } 30.2347% { translate: -203.847px 60.205px; } 30.5477% { translate: -170.393px 50.324px; } 30.8607% { translate: -141.741px 41.862px; } 31.1737% { translate: -117.291px 34.641px; } 31.4867% { translate: -96.466px 28.491px; } 31.7997% { translate: -78.751px 23.259px; } 32.1127% { translate: -63.702px 18.814px; } 32.4257% { translate: -50.946px 15.046px; } 32.7387% { translate: -40.169px 11.863px; } 33.0516% { translate: -31.11px 9.188px; } 33.3646% { translate: -23.551px 6.956px; } 33.6776% { translate: -17.308px 5.112px; } 33.9906% { translate: -12.228px 3.611px; } 34.3036% { translate: -8.178px 2.415px; } 34.6166% { translate: -5.049px 1.491px; } 34.9296% { translate: -2.743px 0.81px; } 35.2426% { translate: -1.179px 0.348px; } 35.5556% { translate: -0.285px 0.084px; } 38.0595% { translate: 0px 0px; } 38.3725% { translate: -2px 0px; } 38.9984% { translate: -10px 0px; } 39.3114% { translate: -8.4px 0px; } 39.9374% { translate: 6px 0px; } 40.2504% { translate: 7px 0px; } 40.8764% { translate: -3.4px 0px; } 41.1894% { translate: -4.5px 0px; } 41.8153% { translate: 1.5px 0px; } 42.1283% { translate: 2.5px 0px; } 42.7543% { translate: 0.5px 0px; } 43.3803% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm17 { 0% { scale: 1 1; } 28.0438% { scale: 1 1; } 28.3568% { scale: 0.704 0.704; } 29.6088% { scale: 0.833 0.833; } 30.5477% { scale: 0.901 0.901; } 31.4867% { scale: 0.944 0.944; } 33.0516% { scale: 0.982 0.982; } 35.2426% { scale: 0.999 0.999; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm18 { 0% { rotate: 0deg; } 28.3568% { rotate: 0deg; } 30.5477% { rotate: -2.042deg; } 33.6776% { rotate: -2.962deg; } 99.9906% { rotate: -3.066deg; } }
+@keyframes ailfilm19 { 0% { opacity: 0; } 29.2958% { opacity: 0; } 29.9218% { opacity: 0.232; } 30.2347% { opacity: 0.339; } 30.5477% { opacity: 0.437; } 30.8607% { opacity: 0.524; } 31.1737% { opacity: 0.6; } 31.4867% { opacity: 0.666; } 31.7997% { opacity: 0.722; } 32.4257% { opacity: 0.811; } 33.0516% { opacity: 0.875; } 33.9906% { opacity: 0.939; } 34.9296% { opacity: 0.976; } 36.1815% { opacity: 0.998; } 67.1362% { opacity: 1; } 67.4491% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm20 { 0% { translate: 0px 0px; } 28.9828% { translate: 0px 0px; } 29.2958% { translate: 510px -129.375px; } 29.6088% { translate: 450.022px -114.16px; } 29.9218% { translate: 391.806px -99.392px; } 30.2347% { translate: 337.043px -85.5px; } 30.5477% { translate: 287.076px -72.825px; } 30.8607% { translate: 242.637px -61.551px; } 31.1737% { translate: 203.847px -51.711px; } 31.4867% { translate: 170.393px -43.225px; } 31.7997% { translate: 141.741px -35.956px; } 32.1127% { translate: 117.291px -29.754px; } 32.4257% { translate: 96.466px -24.471px; } 32.7387% { translate: 78.751px -19.977px; } 33.0516% { translate: 63.702px -16.16px; } 33.3646% { translate: 50.946px -12.924px; } 33.6776% { translate: 40.169px -10.19px; } 33.9906% { translate: 31.11px -7.892px; } 34.3036% { translate: 23.551px -5.974px; } 34.6166% { translate: 17.308px -4.391px; } 34.9296% { translate: 12.228px -3.102px; } 35.2426% { translate: 8.178px -2.075px; } 35.5556% { translate: 5.049px -1.281px; } 35.8685% { translate: 2.743px -0.696px; } 36.1815% { translate: 1.179px -0.299px; } 36.4945% { translate: 0.285px -0.072px; } 38.9984% { translate: 0px 0px; } 40.5634% { translate: 0px 0px; } 40.8764% { translate: -0.4px 0px; } 41.5023% { translate: -8.4px 0px; } 41.8153% { translate: -11.28px 0px; } 42.4413% { translate: 3.12px 0px; } 42.7543% { translate: 9.08px 0px; } 43.3803% { translate: -1.32px 0px; } 43.6933% { translate: -5.7px 0px; } 44.3192% { translate: 0.3px 0px; } 44.6322% { translate: 2.9px 0px; } 45.5399% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm21 { 0% { scale: 1 1; } 28.9828% { scale: 1 1; } 29.2958% { scale: 0.668 0.668; } 30.2347% { scale: 0.781 0.781; } 31.1737% { scale: 0.867 0.867; } 32.1127% { scale: 0.924 0.924; } 33.3646% { scale: 0.967 0.967; } 35.2426% { scale: 0.995 0.995; } 40.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm22 { 0% { rotate: 0deg; } 29.2958% { rotate: 0deg; } 31.4867% { rotate: 2.299deg; } 34.3036% { rotate: 3.293deg; } 99.9906% { rotate: 3.453deg; } }
+@keyframes ailfilm23 { 0% { opacity: 0; } 30.2347% { opacity: 0; } 30.8607% { opacity: 0.232; } 31.1737% { opacity: 0.339; } 31.4867% { opacity: 0.437; } 31.7997% { opacity: 0.524; } 32.1127% { opacity: 0.6; } 32.4257% { opacity: 0.666; } 32.7387% { opacity: 0.722; } 33.3646% { opacity: 0.811; } 33.9906% { opacity: 0.875; } 34.9296% { opacity: 0.939; } 35.8685% { opacity: 0.976; } 37.1205% { opacity: 0.998; } 67.7621% { opacity: 1; } 68.0751% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm24 { 0% { translate: 0px 0px; } 29.9218% { translate: 0px 0px; } 30.2347% { translate: 170px -129.375px; } 30.5477% { translate: 150.007px -114.16px; } 30.8607% { translate: 130.602px -99.392px; } 31.1737% { translate: 112.348px -85.5px; } 31.4867% { translate: 95.692px -72.825px; } 31.7997% { translate: 80.879px -61.551px; } 32.1127% { translate: 67.949px -51.711px; } 32.4257% { translate: 56.798px -43.225px; } 32.7387% { translate: 47.247px -35.956px; } 33.0516% { translate: 39.097px -29.754px; } 33.3646% { translate: 32.155px -24.471px; } 33.6776% { translate: 26.25px -19.977px; } 33.9906% { translate: 21.234px -16.16px; } 34.3036% { translate: 16.982px -12.924px; } 34.6166% { translate: 13.39px -10.19px; } 35.2426% { translate: 7.85px -5.974px; } 35.8685% { translate: 4.076px -3.102px; } 36.4945% { translate: 1.683px -1.281px; } 37.4335% { translate: 0.095px -0.072px; } 38.6854% { translate: 0px 0px; } 38.9984% { translate: -0.4px 0px; } 39.6244% { translate: -8.4px 0px; } 39.9374% { translate: -11.28px 0px; } 40.5634% { translate: 3.12px 0px; } 40.8764% { translate: 9.08px 0px; } 41.5023% { translate: -1.32px 0px; } 41.8153% { translate: -5.7px 0px; } 42.4413% { translate: 0.3px 0px; } 42.7543% { translate: 2.9px 0px; } 43.6933% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm25 { 0% { scale: 1 1; } 29.9218% { scale: 1 1; } 30.2347% { scale: 0.511 0.511; } 31.1737% { scale: 0.677 0.677; } 31.7997% { scale: 0.767 0.767; } 32.4257% { scale: 0.837 0.837; } 33.3646% { scale: 0.907 0.907; } 34.3036% { scale: 0.951 0.951; } 35.5556% { scale: 0.983 0.983; } 37.4335% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm26 { 0% { rotate: 0deg; } 31.1737% { rotate: 0.172deg; } 43.0673% { rotate: 0.508deg; } 99.9906% { rotate: 0.508deg; } }
+@keyframes ailfilm27 { 0% { opacity: 0; } 31.1737% { opacity: 0; } 31.7997% { opacity: 0.232; } 32.1127% { opacity: 0.339; } 32.4257% { opacity: 0.437; } 32.7387% { opacity: 0.524; } 33.0516% { opacity: 0.6; } 33.3646% { opacity: 0.666; } 33.6776% { opacity: 0.722; } 34.3036% { opacity: 0.811; } 34.9296% { opacity: 0.875; } 35.8685% { opacity: 0.939; } 36.8075% { opacity: 0.976; } 38.0595% { opacity: 0.998; } 68.7011% { opacity: 1; } 69.0141% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm28 { 0% { translate: 0px 0px; } 30.8607% { translate: 0px 0px; } 31.1737% { translate: -170px -140px; } 31.4867% { translate: -150.007px -123.535px; } 31.7997% { translate: -130.602px -107.555px; } 32.1127% { translate: -112.348px -92.522px; } 32.4257% { translate: -95.692px -78.805px; } 32.7387% { translate: -80.879px -66.606px; } 33.0516% { translate: -67.949px -55.958px; } 33.3646% { translate: -56.798px -46.775px; } 33.6776% { translate: -47.247px -38.909px; } 33.9906% { translate: -39.097px -32.198px; } 34.3036% { translate: -32.155px -26.481px; } 34.6166% { translate: -26.25px -21.618px; } 34.9296% { translate: -21.234px -17.487px; } 35.2426% { translate: -16.982px -13.985px; } 35.5556% { translate: -13.39px -11.027px; } 36.1815% { translate: -7.85px -6.465px; } 36.8075% { translate: -4.076px -3.357px; } 37.4335% { translate: -1.683px -1.386px; } 38.3725% { translate: -0.095px -0.078px; } 40.2504% { translate: 0px 0px; } 40.5634% { translate: -1.2px 0px; } 41.1894% { translate: -9.2px 0px; } 41.5023% { translate: -9.84px 0px; } 42.1283% { translate: 4.56px 0px; } 42.4413% { translate: 8.04px 0px; } 43.0673% { translate: -2.36px 0px; } 43.3803% { translate: -5.1px 0px; } 44.0063% { translate: 0.9px 0px; } 44.3192% { translate: 2.7px 0px; } 45.2582% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm29 { 0% { scale: 1 1; } 30.8607% { scale: 1 1; } 31.1737% { scale: 0.511 0.511; } 32.1127% { scale: 0.677 0.677; } 32.7387% { scale: 0.767 0.767; } 33.3646% { scale: 0.837 0.837; } 34.3036% { scale: 0.907 0.907; } 35.2426% { scale: 0.951 0.951; } 36.4945% { scale: 0.983 0.983; } 38.3725% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm30 { 0% { rotate: 0deg; } 31.4867% { rotate: 0.19deg; } 34.6166% { rotate: 1.37deg; } 45.5399% { rotate: 1.62deg; } 99.9906% { rotate: 1.62deg; } }
+@keyframes ailfilm31 { 0% { opacity: 0; } 32.1127% { opacity: 0; } 32.7387% { opacity: 0.232; } 33.0516% { opacity: 0.339; } 33.3646% { opacity: 0.437; } 33.6776% { opacity: 0.524; } 33.9906% { opacity: 0.6; } 34.3036% { opacity: 0.666; } 34.6166% { opacity: 0.722; } 35.2426% { opacity: 0.811; } 35.8685% { opacity: 0.875; } 36.8075% { opacity: 0.939; } 37.7465% { opacity: 0.976; } 38.9984% { opacity: 0.998; } 69.3271% { opacity: 1; } 69.6401% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm32 { 0% { translate: 0px 0px; } 31.7997% { translate: 0px 0px; } 32.1127% { translate: -510px -129.375px; } 32.4257% { translate: -450.022px -114.16px; } 32.7387% { translate: -391.806px -99.392px; } 33.0516% { translate: -337.043px -85.5px; } 33.3646% { translate: -287.076px -72.825px; } 33.6776% { translate: -242.637px -61.551px; } 33.9906% { translate: -203.847px -51.711px; } 34.3036% { translate: -170.393px -43.225px; } 34.6166% { translate: -141.741px -35.956px; } 34.9296% { translate: -117.291px -29.754px; } 35.2426% { translate: -96.466px -24.471px; } 35.5556% { translate: -78.751px -19.977px; } 35.8685% { translate: -63.702px -16.16px; } 36.1815% { translate: -50.946px -12.924px; } 36.4945% { translate: -40.169px -10.19px; } 36.8075% { translate: -31.11px -7.892px; } 37.1205% { translate: -23.551px -5.974px; } 37.4335% { translate: -17.308px -4.391px; } 37.7465% { translate: -12.228px -3.102px; } 38.0595% { translate: -8.178px -2.075px; } 38.3725% { translate: -5.049px -1.281px; } 38.6854% { translate: -2.743px -0.696px; } 38.9984% { translate: -1.179px -0.299px; } 39.3114% { translate: -0.285px -0.072px; } 39.9374% { translate: 0px 0px; } 40.2504% { translate: -2px 0px; } 40.8764% { translate: -10px 0px; } 41.1894% { translate: -8.4px 0px; } 41.8153% { translate: 6px 0px; } 42.1283% { translate: 7px 0px; } 42.7543% { translate: -3.4px 0px; } 43.0673% { translate: -4.5px 0px; } 43.6933% { translate: 1.5px 0px; } 44.0063% { translate: 2.5px 0px; } 44.6322% { translate: 0.5px 0px; } 44.9452% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm33 { 0% { scale: 1 1; } 31.7997% { scale: 1 1; } 32.1127% { scale: 0.511 0.511; } 33.0516% { scale: 0.677 0.677; } 33.6776% { scale: 0.767 0.767; } 34.3036% { scale: 0.837 0.837; } 35.2426% { scale: 0.907 0.907; } 36.1815% { scale: 0.951 0.951; } 37.4335% { scale: 0.983 0.983; } 39.3114% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm34 { 0% { rotate: 0deg; } 99.9906% { rotate: -0.196deg; } }
+@keyframes ailfilm35 { 0% { translate: 510px 150.625px; } 25.5399% { translate: 510px 150.625px; } 25.8529% { translate: 509.266px 150.408px; } 26.1659% { translate: 506.903px 149.71px; } 26.4789% { translate: 502.622px 148.446px; } 26.7919% { translate: 496.05px 146.505px; } 27.1049% { translate: 486.694px 143.742px; } 27.4178% { translate: 473.894px 139.961px; } 27.7308% { translate: 456.74px 134.895px; } 28.0438% { translate: 433.972px 128.171px; } 28.3568% { translate: 403.872px 119.281px; } 28.6698% { translate: 364.347px 107.608px; } 28.9828% { translate: 313.939px 92.72px; } 29.6088% { translate: 196.061px 57.905px; } 29.9218% { translate: 145.653px 43.017px; } 30.2347% { translate: 106.128px 31.344px; } 30.5477% { translate: 76.028px 22.454px; } 30.8607% { translate: 53.26px 15.73px; } 31.1737% { translate: 36.106px 10.664px; } 31.4867% { translate: 23.306px 6.883px; } 31.7997% { translate: 13.95px 4.12px; } 32.1127% { translate: 7.378px 2.179px; } 32.4257% { translate: 3.097px 0.915px; } 32.7387% { translate: 0.734px 0.217px; } 33.0516% { translate: 0px 0px; } 39.3114% { translate: 0px 0px; } 39.9374% { translate: -7.6px 0px; } 40.2504% { translate: -11.6px 0px; } 40.5634% { translate: -5.52px 0px; } 41.1894% { translate: 8.88px 0px; } 41.5023% { translate: 4.92px 0px; } 42.1283% { translate: -5.48px 0px; } 42.4413% { translate: -3.3px 0px; } 43.0673% { translate: 2.7px 0px; } 43.6933% { translate: 1.1px 0px; } 44.0063% { translate: 0.1px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm36 { 0% { translate: 510px 150.625px; } 25.5399% { translate: 510px 150.625px; } 25.8529% { translate: 509.266px 150.408px; } 26.1659% { translate: 506.903px 149.71px; } 26.4789% { translate: 502.622px 148.446px; } 26.7919% { translate: 496.05px 146.505px; } 27.1049% { translate: 486.694px 143.742px; } 27.4178% { translate: 473.894px 139.961px; } 27.7308% { translate: 456.74px 134.895px; } 28.0438% { translate: 433.972px 128.171px; } 28.3568% { translate: 403.872px 119.281px; } 28.6698% { translate: 364.347px 107.608px; } 28.9828% { translate: 313.939px 92.72px; } 29.6088% { translate: 196.061px 57.905px; } 29.9218% { translate: 145.653px 43.017px; } 30.2347% { translate: 106.128px 31.344px; } 30.5477% { translate: 76.028px 22.454px; } 30.8607% { translate: 53.26px 15.73px; } 31.1737% { translate: 36.106px 10.664px; } 31.4867% { translate: 23.306px 6.883px; } 31.7997% { translate: 13.95px 4.12px; } 32.1127% { translate: 7.378px 2.179px; } 32.4257% { translate: 3.097px 0.915px; } 32.7387% { translate: 0.734px 0.217px; } 33.0516% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+@keyframes ailfilm37 { 0% { opacity: 0; } 38.9984% { opacity: 0; } 39.3114% { opacity: 0.067; } 41.5023% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.009; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm38 { 0% { scale: 1 1; } 38.9984% { scale: 1 1; } 39.3114% { scale: 0.147 0.147; } 39.6244% { scale: 0.404 0.404; } 39.9374% { scale: 0.614 0.614; } 40.2504% { scale: 0.781 0.781; } 40.5634% { scale: 0.907 0.907; } 40.8764% { scale: 0.997 0.997; } 41.1894% { scale: 1.056 1.056; } 41.5023% { scale: 1.087 1.087; } 41.8153% { scale: 1.098 1.098; } 42.1283% { scale: 1.092 1.092; } 43.3803% { scale: 1.013 1.013; } 43.6933% { scale: 1.002 1.002; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm39 { 0% { opacity: 0; } 36.8075% { opacity: 0; } 38.9984% { opacity: 0.933; } 39.3114% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm40 { 0% { scale: 1 1; } 36.4945% { scale: 1 1; } 36.8075% { scale: 0 0; } 37.1205% { scale: 0.281 0.281; } 37.4335% { scale: 0.515 0.515; } 37.7465% { scale: 0.703 0.703; } 38.0595% { scale: 0.849 0.849; } 38.3725% { scale: 0.957 0.957; } 38.6854% { scale: 1.03 1.03; } 38.9984% { scale: 1.075 1.075; } 39.3114% { scale: 1.095 1.095; } 39.6244% { scale: 1.097 1.097; } 39.9374% { scale: 1.085 1.085; } 40.8764% { scale: 1.021 1.021; } 41.1894% { scale: 1.006 1.006; } 42.1283% { scale: 1 1; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm41 { 0% { opacity: 0; } 38.0595% { opacity: 0; } 38.3725% { opacity: 0.067; } 40.5634% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm42 { 0% { scale: 1 1; } 38.0595% { scale: 1 1; } 38.3725% { scale: 0.147 0.147; } 38.6854% { scale: 0.404 0.404; } 38.9984% { scale: 0.614 0.614; } 39.3114% { scale: 0.781 0.781; } 39.6244% { scale: 0.907 0.907; } 39.9374% { scale: 0.997 0.997; } 40.2504% { scale: 1.056 1.056; } 40.5634% { scale: 1.087 1.087; } 40.8764% { scale: 1.098 1.098; } 41.1894% { scale: 1.092 1.092; } 42.4413% { scale: 1.013 1.013; } 42.7543% { scale: 1.002 1.002; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm43 { 0% { opacity: 0; } 39.6244% { opacity: 0; } 41.8153% { opacity: 0.933; } 42.1283% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm44 { 0% { scale: 1 1; } 39.3114% { scale: 1 1; } 39.6244% { scale: 0 0; } 39.9374% { scale: 0.281 0.281; } 40.2504% { scale: 0.515 0.515; } 40.5634% { scale: 0.703 0.703; } 40.8764% { scale: 0.849 0.849; } 41.1894% { scale: 0.957 0.957; } 41.5023% { scale: 1.03 1.03; } 41.8153% { scale: 1.075 1.075; } 42.1283% { scale: 1.095 1.095; } 42.4413% { scale: 1.097 1.097; } 42.7543% { scale: 1.085 1.085; } 43.6933% { scale: 1.021 1.021; } 44.0063% { scale: 1.006 1.006; } 44.9452% { scale: 1 1; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm45 { 0% { opacity: 0; } 37.7465% { opacity: 0; } 39.9374% { opacity: 0.933; } 40.2504% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm46 { 0% { scale: 1 1; } 37.4335% { scale: 1 1; } 37.7465% { scale: 0 0; } 38.0595% { scale: 0.281 0.281; } 38.3725% { scale: 0.515 0.515; } 38.6854% { scale: 0.703 0.703; } 38.9984% { scale: 0.849 0.849; } 39.3114% { scale: 0.957 0.957; } 39.6244% { scale: 1.03 1.03; } 39.9374% { scale: 1.075 1.075; } 40.2504% { scale: 1.095 1.095; } 40.5634% { scale: 1.097 1.097; } 40.8764% { scale: 1.085 1.085; } 41.8153% { scale: 1.021 1.021; } 42.1283% { scale: 1.006 1.006; } 43.0673% { scale: 1 1; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm47 { 0% { opacity: 0; } 38.6854% { opacity: 0; } 40.8764% { opacity: 0.933; } 41.1894% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm48 { 0% { scale: 1 1; } 38.3725% { scale: 1 1; } 38.6854% { scale: 0 0; } 38.9984% { scale: 0.281 0.281; } 39.3114% { scale: 0.515 0.515; } 39.6244% { scale: 0.703 0.703; } 39.9374% { scale: 0.849 0.849; } 40.2504% { scale: 0.957 0.957; } 40.5634% { scale: 1.03 1.03; } 40.8764% { scale: 1.075 1.075; } 41.1894% { scale: 1.095 1.095; } 41.5023% { scale: 1.097 1.097; } 41.8153% { scale: 1.085 1.085; } 42.7543% { scale: 1.021 1.021; } 43.0673% { scale: 1.006 1.006; } 44.0063% { scale: 1 1; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm49 { 0% { opacity: 0; } 39.9374% { opacity: 0; } 40.2504% { opacity: 0.067; } 42.4413% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm50 { 0% { scale: 1 1; } 39.9374% { scale: 1 1; } 40.2504% { scale: 0.147 0.147; } 40.5634% { scale: 0.404 0.404; } 40.8764% { scale: 0.614 0.614; } 41.1894% { scale: 0.781 0.781; } 41.5023% { scale: 0.907 0.907; } 41.8153% { scale: 0.997 0.997; } 42.1283% { scale: 1.056 1.056; } 42.4413% { scale: 1.087 1.087; } 42.7543% { scale: 1.098 1.098; } 43.0673% { scale: 1.092 1.092; } 44.3192% { scale: 1.013 1.013; } 44.6322% { scale: 1.002 1.002; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm51 { 0% { opacity: 0; } 37.1205% { opacity: 0; } 37.4335% { opacity: 0.067; } 39.6244% { opacity: 1; } 58.6854% { opacity: 1; } 58.9984% { opacity: 0.563; } 59.3114% { opacity: 0.278; } 59.6244% { opacity: 0.125; } 59.9374% { opacity: 0.046; } 60.2504% { opacity: 0.01; } 60.5634% { opacity: 0; } 99.9906% { opacity: 0; } }
+@keyframes ailfilm52 { 0% { scale: 1 1; } 37.1205% { scale: 1 1; } 37.4335% { scale: 0.147 0.147; } 37.7465% { scale: 0.404 0.404; } 38.0595% { scale: 0.614 0.614; } 38.3725% { scale: 0.781 0.781; } 38.6854% { scale: 0.907 0.907; } 38.9984% { scale: 0.997 0.997; } 39.3114% { scale: 1.056 1.056; } 39.6244% { scale: 1.087 1.087; } 39.9374% { scale: 1.098 1.098; } 40.2504% { scale: 1.092 1.092; } 41.5023% { scale: 1.013 1.013; } 41.8153% { scale: 1.002 1.002; } 58.6854% { scale: 1 1; } 58.9984% { scale: 0.986 0.986; } 59.3114% { scale: 0.943 0.943; } 59.6244% { scale: 0.865 0.865; } 59.9374% { scale: 0.744 0.744; } 60.2504% { scale: 0.551 0.551; } 60.5634% { scale: 0 0; } 60.8764% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm53 { 0% { opacity: 0; } 59.9374% { opacity: 0; } 60.2504% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm54 { 0% { scale: 1 1; } 60.2504% { scale: 0.999 1; } 60.5634% { scale: 0.985 1; } 60.8764% { scale: 0.954 1; } 61.1894% { scale: 0.895 1; } 61.5023% { scale: 0.795 1; } 61.8153% { scale: 0.628 1; } 62.1283% { scale: 0.36 1; } 62.4413% { scale: 0 1; } 64.6322% { scale: 0 1; } 64.9452% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm55 { 0% { scale: 1 1; } 59.9374% { scale: 1 1; } 60.2504% { scale: 0 1; } 62.4413% { scale: 0 1; } 62.7543% { scale: 0.36 1; } 63.0673% { scale: 0.628 1; } 63.3803% { scale: 0.795 1; } 63.6933% { scale: 0.895 1; } 64.0063% { scale: 0.954 1; } 64.3192% { scale: 0.985 1; } 64.6322% { scale: 0.999 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm56 { 0% { opacity: 1; } 59.9374% { opacity: 1; } 60.2504% { opacity: 0.906; } 60.5634% { opacity: 0.724; } 60.8764% { opacity: 0.563; } 61.1894% { opacity: 0.429; } 61.5023% { opacity: 0.322; } 61.8153% { opacity: 0.239; } 62.1283% { opacity: 0.175; } 62.4413% { opacity: 0.125; } 62.7543% { opacity: 0.087; } 63.3803% { opacity: 0.036; } 64.0063% { opacity: 0.01; } 64.6322% { opacity: 0; } 64.9452% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm57 { 0% { opacity: 1; } 59.9374% { opacity: 1; } 60.2504% { opacity: 0.094; } 60.5634% { opacity: 0.276; } 60.8764% { opacity: 0.437; } 61.1894% { opacity: 0.571; } 61.5023% { opacity: 0.678; } 61.8153% { opacity: 0.761; } 62.1283% { opacity: 0.825; } 62.4413% { opacity: 0.875; } 62.7543% { opacity: 0.913; } 63.3803% { opacity: 0.964; } 64.0063% { opacity: 0.99; } 64.9452% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm58 { 0% { opacity: 0; } 60.5634% { opacity: 0; } 60.8764% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm59 { 0% { scale: 1 1; } 60.8764% { scale: 0.999 1; } 61.1894% { scale: 0.987 1; } 61.5023% { scale: 0.958 1; } 61.8153% { scale: 0.903 1; } 62.1283% { scale: 0.808 1; } 62.4413% { scale: 0.649 1; } 62.7543% { scale: 0.391 1; } 63.0673% { scale: 0.038 1; } 63.3803% { scale: 0 1; } 65.2582% { scale: 0 1; } 65.5712% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm60 { 0% { scale: 1 1; } 60.5634% { scale: 1 1; } 60.8764% { scale: 0 1; } 63.0673% { scale: 0 1; } 63.3803% { scale: 0.327 1; } 63.6933% { scale: 0.606 1; } 64.0063% { scale: 0.782 1; } 64.3192% { scale: 0.888 1; } 64.6322% { scale: 0.949 1; } 64.9452% { scale: 0.983 1; } 65.2582% { scale: 0.998 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm61 { 0% { opacity: 1; } 60.5634% { opacity: 1; } 60.8764% { opacity: 0.925; } 61.1894% { opacity: 0.742; } 61.5023% { opacity: 0.578; } 61.8153% { opacity: 0.441; } 62.1283% { opacity: 0.332; } 62.4413% { opacity: 0.246; } 62.7543% { opacity: 0.18; } 63.0673% { opacity: 0.129; } 63.3803% { opacity: 0.09; } 64.0063% { opacity: 0.038; } 64.6322% { opacity: 0.011; } 65.2582% { opacity: 0.001; } 65.5712% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm62 { 0% { opacity: 1; } 60.5634% { opacity: 1; } 60.8764% { opacity: 0.075; } 61.1894% { opacity: 0.258; } 61.5023% { opacity: 0.422; } 61.8153% { opacity: 0.559; } 62.1283% { opacity: 0.668; } 62.4413% { opacity: 0.754; } 62.7543% { opacity: 0.82; } 63.0673% { opacity: 0.871; } 63.3803% { opacity: 0.91; } 64.0063% { opacity: 0.962; } 64.6322% { opacity: 0.989; } 65.5712% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm63 { 0% { opacity: 0; } 61.1894% { opacity: 0; } 61.5023% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm64 { 0% { scale: 1 1; } 61.5023% { scale: 0.999 1; } 61.8153% { scale: 0.989 1; } 62.1283% { scale: 0.962 1; } 62.4413% { scale: 0.91 1; } 62.7543% { scale: 0.82 1; } 63.0673% { scale: 0.668 1; } 63.3803% { scale: 0.422 1; } 63.6933% { scale: 0.075 1; } 64.0063% { scale: 0 1; } 65.8842% { scale: 0 1; } 66.1972% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm65 { 0% { scale: 1 1; } 61.1894% { scale: 1 1; } 61.5023% { scale: 0 1; } 63.6933% { scale: 0 1; } 64.3192% { scale: 0.583 1; } 64.6322% { scale: 0.768 1; } 64.9452% { scale: 0.879 1; } 65.2582% { scale: 0.945 1; } 65.5712% { scale: 0.981 1; } 65.8842% { scale: 0.997 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm66 { 0% { opacity: 1; } 61.1894% { opacity: 1; } 61.5023% { opacity: 0.943; } 61.8153% { opacity: 0.759; } 62.1283% { opacity: 0.593; } 62.4413% { opacity: 0.453; } 62.7543% { opacity: 0.341; } 63.0673% { opacity: 0.254; } 63.3803% { opacity: 0.186; } 63.6933% { opacity: 0.134; } 64.0063% { opacity: 0.094; } 64.6322% { opacity: 0.04; } 65.2582% { opacity: 0.012; } 65.8842% { opacity: 0.001; } 66.1972% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm67 { 0% { opacity: 1; } 61.1894% { opacity: 1; } 61.5023% { opacity: 0.057; } 61.8153% { opacity: 0.241; } 62.1283% { opacity: 0.407; } 62.4413% { opacity: 0.547; } 62.7543% { opacity: 0.659; } 63.0673% { opacity: 0.746; } 63.3803% { opacity: 0.814; } 63.6933% { opacity: 0.866; } 64.0063% { opacity: 0.906; } 64.6322% { opacity: 0.96; } 65.2582% { opacity: 0.988; } 66.1972% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm68 { 0% { opacity: 0; } 61.8153% { opacity: 0; } 62.1283% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm69 { 0% { scale: 1 1; } 62.1283% { scale: 1 1; } 62.4413% { scale: 0.991 1; } 62.7543% { scale: 0.966 1; } 63.0673% { scale: 0.916 1; } 63.3803% { scale: 0.831 1; } 63.6933% { scale: 0.687 1; } 64.0063% { scale: 0.452 1; } 64.3192% { scale: 0.113 1; } 64.6322% { scale: 0 1; } 66.5102% { scale: 0 1; } 66.8232% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm70 { 0% { scale: 1 1; } 61.8153% { scale: 1 1; } 62.1283% { scale: 0 1; } 64.3192% { scale: 0 1; } 64.6322% { scale: 0.258 1; } 64.9452% { scale: 0.559 1; } 65.2582% { scale: 0.754 1; } 65.5712% { scale: 0.871 1; } 65.8842% { scale: 0.94 1; } 66.1972% { scale: 0.978 1; } 66.5102% { scale: 0.996 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm71 { 0% { opacity: 1; } 61.8153% { opacity: 1; } 62.1283% { opacity: 0.962; } 62.4413% { opacity: 0.777; } 62.7543% { opacity: 0.609; } 63.0673% { opacity: 0.466; } 63.3803% { opacity: 0.351; } 63.6933% { opacity: 0.262; } 64.0063% { opacity: 0.192; } 64.3192% { opacity: 0.138; } 64.6322% { opacity: 0.097; } 65.2582% { opacity: 0.042; } 65.8842% { opacity: 0.013; } 66.5102% { opacity: 0.001; } 66.8232% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm72 { 0% { opacity: 1; } 61.8153% { opacity: 1; } 62.1283% { opacity: 0.038; } 62.4413% { opacity: 0.223; } 62.7543% { opacity: 0.391; } 63.0673% { opacity: 0.534; } 63.3803% { opacity: 0.649; } 63.6933% { opacity: 0.738; } 64.0063% { opacity: 0.808; } 64.3192% { opacity: 0.862; } 64.6322% { opacity: 0.903; } 65.2582% { opacity: 0.958; } 65.8842% { opacity: 0.987; } 66.8232% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm73 { 0% { opacity: 0; } 62.4413% { opacity: 0; } 62.7543% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm74 { 0% { scale: 1 1; } 62.7543% { scale: 1 1; } 63.0673% { scale: 0.992 1; } 63.3803% { scale: 0.969 1; } 63.6933% { scale: 0.923 1; } 64.0063% { scale: 0.842 1; } 64.3192% { scale: 0.705 1; } 64.6322% { scale: 0.48 1; } 64.9452% { scale: 0.15 1; } 65.2582% { scale: 0 1; } 67.1362% { scale: 0 1; } 67.4491% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm75 { 0% { scale: 1 1; } 62.4413% { scale: 1 1; } 62.7543% { scale: 0 1; } 64.9452% { scale: 0 1; } 65.2582% { scale: 0.223 1; } 65.5712% { scale: 0.534 1; } 65.8842% { scale: 0.738 1; } 66.1972% { scale: 0.862 1; } 66.5102% { scale: 0.934 1; } 66.8232% { scale: 0.975 1; } 67.1362% { scale: 0.995 1; } 68.7011% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm76 { 0% { opacity: 1; } 62.4413% { opacity: 1; } 62.7543% { opacity: 0.981; } 63.0673% { opacity: 0.795; } 63.3803% { opacity: 0.624; } 63.6933% { opacity: 0.479; } 64.0063% { opacity: 0.362; } 64.3192% { opacity: 0.27; } 64.6322% { opacity: 0.198; } 64.9452% { opacity: 0.143; } 65.2582% { opacity: 0.101; } 65.5712% { opacity: 0.068; } 66.1972% { opacity: 0.026; } 66.8232% { opacity: 0.006; } 67.1362% { opacity: 0.001; } 67.4491% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm77 { 0% { opacity: 1; } 62.4413% { opacity: 1; } 62.7543% { opacity: 0.019; } 63.0673% { opacity: 0.205; } 63.3803% { opacity: 0.376; } 63.6933% { opacity: 0.521; } 64.0063% { opacity: 0.638; } 64.3192% { opacity: 0.73; } 64.6322% { opacity: 0.802; } 64.9452% { opacity: 0.857; } 65.2582% { opacity: 0.899; } 65.5712% { opacity: 0.932; } 66.1972% { opacity: 0.974; } 66.8232% { opacity: 0.994; } 69.0141% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm78 { 0% { opacity: 0; } 63.0673% { opacity: 0; } 63.3803% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm79 { 0% { scale: 1 1; } 63.3803% { scale: 1 1; } 63.6933% { scale: 0.994 1; } 64.0063% { scale: 0.972 1; } 64.3192% { scale: 0.929 1; } 64.6322% { scale: 0.852 1; } 64.9452% { scale: 0.722 1; } 65.2582% { scale: 0.508 1; } 65.5712% { scale: 0.187 1; } 65.8842% { scale: 0 1; } 68.0751% { scale: 0 1; } 68.3881% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm80 { 0% { scale: 1 1; } 63.0673% { scale: 1 1; } 63.3803% { scale: 0 1; } 65.5712% { scale: 0 1; } 65.8842% { scale: 0.187 1; } 66.1972% { scale: 0.508 1; } 66.5102% { scale: 0.722 1; } 66.8232% { scale: 0.852 1; } 67.1362% { scale: 0.929 1; } 67.4491% { scale: 0.972 1; } 67.7621% { scale: 0.994 1; } 68.3881% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm81 { 0% { opacity: 1; } 63.3803% { opacity: 1; } 63.6933% { opacity: 0.813; } 64.0063% { opacity: 0.64; } 64.3192% { opacity: 0.492; } 64.6322% { opacity: 0.372; } 64.9452% { opacity: 0.278; } 65.2582% { opacity: 0.205; } 65.5712% { opacity: 0.148; } 65.8842% { opacity: 0.105; } 66.1972% { opacity: 0.071; } 66.8232% { opacity: 0.028; } 67.4491% { opacity: 0.006; } 68.0751% { opacity: 0; } 68.3881% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm82 { 0% { opacity: 1; } 63.0673% { opacity: 1; } 63.3803% { opacity: 0; } 63.6933% { opacity: 0.187; } 64.0063% { opacity: 0.36; } 64.3192% { opacity: 0.508; } 64.6322% { opacity: 0.628; } 64.9452% { opacity: 0.722; } 65.2582% { opacity: 0.795; } 65.5712% { opacity: 0.852; } 65.8842% { opacity: 0.895; } 66.1972% { opacity: 0.929; } 66.8232% { opacity: 0.972; } 67.4491% { opacity: 0.994; } 69.0141% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm83 { 0% { opacity: 0; } 64.0063% { opacity: 0; } 64.3192% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm84 { 0% { scale: 1 1; } 64.0063% { scale: 1 1; } 64.3192% { scale: 0.995 1; } 64.6322% { scale: 0.975 1; } 64.9452% { scale: 0.934 1; } 65.2582% { scale: 0.862 1; } 65.5712% { scale: 0.738 1; } 65.8842% { scale: 0.534 1; } 66.1972% { scale: 0.223 1; } 66.5102% { scale: 0 1; } 68.7011% { scale: 0 1; } 69.0141% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm85 { 0% { scale: 1 1; } 64.0063% { scale: 1 1; } 64.3192% { scale: 0 1; } 66.1972% { scale: 0 1; } 66.5102% { scale: 0.15 1; } 66.8232% { scale: 0.48 1; } 67.1362% { scale: 0.705 1; } 67.4491% { scale: 0.842 1; } 67.7621% { scale: 0.923 1; } 68.0751% { scale: 0.969 1; } 68.3881% { scale: 0.992 1; } 69.0141% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm86 { 0% { opacity: 1; } 64.0063% { opacity: 1; } 64.6322% { opacity: 0.657; } 64.9452% { opacity: 0.506; } 65.2582% { opacity: 0.383; } 65.5712% { opacity: 0.286; } 65.8842% { opacity: 0.211; } 66.1972% { opacity: 0.153; } 66.5102% { opacity: 0.108; } 66.8232% { opacity: 0.074; } 67.4491% { opacity: 0.029; } 68.0751% { opacity: 0.007; } 68.7011% { opacity: 0; } 69.0141% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm87 { 0% { opacity: 1; } 64.0063% { opacity: 1; } 64.3192% { opacity: 0.168; } 64.6322% { opacity: 0.343; } 64.9452% { opacity: 0.494; } 65.2582% { opacity: 0.617; } 65.5712% { opacity: 0.714; } 65.8842% { opacity: 0.789; } 66.1972% { opacity: 0.847; } 66.5102% { opacity: 0.892; } 66.8232% { opacity: 0.926; } 67.4491% { opacity: 0.971; } 68.0751% { opacity: 0.993; } 69.3271% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm88 { 0% { opacity: 0; } 64.6322% { opacity: 0; } 64.9452% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm89 { 0% { scale: 1 1; } 64.9452% { scale: 0.996 1; } 65.2582% { scale: 0.978 1; } 65.5712% { scale: 0.94 1; } 65.8842% { scale: 0.871 1; } 66.1972% { scale: 0.754 1; } 66.5102% { scale: 0.559 1; } 66.8232% { scale: 0.258 1; } 67.1362% { scale: 0 1; } 69.3271% { scale: 0 1; } 69.6401% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm90 { 0% { scale: 1 1; } 64.6322% { scale: 1 1; } 64.9452% { scale: 0 1; } 66.8232% { scale: 0 1; } 67.1362% { scale: 0.113 1; } 67.4491% { scale: 0.452 1; } 67.7621% { scale: 0.687 1; } 68.0751% { scale: 0.831 1; } 68.3881% { scale: 0.916 1; } 68.7011% { scale: 0.966 1; } 69.0141% { scale: 0.991 1; } 69.3271% { scale: 1 1; } 99.9906% { scale: 1 1; } }
+@keyframes ailfilm91 { 0% { opacity: 1; } 64.6322% { opacity: 1; } 64.9452% { opacity: 0.85; } 65.2582% { opacity: 0.673; } 65.5712% { opacity: 0.52; } 65.8842% { opacity: 0.394; } 66.1972% { opacity: 0.295; } 66.5102% { opacity: 0.218; } 66.8232% { opacity: 0.158; } 67.1362% { opacity: 0.112; } 67.4491% { opacity: 0.077; } 68.0751% { opacity: 0.031; } 68.7011% { opacity: 0.008; } 69.3271% { opacity: 0; } 69.6401% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm92 { 0% { opacity: 1; } 64.6322% { opacity: 1; } 64.9452% { opacity: 0.15; } 65.2582% { opacity: 0.327; } 65.5712% { opacity: 0.48; } 65.8842% { opacity: 0.606; } 66.1972% { opacity: 0.705; } 66.5102% { opacity: 0.782; } 66.8232% { opacity: 0.842; } 67.1362% { opacity: 0.888; } 67.4491% { opacity: 0.923; } 68.0751% { opacity: 0.969; } 68.7011% { opacity: 0.992; } 69.9531% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm93 { 0% { opacity: 0; } 67.1362% { opacity: 0; } 67.4491% { opacity: 0.187; } 67.7621% { opacity: 0.36; } 68.0751% { opacity: 0.508; } 68.3881% { opacity: 0.628; } 68.7011% { opacity: 0.722; } 69.0141% { opacity: 0.795; } 69.3271% { opacity: 0.852; } 69.6401% { opacity: 0.895; } 69.9531% { opacity: 0.929; } 70.579% { opacity: 0.972; } 71.205% { opacity: 0.994; } 71.831% { opacity: 1; } 99.9906% { opacity: 1; } }
+@keyframes ailfilm94 { 0% { translate: 0px 0px; } 66.8232% { translate: 0px 0px; } 67.1362% { translate: 0px 12px; } 67.7621% { translate: 0px 7.685px; } 68.3881% { translate: 0px 4.467px; } 69.3271% { translate: 0px 1.777px; } 70.579% { translate: 0px 0.332px; } 71.831% { translate: 0px 0px; } 99.9906% { translate: 0px 0px; } }
+.kf-72eefa49-caption { animation: ailfilm93 10.65s linear infinite, ailfilm94 10.65s linear infinite; }
+.kf-72eefa49-d0 { animation: ailfilm4 10.65s linear infinite, ailfilm5 10.65s linear infinite, ailfilm6 10.65s linear infinite, ailfilm35 10.65s linear infinite; }
+.kf-72eefa49-d0_name { animation: ailfilm56 10.65s linear infinite; }
+.kf-72eefa49-d0_pg { animation: ailfilm54 10.65s linear infinite; }
+.kf-72eefa49-d0_q { animation: ailfilm37 10.65s linear infinite, ailfilm38 10.65s linear infinite; }
+.kf-72eefa49-d1 { animation: ailfilm7 10.65s linear infinite, ailfilm8 10.65s linear infinite, ailfilm9 10.65s linear infinite, ailfilm10 10.65s linear infinite; }
+.kf-72eefa49-d1_name { animation: ailfilm61 10.65s linear infinite; }
+.kf-72eefa49-d1_pg { animation: ailfilm59 10.65s linear infinite; }
+.kf-72eefa49-d1_q { animation: ailfilm39 10.65s linear infinite, ailfilm40 10.65s linear infinite; }
+.kf-72eefa49-d2 { animation: ailfilm11 10.65s linear infinite, ailfilm12 10.65s linear infinite, ailfilm13 10.65s linear infinite, ailfilm14 10.65s linear infinite; }
+.kf-72eefa49-d2_name { animation: ailfilm66 10.65s linear infinite; }
+.kf-72eefa49-d2_pg { animation: ailfilm64 10.65s linear infinite; }
+.kf-72eefa49-d2_q { animation: ailfilm41 10.65s linear infinite, ailfilm42 10.65s linear infinite; }
+.kf-72eefa49-d3 { animation: ailfilm15 10.65s linear infinite, ailfilm16 10.65s linear infinite, ailfilm17 10.65s linear infinite, ailfilm18 10.65s linear infinite; }
+.kf-72eefa49-d3_name { animation: ailfilm71 10.65s linear infinite; }
+.kf-72eefa49-d3_pg { animation: ailfilm69 10.65s linear infinite; }
+.kf-72eefa49-d3_q { animation: ailfilm43 10.65s linear infinite, ailfilm44 10.65s linear infinite; }
+.kf-72eefa49-d4 { animation: ailfilm19 10.65s linear infinite, ailfilm20 10.65s linear infinite, ailfilm21 10.65s linear infinite, ailfilm22 10.65s linear infinite; }
+.kf-72eefa49-d4_name { animation: ailfilm76 10.65s linear infinite; }
+.kf-72eefa49-d4_pg { animation: ailfilm74 10.65s linear infinite; }
+.kf-72eefa49-d4_q { animation: ailfilm45 10.65s linear infinite, ailfilm46 10.65s linear infinite; }
+.kf-72eefa49-d5 { animation: ailfilm23 10.65s linear infinite, ailfilm24 10.65s linear infinite, ailfilm25 10.65s linear infinite, ailfilm26 10.65s linear infinite; }
+.kf-72eefa49-d5_name { animation: ailfilm81 10.65s linear infinite; }
+.kf-72eefa49-d5_pg { animation: ailfilm79 10.65s linear infinite; }
+.kf-72eefa49-d5_q { animation: ailfilm47 10.65s linear infinite, ailfilm48 10.65s linear infinite; }
+.kf-72eefa49-d6 { animation: ailfilm27 10.65s linear infinite, ailfilm28 10.65s linear infinite, ailfilm29 10.65s linear infinite, ailfilm30 10.65s linear infinite; }
+.kf-72eefa49-d6_name { animation: ailfilm86 10.65s linear infinite; }
+.kf-72eefa49-d6_pg { animation: ailfilm84 10.65s linear infinite; }
+.kf-72eefa49-d6_q { animation: ailfilm49 10.65s linear infinite, ailfilm50 10.65s linear infinite; }
+.kf-72eefa49-d7 { animation: ailfilm31 10.65s linear infinite, ailfilm32 10.65s linear infinite, ailfilm33 10.65s linear infinite, ailfilm34 10.65s linear infinite; }
+.kf-72eefa49-d7_name { animation: ailfilm91 10.65s linear infinite; }
+.kf-72eefa49-d7_pg { animation: ailfilm89 10.65s linear infinite; }
+.kf-72eefa49-d7_q { animation: ailfilm51 10.65s linear infinite, ailfilm52 10.65s linear infinite; }
+.kf-72eefa49-k0 { animation: ailfilm36 10.65s linear infinite, ailfilm53 10.65s linear infinite; }
+.kf-72eefa49-k0_name { animation: ailfilm57 10.65s linear infinite; }
+.kf-72eefa49-k0_pg { animation: ailfilm55 10.65s linear infinite; }
+.kf-72eefa49-k1 { animation: ailfilm58 10.65s linear infinite; }
+.kf-72eefa49-k1_name { animation: ailfilm62 10.65s linear infinite; }
+.kf-72eefa49-k1_pg { animation: ailfilm60 10.65s linear infinite; }
+.kf-72eefa49-k2 { animation: ailfilm63 10.65s linear infinite; }
+.kf-72eefa49-k2_name { animation: ailfilm67 10.65s linear infinite; }
+.kf-72eefa49-k2_pg { animation: ailfilm65 10.65s linear infinite; }
+.kf-72eefa49-k3 { animation: ailfilm68 10.65s linear infinite; }
+.kf-72eefa49-k3_name { animation: ailfilm72 10.65s linear infinite; }
+.kf-72eefa49-k3_pg { animation: ailfilm70 10.65s linear infinite; }
+.kf-72eefa49-k4 { animation: ailfilm73 10.65s linear infinite; }
+.kf-72eefa49-k4_name { animation: ailfilm77 10.65s linear infinite; }
+.kf-72eefa49-k4_pg { animation: ailfilm75 10.65s linear infinite; }
+.kf-72eefa49-k5 { animation: ailfilm78 10.65s linear infinite; }
+.kf-72eefa49-k5_name { animation: ailfilm82 10.65s linear infinite; }
+.kf-72eefa49-k5_pg { animation: ailfilm80 10.65s linear infinite; }
+.kf-72eefa49-k6 { animation: ailfilm83 10.65s linear infinite; }
+.kf-72eefa49-k6_name { animation: ailfilm87 10.65s linear infinite; }
+.kf-72eefa49-k6_pg { animation: ailfilm85 10.65s linear infinite; }
+.kf-72eefa49-k7 { animation: ailfilm88 10.65s linear infinite; }
+.kf-72eefa49-k7_name { animation: ailfilm92 10.65s linear infinite; }
+.kf-72eefa49-k7_pg { animation: ailfilm90 10.65s linear infinite; }
+.kf-72eefa49-s_badge { animation: ailfilm0 10.65s linear infinite, ailfilm1 10.65s linear infinite; }
+.kf-72eefa49-s_heading { animation: ailfilm2 10.65s linear infinite, ailfilm3 10.65s linear infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
 ]]></style>
   <g class="kf-72eefa49-s kf-anim" style="transform-origin:800px 450px">
     <g id="s" class="ai-container kfp-72eefa49-s">
@@ -1563,333 +1453,4 @@ svg[data-ail-player] * { transition: none !important; }
     <rect id="caption" class="ai-shape ai-rect kfp-72eefa49-caption" x="425.466" y="781.5" width="749.068" height="66" fill="none" stroke="none" stroke-width="1.5"/>
     <text class="ai-label" x="800" y="814.5" text-anchor="middle" dominant-baseline="middle" font-size="40" fill="var(--role-ink)" style="font-weight:800"><tspan x="800" dy="-0"><tspan>4,000 files </tspan><tspan fill="var(--role-secondary)">×</tspan><tspan> 30 developers </tspan><tspan fill="var(--role-secondary)">×</tspan><tspan> every day</tspan></tspan></text>
   </g>
-<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"72eefa49-","frames":[{"name":"one_file","duration":0.92,"auto":null,"title":null,"note":null},{"name":"copies","duration":2.13,"auto":null,"title":null,"note":null},{"name":"code","duration":1.4,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","docs","d0","d0_pg","d0_pg_art","d0_pg_sheet","d0_pg_fold","d0_pg_bars","d0_pg_bar1","d0_pg_bar2","d0_pg_bar3","d0_pg_bar4","d0_pg_bar5","d0_pg_bar6","d0_name","d0_q","d1","d1_pg","d1_pg_art","d1_pg_sheet","d1_pg_fold","d1_pg_bars","d1_pg_bar1","d1_pg_bar2","d1_pg_bar3","d1_pg_bar4","d1_pg_bar5","d1_pg_bar6","d1_name","d1_q","d2","d2_pg","d2_pg_art","d2_pg_sheet","d2_pg_fold","d2_pg_bars","d2_pg_bar1","d2_pg_bar2","d2_pg_bar3","d2_pg_bar4","d2_pg_bar5","d2_pg_bar6","d2_name","d2_q","d3","d3_pg","d3_pg_art","d3_pg_sheet","d3_pg_fold","d3_pg_bars","d3_pg_bar1","d3_pg_bar2","d3_pg_bar3","d3_pg_bar4","d3_pg_bar5","d3_pg_bar6","d3_name","d3_q","d4","d4_pg","d4_pg_art","d4_pg_sheet","d4_pg_fold","d4_pg_bars","d4_pg_bar1","d4_pg_bar2","d4_pg_bar3","d4_pg_bar4","d4_pg_bar5","d4_pg_bar6","d4_name","d4_q","d5","d5_pg","d5_pg_art","d5_pg_sheet","d5_pg_fold","d5_pg_bars","d5_pg_bar1","d5_pg_bar2","d5_pg_bar3","d5_pg_bar4","d5_pg_bar5","d5_pg_bar6","d5_name","d5_q","d6","d6_pg","d6_pg_art","d6_pg_sheet","d6_pg_fold","d6_pg_bars","d6_pg_bar1","d6_pg_bar2","d6_pg_bar3","d6_pg_bar4","d6_pg_bar5","d6_pg_bar6","d6_name","d6_q","d7","d7_pg","d7_pg_art","d7_pg_sheet","d7_pg_fold","d7_pg_bars","d7_pg_bar1","d7_pg_bar2","d7_pg_bar3","d7_pg_bar4","d7_pg_bar5","d7_pg_bar6","d7_name","d7_q","docs__cell_0_0","docs__cell_0_1","docs__cell_0_2","docs__cell_0_3","docs__cell_1_0","docs__cell_1_1","docs__cell_1_2","docs__cell_1_3","codes","k0","k0_pg","k0_pg_art","k0_pg_sheet","k0_pg_fold","k0_pg_bars","k0_pg_bar1","k0_pg_bar2","k0_pg_bar3","k0_pg_bar4","k0_pg_bar5","k0_pg_bar6","k0_name","k1","k1_pg","k1_pg_art","k1_pg_sheet","k1_pg_fold","k1_pg_bars","k1_pg_bar1","k1_pg_bar2","k1_pg_bar3","k1_pg_bar4","k1_pg_bar5","k1_pg_bar6","k1_name","k2","k2_pg","k2_pg_art","k2_pg_sheet","k2_pg_fold","k2_pg_bars","k2_pg_bar1","k2_pg_bar2","k2_pg_bar3","k2_pg_bar4","k2_pg_bar5","k2_pg_bar6","k2_name","k3","k3_pg","k3_pg_art","k3_pg_sheet","k3_pg_fold","k3_pg_bars","k3_pg_bar1","k3_pg_bar2","k3_pg_bar3","k3_pg_bar4","k3_pg_bar5","k3_pg_bar6","k3_name","k4","k4_pg","k4_pg_art","k4_pg_sheet","k4_pg_fold","k4_pg_bars","k4_pg_bar1","k4_pg_bar2","k4_pg_bar3","k4_pg_bar4","k4_pg_bar5","k4_pg_bar6","k4_name","k5","k5_pg","k5_pg_art","k5_pg_sheet","k5_pg_fold","k5_pg_bars","k5_pg_bar1","k5_pg_bar2","k5_pg_bar3","k5_pg_bar4","k5_pg_bar5","k5_pg_bar6","k5_name","k6","k6_pg","k6_pg_art","k6_pg_sheet","k6_pg_fold","k6_pg_bars","k6_pg_bar1","k6_pg_bar2","k6_pg_bar3","k6_pg_bar4","k6_pg_bar5","k6_pg_bar6","k6_name","k7","k7_pg","k7_pg_art","k7_pg_sheet","k7_pg_fold","k7_pg_bars","k7_pg_bar1","k7_pg_bar2","k7_pg_bar3","k7_pg_bar4","k7_pg_bar5","k7_pg_bar6","k7_name","hub","caption"],"channels":[[".kf-72eefa49-s_badge","opacity"],[".kf-72eefa49-s_badge","scale"],[".kf-72eefa49-s_heading","opacity"],[".kf-72eefa49-s_heading","translate"],[".kf-72eefa49-d0","opacity"],[".kf-72eefa49-d0","scale"],[".kf-72eefa49-d0","rotate"],[".kf-72eefa49-d1","opacity"],[".kf-72eefa49-d1","translate"],[".kf-72eefa49-d1","scale"],[".kf-72eefa49-d1","rotate"],[".kf-72eefa49-d2","opacity"],[".kf-72eefa49-d2","translate"],[".kf-72eefa49-d2","scale"],[".kf-72eefa49-d2","rotate"],[".kf-72eefa49-d3","opacity"],[".kf-72eefa49-d3","translate"],[".kf-72eefa49-d3","scale"],[".kf-72eefa49-d3","rotate"],[".kf-72eefa49-d4","opacity"],[".kf-72eefa49-d4","translate"],[".kf-72eefa49-d4","scale"],[".kf-72eefa49-d4","rotate"],[".kf-72eefa49-d5","opacity"],[".kf-72eefa49-d5","translate"],[".kf-72eefa49-d5","scale"],[".kf-72eefa49-d5","rotate"],[".kf-72eefa49-d6","opacity"],[".kf-72eefa49-d6","translate"],[".kf-72eefa49-d6","scale"],[".kf-72eefa49-d6","rotate"],[".kf-72eefa49-d7","opacity"],[".kf-72eefa49-d7","translate"],[".kf-72eefa49-d7","scale"],[".kf-72eefa49-d7","rotate"],[".kf-72eefa49-d0","translate"],[".kf-72eefa49-k0","translate"],[".kf-72eefa49-d0_q","opacity"],[".kf-72eefa49-d0_q","scale"],[".kf-72eefa49-d1_q","opacity"],[".kf-72eefa49-d1_q","scale"],[".kf-72eefa49-d2_q","opacity"],[".kf-72eefa49-d2_q","scale"],[".kf-72eefa49-d3_q","opacity"],[".kf-72eefa49-d3_q","scale"],[".kf-72eefa49-d4_q","opacity"],[".kf-72eefa49-d4_q","scale"],[".kf-72eefa49-d5_q","opacity"],[".kf-72eefa49-d5_q","scale"],[".kf-72eefa49-d6_q","opacity"],[".kf-72eefa49-d6_q","scale"],[".kf-72eefa49-d7_q","opacity"],[".kf-72eefa49-d7_q","scale"],[".kf-72eefa49-k0","opacity"],[".kf-72eefa49-d0_pg","scale"],[".kf-72eefa49-k0_pg","scale"],[".kf-72eefa49-d0_name","opacity"],[".kf-72eefa49-k0_name","opacity"],[".kf-72eefa49-k1","opacity"],[".kf-72eefa49-d1_pg","scale"],[".kf-72eefa49-k1_pg","scale"],[".kf-72eefa49-d1_name","opacity"],[".kf-72eefa49-k1_name","opacity"],[".kf-72eefa49-k2","opacity"],[".kf-72eefa49-d2_pg","scale"],[".kf-72eefa49-k2_pg","scale"],[".kf-72eefa49-d2_name","opacity"],[".kf-72eefa49-k2_name","opacity"],[".kf-72eefa49-k3","opacity"],[".kf-72eefa49-d3_pg","scale"],[".kf-72eefa49-k3_pg","scale"],[".kf-72eefa49-d3_name","opacity"],[".kf-72eefa49-k3_name","opacity"],[".kf-72eefa49-k4","opacity"],[".kf-72eefa49-d4_pg","scale"],[".kf-72eefa49-k4_pg","scale"],[".kf-72eefa49-d4_name","opacity"],[".kf-72eefa49-k4_name","opacity"],[".kf-72eefa49-k5","opacity"],[".kf-72eefa49-d5_pg","scale"],[".kf-72eefa49-k5_pg","scale"],[".kf-72eefa49-d5_name","opacity"],[".kf-72eefa49-k5_name","opacity"],[".kf-72eefa49-k6","opacity"],[".kf-72eefa49-d6_pg","scale"],[".kf-72eefa49-k6_pg","scale"],[".kf-72eefa49-d6_name","opacity"],[".kf-72eefa49-k6_name","opacity"],[".kf-72eefa49-k7","opacity"],[".kf-72eefa49-d7_pg","scale"],[".kf-72eefa49-k7_pg","scale"],[".kf-72eefa49-d7_name","opacity"],[".kf-72eefa49-k7_name","opacity"],[".kf-72eefa49-caption","opacity"],[".kf-72eefa49-caption","translate"]],"settled":[["0","1 1","0","0px 0px","0","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","510px 150.625px","510px 150.625px","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","0px 0px"],["1","1 1","1","0px 0px","1","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","0","0px 0px","1 1","0deg","510px 150.625px","510px 150.625px","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","0px 0px"],["1","1 1","1","0px 0px","1","1 1","1.943deg","1","0px 0px","1 1","2.919deg","1","0px 0px","1 1","-0.766deg","1","0px 0px","1 1","-3.066deg","1","0px 0px","1 1","3.453deg","1","0px 0px","1 1","0.508deg","1","0px 0px","1 1","1.62deg","1","0px 0px","1 1","-0.196deg","0px 0px","0px 0px","1","1 1","1","1 1","1","1 1","1","1 1","1","1 1","1","1 1","1","1 1","1","1 1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","1 1","1 1","1","1","0","0px 0px"],["1","1 1","1","0px 0px","0","1 1","1.943deg","0","0px 0px","1 1","2.919deg","0","0px 0px","1 1","-0.766deg","0","0px 0px","1 1","-3.066deg","0","0px 0px","1 1","3.453deg","0","0px 0px","1 1","0.508deg","0","0px 0px","1 1","1.62deg","0","0px 0px","1 1","-0.196deg","0px 0px","0px 0px","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","0","1 1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","1 1","1 1","1","1","1","0px 0px"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":5,"t":0.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":6,"t":0,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"1.943deg"]]},{"c":7,"t":0.1,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":8,"t":0.1,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"170px 150.625px"],[1,"0px 0px"]]},{"c":8,"t":1.39,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":8,"t":1.89,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":9,"t":0.1,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.84 0.84"],[1,"1 1"]]},{"c":10,"t":0.1,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"2.919deg"]]},{"c":11,"t":0.2,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":12,"t":0.2,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-170px 150.625px"],[1,"0px 0px"]]},{"c":12,"t":1.51,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":12,"t":2.01,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":13,"t":0.2,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.635 0.635"],[1,"1 1"]]},{"c":14,"t":0.2,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"-0.766deg"]]},{"c":15,"t":0.3,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0.3,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-510px 150.625px"],[1,"0px 0px"]]},{"c":16,"t":1.35,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":16,"t":1.85,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":17,"t":0.3,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.704 0.704"],[1,"1 1"]]},{"c":18,"t":0.3,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"-3.066deg"]]},{"c":19,"t":0.4,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":20,"t":0.4,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"510px -129.375px"],[1,"0px 0px"]]},{"c":20,"t":1.63,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":20,"t":2.13,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":21,"t":0.4,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.668 0.668"],[1,"1 1"]]},{"c":22,"t":0.4,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"3.453deg"]]},{"c":23,"t":0.5,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":24,"t":0.5,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"170px -129.375px"],[1,"0px 0px"]]},{"c":24,"t":1.43,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":24,"t":1.93,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":25,"t":0.5,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.511 0.511"],[1,"1 1"]]},{"c":26,"t":0.5,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"0.508deg"]]},{"c":27,"t":0.6,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":28,"t":0.6,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-170px -140px"],[1,"0px 0px"]]},{"c":28,"t":1.59,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":28,"t":2.09,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":29,"t":0.6,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.511 0.511"],[1,"1 1"]]},{"c":30,"t":0.6,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"1.62deg"]]},{"c":31,"t":0.7,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":32,"t":0.7,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-510px -129.375px"],[1,"0px 0px"]]},{"c":32,"t":1.55,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":32,"t":2.05,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":0.7,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.511 0.511"],[1,"1 1"]]},{"c":34,"t":0.7,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0deg"],[1,"-0.196deg"]]},{"c":35,"t":0,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"510px 150.625px"],[1,"0px 0px"]]},{"c":35,"t":1.47,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":35,"t":1.97,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":36,"t":0,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"510px 150.625px"],[1,"0px 0px"]]},{"c":37,"t":1.45,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":38,"t":1.45,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":39,"t":1.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":1.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":41,"t":1.35,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":42,"t":1.35,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":43,"t":1.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":44,"t":1.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":45,"t":1.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":46,"t":1.3,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":47,"t":1.4,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":48,"t":1.4,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":49,"t":1.55,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":50,"t":1.55,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":51,"t":1.25,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":52,"t":1.25,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":4,"t":0.65,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":7,"t":0.72,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":11,"t":0.79,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":15,"t":0.86,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":19,"t":0.93,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":23,"t":1,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":27,"t":1.07,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":31,"t":1.14,"d":0.001,"e":"linear","k":[[0,"1"],[1,"0"]]},{"c":37,"t":0,"d":0.65,"e":"linear","k":[[0,"1"],[0.0256,"0.768"],[0.0513,"0.563"],[0.0769,"0.4"],[0.1026,"0.278"],[0.1282,"0.189"],[0.1538,"0.125"],[0.1795,"0.079"],[0.2051,"0.046"],[0.2308,"0.024"],[0.2564,"0.009"],[0.2821,"0.002"],[0.3077,"0"],[0.3333,"0"],[0.359,"0"],[0.3846,"0"],[0.4103,"0"],[0.4359,"0"],[0.4615,"0"],[0.4872,"0"],[0.5128,"0"],[0.5385,"0"],[0.5641,"0"],[0.5897,"0"],[0.6154,"0"],[0.641,"0"],[0.6667,"0"],[0.6923,"0"],[0.7179,"0"],[0.7436,"0"],[0.7692,"0"],[0.7949,"0"],[0.8205,"0"],[0.8462,"0"],[0.8718,"0"],[0.8974,"0"],[0.9231,"0"],[0.9487,"0"],[0.9744,"0"],[1,"0"]]},{"c":38,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":39,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":39,"t":0.22,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":40,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":41,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":41,"t":0.29,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":42,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":43,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":43,"t":0.36,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":44,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":45,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":45,"t":0.43,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":46,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":47,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":47,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":48,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":49,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":49,"t":0.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":50,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":51,"t":0,"d":0.2,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":51,"t":0.64,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"0"]]},{"c":52,"t":0,"d":0.2,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1 1"],[1,"0 0"]]},{"c":53,"t":0.15,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":54,"t":0.15,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":54,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":54,"t":0.4,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":55,"t":0.15,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":55,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":55,"t":0.4,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":55,"t":0.65,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":56,"t":0.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":57,"t":0.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":57,"t":0.65,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":58,"t":0.22,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":59,"t":0.22,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":59,"t":0.47,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":59,"t":0.47,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":60,"t":0.22,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":60,"t":0.47,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":60,"t":0.47,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":60,"t":0.72,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":61,"t":0.22,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":62,"t":0.22,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":62,"t":0.72,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":63,"t":0.29,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":64,"t":0.29,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":64,"t":0.54,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":64,"t":0.54,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":65,"t":0.29,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":65,"t":0.54,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":65,"t":0.54,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":65,"t":0.79,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":66,"t":0.29,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":67,"t":0.29,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":67,"t":0.79,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":68,"t":0.36,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":69,"t":0.36,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":69,"t":0.61,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":69,"t":0.61,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":70,"t":0.36,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":70,"t":0.61,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":70,"t":0.61,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":70,"t":0.86,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":71,"t":0.36,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":72,"t":0.36,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":72,"t":0.86,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":73,"t":0.43,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":74,"t":0.43,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":74,"t":0.68,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":74,"t":0.68,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":75,"t":0.43,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":75,"t":0.68,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":75,"t":0.68,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":75,"t":0.93,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":76,"t":0.43,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":77,"t":0.43,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":77,"t":0.93,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":78,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":79,"t":0.5,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":79,"t":0.75,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":79,"t":0.75,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":80,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":80,"t":0.75,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":80,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":80,"t":1,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":81,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":82,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":82,"t":1,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":83,"t":0.57,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":84,"t":0.57,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":84,"t":0.82,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":84,"t":0.82,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":85,"t":0.57,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":85,"t":0.82,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":85,"t":0.82,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":85,"t":1.07,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":86,"t":0.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":87,"t":0.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":87,"t":1.07,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":88,"t":0.64,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":89,"t":0.64,"d":0.25,"e":"cubic-bezier(0.645,0,0.785,0.39)","k":[[0,"1 1"],[1,"0 1"]]},{"c":89,"t":0.89,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":89,"t":0.89,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":90,"t":0.64,"d":0.25,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":90,"t":0.89,"d":0.001,"e":"linear","k":[[0,"0 1"],[1,"0 1"]]},{"c":90,"t":0.89,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":90,"t":1.14,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":91,"t":0.64,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":92,"t":0.64,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":92,"t":1.14,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":93,"t":0.9,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":94,"t":0.9,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}]]}]]></script>
-<script><![CDATA[
-/* agent-illustrator motion player: plays the tracks compiled into an SVG.
- * No dependencies; Web Animations API. The player has no semantics of its
- * own: every value it sets comes from the embedded manifest.
- *
- *   var p = ail.player(svgElement);        // shows frame 0, settled
- *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
- *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
- *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
- *
- * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
- * "...", note: "..."]`); a title holds until a later frame sets another, a
- * note belongs to its step. Both come with every 'step' event:
- *   p.on('step', function (k, meta) { header.textContent = meta.title; });
- *
- * A step is what one click shows: a frame and the `[auto]` frames that play
- * on after it by themselves. Hosts that advance on clicks use the step API
- * and never need to know which frames are automatic; `p.steps` lists each
- * step's first frame (also `agent-illustrator --list-steps`).
- *
- * Forward plays the segment; backward and jumps are instant and exact.
- */
-(function (root) {
-  'use strict';
-  if (root.ail && root.ail.player) return;
-
-  function camel(p) {
-    return p.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); });
-  }
-  function mq(q) {
-    return root.matchMedia ? root.matchMedia(q) : { matches: false, addListener: function () {} };
-  }
-
-  function Player(svg, opts) {
-    opts = opts || {};
-    var node = svg.querySelector('script.ail-motion');
-    if (!node) throw new Error('ail.player: this SVG has no motion manifest');
-    var m = JSON.parse(node.textContent);
-    if (m.v !== 1) throw new Error('ail.player: unsupported manifest version ' + m.v);
-    var self = this;
-    this.svg = svg;
-    this.manifest = m;
-    this.frames = m.frames.map(function (f) { return f.name; });
-    this.steps = [];
-    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
-    this.frame = 0;
-    this.playing = false;
-    this._anims = [];
-    this._loops = [];
-    this._timers = [];
-    this._listeners = {};
-    this._nodes = m.channels.map(function (c) {
-      return Array.prototype.slice.call(svg.querySelectorAll(c[0]));
-    });
-    this._reduced = mq('(prefers-reduced-motion: reduce)');
-    svg.setAttribute('data-ail-player', '');
-
-    // Print shows the finished story.
-    var saved = null;
-    function toLast() { saved = self.frame; self.goTo(self.frames.length - 1); }
-    function restore() { if (saved !== null) { self.goTo(saved); saved = null; } }
-    if (root.addEventListener) {
-      root.addEventListener('beforeprint', toLast);
-      root.addEventListener('afterprint', restore);
-    }
-
-    if (opts.autoplay) {
-      this._autoplay(opts.dwell == null ? 1.6 : opts.dwell);
-    } else {
-      this.goTo(opts.frame == null ? 0 : opts.frame);
-    }
-  }
-
-  var P = Player.prototype;
-
-  P.on = function (evt, cb) {
-    (this._listeners[evt] = this._listeners[evt] || []).push(cb);
-    return this;
-  };
-  P._emit = function (evt) {
-    var args = Array.prototype.slice.call(arguments, 1);
-    (this._listeners[evt] || []).forEach(function (cb) { cb.apply(null, args); });
-  };
-  P._index = function (i) {
-    if (typeof i === 'string') {
-      var k = this.frames.indexOf(i);
-      if (k < 0) throw new Error('ail.player: no frame named "' + i + '"');
-      return k;
-    }
-    return Math.max(0, Math.min(this.frames.length - 1, i | 0));
-  };
-  P._set = function (c, v) {
-    var prop = this.manifest.channels[c][1];
-    this._nodes[c].forEach(function (n) {
-      if (prop === 'text') n.textContent = v;
-      else n.style.setProperty(prop, v);
-    });
-  };
-  P._apply = function (row) {
-    var vals = this.manifest.settled[row];
-    for (var c = 0; c < vals.length; c++) this._set(c, vals[c]);
-  };
-  P._stop = function () {
-    this._anims.concat(this._loops).forEach(function (a) { a.cancel(); });
-    this._anims = [];
-    this._loops = [];
-    this._timers.forEach(clearTimeout);
-    this._timers = [];
-    this.playing = false;
-  };
-  /** True when every node of channel c is invisible right now (it or an
-   *  ancestor at opacity 0). */
-  P._hidden = function (c) {
-    var svg = this.svg;
-    return this._nodes[c].every(function (n) {
-      for (var e = n; e && e !== svg; e = e.parentNode) {
-        if (e.nodeType === 1 && getComputedStyle(e).opacity === '0') return true;
-      }
-      return false;
-    });
-  };
-
-  /** Start frame i's animations. A channel of something hidden when the
-   *  frame starts takes its first animation's starting value at once (fill
-   *  both): an element must never become visible before its geometry is in
-   *  place. A page about to flip in held scale 1 until its hold began, and
-   *  the frame that showed it before the hold did was a full-size flash. */
-  P._animateFrame = function (i) {
-    var self = this, seen = {};
-    this.manifest.anims[i].forEach(function (a) {
-      var first = !a.loop && !(a.c in seen);
-      seen[a.c] = true;
-      self._animate(a, false, first && self._hidden(a.c));
-    });
-  };
-
-  P._animate = function (a, loopNow, backfill) {
-    var self = this;
-    var prop = this.manifest.channels[a.c][1];
-    if (prop === 'text') {
-      a.k.forEach(function (kv) {
-        self._timers.push(setTimeout(function () { self._set(a.c, kv[1]); },
-          (a.t + kv[0] * a.d) * 1000));
-      });
-      return;
-    }
-    var key = camel(prop);
-    var frames = a.k.map(function (kv) { var f = { offset: kv[0] }; f[key] = kv[1]; return f; });
-    var timing = {
-      delay: loopNow ? 0 : a.t * 1000,
-      duration: Math.max(a.d * 1000, 1),
-      easing: a.e,
-      fill: a.loop ? 'none' : (backfill ? 'both' : 'forwards'),
-      iterations: a.loop ? Infinity : 1
-    };
-    this._nodes[a.c].forEach(function (n) {
-      if (!n.animate) return;
-      var anim = n.animate(frames, timing);
-      (a.loop ? self._loops : self._anims).push(anim);
-    });
-  };
-  P._startLoops = function (i) {
-    var self = this;
-    this.manifest.anims[i].forEach(function (a) { if (a.loop) self._animate(a, true); });
-  };
-
-  /** Jump to frame i (index or name): instant, exact. */
-  P.goTo = function (i) {
-    i = this._index(i);
-    this._stop();
-    this._apply(i + 1);
-    this.frame = i;
-    this._startLoops(i);
-    this._emit('frame', i, this.frames[i]);
-    return this;
-  };
-
-  /** Play frame i from the state before it. */
-  P.play = function (i) {
-    var self = this;
-    i = this._index(i);
-    this._stop();
-    var f = this.manifest.frames[i];
-    if (this._reduced.matches || !f.duration) {
-      this.goTo(i);
-      this._chain(i);
-      return this;
-    }
-    this._apply(i);
-    this.frame = i;
-    this.playing = true;
-    this._emit('framestart', i, this.frames[i]);
-    this._animateFrame(i);
-    this._timers.push(setTimeout(function () {
-      self._apply(i + 1);
-      self._anims.forEach(function (a) { a.cancel(); });
-      self._anims = [];
-      self.playing = false;
-      self._emit('frame', i, self.frames[i]);
-      self._chain(i);
-    }, f.duration * 1000 + 20));
-    return this;
-  };
-
-  P._chain = function (i) {
-    var self = this;
-    var nf = this.manifest.frames[i + 1];
-    if (nf && nf.auto != null) {
-      this._timers.push(setTimeout(function () { self.play(i + 1); }, nf.auto * 1000));
-    } else if (this._auto) {
-      this._auto(i);
-    }
-  };
-
-  /** The step frame i belongs to. */
-  P._stepOf = function (i) {
-    var k = 0;
-    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
-    return k;
-  };
-  /** Last frame of step k: its own frame and the automatic ones after it. */
-  P._stepEnd = function (k) {
-    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
-  };
-  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
-  /** Host metadata at step k: the latest title set up to its end, its notes. */
-  P.meta = function (k) {
-    if (k == null) k = this.step;
-    var fr = this.manifest.frames, title = null, notes = [];
-    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
-    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
-    return { title: title, note: notes.length ? notes.join('\n') : null };
-  };
-  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
-  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
-
-  /** Jump to the end of step k (its automatic frames included): instant. */
-  P.goToStep = function (k) {
-    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
-    this.goTo(this._stepEnd(k));
-    this._emit('step', k, this.meta(k));
-    return this;
-  };
-
-  /** One click: finish the current step, then play the next one through. */
-  P.nextStep = function () {
-    var k = this.step;
-    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
-    if (k + 1 < this.steps.length) {
-      this.play(this.steps[k + 1]);
-      this._emit('step', k + 1, this.meta(k + 1));
-      return true;
-    }
-    return false;
-  };
-
-  /** One click back: the end of the previous step, instantly. */
-  P.prevStep = function () {
-    var k = this.step;
-    if (k > 0) { this.goToStep(k - 1); return true; }
-    this.goToStep(0);
-    return false;
-  };
-
-  /** Advance: play the next frame (finishing the current one first). */
-  P.next = function () {
-    if (this.playing) this.goTo(this.frame);
-    if (this.frame < this.frames.length - 1) { this.play(this.frame + 1); return true; }
-    return false;
-  };
-
-  /** Step back: instant. */
-  P.prev = function () {
-    if (this.frame > 0) { this.goTo(this.frame - 1); return true; }
-    this.goTo(0);
-    return false;
-  };
-
-  /** Freeze frame i at t seconds into it (for tests and previews). */
-  P.at = function (i, t) {
-    var self = this;
-    i = this._index(i);
-    this._stop();
-    this._apply(i);
-    this.frame = i;
-    this.manifest.anims[i].forEach(function (a) {
-      var prop = self.manifest.channels[a.c][1];
-      if (prop === 'text') {
-        var cur = null;
-        a.k.forEach(function (kv) { if (a.t + kv[0] * a.d <= t + 1e-9) cur = kv[1]; });
-        if (cur !== null) self._set(a.c, cur);
-        return;
-      }
-      self._animate(a, false);
-    });
-    this._anims.concat(this._loops).forEach(function (an) { an.pause(); an.currentTime = t * 1000; });
-    return this;
-  };
-
-  P._autoplay = function (dwell) {
-    var self = this;
-    this._auto = function (i) {
-      self._timers.push(setTimeout(function () {
-        if (i < self.frames.length - 1) self.play(i + 1);
-        else { self._apply(0); self.play(0); }
-      }, dwell * 1000));
-    };
-    function manual() { self._auto = null; }
-    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
-    if (root.document) {
-      root.document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
-        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
-      });
-    }
-    this._apply(0);
-    this.play(0);
-  };
-
-  root.ail = root.ail || {};
-  root.ail.player = function (svg, opts) {
-    if (!svg.__ailPlayer) svg.__ailPlayer = new Player(svg, opts);
-    return svg.__ailPlayer;
-  };
-})(typeof window !== 'undefined' ? window : this);
-
-(function(){var svg=document.currentScript&&document.currentScript.closest?document.currentScript.closest('svg'):null;if(!svg){var all=document.querySelectorAll('svg[data-frames]');svg=all[all.length-1];}if(svg&&window.ail){window.ail.player(svg,{autoplay:true});}})();
-]]></script>
 </svg>

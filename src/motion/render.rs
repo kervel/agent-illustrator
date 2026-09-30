@@ -121,6 +121,132 @@ pub fn settled_css(m: &Motion, frame_names: &[String], prefix_scope: &str) -> St
     css
 }
 
+/// The whole story as plain CSS: one looping timeline (each keyframe plays,
+/// then holds; `[auto]` frames follow after their own pause), sampled with
+/// the native sampler every 1/30 s and reduced per channel to the keys
+/// linear interpolation needs. No script: it plays inside an `<img>` (a
+/// README). Text rewrites (`count`) are not carried; swaps are.
+pub fn film_css(m: &Motion, tokens: &MotionTokens, hold: f64, lead: f64, end_hold: f64) -> String {
+    const DT: f64 = 1.0 / 30.0;
+    // (global time, frame, local time)
+    let mut times: Vec<(f64, usize, f64)> = Vec::new();
+    let mut g = lead;
+    if !m.frames.is_empty() {
+        times.push((0.0, 0, 0.0));
+    }
+    for (fi, f) in m.frames.iter().enumerate() {
+        let n = (f.duration / DT).ceil().max(1.0) as usize;
+        for k in 0..=n {
+            let t = (k as f64 * DT).min(f.duration);
+            times.push((g + t, fi, t));
+        }
+        g += f.duration;
+        let pause = match m.frames.get(fi + 1) {
+            Some(next) => next.auto.unwrap_or(hold),
+            None => end_hold,
+        };
+        g += pause;
+        // Held at the frame's end until the next one starts.
+        times.push((g - 0.001, fi, f.duration + 1e-6));
+    }
+    let total = g.max(0.1);
+    let samples: Vec<Vec<Val>> = times.iter().map(|(_, f, t)| m.sample(*f, *t, tokens)).collect();
+    let tol = |p: Prop| match p {
+        Prop::Translate | Prop::Width | Prop::Height | Prop::StrokeWidth => 0.25,
+        Prop::Rotate => 0.2,
+        Prop::ClipPath => 0.2,
+        _ => 0.004,
+    };
+    let mut css = String::from("/* motion: the whole story as CSS (auto-generated) */\n");
+    // One `animation:` list per selector: a second rule would replace the
+    // first (a pop animates opacity and scale on the same wrapper).
+    let mut by_sel: BTreeMap<&str, Vec<String>> = BTreeMap::new();
+    for (c, k) in m.channels.iter().enumerate() {
+        if k.prop == Prop::Text {
+            continue;
+        }
+        let seq: Vec<(f64, &Val)> = times.iter().zip(&samples).map(|((g, _, _), v)| (*g, &v[c])).collect();
+        let keep = reduce(&seq, tol(k.prop));
+        let name = format!("ailfilm{}", c);
+        css.push_str(&format!("@keyframes {} {{", name));
+        for i in keep {
+            let (t, v) = seq[i];
+            css.push_str(&format!(" {}% {{ {}: {}; }}", num(t / total * 100.0), k.prop.css(), k.prop.format(v)));
+        }
+        css.push_str(" }\n");
+        by_sel.entry(k.sel.as_str()).or_default().push(format!("{} {}s linear infinite", name, num(total)));
+    }
+    // A label's text variants (`.aitxt-<id>-base`, `-v0`) are also `text`
+    // children of the element's wrapper, which `.kf-<id> > text` (the label
+    // colour) animates too: one element, two rules, and only one
+    // `animation:` can win. Each variant gets both lists, and wins.
+    let text_anims: BTreeMap<String, Vec<String>> = by_sel
+        .iter()
+        .filter_map(|(sel, a)| {
+            let id = sel.strip_prefix(".kf-")?.strip_suffix(" > text")?;
+            Some((id.to_string(), a.clone()))
+        })
+        .collect();
+    for (sel, anims) in &by_sel {
+        let mut anims = anims.clone();
+        let mut sel = sel.to_string();
+        if let Some(rest) = sel.strip_prefix(".aitxt-") {
+            if let Some((id, _variant)) = rest.rsplit_once('-') {
+                if let Some(extra) = text_anims.get(id) {
+                    anims.extend(extra.iter().cloned());
+                    sel = format!("{}{}", sel, sel);
+                }
+            }
+        }
+        css.push_str(&format!("{} {{ animation: {}; }}\n", sel, anims.join(", ")));
+    }
+    css.push_str("@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }\n");
+    css
+}
+
+/// The samples a channel needs: its ends, every change of a non-numeric
+/// value, and the points where straight lines between kept samples would
+/// stray more than `tol` from the samples between them.
+fn reduce(seq: &[(f64, &Val)], tol: f64) -> Vec<usize> {
+    let n = seq.len();
+    if n <= 2 {
+        return (0..n).collect();
+    }
+    let nums = |v: &Val| match v {
+        Val::V(x) => Some(x.clone()),
+        Val::S(_) => None,
+    };
+    let mut keep = vec![0];
+    let mut a = 0;
+    let mut j = 2;
+    while j < n {
+        // Can a straight line from a to j stand for everything between?
+        let ok = match (nums(seq[a].1), nums(seq[j].1)) {
+            (Some(va), Some(vj)) if va.len() == vj.len() => (a + 1..j).all(|i| match nums(seq[i].1) {
+                Some(vi) if vi.len() == va.len() => {
+                    let (ta, tj, ti) = (seq[a].0, seq[j].0, seq[i].0);
+                    let u = if tj > ta { (ti - ta) / (tj - ta) } else { 0.0 };
+                    va.iter().zip(&vj).zip(&vi).all(|((x, y), z)| (x + (y - x) * u - z).abs() <= tol)
+                }
+                _ => false,
+            }),
+            // Strings: only while nothing changes.
+            _ => (a + 1..=j).all(|i| seq[i].1 == seq[a].1),
+        };
+        if ok {
+            j += 1;
+        } else {
+            a = j - 1;
+            keep.push(a);
+            j = a + 2;
+        }
+    }
+    if *keep.last().unwrap() != n - 1 {
+        keep.push(n - 1);
+    }
+    keep
+}
+
 /// A static style block that pins every channel to its value at (frame, t).
 pub fn sampled_css(m: &Motion, f: usize, t: f64, tokens: &MotionTokens) -> String {
     let vals = m.sample(f, t, tokens);

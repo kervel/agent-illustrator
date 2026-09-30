@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="main,branch,hotfix,review,fixed,merge">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe CSS suppressed (--no-frame-css) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+    /* examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+  /* motion: the whole story as CSS (auto-generated) */
+@keyframes ailfilm0 { 0% { opacity: 0; } 2.0032% { opacity: 0; } 3.1717% { opacity: 0.933; } 3.3386% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm1 { 0% { scale: 0 0; } 2.0032% { scale: 0 0; } 2.1701% { scale: 0.281 0.281; } 2.337% { scale: 0.515 0.515; } 2.504% { scale: 0.703 0.703; } 2.6709% { scale: 0.849 0.849; } 2.8378% { scale: 0.957 0.957; } 3.0048% { scale: 1.03 1.03; } 3.1717% { scale: 1.075 1.075; } 3.3386% { scale: 1.095 1.095; } 3.5056% { scale: 1.097 1.097; } 3.6725% { scale: 1.085 1.085; } 4.1733% { scale: 1.021 1.021; } 4.3402% { scale: 1.006 1.006; } 4.841% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm2 { 0% { opacity: 0; } 2.504% { opacity: 0; } 2.6709% { opacity: 0.047; } 3.0048% { opacity: 0.276; } 3.1717% { opacity: 0.38; } 3.3386% { opacity: 0.473; } 3.5056% { opacity: 0.556; } 3.6725% { opacity: 0.628; } 3.8394% { opacity: 0.689; } 4.1733% { opacity: 0.787; } 4.5072% { opacity: 0.858; } 4.841% { opacity: 0.909; } 5.3418% { opacity: 0.959; } 6.0096% { opacity: 0.992; } 7.0111% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm3 { 0% { translate: 0px 0px; } 2.504% { translate: 0px 0px; } 2.6709% { translate: 0px 11.433px; } 3.3386% { translate: 0px 6.32px; } 4.0064% { translate: 0px 3.094px; } 4.841% { translate: 0px 1.092px; } 6.1765% { translate: 0px 0.048px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm4 { 0% { stroke-dashoffset: 1.001; } 3.6725% { stroke-dashoffset: 0.998; } 4.3402% { stroke-dashoffset: 0.973; } 4.6741% { stroke-dashoffset: 0.944; } 5.008% { stroke-dashoffset: 0.893; } 5.5088% { stroke-dashoffset: 0.784; } 5.8426% { stroke-dashoffset: 0.734; } 6.3434% { stroke-dashoffset: 0.695; } 7.0111% { stroke-dashoffset: 0.677; } 33.8872% { stroke-dashoffset: 0.673; } 34.388% { stroke-dashoffset: 0.648; } 34.7219% { stroke-dashoffset: 0.605; } 34.8888% { stroke-dashoffset: 0.569; } 35.2227% { stroke-dashoffset: 0.477; } 35.3896% { stroke-dashoffset: 0.441; } 35.7235% { stroke-dashoffset: 0.398; } 36.2243% { stroke-dashoffset: 0.374; } 77.7904% { stroke-dashoffset: 0.367; } 78.2912% { stroke-dashoffset: 0.349; } 78.625% { stroke-dashoffset: 0.324; } 78.9589% { stroke-dashoffset: 0.28; } 79.2928% { stroke-dashoffset: 0.207; } 79.6266% { stroke-dashoffset: 0.123; } 79.9605% { stroke-dashoffset: 0.065; } 80.2943% { stroke-dashoffset: 0.032; } 80.7951% { stroke-dashoffset: 0.008; } 81.7967% { stroke-dashoffset: 0; } 99.995% { stroke-dashoffset: 0; } }
+@keyframes ailfilm5 { 0% { opacity: 0; } 3.5056% { opacity: 0; } 4.6741% { opacity: 0.933; } 4.841% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm6 { 0% { scale: 1 1; } 3.3386% { scale: 1 1; } 3.5056% { scale: 0 0; } 3.6725% { scale: 0.281 0.281; } 3.8394% { scale: 0.515 0.515; } 4.0064% { scale: 0.703 0.703; } 4.1733% { scale: 0.849 0.849; } 4.3402% { scale: 0.957 0.957; } 4.5072% { scale: 1.03 1.03; } 4.6741% { scale: 1.075 1.075; } 4.841% { scale: 1.095 1.095; } 5.008% { scale: 1.097 1.097; } 5.1749% { scale: 1.085 1.085; } 5.6757% { scale: 1.021 1.021; } 5.8426% { scale: 1.006 1.006; } 6.3434% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm7 { 0% { opacity: 0; } 4.6741% { opacity: 0; } 4.841% { opacity: 0.042; } 6.0096% { opacity: 0.975; } 6.1765% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm8 { 0% { scale: 1 1; } 4.6741% { scale: 1 1; } 4.841% { scale: 0.094 0.094; } 5.008% { scale: 0.36 0.36; } 5.1749% { scale: 0.579 0.579; } 5.3418% { scale: 0.754 0.754; } 5.5088% { scale: 0.887 0.887; } 5.6757% { scale: 0.983 0.983; } 5.8426% { scale: 1.047 1.047; } 6.0096% { scale: 1.083 1.083; } 6.1765% { scale: 1.097 1.097; } 6.3434% { scale: 1.094 1.094; } 6.6773% { scale: 1.058 1.058; } 7.0111% { scale: 1.016 1.016; } 7.1781% { scale: 1.003 1.003; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm9 { 0% { opacity: 0; } 5.5088% { opacity: 0; } 5.6757% { opacity: 0.153; } 5.8426% { opacity: 0.329; } 6.0096% { opacity: 0.483; } 6.1765% { opacity: 0.608; } 6.3434% { opacity: 0.706; } 6.5104% { opacity: 0.783; } 6.6773% { opacity: 0.843; } 6.8442% { opacity: 0.888; } 7.0111% { opacity: 0.923; } 7.345% { opacity: 0.969; } 7.6789% { opacity: 0.993; } 8.3466% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm10 { 0% { translate: 0px 0px; } 5.5088% { translate: 0px 0px; } 5.6757% { translate: 0px 10.164px; } 6.0096% { translate: 0px 6.21px; } 6.3434% { translate: 0px 3.523px; } 6.8442% { translate: 0px 1.341px; } 7.6789% { translate: 0px 0.089px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm11 { 0% { opacity: 0; } 5.3418% { opacity: 0; } 5.5088% { opacity: 0.05; } 6.6773% { opacity: 0.983; } 6.8442% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm12 { 0% { scale: 1 1; } 5.3418% { scale: 1 1; } 5.5088% { scale: 0.111 0.111; } 5.6757% { scale: 0.375 0.375; } 5.8426% { scale: 0.591 0.591; } 6.0096% { scale: 0.763 0.763; } 6.1765% { scale: 0.894 0.894; } 6.3434% { scale: 0.988 0.988; } 6.5104% { scale: 1.05 1.05; } 6.6773% { scale: 1.085 1.085; } 6.8442% { scale: 1.097 1.097; } 7.0111% { scale: 1.093 1.093; } 7.345% { scale: 1.057 1.057; } 7.6789% { scale: 1.015 1.015; } 7.8458% { scale: 1.002 1.002; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm13 { 0% { opacity: 0; } 6.1765% { opacity: 0; } 6.3434% { opacity: 0.164; } 6.5104% { opacity: 0.339; } 6.6773% { opacity: 0.491; } 6.8442% { opacity: 0.614; } 7.0111% { opacity: 0.712; } 7.1781% { opacity: 0.787; } 7.345% { opacity: 0.846; } 7.5119% { opacity: 0.891; } 7.6789% { opacity: 0.925; } 8.0127% { opacity: 0.97; } 8.3466% { opacity: 0.993; } 9.0143% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm14 { 0% { translate: 0px 0px; } 6.1765% { translate: 0px 0px; } 6.3434% { translate: 0px 10.032px; } 6.6773% { translate: 0px 6.11px; } 7.0111% { translate: 0px 3.461px; } 7.5119% { translate: 0px 1.313px; } 8.3466% { translate: 0px 0.084px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm15 { 0% { opacity: 0; } 7.1781% { opacity: 0; } 7.345% { opacity: 0.067; } 8.5135% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm16 { 0% { scale: 1 1; } 7.1781% { scale: 1 1; } 7.345% { scale: 0.147 0.147; } 7.5119% { scale: 0.404 0.404; } 7.6789% { scale: 0.614 0.614; } 7.8458% { scale: 0.781 0.781; } 8.0127% { scale: 0.907 0.907; } 8.1797% { scale: 0.997 0.997; } 8.3466% { scale: 1.056 1.056; } 8.5135% { scale: 1.087 1.087; } 8.6805% { scale: 1.098 1.098; } 8.8474% { scale: 1.092 1.092; } 9.5151% { scale: 1.013 1.013; } 9.6821% { scale: 1.002 1.002; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm17 { 0% { opacity: 0; } 8.0127% { opacity: 0; } 8.1797% { opacity: 0.187; } 8.3466% { opacity: 0.36; } 8.5135% { opacity: 0.508; } 8.6805% { opacity: 0.628; } 8.8474% { opacity: 0.722; } 9.0143% { opacity: 0.795; } 9.1813% { opacity: 0.852; } 9.3482% { opacity: 0.895; } 9.5151% { opacity: 0.929; } 9.849% { opacity: 0.972; } 10.1829% { opacity: 0.994; } 10.5167% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm18 { 0% { translate: 0px 0px; } 7.8458% { translate: 0px 0px; } 8.0127% { translate: 0px 12px; } 8.3466% { translate: 0px 7.685px; } 8.6805% { translate: 0px 4.467px; } 9.1813% { translate: 0px 1.777px; } 9.849% { translate: 0px 0.332px; } 10.5167% { translate: 0px 0px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm19 { 0% { stroke-dashoffset: 1.001; } 17.8617% { stroke-dashoffset: 0.998; } 18.3625% { stroke-dashoffset: 0.972; } 18.5295% { stroke-dashoffset: 0.954; } 18.6964% { stroke-dashoffset: 0.929; } 18.8633% { stroke-dashoffset: 0.892; } 19.1972% { stroke-dashoffset: 0.798; } 19.3641% { stroke-dashoffset: 0.761; } 19.5311% { stroke-dashoffset: 0.736; } 19.8649% { stroke-dashoffset: 0.706; } 20.3657% { stroke-dashoffset: 0.69; } 22.202% { stroke-dashoffset: 0.686; } 22.3689% { stroke-dashoffset: 0.673; } 22.5358% { stroke-dashoffset: 0.641; } 22.7028% { stroke-dashoffset: 0.577; } 22.8697% { stroke-dashoffset: 0.528; } 23.0366% { stroke-dashoffset: 0.508; } 23.3705% { stroke-dashoffset: 0.5; } 62.0153% { stroke-dashoffset: 0.497; } 62.1822% { stroke-dashoffset: 0.484; } 62.3491% { stroke-dashoffset: 0.452; } 62.5161% { stroke-dashoffset: 0.388; } 62.683% { stroke-dashoffset: 0.339; } 62.8499% { stroke-dashoffset: 0.319; } 63.1838% { stroke-dashoffset: 0.311; } 77.1226% { stroke-dashoffset: 0.309; } 77.6234% { stroke-dashoffset: 0.289; } 77.9573% { stroke-dashoffset: 0.253; } 78.1242% { stroke-dashoffset: 0.222; } 78.625% { stroke-dashoffset: 0.089; } 78.792% { stroke-dashoffset: 0.058; } 79.1258% { stroke-dashoffset: 0.022; } 79.6266% { stroke-dashoffset: 0.002; } 99.995% { stroke-dashoffset: 0; } }
+@keyframes ailfilm20 { 0% { opacity: 0; } 18.5295% { opacity: 0; } 19.698% { opacity: 0.933; } 19.8649% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm21 { 0% { scale: 1 1; } 18.3625% { scale: 1 1; } 18.5295% { scale: 0 0; } 18.6964% { scale: 0.281 0.281; } 18.8633% { scale: 0.515 0.515; } 19.0303% { scale: 0.703 0.703; } 19.1972% { scale: 0.849 0.849; } 19.3641% { scale: 0.957 0.957; } 19.5311% { scale: 1.03 1.03; } 19.698% { scale: 1.075 1.075; } 19.8649% { scale: 1.095 1.095; } 20.0319% { scale: 1.097 1.097; } 20.1988% { scale: 1.085 1.085; } 20.6996% { scale: 1.021 1.021; } 20.8665% { scale: 1.006 1.006; } 21.3673% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm22 { 0% { opacity: 0; } 20.5326% { opacity: 0; } 21.7012% { opacity: 0.933; } 21.8681% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm23 { 0% { scale: 1 1; } 20.3657% { scale: 1 1; } 20.5326% { scale: 0 0; } 20.6996% { scale: 0.281 0.281; } 20.8665% { scale: 0.515 0.515; } 21.0334% { scale: 0.703 0.703; } 21.2004% { scale: 0.849 0.849; } 21.3673% { scale: 0.957 0.957; } 21.5342% { scale: 1.03 1.03; } 21.7012% { scale: 1.075 1.075; } 21.8681% { scale: 1.095 1.095; } 22.035% { scale: 1.097 1.097; } 22.202% { scale: 1.085 1.085; } 22.7028% { scale: 1.021 1.021; } 22.8697% { scale: 1.006 1.006; } 23.3705% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm24 { 0% { opacity: 0; } 21.2004% { opacity: 0; } 21.3673% { opacity: 0.094; } 21.5342% { opacity: 0.276; } 21.7012% { opacity: 0.437; } 21.8681% { opacity: 0.571; } 22.035% { opacity: 0.678; } 22.202% { opacity: 0.761; } 22.3689% { opacity: 0.825; } 22.5358% { opacity: 0.875; } 22.7028% { opacity: 0.913; } 23.0366% { opacity: 0.964; } 23.3705% { opacity: 0.99; } 23.8713% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm25 { 0% { translate: 0px 0px; } 21.2004% { translate: 0px 0px; } 21.3673% { translate: 0px 10.869px; } 21.7012% { translate: 0px 6.755px; } 22.035% { translate: 0px 3.866px; } 22.5358% { translate: 0px 1.499px; } 23.2036% { translate: 0px 0.247px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm26 { 0% { opacity: 0; } 23.2036% { opacity: 0; } 23.3705% { opacity: 0.067; } 24.539% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm27 { 0% { scale: 1 1; } 23.2036% { scale: 1 1; } 23.3705% { scale: 0.147 0.147; } 23.5374% { scale: 0.404 0.404; } 23.7044% { scale: 0.614 0.614; } 23.8713% { scale: 0.781 0.781; } 24.0382% { scale: 0.907 0.907; } 24.2052% { scale: 0.997 0.997; } 24.3721% { scale: 1.056 1.056; } 24.539% { scale: 1.087 1.087; } 24.706% { scale: 1.098 1.098; } 24.8729% { scale: 1.092 1.092; } 25.5406% { scale: 1.013 1.013; } 25.7075% { scale: 1.002 1.002; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm28 { 0% { opacity: 0; } 24.0382% { opacity: 0; } 24.2052% { opacity: 0.187; } 24.3721% { opacity: 0.36; } 24.539% { opacity: 0.508; } 24.706% { opacity: 0.628; } 24.8729% { opacity: 0.722; } 25.0398% { opacity: 0.795; } 25.2067% { opacity: 0.852; } 25.3737% { opacity: 0.895; } 25.5406% { opacity: 0.929; } 25.8745% { opacity: 0.972; } 26.2083% { opacity: 0.994; } 26.5422% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm29 { 0% { translate: 0px 0px; } 23.8713% { translate: 0px 0px; } 24.0382% { translate: 0px 12px; } 24.3721% { translate: 0px 7.685px; } 24.706% { translate: 0px 4.467px; } 25.2067% { translate: 0px 1.777px; } 25.8745% { translate: 0px 0.332px; } 26.5422% { translate: 0px 0px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm30 { 0% { opacity: 0; } 36.5581% { opacity: 0; } 37.7267% { opacity: 0.933; } 37.8936% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm31 { 0% { scale: 1 1; } 36.3912% { scale: 1 1; } 36.5581% { scale: 0 0; } 36.7251% { scale: 0.281 0.281; } 36.892% { scale: 0.515 0.515; } 37.0589% { scale: 0.703 0.703; } 37.2259% { scale: 0.849 0.849; } 37.3928% { scale: 0.957 0.957; } 37.5597% { scale: 1.03 1.03; } 37.7267% { scale: 1.075 1.075; } 37.8936% { scale: 1.095 1.095; } 38.0605% { scale: 1.097 1.097; } 38.2275% { scale: 1.085 1.085; } 38.7282% { scale: 1.021 1.021; } 38.8952% { scale: 1.006 1.006; } 39.396% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm32 { 0% { opacity: 0; } 37.2259% { opacity: 0; } 37.3928% { opacity: 0.094; } 37.5597% { opacity: 0.276; } 37.7267% { opacity: 0.437; } 37.8936% { opacity: 0.571; } 38.0605% { opacity: 0.678; } 38.2275% { opacity: 0.761; } 38.3944% { opacity: 0.825; } 38.5613% { opacity: 0.875; } 38.7282% { opacity: 0.913; } 39.0621% { opacity: 0.964; } 39.396% { opacity: 0.99; } 39.8133% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm33 { 0% { translate: 0px 0px; } 37.2259% { translate: 0px 0px; } 37.3928% { translate: 0px 10.869px; } 37.7267% { translate: 0px 6.755px; } 38.0605% { translate: 0px 3.866px; } 38.5613% { translate: 0px 1.499px; } 39.229% { translate: 0px 0.247px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm34 { 0% { opacity: 0; } 46.8245% { opacity: 0; } 47.993% { opacity: 0.933; } 48.1599% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm35 { 0% { scale: 1 1; } 46.8194% { scale: 1 1; } 46.8245% { scale: 0 0; } 46.9914% { scale: 0.281 0.281; } 47.1583% { scale: 0.515 0.515; } 47.3253% { scale: 0.703 0.703; } 47.4922% { scale: 0.849 0.849; } 47.6591% { scale: 0.957 0.957; } 47.826% { scale: 1.03 1.03; } 47.993% { scale: 1.075 1.075; } 48.1599% { scale: 1.095 1.095; } 48.3268% { scale: 1.097 1.097; } 48.4938% { scale: 1.085 1.085; } 48.9946% { scale: 1.021 1.021; } 49.1615% { scale: 1.006 1.006; } 49.6623% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm36 { 0% { opacity: 0.3; } 49.8292% { opacity: 0.3; } 49.9962% { opacity: 0.606; } 50.1631% { opacity: 0.805; } 50.33% { opacity: 0.913; } 50.497% { opacity: 0.968; } 50.6639% { opacity: 0.993; } 50.9978% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm37 { 0% { opacity: 0; } 49.8292% { opacity: 0; } 50.9978% { opacity: 0.933; } 51.1647% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm38 { 0% { scale: 1 1; } 49.6623% { scale: 1 1; } 49.8292% { scale: 0 0; } 49.9962% { scale: 0.281 0.281; } 50.1631% { scale: 0.515 0.515; } 50.33% { scale: 0.703 0.703; } 50.497% { scale: 0.849 0.849; } 50.6639% { scale: 0.957 0.957; } 50.8308% { scale: 1.03 1.03; } 50.9978% { scale: 1.075 1.075; } 51.1647% { scale: 1.095 1.095; } 51.3316% { scale: 1.097 1.097; } 51.4986% { scale: 1.085 1.085; } 51.9994% { scale: 1.021 1.021; } 52.1663% { scale: 1.006 1.006; } 52.6671% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm39 { 0% { opacity: 0.3; } 52.3332% { opacity: 0.3; } 52.5001% { opacity: 0.431; } 52.6671% { opacity: 0.552; } 52.834% { opacity: 0.655; } 53.0009% { opacity: 0.739; } 53.1679% { opacity: 0.805; } 53.3348% { opacity: 0.857; } 53.5017% { opacity: 0.896; } 53.8356% { opacity: 0.95; } 54.1695% { opacity: 0.981; } 54.6703% { opacity: 0.999; } 99.995% { opacity: 1; } }
+@keyframes ailfilm40 { 0% { opacity: 0; } 52.3332% { opacity: 0; } 52.5001% { opacity: 0.187; } 52.6671% { opacity: 0.36; } 52.834% { opacity: 0.508; } 53.0009% { opacity: 0.628; } 53.1679% { opacity: 0.722; } 53.3348% { opacity: 0.795; } 53.5017% { opacity: 0.852; } 53.6687% { opacity: 0.895; } 53.8356% { opacity: 0.929; } 54.1695% { opacity: 0.972; } 54.5033% { opacity: 0.994; } 54.8372% { opacity: 1; } 66.0216% { opacity: 1; } 66.1886% { opacity: 0.906; } 66.3555% { opacity: 0.724; } 66.5224% { opacity: 0.563; } 66.6894% { opacity: 0.429; } 66.8563% { opacity: 0.322; } 67.0232% { opacity: 0.239; } 67.1902% { opacity: 0.175; } 67.3571% { opacity: 0.125; } 67.524% { opacity: 0.087; } 67.8579% { opacity: 0.036; } 68.1918% { opacity: 0.01; } 68.6091% { opacity: 0; } 99.995% { opacity: 0; } }
+@keyframes ailfilm41 { 0% { opacity: 0; } 63.0169% { opacity: 0; } 63.1838% { opacity: 0.067; } 64.3523% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm42 { 0% { scale: 1 1; } 63.0169% { scale: 1 1; } 63.1838% { scale: 0.147 0.147; } 63.3507% { scale: 0.404 0.404; } 63.5177% { scale: 0.614 0.614; } 63.6846% { scale: 0.781 0.781; } 63.8515% { scale: 0.907 0.907; } 64.0185% { scale: 0.997 0.997; } 64.1854% { scale: 1.056 1.056; } 64.3523% { scale: 1.087 1.087; } 64.5193% { scale: 1.098 1.098; } 64.6862% { scale: 1.092 1.092; } 65.3539% { scale: 1.013 1.013; } 65.5209% { scale: 1.002 1.002; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm43 { 0% { opacity: 0; } 63.8515% { opacity: 0; } 64.0185% { opacity: 0.187; } 64.1854% { opacity: 0.36; } 64.3523% { opacity: 0.508; } 64.5193% { opacity: 0.628; } 64.6862% { opacity: 0.722; } 64.8531% { opacity: 0.795; } 65.0201% { opacity: 0.852; } 65.187% { opacity: 0.895; } 65.3539% { opacity: 0.929; } 65.6878% { opacity: 0.972; } 66.0216% { opacity: 0.994; } 66.8563% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm44 { 0% { translate: 0px 0px; } 63.6846% { translate: 0px 0px; } 63.8515% { translate: 0px 12px; } 64.1854% { translate: 0px 7.685px; } 64.5193% { translate: 0px 4.467px; } 65.0201% { translate: 0px 1.777px; } 65.6878% { translate: 0px 0.332px; } 68.1918% { translate: 0px 0px; } 99.995% { translate: 0px 0px; } }
+@keyframes ailfilm45 { 0% { opacity: 1; } 65.5209% { opacity: 1; } 65.6878% { opacity: 0.813; } 65.8547% { opacity: 0.492; } 66.0216% { opacity: 0.278; } 66.1886% { opacity: 0.148; } 66.3555% { opacity: 0.071; } 66.5224% { opacity: 0.028; } 66.6894% { opacity: 0.006; } 67.0232% { opacity: 0; } 99.995% { opacity: 0; } }
+@keyframes ailfilm46 { 0% { opacity: 0; } 66.1886% { opacity: 0; } 66.3555% { opacity: 0.187; } 66.5224% { opacity: 0.412; } 66.6894% { opacity: 0.591; } 66.8563% { opacity: 0.722; } 67.0232% { opacity: 0.816; } 67.1902% { opacity: 0.882; } 67.3571% { opacity: 0.929; } 67.524% { opacity: 0.961; } 67.691% { opacity: 0.982; } 68.0248% { opacity: 0.999; } 99.995% { opacity: 1; } }
+@keyframes ailfilm47 { 0% { opacity: 0; } 66.0216% { opacity: 0; } 66.1886% { opacity: 0.067; } 67.3571% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm48 { 0% { scale: 1 1; } 66.0216% { scale: 1 1; } 66.1886% { scale: 0.147 0.147; } 66.3555% { scale: 0.404 0.404; } 66.5224% { scale: 0.614 0.614; } 66.6894% { scale: 0.781 0.781; } 66.8563% { scale: 0.907 0.907; } 67.0232% { scale: 0.997 0.997; } 67.1902% { scale: 1.056 1.056; } 67.3571% { scale: 1.087 1.087; } 67.524% { scale: 1.098 1.098; } 67.691% { scale: 1.092 1.092; } 68.3587% { scale: 1.013 1.013; } 68.6091% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm49 { 0% { opacity: 0; } 75.6152% { opacity: 0; } 75.6202% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm50 { 0% { stroke-dashoffset: 0; } 75.6152% { stroke-dashoffset: 0; } 75.6202% { stroke-dashoffset: 1.001; } 75.7872% { stroke-dashoffset: 0.641; } 75.9541% { stroke-dashoffset: 0.373; } 76.121% { stroke-dashoffset: 0.205; } 76.288% { stroke-dashoffset: 0.105; } 76.4549% { stroke-dashoffset: 0.046; } 76.6218% { stroke-dashoffset: 0.015; } 76.7888% { stroke-dashoffset: 0.001; } 99.995% { stroke-dashoffset: 0; } }
+@keyframes ailfilm51 { 0% { stroke: var(--role-ink); } 79.7935% { stroke: var(--role-ink); } 79.9605% { stroke: rgb(21, 37, 37); } 80.1274% { stroke: rgb(22, 61, 48); } 80.2943% { stroke: rgb(24, 81, 58); } 80.4613% { stroke: rgb(25, 99, 66); } 80.6282% { stroke: rgb(25, 113, 72); } 80.7951% { stroke: rgb(26, 123, 77); } 80.9621% { stroke: rgb(27, 132, 81); } 81.129% { stroke: rgb(27, 138, 84); } 81.2959% { stroke: rgb(27, 143, 86); } 81.4629% { stroke: rgb(28, 147, 88); } 81.6298% { stroke: rgb(28, 149, 89); } 81.7967% { stroke: rgb(28, 151, 90); } 81.9637% { stroke: rgb(28, 153, 90); } 82.1306% { stroke: rgb(28, 154, 91); } 82.2975% { stroke: rgb(28, 154, 91); } 82.4645% { stroke: var(--role-ok); } 99.995% { stroke: var(--role-ok); } }
+@keyframes ailfilm52 { 0% { opacity: 0; } 79.9605% { opacity: 0; } 80.2943% { opacity: 0.261; } 81.129% { opacity: 0.927; } 81.2959% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm53 { 0% { scale: 1 1; } 79.9605% { scale: 1 1; } 80.1274% { scale: 0.269 0.269; } 80.2943% { scale: 0.505 0.505; } 80.4613% { scale: 0.695 0.695; } 80.6282% { scale: 0.843 0.843; } 80.7951% { scale: 0.952 0.952; } 80.9621% { scale: 1.027 1.027; } 81.129% { scale: 1.073 1.073; } 81.2959% { scale: 1.094 1.094; } 81.4629% { scale: 1.097 1.097; } 81.6298% { scale: 1.086 1.086; } 82.1306% { scale: 1.022 1.022; } 82.2975% { scale: 1.006 1.006; } 82.6314% { scale: 1.001 1.001; } 82.9653% { scale: 1.016 1.016; } 83.1322% { scale: 1.032 1.032; } 83.2991% { scale: 1.058 1.058; } 83.4661% { scale: 1.099 1.099; } 83.633% { scale: 1.159 1.159; } 83.7999% { scale: 1.166 1.166; } 83.9668% { scale: 1.103 1.103; } 84.1338% { scale: 1.061 1.061; } 84.3007% { scale: 1.034 1.034; } 84.6346% { scale: 1.007 1.007; } 84.9761% { scale: 1 1; } 99.995% { scale: 1 1; } }
+@keyframes ailfilm54 { 0% { opacity: 0; } 80.6282% { opacity: 0; } 80.7951% { opacity: 0.086; } 80.9621% { opacity: 0.268; } 81.129% { opacity: 0.43; } 81.2959% { opacity: 0.566; } 81.4629% { opacity: 0.673; } 81.6298% { opacity: 0.758; } 81.7967% { opacity: 0.823; } 81.9637% { opacity: 0.873; } 82.1306% { opacity: 0.912; } 82.4645% { opacity: 0.963; } 82.7983% { opacity: 0.99; } 83.2991% { opacity: 1; } 99.995% { opacity: 1; } }
+@keyframes ailfilm55 { 0% { translate: 0px 0px; } 80.6282% { translate: 0px 0px; } 80.7951% { translate: 0px 10.972px; } 81.129% { translate: 0px 6.837px; } 81.4629% { translate: 0px 3.918px; } 81.9637% { translate: 0px 1.523px; } 82.6314% { translate: 0px 0.254px; } 99.995% { translate: 0px 0px; } }
+.aimask-8ba2ce6e-branch { animation: ailfilm19 19.9682s linear infinite; }
+.aimask-8ba2ce6e-gate { animation: ailfilm50 19.9682s linear infinite; }
+.aimask-8ba2ce6e-main_line { animation: ailfilm4 19.9682s linear infinite; }
+.aitxt-8ba2ce6e-review_txt-base { animation: ailfilm45 19.9682s linear infinite; }
+.aitxt-8ba2ce6e-review_txt-v0 { animation: ailfilm46 19.9682s linear infinite; }
+.conn-8ba2ce6e-gate { animation: ailfilm49 19.9682s linear infinite; }
+.kf-8ba2ce6e-a_dot { animation: ailfilm7 19.9682s linear infinite, ailfilm8 19.9682s linear infinite; }
+.kf-8ba2ce6e-a_nm { animation: ailfilm9 19.9682s linear infinite, ailfilm10 19.9682s linear infinite; }
+.kf-8ba2ce6e-b_dot { animation: ailfilm11 19.9682s linear infinite, ailfilm12 19.9682s linear infinite; }
+.kf-8ba2ce6e-b_nm { animation: ailfilm13 19.9682s linear infinite, ailfilm14 19.9682s linear infinite; }
+.kf-8ba2ce6e-branch_tag { animation: ailfilm20 19.9682s linear infinite, ailfilm21 19.9682s linear infinite; }
+.kf-8ba2ce6e-c_dot { animation: ailfilm15 19.9682s linear infinite, ailfilm16 19.9682s linear infinite; }
+.kf-8ba2ce6e-c_nm { animation: ailfilm17 19.9682s linear infinite, ailfilm18 19.9682s linear infinite; }
+.kf-8ba2ce6e-hotfix_dot { animation: ailfilm30 19.9682s linear infinite, ailfilm31 19.9682s linear infinite; }
+.kf-8ba2ce6e-hotfix_nm { animation: ailfilm32 19.9682s linear infinite, ailfilm33 19.9682s linear infinite; }
+.kf-8ba2ce6e-l1_dot { animation: ailfilm22 19.9682s linear infinite, ailfilm23 19.9682s linear infinite; }
+.kf-8ba2ce6e-l1_nm { animation: ailfilm24 19.9682s linear infinite, ailfilm25 19.9682s linear infinite; }
+.kf-8ba2ce6e-l2_dot { animation: ailfilm26 19.9682s linear infinite, ailfilm27 19.9682s linear infinite; }
+.kf-8ba2ce6e-l2_nm { animation: ailfilm28 19.9682s linear infinite, ailfilm29 19.9682s linear infinite; }
+.kf-8ba2ce6e-l3_dot { animation: ailfilm41 19.9682s linear infinite, ailfilm42 19.9682s linear infinite; }
+.kf-8ba2ce6e-l3_nm { animation: ailfilm43 19.9682s linear infinite, ailfilm44 19.9682s linear infinite; }
+.kf-8ba2ce6e-main_tag { animation: ailfilm5 19.9682s linear infinite, ailfilm6 19.9682s linear infinite; }
+.kf-8ba2ce6e-merged_dot { animation: ailfilm52 19.9682s linear infinite, ailfilm53 19.9682s linear infinite; }
+.kf-8ba2ce6e-merged_nm { animation: ailfilm54 19.9682s linear infinite, ailfilm55 19.9682s linear infinite; }
+.kf-8ba2ce6e-mr { animation: ailfilm34 19.9682s linear infinite, ailfilm35 19.9682s linear infinite; }
+.kf-8ba2ce6e-review { animation: ailfilm39 19.9682s linear infinite; }
+.kf-8ba2ce6e-review_bg { animation: ailfilm40 19.9682s linear infinite; }
+.kf-8ba2ce6e-review_tick { animation: ailfilm47 19.9682s linear infinite, ailfilm48 19.9682s linear infinite; }
+.kf-8ba2ce6e-s_badge { animation: ailfilm0 19.9682s linear infinite, ailfilm1 19.9682s linear infinite; }
+.kf-8ba2ce6e-s_heading { animation: ailfilm2 19.9682s linear infinite, ailfilm3 19.9682s linear infinite; }
+.kf-8ba2ce6e-tests { animation: ailfilm36 19.9682s linear infinite; }
+.kf-8ba2ce6e-tests_tick { animation: ailfilm37 19.9682s linear infinite, ailfilm38 19.9682s linear infinite; }
+.kfp-8ba2ce6e-mr_bg { animation: ailfilm51 19.9682s linear infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
+]]></style>
+  <defs>
+    <mask id="aim-8ba2ce6e-main_line" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-8ba2ce6e-main_line aid-8ba2ce6e-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.6761673032084567"/></mask>
+    <mask id="aim-8ba2ce6e-branch" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-8ba2ce6e-branch aid-8ba2ce6e-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00" fill="none" stroke="#fff" stroke-width="27.6" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
+    <mask id="aim-8ba2ce6e-gate" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-8ba2ce6e-gate aid-8ba2ce6e-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-8ba2ce6e-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-8ba2ce6e-s">
+      <g class="kf-8ba2ce6e-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-8ba2ce6e-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-8ba2ce6e-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-8ba2ce6e-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>4</tspan></tspan></text>
+      </g>
+      <g class="kf-8ba2ce6e-s_heading kf-anim" style="transform-origin:605.94px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-8ba2ce6e-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Branches and merge requests</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-main_line kf-anim" style="transform-origin:771.84px 580px">
+    <path id="main_line" class="ai-shape ai-path kfp-8ba2ce6e-main_line" d="M72.75 580.00 L357.54 580.00 L525.53 580.00 L953.23 580.00 L1470.93 580.00"  fill="none" stroke="var(--role-primary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-8ba2ce6e-main_line)"/>
+  </g>
+  <g class="kf-8ba2ce6e-branch kf-anim" style="transform-origin:953.23px 465px">
+    <path id="branch" class="ai-shape ai-path kfp-8ba2ce6e-branch" d="M525.53 580.00 L755.53 350.00 L953.23 350.00 L1150.93 350.00 L1380.93 580.00"  fill="none" stroke="var(--role-secondary)" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-8ba2ce6e-branch)"/>
+  </g>
+  <g class="kf-8ba2ce6e-mains kf-anim" style="transform-origin:340.73px 606.38px">
+    <g id="mains" class="ai-container kfp-8ba2ce6e-mains">
+      <g class="kf-8ba2ce6e-a kf-anim" style="transform-origin:172.75px 606.38px">
+        <g id="a" class="ai-container kfp-8ba2ce6e-a">
+          <g class="kf-8ba2ce6e-a_dot kf-anim" style="transform-origin:172.75px 580px">
+            <circle id="a_dot" class="ai-shape ai-circle kfp-8ba2ce6e-a_dot" cx="172.7471" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+          </g>
+          <g class="kf-8ba2ce6e-a_nm kf-anim" style="transform-origin:172.75px 629.38px">
+            <rect id="a_nm" class="ai-shape ai-rect kfp-8ba2ce6e-a_nm" x="105" y="607" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="172.7471" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="172.7471" dy="-0"><tspan>Login page</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+      <g class="kf-8ba2ce6e-b kf-anim" style="transform-origin:357.54px 606.38px">
+        <g id="b" class="ai-container kfp-8ba2ce6e-b">
+          <g class="kf-8ba2ce6e-b_dot kf-anim" style="transform-origin:357.54px 580px">
+            <circle id="b_dot" class="ai-shape ai-circle kfp-8ba2ce6e-b_dot" cx="357.541" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+          </g>
+          <g class="kf-8ba2ce6e-b_nm kf-anim" style="transform-origin:357.54px 629.38px">
+            <rect id="b_nm" class="ai-shape ai-rect kfp-8ba2ce6e-b_nm" x="290.4942" y="607" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="357.5411" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="357.5411" dy="-0"><tspan>Dark mode</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+      <g class="kf-8ba2ce6e-c kf-anim" style="transform-origin:525.53px 606.38px">
+        <g id="c" class="ai-container kfp-8ba2ce6e-c">
+          <g class="kf-8ba2ce6e-c_dot kf-anim" style="transform-origin:525.53px 580px">
+            <circle id="c_dot" class="ai-shape ai-circle kfp-8ba2ce6e-c_dot" cx="525.5264" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+          </g>
+          <g class="kf-8ba2ce6e-c_nm kf-anim" style="transform-origin:525.53px 629.38px">
+            <rect id="c_nm" class="ai-shape ai-rect kfp-8ba2ce6e-c_nm" x="474.5877" y="607" width="101.8774" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="525.5264" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="525.5264" dy="-0"><tspan>Price fix</tspan></tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-l1 kf-anim" style="transform-origin:755.53px 323.63px">
+    <g id="l1" class="ai-container kfp-8ba2ce6e-l1">
+      <g class="kf-hidden kf-8ba2ce6e-l1_dot kf-anim" style="transform-origin:755.53px 350px">
+        <circle id="l1_dot" class="ai-shape ai-circle kfp-8ba2ce6e-l1_dot" cx="755.5264" cy="350" r="19" fill="var(--role-surface)" stroke="var(--role-secondary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-8ba2ce6e-l1_nm kf-anim" style="transform-origin:755.53px 300.63px">
+        <rect id="l1_nm" class="ai-shape ai-rect kfp-8ba2ce6e-l1_nm" x="671.6954" y="278.25" width="167.662" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="755.5264" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="755.5264" dy="-0"><tspan>New checkout</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-l2 kf-anim" style="transform-origin:953.23px 323.63px">
+    <g id="l2" class="ai-container kfp-8ba2ce6e-l2">
+      <g class="kf-hidden kf-8ba2ce6e-l2_dot kf-anim" style="transform-origin:953.23px 350px">
+        <circle id="l2_dot" class="ai-shape ai-circle kfp-8ba2ce6e-l2_dot" cx="953.2259" cy="350" r="19" fill="var(--role-surface)" stroke="var(--role-secondary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-8ba2ce6e-l2_nm kf-anim" style="transform-origin:953.23px 300.63px">
+        <rect id="l2_nm" class="ai-shape ai-rect kfp-8ba2ce6e-l2_nm" x="863.3574" y="278.25" width="179.737" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="953.2259" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="953.2259" dy="-0"><tspan>Card payments</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-l3 kf-anim" style="transform-origin:1150.93px 323.63px">
+    <g id="l3" class="ai-container kfp-8ba2ce6e-l3">
+      <g class="kf-hidden kf-8ba2ce6e-l3_dot kf-anim" style="transform-origin:1150.93px 350px">
+        <circle id="l3_dot" class="ai-shape ai-circle kfp-8ba2ce6e-l3_dot" cx="1150.9254" cy="350" r="19" fill="var(--role-surface)" stroke="var(--role-secondary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-8ba2ce6e-l3_nm kf-anim" style="transform-origin:1150.93px 300.63px">
+        <rect id="l3_nm" class="ai-shape ai-rect kfp-8ba2ce6e-l3_nm" x="1075.1605" y="278.25" width="151.5298" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1150.9254" y="300.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1150.9254" dy="-0"><tspan>Review fixes</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-hotfix kf-anim" style="transform-origin:953.23px 606.38px">
+    <g id="hotfix" class="ai-container kfp-8ba2ce6e-hotfix">
+      <g class="kf-hidden kf-8ba2ce6e-hotfix_dot kf-anim" style="transform-origin:953.23px 580px">
+        <circle id="hotfix_dot" class="ai-shape ai-circle kfp-8ba2ce6e-hotfix_dot" cx="953.2259" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      </g>
+      <g class="kf-hidden kf-8ba2ce6e-hotfix_nm kf-anim" style="transform-origin:953.23px 629.38px">
+        <rect id="hotfix_nm" class="ai-shape ai-rect kfp-8ba2ce6e-hotfix_nm" x="913.2259" y="607" width="80" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="953.2259" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="953.2259" dy="-0"><tspan>Hotfix</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-merged kf-anim" style="transform-origin:1380.93px 606.38px">
+    <g id="merged" class="ai-container kfp-8ba2ce6e-merged">
+      <g class="kf-hidden kf-8ba2ce6e-merged_dot kf-anim" style="transform-origin:1380.93px 580px">
+        <circle id="merged_dot" class="ai-shape ai-circle kfp-8ba2ce6e-merged_dot" cx="1380.9254" cy="580" r="28" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="9"/>
+      </g>
+      <g class="kf-hidden kf-8ba2ce6e-merged_nm kf-anim" style="transform-origin:1380.93px 638.38px">
+        <rect id="merged_nm" class="ai-shape ai-rect kfp-8ba2ce6e-merged_nm" x="1331.9912" y="616" width="97.8685" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="1380.9254" y="638.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1380.9254" dy="-0"><tspan>Merged</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-main_tag kf-anim" style="transform-origin:123.75px 507.75px">
+    <rect id="main_tag" class="ai-shape ai-rect kfp-8ba2ce6e-main_tag" x="83.7471" y="488.5" width="80" height="38.5" fill="var(--role-primary)" stroke="none" stroke-width="1.5" rx="18" style="rx:18px;ry:18px"/>
+    <text class="ai-label" x="123.7471" y="507.75" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-surface)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="123.7471" dy="-0"><tspan>main</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-8ba2ce6e-branch_tag kf-anim" style="transform-origin:389.82px 465px">
+    <rect id="branch_tag" class="ai-shape ai-rect kfp-8ba2ce6e-branch_tag" x="293.1184" y="445.75" width="193.408" height="38.5" fill="var(--role-secondary)" stroke="none" stroke-width="1.5" rx="18" style="rx:18px;ry:18px"/>
+    <text class="ai-label" x="389.8224" y="465" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-surface)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="389.8224" dy="-0"><tspan>feature/checkout</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-8ba2ce6e-mr kf-anim" style="transform-origin:1414.16px 278.88px">
+    <g id="mr" class="ai-container kfp-8ba2ce6e-mr">
+      <g class="kf-8ba2ce6e-mr_bg kf-anim" style="transform-origin:1414.16px 278.88px">
+        <rect id="mr_bg" class="ai-shape ai-rect kfp-8ba2ce6e-mr_bg" x="1268.3252" y="130" width="291.6748" height="297.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-8ba2ce6e-mr_body kf-anim" style="transform-origin:1414.16px 278.88px">
+        <g id="mr_body" class="ai-container kfp-8ba2ce6e-mr_body">
+          <g class="kf-8ba2ce6e-mr_kind kf-anim" style="transform-origin:1385.1px 173px">
+            <rect id="mr_kind" class="ai-shape ai-rect kfp-8ba2ce6e-mr_kind" x="1293.3252" y="155" width="183.552" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1301.3252" y="173" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1301.3252" dy="-0"><tspan>MERGE REQUEST </tspan><tspan fill="var(--role-primary)">!42</tspan></tspan></text>
+          </g>
+          <g class="kf-8ba2ce6e-mr_title kf-anim" style="transform-origin:1387.05px 223.25px">
+            <rect id="mr_title" class="ai-shape ai-rect kfp-8ba2ce6e-mr_title" x="1293.3252" y="199" width="187.444" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1301.3252" y="223.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1301.3252" dy="-0"><tspan>New checkout</tspan></tspan></text>
+          </g>
+          <g class="kf-8ba2ce6e-tests kf-anim" opacity="0.3" style="transform-origin:1404.74px 284.38px">
+            <g id="tests" class="ai-container kfp-8ba2ce6e-tests">
+              <g class="kf-8ba2ce6e-tests_bg kf-anim" opacity="0" style="transform-origin:1404.74px 284.38px">
+                <rect id="tests_bg" class="ai-shape ai-rect kfp-8ba2ce6e-tests_bg" x="1293.3252" y="255.5" width="222.822" height="57.75" fill="var(--role-warn)" stroke="none" stroke-width="1.5" fill-opacity="0.28" rx="8" style="rx:8px;ry:8px"/>
+              </g>
+              <g class="kf-8ba2ce6e-tests_item kf-anim" style="transform-origin:1404.74px 284.38px">
+                <g id="tests_item" class="ai-container kfp-8ba2ce6e-tests_item">
+                  <g class="kf-hidden kf-8ba2ce6e-tests_tick kf-anim" style="transform-origin:1316.33px 284.38px">
+                    <circle id="tests_tick" class="ai-shape ai-circle kfp-8ba2ce6e-tests_tick" cx="1316.3252" cy="284.375" r="14" fill="var(--role-ok)" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label" x="1316.3252" y="284.375" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-surface)" style="font-weight:800"><tspan x="1316.3252" dy="-0"><tspan>✓</tspan></tspan></text>
+                  </g>
+                  <g class="kf-8ba2ce6e-tests_txt kf-anim" style="transform-origin:1423.74px 284.38px">
+                    <rect id="tests_txt" class="ai-shape ai-rect kfp-8ba2ce6e-tests_txt" x="1340.3252" y="264.5" width="166.822" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label" x="1348.3252" y="284.375" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600"><tspan x="1348.3252" dy="-0"><tspan>218 tests passed</tspan></tspan></text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g class="kf-8ba2ce6e-review kf-anim" opacity="0.3" style="transform-origin:1414.16px 362px">
+            <g id="review" class="ai-container kfp-8ba2ce6e-review">
+              <g class="kf-8ba2ce6e-review_bg kf-anim" opacity="0" style="transform-origin:1414.16px 362px">
+                <rect id="review_bg" class="ai-shape ai-rect kfp-8ba2ce6e-review_bg" x="1293.3252" y="321.25" width="241.6748" height="81.5" fill="var(--role-warn)" stroke="none" stroke-width="1.5" fill-opacity="0.28" rx="8" style="rx:8px;ry:8px"/>
+              </g>
+              <g class="kf-8ba2ce6e-review_item kf-anim" style="transform-origin:1414.16px 362px">
+                <g id="review_item" class="ai-container kfp-8ba2ce6e-review_item">
+                  <g class="kf-hidden kf-8ba2ce6e-review_tick kf-anim" style="transform-origin:1316.33px 362px">
+                    <circle id="review_tick" class="ai-shape ai-circle kfp-8ba2ce6e-review_tick" cx="1316.3252" cy="362" r="14" fill="var(--role-ok)" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label" x="1316.3252" y="362" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-surface)" style="font-weight:800"><tspan x="1316.3252" dy="-0"><tspan>✓</tspan></tspan></text>
+                  </g>
+                  <g class="kf-8ba2ce6e-review_txt kf-anim" style="transform-origin:1433.16px 362px">
+                    <rect id="review_txt" class="ai-shape ai-rect kfp-8ba2ce6e-review_txt" x="1340.3252" y="330.25" width="185.6748" height="63.5" fill="none" stroke="none" stroke-width="1.5"/>
+                    <text class="ai-label aitxt-8ba2ce6e-review_txt-base" x="1348.3252" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600"><tspan x="1348.3252" dy="-11.875"><tspan>Ben: “add a test for</tspan></tspan><tspan x="1348.3252" dy="23.75"><tspan>coupons”</tspan></tspan></text>
+                    <g class="ai-label-variants" fill="var(--role-ink)">
+                      <text class="ai-label aitxt-8ba2ce6e-review_txt-v0" x="1348.3252" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" opacity="0" style="font-weight:600"><tspan x="1348.3252" dy="-0"><tspan>Approved by Ben</tspan></tspan></text>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-8ba2ce6e-gate_top kf-anim" style="transform-origin:1380.93px 427.75px">
+    <rect id="gate_top" class="ai-shape ai-rect ai-point kfp-8ba2ce6e-gate_top" x="1380.9254" y="427.75" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <path class="ai-connection conn-8ba2ce6e-gate conn-8ba2ce6e-gate-base aid-8ba2ce6e-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="var(--role-ink)" stroke-width="3" stroke-dasharray="6,6" opacity="0" mask="url(#aim-8ba2ce6e-gate)"/>
+</svg>

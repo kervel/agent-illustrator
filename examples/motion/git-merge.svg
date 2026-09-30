@@ -249,7 +249,7 @@
   .kf-4daa88cb-merged_line8 { transform: translate(0px, -200px); }
   .kf-4daa88cb-ok { opacity: 1; }
 }
-    /* /home/kervel/projects/agent-illustrator/examples/motion/git-deck.css */
+    /* examples/motion/git-deck.css */
 /* Palette and type for the "git for non-git people" deck. */
 :root {
   --git-paper: #E9ECF0;

@@ -16,7 +16,7 @@
 - `src/parser/grammar.rs` — parse + validate function-call style values.
 - `src/layout/types.rs` — `FillSpec`/`PatternKind`/`GradientKind` enums, `fill_pattern` field, `from_modifiers`/`merge`/`with_defaults` updates, color-arg resolution.
 - `src/renderer/svg.rs` — `fill_def_ids` field, `register_fill`, `build_fill_def`, `format_styles` override param + call site.
-- `examples/pattern-fills.ail` — new example.
+- `tests/fixtures/pattern-fills.ail` — new example.
 - `docs/grammar.md`, `docs/skill-styling.md`, `docs/skill.md` — docs (incl. stroke dash).
 
 ---
@@ -770,12 +770,12 @@ git commit -m "feat(renderer): emit pattern/gradient <defs> and reference via ur
 ## Task 5: Example + documentation
 
 **Files:**
-- Create: `examples/pattern-fills.ail`
+- Create: `tests/fixtures/pattern-fills.ail`
 - Modify: `docs/grammar.md:76-100` (STYLE MODIFIERS + COLORS), `docs/skill-styling.md` (new section), `docs/skill.md` (cross-ref)
 
 - [ ] **Step 1: Create the example**
 
-Write `examples/pattern-fills.ail`. Mirror the structure/conventions of an existing simple example (open `examples/railway-topology.ail` first to match layout idioms — e.g. how rows/labels are declared). Minimal version:
+Write `tests/fixtures/pattern-fills.ail`. Mirror the structure/conventions of an existing simple example (open `examples/railway-topology.ail` first to match layout idioms — e.g. how rows/labels are declared). Minimal version:
 
 ```
 # Pattern & gradient fill showcase
@@ -793,7 +793,7 @@ Adjust shape/layout keywords to match what the grammar actually supports (verify
 
 - [ ] **Step 2: Render it manually to verify it produces valid SVG**
 
-Run: `cargo run -- examples/pattern-fills.ail -o /tmp/pattern-fills.svg` (adjust CLI flags to match the binary — check `examples/render-all.sh` for the exact invocation form, including any `--stylesheet` flag).
+Run: `cargo run -- tests/fixtures/pattern-fills.ail -o /tmp/pattern-fills.svg` (adjust CLI flags to match the binary — check `examples/render-all.sh` for the exact invocation form, including any `--stylesheet` flag).
 Expected: exits 0, `/tmp/pattern-fills.svg` exists and contains `<pattern` and `<linearGradient` and `url(#`.
 
 - [ ] **Step 3: Verify the def is referenced and tiles render**
@@ -883,7 +883,7 @@ Expected: tests PASS; renders complete without error.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add examples/pattern-fills.ail examples/pattern-fills.svg docs/grammar.md docs/skill-styling.md docs/skill.md
+git add tests/fixtures/pattern-fills.ail examples/pattern-fills.svg docs/grammar.md docs/skill-styling.md docs/skill.md
 git commit -m "docs(styling): document pattern/gradient fills + dashed strokes; add example"
 ```
 

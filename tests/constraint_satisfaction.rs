@@ -325,7 +325,7 @@ constrain p180.vertical_center = p0.vertical_center
 /// and cross-instance positioning constraints.
 #[test]
 fn test_person_rotation_cross_instance_alignment() {
-    let source = std::fs::read_to_string("examples/person-rotation.ail")
+    let source = std::fs::read_to_string("tests/fixtures/person-rotation.ail")
         .expect("person-rotation.ail should exist");
 
     let result = compute_layout(&source).expect("layout should succeed");

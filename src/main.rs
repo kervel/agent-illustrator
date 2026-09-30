@@ -254,7 +254,8 @@ struct Cli {
     #[arg(long)]
     animate: bool,
 
-    /// Use pure CSS animation (no JS, works in GitLab/GitHub READMEs)
+    /// The whole choreography as a self-playing pure-CSS loop (no JS: plays
+    /// inside an <img>, e.g. a GitLab/GitHub README)
     #[arg(long)]
     animate_css: bool,
 

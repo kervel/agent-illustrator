@@ -35,21 +35,6 @@ const GATED: &[&str] = &[
 /// is the point, because a bare count would let the corpus rot quietly.
 const REVIEWED: &[(&str, &str, &str)] = &[
     (
-        "person-rotation.ail",
-        "p90→p180",
-        "This file verifies that anchors rotate with their element, so it \
-         always joins hand_right to hand_left. On a figure rotated 180 \
-         degrees that anchor is on the far side and the line must reach \
-         across the torso — the property being demonstrated.",
-    ),
-    (
-        "person-rotation.ail",
-        "p270→p45",
-        "Same: the bend is what connecting two differently-rotated figures \
-         looks like, and straightening it would stop the file testing \
-         anything.",
-    ),
-    (
         "token-prediction.ail",
         "set .center_y to the same constant 300",
         "d, e and f each keep their own literal home row. Keyframes disable \
@@ -141,7 +126,7 @@ fn every_example_is_clean_in_the_high_signal_categories() {
         }
     }
 
-    assert!(checked >= 14, "expected the whole corpus, saw {checked}");
+    assert!(checked >= 7, "expected the whole corpus, saw {checked}");
     assert!(
         failures.is_empty(),
         "examples must not demonstrate what the linter warns about.\n\

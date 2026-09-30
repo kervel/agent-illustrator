@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+  ]]></style>
+  <g id="s" class="ai-container">
+    <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+    <rect id="s_badge" class="ai-shape ai-rect" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+    <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>5</tspan></tspan></text>
+    <text id="s_heading" class="ai-shape ai-text" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Git combines the changes</text>
+  </g>
+  <g id="merged" class="ai-container">
+    <rect id="merged_bg" class="ai-shape ai-rect" x="492.5" y="170" width="615" height="410" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+    <rect id="merged_title" class="ai-shape ai-rect" x="495.5" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+    <text class="ai-label" x="503.5" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="503.5" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+    <rect id="merged_title_rule" class="ai-shape ai-rect" x="495.5" y="238" width="609" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+    <rect id="merged_top_pad" class="ai-shape ai-rect" x="495.5" y="241" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="merged_line1" class="ai-shape ai-rect" x="495.5" y="249" width="609" height="40" fill="var(--role-series-2-soft)" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="269" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart, coupon=</tspan><tspan fill="var(--code-keyword)">None</tspan><tspan>):</tspan></tspan></text>
+    <rect id="merged_line2" class="ai-shape ai-rect" x="495.5" y="289" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="309" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+    <rect id="merged_line3" class="ai-shape ai-rect" x="495.5" y="329" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="349" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+    <rect id="merged_line4" class="ai-shape ai-rect" x="495.5" y="369" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="389" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+    <rect id="merged_line5" class="ai-shape ai-rect" x="495.5" y="409" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="429" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+    <rect id="merged_line6" class="ai-shape ai-rect" x="495.5" y="449" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="469" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">6  </tspan></tspan></text>
+    <rect id="merged_line7" class="ai-shape ai-rect" x="495.5" y="489" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="509" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+    <rect id="merged_line8" class="ai-shape ai-rect" x="495.5" y="529" width="609" height="40" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="503.5" y="549" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+    <rect id="merged_bottom_pad" class="ai-shape ai-rect" x="495.5" y="569" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="merged_title_square" class="ai-shape ai-rect" x="495.5" y="226" width="609" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <circle id="ok" class="ai-shape ai-circle" cx="494.5" cy="172" r="26" fill="var(--role-ok)" stroke="var(--role-backdrop)" stroke-width="3"/>
+  <text class="ai-label" x="494.5" y="172" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:800"><tspan x="494.5" dy="-0"><tspan>✓</tspan></tspan></text>
+</svg>

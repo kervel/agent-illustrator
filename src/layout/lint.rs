@@ -3498,7 +3498,8 @@ fn check_unknown_modifiers(doc: &Document, warnings: &mut Vec<LintWarning>) {
     ) {
         for m in modifiers {
             if let crate::parser::ast::StyleKey::Custom(key) = &m.node.key.node {
-                if KNOWN_CUSTOM_KEYS.contains(&key.as_str()) {
+                // `ail_*`: set by the engine itself (keyframe wordings).
+                if KNOWN_CUSTOM_KEYS.contains(&key.as_str()) || key.starts_with("ail_") {
                     continue;
                 }
                 warnings.push(LintWarning {

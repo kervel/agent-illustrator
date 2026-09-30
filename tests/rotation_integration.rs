@@ -748,7 +748,7 @@ fn test_rotated_anchor_directions() {
 fn test_person_rotation_renders_all_angles() {
     // Verify the full person-rotation example computes without errors
     // and all expected elements exist with reasonable bounds
-    let source = std::fs::read_to_string("examples/person-rotation.ail")
+    let source = std::fs::read_to_string("tests/fixtures/person-rotation.ail")
         .expect("Should read person-rotation.ail");
     let result = compute_layout(&source).expect("Should compute layout");
 

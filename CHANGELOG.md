@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.7
+
+- `--animate-css` now plays the compiled choreography (draws, pops, flights,
+  flips, swaps, layout moves) as one looping pure-CSS timeline, sampled from
+  the native renderer and reduced to the keys interpolation needs (50–160 KB
+  for the git scenes). It plays inside an `<img>`, so a README can show it.
+  Before, it was a step-by-step slideshow of the settled frames.
+- A labelled shape is auto-sized for the widest wording a keyframe gives it
+  (`transform cmd [label: "git commit"]` no longer overflows a box sized for
+  "git clone").
+- README leads with the git scenes (self-playing), a scene's motion source and
+  its `--states`, then a curated diagram gallery. examples/ holds showcases
+  only; feature fixtures moved to tests/fixtures. examples/renders.txt lists
+  every committed image; render-all.sh renders from it and a test fails when
+  a committed image is stale.
+
 ## v0.2.6
 
 From a newcomer's scene (git-history: clone, commit, push, pull), now in

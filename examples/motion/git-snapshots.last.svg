@@ -92,7 +92,7 @@
     --text-light: #ffffff;
   }
   .ai-on-dark { fill: var(--text-light); }
-    /* git-deck.css */
+    /* examples/motion/git-deck.css */
 /* Palette and type for the "git for non-git people" deck. */
 :root {
   --git-paper: #E9ECF0;

@@ -92,7 +92,7 @@
     --text-light: #ffffff;
   }
   .ai-on-dark { fill: var(--text-light); }
-    /* git-deck.css */
+    /* examples/motion/git-deck.css */
 /* Palette and type for the "git for non-git people" deck. */
 :root {
   --git-paper: #E9ECF0;
@@ -164,8 +164,9 @@ text { white-space: pre; }
         <circle id="hub_hist_d1" class="ai-shape ai-circle" cx="716" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
         <circle id="hub_hist_d2" class="ai-shape ai-circle" cx="772" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
         <circle id="hub_hist_d3" class="ai-shape ai-circle" cx="828" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+        <circle id="hub_hist_d4" class="ai-shape ai-circle" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
       </g>
-      <path id="hub_hist_track" class="ai-shape ai-path" d="M716.00 247.00 L772.00 247.00 L828.00 247.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+      <path id="hub_hist_track" class="ai-shape ai-path" d="M716.00 247.00 L772.00 247.00 L828.00 247.00 L884.00 247.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
     </g>
   </g>
   <g id="laptops" class="ai-container">
@@ -179,8 +180,9 @@ text { white-space: pre; }
           <circle id="anna_hist_d1" class="ai-shape ai-circle" cx="266" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
           <circle id="anna_hist_d2" class="ai-shape ai-circle" cx="322" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
           <circle id="anna_hist_d3" class="ai-shape ai-circle" cx="378" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+          <circle id="anna_hist_d4" class="ai-shape ai-circle" cx="434" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
         </g>
-        <path id="anna_hist_track" class="ai-shape ai-path" d="M266.00 592.00 L322.00 592.00 L378.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+        <path id="anna_hist_track" class="ai-shape ai-path" d="M266.00 592.00 L322.00 592.00 L378.00 592.00 L434.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
       </g>
     </g>
     <g id="ben" class="ai-container">
@@ -208,13 +210,14 @@ text { white-space: pre; }
           <circle id="chris_hist_d1" class="ai-shape ai-circle" cx="1166" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
           <circle id="chris_hist_d2" class="ai-shape ai-circle" cx="1222" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
           <circle id="chris_hist_d3" class="ai-shape ai-circle" cx="1278" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+          <circle id="chris_hist_d4" class="ai-shape ai-circle" cx="1334" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
         </g>
-        <path id="chris_hist_track" class="ai-shape ai-path" d="M1166.00 592.00 L1222.00 592.00 L1278.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+        <path id="chris_hist_track" class="ai-shape ai-path" d="M1166.00 592.00 L1222.00 592.00 L1278.00 592.00 L1334.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
       </g>
     </g>
   </g>
   <rect id="cmd" class="ai-shape ai-rect" x="1010" y="202" width="163.84" height="46" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
-  <text class="ai-label" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git commit</tspan></tspan></text>
+  <text class="ai-label" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git pull</tspan></tspan></text>
   <path class="ai-connection conn-99f245da-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-99f245da-l_ben" d="M800 300 L800 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-99f245da-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>

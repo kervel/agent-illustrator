@@ -1,0 +1,32 @@
+# Every committed rendering in examples/: output, source, flags.
+# Paths are relative to the repository root. examples/render-all.sh renders
+# them; tests/readme_images.rs fails when a committed file is stale.
+
+# Static showcases
+examples/architecture.svg          examples/architecture.ail          --stylesheet-css stylesheets/kapernikov.css
+examples/feedback-loops.svg        examples/feedback-loops.ail        --stylesheet-css stylesheets/kapernikov.css
+examples/gallic-wars-timeline.svg  examples/gallic-wars-timeline.ail  --stylesheet-css stylesheets/kapernikov.css
+examples/mosfet-driver.svg         examples/mosfet-driver.ail         --stylesheet-css stylesheets/kapernikov-schematic.css
+examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
+
+# Animated showcases (CSS only: they play inside an <img>)
+examples/token-prediction.svg      examples/token-prediction.ail      --stylesheet-css stylesheets/kapernikov.css --animate-css
+examples/agentic-loop-story.svg    examples/agentic-loop-story.ail    --stylesheet-css stylesheets/agentic-loop-story.css --animate-css
+
+# The git deck: with the player (click to step), as a self-playing CSS
+# loop (README), and the last frame as a still.
+examples/motion/git-copies.svg          examples/motion/git-copies.ail     --stylesheet-css examples/motion/git-deck.css --animate
+examples/motion/git-copies.anim.svg     examples/motion/git-copies.ail     --stylesheet-css examples/motion/git-deck.css --animate-css
+examples/motion/git-copies.last.svg     examples/motion/git-copies.ail     --stylesheet-css examples/motion/git-deck.css --frame code
+examples/motion/git-snapshots.svg       examples/motion/git-snapshots.ail  --stylesheet-css examples/motion/git-deck.css --animate
+examples/motion/git-snapshots.anim.svg  examples/motion/git-snapshots.ail  --stylesheet-css examples/motion/git-deck.css --animate-css
+examples/motion/git-snapshots.last.svg  examples/motion/git-snapshots.ail  --stylesheet-css examples/motion/git-deck.css --frame go_back
+examples/motion/git-history.svg         examples/motion/git-history.ail    --stylesheet-css examples/motion/git-deck.css --animate
+examples/motion/git-history.anim.svg    examples/motion/git-history.ail    --stylesheet-css examples/motion/git-deck.css --animate-css
+examples/motion/git-history.last.svg    examples/motion/git-history.ail    --stylesheet-css examples/motion/git-deck.css --frame pull
+examples/motion/git-branches.svg        examples/motion/git-branches.ail   --stylesheet-css examples/motion/git-deck.css --animate
+examples/motion/git-branches.anim.svg   examples/motion/git-branches.ail   --stylesheet-css examples/motion/git-deck.css --animate-css
+examples/motion/git-branches.last.svg   examples/motion/git-branches.ail   --stylesheet-css examples/motion/git-deck.css --frame merge
+examples/motion/git-merge.svg           examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --animate
+examples/motion/git-merge.anim.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --animate-css
+examples/motion/git-merge.last.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --frame choose

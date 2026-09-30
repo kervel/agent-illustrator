@@ -206,13 +206,13 @@ fn an_instance_level_pin_does_not_drop_a_template_internal_constraint() {
     // different passes, so treating them as rivals deletes relationships the
     // local pass owns.
     //
-    // examples/railway-topology-templated.ail is the case that caught this: it
+    // tests/fixtures/railway-topology-templated.ail is the case that caught this: it
     // aligns six meso junctions to their micro counterparts from outside the
     // template, and leaves jA1/jA2 to the template's own `jA2 = jB2 + 40`.
     // Deduplicating across the two scopes dropped the internal pin on jB2 and
     // dragged jA2 from 299 to 245 — left of the neighbour it is supposed to
     // sit right of.
-    let source = std::fs::read_to_string("examples/railway-topology-templated.ail")
+    let source = std::fs::read_to_string("tests/fixtures/railway-topology-templated.ail")
         .expect("example is part of the repo");
     let svg = render(&source).expect("renders");
     let cx = |id: &str| -> f64 {

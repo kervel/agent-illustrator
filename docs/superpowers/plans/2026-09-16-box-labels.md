@@ -36,7 +36,7 @@
 | `tests/label_markup.rs` (new) | Markup parsing + wrapping + multi-line rendering. |
 | `tests/label_position.rs` (new) | `label_position` × `align` placement and bounds. |
 | `tests/lint_label_guidance.rs` (new) | The two motivating failures as fixtures. |
-| `examples/card-labels.ail` (new) | Canonical reference figure for the feature. |
+| `tests/fixtures/card-labels.ail` (new) | Canonical reference figure for the feature. |
 
 ---
 
@@ -2107,15 +2107,15 @@ was teaching the pattern this feature exists to remove."
 **Files:**
 - Modify: `examples/architecture.ail:39-45,71,133`
 - Modify: `examples/gallic-wars-timeline.ail:40-68`
-- Create: `examples/card-labels.ail`
+- Create: `tests/fixtures/card-labels.ail`
 - Modify: `examples/render-all.sh`
 - Test: `bash examples/render-all.sh` + `--lint` on each
 
 **Interfaces:**
 - Consumes: everything from Tasks 5–7.
-- Produces: `examples/card-labels.ail` as the canonical reference agents copy.
+- Produces: `tests/fixtures/card-labels.ail` as the canonical reference agents copy.
 
-- [ ] **Step 1: Write `examples/card-labels.ail`**
+- [ ] **Step 1: Write `tests/fixtures/card-labels.ail`**
 
 ```
 // Boxes with labels: inside, outside, multi-line, wrapped.
@@ -2164,7 +2164,7 @@ col sheet [gap: 36] {
 
 Run:
 ```bash
-./target/debug/agent-illustrator examples/card-labels.ail --lint > examples/card-labels.svg
+./target/debug/agent-illustrator tests/fixtures/card-labels.ail --lint > examples/card-labels.svg
 ```
 Expected: zero lint warnings, and an SVG where every label is clear of its neighbours. If the linter reports anything, the example is wrong — fix the example, not the linter.
 
@@ -2224,7 +2224,7 @@ Run: `git diff --stat examples/architecture.ail examples/gallic-wars-timeline.ai
 Expected: a net reduction in lines — 12 `text` elements and their constraints gone from the timeline, 4 and ~6 from the architecture example.
 
 ```bash
-git add examples/card-labels.ail examples/card-labels.svg \
+git add tests/fixtures/card-labels.ail examples/card-labels.svg \
         examples/architecture.ail examples/architecture.svg \
         examples/gallic-wars-timeline.ail examples/gallic-wars-timeline.svg \
         examples/render-all.sh

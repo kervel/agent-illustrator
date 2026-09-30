@@ -1,34 +1,122 @@
 # Agent Illustrator
 
-A declarative illustration language for AI agents. Describe *what* to draw, not *how* to render it. I use this to generate powerpoint-like illustrations when creating presentations with markdown+MARP.
+A declarative illustration language for AI agents: describe *what* to draw and
+*how the story unfolds*, not coordinates. An agent writes a scene once; the
+engine lays it out, animates it and checks it. I use it for the explainer
+slides of a workshop deck (reveal.js / MARP).
 
-## The Problem
-
-AI agents can generate two kinds of visual output:
-
-1. **Diagram DSLs** (Mermaid, D2, PlantUML) — Work reliably, but only for predefined diagram types
-2. **Low-level graphics** (SVG, TikZ) — Can draw anything, but LLMs fail with coordinates and spatial reasoning
-
-Agent Illustrator fills the gap: a **general-purpose** language that is **LLM-friendly**.
-
-## Examples
+[![Branches and merge requests](examples/motion/git-branches.anim.svg)](examples/motion/git-branches.ail)
 
 | | |
 |:---:|:---:|
-| **Software Architecture** | **Feedback Loops** |
-| Constraint-based layout, templates, curved routing | Curved connections, stacked layouts, semantic coloring |
-| [![Architecture](examples/architecture.svg)](examples/architecture.ail) | [![Feedback Loops](examples/feedback-loops.svg)](examples/feedback-loops.ail) |
-| **MOSFET Driver Schematic** | **Gallic Wars Timeline** |
-| Custom component templates, anchor-based wiring | Alternating cards, custom path shapes, emphasis styling |
-| [![MOSFET Driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail) | [![Gallic Wars](examples/gallic-wars-timeline.svg)](examples/gallic-wars-timeline.ail) |
-| **Railway Topology** | **Agentic Loop (animated)** |
-| Nested row/col layouts, connection routing | Keyframe animation, SVG clipart, custom CSS |
-| [![Railway](examples/railway-topology.svg)](examples/railway-topology.ail) | [![Agentic Loop](examples/agentic-loop-story.svg)](examples/agentic-loop-story.ail) |
-| **Next-Token Prediction (animated)** | |
-| Keyframe geometry: a growing input box with connectors that follow moving endpoints | |
-| [![Next-Token Prediction](examples/token-prediction.svg)](examples/token-prediction.ail) | |
+| [![Sound familiar?](examples/motion/git-copies.anim.svg)](examples/motion/git-copies.ail) | [![Git takes snapshots](examples/motion/git-snapshots.anim.svg)](examples/motion/git-snapshots.ail) |
+| **Copies everywhere**: copies fly out, then flip into code files | **Snapshots**: commits land on a timeline; go back one |
+| [![Everyone has the full history](examples/motion/git-history.anim.svg)](examples/motion/git-history.ail) | [![Git combines the changes](examples/motion/git-merge.anim.svg)](examples/motion/git-merge.ail) |
+| **Clone, commit, push, pull**: one history, many copies | **Merge**: code blocks, a conflict opens and resolves |
 
-Click any image to view its `.ail` source. More examples: `agent-illustrator --examples`
+Every image above is a plain SVG playing a pure-CSS loop (`--animate-css`), so
+it runs inside an `<img>` on GitHub. With `--animate`, the same scene gets a
+player that steps on click, as in a slide deck. Click an image for its source.
+
+## What this is
+
+- **Constraints, not coordinates.** `row`, `col`, `grid`, templates and
+  `constrain card.left = file.right + 70` place things; the solver works out
+  where. Relabel a station and everything moves to make room.
+- **Motion that says what it waits for.** Keyframes are the click steps;
+  inside them, `when main_line reaches a.dot { … }`, `when mr shown { … }`,
+  named layouts (`use layout beside`) and component states (`set review
+  approved`) describe the choreography. It compiles to explicit tracks.
+- **One player, native stills.** The browser player, a deck host and the
+  native renderer play the same tracks: `--frame 3 --at 50%` renders the exact
+  still the browser shows at that moment.
+- **Checked, not eyeballed.** `--lint` catches what agents get wrong: overlaps,
+  labels that don't fit, a station popping before its line arrives, a swap to
+  something elsewhere, cumulative timing. `--states` prints the storyboard per
+  click step, so a scene can be verified as text.
+
+## A scene, as written
+
+The motion part of the branches scene above (the full file:
+[git-branches.ail](examples/motion/git-branches.ail)):
+
+```
+template "check" (says: "check", then_says: "") {
+    rect bg [fill: role-warn, fill_opacity: 0.28, stroke: none, opacity: 0]
+    row item { circle tick [size: 28, label: "✓", appears: later]  rect txt [label: says] }
+    state passed   { transform self [opacity: 1]; show tick [enter: pop] }
+    state asked    { transform self [opacity: 1]; transform bg [opacity: 1] }
+    state approved { transform self [opacity: 1]; transform txt [label: then_says, swap: fade]
+                     after 0.1 { show tick [enter: pop] } }
+}
+
+path main_line [through: [a.dot, b.dot, c.dot, hotfix.dot, merged.dot], drawn: 0, ...]
+path branch [through: [c.dot, l1.dot, l2.dot, l3.dot, merged.dot], routing: metro, drawn: 0, ...]
+
+keyframe "main" {
+    slide_in(s)
+    at 0.25 { draw main_line [to: c.dot, duration: slow] }
+    when main_line reaches a.dot { station(a) }
+    when main_line reaches b.dot { station(b) }
+    when main_line reaches c.dot { station(c) }
+}
+keyframe "review" {
+    show mr [enter: pop]
+    when mr shown + 0.1 { set tests passed }
+    when tests.tick shown { set review asked }
+}
+keyframe "fixed" {
+    draw branch [to: l3.dot, duration: fast]
+    when branch reaches l3.dot { station(l3) }
+    when l3.dot shown { set review approved }
+}
+keyframe "merge" {
+    show gate [enter: draw, duration: fast]
+    when gate shown { draw branch [duration: 0.6] }
+    when gate shown + 0.1 { draw main_line [duration: slow] }
+    when main_line reaches merged.dot { station(merged) }
+}
+```
+
+And what `agent-illustrator --states git-branches.ail` says it does (trimmed):
+
+```
+changes per step:
+  step 0 (main):
+    + s.badge, s.heading, a.dot, a.nm, b.dot, b.nm, c.dot, c.nm, main_tag
+    / main_line drawn to c.dot
+  step 3 (review):
+    + mr, tests.tick
+    ~ review [opacity: 1]
+    ~ review.bg [opacity: 1]
+  step 4 (fixed):
+    + l3.dot, l3.nm, review.tick
+    ~ review.bg [opacity: initial]
+    ~ review.txt [label: "Approved by Ben"]
+    / branch drawn to l3.dot
+  step 5 (merge):
+    + merged.dot, merged.nm, gate
+    / branch drawn 100%
+    / main_line drawn 100%
+```
+
+## Diagrams
+
+The same engine without keyframes draws diagrams that no fixed-type diagram
+tool covers.
+
+| | |
+|:---:|:---:|
+| [![Architecture](examples/architecture.svg)](examples/architecture.ail) | [![MOSFET driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail) |
+| **Software architecture**: templates, constraint layout, curved routing | **Schematic**: component templates, anchor-based wiring |
+| [![Feedback loops](examples/feedback-loops.svg)](examples/feedback-loops.ail) | [![Gallic Wars](examples/gallic-wars-timeline.svg)](examples/gallic-wars-timeline.ail) |
+| **Feedback loops**: curved connections, semantic colour | **Timeline**: alternating cards, emphasis |
+| [![Railway topology](examples/railway-topology.svg)](examples/railway-topology.ail) | [![Next-token prediction](examples/token-prediction.svg)](examples/token-prediction.ail) |
+| **Railway topology**: nested layouts, routing | **Next-token prediction** (animated): a growing input, connectors that follow |
+
+All images are rendered from the sources by `bash examples/render-all.sh`
+(listed in [examples/renders.txt](examples/renders.txt)); a test fails when a
+committed image is out of date. More: `agent-illustrator --examples`.
 
 ## Installation
 
@@ -60,9 +148,7 @@ nix --option tarball-ttl 0 run github:kervel/agent-illustrator -- --version
 ```
 
 `--version` reports the release tag for a released binary, so it is the quickest
-way to confirm which one you actually have. It is worth checking after an
-upgrade: a long-running `--watch` server keeps the binary it started with, which
-can differ from the one you get by hand.
+way to confirm which one you actually have.
 
 ### Pre-built Binaries
 
@@ -80,43 +166,30 @@ cargo install --git https://github.com/kervel/agent-illustrator
 ## Quick Start
 
 ```bash
-# Render a file
-agent-illustrator diagram.ail > diagram.svg
-
-# Show grammar reference
-agent-illustrator --grammar
-
-# Show annotated examples
-agent-illustrator --examples
-
-# Use with an AI agent (outputs a skill prompt)
-agent-illustrator --skill
+agent-illustrator diagram.ail > diagram.svg            # render
+agent-illustrator scene.ail --animate > scene.svg      # with the step player
+agent-illustrator scene.ail --animate-css > loop.svg   # a self-playing loop (READMEs)
+agent-illustrator scene.ail --serve                    # live preview, reloads on save
+agent-illustrator scene.ail --states                   # the storyboard, as text
+agent-illustrator scene.ail --timeline                 # when everything happens
+agent-illustrator scene.ail --frame 2 --at 50%         # a still, mid-motion
+agent-illustrator scene.ail --lint                     # what an agent should fix
 ```
-
-## Features
-
-- **Semantic layouts**: `row`, `col`, `stack`, `grid` — describe structure, not coordinates
-- **Constraint positioning**: `constrain a.left = b.right + 20` for precise control
-- **Smart connections**: `a -> b` routes automatically, supports curved paths with `via:` waypoints
-- **Templates**: Reusable components with parameters and internal anchors
-- **Styleable colors**: `accent-dark`, `secondary-light` — swap palettes with `--stylesheet`
 
 ## AI Agent Integration
 
-Agent Illustrator ships with built-in LLM support:
+Agent Illustrator ships its own documentation for agents:
 
 ```bash
-# Get a skill prompt for your agent
-agent-illustrator --skill
-
-# Get the full grammar reference
-agent-illustrator --grammar
-
-# Get annotated examples
-agent-illustrator --examples
+agent-illustrator --skill              # the design method and the language
+agent-illustrator --skill-animation    # keyframes, motion, the git deck library
+agent-illustrator --skill-styling      # themes, roles, CSS
+agent-illustrator --grammar            # the full reference
+agent-illustrator --examples           # annotated examples
 ```
 
-Pass `--skill`, `--grammar`, and `--examples` as context to your AI agent, or just tell your agent to figure it out himself (which should lead to the same). The skill prompt includes a 6-phase design methodology that guides the agent from intent to implementation. Tested with codex GPT-5.2-codex and Claude Opus 4.5.
+Pass these to your agent as context, or tell it to run them itself. The skill
+guides the agent from intent to a lint-clean result.
 
 ## About
 

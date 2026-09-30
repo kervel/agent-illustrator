@@ -742,6 +742,21 @@ pub fn size_text_for_keyframe_wordings(mut doc: Document) -> Document {
             match &mut stmt.node {
                 Statement::Shape(shape) => {
                     let ShapeType::Text { content } = &shape.shape_type.node else {
+                        // A labelled shape: its auto-size also fits every
+                        // wording a keyframe gives its label.
+                        let Some(name) = shape.name.as_ref().map(|n| n.node.0.clone()) else { continue };
+                        let Some(texts) = wordings.get(&name) else { continue };
+                        let span = shape.shape_type.span.clone();
+                        shape.modifiers.push(Spanned::new(
+                            StyleModifier {
+                                key: Spanned::new(StyleKey::Custom("ail_wordings".into()), span.clone()),
+                                value: Spanned::new(
+                                    StyleValue::List(texts.iter().map(|t| Spanned::new(StyleValue::String(t.clone()), span.clone())).collect()),
+                                    span.clone(),
+                                ),
+                            },
+                            span,
+                        ));
                         continue;
                     };
                     let Some(name) = shape.name.as_ref().map(|n| n.node.0.clone()) else {

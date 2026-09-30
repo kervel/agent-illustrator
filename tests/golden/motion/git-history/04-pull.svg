@@ -216,9 +216,9 @@ text { white-space: pre; }
       </g>
     </g>
   </g>
-  <rect id="cmd" class="ai-shape ai-rect" x="1010" y="202" width="149.056" height="46" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
-  <text class="ai-label" x="1084.528" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1084.528" dy="-0"><tspan>git pull</tspan></tspan></text>
-  <path class="ai-connection conn-cdad8175-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-cdad8175-l_ben" d="M800 300 L800 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-cdad8175-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
+  <rect id="cmd" class="ai-shape ai-rect" x="1010" y="202" width="163.84" height="46" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+  <text class="ai-label" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git pull</tspan></tspan></text>
+  <path class="ai-connection conn-99f245da-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-99f245da-l_ben" d="M800 300 L800 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-99f245da-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" marker-end="url(#ai-arrow)"/>
 </svg>

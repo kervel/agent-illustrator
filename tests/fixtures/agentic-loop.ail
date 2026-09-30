@@ -3,9 +3,9 @@
    Each phase appears and disappears, giving every step full visual space.
 
    Usage:
-     agent-illustrator examples/agentic-loop.ail --animate
-     agent-illustrator examples/agentic-loop.ail --frame "request"
-     agent-illustrator examples/agentic-loop.ail --stylesheet-css examples/agentic-loop.css
+     agent-illustrator tests/fixtures/agentic-loop.ail --animate
+     agent-illustrator tests/fixtures/agentic-loop.ail --frame "request"
+     agent-illustrator tests/fixtures/agentic-loop.ail --stylesheet-css examples/agentic-loop.css
 */
 
 // === ACTORS: always visible, spread wide ===

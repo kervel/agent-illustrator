@@ -1,4 +1,5 @@
-//! Integration tests: --animate-css animates geometry (not just visibility).
+//! Integration tests: --animate-css plays the compiled motion as plain CSS
+//! (one looping timeline, no script), so it runs inside an `<img>`.
 use agent_illustrator::{render_with_config, RenderConfig};
 
 const SRC: &str = r#"
@@ -25,60 +26,76 @@ fn animate_css(src: &str) -> String {
     render_with_config(src, cfg).expect("render")
 }
 
+/// The `animation:` rule of the selector ending in `suffix` (e.g. `-box`).
+fn rule<'a>(svg: &'a str, prefix: &str, suffix: &str) -> Vec<&'a str> {
+    svg.lines()
+        .filter(|l| l.starts_with(prefix) && l.contains(&format!("{} {{ animation:", suffix)))
+        .collect()
+}
+
+/// Every value of `prop` in the keyframes the rule plays.
+fn values(svg: &str, rule: &str, prop: &str) -> Vec<String> {
+    let names: Vec<&str> = rule
+        .split("animation:")
+        .nth(1)
+        .unwrap()
+        .split(',')
+        .filter_map(|a| a.split_whitespace().next())
+        .collect();
+    let mut out = Vec::new();
+    for n in names {
+        let Some(start) = svg.find(&format!("@keyframes {} {{", n)) else { continue };
+        let body = &svg[start..start + svg[start..].find('\n').unwrap()];
+        for part in body.split(&format!("{}: ", prop)).skip(1) {
+            out.push(part.split(';').next().unwrap().to_string());
+        }
+    }
+    out
+}
+
 #[test]
-fn animate_css_emits_element_transform_keyframes() {
+fn a_moved_element_travels() {
     let svg = animate_css(SRC);
-    // The geometry must come from a @keyframes block (the frame-class CSS is inert in
-    // --animate-css mode — nothing toggles the frame class without JS).
-    assert!(
-        svg.contains("@keyframes kf-geo-") && svg.contains("-box "),
-        "expected a transform @keyframes (kf-geo-box) for the moved element, got:\n{}",
-        svg
-    );
+    let r = rule(&svg, ".kf-", "-box");
+    assert_eq!(r.len(), 1, "{r:?}");
+    let t = values(&svg, r[0], "translate");
+    assert!(t.iter().any(|v| v.starts_with("40px")), "box ends 40px right: {t:?}");
+    assert!(t.iter().any(|v| v.starts_with("0px")), "and starts home: {t:?}");
 }
 
 #[test]
-fn animate_css_emits_element_size_keyframes() {
+fn a_resized_element_grows_smoothly() {
     let svg = animate_css(SRC);
-    assert!(
-        svg.contains("@keyframes kf-width-box"),
-        "expected a width @keyframes (kf-width-box) for the grown element, got:\n{}",
-        svg
-    );
+    let r = rule(&svg, ".kfp-", "-box");
+    let w = values(&svg, r[0], "width");
+    assert!(w.contains(&"100px".to_string()) && w.contains(&"260px".to_string()), "{w:?}");
+    assert!(w.len() > 4, "in between values, not a jump: {w:?}");
 }
 
 #[test]
-fn animate_css_combines_visibility_and_geometry_on_one_selector() {
-    // tok hides then shows AND moves. CSS `animation` is one shorthand property, so
-    // both must be listed in a SINGLE `.kf-tok { animation: ... }` rule — two separate
-    // rules would clobber each other (the second wins), leaving tok invisible.
-    let svg = animate_css(
-        r#"
-rect tok [width: 30, height: 20]
-rect target [width: 10, height: 10]
-constrain target.center_x = 400
-constrain target.center_y = 100
-constrain tok.center_x = 100
-constrain tok.center_y = 100
-keyframe "idle" { hide tok }
-keyframe "show" { show tok; transform tok [dx: 50] }
-"#,
-    );
-    let rules: Vec<&str> = svg.lines().filter(|l| l.contains("-tok { animation:") && !l.contains("conn-")).collect();
-    assert_eq!(rules.len(), 1, "expected ONE .kf-tok animation rule, got {}: {:?}", rules.len(), rules);
-    assert!(
-        rules[0].contains("kf-anim-") && rules[0].contains("kf-geo-"),
-        "the single rule must list BOTH visibility and geometry animations, got: {}",
-        rules[0]
-    );
+fn one_rule_per_element_lists_every_channel() {
+    // tok fades in AND rises: CSS `animation` is one property, so both must
+    // be in a single rule (a second rule would replace the first).
+    let svg = animate_css(SRC);
+    let r = rule(&svg, ".kf-", "-tok");
+    assert_eq!(r.len(), 1, "{r:?}");
+    let o = values(&svg, r[0], "opacity");
+    assert!(o.first().is_some_and(|v| v == "0") && o.last().is_some_and(|v| v == "1"), "{o:?}");
+    assert!(!values(&svg, r[0], "translate").is_empty(), "{}", r[0]);
 }
 
 #[test]
-fn animate_css_hidden_connection_visibility_not_clobbered_by_reshape() {
-    // arrow is visible only in "point"; its endpoint (tok) moves in a later frame while
-    // the arrow is HIDDEN. The reshape must NOT emit a -base/variant animation that
-    // clobbers the arrow's show/hide. Net: the base path keeps its visibility animation
-    // and no `.conn-arr-base` animation rule is emitted.
+fn a_following_connection_reshapes() {
+    let svg = animate_css(SRC);
+    let r = rule(&svg, ".aid-", "-feed");
+    assert_eq!(r.len(), 1, "{r:?}");
+    let d = values(&svg, r[0], "d");
+    let distinct: std::collections::HashSet<&String> = d.iter().collect();
+    assert!(distinct.len() > 2, "the connection follows the box: {d:?}");
+}
+
+#[test]
+fn a_hidden_connection_stays_hidden_while_its_end_moves() {
     let svg = animate_css(
         r#"
 rect llmbox [width: 60, height: 30, label: "L"]
@@ -93,60 +110,23 @@ keyframe "point" { show tok, arr }
 keyframe "moved" { hide arr; disable tok_home; constrain tok.center_x = 400; constrain tok.center_y = 60 }
 "#,
     );
-    assert!(
-        svg.contains("-arr { animation:") && svg.contains("kf-anim-conn-"),
-        "arrow must keep its visibility animation, got:\n{}",
-        svg
-    );
-    assert!(
-        !svg.contains("-arr-base { animation:"),
-        "a reshape while hidden must not emit a clobbering -base animation, got:\n{}",
-        svg
-    );
+    let r: Vec<&str> = svg.lines().filter(|l| l.starts_with(".conn-") && l.contains("-arr { animation:")).collect();
+    assert_eq!(r.len(), 1, "one visibility rule for the arrow: {r:?}");
+    let o = values(&svg, r[0], "opacity");
+    assert_eq!(o.first().map(String::as_str), Some("0"));
+    assert!(o.contains(&"1".to_string()));
+    assert_eq!(o.last().map(String::as_str), Some("0"), "hidden at the end: {o:?}");
 }
 
 #[test]
-fn animate_css_morphable_connection_d_keyframes() {
-    let svg = animate_css(SRC); // feed: straight box.right->other.left, box widens (morphable)
-    assert!(
-        svg.contains("@keyframes kf-d-feed"),
-        "expected d-morph @keyframes (kf-d-feed) for the following connection, got:\n{}",
-        svg
-    );
-}
-
-#[test]
-fn animate_css_reshaping_connection_crossfades() {
-    let svg = animate_css(r#"
-rect box [width: 80, height: 40]
-rect other [width: 80, height: 40]
-constrain box.center_x = 120
-constrain box.center_y = 100
-constrain other.center_x = 120
-constrain other.center_y = 320
-box.bottom -> other.top as link
-keyframe "idle" {}
-keyframe "shift" { transform box [dx: 220] }
-"#);
-    // reshaping route → crossfade variant participates in a (step) opacity animation
-    assert!(
-        svg.contains("-link-fshift") && svg.contains("kf-variant-") && svg.contains("-link-shift"),
-        "expected crossfade variant animation for reshaping route, got:\n{}",
-        svg
-    );
-}
-
-#[test]
-fn animate_css_geometry_is_smooth_visibility_is_step() {
+fn no_script_and_one_looping_timeline() {
     let svg = animate_css(SRC);
-    assert!(
-        svg.contains("ease infinite") || svg.contains("ease-in-out infinite"),
-        "expected a smooth (ease) geometry animation, got:\n{}",
-        svg
-    );
-    assert!(
-        svg.contains("step-end infinite"),
-        "visibility should still be step-end, got:\n{}",
-        svg
-    );
+    assert!(!svg.contains("<script"), "plays in an <img>: no script");
+    let durations: std::collections::HashSet<&str> = svg
+        .lines()
+        .filter(|l| l.contains("{ animation:"))
+        .flat_map(|l| l.split_whitespace().filter(|w| w.ends_with('s') && w.chars().next().is_some_and(|c| c.is_ascii_digit())))
+        .collect();
+    assert_eq!(durations.len(), 1, "every channel on one clock: {durations:?}");
+    assert!(svg.contains("linear infinite"));
 }

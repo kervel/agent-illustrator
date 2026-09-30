@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="two,combine,conflict,choose">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe CSS suppressed (--no-frame-css) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+    /* examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+  /* motion: the whole story as CSS (auto-generated) */
+@keyframes ailfilm0 { 0% { opacity: 0; } 3.0581% { opacity: 0; } 4.842% { opacity: 0.933; } 5.0968% { opacity: 1; } 99.9924% { opacity: 1; } }
+@keyframes ailfilm1 { 0% { scale: 0 0; } 3.0581% { scale: 0 0; } 3.3129% { scale: 0.281 0.281; } 3.5678% { scale: 0.515 0.515; } 3.8226% { scale: 0.703 0.703; } 4.0775% { scale: 0.849 0.849; } 4.3323% { scale: 0.957 0.957; } 4.5872% { scale: 1.03 1.03; } 4.842% { scale: 1.075 1.075; } 5.0968% { scale: 1.095 1.095; } 5.3517% { scale: 1.097 1.097; } 5.6065% { scale: 1.085 1.085; } 6.371% { scale: 1.021 1.021; } 6.6259% { scale: 1.006 1.006; } 7.3904% { scale: 1 1; } 99.9924% { scale: 1 1; } }
+@keyframes ailfilm2 { 0% { opacity: 0; } 3.8226% { opacity: 0; } 4.0775% { opacity: 0.047; } 4.5872% { opacity: 0.276; } 4.842% { opacity: 0.38; } 5.0968% { opacity: 0.473; } 5.3517% { opacity: 0.556; } 5.6065% { opacity: 0.628; } 5.8614% { opacity: 0.689; } 6.371% { opacity: 0.787; } 6.8807% { opacity: 0.858; } 7.3904% { opacity: 0.909; } 8.1549% { opacity: 0.959; } 9.1743% { opacity: 0.992; } 10.0917% { opacity: 1; } 99.9924% { opacity: 1; } }
+@keyframes ailfilm3 { 0% { translate: 0px 0px; } 3.8226% { translate: 0px 0px; } 4.0775% { translate: 0px 11.433px; } 5.0968% { translate: 0px 6.32px; } 6.1162% { translate: 0px 3.094px; } 7.3904% { translate: 0px 1.092px; } 9.4292% { translate: 0px 0.048px; } 99.9924% { translate: 0px 0px; } }
+@keyframes ailfilm4 { 0% { opacity: 0; } 5.0968% { opacity: 0.001; } 5.3517% { opacity: 0.009; } 5.6065% { opacity: 0.027; } 5.8614% { opacity: 0.06; } 6.1162% { opacity: 0.112; } 6.371% { opacity: 0.195; } 6.6259% { opacity: 0.323; } 7.1356% { opacity: 0.677; } 7.3904% { opacity: 0.805; } 7.6453% { opacity: 0.888; } 7.9001% { opacity: 0.94; } 8.1549% { opacity: 0.973; } 8.4098% { opacity: 0.991; } 8.9195% { opacity: 1; } 25.6371% { opacity: 1; } 26.1468% { opacity: 0.125; } 26.4016% { opacity: 0.01; } 26.6565% { opacity: 0; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm5 { 0% { translate: 0px 0px; } 4.842% { translate: 0px 0px; } 5.0968% { translate: 0px 11.989px; } 5.8614% { translate: 0px 11.282px; } 6.371% { translate: 0px 9.661px; } 6.6259% { translate: 0px 8.129px; } 7.1356% { translate: 0px 3.871px; } 7.3904% { translate: 0px 2.339px; } 7.9001% { translate: 0px 0.718px; } 8.6646% { translate: 0px 0.011px; } 20.7951% { translate: 0px 0px; } 21.0499% { translate: 0.288px 0.02px; } 21.3048% { translate: 1.158px 0.082px; } 21.5596% { translate: 2.618px 0.184px; } 21.8145% { translate: 4.682px 0.33px; } 22.0693% { translate: 7.366px 0.519px; } 22.3242% { translate: 10.69px 0.753px; } 22.579% { translate: 14.682px 1.034px; } 22.8338% { translate: 19.374px 1.365px; } 23.0887% { translate: 24.806px 1.748px; } 23.3435% { translate: 31.031px 2.186px; } 23.5984% { translate: 38.112px 2.685px; } 23.8532% { translate: 46.134px 3.25px; } 24.1081% { translate: 55.205px 3.889px; } 24.3629% { translate: 65.47px 4.612px; } 24.6177% { translate: 77.13px 5.434px; } 24.8726% { translate: 90.475px 6.374px; } 25.1274% { translate: 105.95px 7.464px; } 25.3823% { translate: 124.305px 8.757px; } 25.6371% { translate: 146.994px 10.356px; } 25.8919% { translate: 177.754px 12.523px; } 26.1468% { translate: 255.5px 18px; } 43.3486% { translate: 255.5px 18px; } 43.6035% { translate: 214.327px 18px; } 43.8583% { translate: 176.221px 18px; } 44.1131% { translate: 143.551px 18px; } 44.368% { translate: 117.083px 18px; } 44.6228% { translate: 96.282px 18px; } 44.8777% { translate: 80.136px 18px; } 45.1325% { translate: 66.402px 11.915px; } 45.3874% { translate: 58.012px 10.082px; } 45.6422% { translate: 53.402px 11.668px; } 45.897% { translate: 49.966px 16.585px; } 46.1519% { translate: 47.073px 22.61px; } 46.4067% { translate: 44.654px 29.699px; } 46.9164% { translate: 41.334px 48.197px; } 47.1713% { translate: 40.065px 58.174px; } 47.4261% { translate: 38.936px 67.049px; } 47.6809% { translate: 37.999px 74.421px; } 47.9358% { translate: 37.253px 80.287px; } 48.1906% { translate: 36.671px 84.86px; } 48.4455% { translate: 36.221px 88.401px; } 48.7003% { translate: 35.873px 91.132px; } 48.9551% { translate: 35.607px 93.228px; } 49.4648% { translate: 35.253px 96.01px; } 49.9745% { translate: 35.069px 97.456px; } 50.739% { translate: 35px 98px; } 64.2457% { translate: 35px 98px; } 64.5005% { translate: 35px 79.327px; } 64.7554% { translate: 35px 47.229px; } 65.0102% { translate: 35px 25.792px; } 65.265% { translate: 35px 12.812px; } 65.5199% { translate: 35px 5.128px; } 65.7747% { translate: 35px 0.77px; } 66.0296% { translate: 35px -1.384px; } 66.2844% { translate: 35px -2px; } 66.7941% { translate: 35px 5.191px; } 67.0489% { translate: 35px 8.154px; } 67.3038% { translate: 35px 10.555px; } 67.8135% { translate: 35px 13.906px; } 68.578% { translate: 35px 16.574px; } 69.3425% { translate: 35px 17.707px; } 69.5973% { translate: 64.007px 17.797px; } 69.8522% { translate: 103.337px 17.839px; } 70.107% { translate: 137.797px 17.875px; } 70.3619% { translate: 166.112px 17.905px; } 70.6167% { translate: 188.515px 17.929px; } 70.8716% { translate: 205.947px 17.948px; } 71.1264% { translate: 219.431px 17.962px; } 71.3812% { translate: 229.824px 17.973px; } 71.6361% { translate: 237.789px 17.981px; } 71.8909% { translate: 243.825px 17.988px; } 72.1458% { translate: 248.306px 17.992px; } 72.4006% { translate: 251.516px 17.996px; } 72.6555% { translate: 253.673px 17.998px; } 72.9103% { translate: 254.947px 17.999px; } 73.42% { translate: 255.5px 18px; } 99.9924% { translate: 255.5px 18px; } }
+@keyframes ailfilm6 { 0% { opacity: 0; } 5.8614% { opacity: 0.001; } 6.1162% { opacity: 0.009; } 6.371% { opacity: 0.027; } 6.6259% { opacity: 0.06; } 6.8807% { opacity: 0.112; } 7.1356% { opacity: 0.195; } 7.3904% { opacity: 0.323; } 7.9001% { opacity: 0.677; } 8.1549% { opacity: 0.805; } 8.4098% { opacity: 0.888; } 8.6646% { opacity: 0.94; } 8.9195% { opacity: 0.973; } 9.1743% { opacity: 0.991; } 9.684% { opacity: 1; } 25.6371% { opacity: 1; } 26.1468% { opacity: 0.125; } 26.4016% { opacity: 0.01; } 26.6565% { opacity: 0; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm7 { 0% { translate: 0px 0px; } 5.6065% { translate: 0px 0px; } 5.8614% { translate: 0px 11.989px; } 6.6259% { translate: 0px 11.282px; } 7.1356% { translate: 0px 9.661px; } 7.3904% { translate: 0px 8.129px; } 7.9001% { translate: 0px 3.871px; } 8.1549% { translate: 0px 2.339px; } 8.6646% { translate: 0px 0.718px; } 9.4292% { translate: 0px 0.011px; } 20.7951% { translate: 0px 0px; } 21.0499% { translate: -0.288px 0.02px; } 21.3048% { translate: -1.158px 0.082px; } 21.5596% { translate: -2.618px 0.184px; } 21.8145% { translate: -4.682px 0.33px; } 22.0693% { translate: -7.366px 0.519px; } 22.3242% { translate: -10.69px 0.753px; } 22.579% { translate: -14.682px 1.034px; } 22.8338% { translate: -19.374px 1.365px; } 23.0887% { translate: -24.806px 1.748px; } 23.3435% { translate: -31.031px 2.186px; } 23.5984% { translate: -38.112px 2.685px; } 23.8532% { translate: -46.134px 3.25px; } 24.1081% { translate: -55.205px 3.889px; } 24.3629% { translate: -65.47px 4.612px; } 24.6177% { translate: -77.13px 5.434px; } 24.8726% { translate: -90.475px 6.374px; } 25.1274% { translate: -105.95px 7.464px; } 25.3823% { translate: -124.305px 8.757px; } 25.6371% { translate: -146.994px 10.356px; } 25.8919% { translate: -177.754px 12.523px; } 26.1468% { translate: -255.5px 18px; } 43.3486% { translate: -255.5px 18px; } 43.6035% { translate: -296.673px 18px; } 43.8583% { translate: -334.779px 18px; } 44.1131% { translate: -367.449px 18px; } 44.368% { translate: -393.917px 18px; } 44.6228% { translate: -414.718px 18px; } 44.8777% { translate: -430.864px 18px; } 45.1325% { translate: -444.598px 11.915px; } 45.3874% { translate: -452.988px 10.082px; } 45.6422% { translate: -457.598px 11.668px; } 45.897% { translate: -461.034px 16.585px; } 46.1519% { translate: -463.927px 22.61px; } 46.4067% { translate: -466.346px 29.699px; } 46.9164% { translate: -469.666px 48.197px; } 47.1713% { translate: -470.935px 58.174px; } 47.4261% { translate: -472.064px 67.049px; } 47.6809% { translate: -473.001px 74.421px; } 47.9358% { translate: -473.747px 80.287px; } 48.1906% { translate: -474.329px 84.86px; } 48.4455% { translate: -474.779px 88.401px; } 48.7003% { translate: -475.127px 91.132px; } 48.9551% { translate: -475.393px 93.228px; } 49.4648% { translate: -475.747px 96.01px; } 49.9745% { translate: -475.931px 97.456px; } 50.739% { translate: -476px 98px; } 64.2457% { translate: -476px 98px; } 64.5005% { translate: -476px 79.327px; } 64.7554% { translate: -476px 47.229px; } 65.0102% { translate: -476px 25.792px; } 65.265% { translate: -476px 12.812px; } 65.5199% { translate: -476px 5.128px; } 65.7747% { translate: -476px 0.77px; } 66.0296% { translate: -476px -1.384px; } 66.2844% { translate: -476px -2px; } 66.7941% { translate: -476px 5.191px; } 67.0489% { translate: -476px 8.154px; } 67.3038% { translate: -476px 10.555px; } 67.8135% { translate: -476px 13.906px; } 68.578% { translate: -476px 16.574px; } 69.3425% { translate: -476px 17.707px; } 69.5973% { translate: -446.993px 17.797px; } 69.8522% { translate: -407.663px 17.839px; } 70.107% { translate: -373.203px 17.875px; } 70.3619% { translate: -344.888px 17.905px; } 70.6167% { translate: -322.485px 17.929px; } 70.8716% { translate: -305.053px 17.948px; } 71.1264% { translate: -291.569px 17.962px; } 71.3812% { translate: -281.176px 17.973px; } 71.6361% { translate: -273.211px 17.981px; } 71.8909% { translate: -267.175px 17.988px; } 72.1458% { translate: -262.694px 17.992px; } 72.4006% { translate: -259.484px 17.996px; } 72.6555% { translate: -257.327px 17.998px; } 72.9103% { translate: -256.053px 17.999px; } 73.42% { translate: -255.5px 18px; } 99.9924% { translate: -255.5px 18px; } }
+@keyframes ailfilm8 { 0% { opacity: 0; } 25.6371% { opacity: 0; } 25.8919% { opacity: 0.067; } 27.6758% { opacity: 1; } 99.9924% { opacity: 1; } }
+@keyframes ailfilm9 { 0% { scale: 1 1; } 25.6371% { scale: 1 1; } 25.8919% { scale: 0.134 0.134; } 26.1468% { scale: 0.372 0.372; } 26.4016% { scale: 0.571 0.571; } 26.6565% { scale: 0.733 0.733; } 26.9113% { scale: 0.86 0.86; } 27.1662% { scale: 0.957 0.957; } 27.421% { scale: 1.025 1.025; } 27.6758% { scale: 1.068 1.068; } 27.9307% { scale: 1.091 1.091; } 28.1855% { scale: 1.098 1.098; } 28.4404% { scale: 1.092 1.092; } 29.4597% { scale: 1.018 1.018; } 29.7146% { scale: 1.005 1.005; } 30.9888% { scale: 1 1; } 99.9924% { scale: 1 1; } }
+@keyframes ailfilm10 { 0% { opacity: 0; } 28.6952% { opacity: 0; } 28.9501% { opacity: 0.067; } 30.7339% { opacity: 1; } 43.3486% { opacity: 1; } 43.6035% { opacity: 0.563; } 43.8583% { opacity: 0.278; } 44.1131% { opacity: 0.125; } 44.368% { opacity: 0.046; } 44.6228% { opacity: 0.01; } 44.8777% { opacity: 0; } 73.1651% { opacity: 0; } 73.42% { opacity: 0.093; } 74.949% { opacity: 0.893; } 75.2039% { opacity: 1; } 99.9924% { opacity: 1; } }
+@keyframes ailfilm11 { 0% { scale: 1 1; } 28.6952% { scale: 1 1; } 28.9501% { scale: 0.147 0.147; } 29.2049% { scale: 0.404 0.404; } 29.4597% { scale: 0.614 0.614; } 29.7146% { scale: 0.781 0.781; } 29.9694% { scale: 0.907 0.907; } 30.2243% { scale: 0.997 0.997; } 30.4791% { scale: 1.056 1.056; } 30.7339% { scale: 1.087 1.087; } 30.9888% { scale: 1.098 1.098; } 31.2436% { scale: 1.092 1.092; } 32.263% { scale: 1.013 1.013; } 32.6453% { scale: 1 1; } 43.3486% { scale: 1 1; } 43.6035% { scale: 0.986 0.986; } 43.8583% { scale: 0.943 0.943; } 44.1131% { scale: 0.865 0.865; } 44.368% { scale: 0.744 0.744; } 44.6228% { scale: 0.551 0.551; } 44.8777% { scale: 0 0; } 45.1325% { scale: 1 1; } 73.1651% { scale: 1 1; } 73.42% { scale: 0.202 0.202; } 73.6748% { scale: 0.45 0.45; } 73.9297% { scale: 0.651 0.651; } 74.1845% { scale: 0.809 0.809; } 74.4393% { scale: 0.928 0.928; } 74.6942% { scale: 1.011 1.011; } 74.949% { scale: 1.064 1.064; } 75.2039% { scale: 1.091 1.091; } 75.4587% { scale: 1.098 1.098; } 75.7136% { scale: 1.09 1.09; } 76.7329% { scale: 1.01 1.01; } 77.0642% { scale: 1 1; } 99.9924% { scale: 1 1; } }
+@keyframes ailfilm12 { 0% { translate: 0px 0px; } 43.3486% { translate: 0px 0px; } 43.6035% { translate: -41.173px 0px; } 43.8583% { translate: -79.279px 0px; } 44.1131% { translate: -111.949px 0px; } 44.368% { translate: -138.417px 0px; } 44.6228% { translate: -159.218px 0px; } 44.8777% { translate: -175.364px 0px; } 45.1325% { translate: -187.84px 0px; } 45.3874% { translate: -197.443px 0px; } 45.6422% { translate: -204.783px 0px; } 45.897% { translate: -210.318px 0px; } 46.1519% { translate: -214.391px 0px; } 46.4067% { translate: -217.265px 0px; } 46.6616% { translate: -219.141px 0px; } 46.9164% { translate: -220.178px 0px; } 47.9358% { translate: -220.5px 0px; } 67.8135% { translate: -220.5px 0.155px; } 68.3231% { translate: -220.5px 1.154px; } 68.8328% { translate: -220.5px 3.373px; } 69.0877% { translate: -220.5px 5.268px; } 69.3425% { translate: -220.5px 8.646px; } 69.5973% { translate: -191.493px 0px; } 69.8522% { translate: -152.163px 0px; } 70.107% { translate: -117.703px 0px; } 70.3619% { translate: -89.388px 0px; } 70.6167% { translate: -66.985px 0px; } 70.8716% { translate: -49.553px 0px; } 71.1264% { translate: -36.069px 0px; } 71.3812% { translate: -25.676px 0px; } 71.6361% { translate: -17.711px 0px; } 71.8909% { translate: -11.675px 0px; } 72.1458% { translate: -7.194px 0px; } 72.4006% { translate: -3.984px 0px; } 72.6555% { translate: -1.827px 0px; } 72.9103% { translate: -0.553px 0px; } 73.42% { translate: 0px 0px; } 99.9924% { translate: 0px 0px; } }
+@keyframes ailfilm13 { 0% { translate: 0px 0px; } 43.3486% { translate: 0px 0px; } 43.6035% { translate: -41.173px 0px; } 43.8583% { translate: -79.279px 0px; } 44.1131% { translate: -111.949px 0px; } 44.368% { translate: -138.417px 0px; } 44.6228% { translate: -159.218px 0px; } 44.8777% { translate: -175.364px 0px; } 45.1325% { translate: -187.84px 0px; } 45.3874% { translate: -197.443px 0px; } 45.6422% { translate: -204.783px 0px; } 45.897% { translate: -210.318px 0px; } 46.1519% { translate: -214.391px 0px; } 46.4067% { translate: -217.265px 0px; } 46.6616% { translate: -219.141px 0px; } 46.9164% { translate: -220.178px 0px; } 47.9358% { translate: -220.5px 0px; } 69.3425% { translate: -220.5px 0px; } 69.5973% { translate: -191.493px 0px; } 69.8522% { translate: -152.163px 0px; } 70.107% { translate: -117.703px 0px; } 70.3619% { translate: -89.388px 0px; } 70.6167% { translate: -66.985px 0px; } 70.8716% { translate: -49.553px 0px; } 71.1264% { translate: -36.069px 0px; } 71.3812% { translate: -25.676px 0px; } 71.6361% { translate: -17.711px 0px; } 71.8909% { translate: -11.675px 0px; } 72.1458% { translate: -7.194px 0px; } 72.4006% { translate: -3.984px 0px; } 72.6555% { translate: -1.827px 0px; } 72.9103% { translate: -0.553px 0px; } 73.42% { translate: 0px 0px; } 99.9924% { translate: 0px 0px; } }
+@keyframes ailfilm14 { 0% { translate: 0px 0px; } 43.3486% { translate: 0px 0px; } 43.6035% { translate: -41.173px 0px; } 43.8583% { translate: -79.279px 0px; } 44.1131% { translate: -111.949px 0px; } 44.368% { translate: -138.417px 0px; } 44.6228% { translate: -159.218px 0px; } 44.8777% { translate: -175.364px 0px; } 45.1325% { translate: -187.84px 0px; } 45.3874% { translate: -197.443px 0px; } 45.6422% { translate: -204.783px 0px; } 45.897% { translate: -210.318px 0px; } 46.1519% { translate: -214.391px 0px; } 46.4067% { translate: -217.265px 0px; } 46.6616% { translate: -219.141px 0px; } 46.9164% { translate: -220.178px 0px; } 47.9358% { translate: -220.5px 0px; } 69.3425% { translate: -220.5px 0px; } 69.5973% { translate: -191.493px 0px; } 69.8522% { translate: -152.163px 0px; } 70.107% { translate: -117.703px 0px; } 70.3619% { translate: -89.388px 0px; } 70.6167% { translate: -66.985px 0px; } 70.8716% { translate: -49.553px 0px; } 71.1264% { translate: -36.069px 0px; } 71.3812% { translate: -25.676px 0px; } 71.6361% { translate: -17.711px 0px; } 71.8909% { translate: -11.675px 0px; } 72.1458% { translate: -7.194px 0px; } 72.4006% { translate: -3.984px 0px; } 72.6555% { translate: -1.827px 0px; } 72.9103% { translate: -0.553px 0px; } 73.42% { translate: 0px 0px; } 99.9924% { translate: 0px 0px; } }
+@keyframes ailfilm15 { 0% { opacity: 1; } 44.8777% { opacity: 1; } 45.1325% { opacity: 0.696; } 45.3874% { opacity: 0.449; } 45.6422% { opacity: 0.278; } 45.897% { opacity: 0.165; } 46.1519% { opacity: 0.092; } 46.4067% { opacity: 0.046; } 46.6616% { opacity: 0.018; } 46.9164% { opacity: 0.004; } 50.9939% { opacity: 0; } 66.2844% { opacity: 0; } 66.5392% { opacity: 0.187; } 66.7941% { opacity: 0.36; } 67.0489% { opacity: 0.508; } 67.3038% { opacity: 0.628; } 67.5586% { opacity: 0.722; } 67.8135% { opacity: 0.795; } 68.0683% { opacity: 0.852; } 68.3231% { opacity: 0.895; } 68.578% { opacity: 0.929; } 69.0877% { opacity: 0.972; } 69.5973% { opacity: 0.994; } 70.8716% { opacity: 1; } 99.9924% { opacity: 1; } }
+@keyframes ailfilm16 { 0% { clip-path: inset(0% 0% 0% 0%); } 44.8777% { clip-path: inset(0% 0% 0% 0%); } 45.1325% { clip-path: inset(0% 0% 30.427% 0%); } 45.3874% { clip-path: inset(0% 0% 55.081% 0%); } 45.6422% { clip-path: inset(0% 0% 72.208% 0%); } 45.897% { clip-path: inset(0% 0% 83.463% 0%); } 46.1519% { clip-path: inset(0% 0% 90.755% 0%); } 46.4067% { clip-path: inset(0% 0% 95.382% 0%); } 46.6616% { clip-path: inset(0% 0% 98.153% 0%); } 46.9164% { clip-path: inset(0% 0% 99.58% 0%); } 47.1713% { clip-path: inset(0% 0% 100% 0%); } 47.4261% { clip-path: inset(0% 0% 0% 0%); } 66.0296% { clip-path: inset(0% 0% 0% 0%); } 66.2844% { clip-path: inset(0% 0% 100% 0%); } 66.5392% { clip-path: inset(0% 0% 81.327% 0%); } 66.7941% { clip-path: inset(0% 0% 64.046% 0%); } 67.0489% { clip-path: inset(0% 0% 49.229% 0%); } 67.3038% { clip-path: inset(0% 0% 37.226% 0%); } 67.5586% { clip-path: inset(0% 0% 27.792% 0%); } 67.8135% { clip-path: inset(0% 0% 20.47% 0%); } 68.0683% { clip-path: inset(0% 0% 14.812% 0%); } 68.3231% { clip-path: inset(0% 0% 10.457% 0%); } 68.578% { clip-path: inset(0% 0% 7.128% 0%); } 68.8328% { clip-path: inset(0% 0% 4.618% 0%); } 69.0877% { clip-path: inset(0% 0% 2.77% 0%); } 69.3425% { clip-path: inset(0% 0% 1.467% 0%); } 69.8522% { clip-path: inset(0% 0% 0.146% 0%); } 99.9924% { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes ailfilm17 { 0% { translate: 0px -200px; } 44.8777% { translate: 0px -200px; } 45.1325% { translate: 0px -212.171px; } 45.3874% { translate: 0px -215.836px; } 45.6422% { translate: 0px -212.664px; } 45.897% { translate: 0px -202.83px; } 46.1519% { translate: 0px -190.78px; } 46.4067% { translate: 0px -176.602px; } 46.6616% { translate: 0px -158.563px; } 46.9164% { translate: 0px -139.605px; } 47.1713% { translate: 0px -119.653px; } 47.4261% { translate: 0px -101.901px; } 47.6809% { translate: 0px -87.157px; } 47.9358% { translate: 0px -75.427px; } 48.1906% { translate: 0px -66.279px; } 48.4455% { translate: 0px -59.198px; } 48.7003% { translate: 0px -53.736px; } 48.9551% { translate: 0px -49.544px; } 49.21% { translate: 0px -46.358px; } 49.4648% { translate: 0px -43.98px; } 49.7197% { translate: 0px -42.262px; } 50.2294% { translate: 0px -40.371px; } 50.9939% { translate: 0px -40px; } 64.2457% { translate: 0px -40px; } 64.5005% { translate: 0px -77.346px; } 64.7554% { translate: 0px -141.541px; } 65.0102% { translate: 0px -184.415px; } 65.265% { translate: 0px -210.376px; } 65.5199% { translate: 0px -225.744px; } 65.7747% { translate: 0px -234.459px; } 66.0296% { translate: 0px -238.768px; } 66.2844% { translate: 0px -240px; } 66.5392% { translate: 0px -232.531px; } 66.7941% { translate: 0px -225.618px; } 67.0489% { translate: 0px -219.692px; } 67.3038% { translate: 0px -214.89px; } 67.5586% { translate: 0px -211.117px; } 67.8135% { translate: 0px -208.188px; } 68.0683% { translate: 0px -205.925px; } 68.578% { translate: 0px -202.851px; } 69.3425% { translate: 0px -200.587px; } 70.3619% { translate: 0px -200px; } 99.9924% { translate: 0px -200px; } }
+@keyframes ailfilm18 { 0% { height: 410px; } 44.8777% { height: 410px; } 45.1325% { height: 397.829px; } 45.3874% { height: 394.164px; } 45.6422% { height: 397.336px; } 45.897% { height: 407.17px; } 46.1519% { height: 419.22px; } 46.4067% { height: 433.398px; } 46.6616% { height: 451.437px; } 46.9164% { height: 470.395px; } 47.1713% { height: 490.347px; } 47.4261% { height: 508.099px; } 47.6809% { height: 522.843px; } 47.9358% { height: 534.573px; } 48.1906% { height: 543.721px; } 48.4455% { height: 550.802px; } 48.7003% { height: 556.264px; } 48.9551% { height: 560.456px; } 49.21% { height: 563.642px; } 49.4648% { height: 566.02px; } 49.7197% { height: 567.738px; } 50.2294% { height: 569.629px; } 50.9939% { height: 570px; } 64.2457% { height: 570px; } 64.5005% { height: 532.654px; } 64.7554% { height: 468.459px; } 65.0102% { height: 425.585px; } 65.265% { height: 399.624px; } 65.5199% { height: 384.256px; } 65.7747% { height: 375.541px; } 66.0296% { height: 371.232px; } 66.2844% { height: 370px; } 66.5392% { height: 377.469px; } 66.7941% { height: 384.382px; } 67.0489% { height: 390.308px; } 67.3038% { height: 395.11px; } 67.5586% { height: 398.883px; } 67.8135% { height: 401.812px; } 68.0683% { height: 404.075px; } 68.578% { height: 407.149px; } 69.3425% { height: 409.413px; } 70.3619% { height: 410px; } 99.9924% { height: 410px; } }
+@keyframes ailfilm19 { 0% { height: 40px; } 44.8777% { height: 40px; } 45.1325% { height: 27.829px; } 45.3874% { height: 17.968px; } 45.6422% { height: 11.117px; } 45.897% { height: 6.615px; } 46.1519% { height: 3.698px; } 46.4067% { height: 1.847px; } 46.6616% { height: 0.739px; } 47.1713% { height: 0px; } 66.2844% { height: 0px; } 66.5392% { height: 7.469px; } 66.7941% { height: 14.382px; } 67.0489% { height: 20.308px; } 67.3038% { height: 25.11px; } 67.5586% { height: 28.883px; } 67.8135% { height: 31.812px; } 68.0683% { height: 34.075px; } 68.578% { height: 37.149px; } 69.3425% { height: 39.413px; } 70.3619% { height: 40px; } 99.9924% { height: 40px; } }
+@keyframes ailfilm20 { 0% { opacity: 0; } 45.1325% { opacity: 0; } 45.3874% { opacity: 0.094; } 45.6422% { opacity: 0.276; } 45.897% { opacity: 0.437; } 46.1519% { opacity: 0.571; } 46.4067% { opacity: 0.678; } 46.6616% { opacity: 0.761; } 46.9164% { opacity: 0.825; } 47.1713% { opacity: 0.875; } 47.4261% { opacity: 0.913; } 47.9358% { opacity: 0.964; } 48.4455% { opacity: 0.99; } 49.21% { opacity: 1; } 65.5199% { opacity: 1; } 65.7747% { opacity: 0.742; } 66.0296% { opacity: 0.441; } 66.2844% { opacity: 0.246; } 66.5392% { opacity: 0.129; } 66.7941% { opacity: 0.06; } 67.0489% { opacity: 0.022; } 67.3038% { opacity: 0.004; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm21 { 0% { clip-path: inset(0% 0% 0% 0%); } 45.1325% { clip-path: inset(0% 0% 0% 0%); } 45.3874% { clip-path: inset(0% 0% 90.575% 0%); } 45.6422% { clip-path: inset(0% 0% 72.431% 0%); } 45.897% { clip-path: inset(0% 0% 56.289% 0%); } 46.1519% { clip-path: inset(0% 0% 42.882% 0%); } 46.4067% { clip-path: inset(0% 0% 32.215% 0%); } 46.6616% { clip-path: inset(0% 0% 23.897% 0%); } 46.9164% { clip-path: inset(0% 0% 17.458% 0%); } 47.1713% { clip-path: inset(0% 0% 12.491% 0%); } 47.4261% { clip-path: inset(0% 0% 8.678% 0%); } 47.6809% { clip-path: inset(0% 0% 5.781% 0%); } 47.9358% { clip-path: inset(0% 0% 3.619% 0%); } 48.1906% { clip-path: inset(0% 0% 2.057% 0%); } 48.4455% { clip-path: inset(0% 0% 0.99% 0%); } 48.9551% { clip-path: inset(0% 0% 0.036% 0%); } 65.5199% { clip-path: inset(0% 0% 0% 0%); } 65.7747% { clip-path: inset(0% 0% 25.826% 0%); } 66.0296% { clip-path: inset(0% 0% 55.905% 0%); } 66.2844% { clip-path: inset(0% 0% 75.363% 0%); } 66.5392% { clip-path: inset(0% 0% 87.069% 0%); } 66.7941% { clip-path: inset(0% 0% 93.965% 0%); } 67.0489% { clip-path: inset(0% 0% 97.811% 0%); } 67.3038% { clip-path: inset(0% 0% 99.614% 0%); } 67.5586% { clip-path: inset(0% 0% 0% 0%); } 99.9924% { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes ailfilm22 { 0% { translate: 0px -40px; } 45.1325% { translate: 0px -40px; } 45.3874% { translate: 0px -36.23px; } 45.6422% { translate: 0px -28.973px; } 45.897% { translate: 0px -22.516px; } 46.1519% { translate: 0px -17.153px; } 46.4067% { translate: 0px -12.886px; } 46.6616% { translate: 0px -9.559px; } 46.9164% { translate: 0px -6.983px; } 47.4261% { translate: 0px -3.471px; } 47.9358% { translate: 0px -1.448px; } 48.7003% { translate: 0px -0.135px; } 65.5199% { translate: 0px 0px; } 65.7747% { translate: 0px -10.33px; } 66.0296% { translate: 0px -22.362px; } 66.2844% { translate: 0px -30.145px; } 66.5392% { translate: 0px -34.828px; } 66.7941% { translate: 0px -37.586px; } 67.0489% { translate: 0px -39.124px; } 67.3038% { translate: 0px -39.846px; } 99.9924% { translate: 0px -40px; } }
+@keyframes ailfilm23 { 0% { translate: 0px -80px; } 45.1325% { translate: 0px -80px; } 45.3874% { translate: 0px -76.23px; } 45.6422% { translate: 0px -68.973px; } 45.897% { translate: 0px -56.093px; } 46.1519% { translate: 0px -44.174px; } 46.4067% { translate: 0px -33.955px; } 46.6616% { translate: 0px -25.676px; } 46.9164% { translate: 0px -19.169px; } 47.1713% { translate: 0px -14.118px; } 47.4261% { translate: 0px -10.216px; } 47.6809% { translate: 0px -7.212px; } 47.9358% { translate: 0px -4.916px; } 48.4455% { translate: 0px -1.911px; } 48.9551% { translate: 0px -0.425px; } 49.9745% { translate: 0px 0px; } 65.265% { translate: 0px 0px; } 65.5199% { translate: 0px -26.136px; } 65.7747% { translate: 0px -48.474px; } 66.0296% { translate: 0px -62.57px; } 66.2844% { translate: 0px -71.01px; } 66.5392% { translate: 0px -75.95px; } 66.7941% { translate: 0px -78.649px; } 67.0489% { translate: 0px -79.83px; } 99.9924% { translate: 0px -80px; } }
+@keyframes ailfilm24 { 0% { translate: 0px -120px; } 45.1325% { translate: 0px -120px; } 45.3874% { translate: 0px -116.23px; } 45.6422% { translate: 0px -108.973px; } 45.897% { translate: 0px -96.093px; } 46.1519% { translate: 0px -81.479px; } 46.4067% { translate: 0px -65.158px; } 46.6616% { translate: 0px -50.637px; } 46.9164% { translate: 0px -38.576px; } 47.1713% { translate: 0px -28.98px; } 47.4261% { translate: 0px -21.497px; } 47.6809% { translate: 0px -15.704px; } 47.9358% { translate: 0px -11.236px; } 48.1906% { translate: 0px -7.807px; } 48.4455% { translate: 0px -5.201px; } 48.7003% { translate: 0px -3.256px; } 49.21% { translate: 0px -0.891px; } 49.7197% { translate: 0px -0.032px; } 64.7554% { translate: 0px 0px; } 65.0102% { translate: 0px -4.536px; } 65.265% { translate: 0px -46.965px; } 65.5199% { translate: 0px -77.823px; } 65.7747% { translate: 0px -96.939px; } 66.0296% { translate: 0px -108.34px; } 66.2844% { translate: 0px -114.961px; } 66.5392% { translate: 0px -118.484px; } 66.7941% { translate: 0px -119.889px; } 99.9924% { translate: 0px -120px; } }
+@keyframes ailfilm25 { 0% { translate: 0px -160px; } 45.1325% { translate: 0px -160px; } 45.3874% { translate: 0px -156.23px; } 45.6422% { translate: 0px -148.973px; } 45.897% { translate: 0px -136.093px; } 46.1519% { translate: 0px -121.479px; } 46.4067% { translate: 0px -105.158px; } 46.6616% { translate: 0px -85.522px; } 46.9164% { translate: 0px -67.349px; } 47.1713% { translate: 0px -51.768px; } 47.4261% { translate: 0px -39.146px; } 47.6809% { translate: 0px -29.226px; } 47.9358% { translate: 0px -21.525px; } 48.1906% { translate: 0px -15.576px; } 48.4455% { translate: 0px -10.996px; } 48.7003% { translate: 0px -7.495px; } 48.9551% { translate: 0px -4.856px; } 49.21% { translate: 0px -2.913px; } 49.7197% { translate: 0px -0.648px; } 50.2294% { translate: 0px 0px; } 64.5005% { translate: 0px 0px; } 64.7554% { translate: 0px -18.071px; } 65.0102% { translate: 0px -72.287px; } 65.265% { translate: 0px -109.943px; } 65.5199% { translate: 0px -132.959px; } 65.7747% { translate: 0px -146.639px; } 66.0296% { translate: 0px -154.499px; } 66.2844% { translate: 0px -158.548px; } 66.5392% { translate: 0px -159.964px; } 99.9924% { translate: 0px -160px; } }
+@keyframes ailfilm26 { 0% { translate: 0px -200px; } 45.1325% { translate: 0px -200px; } 45.3874% { translate: 0px -196.23px; } 45.6422% { translate: 0px -188.973px; } 45.897% { translate: 0px -176.093px; } 46.1519% { translate: 0px -161.479px; } 46.4067% { translate: 0px -145.158px; } 46.6616% { translate: 0px -125.522px; } 46.9164% { translate: 0px -105.218px; } 47.1713% { translate: 0px -84.141px; } 47.4261% { translate: 0px -65.39px; } 47.6809% { translate: 0px -49.815px; } 47.9358% { translate: 0px -37.423px; } 48.1906% { translate: 0px -27.76px; } 48.4455% { translate: 0px -20.28px; } 48.7003% { translate: 0px -14.51px; } 48.9551% { translate: 0px -10.081px; } 49.21% { translate: 0px -6.716px; } 49.4648% { translate: 0px -4.205px; } 49.7197% { translate: 0px -2.39px; } 50.2294% { translate: 0px -0.392px; } 50.9939% { translate: 0px 0px; } 64.2457% { translate: 0px 0px; } 64.5005% { translate: 0px -37.346px; } 64.7554% { translate: 0px -101.541px; } 65.0102% { translate: 0px -144.415px; } 65.265% { translate: 0px -170.376px; } 65.5199% { translate: 0px -185.744px; } 65.7747% { translate: 0px -194.459px; } 66.0296% { translate: 0px -198.768px; } 66.2844% { translate: 0px -200px; } 99.9924% { translate: 0px -200px; } }
+@keyframes ailfilm27 { 0% { height: 0px; } 45.1325% { height: 0px; } 45.3874% { height: 3.77px; } 45.6422% { height: 11.027px; } 45.897% { height: 17.484px; } 46.1519% { height: 22.847px; } 46.4067% { height: 27.114px; } 46.6616% { height: 30.441px; } 46.9164% { height: 33.017px; } 47.4261% { height: 36.529px; } 47.9358% { height: 38.552px; } 48.7003% { height: 39.865px; } 65.5199% { height: 40px; } 65.7747% { height: 29.67px; } 66.0296% { height: 17.638px; } 66.2844% { height: 9.855px; } 66.5392% { height: 5.172px; } 66.7941% { height: 2.414px; } 67.0489% { height: 0.876px; } 67.3038% { height: 0.154px; } 99.9924% { height: 0px; } }
+@keyframes ailfilm28 { 0% { opacity: 0; } 45.6422% { opacity: 0; } 45.897% { opacity: 0.187; } 46.1519% { opacity: 0.36; } 46.4067% { opacity: 0.508; } 46.6616% { opacity: 0.628; } 46.9164% { opacity: 0.722; } 47.1713% { opacity: 0.795; } 47.4261% { opacity: 0.852; } 47.6809% { opacity: 0.895; } 47.9358% { opacity: 0.929; } 48.4455% { opacity: 0.972; } 48.9551% { opacity: 0.994; } 50.2294% { opacity: 1; } 65.265% { opacity: 1; } 65.5199% { opacity: 0.673; } 65.7747% { opacity: 0.394; } 66.0296% { opacity: 0.218; } 66.2844% { opacity: 0.112; } 66.5392% { opacity: 0.051; } 66.7941% { opacity: 0.017; } 67.0489% { opacity: 0.002; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm29 { 0% { clip-path: inset(0% 0% 0% 0%); } 45.3874% { clip-path: inset(0% 0% 0% 0%); } 45.6422% { clip-path: inset(0% 0% 100% 0%); } 45.897% { clip-path: inset(0% 0% 81.327% 0%); } 46.1519% { clip-path: inset(0% 0% 64.046% 0%); } 46.4067% { clip-path: inset(0% 0% 49.229% 0%); } 46.6616% { clip-path: inset(0% 0% 37.226% 0%); } 46.9164% { clip-path: inset(0% 0% 27.792% 0%); } 47.1713% { clip-path: inset(0% 0% 20.47% 0%); } 47.4261% { clip-path: inset(0% 0% 14.812% 0%); } 47.6809% { clip-path: inset(0% 0% 10.457% 0%); } 47.9358% { clip-path: inset(0% 0% 7.128% 0%); } 48.1906% { clip-path: inset(0% 0% 4.618% 0%); } 48.4455% { clip-path: inset(0% 0% 2.77% 0%); } 48.7003% { clip-path: inset(0% 0% 1.467% 0%); } 49.21% { clip-path: inset(0% 0% 0.146% 0%); } 65.265% { clip-path: inset(0% 0% 0% 0%); } 65.5199% { clip-path: inset(0% 0% 32.67% 0%); } 65.7747% { clip-path: inset(0% 0% 60.592% 0%); } 66.0296% { clip-path: inset(0% 0% 78.212% 0%); } 66.2844% { clip-path: inset(0% 0% 88.762% 0%); } 66.5392% { clip-path: inset(0% 0% 94.938% 0%); } 66.7941% { clip-path: inset(0% 0% 98.311% 0%); } 67.0489% { clip-path: inset(0% 0% 99.787% 0%); } 67.3038% { clip-path: inset(0% 0% 0% 0%); } 99.9924% { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes ailfilm30 { 0% { height: 0px; } 45.6422% { height: 0px; } 45.897% { height: 7.469px; } 46.1519% { height: 14.382px; } 46.4067% { height: 20.308px; } 46.6616% { height: 25.11px; } 46.9164% { height: 28.883px; } 47.1713% { height: 31.812px; } 47.4261% { height: 34.075px; } 47.9358% { height: 37.149px; } 48.7003% { height: 39.413px; } 49.7197% { height: 40px; } 65.265% { height: 40px; } 65.5199% { height: 26.932px; } 65.7747% { height: 15.763px; } 66.0296% { height: 8.715px; } 66.2844% { height: 4.495px; } 66.5392% { height: 2.025px; } 66.7941% { height: 0.676px; } 67.0489% { height: 0.085px; } 99.9924% { height: 0px; } }
+@keyframes ailfilm31 { 0% { opacity: 0; } 45.897% { opacity: 0; } 46.1519% { opacity: 0.094; } 46.4067% { opacity: 0.276; } 46.6616% { opacity: 0.437; } 46.9164% { opacity: 0.571; } 47.1713% { opacity: 0.678; } 47.4261% { opacity: 0.761; } 47.6809% { opacity: 0.825; } 47.9358% { opacity: 0.875; } 48.1906% { opacity: 0.913; } 48.7003% { opacity: 0.964; } 49.21% { opacity: 0.99; } 49.9745% { opacity: 1; } 64.7554% { opacity: 1; } 65.0102% { opacity: 0.962; } 65.265% { opacity: 0.609; } 65.5199% { opacity: 0.351; } 65.7747% { opacity: 0.192; } 66.0296% { opacity: 0.097; } 66.2844% { opacity: 0.042; } 66.5392% { opacity: 0.013; } 66.7941% { opacity: 0.001; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm32 { 0% { clip-path: inset(0% 0% 0% 0%); } 45.897% { clip-path: inset(0% 0% 0% 0%); } 46.1519% { clip-path: inset(0% 0% 90.575% 0%); } 46.4067% { clip-path: inset(0% 0% 72.431% 0%); } 46.6616% { clip-path: inset(0% 0% 56.289% 0%); } 46.9164% { clip-path: inset(0% 0% 42.882% 0%); } 47.1713% { clip-path: inset(0% 0% 32.215% 0%); } 47.4261% { clip-path: inset(0% 0% 23.897% 0%); } 47.6809% { clip-path: inset(0% 0% 17.458% 0%); } 47.9358% { clip-path: inset(0% 0% 12.491% 0%); } 48.1906% { clip-path: inset(0% 0% 8.678% 0%); } 48.4455% { clip-path: inset(0% 0% 5.781% 0%); } 48.7003% { clip-path: inset(0% 0% 3.619% 0%); } 48.9551% { clip-path: inset(0% 0% 2.057% 0%); } 49.21% { clip-path: inset(0% 0% 0.99% 0%); } 49.7197% { clip-path: inset(0% 0% 0.036% 0%); } 64.7554% { clip-path: inset(0% 0% 0% 0%); } 65.0102% { clip-path: inset(0% 0% 3.78% 0%); } 65.265% { clip-path: inset(0% 0% 39.137% 0%); } 65.5199% { clip-path: inset(0% 0% 64.853% 0%); } 65.7747% { clip-path: inset(0% 0% 80.782% 0%); } 66.0296% { clip-path: inset(0% 0% 90.284% 0%); } 66.2844% { clip-path: inset(0% 0% 95.8% 0%); } 66.5392% { clip-path: inset(0% 0% 98.737% 0%); } 66.7941% { clip-path: inset(0% 0% 99.907% 0%); } 67.0489% { clip-path: inset(0% 0% 0% 0%); } 99.9924% { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes ailfilm33 { 0% { height: 0px; } 45.897% { height: 0px; } 46.1519% { height: 3.77px; } 46.4067% { height: 11.027px; } 46.6616% { height: 17.484px; } 46.9164% { height: 22.847px; } 47.1713% { height: 27.114px; } 47.4261% { height: 30.441px; } 47.6809% { height: 33.017px; } 48.1906% { height: 36.529px; } 48.7003% { height: 38.552px; } 49.4648% { height: 39.865px; } 64.7554% { height: 40px; } 65.0102% { height: 38.488px; } 65.265% { height: 24.345px; } 65.5199% { height: 14.059px; } 65.7747% { height: 7.687px; } 66.0296% { height: 3.887px; } 66.2844% { height: 1.68px; } 66.5392% { height: 0.505px; } 67.0489% { height: 0px; } 99.9924% { height: 0px; } }
+@keyframes ailfilm34 { 0% { opacity: 0; } 46.4067% { opacity: 0; } 46.6616% { opacity: 0.187; } 46.9164% { opacity: 0.36; } 47.1713% { opacity: 0.508; } 47.4261% { opacity: 0.628; } 47.6809% { opacity: 0.722; } 47.9358% { opacity: 0.795; } 48.1906% { opacity: 0.852; } 48.4455% { opacity: 0.895; } 48.7003% { opacity: 0.929; } 49.21% { opacity: 0.972; } 49.7197% { opacity: 0.994; } 50.9939% { opacity: 1; } 64.5005% { opacity: 1; } 64.7554% { opacity: 0.887; } 65.0102% { opacity: 0.548; } 65.265% { opacity: 0.313; } 65.5199% { opacity: 0.169; } 65.7747% { opacity: 0.084; } 66.0296% { opacity: 0.034; } 66.2844% { opacity: 0.009; } 66.5392% { opacity: 0; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm35 { 0% { clip-path: inset(0% 0% 0% 0%); } 46.1519% { clip-path: inset(0% 0% 0% 0%); } 46.4067% { clip-path: inset(0% 0% 100% 0%); } 46.6616% { clip-path: inset(0% 0% 81.327% 0%); } 46.9164% { clip-path: inset(0% 0% 64.046% 0%); } 47.1713% { clip-path: inset(0% 0% 49.229% 0%); } 47.4261% { clip-path: inset(0% 0% 37.226% 0%); } 47.6809% { clip-path: inset(0% 0% 27.792% 0%); } 47.9358% { clip-path: inset(0% 0% 20.47% 0%); } 48.1906% { clip-path: inset(0% 0% 14.812% 0%); } 48.4455% { clip-path: inset(0% 0% 10.457% 0%); } 48.7003% { clip-path: inset(0% 0% 7.128% 0%); } 48.9551% { clip-path: inset(0% 0% 4.618% 0%); } 49.21% { clip-path: inset(0% 0% 2.77% 0%); } 49.4648% { clip-path: inset(0% 0% 1.467% 0%); } 49.9745% { clip-path: inset(0% 0% 0.146% 0%); } 64.5005% { clip-path: inset(0% 0% 0% 0%); } 64.7554% { clip-path: inset(0% 0% 11.294% 0%); } 65.0102% { clip-path: inset(0% 0% 45.179% 0%); } 65.265% { clip-path: inset(0% 0% 68.714% 0%); } 65.5199% { clip-path: inset(0% 0% 83.1% 0%); } 65.7747% { clip-path: inset(0% 0% 91.649% 0%); } 66.0296% { clip-path: inset(0% 0% 96.562% 0%); } 66.2844% { clip-path: inset(0% 0% 99.093% 0%); } 66.5392% { clip-path: inset(0% 0% 99.977% 0%); } 66.7941% { clip-path: inset(0% 0% 0% 0%); } 99.9924% { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes ailfilm36 { 0% { height: 0px; } 46.4067% { height: 0px; } 46.6616% { height: 7.469px; } 46.9164% { height: 14.382px; } 47.1713% { height: 20.308px; } 47.4261% { height: 25.11px; } 47.6809% { height: 28.883px; } 47.9358% { height: 31.812px; } 48.1906% { height: 34.075px; } 48.7003% { height: 37.149px; } 49.4648% { height: 39.413px; } 50.4842% { height: 40px; } 64.5005% { height: 40px; } 64.7554% { height: 35.482px; } 65.0102% { height: 21.928px; } 65.265% { height: 12.514px; } 65.5199% { height: 6.76px; } 65.7747% { height: 3.34px; } 66.0296% { height: 1.375px; } 66.2844% { height: 0.363px; } 67.0489% { height: 0px; } 99.9924% { height: 0px; } }
+@keyframes ailfilm37 { 0% { opacity: 0; } 46.6616% { opacity: 0; } 46.9164% { opacity: 0.094; } 47.1713% { opacity: 0.276; } 47.4261% { opacity: 0.437; } 47.6809% { opacity: 0.571; } 47.9358% { opacity: 0.678; } 48.1906% { opacity: 0.761; } 48.4455% { opacity: 0.825; } 48.7003% { opacity: 0.875; } 48.9551% { opacity: 0.913; } 49.4648% { opacity: 0.964; } 49.9745% { opacity: 0.99; } 50.739% { opacity: 1; } 64.2457% { opacity: 1; } 64.5005% { opacity: 0.813; } 64.7554% { opacity: 0.492; } 65.0102% { opacity: 0.278; } 65.265% { opacity: 0.148; } 65.5199% { opacity: 0.071; } 65.7747% { opacity: 0.028; } 66.0296% { opacity: 0.006; } 66.5392% { opacity: 0; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm38 { 0% { clip-path: inset(0% 0% 0% 0%); } 46.6616% { clip-path: inset(0% 0% 0% 0%); } 46.9164% { clip-path: inset(0% 0% 90.575% 0%); } 47.1713% { clip-path: inset(0% 0% 72.431% 0%); } 47.4261% { clip-path: inset(0% 0% 56.289% 0%); } 47.6809% { clip-path: inset(0% 0% 42.882% 0%); } 47.9358% { clip-path: inset(0% 0% 32.215% 0%); } 48.1906% { clip-path: inset(0% 0% 23.897% 0%); } 48.4455% { clip-path: inset(0% 0% 17.458% 0%); } 48.7003% { clip-path: inset(0% 0% 12.491% 0%); } 48.9551% { clip-path: inset(0% 0% 8.678% 0%); } 49.21% { clip-path: inset(0% 0% 5.781% 0%); } 49.4648% { clip-path: inset(0% 0% 3.619% 0%); } 49.7197% { clip-path: inset(0% 0% 2.057% 0%); } 49.9745% { clip-path: inset(0% 0% 0.99% 0%); } 50.4842% { clip-path: inset(0% 0% 0.036% 0%); } 64.2457% { clip-path: inset(0% 0% 0% 0%); } 64.5005% { clip-path: inset(0% 0% 18.673% 0%); } 64.7554% { clip-path: inset(0% 0% 50.771% 0%); } 65.0102% { clip-path: inset(0% 0% 72.208% 0%); } 65.265% { clip-path: inset(0% 0% 85.188% 0%); } 65.5199% { clip-path: inset(0% 0% 92.872% 0%); } 65.7747% { clip-path: inset(0% 0% 97.23% 0%); } 66.0296% { clip-path: inset(0% 0% 99.384% 0%); } 66.2844% { clip-path: inset(0% 0% 100% 0%); } 66.5392% { clip-path: inset(0% 0% 0% 0%); } 99.9924% { clip-path: inset(0% 0% 0% 0%); } }
+@keyframes ailfilm39 { 0% { height: 0px; } 46.6616% { height: 0px; } 46.9164% { height: 3.77px; } 47.1713% { height: 11.027px; } 47.4261% { height: 17.484px; } 47.6809% { height: 22.847px; } 47.9358% { height: 27.114px; } 48.1906% { height: 30.441px; } 48.4455% { height: 33.017px; } 48.9551% { height: 36.529px; } 49.4648% { height: 38.552px; } 50.2294% { height: 39.865px; } 64.2457% { height: 40px; } 64.5005% { height: 32.531px; } 64.7554% { height: 19.692px; } 65.0102% { height: 11.117px; } 65.265% { height: 5.925px; } 65.5199% { height: 2.851px; } 65.7747% { height: 1.108px; } 66.0296% { height: 0.246px; } 99.9924% { height: 0px; } }
+@keyframes ailfilm40 { 0% { opacity: 0; } 47.1713% { opacity: 0; } 48.9551% { opacity: 0.933; } 49.21% { opacity: 1; } 67.3038% { opacity: 1; } 67.5586% { opacity: 0.925; } 67.8135% { opacity: 0.578; } 68.0683% { opacity: 0.332; } 68.3231% { opacity: 0.18; } 68.578% { opacity: 0.09; } 68.8328% { opacity: 0.038; } 69.0877% { opacity: 0.011; } 69.3425% { opacity: 0.001; } 99.9924% { opacity: 0; } }
+@keyframes ailfilm41 { 0% { scale: 1 1; } 46.9164% { scale: 1 1; } 47.1713% { scale: 0 0; } 47.4261% { scale: 0.281 0.281; } 47.6809% { scale: 0.515 0.515; } 47.9358% { scale: 0.703 0.703; } 48.1906% { scale: 0.849 0.849; } 48.4455% { scale: 0.957 0.957; } 48.7003% { scale: 1.03 1.03; } 48.9551% { scale: 1.075 1.075; } 49.21% { scale: 1.095 1.095; } 49.4648% { scale: 1.097 1.097; } 49.7197% { scale: 1.085 1.085; } 50.4842% { scale: 1.021 1.021; } 50.739% { scale: 1.006 1.006; } 50.9939% { scale: 1 1; } 99.9924% { scale: 1 1; } }
+@keyframes ailfilm42 { 0% { fill: var(--role-ink); } 61.6972% { fill: var(--role-ink); } 61.9521% { fill: rgb(123, 124, 129); } 62.2069% { fill: rgb(190, 191, 193); } 62.4618% { fill: rgb(226, 226, 227); } 62.7166% { fill: rgb(244, 244, 245); } 62.9715% { fill: rgb(253, 253, 253); } 63.2263% { fill: var(--role-surface); } 99.9924% { fill: var(--role-surface); } }
+@keyframes ailfilm43 { 0% { fill: var(--role-surface); } 61.6972% { fill: var(--role-surface); } 61.9521% { fill: rgb(150, 204, 204); } 62.2069% { fill: rgb(81, 171, 171); } 62.4618% { fill: rgb(44, 153, 153); } 62.7166% { fill: rgb(25, 143, 143); } 62.9715% { fill: rgb(16, 139, 139); } 63.2263% { fill: var(--role-series-1); } 99.9924% { fill: var(--role-series-1); } }
+@keyframes ailfilm44 { 0% { opacity: 1; } 61.6972% { opacity: 1; } 61.9521% { opacity: 0.716; } 62.2069% { opacity: 0.531; } 62.4618% { opacity: 0.431; } 62.7166% { opacity: 0.38; } 62.9715% { opacity: 0.356; } 63.4811% { opacity: 0.35; } 99.9924% { opacity: 0.35; } }
+.kf-4daa88cb-anna { animation: ailfilm4 13.08s linear infinite, ailfilm5 13.08s linear infinite; }
+.kf-4daa88cb-ben { animation: ailfilm6 13.08s linear infinite, ailfilm7 13.08s linear infinite; }
+.kf-4daa88cb-card { animation: ailfilm12 13.08s linear infinite, ailfilm40 13.08s linear infinite, ailfilm41 13.08s linear infinite; }
+.kf-4daa88cb-keep_anna > text { animation: ailfilm42 13.08s linear infinite; }
+.kf-4daa88cb-keep_ben { animation: ailfilm44 13.08s linear infinite; }
+.kf-4daa88cb-merged { animation: ailfilm8 13.08s linear infinite, ailfilm9 13.08s linear infinite, ailfilm13 13.08s linear infinite; }
+.kf-4daa88cb-merged_bottom_pad { animation: ailfilm17 13.08s linear infinite; }
+.kf-4daa88cb-merged_conflict1 { animation: ailfilm20 13.08s linear infinite, ailfilm21 13.08s linear infinite; }
+.kf-4daa88cb-merged_conflict2 { animation: ailfilm22 13.08s linear infinite, ailfilm28 13.08s linear infinite, ailfilm29 13.08s linear infinite; }
+.kf-4daa88cb-merged_conflict3 { animation: ailfilm23 13.08s linear infinite, ailfilm31 13.08s linear infinite, ailfilm32 13.08s linear infinite; }
+.kf-4daa88cb-merged_conflict4 { animation: ailfilm24 13.08s linear infinite, ailfilm34 13.08s linear infinite, ailfilm35 13.08s linear infinite; }
+.kf-4daa88cb-merged_conflict5 { animation: ailfilm25 13.08s linear infinite, ailfilm37 13.08s linear infinite, ailfilm38 13.08s linear infinite; }
+.kf-4daa88cb-merged_line8 { animation: ailfilm15 13.08s linear infinite, ailfilm16 13.08s linear infinite, ailfilm26 13.08s linear infinite; }
+.kf-4daa88cb-ok { animation: ailfilm10 13.08s linear infinite, ailfilm11 13.08s linear infinite, ailfilm14 13.08s linear infinite; }
+.kf-4daa88cb-s_badge { animation: ailfilm0 13.08s linear infinite, ailfilm1 13.08s linear infinite; }
+.kf-4daa88cb-s_heading { animation: ailfilm2 13.08s linear infinite, ailfilm3 13.08s linear infinite; }
+.kfp-4daa88cb-keep_anna { animation: ailfilm43 13.08s linear infinite; }
+.kfp-4daa88cb-merged_bg { animation: ailfilm18 13.08s linear infinite; }
+.kfp-4daa88cb-merged_conflict1 { animation: ailfilm27 13.08s linear infinite; }
+.kfp-4daa88cb-merged_conflict2 { animation: ailfilm30 13.08s linear infinite; }
+.kfp-4daa88cb-merged_conflict3 { animation: ailfilm33 13.08s linear infinite; }
+.kfp-4daa88cb-merged_conflict4 { animation: ailfilm36 13.08s linear infinite; }
+.kfp-4daa88cb-merged_conflict5 { animation: ailfilm39 13.08s linear infinite; }
+.kfp-4daa88cb-merged_line8 { animation: ailfilm19 13.08s linear infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
+]]></style>
+  <g class="kf-4daa88cb-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-4daa88cb-s">
+      <g class="kf-4daa88cb-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-4daa88cb-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-4daa88cb-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>5</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-s_heading kf-anim" style="transform-origin:548.17px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-4daa88cb-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Git combines the changes</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-4daa88cb-anna kf-anim" style="transform-origin:544.5px 357px">
+    <g id="anna" class="ai-container kfp-4daa88cb-anna">
+      <g class="kf-4daa88cb-anna_bg kf-anim" style="transform-origin:544.5px 357px">
+        <rect id="anna_bg" class="ai-shape ai-rect kfp-4daa88cb-anna_bg" x="309" y="200" width="471" height="314" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-4daa88cb-anna_title kf-anim" style="transform-origin:544.5px 227.5px">
+        <rect id="anna_title" class="ai-shape ai-rect kfp-4daa88cb-anna_title" x="312" y="203" width="465" height="49" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+        <text class="ai-label" x="320" y="227.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--code-title)" style="font-weight:700"><tspan x="320" dy="-0"><tspan fill="var(--role-series-1)">●</tspan><tspan>  cart.py · Anna</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_title_rule kf-anim" style="transform-origin:544.5px 253.5px">
+        <rect id="anna_title_rule" class="ai-shape ai-rect kfp-4daa88cb-anna_title_rule" x="312" y="252" width="465" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-anna_top_pad kf-anim" style="transform-origin:544.5px 259px">
+        <rect id="anna_top_pad" class="ai-shape ai-rect kfp-4daa88cb-anna_top_pad" x="312" y="255" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-anna_line1 kf-anim" style="transform-origin:544.5px 278px">
+        <rect id="anna_line1" class="ai-shape ai-rect kfp-4daa88cb-anna_line1" x="312" y="263" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="278" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart):</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line2 kf-anim" style="transform-origin:544.5px 308px">
+        <rect id="anna_line2" class="ai-shape ai-rect kfp-4daa88cb-anna_line2" x="312" y="293" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="308" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line3 kf-anim" style="transform-origin:544.5px 338px">
+        <rect id="anna_line3" class="ai-shape ai-rect kfp-4daa88cb-anna_line3" x="312" y="323" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="338" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line4 kf-anim" style="transform-origin:544.5px 368px">
+        <rect id="anna_line4" class="ai-shape ai-rect kfp-4daa88cb-anna_line4" x="312" y="353" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="368" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line5 kf-anim" style="transform-origin:544.5px 398px">
+        <rect id="anna_line5" class="ai-shape ai-rect kfp-4daa88cb-anna_line5" x="312" y="383" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="398" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line6 kf-anim" style="transform-origin:544.5px 428px">
+        <rect id="anna_line6" class="ai-shape ai-rect kfp-4daa88cb-anna_line6" x="312" y="413" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="428" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">6  </tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line7 kf-anim" style="transform-origin:544.5px 458px">
+        <rect id="anna_line7" class="ai-shape ai-rect kfp-4daa88cb-anna_line7" x="312" y="443" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="458" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_line8 kf-anim" style="transform-origin:544.5px 488px">
+        <rect id="anna_line8" class="ai-shape ai-rect kfp-4daa88cb-anna_line8" x="312" y="473" width="465" height="30" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="320" y="488" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="320" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-anna_bottom_pad kf-anim" style="transform-origin:544.5px 507px">
+        <rect id="anna_bottom_pad" class="ai-shape ai-rect kfp-4daa88cb-anna_bottom_pad" x="312" y="503" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-anna_title_square kf-anim" style="transform-origin:544.5px 246px">
+        <rect id="anna_title_square" class="ai-shape ai-rect kfp-4daa88cb-anna_title_square" x="312" y="240" width="465" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-4daa88cb-merged kf-anim" style="transform-origin:800px 475px">
+    <g id="merged" class="ai-container kfp-4daa88cb-merged">
+      <g class="kf-4daa88cb-merged_bg kf-anim" style="transform-origin:800px 475px">
+        <rect id="merged_bg" class="ai-shape ai-rect kfp-4daa88cb-merged_bg" x="492.5" y="170" width="615" height="610" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-4daa88cb-merged_title kf-anim" style="transform-origin:800px 205.5px">
+        <rect id="merged_title" class="ai-shape ai-rect kfp-4daa88cb-merged_title" x="495.5" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+        <text class="ai-label" x="503.5" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="503.5" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_title_rule kf-anim" style="transform-origin:800px 239.5px">
+        <rect id="merged_title_rule" class="ai-shape ai-rect kfp-4daa88cb-merged_title_rule" x="495.5" y="238" width="609" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-merged_top_pad kf-anim" style="transform-origin:800px 245px">
+        <rect id="merged_top_pad" class="ai-shape ai-rect kfp-4daa88cb-merged_top_pad" x="495.5" y="241" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-merged_line1 kf-anim" style="transform-origin:800px 269px">
+        <rect id="merged_line1" class="ai-shape ai-rect kfp-4daa88cb-merged_line1" x="495.5" y="249" width="609" height="40" fill="var(--role-series-2-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="269" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart, coupon=</tspan><tspan fill="var(--code-keyword)">None</tspan><tspan>):</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line2 kf-anim" style="transform-origin:800px 309px">
+        <rect id="merged_line2" class="ai-shape ai-rect kfp-4daa88cb-merged_line2" x="495.5" y="289" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="309" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line3 kf-anim" style="transform-origin:800px 349px">
+        <rect id="merged_line3" class="ai-shape ai-rect kfp-4daa88cb-merged_line3" x="495.5" y="329" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="349" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line4 kf-anim" style="transform-origin:800px 389px">
+        <rect id="merged_line4" class="ai-shape ai-rect kfp-4daa88cb-merged_line4" x="495.5" y="369" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="389" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line5 kf-anim" style="transform-origin:800px 429px">
+        <rect id="merged_line5" class="ai-shape ai-rect kfp-4daa88cb-merged_line5" x="495.5" y="409" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="429" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line6 kf-anim" style="transform-origin:800px 469px">
+        <rect id="merged_line6" class="ai-shape ai-rect kfp-4daa88cb-merged_line6" x="495.5" y="449" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="469" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">6  </tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line7 kf-anim" style="transform-origin:800px 509px">
+        <rect id="merged_line7" class="ai-shape ai-rect kfp-4daa88cb-merged_line7" x="495.5" y="489" width="609" height="40" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="509" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-4daa88cb-merged_conflict1 kf-anim" style="transform-origin:800px 549px">
+        <rect id="merged_conflict1" class="ai-shape ai-rect conflict kfp-4daa88cb-merged_conflict1" x="495.5" y="529" width="609" height="40" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="549" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">   </tspan><tspan>&lt;&lt;&lt;&lt;&lt;&lt;&lt; anna</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-4daa88cb-merged_conflict2 kf-anim" style="transform-origin:800px 589px">
+        <rect id="merged_conflict2" class="ai-shape ai-rect conflict kfp-4daa88cb-merged_conflict2" x="495.5" y="569" width="609" height="40" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="589" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">   </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-4daa88cb-merged_conflict3 kf-anim" style="transform-origin:800px 629px">
+        <rect id="merged_conflict3" class="ai-shape ai-rect conflict kfp-4daa88cb-merged_conflict3" x="495.5" y="609" width="609" height="40" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="629" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">   </tspan><tspan>=======</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-4daa88cb-merged_conflict4 kf-anim" style="transform-origin:800px 669px">
+        <rect id="merged_conflict4" class="ai-shape ai-rect conflict kfp-4daa88cb-merged_conflict4" x="495.5" y="649" width="609" height="40" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="669" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">   </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">60</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-4daa88cb-merged_conflict5 kf-anim" style="transform-origin:800px 709px">
+        <rect id="merged_conflict5" class="ai-shape ai-rect conflict kfp-4daa88cb-merged_conflict5" x="495.5" y="689" width="609" height="40" fill="var(--code-mark-bg)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="709" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">   </tspan><tspan>&gt;&gt;&gt;&gt;&gt;&gt;&gt; ben</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_line8 kf-anim" style="transform-origin:800px 749px">
+        <rect id="merged_line8" class="ai-shape ai-rect kfp-4daa88cb-merged_line8" x="495.5" y="729" width="609" height="40" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="503.5" y="749" text-anchor="start" dominant-baseline="middle" font-size="24" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="503.5" dy="-0"><tspan font-size="19.200000000000003" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">40</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-merged_bottom_pad kf-anim" style="transform-origin:800px 773px">
+        <rect id="merged_bottom_pad" class="ai-shape ai-rect kfp-4daa88cb-merged_bottom_pad" x="495.5" y="769" width="609" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-merged_title_square kf-anim" style="transform-origin:800px 232px">
+        <rect id="merged_title_square" class="ai-shape ai-rect kfp-4daa88cb-merged_title_square" x="495.5" y="226" width="609" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-4daa88cb-ben kf-anim" style="transform-origin:1055.5px 357px">
+    <g id="ben" class="ai-container kfp-4daa88cb-ben">
+      <g class="kf-4daa88cb-ben_bg kf-anim" style="transform-origin:1055.5px 357px">
+        <rect id="ben_bg" class="ai-shape ai-rect kfp-4daa88cb-ben_bg" x="820" y="200" width="471" height="314" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-4daa88cb-ben_title kf-anim" style="transform-origin:1055.5px 227.5px">
+        <rect id="ben_title" class="ai-shape ai-rect kfp-4daa88cb-ben_title" x="823" y="203" width="465" height="49" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5" rx="11" style="rx:11px;ry:11px"/>
+        <text class="ai-label" x="831" y="227.5" text-anchor="start" dominant-baseline="middle" font-size="20" fill="var(--code-title)" style="font-weight:700"><tspan x="831" dy="-0"><tspan fill="var(--role-series-2)">●</tspan><tspan>  cart.py · Ben</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_title_rule kf-anim" style="transform-origin:1055.5px 253.5px">
+        <rect id="ben_title_rule" class="ai-shape ai-rect kfp-4daa88cb-ben_title_rule" x="823" y="252" width="465" height="3" fill="var(--code-frame)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-ben_top_pad kf-anim" style="transform-origin:1055.5px 259px">
+        <rect id="ben_top_pad" class="ai-shape ai-rect kfp-4daa88cb-ben_top_pad" x="823" y="255" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-ben_line1 kf-anim" style="transform-origin:1055.5px 278px">
+        <rect id="ben_line1" class="ai-shape ai-rect kfp-4daa88cb-ben_line1" x="823" y="263" width="465" height="30" fill="var(--role-series-2-soft)" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="278" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">1  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">total</tspan><tspan>(cart, coupon=</tspan><tspan fill="var(--code-keyword)">None</tspan><tspan>):</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line2 kf-anim" style="transform-origin:1055.5px 308px">
+        <rect id="ben_line2" class="ai-shape ai-rect kfp-4daa88cb-ben_line2" x="823" y="293" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="308" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">2  </tspan><tspan>    s = </tspan><tspan fill="var(--code-number)">0</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line3 kf-anim" style="transform-origin:1055.5px 338px">
+        <rect id="ben_line3" class="ai-shape ai-rect kfp-4daa88cb-ben_line3" x="823" y="323" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="338" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">3  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">for</tspan><tspan> item </tspan><tspan fill="var(--code-keyword)">in</tspan><tspan> cart:</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line4 kf-anim" style="transform-origin:1055.5px 368px">
+        <rect id="ben_line4" class="ai-shape ai-rect kfp-4daa88cb-ben_line4" x="823" y="353" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="368" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">4  </tspan><tspan>        s += item.price * item.qty</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line5 kf-anim" style="transform-origin:1055.5px 398px">
+        <rect id="ben_line5" class="ai-shape ai-rect kfp-4daa88cb-ben_line5" x="823" y="383" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="398" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">5  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-function)">round</tspan><tspan>(s, </tspan><tspan fill="var(--code-number)">2</tspan><tspan>)</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line6 kf-anim" style="transform-origin:1055.5px 428px">
+        <rect id="ben_line6" class="ai-shape ai-rect kfp-4daa88cb-ben_line6" x="823" y="413" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="428" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">6  </tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line7 kf-anim" style="transform-origin:1055.5px 458px">
+        <rect id="ben_line7" class="ai-shape ai-rect kfp-4daa88cb-ben_line7" x="823" y="443" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="458" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">7  </tspan><tspan fill="var(--code-keyword)">def</tspan><tspan> </tspan><tspan fill="var(--code-function)">shipping</tspan><tspan>(total):</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_line8 kf-anim" style="transform-origin:1055.5px 488px">
+        <rect id="ben_line8" class="ai-shape ai-rect kfp-4daa88cb-ben_line8" x="823" y="473" width="465" height="30" fill="none" stroke="none" stroke-width="1.5"/>
+        <text class="ai-label" x="831" y="488" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="831" dy="-0"><tspan font-size="14.4" fill="var(--code-ln)">8  </tspan><tspan>    </tspan><tspan fill="var(--code-keyword)">return</tspan><tspan> </tspan><tspan fill="var(--code-number)">0</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">if</tspan><tspan> total &gt; </tspan><tspan fill="var(--code-number)">50</tspan><tspan> </tspan><tspan fill="var(--code-keyword)">else</tspan><tspan> </tspan><tspan fill="var(--code-number)">4</tspan><tspan>.</tspan><tspan fill="var(--code-number)">95</tspan></tspan></text>
+      </g>
+      <g class="kf-4daa88cb-ben_bottom_pad kf-anim" style="transform-origin:1055.5px 507px">
+        <rect id="ben_bottom_pad" class="ai-shape ai-rect kfp-4daa88cb-ben_bottom_pad" x="823" y="503" width="465" height="8" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-4daa88cb-ben_title_square kf-anim" style="transform-origin:1055.5px 246px">
+        <rect id="ben_title_square" class="ai-shape ai-rect kfp-4daa88cb-ben_title_square" x="823" y="240" width="465" height="12" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-4daa88cb-ok kf-anim" style="transform-origin:494.5px 172px">
+    <circle id="ok" class="ai-shape ai-circle kfp-4daa88cb-ok" cx="494.5" cy="172" r="26" fill="var(--role-ok)" stroke="var(--role-backdrop)" stroke-width="3"/>
+    <text class="ai-label" x="494.5" y="172" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:800"><tspan x="494.5" dy="-0"><tspan>✓</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-4daa88cb-card kf-anim" style="transform-origin:1352.8px 589px">
+    <g id="card" class="ai-container kfp-4daa88cb-card">
+      <g class="kf-4daa88cb-card_bg kf-anim" style="transform-origin:1352.8px 589px">
+        <rect id="card_bg" class="ai-shape ai-rect kfp-4daa88cb-card_bg" x="1155.5" y="502.75" width="394.592" height="172.5" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-4daa88cb-card_body kf-anim" style="transform-origin:1352.8px 589px">
+        <g id="card_body" class="ai-container kfp-4daa88cb-card_body">
+          <g class="kf-4daa88cb-card_t kf-anim" style="transform-origin:1352.8px 555.25px">
+            <rect id="card_t" class="ai-shape ai-rect kfp-4daa88cb-card_t" x="1189.5787" y="529.75" width="326.4346" height="51" fill="none" stroke="none" stroke-width="1.5"/>
+            <text class="ai-label" x="1352.796" y="555.25" text-anchor="middle" dominant-baseline="middle" font-size="28" fill="var(--role-ink)" style="font-weight:700"><tspan x="1352.796" dy="-0"><tspan>Same line, two versions</tspan></tspan></text>
+          </g>
+          <g class="kf-4daa88cb-choices kf-anim" style="transform-origin:1352.8px 621.5px">
+            <g id="choices" class="ai-container kfp-4daa88cb-choices">
+              <g class="kf-4daa88cb-keep_anna kf-anim" style="transform-origin:1270.04px 621.5px">
+                <rect id="keep_anna" class="ai-shape ai-rect kfp-4daa88cb-keep_anna" x="1187.5" y="599.75" width="165.072" height="43.5" fill="var(--role-surface)" stroke="var(--role-series-1)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
+                <text class="ai-label" x="1270.036" y="621.5" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-ink)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1270.036" dy="-0"><tspan>Keep Anna’s</tspan></tspan></text>
+              </g>
+              <g class="kf-4daa88cb-keep_ben kf-anim" style="transform-origin:1442.33px 621.5px">
+                <rect id="keep_ben" class="ai-shape ai-rect kfp-4daa88cb-keep_ben" x="1366.572" y="599.75" width="151.52" height="43.5" fill="var(--role-surface)" stroke="var(--role-series-2)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
+                <text class="ai-label" x="1442.332" y="621.5" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-ink)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1442.332" dy="-0"><tspan>Keep Ben’s</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

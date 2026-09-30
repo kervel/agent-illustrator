@@ -294,7 +294,7 @@ fn test_undirected_connection_with_routing() {
 fn test_railway_junction_with_direct_routing() {
     // Feature: Direct routing for railway junction diagrams
     // This example demonstrates diagonal connections for track switches
-    let input = include_str!("../examples/railway-junction-direct.ail");
+    let input = include_str!("fixtures/railway-junction-direct.ail");
 
     let doc = parse(input).expect("Railway junction with direct routing should parse");
 

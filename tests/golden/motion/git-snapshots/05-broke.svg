@@ -186,8 +186,8 @@ text { white-space: pre; }
       </g>
     </g>
   </g>
-  <rect id="status" class="ai-shape ai-rect" x="96" y="530" width="194.3089" height="43.5" fill="var(--role-surface)" stroke="var(--role-error)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
-  <text class="ai-label" x="193.1545" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-error)" style="font-weight:700"><tspan x="193.1545" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
+  <rect id="status" class="ai-shape ai-rect" x="96" y="530" width="204.6115" height="43.5" fill="var(--role-surface)" stroke="var(--role-error)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
+  <text class="ai-label" x="198.3058" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-error)" style="font-weight:700"><tspan x="198.3058" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
   <path id="rule" class="ai-shape ai-path dots" d="M747.85 359.00 L1520.00 359.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
   <rect id="rule_end" class="ai-shape ai-rect ai-point" x="1520" y="359" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
   <path id="track" class="ai-shape ai-path" d="M807.85 359.00 L1021.54 359.00 L1252.35 359.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>

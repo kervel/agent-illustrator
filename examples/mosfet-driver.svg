@@ -77,7 +77,7 @@
   }
   .ai-on-dark { fill: var(--text-light); }
     
-/* /home/kervel/projects/agent-illustrator/examples/../stylesheets/kapernikov-schematic.css */
+/* stylesheets/kapernikov-schematic.css */
 /* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */

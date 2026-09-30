@@ -303,7 +303,7 @@ must model the new idiom.
 - **`examples/gallic-wars-timeline.ail`** — each event's three `text` elements
   collapse to one `label:` using `<b>`/`<br>`/`<small>`. Removes 12 `text`
   elements and their constraints.
-- **`examples/card-labels.ail`** (new) — the canonical reference for this
+- **`tests/fixtures/card-labels.ail`** (new) — the canonical reference for this
   feature: one figure showing a label inside, above, below, left and right of a
   box, a multi-line card with mixed markup, and a wrapped fixed-width card.
   Registered in `examples/render-all.sh`.
@@ -333,7 +333,7 @@ Other examples are left alone; this is a representative subset, not a sweep.
   that must produce exactly one actionable warning naming the fix; the
   `col` + `contains` idiom must produce zero warnings.
 - **Regression** — all examples re-rendered; the structural SVG regression test
-  must pass; `examples/card-labels.ail` gets a golden.
+  must pass; `tests/fixtures/card-labels.ail` gets a golden.
 
 ## Success criterion
 

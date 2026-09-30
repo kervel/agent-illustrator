@@ -221,8 +221,10 @@ bring the animation to life.
 
 `--animate` embeds the motion player: full choreography, autoplaying, click or
 arrow keys to step, only when the SVG is opened directly (JS does not run in an
-`<img>`). For a GitHub README use `--animate-css`: a self-cycling pure-CSS
-animation of the settled frames (visibility and geometry, not the timed motion).
+`<img>`). For a GitHub README use `--animate-css`: the same choreography as
+a self-playing pure-CSS loop (each keyframe plays, holds 1.4s, and the story
+restarts), sampled from the native renderer, so it plays inside an `<img>`.
+Only `count` (rewritten digits) is not carried.
 
 ### Geometry Animation (Position & Size)
 

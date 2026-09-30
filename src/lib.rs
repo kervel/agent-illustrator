@@ -892,7 +892,25 @@ fn render_pipeline(
         }
         return Ok((out, lint_warnings));
     }
-    let svg = if let (Some(frame_selector), Some(at)) = (&config.frame, &config.at) {
+    let svg = if let (true, None, Some(m)) = (config.animate_css, &config.frame, compiled.as_ref()) {
+        // --animate-css with motion: the compiled choreography as a looping
+        // CSS timeline (plays in an <img>, no script).
+        let hooks = motion::render::MotionHooks::from_motion(m, &result);
+        let mut svg = render_svg_with_keyframes(
+            &result,
+            &config.svg,
+            &config.stylesheet,
+            config.custom_css.as_deref(),
+            config.debug,
+            &frame_states,
+            &frame_diffs,
+            true,
+            Some(hooks),
+        );
+        let css = motion::render::film_css(m, &tokens, 1.4, 0.4, 3.0);
+        renderer::svg::insert_css(&mut svg, &css);
+        svg
+    } else if let (Some(frame_selector), Some(at)) = (&config.frame, &config.at) {
         // A mid-motion still: base markup with hooks, every channel pinned to
         // its sampled value.
         let m = compiled.as_ref().ok_or_else(|| {

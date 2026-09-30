@@ -77,7 +77,7 @@
   }
   .ai-on-dark { fill: var(--text-light); }
     
-/* /home/kervel/projects/agent-illustrator/examples/../stylesheets/kapernikov.css */
+/* stylesheets/kapernikov.css */
 /* Kapernikov Brand Stylesheet for Agent Illustrator
    Colors from kapernikov-theme.css (huisstijlgids v4)
 */

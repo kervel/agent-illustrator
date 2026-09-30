@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="start,clone,commit,push,pull">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe CSS suppressed (--no-frame-css) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+    /* examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+  /* motion: the whole story as CSS (auto-generated) */
+@keyframes ailfilm0 { 0% { opacity: 0; } 2.4125% { opacity: 0; } 3.8199% { opacity: 0.933; } 4.0209% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm1 { 0% { scale: 0 0; } 2.4125% { scale: 0 0; } 2.6136% { scale: 0.281 0.281; } 2.8146% { scale: 0.515 0.515; } 3.0157% { scale: 0.703 0.703; } 3.2167% { scale: 0.849 0.849; } 3.4178% { scale: 0.957 0.957; } 3.6188% { scale: 1.03 1.03; } 3.8199% { scale: 1.075 1.075; } 4.0209% { scale: 1.095 1.095; } 4.222% { scale: 1.097 1.097; } 4.423% { scale: 1.085 1.085; } 5.0261% { scale: 1.021 1.021; } 5.2272% { scale: 1.006 1.006; } 5.8303% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm2 { 0% { opacity: 0; } 3.0157% { opacity: 0; } 3.2167% { opacity: 0.047; } 3.6188% { opacity: 0.276; } 3.8199% { opacity: 0.38; } 4.0209% { opacity: 0.473; } 4.222% { opacity: 0.556; } 4.423% { opacity: 0.628; } 4.624% { opacity: 0.689; } 5.0261% { opacity: 0.787; } 5.4282% { opacity: 0.858; } 5.8303% { opacity: 0.909; } 6.4335% { opacity: 0.959; } 7.2376% { opacity: 0.992; } 8.4439% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm3 { 0% { translate: 0px 0px; } 3.0157% { translate: 0px 0px; } 3.2167% { translate: 0px 11.433px; } 4.0209% { translate: 0px 6.32px; } 4.8251% { translate: 0px 3.094px; } 5.8303% { translate: 0px 1.092px; } 7.4387% { translate: 0px 0.048px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm4 { 0% { opacity: 0; } 3.6188% { opacity: 0; } 5.0261% { opacity: 0.933; } 5.2272% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm5 { 0% { scale: 1 1; } 3.4178% { scale: 1 1; } 3.6188% { scale: 0 0; } 3.8199% { scale: 0.281 0.281; } 4.0209% { scale: 0.515 0.515; } 4.222% { scale: 0.703 0.703; } 4.423% { scale: 0.849 0.849; } 4.624% { scale: 0.957 0.957; } 4.8251% { scale: 1.03 1.03; } 5.0261% { scale: 1.075 1.075; } 5.2272% { scale: 1.095 1.095; } 5.4282% { scale: 1.097 1.097; } 5.6293% { scale: 1.085 1.085; } 6.2324% { scale: 1.021 1.021; } 6.4335% { scale: 1.006 1.006; } 7.0366% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm6 { 0% { opacity: 0; } 6.6345% { opacity: 0; } 6.8355% { opacity: 0.187; } 7.0366% { opacity: 0.36; } 7.2376% { opacity: 0.508; } 7.4387% { opacity: 0.628; } 7.6397% { opacity: 0.722; } 7.8408% { opacity: 0.795; } 8.0418% { opacity: 0.852; } 8.2429% { opacity: 0.895; } 8.4439% { opacity: 0.929; } 8.846% { opacity: 0.972; } 9.2481% { opacity: 0.994; } 10.2533% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm7 { 0% { translate: 0px 0px; } 6.4335% { translate: 0px 0px; } 6.6345% { translate: 0px 12px; } 7.0366% { translate: 0px 7.685px; } 7.4387% { translate: 0px 4.467px; } 8.0418% { translate: 0px 1.777px; } 8.846% { translate: 0px 0.332px; } 10.8565% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm8 { 0% { opacity: 0; } 7.2376% { opacity: 0; } 7.4387% { opacity: 0.187; } 7.6397% { opacity: 0.36; } 7.8408% { opacity: 0.508; } 8.0418% { opacity: 0.628; } 8.2429% { opacity: 0.722; } 8.4439% { opacity: 0.795; } 8.645% { opacity: 0.852; } 8.846% { opacity: 0.895; } 9.047% { opacity: 0.929; } 9.4491% { opacity: 0.972; } 9.8512% { opacity: 0.994; } 10.8565% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm9 { 0% { translate: 0px 0px; } 7.0366% { translate: 0px 0px; } 7.2376% { translate: 0px 12px; } 7.6397% { translate: 0px 7.685px; } 8.0418% { translate: 0px 4.467px; } 8.645% { translate: 0px 1.777px; } 9.4491% { translate: 0px 0.332px; } 10.8565% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm10 { 0% { opacity: 0; } 7.8408% { opacity: 0; } 8.0418% { opacity: 0.187; } 8.2429% { opacity: 0.36; } 8.4439% { opacity: 0.508; } 8.645% { opacity: 0.628; } 8.846% { opacity: 0.722; } 9.047% { opacity: 0.795; } 9.2481% { opacity: 0.852; } 9.4491% { opacity: 0.895; } 9.6502% { opacity: 0.929; } 10.0523% { opacity: 0.972; } 10.4544% { opacity: 0.994; } 10.8565% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm11 { 0% { translate: 0px 0px; } 7.6397% { translate: 0px 0px; } 7.8408% { translate: 0px 12px; } 8.2429% { translate: 0px 7.685px; } 8.645% { translate: 0px 4.467px; } 9.2481% { translate: 0px 1.777px; } 10.0523% { translate: 0px 0.332px; } 10.8565% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm12 { 0% { opacity: 0; } 19.3004% { opacity: 0; } 20.7077% { opacity: 0.933; } 20.9087% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm13 { 0% { scale: 1 1; } 19.2943% { scale: 1 1; } 19.3004% { scale: 0 0; } 19.5014% { scale: 0.281 0.281; } 19.7025% { scale: 0.515 0.515; } 19.9035% { scale: 0.703 0.703; } 20.1045% { scale: 0.849 0.849; } 20.3056% { scale: 0.957 0.957; } 20.5066% { scale: 1.03 1.03; } 20.7077% { scale: 1.075 1.075; } 20.9087% { scale: 1.095 1.095; } 21.1098% { scale: 1.097 1.097; } 21.3108% { scale: 1.085 1.085; } 21.914% { scale: 1.021 1.021; } 22.115% { scale: 1.006 1.006; } 22.7181% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm14 { 0% { opacity: 0; } 19.2943% { opacity: 0; } 19.3004% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm15 { 0% { stroke-dashoffset: 0; } 19.2943% { stroke-dashoffset: 0; } 19.3004% { stroke-dashoffset: 1.001; } 19.5014% { stroke-dashoffset: 0.814; } 19.7025% { stroke-dashoffset: 0.641; } 19.9035% { stroke-dashoffset: 0.493; } 20.1045% { stroke-dashoffset: 0.373; } 20.3056% { stroke-dashoffset: 0.278; } 20.5066% { stroke-dashoffset: 0.205; } 20.7077% { stroke-dashoffset: 0.148; } 20.9087% { stroke-dashoffset: 0.105; } 21.1098% { stroke-dashoffset: 0.071; } 21.5119% { stroke-dashoffset: 0.028; } 21.914% { stroke-dashoffset: 0.006; } 22.9192% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm16 { 0% { opacity: 1; } 19.2943% { opacity: 1; } 19.3004% { opacity: 0; } 21.914% { opacity: 0; } 22.115% { opacity: 0.467; } 22.316% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm17 { 0% { opacity: 0; } 19.7025% { opacity: 0; } 19.9035% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm18 { 0% { stroke-dashoffset: 0; } 19.7025% { stroke-dashoffset: 0; } 19.9035% { stroke-dashoffset: 1.001; } 20.1045% { stroke-dashoffset: 0.814; } 20.3056% { stroke-dashoffset: 0.641; } 20.5066% { stroke-dashoffset: 0.493; } 20.7077% { stroke-dashoffset: 0.373; } 20.9087% { stroke-dashoffset: 0.278; } 21.1098% { stroke-dashoffset: 0.205; } 21.3108% { stroke-dashoffset: 0.148; } 21.5119% { stroke-dashoffset: 0.105; } 21.7129% { stroke-dashoffset: 0.071; } 22.115% { stroke-dashoffset: 0.028; } 22.5171% { stroke-dashoffset: 0.006; } 23.5223% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm19 { 0% { opacity: 1; } 19.7025% { opacity: 1; } 19.9035% { opacity: 0; } 22.5171% { opacity: 0; } 22.7181% { opacity: 0.467; } 22.9192% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm20 { 0% { opacity: 0; } 20.3056% { opacity: 0; } 20.5066% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm21 { 0% { stroke-dashoffset: 0; } 20.3056% { stroke-dashoffset: 0; } 20.5066% { stroke-dashoffset: 1.001; } 20.7077% { stroke-dashoffset: 0.814; } 20.9087% { stroke-dashoffset: 0.641; } 21.1098% { stroke-dashoffset: 0.493; } 21.3108% { stroke-dashoffset: 0.373; } 21.5119% { stroke-dashoffset: 0.278; } 21.7129% { stroke-dashoffset: 0.205; } 21.914% { stroke-dashoffset: 0.148; } 22.115% { stroke-dashoffset: 0.105; } 22.316% { stroke-dashoffset: 0.071; } 22.7181% { stroke-dashoffset: 0.028; } 23.1202% { stroke-dashoffset: 0.006; } 24.1255% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm22 { 0% { opacity: 1; } 20.3056% { opacity: 1; } 20.5066% { opacity: 0; } 23.1202% { opacity: 0; } 23.3213% { opacity: 0.467; } 23.5223% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm23 { 0% { opacity: 0; } 23.5223% { opacity: 0; } 23.7234% { opacity: 0.187; } 23.9244% { opacity: 0.36; } 24.1255% { opacity: 0.508; } 24.3265% { opacity: 0.628; } 24.5275% { opacity: 0.722; } 24.7286% { opacity: 0.795; } 24.9296% { opacity: 0.852; } 25.1307% { opacity: 0.895; } 25.3317% { opacity: 0.929; } 25.7338% { opacity: 0.972; } 26.1359% { opacity: 0.994; } 27.1411% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm24 { 0% { translate: 0px 0px; } 23.3213% { translate: 0px 0px; } 23.5223% { translate: 450px -345px; } 23.7234% { translate: 365.973px -280.579px; } 23.9244% { translate: 288.206px -220.958px; } 24.1255% { translate: 221.532px -169.841px; } 24.3265% { translate: 167.516px -128.429px; } 24.5275% { translate: 125.065px -95.884px; } 24.7286% { translate: 92.114px -70.621px; } 24.9296% { translate: 66.654px -51.101px; } 25.1307% { translate: 47.055px -36.076px; } 25.3317% { translate: 32.075px -24.591px; } 25.5328% { translate: 20.78px -15.931px; } 25.7338% { translate: 12.467px -9.558px; } 25.9349% { translate: 6.602px -5.061px; } 26.1359% { translate: 2.773px -2.126px; } 26.337% { translate: 0.657px -0.504px; } 26.538% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm25 { 0% { opacity: 0; } 24.3265% { opacity: 0; } 24.5275% { opacity: 0.15; } 24.7286% { opacity: 0.327; } 24.9296% { opacity: 0.48; } 25.1307% { opacity: 0.606; } 25.3317% { opacity: 0.705; } 25.5328% { opacity: 0.782; } 25.7338% { opacity: 0.842; } 25.9349% { opacity: 0.888; } 26.1359% { opacity: 0.923; } 26.538% { opacity: 0.969; } 26.9401% { opacity: 0.992; } 27.7443% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm26 { 0% { translate: 0px 0px; } 24.3265% { translate: 0px 0px; } 24.5275% { translate: 0px -293.229px; } 24.7286% { translate: 0px -232.289px; } 24.9296% { translate: 0px -179.289px; } 25.1307% { translate: 0px -135.957px; } 25.3317% { translate: 0px -101.757px; } 25.5328% { translate: 0px -75.168px; } 25.7338% { translate: 0px -54.61px; } 25.9349% { translate: 0px -38.771px; } 26.1359% { translate: 0px -26.642px; } 26.337% { translate: 0px -17.465px; } 26.538% { translate: 0px -10.671px; } 26.739% { translate: 0px -5.827px; } 26.9401% { translate: 0px -2.601px; } 27.1411% { translate: 0px -0.733px; } 27.3422% { translate: 0px -0.019px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm27 { 0% { opacity: 0; } 25.1307% { opacity: 0; } 25.3317% { opacity: 0.113; } 25.5328% { opacity: 0.293; } 25.7338% { opacity: 0.452; } 25.9349% { opacity: 0.583; } 26.1359% { opacity: 0.687; } 26.337% { opacity: 0.768; } 26.538% { opacity: 0.831; } 26.739% { opacity: 0.879; } 26.9401% { opacity: 0.916; } 27.3422% { opacity: 0.966; } 27.7443% { opacity: 0.991; } 28.2268% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm28 { 0% { translate: 0px 0px; } 25.1307% { translate: 0px 0px; } 25.3317% { translate: -399.175px -306.034px; } 25.5328% { translate: -318.19px -243.946px; } 25.7338% { translate: -246.693px -189.131px; } 25.9349% { translate: -187.635px -143.854px; } 26.1359% { translate: -140.785px -107.935px; } 26.337% { translate: -104.29px -79.956px; } 26.538% { translate: -76.052px -58.307px; } 26.739% { translate: -54.279px -41.614px; } 26.9401% { translate: -37.579px -28.81px; } 27.1411% { translate: -24.905px -19.094px; } 27.3422% { translate: -15.472px -11.862px; } 27.5432% { translate: -8.683px -6.657px; } 27.7443% { translate: -4.082px -3.13px; } 27.9453% { translate: -1.315px -1.008px; } 28.1464% { translate: -0.102px -0.078px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm29 { 0% { opacity: 1; } 36.6707% { opacity: 1; } 36.8717% { opacity: 0.991; } 37.0728% { opacity: 0.964; } 37.2738% { opacity: 0.916; } 37.4749% { opacity: 0.845; } 37.6759% { opacity: 0.744; } 37.877% { opacity: 0.598; } 38.078% { opacity: 0.358; } 38.2791% { opacity: 0; } 99.994% { opacity: 0; } }
+@keyframes ailfilm30 { 0% { translate: 0px 0px; } 36.8717% { translate: 0px -0.107px; } 37.2738% { translate: 0px -1.008px; } 37.6759% { translate: 0px -3.075px; } 37.877% { translate: 0px -4.821px; } 38.078% { translate: 0px -7.703px; } 38.2791% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm31 { 0% { opacity: 0; } 37.4749% { opacity: 0; } 37.6759% { opacity: 0.187; } 37.877% { opacity: 0.508; } 38.078% { opacity: 0.722; } 38.2791% { opacity: 0.852; } 38.4801% { opacity: 0.929; } 38.6811% { opacity: 0.972; } 38.8822% { opacity: 0.994; } 39.2843% { opacity: 1; } 51.146% { opacity: 1; } 51.347% { opacity: 0.991; } 51.548% { opacity: 0.964; } 51.7491% { opacity: 0.916; } 51.9501% { opacity: 0.845; } 52.1512% { opacity: 0.744; } 52.3522% { opacity: 0.598; } 52.5533% { opacity: 0.358; } 52.7543% { opacity: 0; } 99.994% { opacity: 0; } }
+@keyframes ailfilm32 { 0% { translate: 0px 0px; } 37.4749% { translate: 0px 0px; } 37.6759% { translate: 0px 9.759px; } 37.877% { translate: 0px 5.908px; } 38.078% { translate: 0px 3.335px; } 38.2791% { translate: 0px 1.777px; } 38.6811% { translate: 0px 0.332px; } 40.2895% { translate: 0px 0px; } 51.347% { translate: 0px -0.107px; } 51.7491% { translate: 0px -1.008px; } 52.1512% { translate: 0px -3.075px; } 52.3522% { translate: 0px -4.821px; } 52.5533% { translate: 0px -7.703px; } 52.7543% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm33 { 0% { stroke-dashoffset: 0.333; } 36.8717% { stroke-dashoffset: 0.332; } 37.2738% { stroke-dashoffset: 0.319; } 37.4749% { stroke-dashoffset: 0.306; } 37.6759% { stroke-dashoffset: 0.284; } 37.877% { stroke-dashoffset: 0.249; } 38.078% { stroke-dashoffset: 0.198; } 38.2791% { stroke-dashoffset: 0.136; } 38.4801% { stroke-dashoffset: 0.084; } 38.6811% { stroke-dashoffset: 0.05; } 38.8822% { stroke-dashoffset: 0.028; } 39.2843% { stroke-dashoffset: 0.006; } 40.6916% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm34 { 0% { opacity: 0; } 39.6864% { opacity: 0; } 41.0937% { opacity: 0.933; } 41.2947% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm35 { 0% { scale: 1 1; } 39.4853% { scale: 1 1; } 39.6864% { scale: 0 0; } 39.8874% { scale: 0.281 0.281; } 40.0885% { scale: 0.515 0.515; } 40.2895% { scale: 0.703 0.703; } 40.4906% { scale: 0.849 0.849; } 40.6916% { scale: 0.957 0.957; } 40.8926% { scale: 1.03 1.03; } 41.0937% { scale: 1.075 1.075; } 41.2947% { scale: 1.095 1.095; } 41.4958% { scale: 1.097 1.097; } 41.6968% { scale: 1.085 1.085; } 42.3% { scale: 1.021 1.021; } 42.501% { scale: 1.006 1.006; } 42.7021% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm36 { 0% { opacity: 0; } 51.9501% { opacity: 0; } 52.1512% { opacity: 0.187; } 52.3522% { opacity: 0.508; } 52.5533% { opacity: 0.722; } 52.7543% { opacity: 0.852; } 52.9554% { opacity: 0.929; } 53.1564% { opacity: 0.972; } 53.3575% { opacity: 0.994; } 53.7595% { opacity: 1; } 70.4463% { opacity: 1; } 70.6474% { opacity: 0.991; } 70.8484% { opacity: 0.964; } 71.0495% { opacity: 0.916; } 71.2505% { opacity: 0.845; } 71.4515% { opacity: 0.744; } 71.6526% { opacity: 0.598; } 71.8536% { opacity: 0.358; } 72.0547% { opacity: 0; } 99.994% { opacity: 0; } }
+@keyframes ailfilm37 { 0% { translate: 0px 0px; } 51.9501% { translate: 0px 0px; } 52.1512% { translate: 0px 9.759px; } 52.3522% { translate: 0px 5.908px; } 52.5533% { translate: 0px 3.335px; } 52.7543% { translate: 0px 1.777px; } 53.1564% { translate: 0px 0.332px; } 54.7648% { translate: 0px 0px; } 70.6474% { translate: 0px -0.107px; } 71.0495% { translate: 0px -1.008px; } 71.4515% { translate: 0px -3.075px; } 71.6526% { translate: 0px -4.821px; } 71.8536% { translate: 0px -7.703px; } 72.0547% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm38 { 0% { translate: 0px 0px; } 51.146% { translate: 0px 0px; } 51.347% { translate: 0px -0.497px; } 51.548% { translate: 0px -2.095px; } 51.7491% { translate: 0px -4.991px; } 51.9501% { translate: 0px -9.437px; } 52.1512% { translate: 0px -15.766px; } 52.3522% { translate: 0px -24.425px; } 52.5533% { translate: 0px -36.029px; } 52.7543% { translate: 0px -51.431px; } 52.9554% { translate: 0px -71.792px; } 53.1564% { translate: 0px -98.53px; } 53.3575% { translate: 0px -132.629px; } 53.7595% { translate: 0px -212.371px; } 53.9606% { translate: 0px -246.47px; } 54.1616% { translate: 0px -273.208px; } 54.3627% { translate: 0px -293.569px; } 54.5637% { translate: 0px -308.971px; } 54.7648% { translate: 0px -320.575px; } 54.9658% { translate: 0px -329.234px; } 55.1669% { translate: 0px -335.563px; } 55.3679% { translate: 0px -340.009px; } 55.569% { translate: 0px -342.905px; } 55.77% { translate: 0px -344.503px; } 55.971% { translate: 0px -345px; } 56.1721% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm39 { 0% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm40 { 0% { opacity: 0; } 51.1399% { opacity: 0; } 51.146% { opacity: 1; } 55.3679% { opacity: 1; } 55.569% { opacity: 0.75; } 55.971% { opacity: 0; } 99.994% { opacity: 0; } }
+@keyframes ailfilm41 { 0% { stroke-dashoffset: 0.333; } 56.1721% { stroke-dashoffset: 0.332; } 56.5742% { stroke-dashoffset: 0.319; } 56.7752% { stroke-dashoffset: 0.306; } 56.9763% { stroke-dashoffset: 0.284; } 57.1773% { stroke-dashoffset: 0.249; } 57.3784% { stroke-dashoffset: 0.198; } 57.5794% { stroke-dashoffset: 0.136; } 57.7805% { stroke-dashoffset: 0.084; } 57.9815% { stroke-dashoffset: 0.05; } 58.1825% { stroke-dashoffset: 0.028; } 58.5846% { stroke-dashoffset: 0.006; } 59.992% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm42 { 0% { opacity: 0; } 58.9867% { opacity: 0; } 60.394% { opacity: 0.933; } 60.5951% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm43 { 0% { scale: 1 1; } 58.7857% { scale: 1 1; } 58.9867% { scale: 0 0; } 59.1878% { scale: 0.281 0.281; } 59.3888% { scale: 0.515 0.515; } 59.5899% { scale: 0.703 0.703; } 59.7909% { scale: 0.849 0.849; } 59.992% { scale: 0.957 0.957; } 60.193% { scale: 1.03 1.03; } 60.394% { scale: 1.075 1.075; } 60.5951% { scale: 1.095 1.095; } 60.7961% { scale: 1.097 1.097; } 60.9972% { scale: 1.085 1.085; } 61.6003% { scale: 1.021 1.021; } 61.8014% { scale: 1.006 1.006; } 62.0024% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm44 { 0% { opacity: 0; } 71.2505% { opacity: 0; } 71.4515% { opacity: 0.187; } 71.6526% { opacity: 0.508; } 71.8536% { opacity: 0.722; } 72.0547% { opacity: 0.852; } 72.2557% { opacity: 0.929; } 72.4568% { opacity: 0.972; } 72.6578% { opacity: 0.994; } 73.0599% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm45 { 0% { translate: 0px 0px; } 71.2505% { translate: 0px 0px; } 71.4515% { translate: 0px 9.759px; } 71.6526% { translate: 0px 5.908px; } 71.8536% { translate: 0px 3.335px; } 72.0547% { translate: 0px 1.777px; } 72.4568% { translate: 0px 0.332px; } 74.0651% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm46 { 0% { translate: 0px 0px; } 70.4463% { translate: 0px 0px; } 70.6474% { translate: -0.648px 0.497px; } 70.8484% { translate: -2.733px 2.095px; } 71.0495% { translate: -6.51px 4.991px; } 71.2505% { translate: -12.309px 9.437px; } 71.4515% { translate: -20.564px 15.766px; } 71.6526% { translate: -31.859px 24.425px; } 71.8536% { translate: -46.995px 36.029px; } 72.0547% { translate: -67.084px 51.431px; } 72.2557% { translate: -93.642px 71.792px; } 72.4568% { translate: -128.517px 98.53px; } 72.6578% { translate: -172.995px 132.629px; } 73.0599% { translate: -277.005px 212.371px; } 73.261% { translate: -321.483px 246.47px; } 73.462% { translate: -356.358px 273.208px; } 73.663% { translate: -382.916px 293.569px; } 73.8641% { translate: -403.005px 308.971px; } 74.0651% { translate: -418.141px 320.575px; } 74.2662% { translate: -429.436px 329.234px; } 74.4672% { translate: -437.691px 335.563px; } 74.6683% { translate: -443.49px 340.009px; } 74.8693% { translate: -447.267px 342.905px; } 75.0704% { translate: -449.352px 344.503px; } 75.2714% { translate: -450px 345px; } 75.4725% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm47 { 0% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm48 { 0% { opacity: 0; } 70.4403% { opacity: 0; } 70.4463% { opacity: 1; } 74.6683% { opacity: 1; } 74.8693% { opacity: 0.75; } 75.2714% { opacity: 0; } 99.994% { opacity: 0; } }
+@keyframes ailfilm49 { 0% { translate: 0px 0px; } 71.0495% { translate: 0px 0px; } 71.2505% { translate: 0.648px 0.497px; } 71.4515% { translate: 2.733px 2.095px; } 71.6526% { translate: 6.51px 4.991px; } 71.8536% { translate: 12.309px 9.437px; } 72.0547% { translate: 20.564px 15.766px; } 72.2557% { translate: 31.859px 24.425px; } 72.4568% { translate: 46.995px 36.029px; } 72.6578% { translate: 67.084px 51.431px; } 72.8589% { translate: 93.642px 71.792px; } 73.0599% { translate: 128.517px 98.53px; } 73.261% { translate: 172.995px 132.629px; } 73.663% { translate: 277.005px 212.371px; } 73.8641% { translate: 321.483px 246.47px; } 74.0651% { translate: 356.358px 273.208px; } 74.2662% { translate: 382.916px 293.569px; } 74.4672% { translate: 403.005px 308.971px; } 74.6683% { translate: 418.141px 320.575px; } 74.8693% { translate: 429.436px 329.234px; } 75.0704% { translate: 437.691px 335.563px; } 75.2714% { translate: 443.49px 340.009px; } 75.4725% { translate: 447.267px 342.905px; } 75.6735% { translate: 449.352px 344.503px; } 75.8745% { translate: 450px 345px; } 76.0756% { translate: 0px 0px; } 99.994% { translate: 0px 0px; } }
+@keyframes ailfilm50 { 0% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm51 { 0% { opacity: 0; } 70.8484% { opacity: 0; } 71.0495% { opacity: 1; } 75.2714% { opacity: 1; } 75.4725% { opacity: 0.75; } 75.8745% { opacity: 0; } 99.994% { opacity: 0; } }
+@keyframes ailfilm52 { 0% { stroke-dashoffset: 0.333; } 76.0756% { stroke-dashoffset: 0.332; } 76.4777% { stroke-dashoffset: 0.319; } 76.6787% { stroke-dashoffset: 0.306; } 76.8798% { stroke-dashoffset: 0.284; } 77.0808% { stroke-dashoffset: 0.249; } 77.2819% { stroke-dashoffset: 0.198; } 77.4829% { stroke-dashoffset: 0.136; } 77.684% { stroke-dashoffset: 0.084; } 77.885% { stroke-dashoffset: 0.05; } 78.086% { stroke-dashoffset: 0.028; } 78.4881% { stroke-dashoffset: 0.006; } 79.8955% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm53 { 0% { stroke-dashoffset: 0.333; } 76.0756% { stroke-dashoffset: 0.332; } 76.4777% { stroke-dashoffset: 0.319; } 76.6787% { stroke-dashoffset: 0.306; } 76.8798% { stroke-dashoffset: 0.284; } 77.0808% { stroke-dashoffset: 0.249; } 77.2819% { stroke-dashoffset: 0.198; } 77.4829% { stroke-dashoffset: 0.136; } 77.684% { stroke-dashoffset: 0.084; } 77.885% { stroke-dashoffset: 0.05; } 78.086% { stroke-dashoffset: 0.028; } 78.4881% { stroke-dashoffset: 0.006; } 79.8955% { stroke-dashoffset: 0; } 99.994% { stroke-dashoffset: 0; } }
+@keyframes ailfilm54 { 0% { opacity: 0; } 78.8902% { opacity: 0; } 80.2975% { opacity: 0.933; } 80.4986% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm55 { 0% { scale: 1 1; } 78.6892% { scale: 1 1; } 78.8902% { scale: 0 0; } 79.0913% { scale: 0.281 0.281; } 79.2923% { scale: 0.515 0.515; } 79.4934% { scale: 0.703 0.703; } 79.6944% { scale: 0.849 0.849; } 79.8955% { scale: 0.957 0.957; } 80.0965% { scale: 1.03 1.03; } 80.2975% { scale: 1.075 1.075; } 80.4986% { scale: 1.095 1.095; } 80.6996% { scale: 1.097 1.097; } 80.9007% { scale: 1.085 1.085; } 81.5038% { scale: 1.021 1.021; } 81.7049% { scale: 1.006 1.006; } 81.9059% { scale: 1 1; } 99.994% { scale: 1 1; } }
+@keyframes ailfilm56 { 0% { opacity: 0; } 78.8902% { opacity: 0; } 80.2975% { opacity: 0.933; } 80.4986% { opacity: 1; } 99.994% { opacity: 1; } }
+@keyframes ailfilm57 { 0% { scale: 1 1; } 78.6892% { scale: 1 1; } 78.8902% { scale: 0 0; } 79.0913% { scale: 0.281 0.281; } 79.2923% { scale: 0.515 0.515; } 79.4934% { scale: 0.703 0.703; } 79.6944% { scale: 0.849 0.849; } 79.8955% { scale: 0.957 0.957; } 80.0965% { scale: 1.03 1.03; } 80.2975% { scale: 1.075 1.075; } 80.4986% { scale: 1.095 1.095; } 80.6996% { scale: 1.097 1.097; } 80.9007% { scale: 1.085 1.085; } 81.5038% { scale: 1.021 1.021; } 81.7049% { scale: 1.006 1.006; } 81.9059% { scale: 1 1; } 99.994% { scale: 1 1; } }
+.aighost-99f245da-0 { animation: ailfilm38 16.58s linear infinite, ailfilm39 16.58s linear infinite, ailfilm40 16.58s linear infinite; }
+.aighost-99f245da-1 { animation: ailfilm46 16.58s linear infinite, ailfilm47 16.58s linear infinite, ailfilm48 16.58s linear infinite; }
+.aighost-99f245da-2 { animation: ailfilm49 16.58s linear infinite, ailfilm50 16.58s linear infinite, ailfilm51 16.58s linear infinite; }
+.aihead-99f245da-l_anna { animation: ailfilm16 16.58s linear infinite; }
+.aihead-99f245da-l_ben { animation: ailfilm19 16.58s linear infinite; }
+.aihead-99f245da-l_chris { animation: ailfilm22 16.58s linear infinite; }
+.aimask-99f245da-anna_hist_track { animation: ailfilm52 16.58s linear infinite; }
+.aimask-99f245da-ben_hist_track { animation: ailfilm33 16.58s linear infinite; }
+.aimask-99f245da-chris_hist_track { animation: ailfilm53 16.58s linear infinite; }
+.aimask-99f245da-hub_hist_track { animation: ailfilm41 16.58s linear infinite; }
+.aimask-99f245da-l_anna { animation: ailfilm15 16.58s linear infinite; }
+.aimask-99f245da-l_ben { animation: ailfilm18 16.58s linear infinite; }
+.aimask-99f245da-l_chris { animation: ailfilm21 16.58s linear infinite; }
+.aitxt-99f245da-cmd-base { animation: ailfilm29 16.58s linear infinite, ailfilm30 16.58s linear infinite; }
+.aitxt-99f245da-cmd-v0 { animation: ailfilm31 16.58s linear infinite, ailfilm32 16.58s linear infinite; }
+.aitxt-99f245da-cmd-v1 { animation: ailfilm36 16.58s linear infinite, ailfilm37 16.58s linear infinite; }
+.aitxt-99f245da-cmd-v2 { animation: ailfilm44 16.58s linear infinite, ailfilm45 16.58s linear infinite; }
+.conn-99f245da-l_anna { animation: ailfilm14 16.58s linear infinite; }
+.conn-99f245da-l_ben { animation: ailfilm17 16.58s linear infinite; }
+.conn-99f245da-l_chris { animation: ailfilm20 16.58s linear infinite; }
+.kf-99f245da-anna { animation: ailfilm6 16.58s linear infinite, ailfilm7 16.58s linear infinite; }
+.kf-99f245da-anna_hist { animation: ailfilm23 16.58s linear infinite, ailfilm24 16.58s linear infinite; }
+.kf-99f245da-anna_hist_d4 { animation: ailfilm54 16.58s linear infinite, ailfilm55 16.58s linear infinite; }
+.kf-99f245da-ben { animation: ailfilm8 16.58s linear infinite, ailfilm9 16.58s linear infinite; }
+.kf-99f245da-ben_hist { animation: ailfilm25 16.58s linear infinite, ailfilm26 16.58s linear infinite; }
+.kf-99f245da-ben_hist_d4 { animation: ailfilm34 16.58s linear infinite, ailfilm35 16.58s linear infinite; }
+.kf-99f245da-chris { animation: ailfilm10 16.58s linear infinite, ailfilm11 16.58s linear infinite; }
+.kf-99f245da-chris_hist { animation: ailfilm27 16.58s linear infinite, ailfilm28 16.58s linear infinite; }
+.kf-99f245da-chris_hist_d4 { animation: ailfilm56 16.58s linear infinite, ailfilm57 16.58s linear infinite; }
+.kf-99f245da-cmd { animation: ailfilm12 16.58s linear infinite, ailfilm13 16.58s linear infinite; }
+.kf-99f245da-hub { animation: ailfilm4 16.58s linear infinite, ailfilm5 16.58s linear infinite; }
+.kf-99f245da-hub_hist_d4 { animation: ailfilm42 16.58s linear infinite, ailfilm43 16.58s linear infinite; }
+.kf-99f245da-s_badge { animation: ailfilm0 16.58s linear infinite, ailfilm1 16.58s linear infinite; }
+.kf-99f245da-s_heading { animation: ailfilm2 16.58s linear infinite, ailfilm3 16.58s linear infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
+]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <mask id="aim-99f245da-hub_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-hub_hist_track aid-99f245da-hub_hist_track" d="M716.00 247.00 L772.00 247.00 L828.00 247.00 L884.00 247.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-99f245da-anna_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-anna_hist_track aid-99f245da-anna_hist_track" d="M266.00 592.00 L322.00 592.00 L378.00 592.00 L434.00 592.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-99f245da-ben_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-ben_hist_track aid-99f245da-ben_hist_track" d="M716.00 592.00 L772.00 592.00 L828.00 592.00 L884.00 592.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-99f245da-chris_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-chris_hist_track aid-99f245da-chris_hist_track" d="M1166.00 592.00 L1222.00 592.00 L1278.00 592.00 L1334.00 592.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-99f245da-l_anna" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-l_anna aid-99f245da-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-99f245da-l_ben" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-l_ben aid-99f245da-l_ben" d="M800 300 L800 480.6" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-99f245da-l_chris" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-99f245da-l_chris aid-99f245da-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-99f245da-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-99f245da-s">
+      <g class="kf-99f245da-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-99f245da-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-99f245da-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-99f245da-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>3</tspan></tspan></text>
+      </g>
+      <g class="kf-99f245da-s_heading kf-anim" style="transform-origin:579.67px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-99f245da-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Everyone has the full history</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-99f245da-hub kf-anim" style="transform-origin:800px 225px">
+    <g id="hub" class="ai-container kfp-99f245da-hub">
+      <g class="kf-99f245da-hub_bg kf-anim" style="transform-origin:800px 225px">
+        <rect id="hub_bg" class="ai-shape ai-rect kfp-99f245da-hub_bg" x="650" y="150" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+      </g>
+      <g class="kf-99f245da-hub_head kf-anim" style="transform-origin:800px 174px">
+        <rect id="hub_head" class="ai-shape ai-rect kfp-99f245da-hub_head" x="650" y="150" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="658" y="174" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>GitLab</tspan></tspan></text>
+      </g>
+      <g class="kf-99f245da-hub_tag kf-anim" style="transform-origin:924px 174px">
+        <circle id="hub_tag" class="ai-shape ai-circle kfp-99f245da-hub_tag" cx="924" cy="174" r="8" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="2"/>
+      </g>
+      <g class="kf-99f245da-hub_hist kf-anim" style="transform-origin:800px 247px">
+        <g id="hub_hist" class="ai-container kfp-99f245da-hub_hist">
+          <g class="kf-99f245da-hub_hist_dots kf-anim" style="transform-origin:800px 247px">
+            <g id="hub_hist_dots" class="ai-container kfp-99f245da-hub_hist_dots">
+              <g class="kf-99f245da-hub_hist_d1 kf-anim" style="transform-origin:716px 247px">
+                <circle id="hub_hist_d1" class="ai-shape ai-circle kfp-99f245da-hub_hist_d1" cx="716" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+              <g class="kf-99f245da-hub_hist_d2 kf-anim" style="transform-origin:772px 247px">
+                <circle id="hub_hist_d2" class="ai-shape ai-circle kfp-99f245da-hub_hist_d2" cx="772" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+              <g class="kf-99f245da-hub_hist_d3 kf-anim" style="transform-origin:828px 247px">
+                <circle id="hub_hist_d3" class="ai-shape ai-circle kfp-99f245da-hub_hist_d3" cx="828" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+              <g class="kf-hidden kf-99f245da-hub_hist_d4 kf-anim" style="transform-origin:884px 247px">
+                <circle id="hub_hist_d4" class="ai-shape ai-circle kfp-99f245da-hub_hist_d4" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+            </g>
+          </g>
+          <g class="kf-99f245da-hub_hist_track kf-anim" style="transform-origin:800px 247px">
+            <path id="hub_hist_track" class="ai-shape ai-path kfp-99f245da-hub_hist_track" d="M716.00 247.00 L772.00 247.00 L828.00 247.00 L884.00 247.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-99f245da-hub_hist_track)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-99f245da-laptops kf-anim" style="transform-origin:800px 570px">
+    <g id="laptops" class="ai-container kfp-99f245da-laptops">
+      <g class="kf-99f245da-anna kf-anim" style="transform-origin:350px 570px">
+        <g id="anna" class="ai-container kfp-99f245da-anna">
+          <g class="kf-99f245da-anna_bg kf-anim" style="transform-origin:350px 570px">
+            <rect id="anna_bg" class="ai-shape ai-rect kfp-99f245da-anna_bg" x="200" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+          </g>
+          <g class="kf-99f245da-anna_head kf-anim" style="transform-origin:350px 519px">
+            <rect id="anna_head" class="ai-shape ai-rect kfp-99f245da-anna_head" x="200" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+            <text class="ai-label" x="208" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="208" dy="-0"><tspan>Anna’s laptop</tspan></tspan></text>
+          </g>
+          <g class="kf-99f245da-anna_tag kf-anim" style="transform-origin:474px 519px">
+            <circle id="anna_tag" class="ai-shape ai-circle kfp-99f245da-anna_tag" cx="474" cy="519" r="8" fill="var(--role-series-1)" stroke="var(--role-ink)" stroke-width="2"/>
+          </g>
+          <g class="kf-hidden kf-99f245da-anna_hist kf-anim" style="transform-origin:350px 592px">
+            <g id="anna_hist" class="ai-container kfp-99f245da-anna_hist">
+              <g class="kf-99f245da-anna_hist_dots kf-anim" style="transform-origin:350px 592px">
+                <g id="anna_hist_dots" class="ai-container kfp-99f245da-anna_hist_dots">
+                  <g class="kf-99f245da-anna_hist_d1 kf-anim" style="transform-origin:266px 592px">
+                    <circle id="anna_hist_d1" class="ai-shape ai-circle kfp-99f245da-anna_hist_d1" cx="266" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-99f245da-anna_hist_d2 kf-anim" style="transform-origin:322px 592px">
+                    <circle id="anna_hist_d2" class="ai-shape ai-circle kfp-99f245da-anna_hist_d2" cx="322" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-99f245da-anna_hist_d3 kf-anim" style="transform-origin:378px 592px">
+                    <circle id="anna_hist_d3" class="ai-shape ai-circle kfp-99f245da-anna_hist_d3" cx="378" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-hidden kf-99f245da-anna_hist_d4 kf-anim" style="transform-origin:434px 592px">
+                    <circle id="anna_hist_d4" class="ai-shape ai-circle kfp-99f245da-anna_hist_d4" cx="434" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                </g>
+              </g>
+              <g class="kf-99f245da-anna_hist_track kf-anim" style="transform-origin:350px 592px">
+                <path id="anna_hist_track" class="ai-shape ai-path kfp-99f245da-anna_hist_track" d="M266.00 592.00 L322.00 592.00 L378.00 592.00 L434.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-99f245da-anna_hist_track)"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="kf-99f245da-ben kf-anim" style="transform-origin:800px 570px">
+        <g id="ben" class="ai-container kfp-99f245da-ben">
+          <g class="kf-99f245da-ben_bg kf-anim" style="transform-origin:800px 570px">
+            <rect id="ben_bg" class="ai-shape ai-rect kfp-99f245da-ben_bg" x="650" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+          </g>
+          <g class="kf-99f245da-ben_head kf-anim" style="transform-origin:800px 519px">
+            <rect id="ben_head" class="ai-shape ai-rect kfp-99f245da-ben_head" x="650" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+            <text class="ai-label" x="658" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>Ben’s laptop</tspan></tspan></text>
+          </g>
+          <g class="kf-99f245da-ben_tag kf-anim" style="transform-origin:924px 519px">
+            <circle id="ben_tag" class="ai-shape ai-circle kfp-99f245da-ben_tag" cx="924" cy="519" r="8" fill="var(--role-series-2)" stroke="var(--role-ink)" stroke-width="2"/>
+          </g>
+          <g class="kf-hidden kf-99f245da-ben_hist kf-anim" style="transform-origin:800px 592px">
+            <g id="ben_hist" class="ai-container kfp-99f245da-ben_hist">
+              <g class="kf-99f245da-ben_hist_dots kf-anim" style="transform-origin:800px 592px">
+                <g id="ben_hist_dots" class="ai-container kfp-99f245da-ben_hist_dots">
+                  <g class="kf-99f245da-ben_hist_d1 kf-anim" style="transform-origin:716px 592px">
+                    <circle id="ben_hist_d1" class="ai-shape ai-circle kfp-99f245da-ben_hist_d1" cx="716" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-99f245da-ben_hist_d2 kf-anim" style="transform-origin:772px 592px">
+                    <circle id="ben_hist_d2" class="ai-shape ai-circle kfp-99f245da-ben_hist_d2" cx="772" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-99f245da-ben_hist_d3 kf-anim" style="transform-origin:828px 592px">
+                    <circle id="ben_hist_d3" class="ai-shape ai-circle kfp-99f245da-ben_hist_d3" cx="828" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-hidden kf-99f245da-ben_hist_d4 kf-anim" style="transform-origin:884px 592px">
+                    <circle id="ben_hist_d4" class="ai-shape ai-circle kfp-99f245da-ben_hist_d4" cx="884" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                </g>
+              </g>
+              <g class="kf-99f245da-ben_hist_track kf-anim" style="transform-origin:800px 592px">
+                <path id="ben_hist_track" class="ai-shape ai-path kfp-99f245da-ben_hist_track" d="M716.00 592.00 L772.00 592.00 L828.00 592.00 L884.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-99f245da-ben_hist_track)"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="kf-99f245da-chris kf-anim" style="transform-origin:1250px 570px">
+        <g id="chris" class="ai-container kfp-99f245da-chris">
+          <g class="kf-99f245da-chris_bg kf-anim" style="transform-origin:1250px 570px">
+            <rect id="chris_bg" class="ai-shape ai-rect kfp-99f245da-chris_bg" x="1100" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+          </g>
+          <g class="kf-99f245da-chris_head kf-anim" style="transform-origin:1250px 519px">
+            <rect id="chris_head" class="ai-shape ai-rect kfp-99f245da-chris_head" x="1100" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+            <text class="ai-label" x="1108" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="1108" dy="-0"><tspan>Chris’s laptop</tspan></tspan></text>
+          </g>
+          <g class="kf-99f245da-chris_tag kf-anim" style="transform-origin:1374px 519px">
+            <circle id="chris_tag" class="ai-shape ai-circle kfp-99f245da-chris_tag" cx="1374" cy="519" r="8" fill="var(--role-series-3)" stroke="var(--role-ink)" stroke-width="2"/>
+          </g>
+          <g class="kf-hidden kf-99f245da-chris_hist kf-anim" style="transform-origin:1250px 592px">
+            <g id="chris_hist" class="ai-container kfp-99f245da-chris_hist">
+              <g class="kf-99f245da-chris_hist_dots kf-anim" style="transform-origin:1250px 592px">
+                <g id="chris_hist_dots" class="ai-container kfp-99f245da-chris_hist_dots">
+                  <g class="kf-99f245da-chris_hist_d1 kf-anim" style="transform-origin:1166px 592px">
+                    <circle id="chris_hist_d1" class="ai-shape ai-circle kfp-99f245da-chris_hist_d1" cx="1166" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-99f245da-chris_hist_d2 kf-anim" style="transform-origin:1222px 592px">
+                    <circle id="chris_hist_d2" class="ai-shape ai-circle kfp-99f245da-chris_hist_d2" cx="1222" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-99f245da-chris_hist_d3 kf-anim" style="transform-origin:1278px 592px">
+                    <circle id="chris_hist_d3" class="ai-shape ai-circle kfp-99f245da-chris_hist_d3" cx="1278" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-hidden kf-99f245da-chris_hist_d4 kf-anim" style="transform-origin:1334px 592px">
+                    <circle id="chris_hist_d4" class="ai-shape ai-circle kfp-99f245da-chris_hist_d4" cx="1334" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                </g>
+              </g>
+              <g class="kf-99f245da-chris_hist_track kf-anim" style="transform-origin:1250px 592px">
+                <path id="chris_hist_track" class="ai-shape ai-path kfp-99f245da-chris_hist_track" d="M1166.00 592.00 L1222.00 592.00 L1278.00 592.00 L1334.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-99f245da-chris_hist_track)"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-99f245da-cmd kf-anim" style="transform-origin:1091.92px 225px">
+    <rect id="cmd" class="ai-shape ai-rect kfp-99f245da-cmd" x="1010" y="202" width="163.84" height="46" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+    <text class="ai-label aitxt-99f245da-cmd-base" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git clone</tspan></tspan></text>
+    <g class="ai-label-variants" fill="var(--role-surface)">
+      <text class="ai-label aitxt-99f245da-cmd-v0" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git commit</tspan></tspan></text>
+      <text class="ai-label aitxt-99f245da-cmd-v1" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git push</tspan></tspan></text>
+      <text class="ai-label aitxt-99f245da-cmd-v2" x="1091.92" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1091.92" dy="-0"><tspan>git pull</tspan></tspan></text>
+    </g>
+  </g>
+  <path class="ai-connection conn-99f245da-l_anna conn-99f245da-l_anna-base aid-99f245da-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" opacity="0" mask="url(#aim-99f245da-l_anna)"/>
+  <g class="conn-99f245da-l_anna"><path class="aihead-99f245da-l_anna" d="M342 479 L350 493.4 L358 479 Z" fill="var(--role-rule)" style="opacity:1"/></g>
+  <path class="ai-connection conn-99f245da-l_ben conn-99f245da-l_ben-base aid-99f245da-l_ben" d="M800 300 L800 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" opacity="0" mask="url(#aim-99f245da-l_ben)"/>
+  <g class="conn-99f245da-l_ben"><path class="aihead-99f245da-l_ben" d="M792 479 L800 493.4 L808 479 Z" fill="var(--role-rule)" style="opacity:1"/></g>
+  <path class="ai-connection conn-99f245da-l_chris conn-99f245da-l_chris-base aid-99f245da-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" opacity="0" mask="url(#aim-99f245da-l_chris)"/>
+  <g class="conn-99f245da-l_chris"><path class="aihead-99f245da-l_chris" d="M1242 479 L1250 493.4 L1258 479 Z" fill="var(--role-rule)" style="opacity:1"/></g>
+  <g class="aighost-99f245da-0" style="opacity:0;transform-origin:884px 592px;pointer-events:none"><circle data-ghost-of="ben_hist_d4" class="ai-shape ai-circle" cx="884" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/></g>
+  <g class="aighost-99f245da-1" style="opacity:0;transform-origin:884px 247px;pointer-events:none"><circle data-ghost-of="hub_hist_d4" class="ai-shape ai-circle" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/></g>
+  <g class="aighost-99f245da-2" style="opacity:0;transform-origin:884px 247px;pointer-events:none"><circle data-ghost-of="hub_hist_d4" class="ai-shape ai-circle" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/></g>
+</svg>

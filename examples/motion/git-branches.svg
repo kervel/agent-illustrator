@@ -169,7 +169,7 @@
   .kf-8ba2ce6e-tests_tick { opacity: 1; }
   .conn-8ba2ce6e-gate { opacity: 1; }
 }
-    /* /home/kervel/projects/agent-illustrator/examples/motion/git-deck.css */
+    /* examples/motion/git-deck.css */
 /* Palette and type for the "git for non-git people" deck. */
 :root {
   --git-paper: #E9ECF0;

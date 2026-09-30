@@ -1252,6 +1252,24 @@ pub(crate) fn font_width_factor(modifiers: &[Spanned<StyleModifier>]) -> f64 {
     f
 }
 
+/// `ail_wordings`: every label a keyframe gives the shape (set from the
+/// keyframes before layout).
+fn keyframe_wordings(mods: &[Spanned<StyleModifier>]) -> Vec<String> {
+    mods.iter()
+        .filter(|m| matches!(&m.node.key.node, StyleKey::Custom(k) if k == "ail_wordings"))
+        .flat_map(|m| match &m.node.value.node {
+            StyleValue::List(items) => items
+                .iter()
+                .filter_map(|v| match &v.node {
+                    StyleValue::String(s) => Some(s.clone()),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+            _ => vec![],
+        })
+        .collect()
+}
+
 fn compute_shape_size(
     shape: &ShapeDecl,
     config: &LayoutConfig,
@@ -1279,6 +1297,20 @@ fn compute_shape_size(
     let label_metrics = label.map(|(rich, font_size, _, _)| {
         let mut m = crate::layout::text::measure_runs(&rich.lines, *font_size);
         m.width = if mono { mono_width(rich, *font_size) } else { m.width * factor };
+        m
+    });
+    // Wordings keyframes swap into the label (`transform cmd [label: "git
+    // commit"]`): the box is auto-sized for the widest of them too.
+    let label_metrics = label_metrics.map(|mut m| {
+        if let Some((_, font_size, _, _)) = label {
+            for w in keyframe_wordings(&shape.modifiers) {
+                let rich = crate::layout::text::parse_markup(&w).unwrap_or_else(|_| crate::layout::text::RichText::from_plain(&w));
+                let mut mw = crate::layout::text::measure_runs(&rich.lines, *font_size);
+                mw.width = if mono { mono_width(&rich, *font_size) } else { mw.width * factor };
+                m.width = m.width.max(mw.width);
+                m.height = m.height.max(mw.height);
+            }
+        }
         m
     });
     let label_min_width = label_metrics.map(|m| m.width + 2.0 * LABEL_INSET);
