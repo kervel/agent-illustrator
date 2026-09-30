@@ -1252,7 +1252,9 @@ fn render_motion_overlays(element: &ElementLayout, builder: &mut SvgBuilder, beh
                 ));
             }
             ("accent-badge", false) => {
-                let (cx, cy) = (b.right(), b.y);
+                // Just outside the right edge, level with the element: it
+                // says which row it means.
+                let (cx, cy) = (b.right() + 26.0, b.center().y);
                 builder.add_raw(&format!(
                     r##"<g class="aiacb-{s}{id}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"><circle cx="{}" cy="{}" r="13" fill="{colour}"/><text x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="#ffffff">!</text></g>"##,
                     r2(cx), r2(cy), r2(cx), r2(cy), r2(cx), r2(cy + 1.0)

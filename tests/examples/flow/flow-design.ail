@@ -1,0 +1,130 @@
+/* From idea to production, slide 2: idea -> design document.
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-design.ail
+
+   STORYBOARD
+     session  a person and Claude talk the feature through (an interactive session)
+     doc      out comes a design document, with the user journey in it
+     iceberg  the document is only the tip: below the waterline sit silent assumptions
+     surface  a Kapernikov colleague brings them up; they become lines in the document
+     agree    the person reads the document, not the code, and agrees
+*/
+
+import "flow-deck.ail"
+
+template "person" from "assets/person.svg"
+template "agent_art" from "assets/agent.svg"
+template "berg" from "assets/iceberg.svg"
+
+// A chat bubble.
+template "bubble" (says: "", tint: role-surface-2) {
+    rect bg [fill: tint, stroke: none, corner_radius: 14, label: says, font_size: 19, label_fill: role-ink,
+             max_width: 300]
+}
+
+// A silent assumption, under water until someone asks.
+template "assumption" (says: "") {
+    rect bg [fill: none, stroke: none, label: says, font_size: 19, font_weight: 600, label_fill: role-series-1,
+             max_width: 230]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "2", title: "Idea → design document"]
+
+// The interactive session.
+rect chat [width: 460, height: 430, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+rect chat_bar [width: 460, height: 50, fill: role-surface-2, stroke: none, clip: chat,
+               label: "Claude · interactive", align: start, font_size: 21, font_weight: 700, label_fill: role-ink]
+constrain chat.left = s.stage.left + 90
+constrain chat.top = s.stage.top + 150
+constrain chat_bar.top = chat.top
+constrain chat_bar.left = chat.left
+person you [width: 42, height: 49, tint: role-ink]
+agent_art claude [width: 52, height: 52]
+constrain you.left = chat.left + 20
+constrain you.top = chat_bar.bottom + 24
+constrain claude.right = chat.right - 20
+constrain claude.top = you.bottom + 40
+bubble b1 [says: "Customers keep asking when their order arrives.", appears: later]
+bubble b2 [says: "Show the delivery date on the order page?", tint: role-series-1-soft, appears: later]
+bubble b3 [says: "Yes, and in the order list.", appears: later]
+constrain b1.bg.left = you.right + 14
+constrain b1.bg.top = you.top
+constrain b2.bg.right = claude.left - 14
+constrain b2.bg.top = claude.top
+constrain b3.bg.left = b1.bg.left
+constrain b3.bg.top = b2.bg.bottom + 26
+
+// Below the waterline: what nobody wrote down (declared first, so the document covers its tip).
+// The document is the tip: the iceberg's waterline sits at the document's bottom edge.
+berg ice [width: 600, height: 525, appears: later, overlaps: doc]
+constrain ice.center_x = doc.center_x
+constrain ice.top = doc.bottom - 120   // the waterline (64 of 280 in the artwork) meets the document
+
+// The design document.
+code doc [lang: markdown, title: "design.md", font_size: 19, min_chars: 36, appears: later,
+          source: "## Delivery date on the order\nShow it on the order page and list.\n\nJourney: open order 42,\nsee its delivery date."]
+constrain doc.left = chat.right + 80
+constrain doc.top = chat.top
+
+// The silent assumptions.
+assumption q1 [says: "Promised date, or actual date?", appears: later]
+assumption q2 [says: "What if there is none yet?", appears: later]
+assumption q3 [says: "May every customer see it?", appears: later]
+constrain q1.bg.center_x = ice.center_x
+constrain q1.bg.top = ice.top + 110
+constrain q2.bg.center_x = q1.bg.center_x
+constrain q2.bg.top = q1.bg.bottom + 14
+constrain q3.bg.center_x = q1.bg.center_x
+constrain q3.bg.top = q2.bg.bottom + 14
+
+// The colleague who asks.
+person kap [width: 46, height: 54, tint: role-secondary, appears: later]
+rect kap_lbl [label: "Kapernikov colleague", font_size: 17, font_weight: 600, label_fill: role-muted, fill: none,
+              stroke: none, appears: later]
+constrain kap.left = ice.right + 10
+constrain kap.center_y = q2.bg.center_y
+constrain kap_lbl.left = kap.left
+constrain kap_lbl.top = kap.bottom + 6
+
+// Agreement.
+circle ok [size: 56, fill: role-ok, stroke: role-ink, stroke_width: 3, label: "✓", label_fill: role-surface,
+           font_size: 28, font_weight: 800, appears: later, overlaps: doc]
+constrain ok.center_x = doc.right
+constrain ok.center_y = doc.top
+
+// ---------------------------------------------------------------- motion
+
+keyframe "session" [title: "Idea → design document"] {
+    slide_in(s)
+    at 0.2 { show chat, chat_bar, you, claude [enter: rise, stagger: 0.05] }
+    when claude shown { show b1 [enter: pop, duration: fast] }
+    when b1 shown + 0.1 { show b2 [enter: pop, duration: fast] }
+    when b2 shown + 0.1 { show b3 [enter: pop, duration: fast] }
+}
+
+keyframe "doc" {
+    show doc [from: chat, duration: slow]
+}
+
+keyframe "iceberg" {
+    show ice [enter: rise]
+    when ice shown { show q1, q2, q3 [enter: fade, stagger: 0.15] }
+}
+
+keyframe "surface" {
+    show kap, kap_lbl [enter: pop]
+    when kap shown {
+        move q1, q2, q3 to doc [stagger: 0.15, duration: slow]
+    }
+    when q3 arrives {
+        hide q1, q2, q3 [exit: shrink, duration: fast]
+        insert doc after line 5 [name: extra, tint: role-warn-soft, stagger: 0.08,
+            source: "\nDate: the promised one.\nNone yet: say \"to be planned\".\nVisible to the customer only."]
+    }
+}
+
+keyframe "agree" {
+    pulse you
+    then { show ok [enter: pop] }
+}

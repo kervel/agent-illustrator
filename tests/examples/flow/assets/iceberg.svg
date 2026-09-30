@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 280" width="320" height="280">
+  <title>Iceberg</title>
+  <!-- Parts: berg.tip (above the water), berg.mass (below), berg.water (the waterline).
+       Colours are theme roles. -->
+  <path id="mass" d="M96 64 L224 64 L276 118 L300 176 L262 238 L188 274 L108 266 L42 222 L20 160 L52 104 Z"
+        fill="var(--role-series-1-soft, #d2e9ee)" stroke="var(--role-series-1, #1f92a6)" stroke-width="3"
+        stroke-linejoin="round" stroke-dasharray="10 7"/>
+  <path id="tip" d="M96 64 L128 30 L150 40 L172 8 L200 38 L224 64 Z"
+        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3" stroke-linejoin="round"/>
+  <line id="water" x1="0" y1="64" x2="320" y2="64" stroke="var(--role-series-1, #1f92a6)" stroke-width="4"
+        stroke-linecap="round"/>
+</svg>

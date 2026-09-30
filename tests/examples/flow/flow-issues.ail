@@ -1,0 +1,130 @@
+/* From idea to production, slide 3: design document -> issues -> Claude or Boss.
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-issues.ail
+
+   STORYBOARD
+     split   the design document splits into issues, each with a well-defined briefing
+     lanes   each issue takes a lane: Claude (interactive: you drive, fast) or Boss (on its own, ~2 hours);
+             no fixed rule, it's your attention against waiting
+     mrs     both lanes end the same way: a merge request (Claude's comes first, Boss's while you did something else)
+*/
+
+import "flow-deck.ail"
+
+template "person" from "assets/person.svg"
+template "agent_art" from "assets/agent.svg"
+
+// An issue card: its number and a one-line briefing title.
+template "issue" (nr: "#1", what: "Do something") {
+    rect bg [width: 250, height: 112, fill: role-surface, stroke: role-ink, stroke_width: 2, corner_radius: 10]
+    rect num [label: nr, font_family: mono, font_size: 17, font_weight: 700, label_fill: role-muted, fill: none,
+              stroke: none]
+    rect ttl [label: what, font_size: 19, font_weight: 600, label_fill: role-ink, fill: none, stroke: none,
+              align: start, max_width: 220]
+    constrain num.left = bg.left + 14
+    constrain num.top = bg.top + 10
+    constrain ttl.left = num.left
+    constrain ttl.top = num.bottom + 4
+}
+
+// A merge request chip.
+template "mr" (nr: "!1") {
+    rect bg [label: nr, font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
+             fill: role-primary, stroke: none, corner_radius: 8, width: 90, height: 48]
+}
+
+// A lane: a band with who drives it and how long it takes.
+template "lane" (title: "Lane", how: "", tint: role-surface-2) {
+    rect band [width: 920, height: 220, fill: tint, stroke: none, corner_radius: 16]
+    rect ttl [label: title, font_size: 22, font_weight: 700, label_fill: role-ink, fill: none, stroke: none,
+              align: start]
+    rect sub [label: how, font_size: 18, label_fill: role-muted, fill: none, stroke: none, align: start]
+    constrain ttl.left = band.left + 24
+    constrain ttl.top = band.top + 18
+    constrain sub.left = ttl.left
+    constrain sub.top = ttl.bottom + 4
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "3", title: "Issues: Claude or Boss"]
+
+code doc [lang: markdown, title: "design.md", font_size: 15, min_chars: 30,
+          source: "## Delivery date on the order\nShow it on the order page and list.\n\nJourney: open order 42,\nsee its delivery date."]
+constrain doc.left = s.stage.left + 70
+constrain doc.center_y = s.stage.center_y + 20
+
+// The lanes first: they are opaque bands, and the issue cards move on top of them.
+lane l_claude [title: "Claude · interactive", how: "you drive · fast · best result", appears: later]
+lane l_boss [title: "Boss · autonomous", how: "on its own · ~2 hours · you do something else", tint: role-series-2-soft,
+             appears: later]
+constrain l_claude.band.right = s.stage.right - 60
+constrain l_claude.band.top = s.stage.top + 140
+constrain l_boss.band.right = l_claude.band.right
+constrain l_boss.band.top = l_claude.band.bottom + 40
+
+col issues [gap: 18] {
+    issue i1 [nr: "#101", what: "Delivery date in the API", appears: later]
+    issue i2 [nr: "#102", what: "Show it on the order page", appears: later]
+    issue i3 [nr: "#103", what: "Show it in the order list", appears: later]
+}
+constrain issues.left = doc.right + 50
+constrain issues.center_y = doc.center_y
+
+// Who works in each lane.
+person you [width: 44, height: 51, tint: role-ink, appears: later]
+agent_art claude [width: 60, height: 60, appears: later]
+agent_art boss [width: 60, height: 60, tint: role-secondary, appears: later]
+constrain you.left = l_claude.band.left + 30
+constrain you.bottom = l_claude.band.bottom - 26
+constrain claude.left = you.right + 16
+constrain claude.bottom = you.bottom
+constrain boss.left = l_boss.band.left + 30
+constrain boss.bottom = l_boss.band.bottom - 26
+
+// Where the issues go in their lane.
+group slots {
+    point slot_c
+    point slot_b1
+    point slot_b2
+}
+constrain slot_c.center_x = l_claude.band.center_x - 40
+constrain slot_c.center_y = l_claude.band.center_y + 44
+constrain slot_b1.center_x = l_boss.band.center_x - 110
+constrain slot_b1.center_y = l_boss.band.center_y + 44
+constrain slot_b2.center_x = l_boss.band.center_x + 160
+constrain slot_b2.center_y = slot_b1.center_y
+
+// What comes out: merge requests.
+mr m1 [nr: "!58", appears: later]
+mr m2 [nr: "!59", appears: later]
+mr m3 [nr: "!60", appears: later]
+constrain m1.bg.right = l_claude.band.right - 30
+constrain m1.bg.center_y = slot_c.center_y
+constrain m2.bg.right = l_boss.band.right - 30
+constrain m2.bg.center_y = slot_b1.center_y - 30
+constrain m3.bg.right = m2.bg.right
+constrain m3.bg.top = m2.bg.bottom + 12
+
+// ---------------------------------------------------------------- motion
+
+keyframe "split" [title: "Issues: Claude or Boss"] {
+    slide_in(s)
+    at 0.2 { show doc [enter: rise] }
+    when doc shown { show i1, i2, i3 [from: doc, stagger: 0.12] }
+}
+
+keyframe "lanes" {
+    show l_claude, l_boss [enter: fade, stagger: 0.1]
+    when l_boss shown { show you, claude, boss [enter: pop, stagger: 0.08] }
+    when boss shown {
+        // one statement per issue: `move` takes one destination (no `to a, b, c` / `to slots.*` pairing)
+        move i1 to slot_c [duration: slow]
+        move i2 to slot_b1 [duration: slow, delay: 0.12]
+        move i3 to slot_b2 [duration: slow, delay: 0.24]
+    }
+}
+
+keyframe "mrs" {
+    show m1 [from: i1, duration: slow]
+    when m1 shown + 0.5 { show m2, m3 [from: boss, duration: slow, stagger: 0.2] }
+}

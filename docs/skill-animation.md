@@ -524,7 +524,10 @@ accent step3 [tone: error]               // why: attention (default) | error (ad
 accent code.line[4] [hold: step]         // stays until the next click (while you talk)
 accent icon [style: wiggle]              // or underline | ring | outline
 ```
-The style follows the element; the tone picks a role colour. It is drawn over
+The style follows the element: text and rows (things with no fill or border
+of their own) are underlined, something small (up to 80px) is ringed, any
+other box is outlined; the tone picks a role colour. An accent lasts 1.2s:
+a `then` after it waits for it (use `when x shown` to go on sooner). It is drawn over
 the element, moves nothing and leaves nothing behind; stills (`--at`, PNG)
 show it while it plays. Prefer it to building emphasis from pulse +
 highlight + a colour change.

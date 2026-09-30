@@ -1,0 +1,135 @@
+/* From idea to production, slide 6: a merge isn't a release.
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-release.ail
+
+   STORYBOARD
+     merges    three merge requests join main, each fine on its own
+     together  on main, together, something is off: testing isn't done after the merge requests
+     release   a release is created in GitLab and built automatically
+     test      it rides to the test environment: people test the whole
+     prod      when it's good, on to production (sometimes via user acceptance first)
+*/
+
+import "flow-deck.ail"
+
+template "person" from "assets/person.svg"
+
+// A station: a ring on the line, its name below.
+template "stop" (name: "Station", tint: role-primary, side: below) {
+    circle dot [size: 40, fill: role-surface, stroke: tint, stroke_width: 8, appears: later]
+    rect nm [caption_of: dot, label_position: side, label_offset: 10, label: name, font_size: 21,
+             font_weight: 700, label_fill: role-ink, fill: none, stroke: none, max_width: 170, appears: later]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "6", title: "A merge isn't a release"]
+
+// The branches of three merge requests, drawn under their stations.
+path br1 [through: [p1, m1.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
+path br2 [through: [p2, m2.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
+path br3 [through: [p3, m3.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
+path track [through: [m1.dot, m2.dot, m3.dot, rel.dot, test.dot, prod.dot], drawn: 0, extend_start: 60,
+            stroke: role-primary, stroke_width: 14, fill: none]
+path uat_path [through: [test.dot, uat.dot, prod.dot], routing: metro, drawn: 0, stroke: role-primary,
+               stroke_width: 8, stroke_dasharray: "12,9", fill: none]
+
+stop m1 [name: "!58"]
+stop m2 [name: "!59"]
+stop m3 [name: "!60"]
+stop rel [name: "release v1.4"]
+stop test [name: "test environment"]
+stop uat [name: "user acceptance", side: below]
+stop prod [name: "production", tint: role-ok]
+constrain m1.dot.center_x = s.stage.left + 150
+constrain m1.dot.center_y = s.stage.center_y + 10
+constrain prod.dot.center_x = s.stage.right - 120
+constrain m2.dot.center_x = m1.dot.center_x + 140
+constrain m3.dot.center_x = m2.dot.center_x + 140
+constrain rel.dot.center_x = m3.dot.center_x + 260
+constrain test.dot.center_x = rel.dot.center_x + 280
+constrain uat.dot.center_x = midpoint(test.dot, prod.dot)
+constrain m2.dot.center_y = m1.dot.center_y
+constrain m3.dot.center_y = m1.dot.center_y
+constrain rel.dot.center_y = m1.dot.center_y
+constrain test.dot.center_y = m1.dot.center_y
+constrain prod.dot.center_y = m1.dot.center_y
+constrain uat.dot.center_y = m1.dot.center_y + 170
+
+// Where the branches come from.
+point p1
+point p2
+point p3
+constrain p1.center_x = m1.dot.center_x - 60
+constrain p1.center_y = m1.dot.center_y - 160
+constrain p2.center_x = m2.dot.center_x - 60
+constrain p2.center_y = p1.center_y
+constrain p3.center_x = m3.dot.center_x - 60
+constrain p3.center_y = p1.center_y
+
+// Together, something is off.
+circle warn [size: 50, fill: role-warn, stroke: role-ink, stroke_width: 3, label: "!", label_fill: role-ink,
+             font_size: 28, font_weight: 800, appears: later]
+rect warn_lbl [label: "fine alone · slow together", font_size: 20, font_weight: 700, label_fill: role-ink,
+               fill: role-warn-soft, stroke: none, corner_radius: 8, appears: later]
+constrain warn.center_x = midpoint(m3.dot, rel.dot)
+constrain warn.center_y = m1.dot.center_y
+constrain warn_lbl.center_x = warn.center_x
+constrain warn_lbl.top = warn.bottom + 75
+
+// The release: built by GitLab.
+rect built [label: "built by GitLab", font_size: 18, font_weight: 600, label_fill: role-ink, fill: role-surface-2,
+            stroke: none, corner_radius: 8, appears: later]
+constrain built.center_x = rel.dot.center_x
+constrain built.bottom = rel.dot.top - 50
+
+// People testing the whole.
+row testers [gap: 14, align: bottom] {
+    person t1 [width: 40, height: 47, tint: role-ink, appears: later]
+    person t2 [width: 40, height: 47, tint: role-ink, appears: later]
+    person t3 [width: 40, height: 47, tint: role-ink, appears: later]
+}
+constrain testers.center_x = test.dot.center_x
+constrain testers.bottom = test.dot.top - 50
+
+// The feature, arriving.
+rect card [label: "Delivery date on the order", font_size: 19, font_weight: 700, label_fill: role-ink,
+           fill: role-series-2-soft, stroke: role-ink, stroke_width: 2, corner_radius: 10, max_width: 190,
+           appears: later]
+constrain card.center_x = prod.dot.center_x
+constrain card.bottom = prod.dot.top - 50
+
+// ---------------------------------------------------------------- motion
+
+keyframe "merges" [title: "A merge isn't a release"] {
+    slide_in(s)
+    at 0.2 { draw br1, br2, br3 [stagger: 0.15] }
+    then { draw track [to: m3.dot] }
+    when track reaches m1.dot { show m1.dot, m1.nm [enter: pop] }
+    when track reaches m2.dot { show m2.dot, m2.nm [enter: pop] }
+    when track reaches m3.dot { show m3.dot, m3.nm [enter: pop] }
+}
+
+keyframe "together" {
+    draw track [to: rel.dot]
+    when track reaches warn { show warn [enter: pop] }
+    when warn shown { show warn_lbl [enter: rise]; accent warn }
+}
+
+keyframe "release" {
+    show rel.dot, rel.nm [enter: pop]
+    when rel.dot shown { show built [enter: rise] }
+}
+
+keyframe "test" {
+    draw track [to: test.dot]
+    when track reaches test.dot { show test.dot, test.nm [enter: pop] }
+    when test.dot shown { show t1, t2, t3 [enter: pop, stagger: 0.1] }
+}
+
+keyframe "prod" {
+    draw uat_path [duration: slow]
+    when uat_path reaches uat.dot { show uat.dot, uat.nm [enter: pop] }
+    draw track [duration: slow]
+    when track reaches prod.dot { show prod.dot, prod.nm [enter: pop] }
+    when prod.dot shown { show card [enter: pop] }
+}

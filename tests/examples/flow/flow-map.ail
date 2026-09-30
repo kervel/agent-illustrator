@@ -1,0 +1,104 @@
+/* From idea to production, slide 1: the whole line.
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-map.ail
+
+   STORYBOARD
+     line   one line from idea to production; its stations pop as it draws; the feature card waits at "idea"
+     who    who acts where: people judge (idea, design, test), agents build and verify (issues, merge request)
+     ride   the feature card rides the whole line: this is the journey the next slides follow
+*/
+
+import "flow-deck.ail"
+
+template "person" from "assets/person.svg"
+template "agent_art" from "assets/agent.svg"
+
+// A station: a ring on the line, its name below.
+template "stop" (name: "Station", tint: role-primary) {
+    circle dot [size: 40, fill: role-surface, stroke: tint, stroke_width: 8, appears: later]
+    rect nm [caption_of: dot, label_position: below, label_offset: 10, label: name, font_size: 21,
+             font_weight: 700, label_fill: role-ink, fill: none, stroke: none, max_width: 150, appears: later]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "1", title: "From idea to production"]
+
+path route [through: [idea.dot, design.dot, issues.dot, mr.dot, main.dot, release.dot, test.dot, prod.dot],
+           spread: even, drawn: 0, stroke: role-primary, stroke_width: 14, fill: none]
+stop idea [name: "idea"]
+stop design [name: "design document"]
+stop issues [name: "issues"]
+stop mr [name: "merge request"]
+stop main [name: "main"]
+stop release [name: "release"]
+stop test [name: "test environment"]
+stop prod [name: "production", tint: role-ok]
+constrain idea.dot.center_x = s.stage.left + 130
+constrain idea.dot.center_y = s.stage.center_y + 40
+constrain prod.dot.center_x = s.stage.right - 130
+constrain prod.dot.center_y = idea.dot.center_y
+constrain design.dot.center_y = idea.dot.center_y
+constrain issues.dot.center_y = idea.dot.center_y
+constrain mr.dot.center_y = idea.dot.center_y
+constrain main.dot.center_y = idea.dot.center_y
+constrain release.dot.center_y = idea.dot.center_y
+constrain test.dot.center_y = idea.dot.center_y
+
+// The feature that travels the line.
+rect card [label: "Delivery date on the order", font_size: 19, font_weight: 700, label_fill: role-ink,
+           fill: role-series-2-soft, stroke: role-ink, stroke_width: 2, corner_radius: 10, max_width: 190,
+           appears: later]
+constrain card.center_x = idea.dot.center_x
+constrain card.bottom = idea.dot.top - 30
+// Where the card ends up: above production.
+point card_end
+constrain card_end.center_x = prod.dot.center_x
+constrain card_end.center_y = card.center_y
+
+// Who acts where.
+person p_idea [width: 40, height: 47, tint: role-ink, appears: later]
+person p_design [width: 40, height: 47, tint: role-ink, appears: later]
+person p_test [width: 40, height: 47, tint: role-ink, appears: later]
+agent_art a_issues [width: 56, height: 56, appears: later]
+agent_art a_mr [width: 56, height: 56, appears: later]
+constrain p_idea.center_x = idea.dot.center_x
+constrain p_idea.bottom = idea.dot.top - 120
+constrain p_design.center_x = design.dot.center_x
+constrain p_design.bottom = p_idea.bottom
+constrain p_test.center_x = test.dot.center_x
+constrain p_test.bottom = p_idea.bottom
+constrain a_issues.center_x = issues.dot.center_x
+constrain a_issues.bottom = p_idea.bottom
+constrain a_mr.center_x = mr.dot.center_x
+constrain a_mr.bottom = p_idea.bottom
+
+// ---------------------------------------------------------------- motion
+
+motion arrive(st: element) {
+    show st.dot [enter: pop]
+    show st.nm [enter: rise, delay: 0.1]
+}
+
+keyframe "line" [title: "From idea to production"] {
+    slide_in(s)
+    at 0.2 { draw route [duration: slow] }
+    when route reaches idea.dot { arrive(idea) }
+    when route reaches design.dot { arrive(design) }
+    when route reaches issues.dot { arrive(issues) }
+    when route reaches mr.dot { arrive(mr) }
+    when route reaches main.dot { arrive(main) }
+    when route reaches release.dot { arrive(release) }
+    when route reaches test.dot { arrive(test) }
+    when route reaches prod.dot { arrive(prod) }
+    when prod.dot shown { show card [enter: pop] }
+}
+
+keyframe "who" {
+    show p_idea, p_design, p_test [enter: pop, stagger: 0.1]
+    then { show a_issues, a_mr [enter: pop, stagger: 0.1] }
+}
+
+keyframe "ride" {
+    move card to card_end [duration: slow]
+    when card arrives { pulse prod.dot [scale: 1.3] }
+}

@@ -1,0 +1,159 @@
+/* From idea to production, slide 4: what one merge request does on its own.
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-mr.ail
+
+   STORYBOARD
+     pipeline  the merge request starts its pipeline: build, tests, and its own review deployment
+     e2e       the robot walks the journey from the design document on that deployment; one step goes red
+     dig       an agent digs from the failing screen step through the API to the cause; the fix makes it green
+     check     a person checks the review deployment: does it look right, does it work right
+     merge     the merge gate opens: the change joins main
+*/
+
+import "flow-deck.ail"
+
+template "person" from "assets/person.svg"
+template "agent_art" from "assets/agent.svg"
+template "boxart" from "assets/box.svg"
+template "barrier" from "assets/barrier.svg"
+
+// A pipeline stage: a chip that turns green when it passes.
+template "stage" (what: "build") {
+    rect bg [label: what, font_size: 19, font_weight: 700, label_fill: role-ink, fill: role-surface-2,
+             stroke: role-rule, stroke_width: 2, corner_radius: 10, width: 170, height: 52]
+    state passed { transform self [fill: role-ok-soft, stroke: role-ok] }   // one-part template: the part is `self`
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "4", title: "What one merge request does"]
+
+rect mr [label: "!59 Show it on the order page", font_family: mono, font_size: 20, font_weight: 700,
+         label_fill: role-surface, fill: role-primary, stroke: none, corner_radius: 10]
+constrain mr.left = s.stage.left + 80
+constrain mr.top = s.stage.top + 120
+
+row pipe [gap: 30, align: center] {
+    stage st_build [what: "build"]
+    stage st_tests [what: "tests"]
+    stage st_review [what: "review deploy"]
+    stage st_e2e [what: "e2e journey"]
+}
+constrain pipe.left = mr.right + 40
+constrain pipe.center_y = mr.center_y
+
+// The review deployment: the whole app, for this merge request only.
+rect review [width: 520, height: 330, fill: none, stroke: role-primary, stroke_width: 3, stroke_dasharray: "10,7",
+             corner_radius: 18, appears: later]
+rect review_tag [label: "review-59.acme.example.com", font_family: mono, font_size: 18, font_weight: 700,
+                 label_fill: role-surface, fill: role-primary, stroke: none, corner_radius: 8, appears: later,
+                 overlaps: review]
+constrain review.left = s.stage.left + 80
+constrain review.top = mr.bottom + 90
+constrain review_tag.left = review.left + 24
+constrain review_tag.center_y = review.top
+grid apps [cols: 3, gap: 36, cell_width: 130, cell_height: 110] {
+    boxart b* [width: 110, height: 96, appears: later, items: [
+        {tint: role-series-1}, {tint: role-primary}, {tint: role-series-2},
+        {tint: role-series-4}, {tint: role-secondary}, {tint: role-series-3}]]
+}
+constrain apps.center_x = review.center_x
+constrain apps.center_y = review.center_y + 10
+
+// The journey the robot walks, from the design document.
+table journey [columns: ["journey (design.md)", ""],
+               rows: [["log in", ""], ["open order 42", ""], ["see its delivery date", ""]],
+               widths: [300, 60], font_size: 20, appears: later]
+agent_art robot [width: 60, height: 60, appears: later]
+constrain journey.left = review.right + 100
+constrain journey.top = review.top + 10
+constrain robot.right = journey.left - 12
+constrain robot.center_y = journey.row1.center_y
+// Where the robot stands for rows 2 and 3 (beside the table, not on it).
+point at_row2
+point at_row3
+constrain at_row2.center_x = robot.center_x
+constrain at_row2.center_y = journey.row2.center_y
+constrain at_row3.center_x = robot.center_x
+constrain at_row3.center_y = journey.row3.center_y
+
+// Where the agent digs: screen, API, database.
+col layers [gap: 10, appears: later] {
+    rect ly_screen [label: "screen", font_size: 18, font_weight: 600, label_fill: role-ink, fill: role-surface-2,
+                    stroke: role-rule, stroke_width: 2, corner_radius: 8, width: 180, height: 44]
+    rect ly_api [label: "API", font_size: 18, font_weight: 600, label_fill: role-ink, fill: role-surface-2,
+                 stroke: role-rule, stroke_width: 2, corner_radius: 8, width: 180, height: 44]
+    rect ly_db [label: "database", font_size: 18, font_weight: 600, label_fill: role-ink, fill: role-surface-2,
+                stroke: role-rule, stroke_width: 2, corner_radius: 8, width: 180, height: 44]
+}
+agent_art digger [width: 52, height: 52, tint: role-secondary, appears: later]
+rect cause [label: "the API sends the order date, not the delivery date", font_size: 18, font_weight: 600,
+            label_fill: role-ink, fill: role-warn-soft, stroke: none, corner_radius: 8, max_width: 330, appears: later]
+constrain layers.left = journey.left
+constrain layers.top = journey.bottom + 40
+constrain digger.left = layers.right + 16
+constrain digger.center_y = ly_screen.center_y
+point at_api
+constrain at_api.center_x = digger.center_x
+constrain at_api.center_y = ly_api.center_y
+constrain cause.left = digger.left
+constrain cause.top = ly_db.bottom + 16
+
+// The human check, and the merge gate.
+person checker [width: 46, height: 54, tint: role-ink, appears: later]
+rect check_lbl [label: "looks right · works right", font_size: 18, font_weight: 600, label_fill: role-ink,
+                fill: none, stroke: none, appears: later]
+constrain checker.left = review.left + 24
+constrain checker.top = review.bottom + 24
+constrain check_lbl.left = checker.right + 12
+constrain check_lbl.center_y = checker.center_y
+barrier gate [width: 200, height: 96, appears: later]   // `arm.pivot: left` isn't accepted on an artwork part yet
+rect merged [label: "merged into main", font_family: mono, font_size: 18, font_weight: 700, label_fill: role-surface,
+             fill: role-ok, stroke: none, corner_radius: 8, appears: later]
+constrain gate.left = review.right + 70
+constrain gate.bottom = s.stage.bottom - 60
+constrain merged.left = gate.right + 20
+constrain merged.bottom = gate.bottom - 10
+
+// ---------------------------------------------------------------- motion
+
+keyframe "pipeline" [title: "What one merge request does"] {
+    slide_in(s)
+    at 0.2 { show mr [enter: pop] }
+    when mr shown { set st_build passed }
+    then { set st_tests passed }
+    then { set st_review passed }
+}
+
+keyframe "deploy" [auto] {
+    show review [enter: draw]
+    show review_tag [enter: pop]
+    when review shown { show apps.* [enter: pop, stagger: 0.06] }
+}
+
+keyframe "e2e" {
+    show journey, robot [enter: fade]
+    when robot shown { transform journey.r1c1 [label: "✓", label_fill: role-ok] }
+    then { move robot to at_row2 [duration: fast]; transform journey.r2c1 [label: "✓", label_fill: role-ok] }
+    then { move robot to at_row3 [duration: fast] }
+    when robot arrives {
+        transform journey.r3c1 [label: "✕", label_fill: role-error]
+        accent journey.row[3] [tone: error, hold: step]
+    }
+}
+
+keyframe "dig" {
+    show layers, digger [enter: fade]
+    when digger shown { move digger to at_api [duration: normal] }
+    when digger arrives { accent ly_api [style: outline]; show cause [enter: pop] }
+    when cause shown + 0.3 { transform journey.r3c1 [label: "✓", label_fill: role-ok, swap: roll]; set st_e2e passed }
+}
+
+keyframe "check" {
+    show checker, check_lbl [enter: pop]
+}
+
+keyframe "merge" {
+    show gate [enter: rise]
+    when gate shown { hide gate.arm [exit: lift] }
+    then { show merged [from: mr, duration: slow] }
+}

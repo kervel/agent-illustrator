@@ -1,0 +1,86 @@
+/* From idea to production, slide 5: seventy at once.
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-seventy.ail
+
+   STORYBOARD
+     one      one merge request, one review deployment: the cluster barely notices
+     seventy  seventy issues handed out at once: seventy merge requests, seventy review deployments;
+              the servers fill up and go red (the fix is explained live)
+*/
+
+import "flow-deck.ail"
+
+template "boxart" from "assets/box.svg"
+
+// A server with a load meter: one green bar when fine, three red bars when overloaded.
+template "server" (title: "server") {
+    rect bg [width: 300, height: 170, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+    rect head [width: 300, height: 44, fill: role-surface-2, stroke: none, clip: bg,
+               label: title, align: start, font_size: 20, font_weight: 700, label_fill: role-ink]
+    row meter [gap: 8, align: bottom] {
+        rect m1 [width: 26, height: 24, fill: role-ok, stroke: none, corner_radius: 3]
+        rect m2 [width: 26, height: 44, fill: role-ok, stroke: none, corner_radius: 3, appears: later]
+        rect m3 [width: 26, height: 64, fill: role-ok, stroke: none, corner_radius: 3, appears: later]
+    }
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+    constrain meter.center_x = bg.center_x
+    constrain meter.bottom = bg.bottom - 22
+    state full {
+        show m2, m3 [enter: grow]
+        transform m1, m2, m3 [fill: role-error]
+        transform bg [stroke: role-error]
+    }
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "5", title: "Seventy at once"]
+
+row cluster [gap: 40] {
+    server srv1 [title: "server 1"]
+    server srv2 [title: "server 2"]
+    server srv3 [title: "server 3"]
+}
+constrain cluster.right = s.stage.right - 70
+constrain cluster.bottom = s.stage.bottom - 90
+
+// One merge request and its review deployment.
+rect mr_one [label: "!59", font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
+             fill: role-primary, stroke: none, corner_radius: 8, width: 90, height: 46]
+boxart dep_one [width: 64, height: 56, tint: role-primary]
+constrain mr_one.left = s.stage.left + 80
+constrain mr_one.top = s.stage.top + 150
+constrain dep_one.center_x = srv1.bg.center_x - 80
+constrain dep_one.center_y = srv1.bg.center_y + 10
+
+// Seventy more.
+grid many [cols: 14, gap: 10, cell_width: 76, cell_height: 40] {
+    rect c* [label: ["!60", "!61", "!62", "!63", "!64", "!65", "!66", "!67", "!68", "!69", "!70", "!71", "!72", "!73", "!74", "!75", "!76", "!77", "!78", "!79", "!80", "!81", "!82", "!83", "!84", "!85", "!86", "!87", "!88", "!89", "!90", "!91", "!92", "!93", "!94", "!95", "!96", "!97", "!98", "!99", "!100", "!101", "!102", "!103", "!104", "!105", "!106", "!107", "!108", "!109", "!110", "!111", "!112", "!113", "!114", "!115", "!116", "!117", "!118", "!119", "!120", "!121", "!122", "!123", "!124", "!125", "!126", "!127", "!128", "!129"], font_family: mono, font_size: 15, font_weight: 700,
+             label_fill: role-surface, fill: role-primary, stroke: none, corner_radius: 6, width: 70, height: 34,
+             appears: later]
+}
+constrain many.left = mr_one.left
+constrain many.top = mr_one.bottom + 40
+rect caption [label: "70 issues, handed out at once", font_size: 26, font_weight: 700, label_fill: role-ink,
+              fill: none, stroke: none, appears: later]
+constrain caption.left = mr_one.right + 30
+constrain caption.center_y = mr_one.center_y
+
+// ---------------------------------------------------------------- motion
+
+keyframe "one" [title: "Seventy at once"] {
+    slide_in(s)
+    at 0.2 { show cluster.* [enter: rise, stagger: 0.08] }
+    when srv3 shown { show mr_one [enter: pop] }
+    when mr_one shown { show dep_one [from: mr_one, duration: slow] }
+}
+
+keyframe "seventy" {
+    show caption [enter: rise]
+    when caption shown { show many.* [enter: pop, stagger: 0.015, order: random] }
+}
+
+keyframe "overload" [auto] {
+    set srv1 full; set srv2 full; set srv3 full
+    then { shake cluster }
+}

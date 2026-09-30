@@ -1,0 +1,21 @@
+// Shared parts of the "from idea to production" slides (same stage as the git slides): `import "flow-deck.ail"`.
+// In the reveal deck the slide title lives in the red header (and follows the
+// keyframes' `title:` metadata), so the stage has no visible badge or heading.
+// They stay as empty parts so the scenes compile unchanged.
+import "ail:motion/git"
+
+template "slide" (num: "1", title: "Title") {
+    rect stage [width: 1600, height: 900, fill: none, stroke: none, canvas: true]
+    rect badge [width: 1, height: 1, fill: none, stroke: none]
+    text "{title}" heading [font_size: 1, fill: none, align: start]
+    constrain stage.left = 0
+    constrain stage.top = 0
+    constrain badge.left = stage.left + 96
+    constrain badge.top = stage.top + 64
+    constrain heading.left = badge.right + 22
+    constrain heading.center_y = badge.center_y
+}
+
+motion slide_in(s: element) {
+    show s.badge [enter: fade]
+}

@@ -490,3 +490,46 @@ fn an_accent_on_something_hidden_is_linted() {
     let src = "rect a [width: 40, height: 20, appears: later]\nkeyframe \"k\" { }\nkeyframe \"j\" { accent a }";
     assert!(lint(src).iter().any(|m| m.contains("accent on a")), "{:?}", lint(src));
 }
+
+#[test]
+fn what_the_first_keyframe_does_later_plays() {
+    // v0.2.14 applied every change of frame 0 before it started, so a `set`
+    // behind `when` in the first keyframe never animated.
+    let src = r#"
+template "stage" (what: "build") {
+    rect bg [label: what, fill: gray, width: 170, height: 52]
+    state passed { transform self [fill: green] }
+}
+row pipe [gap: 30] { stage a [what: "build"]
+ stage b [what: "tests"] }
+rect mr [width: 100, height: 30]
+keyframe "first" {
+    transform mr [fill: blue]
+    at 0.2 { show mr [enter: pop] }
+    when mr shown { set a passed }
+    then { set b passed }
+}
+keyframe "later" { }
+"#;
+    let t = timeline(src);
+    assert!(t.contains("a (shape) fill: gray -> green  @0.70+0.50"), "{t}");
+    assert!(t.contains("b (shape) fill: gray -> green  @1.20+0.50"), "{t}");
+    assert!(!t.contains("mr (shape) fill"), "what it does at its start still sets the scene: {t}");
+}
+
+#[test]
+fn a_held_accent_ends_with_its_step() {
+    let src = "rect a [width: 200, height: 100, fill: white]\nkeyframe \"k\" { }\nkeyframe \"j\" { accent a [hold: step] }\nkeyframe \"n\" { }";
+    let mut c = RenderConfig::new();
+    c.frame = Some("n".into());
+    c.at = Some("50%".into());
+    let still = render_with_config(src, c).unwrap();
+    assert!(still.contains("{ opacity: 0 !important; }") && !still.contains("aiaco-") || still.contains("aiaco-") && still.split("aiaco-").nth(1).unwrap().contains("opacity: 0"), "gone in the next step");
+}
+
+#[test]
+fn a_filled_box_is_outlined_not_underlined() {
+    let src = "rect layer [width: 180, height: 44, fill: white, stroke: black]\nkeyframe \"k\" { }\nkeyframe \"j\" { accent layer }";
+    let t = timeline(src);
+    assert!(t.contains(".aiaco-") && !t.contains(".aiacu-"), "{t}");
+}

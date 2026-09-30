@@ -11,7 +11,7 @@
 //! timing of the statement that changed it. A dependent that follows a moved
 //! element therefore moves *with* it, in the same beat.
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 use crate::layout::keyframe::FrameState;
 use crate::layout::types::{ElementLayout, ElementType, LayoutResult, Point};
@@ -461,6 +461,9 @@ struct ElemInfo {
     base: crate::layout::types::BoundingBox,
     is_rect: bool,
     base_text: Option<String>,
+    /// Text, or a box that paints nothing of its own (a label, a table row,
+    /// a code line): accented with an underline rather than an outline.
+    text_like: bool,
 }
 
 fn element_text(elem: &ElementLayout) -> Option<String> {
@@ -568,6 +571,9 @@ struct Compiler<'a> {
     /// Options of the statement being compiled.
     current_opts: Vec<Spanned<MotionOpt>>,
     display: HashMap<String, String>,
+    /// Frame 0's statements already applied in the pre-state (those at its
+    /// start), by span: they set the scene and do not animate.
+    pre_applied: HashSet<(usize, usize)>,
 }
 
 fn has_marker(layout: &LayoutResult, id: &str) -> bool {
@@ -1171,6 +1177,10 @@ impl<'a> Compiler<'a> {
                         base: e.bounds,
                         is_rect: matches!(e.element_type, ElementType::Shape(ShapeType::Rectangle)),
                         base_text: element_text(e),
+                        text_like: matches!(e.element_type, ElementType::Shape(ShapeType::Text { .. }))
+                            || (matches!(e.element_type, ElementType::Shape(ShapeType::Rectangle))
+                                && e.styles.fill.as_deref().is_none_or(|f| f == "none")
+                                && e.styles.stroke.as_deref().is_none_or(|s| s == "none")),
                     },
                 );
             }
@@ -1209,6 +1219,7 @@ impl<'a> Compiler<'a> {
             scope: input.scope.to_string(),
             current_opts: Vec::new(),
             display: super::expand::ElementIndex::build(input.doc).display,
+            pre_applied: HashSet::new(),
         }
     }
 }
@@ -1359,19 +1370,42 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
         found
     });
 
-    // Pre-state: frame 0's own changes applied instantly, except what it
-    // brings on stage (shows, draws, swaps-in, counts), which enter.
+    // Pre-state: frame 0 sets the scene with what it does at its start
+    // (applied instantly), except what it brings on stage (shows, draws,
+    // swaps-in, counts), which enter. What it does later (behind `when`,
+    // `then`, `at`, `after`, a delay) is its animation, and plays.
     let mut state = FrameState::initial();
     if let Some(kf0) = keyframes.first() {
         for op in &kf0.operations {
-            match &op.node {
-                KeyframeOp::Show(targets) => {
-                    for t in targets {
-                        state.hidden_elements.insert(t.node.0.clone());
-                        state.hidden_connections.insert(t.node.0.clone());
-                    }
+            if let KeyframeOp::Show(targets) = &op.node {
+                for t in targets {
+                    state.hidden_elements.insert(t.node.0.clone());
+                    state.hidden_connections.insert(t.node.0.clone());
                 }
-                KeyframeOp::Draw { .. } => {}
+            }
+        }
+        fn at_start(nodes: &[Spanned<MotionNode>], out: &mut Vec<KeyframeOp>, spans: &mut HashSet<(usize, usize)>) {
+            for n in nodes {
+                match &n.node {
+                    MotionNode::Stmt(s) => {
+                        let delayed = opt_number(&s.opts, "delay").is_some_and(|d| d > 1e-9);
+                        if !delayed {
+                            out.extend(crate::motion::expand::stmt_state_ops(s, &n.span));
+                            spans.insert((n.span.start, n.span.end));
+                        }
+                    }
+                    MotionNode::After(t, b) | MotionNode::At(t, b) if *t <= 1e-9 => at_start(b, out, spans),
+                    MotionNode::Beat(_, b) => at_start(b, out, spans),
+                    _ => {}
+                }
+            }
+        }
+        let mut ops = Vec::new();
+        at_start(&kf0.motion, &mut ops, &mut c.pre_applied);
+
+        for op in &ops {
+            match op {
+                KeyframeOp::Show(_) | KeyframeOp::Draw { .. } => {}
                 KeyframeOp::Transform { modifiers, .. }
                     if modifiers.iter().any(|m| matches!(m.node.key.node, crate::parser::ast::StyleKey::Label)) => {}
                 other => state.apply(other),
@@ -1465,7 +1499,7 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
 
     // Fill the settled table; defaults for channels that only animate.
     let neutral = |k: &ChKey| -> Val {
-        let aux_hook = ["aighost-", "aiflash-", "aihl-", "aiping-", "aitick-"]
+        let aux_hook = ["aighost-", "aiflash-", "aihl-", "aiping-", "aitick-", "aiacu-", "aiacr-", "aiaco-", "aiacb-"]
             .iter()
             .any(|p| k.sel.starts_with(&format!(".{}", p)));
         match k.prop {
@@ -1611,8 +1645,10 @@ impl<'a> Compiler<'a> {
 
             // State change, for this target only.
             let ops = super::expand::atom_state_ops(s, i, &ts.span);
-            // Frame 0 already carries its non-entering changes (pre-state).
-            let ops: Vec<KeyframeOp> = if fi == 0 {
+            // Frame 0 already carries the non-entering changes of what it
+            // does at its start (pre-state); what it does later plays.
+            let pre = fi == 0 && self.pre_applied.contains(&(ts.span.start, ts.span.end));
+            let ops: Vec<KeyframeOp> = if pre {
                 ops.into_iter()
                     .filter(|op| {
                         matches!(op, KeyframeOp::Show(_) | KeyframeOp::Draw { .. })
@@ -2178,7 +2214,8 @@ impl<'a> Compiler<'a> {
     ) -> Result<(), CompileError> {
         let span = fm.atoms[atom].span.clone();
         let err = |m: String| CompileError { message: m, span: span.clone() };
-        let b = self.elems.get(target).map(|e| e.base).ok_or_else(|| err(format!("accent: '{}' is not an element", target)))?;
+        let info = self.elems.get(target).ok_or_else(|| err(format!("accent: '{}' is not an element", target)))?;
+        let (b, text_like) = (info.base, info.text_like);
         let tone = opt_name(opts, "tone").unwrap_or("attention");
         let colour = match tone {
             "attention" => "var(--role-warn, #E8A33D)",
@@ -2188,7 +2225,7 @@ impl<'a> Compiler<'a> {
         };
         let style = match opt_name(opts, "style").unwrap_or("auto") {
             "auto" => {
-                if b.height <= 60.0 && b.width >= 2.5 * b.height {
+                if text_like && b.height <= 60.0 && b.width >= 2.5 * b.height {
                     "underline"
                 } else if b.width.max(b.height) <= 80.0 {
                     "ring"

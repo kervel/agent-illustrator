@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120" width="250" height="120">
+  <title>Barrier</title>
+  <!-- A merge gate. Parts: gate.post, gate.arm (rotate it about its left end to open). -->
+  <g id="arm">
+    <rect x="30" y="22" width="215" height="18" rx="9" fill="var(--role-surface, #ffffff)"
+          stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+    <rect x="70" y="24" width="28" height="14" fill="var(--role-error, #ba2415)"/>
+    <rect x="126" y="24" width="28" height="14" fill="var(--role-error, #ba2415)"/>
+    <rect x="182" y="24" width="28" height="14" fill="var(--role-error, #ba2415)"/>
+  </g>
+  <g id="post">
+    <rect x="14" y="16" width="30" height="102" rx="6" fill="var(--role-ink, #14171f)"/>
+    <circle cx="29" cy="31" r="8" fill="var(--role-surface, #ffffff)"/>
+  </g>
+</svg>

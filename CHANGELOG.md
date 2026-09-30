@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.15
+
+- Fix: the first keyframe applied all its changes before it started, so what
+  it does later (a `set` behind `when mr shown`, a transform after `then`)
+  never animated. Frame 0 now sets the scene only with what happens at its
+  start; the rest plays.
+- Fix: an accent's marks settled visible after they played, so a held accent
+  (and any accent) showed again in later steps. They settle hidden, like
+  flash, highlight and ping.
+- Accent defaults from real use: only text-like things (text, rows, code
+  lines, label-only boxes) are underlined, a filled or bordered box is
+  outlined; the error "!" badge sits just outside the right edge, level with
+  the element (it says which row it means).
+
 ## v0.2.14
 
 - `accent x`: one verb for "look here". The style follows the element (a
