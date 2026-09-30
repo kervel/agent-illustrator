@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.17
+
+- Fix: two accents on the same element in different tones (`[tone: error]`
+  then `[tone: ok]` a step later) shared one mark, so the earlier one showed
+  the later one's colour. Each style and tone now has its own mark. Covered
+  by the playback-equivalence test.
+
 ## v0.2.16
 
 - Fix: a part of SVG artwork turned about the wrong point. Part overrides

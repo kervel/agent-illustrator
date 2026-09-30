@@ -2255,8 +2255,10 @@ impl<'a> Compiler<'a> {
         }
         for (what, prefix) in nodes {
             let node_colour = if what == "badge" { "var(--role-error, #D64545)" } else { colour };
-            self.aux.overlays.entry(target.to_string()).or_default().insert(format!("accent-{}:{}", what, node_colour));
-            let hook = format!(".{}{}-{}{}", prefix, &what[..1], s, target);
+            // One mark per element, style and tone: two accents on the same
+            // thing in different tones each keep their own colour.
+            self.aux.overlays.entry(target.to_string()).or_default().insert(format!("accent-{}-{}:{}", what, tone, node_colour));
+            let hook = format!(".{}{}-{}{}-{}", prefix, &what[..1], s, target, tone);
             // Opacity: in, hold, out; or in and held while the step is shown.
             if hold {
                 self.overlay(fm, hook.clone(), Prop::Opacity, Overlay { start, dur: entr, ease: Ease::Linear, keys: vec![Val::n(0.0), Val::n(1.0)], mode: Mode::Abs, looping: false, atom });

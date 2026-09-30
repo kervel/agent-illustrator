@@ -18,3 +18,6 @@ keyframe "b" {
     accent dot
     accent panel [tone: error, hold: step]
 }
+keyframe "c" {
+    accent panel [tone: ok]
+}

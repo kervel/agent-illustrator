@@ -1228,37 +1228,44 @@ fn render_motion_overlays(element: &ElementLayout, builder: &mut SvgBuilder, beh
             )),
             // `accent`: drawn over the element, hidden until the accent plays
             // (so the no-JS picture and stills of other moments show none).
-            ("accent-underline", false) => {
-                let (x, y, w) = (b.x, b.bottom() + 5.0, b.width);
-                builder.add_raw(&format!(
-                    r#"<rect class="aiacu-{s}{id}" x="{}" y="{}" width="{}" height="5" rx="2.5" fill="{colour}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                    r2(x), r2(y), r2(w), r2(x), r2(y + 2.5)
-                ));
-            }
-            ("accent-ring", false) => {
+            (w, false) if w.starts_with("accent-") => {
+                // `accent-<style>-<tone>`: one mark per element, style and tone.
+                let (style, tone) = w["accent-".len()..].split_once('-').unwrap_or((&w["accent-".len()..], "attention"));
+                let class = format!("aiac{}-{s}{id}-{tone}", &style[..1]);
                 let c = b.center();
-                let r = b.width.max(b.height) / 2.0 + 9.0;
-                builder.add_raw(&format!(
-                    r#"<circle class="aiacr-{s}{id}" cx="{}" cy="{}" r="{}" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                    r2(c.x), r2(c.y), r2(r), r2(c.x), r2(c.y)
-                ));
-            }
-            ("accent-outline", false) => {
-                let pad = 7.0;
-                let c = b.center();
-                builder.add_raw(&format!(
-                    r#"<rect class="aiaco-{s}{id}" x="{}" y="{}" width="{}" height="{}" rx="10" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                    r2(b.x - pad), r2(b.y - pad), r2(b.width + 2.0 * pad), r2(b.height + 2.0 * pad), r2(c.x), r2(c.y)
-                ));
-            }
-            ("accent-badge", false) => {
-                // Just outside the right edge, level with the element: it
-                // says which row it means.
-                let (cx, cy) = (b.right() + 26.0, b.center().y);
-                builder.add_raw(&format!(
-                    r##"<g class="aiacb-{s}{id}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"><circle cx="{}" cy="{}" r="13" fill="{colour}"/><text x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="#ffffff">!</text></g>"##,
-                    r2(cx), r2(cy), r2(cx), r2(cy), r2(cx), r2(cy + 1.0)
-                ));
+                match style {
+                    "underline" => {
+                        let (x, y, w) = (b.x, b.bottom() + 5.0, b.width);
+                        builder.add_raw(&format!(
+                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="5" rx="2.5" fill="{colour}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(x), r2(y), r2(w), r2(x), r2(y + 2.5)
+                        ));
+                    }
+                    "ring" => {
+                        let r = b.width.max(b.height) / 2.0 + 9.0;
+                        builder.add_raw(&format!(
+                            r#"<circle class="{class}" cx="{}" cy="{}" r="{}" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(c.x), r2(c.y), r2(r), r2(c.x), r2(c.y)
+                        ));
+                    }
+                    "outline" => {
+                        let pad = 7.0;
+                        builder.add_raw(&format!(
+                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="{}" rx="10" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(b.x - pad), r2(b.y - pad), r2(b.width + 2.0 * pad), r2(b.height + 2.0 * pad), r2(c.x), r2(c.y)
+                        ));
+                    }
+                    "badge" => {
+                        // Just outside the right edge, level with the element:
+                        // it says which row it means.
+                        let (cx, cy) = (b.right() + 26.0, c.y);
+                        builder.add_raw(&format!(
+                            r##"<g class="{class}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"><circle cx="{}" cy="{}" r="13" fill="{colour}"/><text x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="#ffffff">!</text></g>"##,
+                            r2(cx), r2(cy), r2(cx), r2(cy), r2(cx), r2(cy + 1.0)
+                        ));
+                    }
+                    _ => {}
+                }
             }
             ("ping", false) => {
                 let c = b.center();

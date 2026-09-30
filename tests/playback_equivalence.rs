@@ -231,7 +231,8 @@ fn fan_out_flights_and_nested_entrances_play_as_sampled() {
 
 #[test]
 fn accents_play_as_sampled() {
-    check_in("tests/fixtures", "accents", &[1]);
+    // Frame 2 accents the panel again in another tone: each keeps its colour.
+    check_in("tests/fixtures", "accents", &[1, 2]);
 }
 
 #[test]

@@ -558,3 +558,14 @@ fn an_artwork_part_turns_about_its_pivot_in_player_and_stills() {
     let lint = agent_illustrator::render_with_lint(src, RenderConfig::new().with_template_base_path(dir.clone()).with_lint(true)).unwrap().1;
     assert!(lint.is_empty(), "part overrides are not unknown modifiers: {:?}", lint.iter().map(|w| &w.message).collect::<Vec<_>>());
 }
+
+#[test]
+fn two_accents_in_different_tones_keep_their_colours() {
+    let src = "rect box [width: 200, height: 100, fill: white, stroke: black]\nkeyframe \"a\" { }\n\
+               keyframe \"found\" { accent box [tone: error] }\nkeyframe \"retest\" { accent box [tone: ok] }";
+    let mut c = RenderConfig::new();
+    c.frame = Some("found".into());
+    c.at = Some("0.6s".into());
+    let still = render_with_config(src, c).unwrap();
+    assert!(still.contains("-box-error { opacity: 1") && still.contains("-box-ok { opacity: 0"), "{still}");
+}
