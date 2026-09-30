@@ -20,7 +20,7 @@ Connection labels always sit at the midpoint, causing collisions when paths cros
 
 ## Medium Priority
 
-### Sandbox: the static binary is the whole loop (next, from the deck review)
+### ~~Sandbox: the static binary is the whole loop~~ DONE (v0.2.11)
 PNG output via resvg (`--frame N [--at T] --png`, `--frames-to-dir --png`,
 `--frames-strip --png`, `--scale`); bundled sans + mono fonts and `@font-face`
 data URIs from stylesheets, with a clear report on fallback; CI check that the
@@ -93,7 +93,7 @@ between the two showed it for one frame. Nothing about an element now steps at
 
 ## Low Priority / Won't Do
 
-### z-index control
+### ~~z-index control~~ DONE (v0.2.8: `z_order:` on any shape; through-lines under their stations)
 Declaration order already determines draw order and is documented. Not worth adding
 explicit z-index — it would complicate the mental model for no real benefit.
 
