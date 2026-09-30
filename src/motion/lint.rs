@@ -173,6 +173,46 @@ pub fn check(
         }
     }
 
+    // `show x` on something on screen from before the keyframe (and never
+    // hidden in it first): it does nothing, and x was there all along. The
+    // usual cause is a missing `appears: later`.
+    let mut kids: HashMap<&str, Vec<&str>> = HashMap::new();
+    for (c, p) in &parent_of {
+        kids.entry(p.as_str()).or_default().push(c.as_str());
+    }
+    // (A show in the first keyframe is an entrance: what it shows starts hidden.)
+    for (fi, f) in m.frames.iter().enumerate().skip(1) {
+        let prev = &states[fi - 1];
+        let mut reported: HashSet<&str> = HashSet::new();
+        for (ai, a) in f.atoms.iter().enumerate() {
+            if a.kind != "show" || !m.display.contains_key(&a.target_id) || reported.contains(a.target_id.as_str()) {
+                continue;
+            }
+            // Everything under it (and it) visible before the keyframe.
+            let mut stack = vec![a.target_id.as_str()];
+            let mut all_visible = true;
+            while let Some(x) = stack.pop() {
+                if hidden_in(prev, x, &parent_of) {
+                    all_visible = false;
+                    break;
+                }
+                stack.extend(kids.get(x).into_iter().flatten().copied());
+            }
+            let hidden_first = f.atoms[..ai].iter().any(|b| b.kind == "hide" && b.target_id == a.target_id);
+            if all_visible && !hidden_first {
+                reported.insert(a.target_id.as_str());
+                out.push(warn(
+                    LintCategory::Motion,
+                    &f.name,
+                    format!(
+                        "show {}: it is already on screen before this keyframe, so this does nothing (missing `appears: later` on it?)",
+                        show(&a.target_id)
+                    ),
+                ));
+            }
+        }
+    }
+
     for (fi, f) in m.frames.iter().enumerate() {
         let end = &states[fi];
         let before = if fi > 0 { Some(&states[fi - 1]) } else { None };

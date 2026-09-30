@@ -22,6 +22,10 @@ const MONO: &[u8] = include_bytes!("../assets/fonts/OverpassMono[wght].ttf");
 /// (OFL), used as the fallback for any character the chosen font has not.
 const SYMBOLS: &[u8] = include_bytes!("../assets/fonts/NotoSansSymbols2-subset.ttf");
 
+/// Marks every bundled face set draws (checked by a test), for the
+/// missing-glyph note and the guides.
+pub const SAFE_MARKS: &str = "✓ ✔ ✕ ✗ × → ← ↑ ↓ ↔ ↕ ↺ ➜ ➤ · • … – — ★ ☆ ● ○ ■ □ ▲ ▶ ◀ ▼ ◆ ◇ ♥ ⚠ ⚡ ☁ ☐ ☑ ☒ ✉ ✎ ✚ € £ ° ± ≈ ≠ ≤ ≥ ∞ √ π « »";
+
 /// What happened on the way to the picture that the author should know.
 pub struct Raster {
     pub png: Vec<u8>,
@@ -109,8 +113,9 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
     boxes.dedup();
     if !boxes.is_empty() {
         notes.push(format!(
-            "no available font has {}; they are drawn as boxes. Embed a font that has them as an @font-face data URI",
-            boxes.iter().map(|c| format!("'{}' (U+{:04X})", c, *c as u32)).collect::<Vec<_>>().join(", ")
+            "no available font has {}; they are drawn as boxes. Use a mark the bundled fonts have ({}), or embed a font that has them as an @font-face data URI",
+            boxes.iter().map(|c| format!("'{}' (U+{:04X})", c, *c as u32)).collect::<Vec<_>>().join(", "),
+            SAFE_MARKS
         ));
     }
     let opt = usvg::Options { fontdb: Arc::new(db), ..Default::default() };
@@ -740,6 +745,14 @@ fn write_node(n: roxmltree::Node, rules: &[Rule], vars: &HashMap<String, String>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_safe_marks_have_glyphs() {
+        let faces: Vec<ttf_parser::Face> = [SANS, MONO, SYMBOLS].iter().map(|d| ttf_parser::Face::parse(d, 0).unwrap()).collect();
+        for c in SAFE_MARKS.chars().filter(|c| *c != ' ') {
+            assert!(faces.iter().any(|f| f.glyph_index(c).is_some()), "{c} (U+{:04X})", c as u32);
+        }
+    }
 
     #[test]
     fn path_lengths() {

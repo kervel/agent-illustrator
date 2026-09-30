@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.20
+
+- Fix: `fly ghost(group)` copied every child, including ones not shown yet
+  (a conversation flew with answers still to come). A ghost is now a snapshot
+  of what is on screen when it flies: hidden children, and the parts of hidden
+  instances, stay behind.
+- Lint: `show x` on something already on screen before the keyframe does
+  nothing; it is now reported ("missing `appears: later` on it?").
+- `--doc text` (also `--doc symbols`) lists the marks the bundled fonts draw
+  (✓ ✕ → ↺ ★ ⚠ ● ▶ …); the `--png` missing-glyph note names them too, and a
+  test keeps the list true.
+
 ## v0.2.19
 
 - `--doc` knows more words: aliases (`move`, `pivot`, `stagger`, `timing`,

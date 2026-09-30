@@ -22,7 +22,7 @@ pub struct MotionHooks {
     /// Per element: overlay nodes ("flash:#fff", "ping:colour", "highlight:colour").
     pub overlays: BTreeMap<String, BTreeSet<String>>,
     /// Ghost copies: (hook suffix, source element).
-    pub ghosts: Vec<(String, String)>,
+    pub ghosts: Vec<(String, String, Vec<String>)>,
     /// Text elements that get a counter ticker node.
     pub tickers: BTreeSet<String>,
 }

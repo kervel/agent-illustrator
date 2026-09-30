@@ -78,6 +78,10 @@ const ALIASES: &[(&str, &str)] = &[
     ("lint", "verify"),
     ("icons", "artwork"),
     ("svg", "artwork"),
+    ("symbols", "text"),
+    ("glyphs", "text"),
+    ("marks", "text"),
+    ("fonts", "text"),
 ];
 
 /// The brief, with its topic list filled in from the one table `--doc`

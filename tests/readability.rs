@@ -569,3 +569,56 @@ fn two_accents_in_different_tones_keep_their_colours() {
     let still = render_with_config(src, c).unwrap();
     assert!(still.contains("-box-error { opacity: 1") && still.contains("-box-ok { opacity: 0"), "{still}");
 }
+
+#[test]
+fn a_ghost_copies_what_shows_when_it_flies() {
+    // v0.2.18 copied a container with all its children, the ones still to
+    // come included.
+    // A hidden instance hides its parts too.
+    let src = r#"
+template "msg" (says: "") { rect bg [width: 120, height: 30, label: says] }
+group convo {
+    col conv [gap: 8] {
+        rect e1 [width: 120, height: 30, label: "first", appears: later]
+        msg e2 [says: "second", appears: later]
+        msg e3 [says: "later answer", appears: later]
+    }
+}
+rect llm [width: 80, height: 80]
+constrain llm.left = convo.right + 100
+keyframe "a" { show e1, e2 }
+keyframe "b" { fly ghost(convo) to llm
+ then { show e3 } }
+"#;
+    let svg = render(src);
+    // The ghost's own group, up to its matching `</g>`.
+    let at = svg.find("<g class=\"aighost-").expect("a ghost");
+    let (mut depth, mut end) = (0i32, svg.len());
+    for (i, _) in svg[at..].match_indices('<') {
+        let rest = &svg[at + i..];
+        if rest.starts_with("<g") && !rest[..rest.find('>').unwrap()].ends_with('/') {
+            depth += 1;
+        } else if rest.starts_with("</g>") {
+            depth -= 1;
+            if depth == 0 {
+                end = at + i;
+                break;
+            }
+        }
+    }
+    let ghost = &svg[at..end];
+    assert!(ghost.contains("second"), "{ghost}");
+    assert!(!ghost.contains("later answer"), "{ghost}");
+}
+
+#[test]
+fn a_show_of_something_already_on_screen_is_linted() {
+    // A panel missing `appears: later` sat on screen from the first click;
+    // its `show` later did nothing, and lint said nothing.
+    let src = "rect panel [width: 200, height: 100]\nrect tip [width: 40, height: 20, appears: later]\n\
+               keyframe \"a\" { show tip }\nkeyframe \"b\" { show panel [enter: fade] }\n\
+               keyframe \"c\" { hide tip\n then { show tip } }";
+    let w = lint(src);
+    assert!(w.iter().any(|m| m.contains("show panel: it is already on screen")), "{w:?}");
+    assert!(!w.iter().any(|m| m.contains("show tip")), "hidden first in the keyframe, or entering: {w:?}");
+}

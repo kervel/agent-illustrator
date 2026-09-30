@@ -74,3 +74,10 @@ fn other_words_find_the_same_sections() {
     assert_eq!(docs::section("z-order"), docs::section("layering"));
     assert!(docs::suggest("stagr").contains(&"swarm") || docs::suggest("stagr").contains(&"stage"));
 }
+
+#[test]
+fn the_text_section_lists_the_safe_marks() {
+    let text = agent_illustrator::docs::section("text").expect("text section");
+    assert!(text.contains(agent_illustrator::raster::SAFE_MARKS), "{text}");
+    assert!(agent_illustrator::docs::section("symbols").is_some());
+}

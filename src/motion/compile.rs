@@ -207,7 +207,8 @@ pub struct Aux {
     /// Drawables: id -> is a connection (true) or path shape (false).
     pub drawables: BTreeMap<String, bool>,
     /// Ghost copies: (hook class suffix, source element id).
-    pub ghosts: Vec<(String, String)>,
+    /// (suffix, source, parts of the source hidden when it flies).
+    pub ghosts: Vec<(String, String, Vec<String>)>,
     /// Per element, the transient overlay nodes it needs: flash, ping, highlight(colour).
     pub overlays: BTreeMap<String, BTreeSet<String>>,
     /// Text elements that get a counter ticker node.
@@ -2028,6 +2029,17 @@ impl<'a> Compiler<'a> {
         Ok(())
     }
 
+    fn is_descendant(&self, id: &str, ancestor: &str) -> bool {
+        let mut cur = self.elems.get(id).and_then(|e| e.parent.clone());
+        while let Some(p) = cur {
+            if p == ancestor {
+                return true;
+            }
+            cur = self.elems.get(&p).and_then(|e| e.parent.clone());
+        }
+        false
+    }
+
     fn center_before(&self, before: &Snap, id: &str) -> Option<Point> {
         let base = self.base_center(id)?;
         let own = match before.vals.get(&ChKey { sel: self.wrap(id), prop: Prop::Translate }) {
@@ -2069,7 +2081,28 @@ impl<'a> Compiler<'a> {
         let (hook, src, anc) = match subject {
             FlySubject::Ghost(_) => {
                 let suffix = format!("{}", self.aux.ghosts.len());
-                self.aux.ghosts.push((suffix.clone(), target.to_string()));
+                // A snapshot of what shows now: parts still hidden stay behind.
+                let hidden: Vec<String> = self
+                    .elems
+                    .keys()
+                    .filter(|id| *id != target && self.is_descendant(id, target))
+                    .filter(|id| {
+                        // Hidden itself, or inside a hidden part of the source.
+                        let hid = |x: &str| {
+                            matches!(snap.vals.get(&ChKey { sel: self.wrap(x), prop: Prop::Opacity }), Some(v) if v.close(&Val::n(0.0)))
+                        };
+                        let mut cur = Some(id.to_string());
+                        while let Some(x) = cur.filter(|x| x != target) {
+                            if hid(&x) {
+                                return true;
+                            }
+                            cur = self.elems.get(&x).and_then(|e| e.parent.clone());
+                        }
+                        false
+                    })
+                    .cloned()
+                    .collect();
+                self.aux.ghosts.push((suffix.clone(), target.to_string(), hidden));
                 let hook = format!(".aighost-{}{}", self.scope, suffix);
                 // The ghost starts wherever its source is drawn right now.
                 let src = self.center_before(snap, target).unwrap_or(base_c);

@@ -140,4 +140,4 @@ keyframe "clone" {
 ## Fetch on demand: `agent-illustrator --doc <topic>`
 
 Topics: {TOPICS}. Other words work too (move, pivot, stagger, timing,
-highlight, z-order, overlap, caption); a near miss gets a suggestion.
+highlight, z-order, overlap, caption, symbols); a near miss gets a suggestion.

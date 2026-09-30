@@ -562,6 +562,11 @@ changes wording and colour is simpler as a transform: `transform status [label:
 with `[label: initial, stroke: initial, label_fill: initial]` (or give it
 states, below).
 
+Marks in labels: the bundled fonts (used by `--png` and for any viewer
+without the right font) have these, so they look the same everywhere:
+✓ ✔ ✕ ✗ × → ← ↑ ↓ ↔ ↕ ↺ ➜ ➤ · • … – — ★ ☆ ● ○ ■ □ ▲ ▶ ◀ ▼ ◆ ◇ ♥ ⚠ ⚡ ☁ ☐ ☑ ☒ ✉ ✎ ✚ € £ ° ± ≈ ≠ ≤ ≥ ∞ √ π « ».
+Others (↻ ⇒ ↩ ⚙ ⏳, emoji) may show as boxes; `--png` names them.
+
 ### Layouts that change
 
 A few elements placed differently for a while (a file moving aside for a card)

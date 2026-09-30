@@ -1299,8 +1299,17 @@ fn render_motion_ghosts(result: &LayoutResult, builder: &mut SvgBuilder) {
         }
         None
     }
-    for (suffix, src) in ghosts {
+    fn prune(e: &mut ElementLayout, hidden: &[String]) {
+        e.children.retain(|c| !c.id.as_ref().is_some_and(|i| hidden.contains(&i.0)));
+        for c in &mut e.children {
+            prune(c, hidden);
+        }
+    }
+    for (suffix, src, hidden) in ghosts {
         let Some(el) = find(&result.root_elements, &src) else { continue };
+        let mut el = el.clone();
+        prune(&mut el, &hidden);
+        let el = &el;
         let saved_motion = builder.motion.take();
         let saved_variants = std::mem::take(&mut builder.text_variants);
         let start = builder.elements.len();
