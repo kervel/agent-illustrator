@@ -20,6 +20,20 @@ Connection labels always sit at the midpoint, causing collisions when paths cros
 
 ## Medium Priority
 
+### Tight group box as a constraint subject (deferred from v0.2.5)
+`constrain [merged, card].center_x = s.stage.center_x`: centre two elements
+together. `contains` only emits inequalities, so a helper box is loose (the
+solver stretches the box instead of moving what is inside). Needs a solver
+preference that keeps the box tight. Would replace the `+ 272` in
+git-merge's `layout beside`.
+
+### Player: translate of a collapsing line at the instant it vanishes
+playback_equivalence saw git-merge "conflict" line8 at t=0.499 translate
+-84 (native) vs -94 (played) while its opacity is ~0 and it is clipped
+shut; the test now ignores opacity < 0.005. Not visible in settled stills;
+not yet checked in a GPU `--film` of git-merge step 2.
+
+
 ### Orthogonal routing merge control
 Fan-in/fan-out connections share a vertical/horizontal trunk line with no control
 over where it sits. Options:
