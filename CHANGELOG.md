@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.2.6
+
+From a newcomer's scene (git-history: clone, commit, push, pull), now in
+examples/motion.
+
+- Station spacing no longer misfires on plain dots: a component's other parts
+  count as a station's name only when it holds a single station of the line,
+  dots a row already spaces are left alone, and room-for-names and `spread:
+  even` are weaker than any constraint the author writes (they never move a
+  component off its pin). Also makes `hub.center_x`/`hub.top` on a
+  standalone instance reliable again.
+- `midpoint(a.bottom, b.top)`: the middle of a gap between edges. A `(` in a
+  constraint says there is no arithmetic and points at midpoint.
+- Instance part overrides: `machine anna [hist.appears: later, bg.fill:
+  role-ok]`; `appears:` (and `opacity:`) on a nested instance now apply.
+- The line-before-station lint only counts what a line is declared to pass: a
+  `through:` path's stations, a connection's end (fix: `when l shown`). A
+  caption sitting on a link is not a station.
+- Lint messages name parts with dots (`hub.bg.left`, not `hub_bg.left`).
+- `ail:motion/git` macros time with `delay:` and `then`; docs say how to time
+  inside a macro, and that rows/grids are for regular arrangements.
+
 ## v0.2.5
 
 Readability: a scene says what it means, so an author (or an agent) can read

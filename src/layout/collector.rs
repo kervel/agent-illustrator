@@ -595,44 +595,24 @@ impl ConstraintCollector {
                 a,
                 b,
                 offset,
+                a_edge,
+                b_edge,
             } => {
                 let target_var = self.property_to_variable(target);
-
-                // For midpoint of elements, we use the same property type as target
-                // e.g., if target is a.center_y, we use b.center_y and c.center_y
-                // This ensures centers are compared with centers for proper alignment
-                let a_var = LayoutVariable::new(
-                    &a.node.0,
-                    match &target.property.node {
-                        ConstraintProperty::CenterX | ConstraintProperty::Center => {
-                            super::solver::LayoutProperty::CenterX
-                        }
-                        ConstraintProperty::CenterY => super::solver::LayoutProperty::CenterY,
-                        ConstraintProperty::X | ConstraintProperty::Left => {
-                            super::solver::LayoutProperty::X
-                        }
-                        ConstraintProperty::Y | ConstraintProperty::Top => {
-                            super::solver::LayoutProperty::Y
-                        }
-                        _ => super::solver::LayoutProperty::X,
-                    },
-                );
-                let b_var = LayoutVariable::new(
-                    &b.node.0,
-                    match &target.property.node {
-                        ConstraintProperty::CenterX | ConstraintProperty::Center => {
-                            super::solver::LayoutProperty::CenterX
-                        }
-                        ConstraintProperty::CenterY => super::solver::LayoutProperty::CenterY,
-                        ConstraintProperty::X | ConstraintProperty::Left => {
-                            super::solver::LayoutProperty::X
-                        }
-                        ConstraintProperty::Y | ConstraintProperty::Top => {
-                            super::solver::LayoutProperty::Y
-                        }
-                        _ => super::solver::LayoutProperty::X,
-                    },
-                );
+                use super::solver::LayoutProperty as LP;
+                // An edge as written (`hub.bottom`), else the same property
+                // as the target (centres with centres).
+                let prop = |edge: &Option<ConstraintProperty>| match edge.as_ref().unwrap_or(&target.property.node) {
+                    ConstraintProperty::CenterX | ConstraintProperty::Center => LP::CenterX,
+                    ConstraintProperty::CenterY => LP::CenterY,
+                    ConstraintProperty::X | ConstraintProperty::Left => LP::X,
+                    ConstraintProperty::Y | ConstraintProperty::Top => LP::Y,
+                    ConstraintProperty::Right => LP::Right,
+                    ConstraintProperty::Bottom => LP::Bottom,
+                    _ => LP::X,
+                };
+                let a_var = LayoutVariable::new(&a.node.0, prop(a_edge));
+                let b_var = LayoutVariable::new(&b.node.0, prop(b_edge));
 
                 self.constraints.push(LayoutConstraint::Midpoint {
                     target: target_var,

@@ -1029,6 +1029,10 @@ pub enum ConstraintExpr {
         b: Spanned<Identifier>,
         /// Offset to add to midpoint (0.0 for no offset)
         offset: f64,
+        /// `midpoint(hub.bottom, laptops.top)`: the edges to take the middle
+        /// of (default: the target's own property on each).
+        a_edge: Option<ConstraintProperty>,
+        b_edge: Option<ConstraintProperty>,
     },
     /// container contains a, b, c [padding: 20]
     Contains {

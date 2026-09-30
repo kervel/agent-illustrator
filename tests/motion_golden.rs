@@ -12,7 +12,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const SCENES: &[&str] = &["git-copies", "git-snapshots", "git-branches", "git-merge"];
+const SCENES: &[&str] = &["git-copies", "git-snapshots", "git-branches", "git-merge", "git-history"];
 
 /// The build stamp differs between builds; nothing else may.
 fn normalise(svg: &str) -> String {

@@ -212,6 +212,7 @@ The `--grammar` output is the authoritative syntax reference. Below are the most
 constrain a.center_x = b.center_x        // align centers
 constrain a.bottom = b.top - 10          // 10px gap
 constrain a.center_x = midpoint(b, c)    // center between two elements
+constrain a.center_y = midpoint(b.bottom, c.top)   // centred in the gap between them
 ```
 
 #### Shape and routing selection

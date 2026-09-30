@@ -1,0 +1,103 @@
+/* Scene: "Everyone has the full history" (clone, commit, push, pull).
+   Render: agent-illustrator --stylesheet-css git-deck.css --animate git-history.ail
+
+   STORYBOARD
+     start   GitLab holds the project history (three commits); three laptops, empty
+     clone   the links draw; the whole history copies down to every laptop
+     commit  Ben commits on his own laptop: a fourth dot, no server involved
+     push    Ben's commit travels up to GitLab
+     pull    Anna and Chris pull it down; everyone has the same four commits again
+   A caption above the links shows the git command of each step.
+*/
+
+import "git-deck.ail"
+
+// ---------------------------------------------------------------- parts
+
+// A history: four commits on a line. The fourth is the one Ben makes later.
+template "history" () {
+    row dots [gap: 34, align: center] {
+        circle d1 [size: 22, fill: role-surface, stroke: role-primary, stroke_width: 5]
+        circle d2 [size: 22, fill: role-surface, stroke: role-primary, stroke_width: 5]
+        circle d3 [size: 22, fill: role-surface, stroke: role-primary, stroke_width: 5]
+        circle d4 [size: 22, fill: role-surface, stroke: role-primary, stroke_width: 5, appears: later]
+    }
+    path track [through: [d1, d2, d3, d4], drawn: d3,
+                stroke: role-primary, stroke_width: 5, fill: none]
+}
+
+// A machine: a window with a title and the history it holds.
+template "machine" (title: "Laptop", who: role-primary) {
+    rect bg [width: 300, height: 150, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 16]
+    rect head [width: 300, height: 48, fill: role-surface-2, stroke: none, corner_radius: 14,
+               label: title, align: start, font_size: 21, font_weight: 700, label_fill: role-ink]
+    circle tag [size: 16, fill: who, stroke: role-ink, stroke_width: 2]
+    history hist
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+    constrain tag.right = bg.right - 18
+    constrain tag.center_y = head.center_y
+    constrain hist.center_x = bg.center_x
+    constrain hist.center_y = bg.center_y + 22
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "3", title: "Everyone has the full history"]
+
+machine hub [title: "GitLab", who: role-secondary]
+constrain hub.center_x = s.stage.center_x
+constrain hub.top = s.stage.top + 150
+
+row laptops [gap: 150] {
+    machine anna [title: "Anna’s laptop", who: role-series-1, hist.appears: later]
+    machine ben [title: "Ben’s laptop", who: role-series-2, hist.appears: later]
+    machine chris [title: "Chris’s laptop", who: role-series-3, hist.appears: later]
+}
+constrain laptops.center_x = s.stage.center_x
+constrain laptops.top = hub.bottom + 190
+
+hub.bottom -> anna.top as l_anna [stroke: role-rule, stroke_width: 4, appears: later]
+hub.bottom -> ben.top as l_ben [stroke: role-rule, stroke_width: 4, appears: later]
+hub.bottom -> chris.top as l_chris [stroke: role-rule, stroke_width: 4, appears: later]
+
+// The git command of the current step, beside the server.
+rect cmd [label: "git clone", font_family: mono, font_size: 24, font_weight: 700, label_fill: role-surface,
+          fill: role-ink, stroke: none, corner_radius: 10, appears: later]
+constrain cmd.left = hub.bg.right + 60
+constrain cmd.center_y = hub.bg.center_y
+
+// ---------------------------------------------------------------- motion
+
+keyframe "start" [title: "Everyone has the full history"] {
+    slide_in(s)
+    at 0.2 { show hub [enter: pop] }
+    when hub shown { show laptops.* [enter: rise, stagger: 0.1] }
+}
+
+keyframe "clone" {
+    show cmd [enter: pop]
+    show l_anna, l_ben, l_chris [enter: draw, stagger: 0.1]
+    when l_chris shown { show anna.hist, ben.hist, chris.hist [from: hub.hist, stagger: 0.14] }
+}
+
+keyframe "commit" {
+    transform cmd [label: "git commit", swap: roll]
+    draw ben.hist.track [to: ben.hist.d4]
+    when ben.hist.track reaches ben.hist.d4 { show ben.hist.d4 [enter: pop] }
+}
+
+keyframe "push" {
+    transform cmd [label: "git push", swap: roll]
+    fly ghost(ben.hist.d4) to hub.hist.d4
+    then { draw hub.hist.track [to: hub.hist.d4] }
+    when hub.hist.track reaches hub.hist.d4 { show hub.hist.d4 [enter: pop] }
+}
+
+keyframe "pull" {
+    transform cmd [label: "git pull", swap: roll]
+    fly ghost(hub.hist.d4) to anna.hist.d4, chris.hist.d4 [stagger: 0.1]
+    then { draw anna.hist.track, chris.hist.track [to: 100%] }
+    when anna.hist.track reaches anna.hist.d4 { show anna.hist.d4 [enter: pop] }
+    when chris.hist.track reaches chris.hist.d4 { show chris.hist.d4 [enter: pop] }
+}

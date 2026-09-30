@@ -168,6 +168,8 @@ constrain a.center_x = b.center_x      Center horizontally
 constrain a.top = b.bottom + 20        Position with offset
 constrain a.width = 100                Fixed dimension
 constrain a.center_x = midpoint(b, c)  Center between two elements
+constrain a.center_y = midpoint(b.bottom, c.top)   Center in the gap between edges
+                                       (there is no other arithmetic: no ( ) or /)
 constrain bg contains a, b [padding: 10]   Auto-size container
 constrain a.center_x = 50 as a_home    Name a constraint
 disable a_home                         Release a named constraint (top level
@@ -195,6 +197,10 @@ TEMPLATES
 Inline templates:
     template "mytemplate" { ... }        Define reusable group (quoted name)
     mytemplate instance_name [params]    Instantiate template (unquoted)
+    machine anna [title: "A", hist.appears: later, bg.fill: role-ok]
+                                         part.modifier: value overrides one part
+                                         of this instance (nested: hist.d4.fill)
+    Instance modifiers opacity: and appears: apply to the whole instance.
 
 File-based templates:
     template "icon" from "path/to/file.svg"     Import SVG file (embedded)

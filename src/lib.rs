@@ -314,6 +314,30 @@ fn validate_colors(doc: &Document, stylesheet: &Stylesheet) -> Result<(), Render
     Ok(())
 }
 
+/// Every internal id in `text` (a part `hub_hist_d2`) written as its dotted
+/// path (`hub.hist.d2`).
+fn dotted_names(text: &str, display: &std::collections::HashMap<String, String>) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut word = String::new();
+    let flush = |word: &mut String, out: &mut String| {
+        match display.get(word.as_str()) {
+            Some(d) if word.contains('_') => out.push_str(d),
+            _ => out.push_str(word),
+        }
+        word.clear();
+    };
+    for ch in text.chars() {
+        if ch.is_ascii_alphanumeric() || ch == '_' {
+            word.push(ch);
+        } else {
+            flush(&mut word, &mut out);
+            out.push(ch);
+        }
+    }
+    flush(&mut word, &mut out);
+    out
+}
+
 /// Extract rotation modifiers from template instances in a document.
 ///
 /// Scans all statements (including nested ones) for template instances with
@@ -826,6 +850,11 @@ fn render_pipeline(
     if config.lint {
         if let Some(m) = &compiled {
             lint_warnings.extend(motion::lint::check(m, &doc, &frame_states, &result));
+        }
+        // Names as the author writes them: `hub.hist.d2`, not `hub_hist_d2`.
+        let display = motion::expand::ElementIndex::build(&doc).display;
+        for w in &mut lint_warnings {
+            w.message = dotted_names(&w.message, &display);
         }
     }
 

@@ -51,6 +51,17 @@ impl ParseError {
         } else {
             message
         };
+        // `constrain c.center_y = (a.bottom + b.top) / 2`: no grouping or
+        // division in constraints; say what does it.
+        let message = if source[start..].starts_with('(') && text.trim_start().starts_with("constrain") {
+            format!(
+                "{} (constraints have no arithmetic; the middle of a gap is `midpoint(a.bottom, b.top)`, \
+                 an offset is `+ 20`)",
+                message
+            )
+        } else {
+            message
+        };
         let mut shown = expected.clone();
         shown.sort();
         shown.dedup();

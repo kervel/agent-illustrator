@@ -252,3 +252,100 @@ fn an_instance_opacity_dims_the_instance() {
     let t = timeline(src);
     assert!(t.contains("i opacity: 0.3 -> 1"), "{t}");
 }
+
+#[test]
+fn unnamed_dots_in_a_row_are_not_spaced_as_stations_and_pins_hold() {
+    let src = r#"
+rect stage [width: 1600, height: 900, fill: none, canvas: true]
+constrain stage.left = 0
+constrain stage.top = 0
+template "history" () {
+    row dots [gap: 34, align: center] {
+        circle d1 [size: 22]
+        circle d2 [size: 22]
+        circle d3 [size: 22]
+    }
+    path track [through: [d1, d2, d3], stroke_width: 5, fill: none]
+}
+template "machine" (title: "Laptop") {
+    rect bg [width: 300, height: 150]
+    rect head [width: 300, height: 48, label: title]
+    history hist
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+    constrain hist.center_x = bg.center_x
+    constrain hist.center_y = bg.center_y + 22
+}
+machine hub [title: "A long title for the server machine"]
+constrain hub.bg.center_x = stage.center_x
+constrain hub.bg.top = stage.top + 150
+"#;
+    let w = lint(src);
+    assert!(w.is_empty(), "{w:?}");
+    let svg = render(src);
+    assert_eq!(attr(&svg, "hub_bg", "x"), 650.0, "the author's pin holds");
+    assert_eq!(attr(&svg, "hub_hist_d2", "cx") - attr(&svg, "hub_hist_d1", "cx"), 56.0, "the row's gap, not a station's");
+}
+
+#[test]
+fn a_caption_on_a_link_is_not_a_station_but_the_link_end_is() {
+    let base = r#"
+rect a [width: 100, height: 40]
+rect b [width: 100, height: 40, appears: later]
+rect cmd [width: 60, height: 20, appears: later]
+constrain a.top = 0
+constrain b.top = 300
+constrain b.left = a.left
+constrain cmd.center_x = a.center_x
+constrain cmd.center_y = midpoint(a.bottom, b.top)
+a.bottom -> b.top as l [appears: later]
+keyframe "k" { show l [enter: draw, duration: 1]
+"#;
+    let caption = format!("{base} show cmd }}");
+    let early = |src: &str| lint(src).into_iter().filter(|m| m.contains("only reaches it")).collect::<Vec<_>>();
+    assert!(early(&caption).is_empty(), "{:?}", early(&caption));
+    let end = format!("{base} show b }}");
+    assert!(lint(&end).iter().any(|m| m.contains("`when l shown { ... }`")), "{:?}", lint(&end));
+    let fixed = format!("{base} when l shown {{ show b }} }}");
+    assert!(early(&fixed).is_empty(), "{:?}", early(&fixed));
+}
+
+#[test]
+fn midpoint_takes_edges_for_the_middle_of_a_gap() {
+    let src = "rect a [width: 100, height: 40]\nrect b [width: 100, height: 40]\nrect c [width: 60, height: 20]\n\
+               constrain a.top = 0\nconstrain b.top = 200\nconstrain b.left = a.left\n\
+               constrain c.center_y = midpoint(a.bottom, b.top)";
+    assert_eq!(attr(&render(src), "c", "y"), 110.0);
+    let e = render_with_config("rect a\nrect c\nconstrain c.center_y = (a.bottom + a.top) / 2", RenderConfig::new())
+        .unwrap_err()
+        .to_string();
+    assert!(e.contains("midpoint(a.bottom, b.top)"), "{e}");
+}
+
+#[test]
+fn an_instance_can_override_one_of_its_parts() {
+    let src = r#"
+template "h" () { circle d1 [size: 10]
+ circle d2 [size: 10] }
+template "m" () { rect bg [width: 100, height: 50]
+ h hist }
+row r { m a [hist.appears: later]
+ m b [bg.fill: red] }
+keyframe "k" { }
+keyframe "j" { show a.hist }
+"#;
+    let s = states(src);
+    assert!(s.contains("a.hist") && !s.contains("b.hist"), "only a's history enters later: {s}");
+    assert!(render(src).contains(r#"id="b_bg""#));
+    let svg = render(src);
+    let at = svg.find(r#"id="b_bg""#).unwrap();
+    assert!(svg[at..at + 300].contains("red"), "b.bg is red");
+}
+
+#[test]
+fn lint_messages_name_parts_with_dots() {
+    let src = "template \"m\" () { rect bg [width: 100, height: 50]\n rect head [width: 100, height: 20] }\nm hub\n\
+               rect stage [width: 800, height: 400]\nconstrain hub.bg.center_x = stage.center_x\nconstrain hub.bg.left = 3";
+    let w = lint(src);
+    assert!(w.iter().any(|m| m.contains("hub.bg.left")) && !w.iter().any(|m| m.contains("hub_bg")), "{w:?}");
+}

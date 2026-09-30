@@ -1,0 +1,897 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="start,clone,commit,push,pull">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap');
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --font-mono: 'Overpass Mono', Consolas, monospace;
+    --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --git-anna: #0E8A8A;
+    --git-ben: #E07A12;
+    --git-branch: #C92C76;
+    --git-ink: #14171F;
+    --git-lost: #D2382A;
+    --git-lost-soft: #F6DEDB;
+    --git-main: #2346D8;
+    --git-muted: #5F6780;
+    --git-ok: #1C9A5B;
+    --git-ok-soft: #DDF1E6;
+    --git-panel: #FFFFFF;
+    --git-paper: #E9ECF0;
+    --git-paper2: #F4F6F8;
+    --git-rule: #CBD1DA;
+    --git-warn: #F0B400;
+    --role-backdrop: var(--git-paper);
+    --role-error: var(--git-lost);
+    --role-error-soft: var(--git-lost-soft);
+    --role-ink: var(--git-ink);
+    --role-muted: var(--git-muted);
+    --role-ok: var(--git-ok);
+    --role-ok-soft: var(--git-ok-soft);
+    --role-primary: var(--git-main);
+    --role-rule: var(--git-rule);
+    --role-secondary: var(--git-branch);
+    --role-series-1: var(--git-anna);
+    --role-series-1-soft: #D2ECEC;
+    --role-series-2: var(--git-ben);
+    --role-series-2-soft: #FAE3CC;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--git-panel);
+    --role-surface-2: var(--git-paper2);
+    --role-warn: var(--git-warn);
+    --role-warn-soft: #FDF1C7;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe animation CSS (auto-generated) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+.frame-start {
+}
+.frame-clone {
+  .kf-cdad8175-anna_hist { opacity: 1; }
+  .kf-cdad8175-ben_hist { opacity: 1; }
+  .kf-cdad8175-chris_hist { opacity: 1; }
+  .kf-cdad8175-cmd { opacity: 1; }
+  .conn-cdad8175-l_anna { opacity: 1; }
+  .conn-cdad8175-l_ben { opacity: 1; }
+  .conn-cdad8175-l_chris { opacity: 1; }
+}
+.frame-commit {
+  .kf-cdad8175-anna_hist { opacity: 1; }
+  .kf-cdad8175-ben_hist { opacity: 1; }
+  .kf-cdad8175-ben_hist_d4 { opacity: 1; }
+  .kf-cdad8175-chris_hist { opacity: 1; }
+  .kf-cdad8175-cmd { opacity: 1; }
+  .aitxt-cdad8175-cmd-base { opacity: 0; }
+  .aitxt-cdad8175-cmd-v0 { opacity: 1; }
+  .conn-cdad8175-l_anna { opacity: 1; }
+  .conn-cdad8175-l_ben { opacity: 1; }
+  .conn-cdad8175-l_chris { opacity: 1; }
+}
+.frame-push {
+  .kf-cdad8175-anna_hist { opacity: 1; }
+  .kf-cdad8175-ben_hist { opacity: 1; }
+  .kf-cdad8175-ben_hist_d4 { opacity: 1; }
+  .kf-cdad8175-chris_hist { opacity: 1; }
+  .kf-cdad8175-cmd { opacity: 1; }
+  .aitxt-cdad8175-cmd-base { opacity: 0; }
+  .aitxt-cdad8175-cmd-v1 { opacity: 1; }
+  .kf-cdad8175-hub_hist_d4 { opacity: 1; }
+  .conn-cdad8175-l_anna { opacity: 1; }
+  .conn-cdad8175-l_ben { opacity: 1; }
+  .conn-cdad8175-l_chris { opacity: 1; }
+}
+.frame-pull {
+  .kf-cdad8175-anna_hist { opacity: 1; }
+  .kf-cdad8175-anna_hist_d4 { opacity: 1; }
+  .kf-cdad8175-ben_hist { opacity: 1; }
+  .kf-cdad8175-ben_hist_d4 { opacity: 1; }
+  .kf-cdad8175-chris_hist { opacity: 1; }
+  .kf-cdad8175-chris_hist_d4 { opacity: 1; }
+  .kf-cdad8175-cmd { opacity: 1; }
+  .aitxt-cdad8175-cmd-base { opacity: 0; }
+  .aitxt-cdad8175-cmd-v2 { opacity: 1; }
+  .kf-cdad8175-hub_hist_d4 { opacity: 1; }
+  .conn-cdad8175-l_anna { opacity: 1; }
+  .conn-cdad8175-l_ben { opacity: 1; }
+  .conn-cdad8175-l_chris { opacity: 1; }
+}
+    /* /home/kervel/projects/agent-illustrator/examples/motion/git-deck.css */
+/* Palette and type for the "git for non-git people" deck. */
+:root {
+  --git-paper: #E9ECF0;
+  --git-paper2: #F4F6F8;
+  --git-panel: #FFFFFF;
+  --git-ink: #14171F;
+  --git-muted: #5F6780;
+  --git-rule: #CBD1DA;
+  --git-main: #2346D8;
+  /* Roles: the scenes and ail:motion/git use only these. */
+  --role-primary: var(--git-main);
+  --role-secondary: var(--git-branch);
+  --role-ink: var(--git-ink);
+  --role-muted: var(--git-muted);
+  --role-rule: var(--git-rule);
+  --role-surface: var(--git-panel);
+  --role-surface-2: var(--git-paper2);
+  --role-backdrop: var(--git-paper);
+  --role-ok: var(--git-ok);
+  --role-error: var(--git-lost);
+  --role-warn: var(--git-warn);
+  --role-ok-soft: var(--git-ok-soft);
+  --role-error-soft: var(--git-lost-soft);
+  --role-warn-soft: #FDF1C7;
+  --role-series-1: var(--git-anna);
+  --role-series-2: var(--git-ben);
+  --role-series-1-soft: #D2ECEC;
+  --role-series-2-soft: #FAE3CC;
+  --git-branch: #C92C76;
+  --git-anna: #0E8A8A;
+  --git-ben: #E07A12;
+  --git-lost: #D2382A;
+  --git-warn: #F0B400;
+  --git-ok: #1C9A5B;
+  --git-ok-soft: #DDF1E6;
+  --git-lost-soft: #F6DEDB;
+  /* Retime the whole deck here. */
+  --ail-motion-fast: .25s;
+  --ail-motion-normal: .5s;
+  --ail-motion-slow: .8s;
+  /* Overpass Mono is a little wider than the usual 0.6em. */
+  --ail-mono-advance: 0.616;
+  --font-sans: 'Overpass', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Overpass Mono', Consolas, monospace;
+}
+/* Inherited, so a label's own font_family / font_weight still wins. */
+svg { font-family: var(--font-sans); }
+.dots { stroke-linecap: round; }
+text { white-space: pre; }
+  /* motion: settled states (auto-generated) */
+svg[data-ail-player] * { transition: none !important; }
+.kf-cdad8175-s_badge { opacity: 1; }
+.kf-cdad8175-s_badge { scale: 1 1; }
+.kf-cdad8175-s_heading { opacity: 1; }
+.kf-cdad8175-s_heading { translate: 0px 0px; }
+.kf-cdad8175-hub { opacity: 1; }
+.kf-cdad8175-hub { scale: 1 1; }
+.kf-cdad8175-anna { opacity: 1; }
+.kf-cdad8175-anna { translate: 0px 0px; }
+.kf-cdad8175-ben { opacity: 1; }
+.kf-cdad8175-ben { translate: 0px 0px; }
+.kf-cdad8175-chris { opacity: 1; }
+.kf-cdad8175-chris { translate: 0px 0px; }
+.kf-cdad8175-cmd { opacity: 0; }
+.kf-cdad8175-cmd { scale: 1 1; }
+.conn-cdad8175-l_anna { opacity: 0; }
+.aimask-cdad8175-l_anna { stroke-dashoffset: 0; }
+.aihead-cdad8175-l_anna { opacity: 1; }
+.conn-cdad8175-l_ben { opacity: 0; }
+.aimask-cdad8175-l_ben { stroke-dashoffset: 0; }
+.aihead-cdad8175-l_ben { opacity: 1; }
+.conn-cdad8175-l_chris { opacity: 0; }
+.aimask-cdad8175-l_chris { stroke-dashoffset: 0; }
+.aihead-cdad8175-l_chris { opacity: 1; }
+.kf-cdad8175-anna_hist { opacity: 0; }
+.kf-cdad8175-anna_hist { translate: 0px 0px; }
+.kf-cdad8175-ben_hist { opacity: 0; }
+.kf-cdad8175-ben_hist { translate: 0px 0px; }
+.kf-cdad8175-chris_hist { opacity: 0; }
+.kf-cdad8175-chris_hist { translate: 0px 0px; }
+.aitxt-cdad8175-cmd-base { opacity: 1; }
+.aitxt-cdad8175-cmd-base { translate: 0px 0px; }
+.aitxt-cdad8175-cmd-v0 { opacity: 0; }
+.aitxt-cdad8175-cmd-v0 { translate: 0px 0px; }
+.aimask-cdad8175-ben_hist_track { stroke-dashoffset: 0.333; }
+.kf-cdad8175-ben_hist_d4 { opacity: 0; }
+.kf-cdad8175-ben_hist_d4 { scale: 1 1; }
+.aitxt-cdad8175-cmd-v1 { opacity: 0; }
+.aitxt-cdad8175-cmd-v1 { translate: 0px 0px; }
+.aighost-cdad8175-0 { translate: 0px 0px; }
+.aighost-cdad8175-0 { scale: 1 1; }
+.aighost-cdad8175-0 { opacity: 0; }
+.aimask-cdad8175-hub_hist_track { stroke-dashoffset: 0.333; }
+.kf-cdad8175-hub_hist_d4 { opacity: 0; }
+.kf-cdad8175-hub_hist_d4 { scale: 1 1; }
+.aitxt-cdad8175-cmd-v2 { opacity: 0; }
+.aitxt-cdad8175-cmd-v2 { translate: 0px 0px; }
+.aighost-cdad8175-1 { translate: 0px 0px; }
+.aighost-cdad8175-1 { scale: 1 1; }
+.aighost-cdad8175-1 { opacity: 0; }
+.aighost-cdad8175-2 { translate: 0px 0px; }
+.aighost-cdad8175-2 { scale: 1 1; }
+.aighost-cdad8175-2 { opacity: 0; }
+.aimask-cdad8175-anna_hist_track { stroke-dashoffset: 0.333; }
+.aimask-cdad8175-chris_hist_track { stroke-dashoffset: 0.333; }
+.kf-cdad8175-anna_hist_d4 { opacity: 0; }
+.kf-cdad8175-anna_hist_d4 { scale: 1 1; }
+.kf-cdad8175-chris_hist_d4 { opacity: 0; }
+.kf-cdad8175-chris_hist_d4 { scale: 1 1; }
+.frame-start {
+  .kf-cdad8175-s_badge { scale: 1 1; }
+  .kf-cdad8175-hub { scale: 1 1; }
+  .kf-cdad8175-cmd { scale: 1 1; }
+  .aimask-cdad8175-l_anna { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_anna { opacity: 1; }
+  .aimask-cdad8175-l_ben { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_ben { opacity: 1; }
+  .aimask-cdad8175-l_chris { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_chris { opacity: 1; }
+  .aimask-cdad8175-ben_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-ben_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-0 { scale: 1 1; }
+  .aimask-cdad8175-hub_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-hub_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-1 { scale: 1 1; }
+  .aighost-cdad8175-2 { scale: 1 1; }
+  .aimask-cdad8175-anna_hist_track { stroke-dashoffset: 0.333; }
+  .aimask-cdad8175-chris_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-anna_hist_d4 { scale: 1 1; }
+  .kf-cdad8175-chris_hist_d4 { scale: 1 1; }
+}
+.frame-clone {
+  .kf-cdad8175-s_badge { scale: 1 1; }
+  .kf-cdad8175-hub { scale: 1 1; }
+  .kf-cdad8175-cmd { scale: 1 1; }
+  .aimask-cdad8175-l_anna { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_anna { opacity: 1; }
+  .aimask-cdad8175-l_ben { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_ben { opacity: 1; }
+  .aimask-cdad8175-l_chris { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_chris { opacity: 1; }
+  .aimask-cdad8175-ben_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-ben_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-0 { scale: 1 1; }
+  .aimask-cdad8175-hub_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-hub_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-1 { scale: 1 1; }
+  .aighost-cdad8175-2 { scale: 1 1; }
+  .aimask-cdad8175-anna_hist_track { stroke-dashoffset: 0.333; }
+  .aimask-cdad8175-chris_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-anna_hist_d4 { scale: 1 1; }
+  .kf-cdad8175-chris_hist_d4 { scale: 1 1; }
+}
+.frame-commit {
+  .kf-cdad8175-s_badge { scale: 1 1; }
+  .kf-cdad8175-hub { scale: 1 1; }
+  .kf-cdad8175-cmd { scale: 1 1; }
+  .aimask-cdad8175-l_anna { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_anna { opacity: 1; }
+  .aimask-cdad8175-l_ben { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_ben { opacity: 1; }
+  .aimask-cdad8175-l_chris { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_chris { opacity: 1; }
+  .aimask-cdad8175-ben_hist_track { stroke-dashoffset: 0; }
+  .kf-cdad8175-ben_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-0 { scale: 1 1; }
+  .aimask-cdad8175-hub_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-hub_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-1 { scale: 1 1; }
+  .aighost-cdad8175-2 { scale: 1 1; }
+  .aimask-cdad8175-anna_hist_track { stroke-dashoffset: 0.333; }
+  .aimask-cdad8175-chris_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-anna_hist_d4 { scale: 1 1; }
+  .kf-cdad8175-chris_hist_d4 { scale: 1 1; }
+}
+.frame-push {
+  .kf-cdad8175-s_badge { scale: 1 1; }
+  .kf-cdad8175-hub { scale: 1 1; }
+  .kf-cdad8175-cmd { scale: 1 1; }
+  .aimask-cdad8175-l_anna { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_anna { opacity: 1; }
+  .aimask-cdad8175-l_ben { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_ben { opacity: 1; }
+  .aimask-cdad8175-l_chris { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_chris { opacity: 1; }
+  .aimask-cdad8175-ben_hist_track { stroke-dashoffset: 0; }
+  .kf-cdad8175-ben_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-0 { scale: 1 1; }
+  .aimask-cdad8175-hub_hist_track { stroke-dashoffset: 0; }
+  .kf-cdad8175-hub_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-1 { scale: 1 1; }
+  .aighost-cdad8175-2 { scale: 1 1; }
+  .aimask-cdad8175-anna_hist_track { stroke-dashoffset: 0.333; }
+  .aimask-cdad8175-chris_hist_track { stroke-dashoffset: 0.333; }
+  .kf-cdad8175-anna_hist_d4 { scale: 1 1; }
+  .kf-cdad8175-chris_hist_d4 { scale: 1 1; }
+}
+.frame-pull {
+  .kf-cdad8175-s_badge { scale: 1 1; }
+  .kf-cdad8175-hub { scale: 1 1; }
+  .kf-cdad8175-cmd { scale: 1 1; }
+  .aimask-cdad8175-l_anna { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_anna { opacity: 1; }
+  .aimask-cdad8175-l_ben { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_ben { opacity: 1; }
+  .aimask-cdad8175-l_chris { stroke-dashoffset: 0; }
+  .aihead-cdad8175-l_chris { opacity: 1; }
+  .aimask-cdad8175-ben_hist_track { stroke-dashoffset: 0; }
+  .kf-cdad8175-ben_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-0 { scale: 1 1; }
+  .aimask-cdad8175-hub_hist_track { stroke-dashoffset: 0; }
+  .kf-cdad8175-hub_hist_d4 { scale: 1 1; }
+  .aighost-cdad8175-1 { scale: 1 1; }
+  .aighost-cdad8175-2 { scale: 1 1; }
+  .aimask-cdad8175-anna_hist_track { stroke-dashoffset: 0; }
+  .aimask-cdad8175-chris_hist_track { stroke-dashoffset: 0; }
+  .kf-cdad8175-anna_hist_d4 { scale: 1 1; }
+  .kf-cdad8175-chris_hist_d4 { scale: 1 1; }
+}
+]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <mask id="aim-cdad8175-hub_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-hub_hist_track aid-cdad8175-hub_hist_track" d="M716.00 247.00 L772.00 247.00 L828.00 247.00 L884.00 247.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-cdad8175-anna_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-anna_hist_track aid-cdad8175-anna_hist_track" d="M266.00 592.00 L322.00 592.00 L378.00 592.00 L434.00 592.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-cdad8175-ben_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-ben_hist_track aid-cdad8175-ben_hist_track" d="M716.00 592.00 L772.00 592.00 L828.00 592.00 L884.00 592.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-cdad8175-chris_hist_track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-chris_hist_track aid-cdad8175-chris_hist_track" d="M1166.00 592.00 L1222.00 592.00 L1278.00 592.00 L1334.00 592.00" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0.33333333333333337"/></mask>
+    <mask id="aim-cdad8175-l_anna" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-l_anna aid-cdad8175-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-cdad8175-l_ben" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-l_ben aid-cdad8175-l_ben" d="M800 300 L800 480.6" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-cdad8175-l_chris" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-cdad8175-l_chris aid-cdad8175-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-cdad8175-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-cdad8175-s">
+      <g class="kf-cdad8175-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-cdad8175-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-cdad8175-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-cdad8175-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>3</tspan></tspan></text>
+      </g>
+      <g class="kf-cdad8175-s_heading kf-anim" style="transform-origin:579.67px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-cdad8175-s_heading" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Everyone has the full history</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-cdad8175-hub kf-anim" style="transform-origin:800px 225px">
+    <g id="hub" class="ai-container kfp-cdad8175-hub">
+      <g class="kf-cdad8175-hub_bg kf-anim" style="transform-origin:800px 225px">
+        <rect id="hub_bg" class="ai-shape ai-rect kfp-cdad8175-hub_bg" x="650" y="150" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+      </g>
+      <g class="kf-cdad8175-hub_head kf-anim" style="transform-origin:800px 174px">
+        <rect id="hub_head" class="ai-shape ai-rect kfp-cdad8175-hub_head" x="650" y="150" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="658" y="174" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>GitLab</tspan></tspan></text>
+      </g>
+      <g class="kf-cdad8175-hub_tag kf-anim" style="transform-origin:924px 174px">
+        <circle id="hub_tag" class="ai-shape ai-circle kfp-cdad8175-hub_tag" cx="924" cy="174" r="8" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="2"/>
+      </g>
+      <g class="kf-cdad8175-hub_hist kf-anim" style="transform-origin:800px 247px">
+        <g id="hub_hist" class="ai-container kfp-cdad8175-hub_hist">
+          <g class="kf-cdad8175-hub_hist_dots kf-anim" style="transform-origin:800px 247px">
+            <g id="hub_hist_dots" class="ai-container kfp-cdad8175-hub_hist_dots">
+              <g class="kf-cdad8175-hub_hist_d1 kf-anim" style="transform-origin:716px 247px">
+                <circle id="hub_hist_d1" class="ai-shape ai-circle kfp-cdad8175-hub_hist_d1" cx="716" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+              <g class="kf-cdad8175-hub_hist_d2 kf-anim" style="transform-origin:772px 247px">
+                <circle id="hub_hist_d2" class="ai-shape ai-circle kfp-cdad8175-hub_hist_d2" cx="772" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+              <g class="kf-cdad8175-hub_hist_d3 kf-anim" style="transform-origin:828px 247px">
+                <circle id="hub_hist_d3" class="ai-shape ai-circle kfp-cdad8175-hub_hist_d3" cx="828" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+              <g class="kf-hidden kf-cdad8175-hub_hist_d4 kf-anim" style="transform-origin:884px 247px">
+                <circle id="hub_hist_d4" class="ai-shape ai-circle kfp-cdad8175-hub_hist_d4" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+              </g>
+            </g>
+          </g>
+          <g class="kf-cdad8175-hub_hist_track kf-anim" style="transform-origin:800px 247px">
+            <path id="hub_hist_track" class="ai-shape ai-path kfp-cdad8175-hub_hist_track" d="M716.00 247.00 L772.00 247.00 L828.00 247.00 L884.00 247.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-cdad8175-hub_hist_track)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-cdad8175-laptops kf-anim" style="transform-origin:800px 570px">
+    <g id="laptops" class="ai-container kfp-cdad8175-laptops">
+      <g class="kf-cdad8175-anna kf-anim" style="transform-origin:350px 570px">
+        <g id="anna" class="ai-container kfp-cdad8175-anna">
+          <g class="kf-cdad8175-anna_bg kf-anim" style="transform-origin:350px 570px">
+            <rect id="anna_bg" class="ai-shape ai-rect kfp-cdad8175-anna_bg" x="200" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+          </g>
+          <g class="kf-cdad8175-anna_head kf-anim" style="transform-origin:350px 519px">
+            <rect id="anna_head" class="ai-shape ai-rect kfp-cdad8175-anna_head" x="200" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+            <text class="ai-label" x="208" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="208" dy="-0"><tspan>Anna’s laptop</tspan></tspan></text>
+          </g>
+          <g class="kf-cdad8175-anna_tag kf-anim" style="transform-origin:474px 519px">
+            <circle id="anna_tag" class="ai-shape ai-circle kfp-cdad8175-anna_tag" cx="474" cy="519" r="8" fill="var(--role-series-1)" stroke="var(--role-ink)" stroke-width="2"/>
+          </g>
+          <g class="kf-hidden kf-cdad8175-anna_hist kf-anim" style="transform-origin:350px 592px">
+            <g id="anna_hist" class="ai-container kfp-cdad8175-anna_hist">
+              <g class="kf-cdad8175-anna_hist_dots kf-anim" style="transform-origin:350px 592px">
+                <g id="anna_hist_dots" class="ai-container kfp-cdad8175-anna_hist_dots">
+                  <g class="kf-cdad8175-anna_hist_d1 kf-anim" style="transform-origin:266px 592px">
+                    <circle id="anna_hist_d1" class="ai-shape ai-circle kfp-cdad8175-anna_hist_d1" cx="266" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-cdad8175-anna_hist_d2 kf-anim" style="transform-origin:322px 592px">
+                    <circle id="anna_hist_d2" class="ai-shape ai-circle kfp-cdad8175-anna_hist_d2" cx="322" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-cdad8175-anna_hist_d3 kf-anim" style="transform-origin:378px 592px">
+                    <circle id="anna_hist_d3" class="ai-shape ai-circle kfp-cdad8175-anna_hist_d3" cx="378" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-hidden kf-cdad8175-anna_hist_d4 kf-anim" style="transform-origin:434px 592px">
+                    <circle id="anna_hist_d4" class="ai-shape ai-circle kfp-cdad8175-anna_hist_d4" cx="434" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                </g>
+              </g>
+              <g class="kf-cdad8175-anna_hist_track kf-anim" style="transform-origin:350px 592px">
+                <path id="anna_hist_track" class="ai-shape ai-path kfp-cdad8175-anna_hist_track" d="M266.00 592.00 L322.00 592.00 L378.00 592.00 L434.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-cdad8175-anna_hist_track)"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="kf-cdad8175-ben kf-anim" style="transform-origin:800px 570px">
+        <g id="ben" class="ai-container kfp-cdad8175-ben">
+          <g class="kf-cdad8175-ben_bg kf-anim" style="transform-origin:800px 570px">
+            <rect id="ben_bg" class="ai-shape ai-rect kfp-cdad8175-ben_bg" x="650" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+          </g>
+          <g class="kf-cdad8175-ben_head kf-anim" style="transform-origin:800px 519px">
+            <rect id="ben_head" class="ai-shape ai-rect kfp-cdad8175-ben_head" x="650" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+            <text class="ai-label" x="658" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="658" dy="-0"><tspan>Ben’s laptop</tspan></tspan></text>
+          </g>
+          <g class="kf-cdad8175-ben_tag kf-anim" style="transform-origin:924px 519px">
+            <circle id="ben_tag" class="ai-shape ai-circle kfp-cdad8175-ben_tag" cx="924" cy="519" r="8" fill="var(--role-series-2)" stroke="var(--role-ink)" stroke-width="2"/>
+          </g>
+          <g class="kf-hidden kf-cdad8175-ben_hist kf-anim" style="transform-origin:800px 592px">
+            <g id="ben_hist" class="ai-container kfp-cdad8175-ben_hist">
+              <g class="kf-cdad8175-ben_hist_dots kf-anim" style="transform-origin:800px 592px">
+                <g id="ben_hist_dots" class="ai-container kfp-cdad8175-ben_hist_dots">
+                  <g class="kf-cdad8175-ben_hist_d1 kf-anim" style="transform-origin:716px 592px">
+                    <circle id="ben_hist_d1" class="ai-shape ai-circle kfp-cdad8175-ben_hist_d1" cx="716" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-cdad8175-ben_hist_d2 kf-anim" style="transform-origin:772px 592px">
+                    <circle id="ben_hist_d2" class="ai-shape ai-circle kfp-cdad8175-ben_hist_d2" cx="772" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-cdad8175-ben_hist_d3 kf-anim" style="transform-origin:828px 592px">
+                    <circle id="ben_hist_d3" class="ai-shape ai-circle kfp-cdad8175-ben_hist_d3" cx="828" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-hidden kf-cdad8175-ben_hist_d4 kf-anim" style="transform-origin:884px 592px">
+                    <circle id="ben_hist_d4" class="ai-shape ai-circle kfp-cdad8175-ben_hist_d4" cx="884" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                </g>
+              </g>
+              <g class="kf-cdad8175-ben_hist_track kf-anim" style="transform-origin:800px 592px">
+                <path id="ben_hist_track" class="ai-shape ai-path kfp-cdad8175-ben_hist_track" d="M716.00 592.00 L772.00 592.00 L828.00 592.00 L884.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-cdad8175-ben_hist_track)"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="kf-cdad8175-chris kf-anim" style="transform-origin:1250px 570px">
+        <g id="chris" class="ai-container kfp-cdad8175-chris">
+          <g class="kf-cdad8175-chris_bg kf-anim" style="transform-origin:1250px 570px">
+            <rect id="chris_bg" class="ai-shape ai-rect kfp-cdad8175-chris_bg" x="1100" y="495" width="300" height="150" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+          </g>
+          <g class="kf-cdad8175-chris_head kf-anim" style="transform-origin:1250px 519px">
+            <rect id="chris_head" class="ai-shape ai-rect kfp-cdad8175-chris_head" x="1100" y="495" width="300" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+            <text class="ai-label" x="1108" y="519" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="1108" dy="-0"><tspan>Chris’s laptop</tspan></tspan></text>
+          </g>
+          <g class="kf-cdad8175-chris_tag kf-anim" style="transform-origin:1374px 519px">
+            <circle id="chris_tag" class="ai-shape ai-circle kfp-cdad8175-chris_tag" cx="1374" cy="519" r="8" fill="var(--role-series-3)" stroke="var(--role-ink)" stroke-width="2"/>
+          </g>
+          <g class="kf-hidden kf-cdad8175-chris_hist kf-anim" style="transform-origin:1250px 592px">
+            <g id="chris_hist" class="ai-container kfp-cdad8175-chris_hist">
+              <g class="kf-cdad8175-chris_hist_dots kf-anim" style="transform-origin:1250px 592px">
+                <g id="chris_hist_dots" class="ai-container kfp-cdad8175-chris_hist_dots">
+                  <g class="kf-cdad8175-chris_hist_d1 kf-anim" style="transform-origin:1166px 592px">
+                    <circle id="chris_hist_d1" class="ai-shape ai-circle kfp-cdad8175-chris_hist_d1" cx="1166" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-cdad8175-chris_hist_d2 kf-anim" style="transform-origin:1222px 592px">
+                    <circle id="chris_hist_d2" class="ai-shape ai-circle kfp-cdad8175-chris_hist_d2" cx="1222" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-cdad8175-chris_hist_d3 kf-anim" style="transform-origin:1278px 592px">
+                    <circle id="chris_hist_d3" class="ai-shape ai-circle kfp-cdad8175-chris_hist_d3" cx="1278" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                  <g class="kf-hidden kf-cdad8175-chris_hist_d4 kf-anim" style="transform-origin:1334px 592px">
+                    <circle id="chris_hist_d4" class="ai-shape ai-circle kfp-cdad8175-chris_hist_d4" cx="1334" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/>
+                  </g>
+                </g>
+              </g>
+              <g class="kf-cdad8175-chris_hist_track kf-anim" style="transform-origin:1250px 592px">
+                <path id="chris_hist_track" class="ai-shape ai-path kfp-cdad8175-chris_hist_track" d="M1166.00 592.00 L1222.00 592.00 L1278.00 592.00 L1334.00 592.00"  fill="none" stroke="var(--role-primary)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-cdad8175-chris_hist_track)"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-cdad8175-cmd kf-anim" style="transform-origin:1084.53px 225px">
+    <rect id="cmd" class="ai-shape ai-rect kfp-cdad8175-cmd" x="1010" y="202" width="149.056" height="46" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+    <text class="ai-label aitxt-cdad8175-cmd-base" x="1084.528" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--role-surface)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1084.528" dy="-0"><tspan>git clone</tspan></tspan></text>
+    <g class="ai-label-variants" fill="var(--role-surface)">
+      <text class="ai-label aitxt-cdad8175-cmd-v0" x="1084.528" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1084.528" dy="-0"><tspan>git commit</tspan></tspan></text>
+      <text class="ai-label aitxt-cdad8175-cmd-v1" x="1084.528" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1084.528" dy="-0"><tspan>git push</tspan></tspan></text>
+      <text class="ai-label aitxt-cdad8175-cmd-v2" x="1084.528" y="225" text-anchor="middle" dominant-baseline="middle" font-size="24" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1084.528" dy="-0"><tspan>git pull</tspan></tspan></text>
+    </g>
+  </g>
+  <path class="ai-connection conn-cdad8175-l_anna conn-cdad8175-l_anna-base aid-cdad8175-l_anna" d="M800 300 L800 397.5 L350 397.5 L350 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" opacity="0" mask="url(#aim-cdad8175-l_anna)"/>
+  <g class="conn-cdad8175-l_anna"><path class="aihead-cdad8175-l_anna" d="M342 479 L350 493.4 L358 479 Z" fill="var(--role-rule)" style="opacity:1"/></g>
+  <path class="ai-connection conn-cdad8175-l_ben conn-cdad8175-l_ben-base aid-cdad8175-l_ben" d="M800 300 L800 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" opacity="0" mask="url(#aim-cdad8175-l_ben)"/>
+  <g class="conn-cdad8175-l_ben"><path class="aihead-cdad8175-l_ben" d="M792 479 L800 493.4 L808 479 Z" fill="var(--role-rule)" style="opacity:1"/></g>
+  <path class="ai-connection conn-cdad8175-l_chris conn-cdad8175-l_chris-base aid-cdad8175-l_chris" d="M800 300 L800 397.5 L1250 397.5 L1250 480.6" fill="none" stroke="var(--role-rule)" stroke-width="4" opacity="0" mask="url(#aim-cdad8175-l_chris)"/>
+  <g class="conn-cdad8175-l_chris"><path class="aihead-cdad8175-l_chris" d="M1242 479 L1250 493.4 L1258 479 Z" fill="var(--role-rule)" style="opacity:1"/></g>
+  <g class="aighost-cdad8175-0" style="opacity:0;transform-origin:884px 592px;pointer-events:none"><circle data-ghost-of="ben_hist_d4" class="ai-shape ai-circle" cx="884" cy="592" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/></g>
+  <g class="aighost-cdad8175-1" style="opacity:0;transform-origin:884px 247px;pointer-events:none"><circle data-ghost-of="hub_hist_d4" class="ai-shape ai-circle" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/></g>
+  <g class="aighost-cdad8175-2" style="opacity:0;transform-origin:884px 247px;pointer-events:none"><circle data-ghost-of="hub_hist_d4" class="ai-shape ai-circle" cx="884" cy="247" r="11" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="5"/></g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"cdad8175-","frames":[{"name":"start","duration":1.4,"auto":null,"title":"Everyone has the full history","note":null},{"name":"clone","duration":1.48,"auto":null,"title":null,"note":null},{"name":"commit","duration":1,"auto":null,"title":null,"note":null},{"name":"push","duration":1.8,"auto":null,"title":null,"note":null},{"name":"pull","duration":1.9,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","hub","hub_bg","hub_head","hub_tag","hub_hist","hub_hist_dots","hub_hist_d1","hub_hist_d2","hub_hist_d3","hub_hist_d4","hub_hist_track","laptops","anna","anna_bg","anna_head","anna_tag","anna_hist","anna_hist_dots","anna_hist_d1","anna_hist_d2","anna_hist_d3","anna_hist_d4","anna_hist_track","ben","ben_bg","ben_head","ben_tag","ben_hist","ben_hist_dots","ben_hist_d1","ben_hist_d2","ben_hist_d3","ben_hist_d4","ben_hist_track","chris","chris_bg","chris_head","chris_tag","chris_hist","chris_hist_dots","chris_hist_d1","chris_hist_d2","chris_hist_d3","chris_hist_d4","chris_hist_track","cmd","l_anna","l_ben","l_chris"],"channels":[[".kf-cdad8175-s_badge","opacity"],[".kf-cdad8175-s_badge","scale"],[".kf-cdad8175-s_heading","opacity"],[".kf-cdad8175-s_heading","translate"],[".kf-cdad8175-hub","opacity"],[".kf-cdad8175-hub","scale"],[".kf-cdad8175-anna","opacity"],[".kf-cdad8175-anna","translate"],[".kf-cdad8175-ben","opacity"],[".kf-cdad8175-ben","translate"],[".kf-cdad8175-chris","opacity"],[".kf-cdad8175-chris","translate"],[".kf-cdad8175-cmd","opacity"],[".kf-cdad8175-cmd","scale"],[".conn-cdad8175-l_anna","opacity"],[".aimask-cdad8175-l_anna","stroke-dashoffset"],[".aihead-cdad8175-l_anna","opacity"],[".conn-cdad8175-l_ben","opacity"],[".aimask-cdad8175-l_ben","stroke-dashoffset"],[".aihead-cdad8175-l_ben","opacity"],[".conn-cdad8175-l_chris","opacity"],[".aimask-cdad8175-l_chris","stroke-dashoffset"],[".aihead-cdad8175-l_chris","opacity"],[".kf-cdad8175-anna_hist","opacity"],[".kf-cdad8175-anna_hist","translate"],[".kf-cdad8175-ben_hist","opacity"],[".kf-cdad8175-ben_hist","translate"],[".kf-cdad8175-chris_hist","opacity"],[".kf-cdad8175-chris_hist","translate"],[".aitxt-cdad8175-cmd-base","opacity"],[".aitxt-cdad8175-cmd-base","translate"],[".aitxt-cdad8175-cmd-v0","opacity"],[".aitxt-cdad8175-cmd-v0","translate"],[".aimask-cdad8175-ben_hist_track","stroke-dashoffset"],[".kf-cdad8175-ben_hist_d4","opacity"],[".kf-cdad8175-ben_hist_d4","scale"],[".aitxt-cdad8175-cmd-v1","opacity"],[".aitxt-cdad8175-cmd-v1","translate"],[".aighost-cdad8175-0","translate"],[".aighost-cdad8175-0","scale"],[".aighost-cdad8175-0","opacity"],[".aimask-cdad8175-hub_hist_track","stroke-dashoffset"],[".kf-cdad8175-hub_hist_d4","opacity"],[".kf-cdad8175-hub_hist_d4","scale"],[".aitxt-cdad8175-cmd-v2","opacity"],[".aitxt-cdad8175-cmd-v2","translate"],[".aighost-cdad8175-1","translate"],[".aighost-cdad8175-1","scale"],[".aighost-cdad8175-1","opacity"],[".aighost-cdad8175-2","translate"],[".aighost-cdad8175-2","scale"],[".aighost-cdad8175-2","opacity"],[".aimask-cdad8175-anna_hist_track","stroke-dashoffset"],[".aimask-cdad8175-chris_hist_track","stroke-dashoffset"],[".kf-cdad8175-anna_hist_d4","opacity"],[".kf-cdad8175-anna_hist_d4","scale"],[".kf-cdad8175-chris_hist_d4","opacity"],[".kf-cdad8175-chris_hist_d4","scale"]],"settled":[["0","1 1","0","0px 0px","0","1 1","0","0px 0px","0","0px 0px","0","0px 0px","0","1 1","0","0","1","0","0","1","0","0","1","0","0px 0px","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0px 0px","1 1","0","0.333","0.333","0","1 1","0","1 1"],["1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","0","1 1","0","0","1","0","0","1","0","0","1","0","0px 0px","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0px 0px","1 1","0","0.333","0.333","0","1 1","0","1 1"],["1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","1","1 1","1","0","1","1","0","1","1","0","1","1","0px 0px","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0px 0px","1 1","0","0.333","0.333","0","1 1","0","1 1"],["1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","1","1 1","1","0","1","1","0","1","1","0","1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","1","1 1","0","0px 0px","0px 0px","1 1","0","0.333","0","1 1","0","0px 0px","0px 0px","1 1","0","0px 0px","1 1","0","0.333","0.333","0","1 1","0","1 1"],["1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","1","1 1","1","0","1","1","0","1","1","0","1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","0","1","1 1","1","0px 0px","0px 0px","1 1","0","0","1","1 1","0","0px 0px","0px 0px","1 1","0","0px 0px","1 1","0","0.333","0.333","0","1 1","0","1 1"],["1","1 1","1","0px 0px","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","1","1 1","1","0","1","1","0","1","1","0","1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","0","1","1 1","0","0px 0px","0px 0px","1 1","0","0","1","1 1","1","0px 0px","0px 0px","1 1","0","0px 0px","1 1","0","0","0","1","1 1","1","1 1"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":5,"t":0.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":6,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":7,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":8,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":10,"t":0.9,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0.9,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":12,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":13,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":14,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":15,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":15,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":16,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":16,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":17,"t":0.1,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":18,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":18,"t":0.6,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":19,"t":0.1,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":19,"t":0.6,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":20,"t":0.2,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":21,"t":0.2,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":21,"t":0.7,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":22,"t":0.2,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":22,"t":0.7,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":23,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":24,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"450px -345px"],[1,"0px 0px"]]},{"c":25,"t":0.84,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":26,"t":0.84,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px -345px"],[1,"0px 0px"]]},{"c":27,"t":0.98,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":28,"t":0.98,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-450px -345px"],[1,"0px 0px"]]}],[{"c":29,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":30,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":30,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":31,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":32,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":32,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.333"],[1,"0"]]},{"c":34,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":35,"t":0.5,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":31,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":32,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":32,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":36,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":37,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":37,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":38,"t":0,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"0px -345px"]]},{"c":38,"t":0.8,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":39,"t":0,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"1 1"]]},{"c":39,"t":0.8,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":40,"t":0,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":40,"t":0.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":41,"t":0.8,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.333"],[1,"0"]]},{"c":42,"t":1.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":43,"t":1.3,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":36,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":37,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":37,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":44,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":45,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":45,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":46,"t":0,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"-450px 345px"]]},{"c":46,"t":0.8,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":47,"t":0,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"1 1"]]},{"c":47,"t":0.8,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":48,"t":0,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":48,"t":0.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":49,"t":0.1,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"450px 345px"]]},{"c":49,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":50,"t":0.1,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"1 1"]]},{"c":50,"t":0.9,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":51,"t":0.1,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":51,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":52,"t":0.9,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.333"],[1,"0"]]},{"c":53,"t":0.9,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.333"],[1,"0"]]},{"c":54,"t":1.4,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":55,"t":1.4,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":56,"t":1.4,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":57,"t":1.4,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}]]}]]></script>
+<script><![CDATA[
+/* agent-illustrator motion player: plays the tracks compiled into an SVG.
+ * No dependencies; Web Animations API. The player has no semantics of its
+ * own: every value it sets comes from the embedded manifest.
+ *
+ *   var p = ail.player(svgElement);        // shows frame 0, settled
+ *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
+ *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
+ *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
+ *
+ * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
+ * "...", note: "..."]`); a title holds until a later frame sets another, a
+ * note belongs to its step. Both come with every 'step' event:
+ *   p.on('step', function (k, meta) { header.textContent = meta.title; });
+ *
+ * A step is what one click shows: a frame and the `[auto]` frames that play
+ * on after it by themselves. Hosts that advance on clicks use the step API
+ * and never need to know which frames are automatic; `p.steps` lists each
+ * step's first frame (also `agent-illustrator --list-steps`).
+ *
+ * Forward plays the segment; backward and jumps are instant and exact.
+ */
+(function (root) {
+  'use strict';
+  if (root.ail && root.ail.player) return;
+
+  function camel(p) {
+    return p.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); });
+  }
+  function mq(q) {
+    return root.matchMedia ? root.matchMedia(q) : { matches: false, addListener: function () {} };
+  }
+
+  function Player(svg, opts) {
+    opts = opts || {};
+    var node = svg.querySelector('script.ail-motion');
+    if (!node) throw new Error('ail.player: this SVG has no motion manifest');
+    var m = JSON.parse(node.textContent);
+    if (m.v !== 1) throw new Error('ail.player: unsupported manifest version ' + m.v);
+    var self = this;
+    this.svg = svg;
+    this.manifest = m;
+    this.frames = m.frames.map(function (f) { return f.name; });
+    this.steps = [];
+    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
+    this.frame = 0;
+    this.playing = false;
+    this._anims = [];
+    this._loops = [];
+    this._timers = [];
+    this._listeners = {};
+    this._nodes = m.channels.map(function (c) {
+      return Array.prototype.slice.call(svg.querySelectorAll(c[0]));
+    });
+    this._reduced = mq('(prefers-reduced-motion: reduce)');
+    svg.setAttribute('data-ail-player', '');
+
+    // Print shows the finished story.
+    var saved = null;
+    function toLast() { saved = self.frame; self.goTo(self.frames.length - 1); }
+    function restore() { if (saved !== null) { self.goTo(saved); saved = null; } }
+    if (root.addEventListener) {
+      root.addEventListener('beforeprint', toLast);
+      root.addEventListener('afterprint', restore);
+    }
+
+    if (opts.autoplay) {
+      this._autoplay(opts.dwell == null ? 1.6 : opts.dwell);
+    } else {
+      this.goTo(opts.frame == null ? 0 : opts.frame);
+    }
+  }
+
+  var P = Player.prototype;
+
+  P.on = function (evt, cb) {
+    (this._listeners[evt] = this._listeners[evt] || []).push(cb);
+    return this;
+  };
+  P._emit = function (evt) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    (this._listeners[evt] || []).forEach(function (cb) { cb.apply(null, args); });
+  };
+  P._index = function (i) {
+    if (typeof i === 'string') {
+      var k = this.frames.indexOf(i);
+      if (k < 0) throw new Error('ail.player: no frame named "' + i + '"');
+      return k;
+    }
+    return Math.max(0, Math.min(this.frames.length - 1, i | 0));
+  };
+  P._set = function (c, v) {
+    var prop = this.manifest.channels[c][1];
+    this._nodes[c].forEach(function (n) {
+      if (prop === 'text') n.textContent = v;
+      else n.style.setProperty(prop, v);
+    });
+  };
+  P._apply = function (row) {
+    var vals = this.manifest.settled[row];
+    for (var c = 0; c < vals.length; c++) this._set(c, vals[c]);
+  };
+  P._stop = function () {
+    this._anims.concat(this._loops).forEach(function (a) { a.cancel(); });
+    this._anims = [];
+    this._loops = [];
+    this._timers.forEach(clearTimeout);
+    this._timers = [];
+    this.playing = false;
+  };
+  /** True when every node of channel c is invisible right now (it or an
+   *  ancestor at opacity 0). */
+  P._hidden = function (c) {
+    var svg = this.svg;
+    return this._nodes[c].every(function (n) {
+      for (var e = n; e && e !== svg; e = e.parentNode) {
+        if (e.nodeType === 1 && getComputedStyle(e).opacity === '0') return true;
+      }
+      return false;
+    });
+  };
+
+  /** Start frame i's animations. A channel of something hidden when the
+   *  frame starts takes its first animation's starting value at once (fill
+   *  both): an element must never become visible before its geometry is in
+   *  place. A page about to flip in held scale 1 until its hold began, and
+   *  the frame that showed it before the hold did was a full-size flash. */
+  P._animateFrame = function (i) {
+    var self = this, seen = {};
+    this.manifest.anims[i].forEach(function (a) {
+      var first = !a.loop && !(a.c in seen);
+      seen[a.c] = true;
+      self._animate(a, false, first && self._hidden(a.c));
+    });
+  };
+
+  P._animate = function (a, loopNow, backfill) {
+    var self = this;
+    var prop = this.manifest.channels[a.c][1];
+    if (prop === 'text') {
+      a.k.forEach(function (kv) {
+        self._timers.push(setTimeout(function () { self._set(a.c, kv[1]); },
+          (a.t + kv[0] * a.d) * 1000));
+      });
+      return;
+    }
+    var key = camel(prop);
+    var frames = a.k.map(function (kv) { var f = { offset: kv[0] }; f[key] = kv[1]; return f; });
+    var timing = {
+      delay: loopNow ? 0 : a.t * 1000,
+      duration: Math.max(a.d * 1000, 1),
+      easing: a.e,
+      fill: a.loop ? 'none' : (backfill ? 'both' : 'forwards'),
+      iterations: a.loop ? Infinity : 1
+    };
+    this._nodes[a.c].forEach(function (n) {
+      if (!n.animate) return;
+      var anim = n.animate(frames, timing);
+      (a.loop ? self._loops : self._anims).push(anim);
+    });
+  };
+  P._startLoops = function (i) {
+    var self = this;
+    this.manifest.anims[i].forEach(function (a) { if (a.loop) self._animate(a, true); });
+  };
+
+  /** Jump to frame i (index or name): instant, exact. */
+  P.goTo = function (i) {
+    i = this._index(i);
+    this._stop();
+    this._apply(i + 1);
+    this.frame = i;
+    this._startLoops(i);
+    this._emit('frame', i, this.frames[i]);
+    return this;
+  };
+
+  /** Play frame i from the state before it. */
+  P.play = function (i) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    var f = this.manifest.frames[i];
+    if (this._reduced.matches || !f.duration) {
+      this.goTo(i);
+      this._chain(i);
+      return this;
+    }
+    this._apply(i);
+    this.frame = i;
+    this.playing = true;
+    this._emit('framestart', i, this.frames[i]);
+    this._animateFrame(i);
+    this._timers.push(setTimeout(function () {
+      self._apply(i + 1);
+      self._anims.forEach(function (a) { a.cancel(); });
+      self._anims = [];
+      self.playing = false;
+      self._emit('frame', i, self.frames[i]);
+      self._chain(i);
+    }, f.duration * 1000 + 20));
+    return this;
+  };
+
+  P._chain = function (i) {
+    var self = this;
+    var nf = this.manifest.frames[i + 1];
+    if (nf && nf.auto != null) {
+      this._timers.push(setTimeout(function () { self.play(i + 1); }, nf.auto * 1000));
+    } else if (this._auto) {
+      this._auto(i);
+    }
+  };
+
+  /** The step frame i belongs to. */
+  P._stepOf = function (i) {
+    var k = 0;
+    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
+    return k;
+  };
+  /** Last frame of step k: its own frame and the automatic ones after it. */
+  P._stepEnd = function (k) {
+    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
+  };
+  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
+  /** Host metadata at step k: the latest title set up to its end, its notes. */
+  P.meta = function (k) {
+    if (k == null) k = this.step;
+    var fr = this.manifest.frames, title = null, notes = [];
+    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
+    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
+    return { title: title, note: notes.length ? notes.join('\n') : null };
+  };
+  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
+  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
+
+  /** Jump to the end of step k (its automatic frames included): instant. */
+  P.goToStep = function (k) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
+    this.goTo(this._stepEnd(k));
+    this._emit('step', k, this.meta(k));
+    return this;
+  };
+
+  /** One click: finish the current step, then play the next one through. */
+  P.nextStep = function () {
+    var k = this.step;
+    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
+    if (k + 1 < this.steps.length) {
+      this.play(this.steps[k + 1]);
+      this._emit('step', k + 1, this.meta(k + 1));
+      return true;
+    }
+    return false;
+  };
+
+  /** One click back: the end of the previous step, instantly. */
+  P.prevStep = function () {
+    var k = this.step;
+    if (k > 0) { this.goToStep(k - 1); return true; }
+    this.goToStep(0);
+    return false;
+  };
+
+  /** Advance: play the next frame (finishing the current one first). */
+  P.next = function () {
+    if (this.playing) this.goTo(this.frame);
+    if (this.frame < this.frames.length - 1) { this.play(this.frame + 1); return true; }
+    return false;
+  };
+
+  /** Step back: instant. */
+  P.prev = function () {
+    if (this.frame > 0) { this.goTo(this.frame - 1); return true; }
+    this.goTo(0);
+    return false;
+  };
+
+  /** Freeze frame i at t seconds into it (for tests and previews). */
+  P.at = function (i, t) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    this._apply(i);
+    this.frame = i;
+    this.manifest.anims[i].forEach(function (a) {
+      var prop = self.manifest.channels[a.c][1];
+      if (prop === 'text') {
+        var cur = null;
+        a.k.forEach(function (kv) { if (a.t + kv[0] * a.d <= t + 1e-9) cur = kv[1]; });
+        if (cur !== null) self._set(a.c, cur);
+        return;
+      }
+      self._animate(a, false);
+    });
+    this._anims.concat(this._loops).forEach(function (an) { an.pause(); an.currentTime = t * 1000; });
+    return this;
+  };
+
+  P._autoplay = function (dwell) {
+    var self = this;
+    this._auto = function (i) {
+      self._timers.push(setTimeout(function () {
+        if (i < self.frames.length - 1) self.play(i + 1);
+        else { self._apply(0); self.play(0); }
+      }, dwell * 1000));
+    };
+    function manual() { self._auto = null; }
+    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
+    if (root.document) {
+      root.document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
+      });
+    }
+    this._apply(0);
+    this.play(0);
+  };
+
+  root.ail = root.ail || {};
+  root.ail.player = function (svg, opts) {
+    if (!svg.__ailPlayer) svg.__ailPlayer = new Player(svg, opts);
+    return svg.__ailPlayer;
+  };
+})(typeof window !== 'undefined' ? window : this);
+
+(function(){var svg=document.currentScript&&document.currentScript.closest?document.currentScript.closest('svg'):null;if(!svg){var all=document.querySelectorAll('svg[data-frames]');svg=all[all.length-1];}if(svg&&window.ail){window.ail.player(svg,{autoplay:true});}})();
+]]></script>
+</svg>

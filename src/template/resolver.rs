@@ -451,13 +451,32 @@ fn resolve_inline_template(
     param_values: &HashMap<String, StyleValue>,
     instance_modifiers: &[Spanned<StyleModifier>],
 ) -> Result<Vec<Spanned<Statement>>, TemplateError> {
-    // `check tests [opacity: 0.3]`: the whole instance is faint.
-    let group_modifiers: Vec<Spanned<StyleModifier>> =
-        instance_modifiers.iter().filter(|m| matches!(m.node.key.node, StyleKey::Opacity)).cloned().collect();
-    let body = match &def.body {
+    // `check tests [opacity: 0.3]`: the whole instance is faint;
+    // `[appears: later]`: it enters later.
+    let group_modifiers: Vec<Spanned<StyleModifier>> = instance_modifiers
+        .iter()
+        .filter(|m| matches!(&m.node.key.node, StyleKey::Opacity) || matches!(&m.node.key.node, StyleKey::Custom(k) if k == "appears"))
+        .cloned()
+        .collect();
+    let mut body = match &def.body {
         Some(b) => b.clone(),
         None => return Ok(vec![]),
     };
+    // `machine anna [hist.appears: later]`: a modifier for one part of this
+    // instance (`hist.d4.appears` reaches into a nested component).
+    let overrides: Vec<(String, String, Spanned<StyleValue>)> = instance_modifiers
+        .iter()
+        .filter_map(|m| match &m.node.key.node {
+            StyleKey::Custom(k) if k.contains('.') => {
+                let (part, key) = k.split_once('.').unwrap();
+                Some((part.to_string(), key.to_string(), m.node.value.clone()))
+            }
+            _ => None,
+        })
+        .collect();
+    if !overrides.is_empty() {
+        override_parts(&mut body, &overrides);
+    }
 
     // Create a nested context for this instance
     let mut nested_ctx = ctx.nested(instance_name, param_values.clone());
@@ -602,6 +621,65 @@ fn resolve_statement(
 }
 
 /// Substitute parameter references in a statement
+/// Give the named parts of a template body the instance's overrides.
+fn override_parts(stmts: &mut [Spanned<Statement>], overrides: &[(String, String, Spanned<StyleValue>)]) {
+    for st in stmts {
+        let span = st.span.clone();
+        match &mut st.node {
+            Statement::Shape(s) => {
+                let name = s.name.as_ref().map(|n| n.node.0.clone());
+                for (part, key, value) in overrides {
+                    if name.as_deref() == Some(part.as_str()) && !key.contains('.') {
+                        let k = crate::parser::style_key_named(key);
+                        s.modifiers.retain(|m| m.node.key.node != k);
+                        s.modifiers.push(Spanned::new(
+                            StyleModifier { key: Spanned::new(k, span.clone()), value: value.clone() },
+                            span.clone(),
+                        ));
+                    }
+                }
+            }
+            Statement::TemplateInstance(inst) => {
+                for (part, key, value) in overrides {
+                    if inst.instance_name.node.0 == *part {
+                        inst.arguments.retain(|(k, _)| k.node.0 != *key);
+                        inst.arguments.push((Spanned::new(Identifier::new(key.as_str()), span.clone()), value.clone()));
+                    }
+                }
+            }
+            Statement::Group(g) => {
+                if let Some(n) = g.name.as_ref().map(|n| n.node.0.clone()) {
+                    for (part, key, value) in overrides {
+                        if n == *part && !key.contains('.') {
+                            let k = crate::parser::style_key_named(key);
+                            g.modifiers.push(Spanned::new(
+                                StyleModifier { key: Spanned::new(k, span.clone()), value: value.clone() },
+                                span.clone(),
+                            ));
+                        }
+                    }
+                }
+                override_parts(&mut g.children, overrides)
+            }
+            Statement::Layout(l) => {
+                if let Some(n) = l.name.as_ref().map(|n| n.node.0.clone()) {
+                    for (part, key, value) in overrides {
+                        if n == *part && !key.contains('.') {
+                            let k = crate::parser::style_key_named(key);
+                            l.modifiers.push(Spanned::new(
+                                StyleModifier { key: Spanned::new(k, span.clone()), value: value.clone() },
+                                span.clone(),
+                            ));
+                        }
+                    }
+                }
+                override_parts(&mut l.children, overrides)
+            }
+            _ => {}
+        }
+    }
+}
+
 /// A state's transforms may use the template's parameters as values
 /// (`transform txt [label: done_text]`).
 fn substitute_motion_params(nodes: &[Spanned<MotionNode>], params: &HashMap<String, StyleValue>) -> Vec<Spanned<MotionNode>> {
@@ -811,11 +889,15 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr
             a,
             b,
             offset,
+            a_edge,
+            b_edge,
         } => ConstraintExpr::Midpoint {
             target: prefix_property_ref(target, prefix),
             a: prefix_identifier(a, prefix),
             b: prefix_identifier(b, prefix),
             offset: *offset,
+            a_edge: a_edge.clone(),
+            b_edge: b_edge.clone(),
         },
         ConstraintExpr::Contains {
             container,

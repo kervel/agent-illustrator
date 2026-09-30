@@ -249,6 +249,39 @@ pub fn check(
 }
 
 /// Where along a polyline (0..1) a point sits, if it is within `tol` of it.
+/// Where on a line (0..1) it is declared to pass `id`: a connection
+/// reaches its end element at 1 (and starts at its source), a `through:`
+/// path passes its stations; a caption that merely sits on a line is not on
+/// it. Other paths: whatever their drawing passes through the centre of.
+fn declared_at(
+    base: &LayoutResult,
+    line: &str,
+    id: &str,
+    pl: &crate::motion::geom::Polyline,
+    c: crate::layout::types::Point,
+) -> Option<f64> {
+    use crate::layout::types::ElementType;
+    use crate::parser::ast::ShapeType;
+    let related = |n: &str| n == id || n.starts_with(&format!("{}_", id)) || id.starts_with(&format!("{}_", n));
+    if let Some(conn) = base.connections.iter().find(|x| x.name.as_ref().is_some_and(|n| n.0 == line)) {
+        return if related(&conn.to_id.0) {
+            Some(1.0)
+        } else {
+            None
+        };
+    }
+    if let Some(e) = base.get_element_by_name(line) {
+        if let ElementType::Shape(ShapeType::Path(decl)) = &e.element_type {
+            if let Some(spec) = crate::layout::through::through_spec(&decl.modifiers) {
+                if !spec.names.iter().any(|n| n == id || n.starts_with(&format!("{}_", id))) {
+                    return None;
+                }
+            }
+        }
+    }
+    fraction_on(pl, c, 3.0)
+}
+
 fn fraction_on(pl: &crate::motion::geom::Polyline, p: crate::layout::types::Point, tol: f64) -> Option<f64> {
     let total = *pl.cum.last()?;
     if total <= 0.0 {
@@ -291,7 +324,7 @@ fn appears_before_line(m: &Motion, base: &LayoutResult, out: &mut Vec<LintWarnin
             let Some(e) = base.get_element_by_name(&a.target_id) else { continue };
             let c = e.bounds.center();
             for (line, pl, ch) in &lines {
-                let Some(at) = fraction_on(pl, c, 3.0) else { continue };
+                let Some(at) = declared_at(base, line, &a.target_id, pl, c) else { continue };
                 let drawn = |t: f64| match &m.sample(fi, t, &tokens)[*ch] {
                     Val::V(v) => 1.0 - v.first().copied().unwrap_or(0.0),
                     _ => 1.0,
@@ -306,11 +339,21 @@ fn appears_before_line(m: &Motion, base: &LayoutResult, out: &mut Vec<LintWarnin
                     LintCategory::Motion,
                     &f.name,
                     match arrives {
-                        Some(t) => format!(
-                            "{} appears at {:.2}s but {} only reaches it at {:.2}s: time it on the line \
-                             (`when {} reaches {} {{ ... }}`)",
-                            show(&a.target_id), a.start, show(line), t, show(line), show(&a.target_id)
-                        ),
+                        Some(t) => {
+                            // A connection drawn in (`show l [enter: draw]`) has
+                            // reached its end when its entrance is done.
+                            let conn = base.connections.iter().any(|x| x.name.as_ref().is_some_and(|n| &n.0 == line));
+                            let fix = if conn {
+                                format!("when {} shown", show(line))
+                            } else {
+                                format!("when {} reaches {}", show(line), show(&a.target_id))
+                            };
+                            format!(
+                                "{} appears at {:.2}s but {} only reaches it at {:.2}s: time it on the line \
+                                 (`{} {{ ... }}`)",
+                                show(&a.target_id), a.start, show(line), t, fix
+                            )
+                        }
                         None => format!(
                             "{} appears at {:.2}s on {}, which is not drawn to it in this step",
                             show(&a.target_id), a.start, show(line)

@@ -785,6 +785,7 @@ where
         });
 
     let modifier_block = modifier
+        .clone()
         .separated_by(just(Token::Comma))
         .allow_trailing()
         .collect::<Vec<_>>()
@@ -1096,22 +1097,35 @@ where
 
     // Constraint expression parsers
 
+    // `hub` or `hub.bottom`: an element, or one of its edges.
+    let edge = choice((
+        just(Token::Left).to(ConstraintProperty::Left),
+        just(Token::Right).to(ConstraintProperty::Right),
+        just(Token::Top).to(ConstraintProperty::Top),
+        just(Token::Bottom).to(ConstraintProperty::Bottom),
+        just(Token::CenterXProp).to(ConstraintProperty::CenterX),
+        just(Token::CenterYProp).to(ConstraintProperty::CenterY),
+    ));
+    let midpoint_arg = joined_path.clone().then(just(Token::Dot).ignore_then(edge).or_not()).boxed();
+
     // Midpoint: target.prop = midpoint(a, b) or target.prop = midpoint(a, b) + offset
     let midpoint_expr = property_ref
         .clone()
         .then_ignore(just(Token::Equals))
         .then_ignore(just(Token::Midpoint))
         .then_ignore(just(Token::ParenOpen))
-        .then(joined_path.clone())
+        .then(midpoint_arg.clone())
         .then_ignore(just(Token::Comma))
-        .then(joined_path.clone())
+        .then(midpoint_arg.clone())
         .then_ignore(just(Token::ParenClose))
         .then(offset.clone().or_not())
-        .map(|(((target, a), b), off)| ConstraintExpr::Midpoint {
+        .map(|(((target, (a, a_edge)), (b, b_edge)), off)| ConstraintExpr::Midpoint {
             target,
             a,
             b,
             offset: off.unwrap_or(0.0),
+            a_edge,
+            b_edge,
         });
 
     // A `contains` element may be a plain identifier or a grid cell reference
@@ -1596,9 +1610,28 @@ where
         // For now, we support the syntax: identifier identifier [params]
         // where the first identifier is the template name and second is instance name.
         // Template instances will be distinguished from connections by not having ->/<- operators.
+        // `machine anna [title: "Anna", hist.appears: later]`: an argument,
+        // or a modifier for one of the instance's parts.
+        let part_modifier = identifier
+            .then(just(Token::Dot).ignore_then(identifier).repeated().at_least(1).collect::<Vec<_>>())
+            .then_ignore(just(Token::Colon))
+            .then(style_value.clone())
+            .map_with(|((head, rest), value), e| {
+                let mut path = vec![head.node.0.clone()];
+                path.extend(rest.into_iter().map(|r| r.node.0));
+                Spanned::new(
+                    StyleModifier { key: Spanned::new(StyleKey::Custom(path.join(".")), span_range(&e.span())), value },
+                    span_range(&e.span()),
+                )
+            });
+        let instance_modifiers = choice((part_modifier, modifier.clone()))
+            .separated_by(just(Token::Comma))
+            .allow_trailing()
+            .collect::<Vec<_>>()
+            .delimited_by(just(Token::BracketOpen), just(Token::BracketClose));
         let template_instance = identifier
             .then(starred_name.clone())
-            .then(modifier_block.clone().or_not())
+            .then(instance_modifiers.or_not())
             .try_map(|((template_name, instance_name), mods), _span| {
                 // Convert modifiers to argument list
                 let arguments: Vec<(Spanned<Identifier>, Spanned<StyleValue>)> = mods
@@ -3015,6 +3048,7 @@ mod tests {
                     a,
                     b,
                     offset,
+                    ..
                 } => {
                     assert_eq!(target.element.node.leaf().as_str(), "a");
                     assert!(matches!(target.property.node, ConstraintProperty::CenterX));

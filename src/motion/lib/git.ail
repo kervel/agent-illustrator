@@ -44,12 +44,14 @@ template "git_file" (name: "file.txt", value: "0 lines") {
     constrain val.center_y = bg.center_y
 }
 
+// Timing inside a macro counts from where it is called: offsets are
+// `delay:` on the statement, sequencing is `then`.
 motion snapshot(src: element, station: element) {
     flash src [duration: 0.4]
-    after 0.12 { fly ghost(src) to station.dot [arc: 0.12, duration: slow] }
+    fly ghost(src) to station.dot [arc: 0.12, duration: slow, delay: 0.12]
     then {
         show station.dot [enter: pop]
-        after 0.15 { show station.nm, station.mt [enter: rise, stagger: 0.08] }
+        show station.nm, station.mt [enter: rise, stagger: 0.08, delay: 0.15]
     }
 }
 
@@ -58,7 +60,8 @@ motion change(file: element, value: text) {
     highlight file [color: role-primary]
 }
 
+// The line grows towards the station while the snapshot is in the air.
 motion commit(src: element, station: element, track: path) {
     snapshot(src, station)
-    after 0.6 { draw track [to: station.dot, duration: fast] }
+    draw track [to: station.dot, duration: fast, delay: 0.6]
 }

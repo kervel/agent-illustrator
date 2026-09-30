@@ -5,4 +5,4 @@ mod grammar;
 pub mod lexer;
 
 pub use ast::*;
-pub use grammar::parse;
+pub use grammar::{parse, style_key_named};

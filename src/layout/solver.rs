@@ -105,6 +105,17 @@ pub enum ConstraintOrigin {
     LayoutContainer,
     /// Generated from intrinsic properties (text size, etc.)
     Intrinsic,
+    /// A layout nicety (room for station names, even spread): yields to
+    /// every constraint the author wrote.
+    Preference,
+}
+
+/// Strength of a relational constraint by where it came from.
+fn relational_strength(origin: &ConstraintOrigin) -> Strength {
+    match origin {
+        ConstraintOrigin::Preference => Strength::STRONG * 0.5,
+        _ => Strength::STRONG,
+    }
 }
 
 /// Tracks where a constraint came from
@@ -141,6 +152,16 @@ impl ConstraintSource {
             span,
             description: description.into(),
             origin: ConstraintOrigin::LayoutContainer,
+            template_instance: None,
+            layout_container: None,
+        }
+    }
+
+    pub fn preference(description: impl Into<String>) -> Self {
+        Self {
+            span: 0..0,
+            description: description.into(),
+            origin: ConstraintOrigin::Preference,
             template_instance: None,
             layout_container: None,
         }
@@ -493,6 +514,7 @@ impl ConstraintSolver {
                     ConstraintOrigin::UserDefined => Strength::STRONG,
                     ConstraintOrigin::LayoutContainer => Strength::STRONG * 0.1,
                     ConstraintOrigin::Intrinsic => Strength::STRONG,
+                    ConstraintOrigin::Preference => Strength::STRONG * 0.5,
                 };
                 let left_expr = self.get_expression(left);
                 let right_expr = self.get_expression(right);
@@ -560,7 +582,7 @@ impl ConstraintSolver {
                     left.element_id, left.property, right.element_id, right.property, offset
                 );
                 self.solver
-                    .add_constraint(left_expr | LE(Strength::STRONG) | (right_expr + *offset))
+                    .add_constraint(left_expr | LE(relational_strength(&source.origin)) | (right_expr + *offset))
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -578,7 +600,7 @@ impl ConstraintSolver {
                     left.element_id, left.property, right.element_id, right.property, offset
                 );
                 self.solver
-                    .add_constraint(left_expr | GE(Strength::STRONG) | (right_expr + *offset))
+                    .add_constraint(left_expr | GE(relational_strength(&source.origin)) | (right_expr + *offset))
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }
@@ -621,7 +643,7 @@ impl ConstraintSolver {
                 self.solver
                     .add_constraint(
                         (2.0 * target_expr)
-                            | EQ(Strength::STRONG)
+                            | EQ(relational_strength(&source.origin))
                             | (a_expr + b_expr + 2.0 * offset),
                     )
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;

@@ -206,7 +206,13 @@ pub struct StationPair {
 /// How far a station's parts reach either side of its centre, and how tall
 /// they stack: the dot and every part of its component (its name, placed
 /// later, is centred on it; its measured size is known already).
-fn station_extent(result: &LayoutResult, name: &str, parts_of: &HashMap<&str, Vec<&str>>, owner_of: &HashMap<String, String>) -> Option<(f64, f64)> {
+fn station_extent(
+    result: &LayoutResult,
+    name: &str,
+    parts_of: &HashMap<&str, Vec<&str>>,
+    owner_of: &HashMap<String, String>,
+    stations: &[String],
+) -> Option<(f64, f64)> {
     let el = result.elements.get(name)?;
     let mut half = el.bounds.width / 2.0;
     let mut height = el.bounds.height;
@@ -223,13 +229,19 @@ fn station_extent(result: &LayoutResult, name: &str, parts_of: &HashMap<&str, Ve
             height += m.height;
         }
     }
-    if let Some(parts) = owner_of.get(name).and_then(|o| parts_of.get(o.as_str())) {
+    // A component's other parts are this station's name only when the
+    // component is one station (a dot and its caption): a component that
+    // holds several stations of the line (a row of commit dots) has no
+    // per-station names, and its title belongs to none of them.
+    let parts = owner_of.get(name).and_then(|o| parts_of.get(o.as_str()));
+    let one_station = parts.is_some_and(|ps| ps.iter().filter(|p| stations.iter().any(|s| s == *p)).count() <= 1);
+    if let Some(parts) = parts.filter(|_| one_station) {
         for p in parts {
             if *p == name {
                 continue;
             }
             if let Some(pe) = result.elements.get(*p) {
-                if pe.children.is_empty() {
+                if pe.children.is_empty() && !matches!(pe.element_type, ElementType::Shape(ShapeType::Path(_))) {
                     half = half.max(pe.bounds.width / 2.0);
                     height += pe.bounds.height;
                 }
@@ -286,7 +298,7 @@ pub fn station_pairs(
             let (a, b) = (&w[0], &w[1]);
             let (Some(ea), Some(eb)) = (result.elements.get(a), result.elements.get(b)) else { continue };
             let (Some((ha, hta)), Some((hb, htb))) =
-                (station_extent(result, a, &parts_of, owner_of), station_extent(result, b, &parts_of, owner_of))
+                (station_extent(result, a, &parts_of, owner_of, &spec.names), station_extent(result, b, &parts_of, owner_of, &spec.names))
             else {
                 continue;
             };
@@ -300,7 +312,10 @@ pub fn station_pairs(
             let need = ha + hb + STATION_GAP;
             let oa = owner_of.get(a).unwrap_or(a);
             let ob = owner_of.get(b).unwrap_or(b);
-            let same_flow = flow_parent.get(oa).is_some() && flow_parent.get(oa) == flow_parent.get(ob);
+            // A row already spaces them: the components' row, or the dots'
+            // own (commit dots in a row inside a template).
+            let same_flow = (flow_parent.get(oa).is_some() && flow_parent.get(oa) == flow_parent.get(ob))
+                || (flow_parent.get(a).is_some() && flow_parent.get(a) == flow_parent.get(b));
             out.push(StationPair {
                 line: id.clone(),
                 a: a.clone(),
@@ -331,7 +346,7 @@ pub fn station_constraints(
         if p.same_flow || pinned_x.contains(&p.b) || p.dist >= p.need - 0.5 {
             continue;
         }
-        let source = ConstraintSource::intrinsic(format!("{}: room for the names of {} and {}", p.line, p.a, p.b));
+        let source = ConstraintSource::preference(format!("{}: room for the names of {} and {}", p.line, p.a, p.b));
         out.push(if p.dir > 0.0 {
             LayoutConstraint::GreaterOrEqualRelational { left: cx(&p.b), right: cx(&p.a), offset: p.need, source }
         } else {
@@ -364,7 +379,7 @@ pub fn station_constraints(
                 a: cx(&w[0]),
                 b: cx(&w[2]),
                 offset: 0.0,
-                source: ConstraintSource::intrinsic(format!("{}: spread: even", id)),
+                source: ConstraintSource::preference(format!("{}: spread: even", id)),
             });
         }
     }

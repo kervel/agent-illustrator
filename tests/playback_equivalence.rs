@@ -221,6 +221,11 @@ fn draws_play_as_sampled() {
 }
 
 #[test]
+fn fan_out_flights_and_nested_entrances_play_as_sampled() {
+    check("git-history", &[1, 2, 3, 4]);
+}
+
+#[test]
 fn lines_opening_and_closing_play_as_sampled() {
     check("git-merge", &[2, 3]);
 }
@@ -261,7 +266,7 @@ fn nothing_changes_at_the_instant_something_is_hidden() {
     // showed it, full size, for one frame.
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/motion");
     let mut bad = Vec::new();
-    for scene in ["git-copies", "git-snapshots", "git-branches", "git-merge"] {
+    for scene in ["git-copies", "git-snapshots", "git-branches", "git-merge", "git-history"] {
         let src = std::fs::read_to_string(dir.join(format!("{scene}.ail"))).unwrap();
         let mut cfg = config(&dir);
         cfg.animate = true;

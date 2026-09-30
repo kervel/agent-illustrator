@@ -368,6 +368,11 @@ ring [enter: fade]`, a `swap`, a macro, a `set`). `appears: go_back` (hidden
 until that keyframe, entering with the default preset) is for elements nothing
 else shows; writing both `appears: go_back` and a `show` in go_back is reported.
 Frame 0's own `hide`s apply before it plays; its `show`s are entrances.
+A part of a component that enters later for *some* instances only is said at
+the instance: `machine anna [title: "Anna", hist.appears: later]` (any
+`part.modifier: value` overrides that part of that instance; `hist.d4.fill:`
+reaches into a nested component). `appears:` on a nested instance in a
+template body applies to every instance.
 
 ### Lines that grow
 
@@ -494,14 +499,15 @@ component), `all except title, stage`. Paired selectors pair by index
 import "ail:motion/git"            // built-in library; or import "deck.ail" (templates + macros)
 motion commit(src: element, station: element, track: path) {
     snapshot(src, station)
-    after 0.6 { draw track [to: station.dot, duration: fast] }
+    draw track [to: station.dot, duration: fast, delay: 0.6]
 }
 keyframe "second" { commit(folder, st2, track) }
 ```
 Parameters are typed (`element | group | path | anchor | number | text`) and
 checked; macros expand before compilation, so they seek, lint and render like
-anything else. There is no raw-SVG/JS escape hatch: extend through macros, or ask
-for a core primitive.
+anything else. Inside a macro, time with `then`, events and `delay:` (all
+relative to where it is called); `at` counts from the keyframe start. There is
+no raw-SVG/JS escape hatch: extend through macros, or ask for a core primitive.
 
 ### Tooling
 
@@ -613,7 +619,7 @@ keyframe's title (it swaps where the title changes).
 ```
 flash folder
 then { fly ghost(folder) to st1.dot [arc: 0.12] }
-then { show st1.dot [enter: pop]; after 0.15 { show st1.nm [enter: rise] } }
+then { show st1.dot [enter: pop]; show st1.nm [enter: rise, delay: 0.15] }
 ```
 (= `snapshot(folder, st1)` from `ail:motion/git`; `commit(folder, st1, track)`
 also grows the line.)
@@ -672,8 +678,11 @@ git-branches, git-merge, sharing `git-deck.ail`).
    put labels on the chips that move.
 4. **Frame naming** — Use descriptive names ("user_sends_prompt", not "frame3").
    Names appear in the animation player UI.
-5. **Element count** — Animations tend to need many elements (persistent + transient
-   for each frame). Use constraint-based layout, not row/col.
+5. **Layout** — Use `row`/`col`/`grid` for regular arrangements (a set of
+   laptops, dots on a history) and constraints for relations between things
+   (this card beside that file, the caption in the gap:
+   `constrain cap.center_y = midpoint(hub.bottom, laptops.top)`). Animations
+   need many elements; declare them all once and let keyframes show them.
 6. **Frame indexing** — `--frame N` is 0-indexed. Frame 0 is the first keyframe,
    frame 1 is the second, etc. When frame 0 plays, its `hide`s are already applied
    and its `show`s enter.
