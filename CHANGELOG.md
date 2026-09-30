@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.18
+
+- `--skill-brief`: the whole method on one page (about 830 words against
+  about 16,000 in the full guides): the loop with the steps agents skip
+  (lint, --states, looking at PNGs), one complete scene, placing things,
+  motion idioms, output.
+- `--doc TOPIC`: one section of the guides at a time (`--doc tables`, `--doc
+  accent`, `--doc verify`, ...); an unknown topic lists them all.
+- Tests keep them honest: the brief's scene lints clean, every topic it names
+  resolves to a section, and the brief stays under 1200 words.
+
 ## v0.2.17
 
 - Fix: two accents on the same element in different tones (`[tone: error]`

@@ -180,6 +180,16 @@ struct Cli {
     #[arg(long)]
     skill_animation: bool,
 
+    /// The one-page version for agents with little context: the loop, a
+    /// whole scene, the idioms, and the topics `--doc` can fetch
+    #[arg(long)]
+    skill_brief: bool,
+
+    /// Print one section of the guides (e.g. `--doc tables`, `--doc
+    /// accent`); an unknown topic lists them all
+    #[arg(long, value_name = "TOPIC")]
+    doc: Option<String>,
+
     /// Output clipart search sub-skill document
     #[arg(long)]
     skill_find_clipart: bool,
@@ -357,6 +367,22 @@ fn main() {
 
     if cli.skill {
         print_skill();
+        return;
+    }
+
+    if cli.skill_brief {
+        print!("{}", agent_illustrator::docs::SKILL_BRIEF);
+        return;
+    }
+
+    if let Some(topic) = &cli.doc {
+        match agent_illustrator::docs::section(topic) {
+            Some(s) => print!("{}", s),
+            None => {
+                eprintln!("no section '{}'. Topics: {}", topic, agent_illustrator::docs::topics().join(", "));
+                std::process::exit(2);
+            }
+        }
         return;
     }
 
@@ -625,6 +651,7 @@ OPTIONS:
     -g, --grammar      Show language grammar reference
     -e, --examples     Show annotated examples
     --skill            Output LLM skill document (for embedding in agent context)
+    --skill-brief      The one-page version (little context); --doc TOPIC for one section
     --stylesheet-css   CSS stylesheet for colors and visual styling
     -s, --stylesheet   [Deprecated] TOML color palette
     -d, --debug        Show element bounds and IDs

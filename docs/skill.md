@@ -4,6 +4,10 @@ Create diagrams with Agent Illustrator.
 
 ## Sub-Skills
 
+Short on context? `agent-illustrator --skill-brief` is this guide and the
+animation guide on one page, and `agent-illustrator --doc <topic>` prints one
+section at a time (`--doc tables`, `--doc accent`, `--doc verify`).
+
 For specialized tasks, read the relevant sub-skill BEFORE starting:
 
 - **`agent-illustrator --skill-animation`** — Keyframe animations with storyboarding,

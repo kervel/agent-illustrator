@@ -12,6 +12,7 @@
 //! ```
 
 pub mod code;
+pub mod docs;
 pub mod raster;
 pub mod table;
 pub mod error;

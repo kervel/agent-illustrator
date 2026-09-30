@@ -192,6 +192,8 @@ agent-illustrator scene.ail --lint                     # what an agent should fi
 Agent Illustrator ships its own documentation for agents:
 
 ```bash
+agent-illustrator --skill-brief        # one page: the loop, a whole scene, the idioms
+agent-illustrator --doc tables         # one section on demand (unknown topic: lists them)
 agent-illustrator --skill              # the design method and the language
 agent-illustrator --skill-animation    # keyframes, motion, the git deck library
 agent-illustrator --skill-styling      # themes, roles, CSS

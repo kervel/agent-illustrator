@@ -84,7 +84,7 @@ angle exceeds ~15° from horizontal or vertical.
 Tangent-relative label offsets (v0.1.12) make `left`/`right` mean perpendicular-left/right
 for any path geometry. No separate `label_side` needed.
 
-### Skill doc too long for constrained contexts
+### ~~Skill doc too long for constrained contexts~~ DONE (v0.2.18: `--skill-brief`, `--doc TOPIC`)
 Agents with long prior context skip steps in the skill doc. Consider:
 - Splitting into a short "checklist" section and a separate reference
 - Moving examples/grammar to appendix sections the agent can fetch on demand
