@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.3
+
+- No more one-frame flash of a full-size page at the start of a flip. When a
+  frame starts playing, anything hidden takes its first animation's starting
+  value at once (`fill: both` on that channel's first animation): an element
+  never becomes visible before its geometry is in place. The incoming page of
+  a flip held scale 1 until its zero-width hold began, and a paint that showed
+  the opacity step before the hold was a full-size flash.
+- `RenderConfig.sample_at`: many `--at` samples from one compile.
+- The playback test samples both sides of every animation start, compares only
+  what is visible, and runs in about 5 seconds.
+
 ## v0.2.2
 
 - The browser player now plays the opening half of `swap a -> b [via: flip]`.

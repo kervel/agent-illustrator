@@ -107,7 +107,33 @@
     this._timers = [];
     this.playing = false;
   };
-  P._animate = function (a, loopNow) {
+  /** True when every node of channel c is invisible right now (it or an
+   *  ancestor at opacity 0). */
+  P._hidden = function (c) {
+    var svg = this.svg;
+    return this._nodes[c].every(function (n) {
+      for (var e = n; e && e !== svg; e = e.parentNode) {
+        if (e.nodeType === 1 && getComputedStyle(e).opacity === '0') return true;
+      }
+      return false;
+    });
+  };
+
+  /** Start frame i's animations. A channel of something hidden when the
+   *  frame starts takes its first animation's starting value at once (fill
+   *  both): an element must never become visible before its geometry is in
+   *  place. A page about to flip in held scale 1 until its hold began, and
+   *  the frame that showed it before the hold did was a full-size flash. */
+  P._animateFrame = function (i) {
+    var self = this, seen = {};
+    this.manifest.anims[i].forEach(function (a) {
+      var first = !a.loop && !(a.c in seen);
+      seen[a.c] = true;
+      self._animate(a, false, first && self._hidden(a.c));
+    });
+  };
+
+  P._animate = function (a, loopNow, backfill) {
     var self = this;
     var prop = this.manifest.channels[a.c][1];
     if (prop === 'text') {
@@ -123,7 +149,7 @@
       delay: loopNow ? 0 : a.t * 1000,
       duration: Math.max(a.d * 1000, 1),
       easing: a.e,
-      fill: a.loop ? 'none' : 'forwards',
+      fill: a.loop ? 'none' : (backfill ? 'both' : 'forwards'),
       iterations: a.loop ? Infinity : 1
     };
     this._nodes[a.c].forEach(function (n) {
@@ -163,7 +189,7 @@
     this.frame = i;
     this.playing = true;
     this._emit('framestart', i, this.frames[i]);
-    this.manifest.anims[i].forEach(function (a) { self._animate(a, false); });
+    this._animateFrame(i);
     this._timers.push(setTimeout(function () {
       self._apply(i + 1);
       self._anims.forEach(function (a) { a.cancel(); });

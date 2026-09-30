@@ -115,6 +115,10 @@ pub struct RenderConfig {
     /// `--crop-to-content [pad]`: the picture is the union of what any frame
     /// shows (plus this margin), not the stage or the whole layout.
     pub crop: Option<f64>,
+    /// With `frame`: sample the motion at each of these times (seconds) and
+    /// return only the sampled rules, one `/* t=... */` block per time (one
+    /// compile for many samples; for tests and tools).
+    pub sample_at: Vec<f64>,
     /// Output the motion timeline as text instead of SVG.
     pub timeline: bool,
     /// Output the motion manifest (tracks) as JSON instead of SVG.
@@ -140,6 +144,7 @@ impl Default for RenderConfig {
             no_frame_css: false,
             at: None,
             crop: None,
+            sample_at: Vec::new(),
             timeline: false,
             timeline_json: false,
         }
@@ -835,6 +840,18 @@ fn render_pipeline(
     }
 
     // Generate SVG with stylesheet
+    if let (Some(frame_selector), false) = (&config.frame, config.sample_at.is_empty()) {
+        let m = compiled.as_ref().ok_or_else(|| {
+            RenderError::Layout(layout::LayoutError::validation_error("sampling needs keyframes"))
+        })?;
+        let frame_idx = resolve_frame_index(frame_selector, &frame_states)?;
+        let mut out = String::new();
+        for t in &config.sample_at {
+            out.push_str(&format!("/* t={} */\n", t));
+            out.push_str(&motion::render::sampled_css(m, frame_idx, *t, &tokens));
+        }
+        return Ok((out, lint_warnings));
+    }
     let svg = if let (Some(frame_selector), Some(at)) = (&config.frame, &config.at) {
         // A mid-motion still: base markup with hooks, every channel pinned to
         // its sampled value.

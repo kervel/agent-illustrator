@@ -61,16 +61,39 @@ fn numbers(v: &str) -> Option<Vec<f64>> {
     (!out.is_empty()).then_some(out)
 }
 
+/// The wrapper opacity channel of the element a channel belongs to.
+fn wrapper_opacity(m: &serde_json::Value, c: usize) -> Option<usize> {
+    let sel = m["channels"][c][0].as_str()?;
+    let id = sel.strip_prefix(".kfp-").or_else(|| sel.strip_prefix(".kf-"))?;
+    let wrap = format!(".kf-{}", id);
+    m["channels"].as_array()?.iter().position(|x| x[0].as_str() == Some(&wrap) && x[1].as_str() == Some("opacity"))
+}
+
+/// Hidden when frame f starts (its wrapper at opacity 0).
+fn hidden_at_start(m: &serde_json::Value, f: usize, c: usize) -> bool {
+    wrapper_opacity(m, c)
+        .and_then(|o| numbers(m["settled"][f][o].as_str()?))
+        .is_some_and(|v| v[0] == 0.0)
+}
+
 /// The value the player shows on a channel at time t of frame f.
 fn played(m: &serde_json::Value, f: usize, c: usize, t: f64) -> Option<Vec<f64>> {
     let mut value = numbers(m["settled"][f][c].as_str()?)?;
+    let mut first = true;
     for a in m["anims"][f].as_array()? {
         if a["c"].as_u64()? as usize != c || a.get("loop").and_then(|l| l.as_bool()).unwrap_or(false) {
             continue;
         }
+        let backfill = first && hidden_at_start(m, f, c);
+        first = false;
         let (start, dur) = (a["t"].as_f64()?, a["d"].as_f64()?.max(0.001));
         if t < start {
-            continue; // before its delay: no effect (fill is forwards only)
+            // Before its delay: no effect, unless the player back-fills it
+            // (the first animation of something hidden when the frame starts).
+            if backfill {
+                value = numbers(a["k"][0][1].as_str()?)?;
+            }
+            continue;
         }
         // A 1ms export of an instant change is a step.
         let p = if dur <= 0.002 { 1.0 } else { ((t - start) / dur).clamp(0.0, 1.0) };
@@ -110,14 +133,38 @@ fn check(scene: &str, frames: &[usize]) {
     let mut failures = Vec::new();
     for &f in frames {
         let d = m["frames"][f]["duration"].as_f64().unwrap();
-        for i in 1..=12 {
-            let t = d * i as f64 / 13.0;
-            let mut c = config(&dir);
-            c.frame = Some(f.to_string());
-            c.at = Some(format!("{}s", t));
-            let native = sampled(&render_with_config(&src, c).unwrap());
+        // Evenly through the step, and on both sides of every start: a
+        // visibility step and a geometry hold that begin together must
+        // agree on the first frame too.
+        let mut times: Vec<f64> = (1..=12).map(|i| d * i as f64 / 13.0).collect();
+        // Both sides of every start: a visibility step and a geometry hold
+        // that begin together must agree from the first frame.
+        let mut edges: Vec<f64> = m["anims"][f].as_array().unwrap().iter().map(|a| a["t"].as_f64().unwrap()).collect();
+        edges.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        edges.dedup_by(|a, b| (*a - *b).abs() < 1e-6);
+        for t0 in edges {
+            times.extend([t0 - 0.0005, t0 + 0.0005]);
+        }
+        times.retain(|t| *t > 0.0 && *t < d);
+        times.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        // One compile, every sample.
+        let mut c = config(&dir);
+        c.frame = Some(f.to_string());
+        c.sample_at = times.clone();
+        let all = render_with_config(&src, c).unwrap();
+        let blocks: Vec<&str> = all.split("/* t=").skip(1).collect();
+        assert_eq!(blocks.len(), times.len());
+        for (t, block) in times.iter().copied().zip(blocks) {
+            let native = sampled(block);
             for (ci, (sel, prop)) in channels.iter().enumerate() {
                 if prop == "text" || prop == "clip-path" {
+                    continue;
+                }
+                // What cannot be seen cannot flash: compare while visible.
+                let visible = wrapper_opacity(&m, ci)
+                    .and_then(|o| played(&m, f, o, t))
+                    .is_none_or(|v| v[0] > 0.0);
+                if !visible {
                     continue;
                 }
                 let (Some(n), Some(p)) = (native.get(&(sel.clone(), prop.clone())).and_then(|v| numbers(v)), played(&m, f, ci, t))
