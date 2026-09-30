@@ -511,6 +511,11 @@ fly token from a to b                                    // a real (hidden) elem
 move ring to st2.dot            // persistent: dependents re-solve around it
 move d0 home                    // release a `move`
 move train along track [to: st3.dot]
+// `move x to y` centres x ON y. To stand next to it, move to a point beside it:
+//   point at_row3
+//   constrain at_row3.left = t.row3.right + 30
+//   constrain at_row3.center_y = t.row3.center_y
+//   move robot to at_row3
 ```
 
 ### Look here: `accent`
@@ -610,9 +615,34 @@ parameter called `later` would rewrite `appears: later`). Outside templates,
 
 `rect lid [..., pivot: left]` turns about its left edge: `transform lid
 [rotation: -28]` opens it like a lid (also `right`, `top`, `bottom`,
-`top_left`, ...). The pivot is where pops and pulses scale from too.
+`top_left`, ...). The pivot is where pops and pulses scale from too. On a part
+of SVG artwork, set it at the instance: `barrier gate [arm.pivot: left]`, then
+`transform gate.arm [rotation: -80]` swings the arm up from its post.
+
+### Layering and overlaps on purpose
+
+What is declared later is drawn on top. Declare backgrounds (bands, lanes, a
+big shape things sit on) *before* what sits on them, or they cover it.
+`z_order: 1` lifts one element above its siblings; a line `through:` stations
+runs under them by itself.
+
+Things that sit on something on purpose (a badge on a document's corner, a
+chip on an environment box, a tag on a frame's border) say so, so the lint
+stops reporting them: `circle badge [..., overlaps: doc]`, or on an instance
+`machine m [overlaps: env.bg]`.
+
+### Captions
+
+A caption follows its subject: `text "Hotfix" nm [caption_of: dot,
+label_position: below]` (or `above`, `left`, `right`). Place the subject, not
+the caption; do not constrain other things against a `caption_of` element
+(the lint says so).
 
 ### Many things at once
+
+Many similar instances from one line: `boxart b* [items: [{tint: role-ok},
+{tint: role-error}]]` makes `b0`, `b1`, … (inside a `row` or `grid` they line
+up); `constrain k*.center = d*.center` pairs two such lists by index.
 
 A swarm is one statement: `move needs.* to box [stagger: 0.07]`,
 `move a, b, c to box`, `fly ghost(a, b, c) to box` (or `fly ghost(a),

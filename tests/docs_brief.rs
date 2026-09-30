@@ -6,7 +6,8 @@ use agent_illustrator::docs;
 use agent_illustrator::{render_with_config, render_with_lint, RenderConfig};
 
 fn brief_scene() -> String {
-    let d = docs::SKILL_BRIEF;
+    let d = docs::skill_brief();
+    let d = d.as_str();
     let start = d.find("```ail\n").expect("an ```ail block") + "```ail\n".len();
     let end = start + d[start..].find("```").unwrap();
     d[start..end].to_string()
@@ -25,9 +26,13 @@ fn the_brief_scene_lints_clean_and_has_its_steps() {
 
 #[test]
 fn every_topic_the_brief_names_can_be_fetched() {
-    let line = docs::SKILL_BRIEF.lines().skip_while(|l| !l.starts_with("Topics:")).collect::<Vec<_>>().join(" ");
+    let brief = docs::skill_brief();
+    let line = brief.lines().skip_while(|l| !l.starts_with("Topics:")).collect::<Vec<_>>().join(" ");
     let named: Vec<String> = line
         .trim_start_matches("Topics:")
+        .split('.')
+        .next()
+        .unwrap()
         .split(',')
         .map(|t| t.trim().trim_end_matches('.').to_string())
         .filter(|t| !t.is_empty())
@@ -51,6 +56,21 @@ fn a_topic_is_a_section_not_a_whole_guide() {
 
 #[test]
 fn the_brief_is_brief() {
-    let words = docs::SKILL_BRIEF.split_whitespace().count();
+    let words = docs::skill_brief().split_whitespace().count();
     assert!(words < 1200, "the brief has grown to {words} words; move detail into --doc topics");
+}
+
+#[test]
+fn the_brief_lists_exactly_the_topics_doc_knows() {
+    let brief = docs::skill_brief();
+    for t in docs::topics() {
+        assert!(brief.contains(t), "the brief does not list {t}");
+    }
+}
+
+#[test]
+fn other_words_find_the_same_sections() {
+    assert_eq!(docs::section("move"), docs::section("travel"));
+    assert_eq!(docs::section("z-order"), docs::section("layering"));
+    assert!(docs::suggest("stagr").contains(&"swarm") || docs::suggest("stagr").contains(&"stage"));
 }

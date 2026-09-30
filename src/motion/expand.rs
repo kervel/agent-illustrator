@@ -82,6 +82,8 @@ impl ElementIndex {
                 let shown = shown.map(|d| {
                     d.strip_suffix(".__art")
                         .or_else(|| d.strip_suffix(".__self"))
+                        .or_else(|| d.strip_suffix("._art"))
+                        .or_else(|| d.strip_suffix("._self"))
                         .or_else(|| d.strip_suffix("__art"))
                         .or_else(|| d.strip_suffix("__self"))
                         .map(|x| x.trim_end_matches('.').to_string())

@@ -1852,10 +1852,48 @@ fn check_label_element_overlaps(
         collect_opaque_elements(elem, None, i, scope, &mut shapes);
     }
 
+    // Paint order (later is on top), and the opaque filled boxes in it: a
+    // shape's edge under a card painted over it is hidden, so a label on
+    // that card does not straddle it.
+    let mut order: HashMap<String, usize> = HashMap::new();
+    let mut covers: Vec<(usize, BoundingBox)> = Vec::new();
+    fn paint(
+        elems: &[ElementLayout],
+        scope: &FrameScope<'_>,
+        order: &mut HashMap<String, usize>,
+        covers: &mut Vec<(usize, BoundingBox)>,
+    ) {
+        let mut v: Vec<&ElementLayout> = elems.iter().collect();
+        v.sort_by_key(|e| e.z_order);
+        for e in v {
+            if scope.hides_element(e) {
+                continue;
+            }
+            let i = order.len();
+            if let Some(id) = &e.id {
+                order.insert(id.0.clone(), i);
+            } else {
+                order.insert(format!("#{}", i), i);
+            }
+            if has_visible_fill(e) && !has_see_through_fill(e) && is_opaque(e) {
+                covers.push((i, e.bounds));
+            }
+            paint(&e.children, scope, order, covers);
+        }
+    }
+    paint(&result.root_elements, scope, &mut order, &mut covers);
+    let covered = |label: &LabelInfo, shape_id: &str| -> bool {
+        let (Some(&s), Some(&l)) = (order.get(shape_id), order.get(&label.owner)) else { return false };
+        covers.iter().any(|(i, b)| *i > s && *i <= l && b.contains_bbox(&label.bbox))
+    };
+
     for label in labels.iter().filter(|l| !l.on_own_fill) {
         for shape in &shapes {
             // Skip if label belongs to this element (own label inside own box)
             if label.owner == shape.id {
+                continue;
+            }
+            if covered(label, &shape.id) {
                 continue;
             }
 

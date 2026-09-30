@@ -1323,9 +1323,12 @@ fn resolve_frame_index(
         if idx < frame_states.len() {
             return Ok(idx);
         }
-        return Err(RenderError::Layout(layout::LayoutError::validation_error(
-            format!("frame index {} out of range (0-{})", idx, frame_states.len() - 1),
-        )));
+        let names: Vec<String> = frame_states.iter().enumerate().map(|(i, st)| format!("{} {}", i, st.name)).collect();
+        return Err(RenderError::Layout(layout::LayoutError::validation_error(format!(
+            "frame {} out of range: keyframes are {} (--frame takes a keyframe name or this index; --states numbers click steps, where an [auto] keyframe joins the step before it)",
+            idx,
+            names.join(", ")
+        ))));
     }
     // Try as name
     for (i, state) in frame_states.iter().enumerate() {

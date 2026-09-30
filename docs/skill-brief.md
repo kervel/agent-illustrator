@@ -10,11 +10,14 @@ guides are `--skill` (diagrams) and `--skill-animation` (motion).
 
 1. Write a `STORYBOARD` comment first: one line per click step.
 2. Write the scene. Declare everything once, then keyframes.
-3. `agent-illustrator --lint scene.ail`. Fix every finding: they are real.
+3. `agent-illustrator --lint scene.ail`. Fix every finding, or accept an
+   intended overlap explicitly with `overlaps:`.
 4. `agent-illustrator --states scene.ail`. Compare it with your storyboard.
 5. Look at it: `agent-illustrator --frames-to-dir out --png scene.ail`, and
-   a mid-motion still with `--frame 2 --at 50% --png -o mid.png`. Look at the
-   PNGs before you say it is done.
+   a mid-motion still with `--frame clone --at 0.6s --png -o mid.png` (at can
+   also be `50%`). Look at the PNGs before you say it is done. `--frame` takes
+   a keyframe name (best) or index; `--states` numbers click steps, and an
+   `[auto]` keyframe joins the step before it.
 
 ## A whole scene
 
@@ -74,7 +77,17 @@ keyframe "clone" {
 - `template "x" (param: default) { ... }` makes a component. Parts are `inst.part`.
   Set one part per instance with `machine anna [hist.appears: later]`.
 - `point hub` is an invisible anchor. `clip: bg` draws a part inside its frame.
-- Stage: `rect stage [..., canvas: true]`. Leaving it is an error.
+- Stage: give every scene one, `rect stage [..., canvas: true]`. It is the
+  picture's frame; anything drawn outside it is a lint error.
+- Later declarations draw on top. Declare backgrounds (bands, lanes, a big
+  shape) before what sits on them. An intended overlap (a badge on a corner,
+  a chip on a box) needs `overlaps: other`.
+- Captions: `text "Hotfix" nm [caption_of: dot, label_position: below]`.
+  Don't constrain other things against a caption.
+- Many alike from one line: `box b* [items: [{tint: role-ok}, {tint: role-warn}]]`
+  gives `b0`, `b1`, … (in a `row`/`grid` they line up).
+- A few words are reserved (`line`, `row`, `label`, `left`, `top`, …); the
+  parse error says so.
 - Colours are roles: `role-primary`, `role-ink`, `role-surface`,
   `role-ok`/`-error`/`-warn` (with `-soft` variants), `role-rule`.
 - Objects (a laptop, a person, a box, a database) are SVG artwork with ids:
@@ -85,21 +98,28 @@ keyframe "clone" {
 ## Motion
 
 - Each `keyframe` is one click. `[title: "..."]` goes to the deck header.
+  Keep a keyframe under about 2.5s. Split a long one with a follow-on
+  `keyframe "more" [auto] { ... }` that plays by itself.
 - Say at the element that it is not there at the start (`appears: later`).
   The verb that brings it on says when and how:
-  `show x [enter: pop | rise | fade | draw]`, `show x [from: y]`.
+  `show x [enter: pop | rise | fade | draw]`, `show x [from: y]`. Put
+  `appears: later` on the thing you `show`, not on its container.
 - Time by what things wait for:
   - `when line reaches st.dot { ... }`
-  - `when x shown { ... }`, `when x arrives { ... }`
-  - `then { ... }` (after everything before it)
+  - `when x shown { ... }`, `when x arrives + 0.3 { ... }` (they fire when
+    that finishes; `+`/`-` shifts them)
+  - `then { ... }` waits for EVERYTHING before it, a 1.2s accent or a slow
+    move included (to go on sooner use `when x shown`)
   - `at 0.4 { ... }` (from the start of the keyframe)
 
   Avoid chains of `after 0.3`.
 - Verbs:
   - `hide`, `move x to y`, `fly ghost(x) to y`, `draw line [to: st.dot]`
+  - `move x to y` centres x on y. To stand beside y, move to a `point`
+    placed beside it.
   - `transform x [fill: role-ok, label: "...", swap: fade]`
   - `swap a -> b [via: flip]`
-  - lists work: `move a, b, needs.* to box [stagger: 0.07]`
+  - lists work: `move a, b, needs.* to box [stagger: 0.07, order: random]`
 - "Look here": `accent x`. Use `[tone: error]` for a problem and
   `[hold: step]` to keep it until the next click.
 - States live in the template:
@@ -107,7 +127,8 @@ keyframe "clone" {
   `set inst done`; go back with `set inst default`.
 - Layouts that change: `layout beside { constrain ... }`, then
   `use layout beside` and later `use layout default`.
-- Hinges: `rect lid [pivot: left]` + `transform lid [rotation: -30]`.
+- Hinges: `rect lid [pivot: left]` + `transform lid [rotation: -30]`. For
+  artwork: `barrier gate [arm.pivot: left]` + `transform gate.arm [rotation: -80]`.
 
 ## Output
 
@@ -118,6 +139,5 @@ keyframe "clone" {
 
 ## Fetch on demand: `agent-illustrator --doc <topic>`
 
-Topics: stage, constraints, templates, artwork, tables, code, beats, events,
-entrances, lines, travel, accent, states, layouts, hinges, swarm, effects,
-text, selectors, macros, styling, roles, verify, player, cookbook, gotchas.
+Topics: {TOPICS}. Other words work too (move, pivot, stagger, timing,
+highlight, z-order, overlap, caption); a near miss gets a suggestion.

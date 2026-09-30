@@ -371,7 +371,7 @@ fn main() {
     }
 
     if cli.skill_brief {
-        print!("{}", agent_illustrator::docs::SKILL_BRIEF);
+        print!("{}", agent_illustrator::docs::skill_brief());
         return;
     }
 
@@ -379,7 +379,11 @@ fn main() {
         match agent_illustrator::docs::section(topic) {
             Some(s) => print!("{}", s),
             None => {
-                eprintln!("no section '{}'. Topics: {}", topic, agent_illustrator::docs::topics().join(", "));
+                let near = agent_illustrator::docs::suggest(topic);
+                if !near.is_empty() {
+                    eprintln!("no section '{}'. Did you mean: {}?", topic, near.join(", "));
+                }
+                eprintln!("Topics: {}", agent_illustrator::docs::topics().join(", "));
                 std::process::exit(2);
             }
         }

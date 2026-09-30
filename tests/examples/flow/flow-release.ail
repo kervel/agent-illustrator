@@ -2,101 +2,136 @@
    Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate flow-release.ail
 
    STORYBOARD
-     merges    three merge requests join main, each fine on its own
-     together  on main, together, something is off: testing isn't done after the merge requests
-     release   a release is created in GitLab and built automatically
-     test      it rides to the test environment: people test the whole
-     prod      when it's good, on to production (sometimes via user acceptance first)
+     merges   three merge requests join main, each fine on its own
+     release  a release (v1.4) is tagged on main; GitLab builds it
+     test     it goes to the test environment; people test the whole and find
+              something: fine alone, slow together
+     fix      a fix merge request joins main; release v1.4.1 is tagged
+     retest   v1.4.1 replaces v1.4 on the test environment, and passes
+     prod     on to production (sometimes via user acceptance first); the feature arrives
 */
 
 import "flow-deck.ail"
 
 template "person" from "assets/person.svg"
 
-// A station: a ring on the line, its name below.
-template "stop" (name: "Station", tint: role-primary, side: below) {
+// A station on main: a ring on the line, its name below.
+template "stop" (name: "Station", tint: role-primary) {
     circle dot [size: 40, fill: role-surface, stroke: tint, stroke_width: 8, appears: later]
-    rect nm [caption_of: dot, label_position: side, label_offset: 10, label: name, font_size: 21,
+    rect nm [caption_of: dot, label_position: below, label_offset: 10, label: name, font_size: 21,
              font_weight: 700, label_fill: role-ink, fill: none, stroke: none, max_width: 170, appears: later]
+}
+
+// An environment: a place where a release runs.
+template "env" (name: "Environment", tint: role-primary, dash: "none") {
+    rect box [width: 220, height: 100, fill: role-surface, stroke: tint, stroke_width: 4, stroke_dasharray: dash,
+              corner_radius: 14]
+    rect nm [caption_of: box, label_position: below, label_offset: 10, label: name, font_size: 21,
+             font_weight: 700, label_fill: role-ink, fill: none, stroke: none]
+}
+
+// A release: what travels to the environments.
+template "release" (nr: "v1") {
+    rect bg [label: nr, font_family: mono, font_size: 21, font_weight: 700, label_fill: role-surface,
+             fill: role-ink, stroke: none, corner_radius: 8, width: 120, height: 46]
 }
 
 // ---------------------------------------------------------------- stage
 
 slide s [num: "6", title: "A merge isn't a release"]
 
-// The branches of three merge requests, drawn under their stations.
+// main, and the branches of the merge requests, drawn under their stations.
 path br1 [through: [p1, m1.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
 path br2 [through: [p2, m2.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
 path br3 [through: [p3, m3.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
-path track [through: [m1.dot, m2.dot, m3.dot, rel.dot, test.dot, prod.dot], drawn: 0, extend_start: 60,
-            stroke: role-primary, stroke_width: 14, fill: none]
-path uat_path [through: [test.dot, uat.dot, prod.dot], routing: metro, drawn: 0, stroke: role-primary,
-               stroke_width: 8, stroke_dasharray: "12,9", fill: none]
+path br4 [through: [p4, m4.dot], routing: metro, drawn: 0, stroke: role-series-2, stroke_width: 10, fill: none]
+path track [through: [m1.dot, m2.dot, m3.dot, v14.dot, m4.dot, v141.dot], drawn: 0, extend_start: 60,
+            extend_end: 60, stroke: role-primary, stroke_width: 14, fill: none]
+rect main_lbl [label: "main", font_family: mono, font_size: 20, font_weight: 700, label_fill: role-primary,
+               fill: none, stroke: none]
+constrain main_lbl.right = m1.dot.left - 70
+constrain main_lbl.center_y = m1.dot.center_y
 
 stop m1 [name: "!58"]
 stop m2 [name: "!59"]
 stop m3 [name: "!60"]
-stop rel [name: "release v1.4"]
-stop test [name: "test environment"]
-stop uat [name: "user acceptance", side: below]
-stop prod [name: "production", tint: role-ok]
-constrain m1.dot.center_x = s.stage.left + 150
-constrain m1.dot.center_y = s.stage.center_y + 10
-constrain prod.dot.center_x = s.stage.right - 120
-constrain m2.dot.center_x = m1.dot.center_x + 140
-constrain m3.dot.center_x = m2.dot.center_x + 140
-constrain rel.dot.center_x = m3.dot.center_x + 260
-constrain test.dot.center_x = rel.dot.center_x + 280
-constrain uat.dot.center_x = midpoint(test.dot, prod.dot)
+stop v14 [name: "v1.4", tint: role-ink]
+stop m4 [name: "!61"]
+stop v141 [name: "v1.4.1", tint: role-ink]
+constrain m1.dot.center_x = s.stage.left + 190
+constrain m1.dot.center_y = s.stage.top + 220
+constrain m2.dot.center_x = m1.dot.center_x + 120
+constrain m3.dot.center_x = m2.dot.center_x + 120
+constrain v14.dot.center_x = m3.dot.center_x + 150
+constrain m4.dot.center_x = v14.dot.center_x + 260
+constrain v141.dot.center_x = m4.dot.center_x + 150
 constrain m2.dot.center_y = m1.dot.center_y
 constrain m3.dot.center_y = m1.dot.center_y
-constrain rel.dot.center_y = m1.dot.center_y
-constrain test.dot.center_y = m1.dot.center_y
-constrain prod.dot.center_y = m1.dot.center_y
-constrain uat.dot.center_y = m1.dot.center_y + 170
+constrain v14.dot.center_y = m1.dot.center_y
+constrain m4.dot.center_y = m1.dot.center_y
+constrain v141.dot.center_y = m1.dot.center_y
 
 // Where the branches come from.
 point p1
 point p2
 point p3
+point p4
 constrain p1.center_x = m1.dot.center_x - 60
-constrain p1.center_y = m1.dot.center_y - 160
+constrain p1.center_y = m1.dot.center_y - 130
 constrain p2.center_x = m2.dot.center_x - 60
 constrain p2.center_y = p1.center_y
 constrain p3.center_x = m3.dot.center_x - 60
 constrain p3.center_y = p1.center_y
+constrain p4.center_x = m4.dot.center_x - 60
+constrain p4.center_y = p1.center_y
 
-// Together, something is off.
-circle warn [size: 50, fill: role-warn, stroke: role-ink, stroke_width: 3, label: "!", label_fill: role-ink,
-             font_size: 28, font_weight: 800, appears: later]
-rect warn_lbl [label: "fine alone · slow together", font_size: 20, font_weight: 700, label_fill: role-ink,
-               fill: role-warn-soft, stroke: none, corner_radius: 8, appears: later]
-constrain warn.center_x = midpoint(m3.dot, rel.dot)
-constrain warn.center_y = m1.dot.center_y
-constrain warn_lbl.center_x = warn.center_x
-constrain warn_lbl.top = warn.bottom + 75
+// The environments.
+env test [name: "test environment", appears: later]
+env uat [name: "user acceptance", dash: "12,9", appears: later]
+env prod [name: "production", tint: role-ok, appears: later]
+constrain test.box.center_x = v14.dot.center_x
+constrain test.box.top = m1.dot.bottom + 170
+constrain prod.box.center_x = s.stage.right - 150
+constrain uat.box.center_x = midpoint(test.box, prod.box)
+constrain uat.box.center_y = test.box.center_y
+constrain prod.box.center_y = test.box.center_y
 
-// The release: built by GitLab.
-rect built [label: "built by GitLab", font_size: 18, font_weight: 600, label_fill: role-ink, fill: role-surface-2,
-            stroke: none, corner_radius: 8, appears: later]
-constrain built.center_x = rel.dot.center_x
-constrain built.bottom = rel.dot.top - 50
+// The releases, and where they stand.
+release r14 [nr: "v1.4", appears: later, overlaps: [test, uat, prod]]
+release r141 [nr: "v1.4.1", appears: later, overlaps: [test, uat, prod]]
+constrain r14.bg.center_x = v14.dot.center_x
+constrain r14.bg.bottom = v14.dot.top - 16
+constrain r141.bg.center_x = v141.dot.center_x
+constrain r141.bg.bottom = v141.dot.top - 16
+point at_test
+point at_uat
+point at_prod
+constrain at_test.center_x = test.box.center_x
+constrain at_test.center_y = test.box.center_y
+constrain at_uat.center_x = uat.box.center_x
+constrain at_uat.center_y = uat.box.center_y
+constrain at_prod.center_x = prod.box.center_x
+constrain at_prod.center_y = prod.box.center_y
 
-// People testing the whole.
-row testers [gap: 14, align: bottom] {
+// People testing the whole, and what they find.
+row testers [gap: 12, align: bottom] {
     person t1 [width: 40, height: 47, tint: role-ink, appears: later]
     person t2 [width: 40, height: 47, tint: role-ink, appears: later]
     person t3 [width: 40, height: 47, tint: role-ink, appears: later]
 }
-constrain testers.center_x = test.dot.center_x
-constrain testers.bottom = test.dot.top - 50
+constrain testers.right = test.box.left - 24
+constrain testers.center_y = test.box.center_y
+rect found [label: "fine alone · slow together", font_size: 20, font_weight: 700, label_fill: role-ink,
+            fill: role-warn-soft, stroke: none, corner_radius: 8, appears: later]
+constrain found.center_x = test.box.center_x
+constrain found.top = test.box.bottom + 56
 
 // The feature, arriving.
 rect card [label: "Delivery date on the order", font_size: 19, font_weight: 700, label_fill: role-ink,
            fill: role-series-2-soft, stroke: role-ink, stroke_width: 2, corner_radius: 10, max_width: 190,
            appears: later]
-constrain card.center_x = prod.dot.center_x
-constrain card.bottom = prod.dot.top - 50
+constrain card.center_x = prod.box.center_x
+constrain card.bottom = prod.box.top - 24
 
 // ---------------------------------------------------------------- motion
 
@@ -109,27 +144,39 @@ keyframe "merges" [title: "A merge isn't a release"] {
     when track reaches m3.dot { show m3.dot, m3.nm [enter: pop] }
 }
 
-keyframe "together" {
-    draw track [to: rel.dot]
-    when track reaches warn { show warn [enter: pop] }
-    when warn shown { show warn_lbl [enter: rise]; accent warn }
-}
-
 keyframe "release" {
-    show rel.dot, rel.nm [enter: pop]
-    when rel.dot shown { show built [enter: rise] }
+    draw track [to: v14.dot]
+    when track reaches v14.dot { show v14.dot, v14.nm [enter: pop] }
+    when v14.dot shown { show r14 [from: v14.dot] }
+    when r14 shown { show test, uat, prod [enter: fade, stagger: 0.1] }
 }
 
 keyframe "test" {
-    draw track [to: test.dot]
-    when track reaches test.dot { show test.dot, test.nm [enter: pop] }
-    when test.dot shown { show t1, t2, t3 [enter: pop, stagger: 0.1] }
+    move r14 to at_test [duration: slow]
+    when r14 arrives { show t1, t2, t3 [enter: pop, stagger: 0.1] }
+}
+
+keyframe "found" [auto] {
+    show found [enter: rise]
+    accent test.box [tone: error]
+}
+
+keyframe "fix" {
+    draw br4
+    then { draw track }
+    when track reaches m4.dot { show m4.dot, m4.nm [enter: pop] }
+    when track reaches v141.dot { show v141.dot, v141.nm [enter: pop] }
+    when v141.dot shown { show r141 [from: v141.dot] }
+}
+
+keyframe "retest" {
+    hide r14, found [exit: fade]
+    move r141 to at_test [duration: slow]
+    when r141 arrives { accent test.box [tone: ok] }
 }
 
 keyframe "prod" {
-    draw uat_path [duration: slow]
-    when uat_path reaches uat.dot { show uat.dot, uat.nm [enter: pop] }
-    draw track [duration: slow]
-    when track reaches prod.dot { show prod.dot, prod.nm [enter: pop] }
-    when prod.dot shown { show card [enter: pop] }
+    move r141 to at_uat
+    then { move r141 to at_prod }
+    when r141 arrives { show card [enter: pop] }
 }

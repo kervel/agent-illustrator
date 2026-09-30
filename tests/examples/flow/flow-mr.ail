@@ -4,9 +4,11 @@
    STORYBOARD
      pipeline  the merge request starts its pipeline: build, tests, and its own review deployment
      e2e       the robot walks the journey from the design document on that deployment; one step goes red
-     dig       an agent digs from the failing screen step through the API to the cause; the fix makes it green
+     dig       an agent digs from the failing screen step through the API to the cause, and fixes it:
+               the cause turns into the fix, and the journey goes green
      check     a person checks the review deployment: does it look right, does it work right
      merge     the merge gate opens: the change joins main
+     cleanup   the review deployment is removed automatically
 */
 
 import "flow-deck.ail"
@@ -106,12 +108,13 @@ constrain checker.left = review.left + 24
 constrain checker.top = review.bottom + 24
 constrain check_lbl.left = checker.right + 12
 constrain check_lbl.center_y = checker.center_y
-barrier gate [width: 200, height: 96, appears: later]   // `arm.pivot: left` isn't accepted on an artwork part yet
+barrier gate [width: 200, height: 96, appears: later, arm.pivot: left]   // the arm turns about its left end, on the post
 rect merged [label: "merged into main", font_family: mono, font_size: 18, font_weight: 700, label_fill: role-surface,
-             fill: role-ok, stroke: none, corner_radius: 8, appears: later]
-constrain gate.left = review.right + 70
-constrain gate.bottom = s.stage.bottom - 60
-constrain merged.left = gate.right + 20
+             fill: role-ok, stroke: none, corner_radius: 8, appears: later, overlaps: gate]
+constrain gate.left = cause.right + 50
+constrain gate.bottom = s.stage.bottom - 40
+// Once the arm is up, the change goes through where it was.
+constrain merged.left = gate.left + 50
 constrain merged.bottom = gate.bottom - 10
 
 // ---------------------------------------------------------------- motion
@@ -144,8 +147,13 @@ keyframe "e2e" {
 keyframe "dig" {
     show layers, digger [enter: fade]
     when digger shown { move digger to at_api [duration: normal] }
-    when digger arrives { accent ly_api [style: outline]; show cause [enter: pop] }
-    when cause shown + 0.3 { transform journey.r3c1 [label: "✓", label_fill: role-ok, swap: roll]; set st_e2e passed }
+    when digger arrives { accent ly_api; show cause [enter: pop] }
+    // The agent fixes it: the cause becomes the fix, and the journey goes green.
+    when cause shown + 0.3 {
+        transform cause [label: "fixed: the API sends the delivery date", fill: role-ok-soft, swap: roll]
+        transform journey.r3c1 [label: "✓", label_fill: role-ok, swap: roll]
+        set st_e2e passed
+    }
 }
 
 keyframe "check" {
@@ -154,6 +162,12 @@ keyframe "check" {
 
 keyframe "merge" {
     show gate [enter: rise]
-    when gate shown { hide gate.arm [exit: lift] }
+    when gate shown { transform gate.arm [rotation: -80, duration: slow] }
     then { show merged [from: mr, duration: slow] }
+}
+
+// Merged: the review deployment is removed automatically.
+keyframe "cleanup" [auto] {
+    hide apps.* [exit: shrink, stagger: 0.05]
+    then { hide review, review_tag, checker, check_lbl [exit: fade] }
 }

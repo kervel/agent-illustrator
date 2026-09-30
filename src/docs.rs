@@ -2,7 +2,7 @@
 //! section at a time, for agents whose context has no room for whole guides.
 
 pub const SKILL: &str = include_str!("../docs/skill.md");
-pub const SKILL_BRIEF: &str = include_str!("../docs/skill-brief.md");
+const SKILL_BRIEF_SRC: &str = include_str!("../docs/skill-brief.md");
 pub const SKILL_ANIMATION: &str = include_str!("../docs/skill-animation.md");
 pub const SKILL_STYLING: &str = include_str!("../docs/skill-styling.md");
 pub const SKILL_CLIPART: &str = include_str!("../docs/skill-find-clipart.md");
@@ -39,7 +39,87 @@ const TOPICS: &[(&str, &str, &str)] = &[
     ("styling", "styling", ""),
     ("clipart", "clipart", ""),
     ("first-scene", "animation", "Your first scene"),
+    ("layering", "animation", "Layering and overlaps"),
+    ("overlaps", "animation", "Layering and overlaps"),
+    ("captions", "animation", "Captions"),
 ];
+
+/// Other words for the same topics (what an agent would type).
+const ALIASES: &[(&str, &str)] = &[
+    ("move", "travel"),
+    ("fly", "travel"),
+    ("pivot", "hinges"),
+    ("rotate", "hinges"),
+    ("rotation", "hinges"),
+    ("stagger", "swarm"),
+    ("many", "swarm"),
+    ("timing", "beats"),
+    ("when", "events"),
+    ("then", "beats"),
+    ("highlight", "accent"),
+    ("emphasis", "accent"),
+    ("caption", "captions"),
+    ("z-order", "layering"),
+    ("z_order", "layering"),
+    ("order", "layering"),
+    ("overlap", "overlaps"),
+    ("state", "states"),
+    ("set", "states"),
+    ("table", "tables"),
+    ("layout", "layouts"),
+    ("line", "lines"),
+    ("draw", "lines"),
+    ("show", "entrances"),
+    ("appears", "entrances"),
+    ("colors", "roles"),
+    ("colours", "roles"),
+    ("theme", "roles"),
+    ("png", "verify"),
+    ("lint", "verify"),
+    ("icons", "artwork"),
+    ("svg", "artwork"),
+];
+
+/// The brief, with its topic list filled in from the one table `--doc`
+/// uses (they cannot drift apart).
+pub fn skill_brief() -> String {
+    SKILL_BRIEF_SRC.replace("{TOPICS}", &topics().join(", "))
+}
+
+/// The closest topics to a word (for "did you mean").
+pub fn suggest(word: &str) -> Vec<&'static str> {
+    let w = word.to_lowercase();
+    let dist = |a: &str, b: &str| -> usize {
+        let (a, b): (Vec<char>, Vec<char>) = (a.chars().collect(), b.chars().collect());
+        let mut prev: Vec<usize> = (0..=b.len()).collect();
+        for i in 1..=a.len() {
+            let mut cur = vec![i; b.len() + 1];
+            for j in 1..=b.len() {
+                let c = if a[i - 1] == b[j - 1] { 0 } else { 1 };
+                cur[j] = (prev[j] + 1).min(cur[j - 1] + 1).min(prev[j - 1] + c);
+            }
+            prev = cur;
+        }
+        prev[b.len()]
+    };
+    let mut all: Vec<(&str, usize)> = TOPICS
+        .iter()
+        .map(|(t, _, _)| *t)
+        .chain(ALIASES.iter().map(|(a, _)| *a))
+        .map(|t| (t, if t.starts_with(&w) || w.starts_with(t) { 0 } else { dist(t, &w) }))
+        .filter(|(_, d)| *d <= 2)
+        .collect();
+    all.sort_by_key(|(_, d)| *d);
+    let mut out: Vec<&str> = Vec::new();
+    for (t, _) in all {
+        let t = ALIASES.iter().find(|(a, _)| *a == t).map(|(_, to)| *to).unwrap_or(t);
+        if !out.contains(&t) {
+            out.push(t);
+        }
+    }
+    out.truncate(3);
+    out
+}
 
 fn doc(name: &str) -> &'static str {
     match name {
@@ -92,6 +172,7 @@ fn section_of(text: &str, needle: &str) -> Option<String> {
 /// `--doc <topic>`: the section, or None for an unknown topic.
 pub fn section(topic: &str) -> Option<String> {
     let t = topic.trim().to_lowercase();
+    let t = ALIASES.iter().find(|(a, _)| *a == t).map(|(_, to)| to.to_string()).unwrap_or(t);
     if let Some((_, d, needle)) = TOPICS.iter().find(|(name, _, _)| *name == t) {
         if needle.is_empty() {
             return Some(doc(d).to_string());

@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.19
+
+- `--doc` knows more words: aliases (`move`, `pivot`, `stagger`, `timing`,
+  `highlight`, `z-order`, `overlap`, `caption`, ...) and new sections
+  (`layering`, `overlaps`, `captions`); an unknown topic suggests the closest
+  ones. The brief's topic list comes from the same table.
+- Brief and guide fixes from review: stage wording, later declarations draw
+  on top, generated instances (`b* [items: ...]`), `move x to y` centres (use
+  a `point` beside), `then` waits for everything, artwork hinges.
+- `--frame` out of range says how keyframe indices relate to `--states` steps.
+- Lint: a label on a card no longer "straddles" the edge of something the
+  card itself covers (paint order is taken into account).
+- An artwork's own drawing no longer shows as `x._art` in messages.
+- Fix: the readability test suite did not compile since v0.2.14, so CI was red
+  and those tests did not run; two broken tests repaired.
+
 ## v0.2.18
 
 - `--skill-brief`: the whole method on one page (about 830 words against
