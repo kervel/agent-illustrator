@@ -85,8 +85,9 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
     missing.dedup();
     for f in missing {
         notes.push(format!(
-            "font '{}' is not available here (no system fonts are read); the next family in its list, or Overpass, is used. Embed it in the stylesheet as an @font-face data URI to use it",
-            f
+            "font '{}' is not available here (no system fonts are read{}); the next family in its list, or Overpass, is used. Embed it in the stylesheet as an @font-face data URI to use it",
+            f,
+            if flat.remote_fonts { ", and the stylesheet's web @import is not fetched" } else { "" }
         ));
     }
     // Characters no available font can draw (they come out as boxes).
@@ -111,9 +112,6 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
             "no available font has {}; they are drawn as boxes. Embed a font that has them as an @font-face data URI",
             boxes.iter().map(|c| format!("'{}' (U+{:04X})", c, *c as u32)).collect::<Vec<_>>().join(", ")
         ));
-    }
-    if flat.remote_fonts {
-        notes.push("the stylesheet @imports fonts from the web; they are not fetched for PNG output".into());
     }
     let opt = usvg::Options { fontdb: Arc::new(db), ..Default::default() };
     let tree = usvg::Tree::from_str(&flat.svg, &opt).map_err(|e| format!("PNG: the flattened SVG does not parse: {}", e))?;

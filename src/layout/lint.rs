@@ -3464,6 +3464,7 @@ fn check_unknown_colors(doc: &Document, warnings: &mut Vec<LintWarning>) {
 const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "at",           // grid placement
     "clip",         // drawn inside another element's shape
+    "pivot",        // what rotation turns about
     "cell_width",   // grid
     "cell_height",  // grid
     "cols",         // grid

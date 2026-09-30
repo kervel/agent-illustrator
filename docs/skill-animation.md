@@ -587,6 +587,12 @@ keyframe "go_back" { set status default [swap: fade] }
 parameter called `later` would rewrite `appears: later`). Outside templates,
 `transform x [fill: initial]` returns a property to the declared value.
 
+### Hinges
+
+`rect lid [..., pivot: left]` turns about its left edge: `transform lid
+[rotation: -28]` opens it like a lid (also `right`, `top`, `bottom`,
+`top_left`, ...). The pivot is where pops and pulses scale from too.
+
 ### Many things at once
 
 A swarm is one statement: `move needs.* to box [stagger: 0.07]`,
@@ -619,6 +625,26 @@ checked; macros expand before compilation, so they seek, lint and render like
 anything else. Inside a macro, time with `then`, events and `delay:` (all
 relative to where it is called); `at` counts from the keyframe start. There is
 no raw-SVG/JS escape hatch: extend through macros, or ask for a core primitive.
+
+### Verifying without a browser
+
+The binary alone is the whole loop; nothing else needs to be installed:
+
+```bash
+agent-illustrator --lint scene.ail                          # what to fix (exit 1 on errors)
+agent-illustrator --states scene.ail                        # per click step: what shows, hides, changes
+agent-illustrator --timeline scene.ail                      # when everything happens
+agent-illustrator --frames-to-dir out --png scene.ail       # every step's end state as PNG
+agent-illustrator --frame 2 --at 50% --png -o mid.png scene.ail   # a still, mid-motion
+agent-illustrator --frames-strip 2 --png -o strip.png scene.ail   # 0/25/50/75/100% of step 2
+agent-illustrator --frame 2 --png --scale 3 -o zoom.png scene.ail # zoom in on details
+```
+
+Look at the PNGs: they are rendered from the same tracks the browser player
+plays. Fonts: Overpass, Overpass Mono and a symbol font are built in; a
+stylesheet's `@font-face` data URIs (TTF/OTF/WOFF/WOFF2) are used; a font or
+character that is not available is reported. A browser (`--serve`, `--film`)
+is extra assurance, never required.
 
 ### Tooling
 

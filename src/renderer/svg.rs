@@ -1480,7 +1480,7 @@ where
 {
     if let Some(rotation) = element.styles.rotation {
         if rotation.abs() > f64::EPSILON {
-            let center = element.bounds.center();
+            let center = element.pivot_point();
             let transform = format!("rotate({} {} {})", rotation, center.x, center.y);
             builder.start_group_with_transform(None, &[], &transform);
             render_fn(builder);
@@ -1834,7 +1834,7 @@ fn render_element_body(
             // Apply rotation transform if specified
             let transform = if let Some(rotation) = element.styles.rotation {
                 if rotation.abs() > f64::EPSILON {
-                    let center = element.bounds.center();
+                    let center = element.pivot_point();
                     Some(format!("rotate({} {} {})", rotation, center.x, center.y))
                 } else {
                     None
@@ -1915,7 +1915,7 @@ fn render_element_body(
             }
             if let Some(rotation) = element.styles.rotation {
                 if rotation.abs() > f64::EPSILON {
-                    let center = element.bounds.center();
+                    let center = element.pivot_point();
                     let transform = format!("rotate({} {} {})", rotation, center.x, center.y);
                     builder.start_group_with_transform(id, &container_classes, &transform);
                 } else {

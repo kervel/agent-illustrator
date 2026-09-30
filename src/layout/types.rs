@@ -603,6 +603,9 @@ pub struct ResolvedStyles {
     /// `padding: 0` on a row/column: room between its edge and its
     /// children (default: the layout's container padding).
     pub padding: Option<f64>,
+    /// `pivot: left`: what rotation and scaling turn about (a lid's hinge);
+    /// default the centre.
+    pub pivot: Option<String>,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -650,6 +653,7 @@ impl ResolvedStyles {
             font_family: None,
             clip: None,
             padding: None,
+            pivot: None,
         }
     }
 
@@ -776,6 +780,16 @@ impl ResolvedStyles {
                     {
                         if k == "clip" {
                             styles.clip = Some(id.0.replace('.', "_"));
+                        }
+                        if k == "pivot" {
+                            styles.pivot = Some(id.0.clone());
+                        }
+                    }
+                    if let (StyleKey::Custom(k), StyleValue::Keyword(w) | StyleValue::String(w)) =
+                        (&modifier.node.key.node, &modifier.node.value.node)
+                    {
+                        if k == "pivot" {
+                            styles.pivot = Some(w.clone());
                         }
                     }
                     if matches!(&modifier.node.key.node, StyleKey::Custom(k) if k == "pack")
@@ -923,6 +937,7 @@ impl ResolvedStyles {
             corner_radius: other.corner_radius.or(self.corner_radius),
             clip: other.clip.clone().or_else(|| self.clip.clone()),
             padding: other.padding.or(self.padding),
+            pivot: other.pivot.clone().or_else(|| self.pivot.clone()),
             font_weight: other.font_weight.clone().or_else(|| self.font_weight.clone()),
             font_family: other.font_family.clone().or_else(|| self.font_family.clone()),
         }
@@ -1186,6 +1201,25 @@ pub struct ElementLayout {
 }
 
 impl ElementLayout {
+    /// The point rotation and scaling turn about: `pivot: left | right | top
+    /// | bottom | top_left | top_right | bottom_left | bottom_right`, else
+    /// the centre.
+    pub fn pivot_point(&self) -> Point {
+        let b = &self.bounds;
+        let (fx, fy) = match self.styles.pivot.as_deref() {
+            Some("left") => (0.0, 0.5),
+            Some("right") => (1.0, 0.5),
+            Some("top") => (0.5, 0.0),
+            Some("bottom") => (0.5, 1.0),
+            Some("top_left") | Some("top-left") => (0.0, 0.0),
+            Some("top_right") | Some("top-right") => (1.0, 0.0),
+            Some("bottom_left") | Some("bottom-left") => (0.0, 1.0),
+            Some("bottom_right") | Some("bottom-right") => (1.0, 1.0),
+            _ => (0.5, 0.5),
+        };
+        Point::new(b.x + b.width * fx, b.y + b.height * fy)
+    }
+
     /// A `path [through: ...]`: its geometry comes after layout, from the
     /// elements it passes through, so it takes no room in any container.
     pub fn is_through_path(&self) -> bool {

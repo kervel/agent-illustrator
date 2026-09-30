@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.11
+
+- The static binary is the whole loop: the Linux release binaries are now
+  static musl builds (x86_64 and aarch64), checked static in CI, and CI runs
+  lint, --states, every frame and a mid-motion still to PNG in a bare Alpine
+  container without network. README: a one-line install.
+- `--png` is a plain switch and `-o FILE` names the output (SVG or PNG); with
+  `--frames-to-dir` it writes one PNG per frame. (`--png FILE` swallowed the
+  input file name.)
+- `pivot: left | right | top | bottom | top_left | ...`: what rotation and
+  scaling turn about (a lid's hinge), in the player, static frames and PNGs
+  alike (G7).
+- PNG notes only when a font is really missing (a web @import of a font that
+  is bundled anyway is not worth a note).
+- Docs: "Verifying without a browser" in --skill and --skill-animation.
+
 ## v0.2.10
 
 From three Kubernetes scenes written from scratch (tests/examples):

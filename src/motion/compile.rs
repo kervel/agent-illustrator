@@ -1159,7 +1159,7 @@ impl<'a> Compiler<'a> {
                 if matches!(e.element_type, ElementType::GridCell) {
                     return;
                 }
-                let c = e.bounds.center();
+                let c = e.pivot_point();
                 origins.insert(id.0.clone(), (c.x, c.y));
                 elems.insert(
                     id.0.clone(),

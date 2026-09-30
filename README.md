@@ -150,10 +150,20 @@ nix --option tarball-ttl 0 run github:kervel/agent-illustrator -- --version
 `--version` reports the release tag for a released binary, so it is the quickest
 way to confirm which one you actually have.
 
+### One file, no dependencies (Linux)
+
+The Linux binaries are static: they run in any container or agent sandbox
+with nothing else installed (no browser, no fonts, no libc).
+
+```bash
+curl -fsSL -o agent-illustrator https://github.com/kervel/agent-illustrator/releases/latest/download/agent-illustrator-linux-x86_64
+chmod +x agent-illustrator    # aarch64: agent-illustrator-linux-aarch64
+```
+
 ### Pre-built Binaries
 
 Download from [GitHub Releases](https://github.com/kervel/agent-illustrator/releases):
-- Linux (x86_64, aarch64)
+- Linux (x86_64, aarch64; static)
 - macOS (x86_64, aarch64)
 - Windows (x86_64)
 
@@ -173,6 +183,7 @@ agent-illustrator scene.ail --serve                    # live preview, reloads o
 agent-illustrator scene.ail --states                   # the storyboard, as text
 agent-illustrator scene.ail --timeline                 # when everything happens
 agent-illustrator scene.ail --frame 2 --at 50%         # a still, mid-motion
+agent-illustrator scene.ail --frame 2 --png -o f.png   # a PNG to look at (no browser needed)
 agent-illustrator scene.ail --lint                     # what an agent should fix
 ```
 

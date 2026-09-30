@@ -139,6 +139,8 @@ Common modifiers:
     clip: <element>         Draw only inside that element's shape (within its stroke,
                             following its corner_radius): a window's header bar is a
                             plain rect [clip: bg] and never covers the border
+    pivot: left|right|top|bottom|top_left|...  What rotation and scale turn about
+                            (a lid's hinge); default the centre
     padding: <number>       On row/col: room between its edge and its children
                             (default 5); `padding: 0` puts them flush
     z_order: <number>       Render order among siblings (higher = on top; default 0,
@@ -413,6 +415,9 @@ CLI flags:
     --frames-to-dir D  Every frame as D/NN-name.svg (--list-frames: just names)
     --list-steps       One line per click step: its frame, then its [auto] frames
     --frame N --at T   A still T into frame N (0.35s, 350ms, 50%)
+    --png [-o FILE]    PNG instead of SVG (with --frame/--at, --frames-strip,
+                       --frames-to-dir); --scale 2 zooms. No browser needed
+    -o FILE            Write the output to FILE instead of stdout
     --frames-strip N   Contact sheet of frame N at 0/25/50/75/100%
     --states           The storyboard: per click step what is visible (a matrix)
                        and what changes (entrances, exits, transforms, moves,

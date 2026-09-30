@@ -12,9 +12,12 @@ build-linux-x86_64:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v.*/
   script:
-    - rustup target add x86_64-unknown-linux-gnu
-    - cargo build --release --target x86_64-unknown-linux-gnu
-    - cp target/x86_64-unknown-linux-gnu/release/agent-illustrator agent-illustrator-linux-x86_64
+    # Static (musl): runs in any container or sandbox with nothing installed.
+    - apt-get update && apt-get install -y musl-tools file
+    - rustup target add x86_64-unknown-linux-musl
+    - cargo build --release --target x86_64-unknown-linux-musl
+    - file target/x86_64-unknown-linux-musl/release/agent-illustrator | grep -Eq 'static(-pie)? linked'
+    - cp target/x86_64-unknown-linux-musl/release/agent-illustrator agent-illustrator-linux-x86_64
   artifacts:
     paths:
       - agent-illustrator-linux-x86_64

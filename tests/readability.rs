@@ -426,3 +426,14 @@ keyframe "c" { set api default }
     let t = timeline(src);
     assert!(t.contains("-> green"), "tweens back to the declared colour: {t}");
 }
+
+#[test]
+fn a_pivot_is_where_rotation_turns() {
+    let src = "rect lid [width: 100, height: 10, pivot: left]\nconstrain lid.left = 50\nconstrain lid.top = 50\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { transform lid [rotation: -28] }";
+    assert!(frame(src, "b").contains("rotate(-28 50 55)"), "static frames turn about the hinge");
+    let mut c = RenderConfig::new();
+    c.animate = true;
+    let svg = render_with_config(src, c).unwrap();
+    assert!(svg.contains("transform-origin:50px 55px"), "and so does the player");
+}

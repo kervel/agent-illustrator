@@ -481,6 +481,26 @@ Timed motion (draw a line, fly a copy, pulse, timing by events with `when` /
 `--animate` player, the `--states` storyboard, stills with `--at`, the built-in
 `ail:motion/git` macros) is a whole skill of its own: read `--skill-animation`.
 
+### Verifying without a browser
+
+The binary alone is the whole loop; nothing else needs to be installed:
+
+```bash
+agent-illustrator --lint scene.ail                          # what to fix (exit 1 on errors)
+agent-illustrator --states scene.ail                        # per click step: what shows, hides, changes
+agent-illustrator --timeline scene.ail                      # when everything happens
+agent-illustrator --frames-to-dir out --png scene.ail       # every step's end state as PNG
+agent-illustrator --frame 2 --at 50% --png -o mid.png scene.ail   # a still, mid-motion
+agent-illustrator --frames-strip 2 --png -o strip.png scene.ail   # 0/25/50/75/100% of step 2
+agent-illustrator --frame 2 --png --scale 3 -o zoom.png scene.ail # zoom in on details
+```
+
+Look at the PNGs: they are rendered from the same tracks the browser player
+plays. Fonts: Overpass, Overpass Mono and a symbol font are built in; a
+stylesheet's `@font-face` data URIs (TTF/OTF/WOFF/WOFF2) are used; a font or
+character that is not available is reported. A browser (`--serve`, `--film`)
+is extra assurance, never required.
+
 ### Syntax
 ```
 a -> b as req_arrow [stroke: red]    // Named connection

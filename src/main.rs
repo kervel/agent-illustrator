@@ -43,24 +43,19 @@ fn to_png(svg: &str, scale: f32) -> Vec<u8> {
     }
 }
 
-/// Print the SVG, or with `--png` write the picture (to FILE, or stdout).
-fn emit(svg: &str, png: &Option<Option<PathBuf>>, scale: f32) {
-    match png {
-        None => print!("{}", svg),
-        Some(target) => {
-            let bytes = to_png(svg, scale);
-            match target {
-                Some(path) => {
-                    if let Err(e) = fs::write(path, bytes) {
-                        eprintln!("Error writing '{}': {}", path.display(), e);
-                        std::process::exit(1);
-                    }
-                }
-                None => {
-                    use std::io::Write;
-                    let _ = std::io::stdout().write_all(&bytes);
-                }
+/// The SVG, or with `--png` the picture; to `-o FILE`, or stdout.
+fn emit(svg: &str, png: bool, output: &Option<PathBuf>, scale: f32) {
+    let bytes = if png { to_png(svg, scale) } else { svg.as_bytes().to_vec() };
+    match output {
+        Some(path) => {
+            if let Err(e) = fs::write(path, bytes) {
+                eprintln!("Error writing '{}': {}", path.display(), e);
+                std::process::exit(1);
             }
+        }
+        None => {
+            use std::io::Write;
+            let _ = std::io::stdout().write_all(&bytes);
         }
     }
 }
@@ -259,12 +254,16 @@ struct Cli {
     #[arg(long, value_name = "DIR")]
     frames_to_dir: Option<PathBuf>,
 
-    /// Write a PNG instead of the SVG: to FILE, or to stdout. Works with
+    /// Write a PNG instead of the SVG (to -o FILE, or stdout). Works with
     /// --frame (and --at), --frames-strip and --frames-to-dir (one PNG per
     /// frame). Uses the fonts bundled in the binary and any @font-face the
     /// stylesheet embeds as a data URI; no browser needed.
-    #[arg(long, value_name = "FILE", num_args = 0..=1)]
-    png: Option<Option<PathBuf>>,
+    #[arg(long)]
+    png: bool,
+
+    /// Write the output to FILE instead of stdout
+    #[arg(short = 'o', long, value_name = "FILE")]
+    output: Option<PathBuf>,
 
     /// Zoom for --png (2 = twice the size, for checking details)
     #[arg(long, default_value_t = 1.0)]
@@ -534,7 +533,7 @@ fn main() {
 
     if let Some(frame) = &cli.frames_strip {
         match agent_illustrator::render_frames_strip(&source, config, frame) {
-            Ok(svg) => emit(&svg, &cli.png, cli.scale),
+            Ok(svg) => emit(&svg, cli.png, &cli.output, cli.scale),
             Err(e) => {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
@@ -548,7 +547,7 @@ fn main() {
             eprintln!("Error: --frames-to-dir cannot be combined with --frame or --animate");
             std::process::exit(2);
         }
-        write_all_frames(&source, config, dir, cli.png.as_ref().map(|_| cli.scale));
+        write_all_frames(&source, config, dir, cli.png.then_some(cli.scale));
         return;
     }
 
@@ -600,8 +599,8 @@ fn main() {
     } else {
         match render_with_config(&source, config) {
             Ok(svg) => {
-                if cli.png.is_some() {
-                    emit(&svg, &cli.png, cli.scale);
+                if cli.png || cli.output.is_some() {
+                    emit(&svg, cli.png, &cli.output, cli.scale);
                 } else {
                     println!("{}", svg);
                 }
