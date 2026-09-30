@@ -1,0 +1,121 @@
+/* Single-page apps, slide 2: "A single-page app: the app moves into the browser".
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate spa-app.ail
+
+   STORYBOARD
+     start   an empty browser; the server holds the app (Angular) and the API (Django) with the database
+     load    first visit: the app travels to the browser once and builds the page there
+     click   "Order 42": the app asks the API for data only; a small card comes back;
+             only the middle of the page changes, the header and menu stay
+     push    a colleague changes the order: the server pushes the change, the page updates by itself
+     others  the same API also serves a phone app and an AI agent
+*/
+
+import "spa-parts.ail"
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "2", title: "A single-page app: the app moves into the browser"]
+
+browser web [header.appears: later, menu.appears: later, content.appears: later]
+constrain web.bg.left = s.stage.left + 90
+constrain web.bg.center_y = s.stage.center_y + 30
+
+server_win srv [title: "Server"]
+constrain srv.bg.right = s.stage.right - 90
+constrain srv.bg.center_y = web.bg.center_y
+
+// In the server: the app's files, and the API with the database behind it.
+code_file app_files [width: 90, height: 116]
+rect app_lbl [label: "the app", font_size: 18, font_weight: 600, label_fill: role-muted, fill: none, stroke: none]
+rect api [label: "API", font_family: mono, font_size: 24, font_weight: 700, label_fill: role-surface,
+          fill: role-primary, stroke: none, corner_radius: 10, width: 110, height: 56]
+db data [width: 76, height: 90, tint: role-secondary]
+constrain app_files.center_x = srv.bg.center_x + 95
+constrain app_files.top = srv.bar.bottom + 50
+constrain app_lbl.center_x = app_files.center_x
+constrain app_lbl.top = app_files.bottom + 10
+constrain api.center_x = srv.bg.center_x - 95
+constrain api.center_y = app_files.center_y
+constrain data.center_x = api.center_x
+constrain data.top = api.bottom + 40
+api.bottom -> data.top as api_db [stroke: role-rule, stroke_width: 3]
+
+// A colleague who changes the order on the server side.
+person ben [width: 44, height: 51, tint: role-series-2, appears: later]
+rect ben_lbl [label: "a colleague", font_size: 17, font_weight: 600, label_fill: role-muted, fill: none, stroke: none,
+              appears: later]
+constrain ben.center_x = app_files.center_x
+constrain ben.bottom = srv.bg.bottom - 50
+constrain ben_lbl.center_x = ben.center_x
+constrain ben_lbl.top = ben.bottom + 6
+
+// What travels.
+rect req [label: "GET /api/orders/42", font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
+          fill: role-ink, stroke: none, corner_radius: 8, appears: later]
+constrain req.center_x = midpoint(web.bg.right, srv.bg.left)
+constrain req.top = web.bg.top + 40
+code answer [lang: json, frame: false, font_size: 18, line_numbers: false, appears: later,
+             source: "{\"order\": 42,\n \"status\": \"shipped\"}"]
+constrain answer.center_x = req.center_x
+constrain answer.top = req.bottom + 30
+code pushed [lang: json, frame: false, font_size: 18, line_numbers: false, appears: later,
+             source: "{\"status\": \"delivered\"}"]
+constrain pushed.center_x = req.center_x
+constrain pushed.top = answer.bottom + 30
+
+// Other clients of the same API.
+phone_art phone [width: 58, height: 101, appears: later]
+agent_art bot [width: 90, height: 90, appears: later]
+rect phone_lbl [label: "phone app", font_size: 17, font_weight: 600, label_fill: role-muted, fill: none, stroke: none,
+                appears: later]
+rect bot_lbl [label: "AI agent", font_size: 17, font_weight: 600, label_fill: role-muted, fill: none, stroke: none,
+              appears: later]
+constrain phone.center_x = req.center_x - 40
+constrain phone.bottom = web.bg.bottom - 150
+constrain bot.center_x = phone.center_x
+constrain bot.top = phone.bottom + 50
+constrain phone_lbl.left = phone.right + 14
+constrain phone_lbl.center_y = phone.center_y
+constrain bot_lbl.left = bot.right + 14
+constrain bot_lbl.center_y = bot.center_y
+phone.right -> api.left as phone_api [stroke: role-rule, stroke_width: 3, appears: later]
+bot.right -> api.left as bot_api [stroke: role-rule, stroke_width: 3, appears: later]
+
+// ---------------------------------------------------------------- motion
+
+keyframe "start" [title: "A single-page app: the app moves into the browser"] {
+    slide_in(s)
+    at 0.2 { show web.bg, web.bar [enter: rise] }
+    at 0.35 { show srv [enter: rise] }
+}
+
+keyframe "load" {
+    fly ghost(app_files) to web.bg [duration: slow, scale: 1]
+    when app_files arrives { show web.header, web.menu, web.content [enter: pop, stagger: 0.1] }
+}
+
+keyframe "click" {
+    transform web.bar [label: "acme.example.com/orders/42", swap: roll]
+    fly req from web.content to api [duration: slow, scale: 1]
+    when req arrives { flash data }
+}
+
+keyframe "click_reply" [auto] {
+    fly answer from api to web.content [duration: slow, scale: 1]
+    when answer arrives { transform web.content [label: "Order 42 · shipped", swap: fade] }
+}
+
+keyframe "push" {
+    show ben, ben_lbl [enter: pop]
+    when ben shown { flash data }
+    then { fly pushed from api to web.content [duration: slow, scale: 1] }
+    when pushed arrives {
+        transform web.content [label: "Order 42 · delivered", swap: roll]
+        highlight web.content [color: role-ok]
+    }
+}
+
+keyframe "others" {
+    show phone, bot, phone_lbl, bot_lbl [enter: pop, stagger: 0.1]
+    when bot shown { show phone_api, bot_api [enter: draw, stagger: 0.1] }
+}

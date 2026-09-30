@@ -505,9 +505,9 @@ or packed in a `pack: tight` row, is reported by lint rather than moved.
 ### Travel
 
 ```
-fly ghost(folder) to st1.dot [scale: 0.25, arc: 0.15]   // a copy flies and vanishes; default scale fits the target
+fly ghost(folder) to st1.dot [scale: 0.25, arc: 0.15]   // a copy flies and vanishes; by default it shrinks to fit the target
 fly ghost(hub.d4) to anna.d4, chris.d4 [stagger: 0.1]   // one copy per destination
-fly token from a to b                                    // a real (hidden) element as the traveller
+fly token from a to b                                    // a real (hidden) element travels, at its own size
 move ring to st2.dot            // persistent: dependents re-solve around it
 move d0 home                    // release a `move`
 move train along track [to: st3.dot]

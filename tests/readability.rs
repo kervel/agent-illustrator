@@ -437,3 +437,12 @@ fn a_pivot_is_where_rotation_turns() {
     let svg = render_with_config(src, c).unwrap();
     assert!(svg.contains("transform-origin:50px 55px"), "and so does the player");
 }
+
+#[test]
+fn something_shown_and_hidden_within_a_frame_is_not_hidden_throughout() {
+    let src = "row r [gap: 40] { rect a [width: 30, height: 30]\n rect b [width: 30, height: 30]\n rect tip [width: 60, height: 20, appears: later] }\n\
+               keyframe \"k\" { }\n\
+               keyframe \"j\" { show tip\n when tip shown { pulse tip }\n then { hide tip } }";
+    let w = lint(src);
+    assert!(!w.iter().any(|m| m.contains("hidden the whole keyframe")), "{w:?}");
+}

@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.12
+
+- Fix: a flying ghost of SVG artwork could glue two attributes together
+  (`stroke="…"stroke-width="3"`) where the artwork file broke a tag across
+  lines: invalid XML, so standalone SVG and `--png` failed (G22). New test:
+  every frame, mid-motion still and animation of the example scenes parses as
+  XML.
+- The "hidden the whole keyframe" lint no longer fires on something shown
+  (and hidden again) within the frame, or flown as a traveller (G20).
+- `fly X from A to B` keeps the traveller's size by default; only a
+  `fly ghost(...)` snapshot shrinks to fit its target (G21).
+
 ## v0.2.11
 
 - The static binary is the whole loop: the Linux release binaries are now

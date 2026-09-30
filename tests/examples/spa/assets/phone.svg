@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 112" width="64" height="112">
+  <title>Phone</title>
+  <!-- Parts: phone.case, phone.screen. -->
+  <rect id="case" x="1.5" y="1.5" width="61" height="109" rx="11"
+        fill="var(--role-ink, #14171f)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+  <rect id="screen" x="7" y="13" width="50" height="80" rx="3" fill="var(--role-surface, #ffffff)"/>
+  <rect x="24" y="100" width="16" height="4" rx="2" fill="var(--role-surface, #ffffff)" opacity="0.6"/>
+  <rect x="13" y="22" width="38" height="7" rx="3" fill="var(--tint, var(--role-primary, #1d6e88))"/>
+  <rect x="13" y="36" width="30" height="5" rx="2.5" fill="var(--role-rule, #cbd1da)"/>
+  <rect x="13" y="47" width="34" height="5" rx="2.5" fill="var(--role-rule, #cbd1da)"/>
+  <rect x="13" y="58" width="24" height="5" rx="2.5" fill="var(--role-rule, #cbd1da)"/>
+</svg>

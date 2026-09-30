@@ -1276,8 +1276,12 @@ fn render_motion_ghosts(result: &LayoutResult, builder: &mut SvgBuilder) {
             r2(c.y)
         );
         for line in body {
+            // A line break may sit inside a tag (artwork keeps its source's
+            // layout): keep a separator, or two attributes run together.
+            markup.push('\n');
             markup.push_str(&line.trim().replace(" id=\"", " data-ghost-of=\""));
         }
+        markup.push('\n');
         markup.push_str("</g>");
         builder.add_connection_raw(markup);
     }

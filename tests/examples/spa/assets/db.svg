@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 100" width="84" height="100">
+  <title>Database</title>
+  <!-- Parts: db.body, db.top. Colours are theme roles; "tint" is an instance argument. -->
+  <path id="body" d="M3 16 V84 C3 92 21 97.5 42 97.5 C63 97.5 81 92 81 84 V16"
+        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+  <path d="M3 39 C3 47 21 52.5 42 52.5 C63 52.5 81 47 81 39 M3 62 C3 70 21 75.5 42 75.5 C63 75.5 81 70 81 62"
+        fill="none" stroke="var(--role-ink, #14171f)" stroke-width="2.5" opacity="0.55"/>
+  <ellipse id="top" cx="42" cy="16" rx="39" ry="13.5"
+           fill="var(--tint, var(--role-secondary, #ba2415))" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+</svg>

@@ -176,8 +176,27 @@ pub fn check(
     for (fi, f) in m.frames.iter().enumerate() {
         let end = &states[fi];
         let before = if fi > 0 { Some(&states[fi - 1]) } else { None };
-        let hidden_throughout =
-            |id: &str| hidden_in(end, id, &parent_of) && before.is_none_or(|b| hidden_in(b, id, &parent_of));
+        // On screen for a while in this frame: shown (and perhaps hidden
+        // again), or flown as a traveller.
+        let on_screen_meanwhile: HashSet<&str> = f
+            .atoms
+            .iter()
+            .filter(|a| a.kind == "show" || a.kind == "fly")
+            .map(|a| a.target_id.as_str())
+            .collect();
+        let shown_meanwhile = |id: &str| {
+            let mut cur = Some(id.to_string());
+            while let Some(c) = cur {
+                if on_screen_meanwhile.contains(c.as_str()) {
+                    return true;
+                }
+                cur = parent_of.get(&c).cloned();
+            }
+            false
+        };
+        let hidden_throughout = |id: &str| {
+            hidden_in(end, id, &parent_of) && before.is_none_or(|b| hidden_in(b, id, &parent_of)) && !shown_meanwhile(id)
+        };
 
         // A slow beat.
         if f.duration > SLOW_BEAT {

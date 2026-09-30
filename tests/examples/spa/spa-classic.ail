@@ -1,0 +1,101 @@
+/* Single-page apps, slide 1: "Old style: the server builds every page".
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate spa-classic.ail
+
+   STORYBOARD
+     start   a browser showing the Orders page; the Django server with a page template and the database
+     click   "Order 42": the request goes to the server; template + data become a whole HTML page;
+             it travels back; the browser blanks and redraws everything
+     again   "Order 43": the same round trip; header and menu come back again though only the middle changed
+*/
+
+import "spa-parts.ail"
+
+// ---------------------------------------------------------------- parts
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "1", title: "Old style: the server builds every page"]
+
+browser web []
+constrain web.bg.left = s.stage.left + 90
+constrain web.bg.center_y = s.stage.center_y + 30
+
+// The server: a page template and the database.
+rect server [width: 400, height: 440, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+rect server_bar [width: 400, height: 50, fill: role-surface-2, stroke: none, clip: server,
+                 label: "Django server", align: start, font_size: 21, font_weight: 700, label_fill: role-ink]
+constrain server.right = s.stage.right - 90
+constrain server.center_y = web.bg.center_y
+constrain server_bar.top = server.top
+constrain server_bar.left = server.left
+
+page tmpl [width: 102, height: 132]
+rect tmpl_lbl [label: "template", font_size: 18, font_weight: 600, label_fill: role-muted, fill: none, stroke: none]
+db data [width: 84, height: 100, tint: role-secondary]
+rect data_lbl [label: "database", font_size: 18, font_weight: 600, label_fill: role-muted, fill: none, stroke: none]
+constrain tmpl.center_x = server.center_x - 85
+constrain tmpl.center_y = server.center_y + 20
+constrain data.center_x = server.center_x + 85
+constrain data.center_y = tmpl.center_y
+constrain tmpl_lbl.center_x = tmpl.center_x
+constrain tmpl_lbl.top = tmpl.bottom + 12
+constrain data_lbl.center_x = data.center_x
+constrain data_lbl.top = tmpl_lbl.top
+
+// What travels: the request, and the whole page that comes back.
+rect req [label: "GET /orders/42", font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
+          fill: role-ink, stroke: none, corner_radius: 8, appears: later]
+constrain req.center_x = midpoint(web.bg.right, server.left)
+constrain req.bottom = web.bg.top + 110
+template "packet" (what: "whole page") {
+    page sheet [width: 80, height: 103]
+    rect lbl [label: what, font_size: 18, font_weight: 700, label_fill: role-ink, fill: none, stroke: none]
+    constrain lbl.center_x = sheet.center_x
+    constrain lbl.top = sheet.bottom + 8
+}
+packet reply [appears: later]
+constrain reply.center_x = req.center_x
+constrain reply.center_y = web.bg.center_y + 60
+
+// ---------------------------------------------------------------- motion
+
+// A click: the request travels to the server, which fills the template with data.
+motion request(url: text, bar: text) {
+    transform req [label: url, swap: cut]
+    transform web.bar [label: bar, swap: roll]
+    fly req from web.bg to server [duration: slow, scale: 1]
+    when req arrives { flash tmpl; flash data }
+}
+
+// The reply: a whole page travels back; the browser blanks and redraws all of it.
+motion whole_page(shows: text) {
+    fly reply from tmpl to web.content [duration: slow, scale: 1]
+    when reply arrives { hide web.header, web.menu, web.content [exit: fade, duration: fast] }
+    then {
+        transform web.content [label: shows, swap: cut]
+        show web.header, web.menu, web.content [enter: fade, stagger: 0.08]
+    }
+}
+
+keyframe "start" [title: "Old style: the server builds every page"] {
+    slide_in(s)
+    at 0.2 { show web [enter: rise] }
+    at 0.35 { show server, server_bar, tmpl, tmpl_lbl, data, data_lbl [enter: rise, stagger: 0.06] }
+}
+
+keyframe "click" {
+    request("GET /orders/42", "acme.example.com/orders/42")
+}
+
+keyframe "click_reply" [auto] {
+    whole_page("Order 42")
+}
+
+keyframe "again" {
+    request("GET /orders/43", "acme.example.com/orders/43")
+}
+
+keyframe "again_reply" [auto] {
+    whole_page("Order 43")
+    then { highlight web.header [color: role-warn]; highlight web.menu [color: role-warn] }
+}

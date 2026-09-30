@@ -2051,7 +2051,12 @@ impl<'a> Compiler<'a> {
             }
         };
         let opts = self.current_opts.clone();
-        let s_end = opt_number(&opts, "scale").unwrap_or(fit);
+        // A snapshot (ghost) shrinks into its target; a traveller (a request
+        // chip, a card) keeps its size unless told otherwise.
+        let s_end = opt_number(&opts, "scale").unwrap_or(match subject {
+            FlySubject::Ghost(_) => fit,
+            FlySubject::Proxy(_) => 1.0,
+        });
         let s_start = opt_number(&opts, "from_scale").unwrap_or(1.0);
         let arc = opt_number(&opts, "arc").unwrap_or(0.0);
         let (ax, ay) = (src.x - base_c.x - anc.0, src.y - base_c.y - anc.1);
