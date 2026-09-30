@@ -175,7 +175,10 @@ impl FrameState {
                 for m in modifiers {
                     // per-property override: drop any earlier modifier with the same key
                     entry.retain(|existing| existing.node.key.node != m.node.key.node);
-                    entry.push(m.clone());
+                    // `[fill: initial]`: back to what the file declares.
+                    if !crate::parser::ast::is_initial(&m.node.value.node) {
+                        entry.push(m.clone());
+                    }
                 }
             }
             KeyframeOp::Constrain(decl) => {

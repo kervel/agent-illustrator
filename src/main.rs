@@ -199,6 +199,12 @@ struct Cli {
     #[arg(long)]
     timeline: bool,
 
+    /// Print the storyboard: per click step, which elements are visible and
+    /// what changes (appears, disappears, properties, moves, draws), as the
+    /// file declares it. Check it against your STORYBOARD comment.
+    #[arg(long)]
+    states: bool,
+
     /// Print the compiled motion manifest (tracks) as JSON
     #[arg(long)]
     timeline_json: bool,
@@ -404,6 +410,7 @@ fn main() {
     config.at = cli.at.clone();
     config.crop = cli.crop_to_content;
     config.timeline = cli.timeline;
+    config.states = cli.states;
     config.timeline_json = cli.timeline_json;
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);

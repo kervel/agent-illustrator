@@ -731,7 +731,9 @@ fn rewrite_motion(
     for n in nodes {
         let span = n.span.clone();
         match &mut n.node {
-            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) => rewrite_motion(b, specs, inserts)?,
+            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                rewrite_motion(b, specs, inserts)?
+            }
             MotionNode::Stmt(st) => match &mut st.verb {
                 MotionVerb::Insert { code, after } => {
                     let Some(spec) = specs.get(&code.node) else {
@@ -813,6 +815,58 @@ fn rewrite(
         out.push(s);
     }
     Ok(out)
+}
+
+/// `point hub`: a position and nothing else (a zero-size, invisible anchor for
+/// constraints, moves and flights), instead of a 1x1 rect with no fill and no
+/// stroke. A user template called `point` takes precedence.
+pub fn expand_points(stmts: Vec<Spanned<Statement>>) -> Vec<Spanned<Statement>> {
+    let user = stmts.iter().any(|s| matches!(&s.node, Statement::TemplateDecl(d) if d.name.node.0 == "point"));
+    if user {
+        return stmts;
+    }
+    fn walk(stmts: Vec<Spanned<Statement>>) -> Vec<Spanned<Statement>> {
+        stmts
+            .into_iter()
+            .map(|mut s| {
+                match &mut s.node {
+                    Statement::TemplateInstance(t) if t.template_name.node.0 == "point" => {
+                        use crate::parser::ast::{ShapeDecl, ShapeType, StyleKey, StyleModifier};
+                        let sp = s.span.clone();
+                        let m = |k: StyleKey, v: StyleValue| {
+                            Spanned::new(
+                                StyleModifier { key: Spanned::new(k, sp.clone()), value: Spanned::new(v, sp.clone()) },
+                                sp.clone(),
+                            )
+                        };
+                        let none = || StyleValue::Keyword("none".into());
+                        let mut modifiers = vec![
+                            m(StyleKey::Width, StyleValue::Number { value: 0.0, unit: None }),
+                            m(StyleKey::Height, StyleValue::Number { value: 0.0, unit: None }),
+                            m(StyleKey::Fill, none()),
+                            m(StyleKey::Stroke, none()),
+                            m(StyleKey::Class, StyleValue::Identifier(crate::parser::ast::Identifier::new("ai-point"))),
+                        ];
+                        // Anything else written on it (appears:, ...) is kept.
+                        for (k, v) in std::mem::take(&mut t.arguments) {
+                            modifiers.push(m(StyleKey::Custom(k.node.0), v.node));
+                        }
+                        let name = t.instance_name.clone();
+                        s.node = Statement::Shape(ShapeDecl {
+                            shape_type: Spanned::new(ShapeType::Rectangle, sp.clone()),
+                            name: Some(name),
+                            modifiers,
+                        });
+                    }
+                    Statement::Layout(l) => l.children = walk(std::mem::take(&mut l.children)),
+                    Statement::Group(g) => g.children = walk(std::mem::take(&mut g.children)),
+                    _ => {}
+                }
+                s
+            })
+            .collect()
+    }
+    walk(stmts)
 }
 
 #[cfg(test)]

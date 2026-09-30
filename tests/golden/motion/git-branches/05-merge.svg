@@ -224,6 +224,6 @@ text { white-space: pre; }
       </g>
     </g>
   </g>
-  <rect id="gate_top" class="ai-shape ai-rect" x="1380.4254" y="426.75" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
-  <path class="ai-connection conn-98b54573-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="var(--role-ink)" stroke-width="3" stroke-dasharray="6,6"/>
+  <rect id="gate_top" class="ai-shape ai-rect ai-point" x="1380.9254" y="427.75" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  <path class="ai-connection conn-8ba2ce6e-gate" d="M1380.9254 427.75 L1380.9254 552" fill="none" stroke="var(--role-ink)" stroke-width="3" stroke-dasharray="6,6"/>
 </svg>

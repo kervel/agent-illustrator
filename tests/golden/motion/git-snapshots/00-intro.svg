@@ -186,8 +186,8 @@ text { white-space: pre; }
       </g>
     </g>
   </g>
-  <path id="rule" class="ai-shape ai-path dots" d="M747.85 359.00 L1519.50 359.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
-  <rect id="rule_end" class="ai-shape ai-rect" x="1519" y="358.5" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <path id="rule" class="ai-shape ai-path dots" d="M747.85 359.00 L1520.00 359.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect id="rule_end" class="ai-shape ai-rect ai-point" x="1520" y="359" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
   <g id="stations" class="ai-container">
     <g id="st1" class="ai-container">
     </g>

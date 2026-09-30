@@ -517,6 +517,8 @@ fn subst_stmt(s: &MotionStmt, env: &HashMap<String, Bound>) -> MotionStmt {
         },
         MotionVerb::Count(t) => MotionVerb::Count(subst_sel(t, env)),
         MotionVerb::Insert { code, after } => MotionVerb::Insert { code: code.clone(), after: *after },
+        MotionVerb::UseLayout(n) => MotionVerb::UseLayout(n.clone()),
+        MotionVerb::SetState { target, state } => MotionVerb::SetState { target: subst_sel(target, env), state: state.clone() },
         MotionVerb::Swap { from, to } => MotionVerb::Swap {
             from: subst_sel(from, env),
             to: subst_sel(to, env),
@@ -560,6 +562,70 @@ fn subst_stmt(s: &MotionStmt, env: &HashMap<String, Bound>) -> MotionStmt {
 struct Expander<'a> {
     idx: &'a ElementIndex,
     macros: &'a BTreeMap<String, MotionMacroDecl>,
+    /// Named states of each component instance (`state done { ... }`).
+    states: &'a HashMap<String, Vec<(String, Vec<Spanned<MotionNode>>)>>,
+}
+
+type States = HashMap<String, Vec<(String, Vec<Spanned<MotionNode>>)>>;
+
+fn collect_states(stmts: &[Spanned<Statement>], out: &mut States) {
+    for st in stmts {
+        match &st.node {
+            Statement::ComponentState { name, body, owner } => {
+                out.entry(owner.clone()).or_default().push((name.node.clone(), body.clone()))
+            }
+            Statement::Group(g) => collect_states(&g.children, out),
+            Statement::Layout(l) => collect_states(&l.children, out),
+            _ => {}
+        }
+    }
+}
+
+fn strip_states(stmts: &mut Vec<Spanned<Statement>>) {
+    stmts.retain(|s| !matches!(s.node, Statement::ComponentState { .. }));
+    for st in stmts {
+        match &mut st.node {
+            Statement::Group(g) => strip_states(&mut g.children),
+            Statement::Layout(l) => strip_states(&mut l.children),
+            _ => {}
+        }
+    }
+}
+
+/// Every statement in a motion tree, mutably.
+fn each_stmt(nodes: &mut [Spanned<MotionNode>], f: &mut dyn FnMut(&mut MotionStmt)) {
+    for n in nodes {
+        match &mut n.node {
+            MotionNode::Stmt(s) => f(s),
+            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                each_stmt(b, f)
+            }
+        }
+    }
+}
+
+/// What a state sets: (part, property) for transforms, part for show/hide
+/// (true = shown).
+fn state_effects(nodes: &[Spanned<MotionNode>]) -> (Vec<(String, StyleKey)>, Vec<(String, bool)>) {
+    let mut props = Vec::new();
+    let mut vis = Vec::new();
+    let mut nodes = nodes.to_vec();
+    each_stmt(&mut nodes, &mut |s| match &s.verb {
+        MotionVerb::Transform { target: Spanned { node: Selector::Name(t), .. }, modifiers } => {
+            for m in modifiers {
+                props.push((t.clone(), m.node.key.node.clone()));
+            }
+        }
+        MotionVerb::Show(v) | MotionVerb::Hide(v) => {
+            for sel in v {
+                if let Selector::Name(t) = &sel.node {
+                    vis.push((t.clone(), matches!(s.verb, MotionVerb::Show(_))));
+                }
+            }
+        }
+        _ => {}
+    });
+    (props, vis)
 }
 
 impl Expander<'_> {
@@ -654,8 +720,23 @@ impl Expander<'_> {
                     MotionNode::After(*t, self.expand_block(b, env, depth)?),
                     n.span.clone(),
                 )),
+                MotionNode::When(ev, off, b) => out.push(Spanned::new(
+                    MotionNode::When(self.resolve_event(ev, env)?, *off, self.expand_block(b, env, depth)?),
+                    n.span.clone(),
+                )),
+                MotionNode::Beat(name, b) => out.push(Spanned::new(
+                    MotionNode::Beat(name.clone(), self.expand_block(b, env, depth)?),
+                    n.span.clone(),
+                )),
                 MotionNode::Stmt(s) => {
                     let s = subst_stmt(s, env);
+                    if let MotionVerb::SetState { target, state } = &s.verb {
+                        for id in self.idx.resolve(target)? {
+                            let body = self.set_state(&id, state, &s.opts, n.span.clone())?;
+                            out.push(Spanned::new(MotionNode::After(0.0, self.expand_block(&body, &HashMap::new(), depth + 1)?), n.span.clone()));
+                        }
+                        continue;
+                    }
                     if let MotionVerb::Call { name, args } = &s.verb {
                         let Some(m) = self.macros.get(&name.node) else {
                             let known: HashSet<String> = self.macros.keys().cloned().collect();
@@ -704,6 +785,138 @@ impl Expander<'_> {
             }
         }
         Ok(out)
+    }
+
+    /// `set review done [opts]`: the state's statements, addressed to the
+    /// instance's parts, each with the options; what other states of the
+    /// component change and this one does not goes back to how the
+    /// template draws it.
+    fn set_state(
+        &self,
+        id: &str,
+        state: &Spanned<String>,
+        opts: &[Spanned<MotionOpt>],
+        span: Span,
+    ) -> Result<Vec<Spanned<MotionNode>>, LayoutError> {
+        let shown = self.idx.show(id);
+        let Some(states) = self.states.get(id) else {
+            return Err(LayoutError::Located {
+                message: format!("set {} {}: `{}` has no states (declare `state {} {{ ... }}` in its template)", shown, state.node, shown, state.node),
+                span: state.span.clone(),
+            });
+        };
+        // `default`: the look as declared (every state's changes undone).
+        let empty = Vec::new();
+        let found = states.iter().find(|(n, _)| *n == state.node).map(|(_, b)| b);
+        let found = found.or((state.node == "default").then_some(&empty));
+        let Some(body) = found else {
+            let known: HashSet<String> = states.iter().map(|(n, _)| n.clone()).collect();
+            let mut names: Vec<&String> = known.iter().collect();
+            names.sort();
+            return Err(LayoutError::Located {
+                message: format!(
+                    "set {} {}: no state `{}`; {} has {} (and `default`)",
+                    shown,
+                    state.node,
+                    state.node,
+                    shown,
+                    names.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", ")
+                ),
+                span: state.span.clone(),
+            });
+        };
+        // Parts by their name in the template: `bg` is `review_bg`.
+        let prefix = format!("{}_", id);
+        let mut env: HashMap<String, Bound> = self
+            .idx
+            .ids
+            .iter()
+            .filter_map(|i| i.strip_prefix(&prefix).map(|local| (local.to_string(), Bound::Name(i.clone()))))
+            .collect();
+        env.insert("self".into(), Bound::Name(id.to_string()));
+        let (mine, my_vis) = state_effects(body);
+        let mut nodes = body.clone();
+        for (other, obody) in states.iter().filter(|(n, _)| *n != state.node) {
+            let _ = other;
+            let (props, vis) = state_effects(obody);
+            for (part, key) in props {
+                if mine.iter().any(|(p, k)| *p == part && *k == key) {
+                    continue;
+                }
+                let sp = span.clone();
+                let modifier = Spanned::new(
+                    StyleModifier {
+                        key: Spanned::new(key.clone(), sp.clone()),
+                        value: Spanned::new(StyleValue::Keyword("initial".into()), sp.clone()),
+                    },
+                    sp.clone(),
+                );
+                let exists = nodes.iter_mut().any(|n| match &mut n.node {
+                    MotionNode::Stmt(MotionStmt { verb: MotionVerb::Transform { target: Spanned { node: Selector::Name(t), .. }, modifiers }, .. })
+                        if *t == part =>
+                    {
+                        if !modifiers.iter().any(|m| m.node.key.node == key) {
+                            modifiers.push(modifier.clone());
+                        }
+                        true
+                    }
+                    _ => false,
+                });
+                if !exists {
+                    nodes.push(Spanned::new(
+                        MotionNode::Stmt(MotionStmt {
+                            verb: MotionVerb::Transform { target: Spanned::new(Selector::Name(part.clone()), sp.clone()), modifiers: vec![modifier] },
+                            opts: vec![],
+                            targets: vec![],
+                            partners: vec![],
+                        }),
+                        sp,
+                    ));
+                }
+            }
+            for (part, on) in vis {
+                if my_vis.iter().any(|(p, _)| *p == part) {
+                    continue;
+                }
+                let sel = vec![Spanned::new(Selector::Name(part.clone()), span.clone())];
+                let verb = if on { MotionVerb::Hide(sel) } else { MotionVerb::Show(sel) };
+                nodes.push(Spanned::new(MotionNode::Stmt(MotionStmt { verb, opts: vec![], targets: vec![], partners: vec![] }), span.clone()));
+            }
+        }
+        // Address the parts, and give every statement the options.
+        each_stmt(&mut nodes, &mut |s| {
+            *s = subst_stmt(s, &env);
+            for o in opts {
+                if !s.opts.iter().any(|x| x.node.key.node == o.node.key.node) {
+                    s.opts.push(o.clone());
+                }
+            }
+        });
+        Ok(nodes)
+    }
+
+    /// An event's names, as element ids (macro parameters substituted).
+    fn resolve_event(&self, ev: &MotionEvent, env: &HashMap<String, Bound>) -> Result<MotionEvent, LayoutError> {
+        let id = |n: &Spanned<String>| -> Result<Spanned<String>, LayoutError> {
+            let name = subst_name(&n.node, env);
+            let id = self.idx.member(&name);
+            if self.idx.ids.contains(&id) {
+                Ok(Spanned::new(id, n.span.clone()))
+            } else {
+                Err(LayoutError::UndefinedIdentifier {
+                    name: name.clone(),
+                    span: n.span.clone(),
+                    suggestions: self.idx.suggest(&name),
+                })
+            }
+        };
+        Ok(match ev {
+            MotionEvent::Reaches { line, target } => MotionEvent::Reaches { line: id(line)?, target: id(target)? },
+            MotionEvent::Arrives(e) => MotionEvent::Arrives(id(e)?),
+            MotionEvent::Shown(e) => MotionEvent::Shown(id(e)?),
+            MotionEvent::Hidden(e) => MotionEvent::Hidden(id(e)?),
+            MotionEvent::BeatEnd(b) => MotionEvent::BeatEnd(b.clone()),
+        })
     }
 
     fn resolve_stmt(&self, mut s: MotionStmt) -> Result<MotionStmt, LayoutError> {
@@ -794,6 +1007,8 @@ impl Expander<'_> {
             }
             MotionVerb::Constrain(_) | MotionVerb::Disable(_) | MotionVerb::Enable(_) => {}
             MotionVerb::Call { .. } => unreachable!("calls are expanded before resolution"),
+            MotionVerb::UseLayout(_) => unreachable!("layouts are desugared before resolution"),
+            MotionVerb::SetState { .. } => unreachable!("states are expanded before resolution"),
             MotionVerb::Insert { code, .. } => {
                 return Err(LayoutError::UndefinedIdentifier {
                     name: format!("{} (insert works on a `code` block)", code.node),
@@ -831,6 +1046,14 @@ pub fn expand(mut doc: Document, ctx: &ImportContext) -> Result<Document, Layout
         let idx = ElementIndex::build(&doc);
         canonicalize_statements(&mut doc.statements, &idx);
     }
+    {
+        let idx = ElementIndex::build(&doc);
+        desugar_layouts(&mut doc, &idx)?;
+    }
+    // Component states are motion; the layout never sees them.
+    let mut states = States::new();
+    collect_states(&doc.statements, &mut states);
+    strip_states(&mut doc.statements);
     let has_motion = doc.statements.iter().any(|s| {
         matches!(
             s.node,
@@ -843,17 +1066,175 @@ pub fn expand(mut doc: Document, ctx: &ImportContext) -> Result<Document, Layout
     let mut macros = BTreeMap::new();
     collect_macros(&doc, ctx, &mut macros, &mut HashSet::new())?;
     let idx = ElementIndex::build(&doc);
-    let ex = Expander { idx: &idx, macros: &macros };
+    let ex = Expander { idx: &idx, macros: &macros, states: &states };
     for stmt in &mut doc.statements {
         let Statement::Keyframe(kf) = &mut stmt.node else { continue };
         kf.motion = ex.expand_block(&kf.motion, &HashMap::new(), 0)?;
     }
+    titles_follow(&mut doc, &idx)?;
     apply_appears(&mut doc, &idx)?;
     for stmt in &mut doc.statements {
         let Statement::Keyframe(kf) = &mut stmt.node else { continue };
         kf.operations = operations_of(&kf.motion);
     }
+    // After the state operations: in the frame state `initial` drops the
+    // override; the timed statements get the value to tween to.
+    resolve_initial(&mut doc);
     Ok(doc)
+}
+
+/// `transform x [fill: initial]`: the value the file declares for x (so
+/// timing, tweens and lint see a real value). Undeclared: the default look
+/// (opacity 1); otherwise it stays `initial`, which state resets drop.
+fn resolve_initial(doc: &mut Document) {
+    fn decl<'a>(stmts: &'a [Spanned<Statement>], id: &str) -> Option<(&'a [Spanned<StyleModifier>], Option<&'a str>)> {
+        for st in stmts {
+            match &st.node {
+                Statement::Shape(s) => {
+                    let name = s.name.as_ref().map(|n| n.node.0.as_str()).or_else(|| match &s.shape_type.node {
+                        ShapeType::Path(p) => p.name.as_ref().map(|n| n.node.0.as_str()),
+                        _ => None,
+                    });
+                    if name == Some(id) {
+                        let text = match &s.shape_type.node {
+                            ShapeType::Text { content } => Some(content.as_str()),
+                            _ => None,
+                        };
+                        return Some((&s.modifiers, text));
+                    }
+                }
+                Statement::Group(g) => {
+                    if g.name.as_ref().is_some_and(|n| n.node.0 == id) {
+                        return Some((&g.modifiers, None));
+                    }
+                    if let Some(d) = decl(&g.children, id) {
+                        return Some(d);
+                    }
+                }
+                Statement::Layout(l) => {
+                    if l.name.as_ref().is_some_and(|n| n.node.0 == id) {
+                        return Some((&l.modifiers, None));
+                    }
+                    if let Some(d) = decl(&l.children, id) {
+                        return Some(d);
+                    }
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+    let base = doc.statements.clone();
+    for st in &mut doc.statements {
+        let Statement::Keyframe(kf) = &mut st.node else { continue };
+        each_stmt(&mut kf.motion, &mut |s| {
+            let MotionVerb::Transform { modifiers, .. } = &mut s.verb else { return };
+            let [id] = s.targets.as_slice() else { return };
+            for m in modifiers.iter_mut() {
+                if !is_initial(&m.node.value.node) {
+                    continue;
+                }
+                let key = &m.node.key.node;
+                let found = decl(&base, id).and_then(|(mods, text)| {
+                    mods.iter()
+                        .find(|x| x.node.key.node == *key)
+                        .map(|x| x.node.value.node.clone())
+                        .or_else(|| (*key == StyleKey::Label).then(|| text.map(|t| StyleValue::String(t.to_string()))).flatten())
+                });
+                let value = found.or_else(|| (*key == StyleKey::Opacity).then(|| StyleValue::Number { value: 1.0, unit: None }));
+                if let Some(v) = value {
+                    m.node.value.node = v;
+                }
+            }
+        });
+    }
+}
+
+/// `motion [title: s.heading]`: the element shows each keyframe's
+/// `[title: "..."]`, so a title is written once. Where a keyframe's title
+/// differs from what it shows, it swaps (`title_swap:`, fade by default).
+fn titles_follow(doc: &mut Document, idx: &ElementIndex) -> Result<(), LayoutError> {
+    let mut target: Option<Spanned<String>> = None;
+    let mut swap = "fade".to_string();
+    for st in &doc.statements {
+        if let Statement::MotionDefaults(opts) = &st.node {
+            for o in opts {
+                match (o.node.key.node.as_str(), &o.node.value.node) {
+                    ("title", MotionValue::Name(n)) => target = Some(Spanned::new(n.clone(), o.node.value.span.clone())),
+                    ("title_swap", MotionValue::Name(n)) => swap = n.clone(),
+                    _ => {}
+                }
+            }
+        }
+    }
+    let Some(target) = target else { return Ok(()) };
+    let id = idx.member(&target.node);
+    if !idx.ids.contains(&id) {
+        return Err(LayoutError::UndefinedIdentifier {
+            name: target.node.clone(),
+            span: target.span.clone(),
+            suggestions: idx.suggest(&target.node),
+        });
+    }
+    fn text_of(stmts: &[Spanned<Statement>], id: &str) -> Option<String> {
+        for st in stmts {
+            match &st.node {
+                Statement::Shape(s) if s.name.as_ref().is_some_and(|n| n.node.0 == id) => {
+                    if let ShapeType::Text { content } = &s.shape_type.node {
+                        return Some(content.clone());
+                    }
+                    return s.modifiers.iter().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+                        (StyleKey::Label, StyleValue::String(t)) => Some(t.clone()),
+                        _ => None,
+                    });
+                }
+                Statement::Group(g) => {
+                    if let Some(t) = text_of(&g.children, id) {
+                        return Some(t);
+                    }
+                }
+                Statement::Layout(l) => {
+                    if let Some(t) = text_of(&l.children, id) {
+                        return Some(t);
+                    }
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+    let mut showing = text_of(&doc.statements, &id);
+    for st in &mut doc.statements {
+        let Statement::Keyframe(kf) = &mut st.node else { continue };
+        let Some(title) = kf.title.clone() else { continue };
+        if showing.as_deref() == Some(title.as_str()) {
+            continue;
+        }
+        let sp = target.span.clone();
+        let stmt = MotionStmt {
+            verb: MotionVerb::Transform {
+                target: Spanned::new(Selector::Name(id.clone()), sp.clone()),
+                modifiers: vec![Spanned::new(
+                    StyleModifier {
+                        key: Spanned::new(StyleKey::Label, sp.clone()),
+                        value: Spanned::new(StyleValue::String(title.clone()), sp.clone()),
+                    },
+                    sp.clone(),
+                )],
+            },
+            opts: vec![Spanned::new(
+                MotionOpt { key: Spanned::new("swap".into(), sp.clone()), value: Spanned::new(MotionValue::Name(swap.clone()), sp.clone()) },
+                sp.clone(),
+            )],
+            targets: vec![id.clone()],
+            partners: vec![],
+        };
+        // Last in the block, at the start: a `then` in the frame does not
+        // wait for it.
+        kf.motion.push(Spanned::new(MotionNode::At(0.0, vec![Spanned::new(MotionNode::Stmt(stmt), sp.clone())]), sp));
+        showing = Some(title);
+    }
+    Ok(())
 }
 
 /// Elements that declare their entrance: `[appears: go_back]`.
@@ -1110,7 +1491,9 @@ fn canonical_motion(nodes: &mut [Spanned<MotionNode>], idx: &ElementIndex) {
     for n in nodes {
         match &mut n.node {
             MotionNode::Stmt(MotionStmt { verb: MotionVerb::Constrain(d), .. }) => canonical_constraint(d, idx),
-            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) => canonical_motion(b, idx),
+            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                canonical_motion(b, idx)
+            }
             _ => {}
         }
     }
@@ -1137,8 +1520,247 @@ fn canonicalize_statements(stmts: &mut [Spanned<Statement>], idx: &ElementIndex)
                 }
             }
             Statement::MotionMacro(m) => canonical_motion(&mut m.body, idx),
+            Statement::NamedLayout { constraints, .. } => {
+                for d in constraints {
+                    canonical_constraint(&mut d.node, idx);
+                }
+            }
             _ => {}
         }
+    }
+}
+
+/// Which way a constraint places its element: overlapping classes on the
+/// same element mean a layout's constraint replaces the base one.
+fn constraint_axes(expr: &ConstraintExpr) -> Option<(String, &'static [&'static str])> {
+    let pr = match expr {
+        ConstraintExpr::Equal { left, .. }
+        | ConstraintExpr::EqualWithOffset { left, .. }
+        | ConstraintExpr::Constant { left, .. }
+        | ConstraintExpr::GreaterOrEqual { left, .. }
+        | ConstraintExpr::LessOrEqual { left, .. } => left,
+        ConstraintExpr::Midpoint { target, .. } => target,
+        ConstraintExpr::Contains { .. } => return None,
+    };
+    let axes: &'static [&'static str] = match &pr.property.node {
+        ConstraintProperty::X
+        | ConstraintProperty::Left
+        | ConstraintProperty::Right
+        | ConstraintProperty::CenterX
+        | ConstraintProperty::AnchorX(_) => &["x"],
+        ConstraintProperty::Y
+        | ConstraintProperty::Top
+        | ConstraintProperty::Bottom
+        | ConstraintProperty::CenterY
+        | ConstraintProperty::AnchorY(_) => &["y"],
+        ConstraintProperty::Center | ConstraintProperty::Anchor(_) => &["x", "y"],
+        ConstraintProperty::Width => &["width"],
+        ConstraintProperty::Height => &["height"],
+    };
+    Some((pr.element.node.to_string(), axes))
+}
+
+/// `layout beside { constrain ... }` + `use layout beside`: the layout's
+/// constraints are named `layout_beside_<i>`; the base constraints they
+/// replace (same element, same axis) form the implicit `default` layout.
+/// `use layout X` becomes, at one moment: disable every other layout's
+/// constraints (and the base ones X replaces), enable and add X's.
+fn desugar_layouts(doc: &mut Document, idx: &ElementIndex) -> Result<(), LayoutError> {
+    let mut layouts: Vec<(String, Vec<ConstrainDecl>)> = Vec::new();
+    doc.statements.retain(|st| {
+        if let Statement::NamedLayout { name, constraints } = &st.node {
+            let decls = constraints
+                .iter()
+                .enumerate()
+                .map(|(i, d)| ConstrainDecl {
+                    expr: d.node.expr.clone(),
+                    name: Some(Spanned::new(Identifier::new(format!("layout_{}_{}", name.node, i)), d.span.clone())),
+                })
+                .collect();
+            layouts.push((name.node.clone(), decls));
+            false
+        } else {
+            true
+        }
+    });
+    let mut seen = HashSet::new();
+    for (n, _) in &layouts {
+        if n == "default" {
+            return Err(LayoutError::validation_error(
+                "`layout default` is the layout the file declares outside layout blocks; name yours differently",
+            ));
+        }
+        if !seen.insert(n.clone()) {
+            return Err(LayoutError::validation_error(&format!("layout `{}` is declared twice", n)));
+        }
+    }
+    let used = doc.statements.iter().any(|s| match &s.node {
+        Statement::Keyframe(k) => uses_layout(&k.motion),
+        Statement::MotionMacro(m) => uses_layout(&m.body),
+        _ => false,
+    });
+    if layouts.is_empty() && !used {
+        return Ok(());
+    }
+    // Base constraints some layout replaces: named (auto-named if need be).
+    let placed: Vec<(String, &'static [&'static str])> =
+        layouts.iter().flat_map(|(_, ds)| ds.iter().filter_map(|d| constraint_axes(&d.expr))).collect();
+    let mut defaults = Vec::new();
+    fn walk(
+        stmts: &mut [Spanned<Statement>],
+        placed: &[(String, &'static [&'static str])],
+        idx: &ElementIndex,
+        out: &mut Vec<(String, String, &'static [&'static str])>,
+    ) {
+        for st in stmts {
+            match &mut st.node {
+                Statement::Constrain(d) => {
+                    let Some((el, axes)) = constraint_axes(&d.expr) else { continue };
+                    // How a component holds its own parts together (a frame
+                    // around its title) is not where it is placed.
+                    if constraint_others(&d.expr).iter().any(|o| same_component(&el, o, idx)) {
+                        continue;
+                    }
+                    if placed.iter().any(|(e, a)| *e == el && a.iter().any(|x| axes.contains(x))) {
+                        let name = d
+                            .name
+                            .get_or_insert_with(|| {
+                                Spanned::new(Identifier::new(format!("layout_default_{}", out.len())), st.span.clone())
+                            })
+                            .node
+                            .0
+                            .clone();
+                        out.push((name, el, axes));
+                    }
+                }
+                Statement::Group(g) => walk(&mut g.children, placed, idx, out),
+                Statement::Layout(l) => walk(&mut l.children, placed, idx, out),
+                _ => {}
+            }
+        }
+    }
+    walk(&mut doc.statements, &placed, idx, &mut defaults);
+    let ctx = LayoutSet { layouts, defaults };
+    for st in &mut doc.statements {
+        match &mut st.node {
+            Statement::Keyframe(k) => ctx.rewrite(&mut k.motion)?,
+            Statement::MotionMacro(m) => ctx.rewrite(&mut m.body)?,
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+/// The elements a constraint places its element against.
+fn constraint_others(expr: &ConstraintExpr) -> Vec<String> {
+    match expr {
+        ConstraintExpr::Equal { right, .. } | ConstraintExpr::EqualWithOffset { right, .. } => {
+            vec![right.element.node.to_string()]
+        }
+        ConstraintExpr::Midpoint { a, b, .. } => vec![a.node.0.clone(), b.node.0.clone()],
+        _ => vec![],
+    }
+}
+
+/// Both parts of one component (`merged_bg`, `merged_title` in `merged`).
+fn same_component(a: &str, b: &str, idx: &ElementIndex) -> bool {
+    idx.groups.iter().any(|g| {
+        let p = format!("{}_", g);
+        (a == g || a.starts_with(&p)) && (b == g || b.starts_with(&p))
+    })
+}
+
+fn uses_layout(nodes: &[Spanned<MotionNode>]) -> bool {
+    nodes.iter().any(|n| match &n.node {
+        MotionNode::Stmt(s) => matches!(s.verb, MotionVerb::UseLayout(_)),
+        MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+            uses_layout(b)
+        }
+    })
+}
+
+struct LayoutSet {
+    layouts: Vec<(String, Vec<ConstrainDecl>)>,
+    /// Base constraints some layout replaces: name, element, axes.
+    defaults: Vec<(String, String, &'static [&'static str])>,
+}
+
+impl LayoutSet {
+    fn rewrite(&self, nodes: &mut [Spanned<MotionNode>]) -> Result<(), LayoutError> {
+        for n in nodes {
+            match &mut n.node {
+                MotionNode::Stmt(s) => {
+                    let MotionVerb::UseLayout(name) = &s.verb else { continue };
+                    let stmts = self.use_layout(name, &s.opts)?;
+                    n.node = MotionNode::After(0.0, stmts.into_iter().map(|x| Spanned::new(MotionNode::Stmt(x), n.span.clone())).collect());
+                }
+                MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                    self.rewrite(b)?
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn use_layout(&self, name: &Spanned<String>, opts: &[Spanned<MotionOpt>]) -> Result<Vec<MotionStmt>, LayoutError> {
+        let id = |s: &str| Spanned::new(Identifier::new(s), name.span.clone());
+        let names = |ds: &[ConstrainDecl]| -> Vec<String> { ds.iter().filter_map(|d| d.name.as_ref().map(|n| n.node.0.clone())).collect() };
+        // Tagged with the layout, so the timeline says `use layout beside`.
+        let mut opts = opts.to_vec();
+        opts.push(Spanned::new(
+            MotionOpt {
+                key: Spanned::new("layout".into(), name.span.clone()),
+                value: Spanned::new(MotionValue::Name(name.node.clone()), name.span.clone()),
+            },
+            name.span.clone(),
+        ));
+        let stmt = |verb| MotionStmt { verb, opts: opts.clone(), targets: vec![], partners: vec![] };
+        let chosen = if name.node == "default" {
+            None
+        } else {
+            match self.layouts.iter().find(|(n, _)| *n == name.node) {
+                Some(l) => Some(l),
+                None => {
+                    let mut known: HashSet<String> = self.layouts.iter().map(|(n, _)| n.clone()).collect();
+                    known.insert("default".into());
+                    return Err(LayoutError::UndefinedIdentifier {
+                        name: format!("layout {}", name.node),
+                        span: name.span.clone(),
+                        suggestions: crate::layout::find_similar(&known, &name.node, 2),
+                    });
+                }
+            }
+        };
+        let mut off: Vec<String> = self
+            .layouts
+            .iter()
+            .filter(|(n, _)| Some(n) != chosen.map(|(c, _)| c))
+            .flat_map(|(_, ds)| names(ds))
+            .collect();
+        let mut out = Vec::new();
+        match chosen {
+            Some((_, ds)) => {
+                // The base constraints this layout replaces.
+                let axes: Vec<_> = ds.iter().filter_map(|d| constraint_axes(&d.expr)).collect();
+                off.extend(
+                    self.defaults
+                        .iter()
+                        .filter(|(_, el, a)| axes.iter().any(|(e, x)| e == el && x.iter().any(|k| a.contains(k))))
+                        .map(|(n, _, _)| n.clone()),
+                );
+                out.push(stmt(MotionVerb::Disable(off.iter().map(|s| id(s)).collect())));
+                out.push(stmt(MotionVerb::Enable(names(ds).iter().map(|s| id(s)).collect())));
+                for d in ds {
+                    out.push(stmt(MotionVerb::Constrain(d.clone())));
+                }
+            }
+            None => {
+                out.push(stmt(MotionVerb::Disable(off.iter().map(|s| id(s)).collect())));
+                out.push(stmt(MotionVerb::Enable(self.defaults.iter().map(|(s, _, _)| id(s)).collect())));
+            }
+        }
+        out.retain(|s| !matches!(&s.verb, MotionVerb::Disable(v) | MotionVerb::Enable(v) if v.is_empty()));
+        Ok(out)
     }
 }
 

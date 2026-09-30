@@ -154,15 +154,15 @@ text { white-space: pre; }
   <g id="codes" class="ai-container">
     <g id="k0" class="ai-container">
       <g id="k0_pg" class="ai-container">
-        <g id="k0_pg_art" class="ai-svg-embed" transform="translate(228.5, 205) scale(1, 1) translate(-1.5, -0)">
+        <g id="k0_pg_art" class="ai-svg-embed" transform="translate(231.202, 224) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k0_pg_sheet" class="ai-svg-embed" transform="translate(227, 205) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k0_pg_sheet" class="ai-svg-embed" transform="translate(229.702, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k0_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k0_pg_fold" class="ai-svg-embed" transform="translate(319.5, 205) scale(1, 1) translate(-92.5, -0)">
+        <g id="k0_pg_fold" class="ai-svg-embed" transform="translate(322.202, 224) scale(1, 1) translate(-92.5, -0)">
           <g id="k0_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -171,40 +171,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k0_pg_bars" class="ai-container">
-          <g id="k0_pg_bar1" class="ai-svg-embed" transform="translate(244, 245) scale(1, 1) translate(-17, -40)" stroke="var(--role-primary)">
+          <g id="k0_pg_bar1" class="ai-svg-embed" transform="translate(246.702, 264) scale(1, 1) translate(-17, -40)" stroke="var(--role-primary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k0_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k0_pg_bar2" class="ai-svg-embed" transform="translate(258, 266) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k0_pg_bar2" class="ai-svg-embed" transform="translate(260.702, 285) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k0_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k0_pg_bar3" class="ai-svg-embed" transform="translate(258, 287) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k0_pg_bar3" class="ai-svg-embed" transform="translate(260.702, 306) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k0_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k0_pg_bar4" class="ai-svg-embed" transform="translate(272, 308) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k0_pg_bar4" class="ai-svg-embed" transform="translate(274.702, 327) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k0_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k0_pg_bar5" class="ai-svg-embed" transform="translate(258, 329) scale(1, 1) translate(-31, -124)" stroke="var(--role-secondary)">
+          <g id="k0_pg_bar5" class="ai-svg-embed" transform="translate(260.702, 348) scale(1, 1) translate(-31, -124)" stroke="var(--role-secondary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k0_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k0_pg_bar6" class="ai-svg-embed" transform="translate(244, 350) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k0_pg_bar6" class="ai-svg-embed" transform="translate(246.702, 369) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k0_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k0_name" class="ai-shape ai-rect" x="240.112" y="379" width="99.776" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="290" y="397.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="290" dy="-0"><tspan>login.py</tspan></tspan></text>
+      <rect id="k0_name" class="ai-shape ai-rect" x="242.814" y="398" width="99.776" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="292.702" y="416.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="292.702" dy="-0"><tspan>login.py</tspan></tspan></text>
     </g>
     <g id="k1" class="ai-container">
       <g id="k1_pg" class="ai-container">
-        <g id="k1_pg_art" class="ai-svg-embed" transform="translate(568.5, 205) scale(1, 1) translate(-1.5, -0)">
+        <g id="k1_pg_art" class="ai-svg-embed" transform="translate(568.5, 224) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k1_pg_sheet" class="ai-svg-embed" transform="translate(567, 205) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k1_pg_sheet" class="ai-svg-embed" transform="translate(567, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k1_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k1_pg_fold" class="ai-svg-embed" transform="translate(659.5, 205) scale(1, 1) translate(-92.5, -0)">
+        <g id="k1_pg_fold" class="ai-svg-embed" transform="translate(659.5, 224) scale(1, 1) translate(-92.5, -0)">
           <g id="k1_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -213,40 +213,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k1_pg_bars" class="ai-container">
-          <g id="k1_pg_bar1" class="ai-svg-embed" transform="translate(584, 245) scale(1, 1) translate(-17, -40)" stroke="var(--role-ok)">
+          <g id="k1_pg_bar1" class="ai-svg-embed" transform="translate(584, 264) scale(1, 1) translate(-17, -40)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k1_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k1_pg_bar2" class="ai-svg-embed" transform="translate(598, 266) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k1_pg_bar2" class="ai-svg-embed" transform="translate(598, 285) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k1_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k1_pg_bar3" class="ai-svg-embed" transform="translate(598, 287) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k1_pg_bar3" class="ai-svg-embed" transform="translate(598, 306) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k1_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k1_pg_bar4" class="ai-svg-embed" transform="translate(612, 308) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k1_pg_bar4" class="ai-svg-embed" transform="translate(612, 327) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k1_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k1_pg_bar5" class="ai-svg-embed" transform="translate(598, 329) scale(1, 1) translate(-31, -124)" stroke="var(--role-primary)">
+          <g id="k1_pg_bar5" class="ai-svg-embed" transform="translate(598, 348) scale(1, 1) translate(-31, -124)" stroke="var(--role-primary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k1_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k1_pg_bar6" class="ai-svg-embed" transform="translate(584, 350) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k1_pg_bar6" class="ai-svg-embed" transform="translate(584, 369) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k1_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k1_name" class="ai-shape ai-rect" x="585.348" y="379" width="89.304" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="630" y="397.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="630" dy="-0"><tspan>cart.py</tspan></tspan></text>
+      <rect id="k1_name" class="ai-shape ai-rect" x="585.348" y="398" width="89.304" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="630" y="416.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="630" dy="-0"><tspan>cart.py</tspan></tspan></text>
     </g>
     <g id="k2" class="ai-container">
       <g id="k2_pg" class="ai-container">
-        <g id="k2_pg_art" class="ai-svg-embed" transform="translate(908.5, 205) scale(1, 1) translate(-1.5, -0)">
+        <g id="k2_pg_art" class="ai-svg-embed" transform="translate(908.5, 224) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k2_pg_sheet" class="ai-svg-embed" transform="translate(907, 205) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k2_pg_sheet" class="ai-svg-embed" transform="translate(907, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k2_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k2_pg_fold" class="ai-svg-embed" transform="translate(999.5, 205) scale(1, 1) translate(-92.5, -0)">
+        <g id="k2_pg_fold" class="ai-svg-embed" transform="translate(999.5, 224) scale(1, 1) translate(-92.5, -0)">
           <g id="k2_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -255,40 +255,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k2_pg_bars" class="ai-container">
-          <g id="k2_pg_bar1" class="ai-svg-embed" transform="translate(924, 245) scale(1, 1) translate(-17, -40)" stroke="var(--role-secondary)">
+          <g id="k2_pg_bar1" class="ai-svg-embed" transform="translate(924, 264) scale(1, 1) translate(-17, -40)" stroke="var(--role-secondary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k2_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k2_pg_bar2" class="ai-svg-embed" transform="translate(938, 266) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k2_pg_bar2" class="ai-svg-embed" transform="translate(938, 285) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k2_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k2_pg_bar3" class="ai-svg-embed" transform="translate(938, 287) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k2_pg_bar3" class="ai-svg-embed" transform="translate(938, 306) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k2_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k2_pg_bar4" class="ai-svg-embed" transform="translate(952, 308) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k2_pg_bar4" class="ai-svg-embed" transform="translate(952, 327) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k2_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k2_pg_bar5" class="ai-svg-embed" transform="translate(938, 329) scale(1, 1) translate(-31, -124)" stroke="var(--role-ok)">
+          <g id="k2_pg_bar5" class="ai-svg-embed" transform="translate(938, 348) scale(1, 1) translate(-31, -124)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k2_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k2_pg_bar6" class="ai-svg-embed" transform="translate(924, 350) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k2_pg_bar6" class="ai-svg-embed" transform="translate(924, 369) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k2_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k2_name" class="ai-shape ai-rect" x="904.404" y="379" width="131.192" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="970" y="397.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="970" dy="-0"><tspan>checkout.js</tspan></tspan></text>
+      <rect id="k2_name" class="ai-shape ai-rect" x="904.404" y="398" width="131.192" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="970" y="416.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="970" dy="-0"><tspan>checkout.js</tspan></tspan></text>
     </g>
     <g id="k3" class="ai-container">
       <g id="k3_pg" class="ai-container">
-        <g id="k3_pg_art" class="ai-svg-embed" transform="translate(1248.5, 205) scale(1, 1) translate(-1.5, -0)">
+        <g id="k3_pg_art" class="ai-svg-embed" transform="translate(1248.5, 224) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k3_pg_sheet" class="ai-svg-embed" transform="translate(1247, 205) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k3_pg_sheet" class="ai-svg-embed" transform="translate(1247, 224) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k3_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k3_pg_fold" class="ai-svg-embed" transform="translate(1339.5, 205) scale(1, 1) translate(-92.5, -0)">
+        <g id="k3_pg_fold" class="ai-svg-embed" transform="translate(1339.5, 224) scale(1, 1) translate(-92.5, -0)">
           <g id="k3_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -297,40 +297,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k3_pg_bars" class="ai-container">
-          <g id="k3_pg_bar1" class="ai-svg-embed" transform="translate(1264, 245) scale(1, 1) translate(-17, -40)" stroke="var(--role-primary)">
+          <g id="k3_pg_bar1" class="ai-svg-embed" transform="translate(1264, 264) scale(1, 1) translate(-17, -40)" stroke="var(--role-primary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k3_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k3_pg_bar2" class="ai-svg-embed" transform="translate(1278, 266) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k3_pg_bar2" class="ai-svg-embed" transform="translate(1278, 285) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k3_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k3_pg_bar3" class="ai-svg-embed" transform="translate(1278, 287) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k3_pg_bar3" class="ai-svg-embed" transform="translate(1278, 306) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k3_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k3_pg_bar4" class="ai-svg-embed" transform="translate(1292, 308) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k3_pg_bar4" class="ai-svg-embed" transform="translate(1292, 327) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k3_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k3_pg_bar5" class="ai-svg-embed" transform="translate(1278, 329) scale(1, 1) translate(-31, -124)" stroke="var(--role-secondary)">
+          <g id="k3_pg_bar5" class="ai-svg-embed" transform="translate(1278, 348) scale(1, 1) translate(-31, -124)" stroke="var(--role-secondary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k3_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k3_pg_bar6" class="ai-svg-embed" transform="translate(1264, 350) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k3_pg_bar6" class="ai-svg-embed" transform="translate(1264, 369) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k3_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k3_name" class="ai-shape ai-rect" x="1254.876" y="379" width="110.248" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1310" y="397.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1310" dy="-0"><tspan>style.css</tspan></tspan></text>
+      <rect id="k3_name" class="ai-shape ai-rect" x="1254.876" y="398" width="110.248" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1310" y="416.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1310" dy="-0"><tspan>style.css</tspan></tspan></text>
     </g>
     <g id="k4" class="ai-container">
       <g id="k4_pg" class="ai-container">
-        <g id="k4_pg_art" class="ai-svg-embed" transform="translate(228.5, 485) scale(1, 1) translate(-1.5, -0)">
+        <g id="k4_pg_art" class="ai-svg-embed" transform="translate(228.5, 504) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k4_pg_sheet" class="ai-svg-embed" transform="translate(227, 485) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k4_pg_sheet" class="ai-svg-embed" transform="translate(227, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k4_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k4_pg_fold" class="ai-svg-embed" transform="translate(319.5, 485) scale(1, 1) translate(-92.5, -0)">
+        <g id="k4_pg_fold" class="ai-svg-embed" transform="translate(319.5, 504) scale(1, 1) translate(-92.5, -0)">
           <g id="k4_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -339,40 +339,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k4_pg_bars" class="ai-container">
-          <g id="k4_pg_bar1" class="ai-svg-embed" transform="translate(244, 525) scale(1, 1) translate(-17, -40)" stroke="var(--role-ok)">
+          <g id="k4_pg_bar1" class="ai-svg-embed" transform="translate(244, 544) scale(1, 1) translate(-17, -40)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k4_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k4_pg_bar2" class="ai-svg-embed" transform="translate(258, 546) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k4_pg_bar2" class="ai-svg-embed" transform="translate(258, 565) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k4_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k4_pg_bar3" class="ai-svg-embed" transform="translate(258, 567) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k4_pg_bar3" class="ai-svg-embed" transform="translate(258, 586) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k4_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k4_pg_bar4" class="ai-svg-embed" transform="translate(272, 588) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k4_pg_bar4" class="ai-svg-embed" transform="translate(272, 607) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k4_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k4_pg_bar5" class="ai-svg-embed" transform="translate(258, 609) scale(1, 1) translate(-31, -124)" stroke="var(--role-primary)">
+          <g id="k4_pg_bar5" class="ai-svg-embed" transform="translate(258, 628) scale(1, 1) translate(-31, -124)" stroke="var(--role-primary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k4_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k4_pg_bar6" class="ai-svg-embed" transform="translate(244, 630) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k4_pg_bar6" class="ai-svg-embed" transform="translate(244, 649) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k4_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k4_name" class="ai-shape ai-rect" x="213.932" y="659" width="152.136" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="290" y="677.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="290" dy="-0"><tspan>orders_api.py</tspan></tspan></text>
+      <rect id="k4_name" class="ai-shape ai-rect" x="213.932" y="678" width="152.136" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="290" y="696.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="290" dy="-0"><tspan>orders_api.py</tspan></tspan></text>
     </g>
     <g id="k5" class="ai-container">
       <g id="k5_pg" class="ai-container">
-        <g id="k5_pg_art" class="ai-svg-embed" transform="translate(568.5, 485) scale(1, 1) translate(-1.5, -0)">
+        <g id="k5_pg_art" class="ai-svg-embed" transform="translate(568.5, 504) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k5_pg_sheet" class="ai-svg-embed" transform="translate(567, 485) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k5_pg_sheet" class="ai-svg-embed" transform="translate(567, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k5_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k5_pg_fold" class="ai-svg-embed" transform="translate(659.5, 485) scale(1, 1) translate(-92.5, -0)">
+        <g id="k5_pg_fold" class="ai-svg-embed" transform="translate(659.5, 504) scale(1, 1) translate(-92.5, -0)">
           <g id="k5_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -381,40 +381,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k5_pg_bars" class="ai-container">
-          <g id="k5_pg_bar1" class="ai-svg-embed" transform="translate(584, 525) scale(1, 1) translate(-17, -40)" stroke="var(--role-secondary)">
+          <g id="k5_pg_bar1" class="ai-svg-embed" transform="translate(584, 544) scale(1, 1) translate(-17, -40)" stroke="var(--role-secondary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k5_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k5_pg_bar2" class="ai-svg-embed" transform="translate(598, 546) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k5_pg_bar2" class="ai-svg-embed" transform="translate(598, 565) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k5_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k5_pg_bar3" class="ai-svg-embed" transform="translate(598, 567) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k5_pg_bar3" class="ai-svg-embed" transform="translate(598, 586) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k5_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k5_pg_bar4" class="ai-svg-embed" transform="translate(612, 588) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k5_pg_bar4" class="ai-svg-embed" transform="translate(612, 607) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k5_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k5_pg_bar5" class="ai-svg-embed" transform="translate(598, 609) scale(1, 1) translate(-31, -124)" stroke="var(--role-ok)">
+          <g id="k5_pg_bar5" class="ai-svg-embed" transform="translate(598, 628) scale(1, 1) translate(-31, -124)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k5_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k5_pg_bar6" class="ai-svg-embed" transform="translate(584, 630) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k5_pg_bar6" class="ai-svg-embed" transform="translate(584, 649) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k5_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k5_name" class="ai-shape ai-rect" x="574.876" y="659" width="110.248" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="630" y="677.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="630" dy="-0"><tspan>README.md</tspan></tspan></text>
+      <rect id="k5_name" class="ai-shape ai-rect" x="574.876" y="678" width="110.248" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="630" y="696.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="630" dy="-0"><tspan>README.md</tspan></tspan></text>
     </g>
     <g id="k6" class="ai-container">
       <g id="k6_pg" class="ai-container">
-        <g id="k6_pg_art" class="ai-svg-embed" transform="translate(908.5, 485) scale(1, 1) translate(-1.5, -0)">
+        <g id="k6_pg_art" class="ai-svg-embed" transform="translate(908.5, 504) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k6_pg_sheet" class="ai-svg-embed" transform="translate(907, 485) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k6_pg_sheet" class="ai-svg-embed" transform="translate(907, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k6_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k6_pg_fold" class="ai-svg-embed" transform="translate(999.5, 485) scale(1, 1) translate(-92.5, -0)">
+        <g id="k6_pg_fold" class="ai-svg-embed" transform="translate(999.5, 504) scale(1, 1) translate(-92.5, -0)">
           <g id="k6_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -423,40 +423,40 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k6_pg_bars" class="ai-container">
-          <g id="k6_pg_bar1" class="ai-svg-embed" transform="translate(924, 525) scale(1, 1) translate(-17, -40)" stroke="var(--role-primary)">
+          <g id="k6_pg_bar1" class="ai-svg-embed" transform="translate(924, 544) scale(1, 1) translate(-17, -40)" stroke="var(--role-primary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k6_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k6_pg_bar2" class="ai-svg-embed" transform="translate(938, 546) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k6_pg_bar2" class="ai-svg-embed" transform="translate(938, 565) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k6_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k6_pg_bar3" class="ai-svg-embed" transform="translate(938, 567) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k6_pg_bar3" class="ai-svg-embed" transform="translate(938, 586) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k6_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k6_pg_bar4" class="ai-svg-embed" transform="translate(952, 588) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k6_pg_bar4" class="ai-svg-embed" transform="translate(952, 607) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k6_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k6_pg_bar5" class="ai-svg-embed" transform="translate(938, 609) scale(1, 1) translate(-31, -124)" stroke="var(--role-secondary)">
+          <g id="k6_pg_bar5" class="ai-svg-embed" transform="translate(938, 628) scale(1, 1) translate(-31, -124)" stroke="var(--role-secondary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k6_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k6_pg_bar6" class="ai-svg-embed" transform="translate(924, 630) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k6_pg_bar6" class="ai-svg-embed" transform="translate(924, 649) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k6_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k6_name" class="ai-shape ai-rect" x="899.168" y="659" width="141.664" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="970" y="677.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="970" dy="-0"><tspan>test_cart.py</tspan></tspan></text>
+      <rect id="k6_name" class="ai-shape ai-rect" x="899.168" y="678" width="141.664" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="970" y="696.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="970" dy="-0"><tspan>test_cart.py</tspan></tspan></text>
     </g>
     <g id="k7" class="ai-container">
       <g id="k7_pg" class="ai-container">
-        <g id="k7_pg_art" class="ai-svg-embed" transform="translate(1248.5, 485) scale(1, 1) translate(-1.5, -0)">
+        <g id="k7_pg_art" class="ai-svg-embed" transform="translate(1248.5, 504) scale(1, 1) translate(-1.5, -0)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments. -->
         </g>
-        <g id="k7_pg_sheet" class="ai-svg-embed" transform="translate(1247, 485) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+        <g id="k7_pg_sheet" class="ai-svg-embed" transform="translate(1247, 504) scale(1, 1) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
           <rect id="k7_pg__sheet" x="1.5" y="1.5" width="123" height="159" rx="8" stroke-width="3" fill="inherit" stroke="inherit"/>
         </g>
-        <g id="k7_pg_fold" class="ai-svg-embed" transform="translate(1339.5, 485) scale(1, 1) translate(-92.5, -0)">
+        <g id="k7_pg_fold" class="ai-svg-embed" transform="translate(1339.5, 504) scale(1, 1) translate(-92.5, -0)">
           <g id="k7_pg__fold">
           <path d="M93 0 H126 V33 Z" fill="var(--role-backdrop, #e9ecf0)"/>
           <path d="M94 1.5 V26 a6 6 0 0 0 6 6 H124.5 Z" fill="var(--role-rule, #cbd1da)"/>
@@ -465,31 +465,31 @@ text { white-space: pre; }
           </g>
         </g>
         <g id="k7_pg_bars" class="ai-container">
-          <g id="k7_pg_bar1" class="ai-svg-embed" transform="translate(1264, 525) scale(1, 1) translate(-17, -40)" stroke="var(--role-ok)">
+          <g id="k7_pg_bar1" class="ai-svg-embed" transform="translate(1264, 544) scale(1, 1) translate(-17, -40)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k7_pg__bar1" x1="21.5" y1="44.5" x2="74.5" y2="44.5" stroke="inherit"/></g>
           </g>
-          <g id="k7_pg_bar2" class="ai-svg-embed" transform="translate(1278, 546) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
+          <g id="k7_pg_bar2" class="ai-svg-embed" transform="translate(1278, 565) scale(1, 1) translate(-31, -61)" stroke="var(--b2, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k7_pg__bar2" x1="35.5" y1="65.5" x2="88.5" y2="65.5" stroke="inherit"/></g>
           </g>
-          <g id="k7_pg_bar3" class="ai-svg-embed" transform="translate(1278, 567) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
+          <g id="k7_pg_bar3" class="ai-svg-embed" transform="translate(1278, 586) scale(1, 1) translate(-31, -82)" stroke="var(--role-ok)">
             <g stroke-width="9" stroke-linecap="round"><line id="k7_pg__bar3" x1="35.5" y1="86.5" x2="74.5" y2="86.5" stroke="inherit"/></g>
           </g>
-          <g id="k7_pg_bar4" class="ai-svg-embed" transform="translate(1292, 588) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
+          <g id="k7_pg_bar4" class="ai-svg-embed" transform="translate(1292, 607) scale(1, 1) translate(-45, -103)" stroke="var(--b4, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k7_pg__bar4" x1="49.5" y1="107.5" x2="84.5" y2="107.5" stroke="inherit"/></g>
           </g>
-          <g id="k7_pg_bar5" class="ai-svg-embed" transform="translate(1278, 609) scale(1, 1) translate(-31, -124)" stroke="var(--role-primary)">
+          <g id="k7_pg_bar5" class="ai-svg-embed" transform="translate(1278, 628) scale(1, 1) translate(-31, -124)" stroke="var(--role-primary)">
             <g stroke-width="9" stroke-linecap="round"><line id="k7_pg__bar5" x1="35.5" y1="128.5" x2="82.5" y2="128.5" stroke="inherit"/></g>
           </g>
-          <g id="k7_pg_bar6" class="ai-svg-embed" transform="translate(1264, 630) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
+          <g id="k7_pg_bar6" class="ai-svg-embed" transform="translate(1264, 649) scale(1, 1) translate(-17, -145)" stroke="var(--b6, var(--role-rule, #cbd1da))">
             <g stroke-width="9" stroke-linecap="round"><line id="k7_pg__bar6" x1="21.5" y1="149.5" x2="52.5" y2="149.5" stroke="inherit"/></g>
           </g>
         </g>
       </g>
-      <rect id="k7_name" class="ai-shape ai-rect" x="1249.64" y="659" width="120.72" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="1310" y="677.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1310" dy="-0"><tspan>Dockerfile</tspan></tspan></text>
+      <rect id="k7_name" class="ai-shape ai-rect" x="1249.64" y="678" width="120.72" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="1310" y="696.625" text-anchor="middle" dominant-baseline="middle" font-size="17" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1310" dy="-0"><tspan>Dockerfile</tspan></tspan></text>
     </g>
   </g>
-  <rect id="hub" class="ai-shape ai-rect" x="799.5" y="470.25" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="hub" class="ai-shape ai-rect ai-point" x="800" y="470.75" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
   <rect id="caption" class="ai-shape ai-rect" x="425.466" y="781.5" width="749.068" height="66" fill="none" stroke="none" stroke-width="1.5"/>
   <text class="ai-label" x="800" y="814.5" text-anchor="middle" dominant-baseline="middle" font-size="40" fill="var(--role-ink)" style="font-weight:800"><tspan x="800" dy="-0"><tspan>4,000 files </tspan><tspan fill="var(--role-secondary)">×</tspan><tspan> 30 developers </tspan><tspan fill="var(--role-secondary)">×</tspan><tspan> every day</tspan></tspan></text>
 </svg>

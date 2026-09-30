@@ -178,9 +178,10 @@ fn check(scene: &str, frames: &[usize]) {
                     continue;
                 }
                 // What cannot be seen cannot flash: compare while it and
-                // every ancestor (a part `d0_pg` is inside `d0`) is visible.
+                // every ancestor (a part `d0_pg` is inside `d0`) is visible
+                // (1/200 opacity, the last instant of a fade, is not).
                 let visible = ancestors_and_self(&m, ci).iter().all(|o| {
-                    played(&m, f, *o, t).is_none_or(|v| v[0] > 0.0)
+                    played(&m, f, *o, t).is_none_or(|v| v[0] > 0.005)
                 });
                 if !visible {
                     continue;

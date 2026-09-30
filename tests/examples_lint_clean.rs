@@ -165,3 +165,43 @@ fn every_reviewed_exception_still_fires() {
         );
     }
 }
+
+/// The motion scenes are what agents copy for a deck: every lint category
+/// counts, under the deck's own stylesheet and under a real theme (font
+/// metrics differ, so geometry that only lines up in one of them is caught).
+#[test]
+fn every_motion_scene_is_fully_clean_under_each_stylesheet() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let dir = root.join("examples/motion");
+    let sheets = [dir.join("git-deck.css"), root.join("stylesheets/kapernikov.css")];
+    let mut failures = Vec::new();
+    let mut scenes: Vec<_> = std::fs::read_dir(&dir)
+        .expect("examples/motion exists")
+        .filter_map(Result::ok)
+        .map(|e| e.path())
+        .filter(|p| p.extension().is_some_and(|e| e == "ail"))
+        .collect();
+    scenes.sort();
+    for scene in &scenes {
+        for css in &sheets {
+            let out = Command::new(env!("CARGO_BIN_EXE_agent-illustrator"))
+                .arg("--lint")
+                .arg("--stylesheet-css")
+                .arg(css)
+                .arg(scene)
+                .output()
+                .expect("runs");
+            let text = format!("{}{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
+            if !text.contains("lint: clean") {
+                failures.push(format!(
+                    "{} with {}:\n{}",
+                    scene.file_name().unwrap().to_string_lossy(),
+                    css.file_name().unwrap().to_string_lossy(),
+                    text
+                ));
+            }
+        }
+    }
+    assert!(scenes.len() >= 4, "expected the git scenes, saw {}", scenes.len());
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}

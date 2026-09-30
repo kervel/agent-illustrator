@@ -319,21 +319,40 @@ Durations: seconds or `fast | normal | slow`. Eases: `pop` (overshoot), `settle`
 retime a whole deck in its stylesheet CSS —
 `:root { --ail-motion-normal: .4s; --ail-ease-pop: cubic-bezier(.3,1.8,.6,1); }`.
 
-### Beats
+### Beats: say what a thing waits for
 
-Statements in a block start together. Beats sequence them:
+Statements in a block start together. Time the rest **by events**, so a block
+starts when what it depends on happens, whatever that is retimed to:
 ```
-keyframe "commit" {
-    flash folder                                  // starts at 0
-    then { fly ghost(folder) to st1.dot }         // when everything before it has ended
-    after 0.15 { show st1.nm [enter: rise] }      // 0.15s after the previous beat STARTED
-    at 1.2 { pulse st1.dot }                      // 1.2s after the keyframe started
+keyframe "main" {
+    draw main_line [to: c.dot, duration: slow]
+    when main_line reaches a.dot { station(a) }   // the line passes the station
+    when main_line reaches b.dot { station(b) }
+    when l1.dot shown + 0.1 { ... }               // an entrance ended (+/- a nudge)
+    when ring arrives { flash folder }            // a move or flight ended
+    when card hidden { use layout default }       // an exit ended
+    beat open { show mr [enter: pop] }            // a named group ...
+    after open + 0.2 { set tests passed }         // ... and when it ends
+    then { pulse merged.dot }                     // when everything before it has ended
+    at 1.2 { show caption }                       // 1.2s after the keyframe started
 }
 keyframe "next_step" [auto, after: 0.3] { ... }   // plays by itself 0.3s after the previous one
 ```
-`after` chains off the previous beat's *start* (that is how beats overlap);
-`then` waits for everything before it; `at` is absolute. A keyframe's length is
-derived, never declared.
+Every event is a moment something **finishes**: `reaches` when the line's
+drawing passes the element's centre, `shown` when the latest `show` of it in this
+keyframe has finished entering, `hidden` when its latest exit has finished,
+`arrives` when its latest `move`/`fly` ends (or, if nothing moves it, when the
+latest layout change such as `use layout beside` has played), `after name` when
+everything in `beat name` has ended. `+ 0.1` / `- 0.15` shift from that moment.
+Only statements earlier in the same keyframe count. `--timeline` prints each
+event with its resolved time (`when merged shown - 0.15 (= 1.20s, starts
+1.05s)`) above the statements it starts.
+
+Use `when`/`beat`/`then` for coupling and `at` for "roughly then". `after 0.3 {
+... }` (a number) still works but counts from the previous beat's *start*, so a
+row of them is a sum nobody wrote down; `--lint` reports two or more in a row. A
+station that pops before its line reaches it is reported too (`when <line>
+reaches <station>` fixes it). A keyframe's length is derived, never declared.
 
 ### Entrances and exits
 
@@ -343,10 +362,11 @@ show copy [from: original]        // appears at original's place and size, trave
 hide x [exit: fade | shrink | fall | lift | wipe(...)]
 motion [enter: pop, exit: fade]   // diagram-wide defaults (default: rise / fade)
 ```
-Declare where an element enters instead of hiding it in the first frame:
-`rect ring [..., appears: go_back]` (hidden until keyframe `go_back`, where it
-enters with the default preset unless that keyframe says `show ring [...]`), or
-`appears: later` (hidden until some statement — a `swap`, a macro — shows it).
+**One idiom:** declare at the element that it is not there from the start
+(`appears: later`), and let the verb that brings it on say when and how (`show
+ring [enter: fade]`, a `swap`, a macro, a `set`). `appears: go_back` (hidden
+until that keyframe, entering with the default preset) is for elements nothing
+else shows; writing both `appears: go_back` and a `show` in go_back is reported.
 Frame 0's own `hide`s apply before it plays; its `show`s are entrances.
 
 ### Lines that grow
@@ -400,6 +420,63 @@ count total [to: 14900, format: "€ {:,}"]     // {} {:,} {:.1} {:,.2}
 swap docs.* -> codes.* [via: flip, flip: pg, stagger: 0.07]   // flip only member `pg`, crossfade the rest
 swap ok -> bad [via: fade | flip | morph]
 ```
+A swap turns one element into another *where it is*: place the partner on it
+(`constrain bad.center = ok.center`; for lists `constrain k*.pg.center =
+d*.pg.center` pairs them by index), or `--lint` reports it. With `flip: pg`
+the flipped part is what must line up. One element that
+changes wording and colour is simpler as a transform: `transform status [label:
+"● broken", stroke: role-error, label_fill: role-error, swap: fade]` and back
+with `[label: initial, stroke: initial, label_fill: initial]` (or give it
+states, below).
+
+### Layouts that change
+
+A few elements placed differently for a while (a file moving aside for a card)
+is a named layout, not a pair of disable/enable statements:
+```
+constrain merged.bg.center_x = s.stage.center_x      // the layout as declared: `default`
+layout beside {
+    constrain merged.bg.left = s.stage.left + 272
+}
+keyframe "conflict" { use layout beside; ... }
+keyframe "choose"   { ...; at 0.75 { use layout default } }
+```
+`use layout X` takes timing options like any verb; what depends on the moved
+elements follows. A layout's constraints replace the declared ones on the same
+elements and axis (x, y, width, height).
+
+### Components with states
+
+A component that reports (a check, a status, a badge) declares its looks once,
+in its template; keyframes only say which one:
+```
+template "check" (says: "check", then_says: "") {
+    rect bg [fill: role-warn, fill_opacity: 0.28, stroke: none, opacity: 0]
+    row item { circle tick [..., appears: later]  rect txt [label: says, ...] }
+    constrain bg contains item [padding: 4]
+    state passed   { transform self [opacity: 1]; show tick [enter: pop] }
+    state asked    { transform self [opacity: 1]; transform bg [opacity: 1] }
+    state approved { transform self [opacity: 1]; transform txt [label: then_says, swap: fade]
+                     after 0.1 { show tick [enter: pop] } }
+}
+keyframe "review" { set tests passed; when tests.tick shown { set review asked } }
+keyframe "fixed"  { set review approved [duration: fast] }
+```
+A state is motion statements naming the component's parts (`self` is the
+instance), with the template's parameters. `set x s [opts]` gives every
+statement the options, and whatever another state of the component changes that
+`s` does not goes back to how the template draws it (`asked` → `approved` clears
+the wash); `set x default` undoes every state. A single element gets states at
+top level:
+```
+rect status [label: "● checkout works", stroke: role-ok, label_fill: role-ok, ...]
+state status broken { transform self [label: "● checkout broken", stroke: role-error,
+                                      label_fill: role-error, swap: fade] }
+keyframe "broke"   { set status broken [duration: fast] }
+keyframe "go_back" { set status default [swap: fade] }
+``` Name parameters so they do not shadow words used as values (a
+parameter called `later` would rewrite `appears: later`). Outside templates,
+`transform x [fill: initial]` returns a property to the declared value.
 
 ### Selecting many things
 
@@ -429,6 +506,7 @@ for a core primitive.
 ### Tooling
 
 ```bash
+agent-illustrator f.ail --states                # the storyboard: per click step what is visible, what changes
 agent-illustrator f.ail --timeline              # the choreography as a table: when, what, from -> to
 agent-illustrator f.ail --frame 2 --at 50%      # a still mid-motion (also 0.35s, 350ms)
 agent-illustrator f.ail --frames-strip 2 > s.svg  # contact sheet: 0/25/50/75/100%
@@ -444,8 +522,9 @@ agent-illustrator f.ail --stylesheet-css theme.css --stylesheet-css deck.css   #
 `--serve` and `--film` run the browser player itself: use them for what a host
 will really show (flicker, a jump between steps); `--at` and `--frames-strip`
 are the native renderer, which the golden tests check against.
-Review `--timeline` before rendering anything: it answers "does this land in
-the right beat" without images. Motion lints: motion on something hidden the whole
+Check `--states` against the STORYBOARD comment first (it answers "is the right
+thing on screen at each step", including what `appears:`, macros and `set` do),
+then `--timeline` for "does this land in the right beat", both without images. Motion lints: motion on something hidden the whole
 frame, a flight to a hidden target, a connection whose end is hidden, slow beat,
 busy beat, and numeric coordinates in keyframes (`motion-coordinate`, an error).
 
@@ -524,7 +603,9 @@ git-copies.ail.
 `keyframe "broke" [title: "Broke something? Go back", note: "..."]`: the title
 holds from that step on, notes belong to their step. The player hands both to the
 host with every step (`p.on('step', (k, m) => header.textContent = m.title)`),
-forward and backward.
+forward and backward. When the picture has its own heading, write the title once:
+`motion [title: s.heading, title_swap: roll]` makes the heading show each
+keyframe's title (it swaps where the title changes).
 
 ### Cookbook
 
@@ -556,11 +637,8 @@ per step `draw branch [to: l1.dot]` then the station pops; to merge,
 `show gate [enter: draw]`, `draw branch`, `draw main_line`, then pop and
 `pulse` the interchange.
 
-**Merge request checklist**: rows with a hidden tick
-(`appears: later`); `transform tests [opacity: 1]` + `show tests.tick [enter: pop]`
-per check; a pending review is a highlight wash
-(`transform review.bg [opacity: 1]`), approval is
-`transform review.txt [label: "Approved by Ben", swap: fade]` + its tick.
+**Merge request checklist**: a `check` component with states (see Components
+with states): `set tests passed`, `set review asked`, `set review approved`.
 
 **Conflict chooser**: both versions side by side, the chosen one
 `highlight`ed then `move`d into place, the other `hide [exit: shrink]`:
@@ -571,10 +649,10 @@ then { move ours to merged_slot; hide theirs [exit: shrink] }
 
 **Go back** (undo to an earlier state): `move ring to st2.dot`,
 `transform st3 [opacity: 0.28]`, `flash folder`, and roll the values back with
-`transform file.val [label: "57 lines", swap: roll]`.
+`transform file.val [label: "57 lines", swap: roll]` (or `[label: initial]`).
 
 The full acceptance scenes are in `examples/motion/` (git-copies, git-snapshots,
-git-branches, sharing `git-deck.ail`).
+git-branches, git-merge, sharing `git-deck.ail`).
 
 ---
 
@@ -586,8 +664,8 @@ git-branches, sharing `git-deck.ail`).
 2. **Cumulative keyframes** — Each frame builds on the previous. If you `hide X` in
    frame 2, X stays hidden in frames 3+ unless you `show X` again.
 3. **Transform persistence** — Transforms in frame N carry forward (visual AND
-   geometry), merged per-property. To reset a property in a later frame, restate it
-   explicitly (e.g. `transform elem [opacity: 1.0]`, or `move elem home`).
+   geometry), merged per-property. To reset a property in a later frame, say so:
+   `transform elem [opacity: initial]` (the declared value), or `move elem home`.
 3b. **Labels and resize** — Position animation moves an element's label with it (both
    live in the same wrapper group). But a *labeled* element that itself resizes
    (width/height) does not re-center its own label. Resize unlabeled frames/boxes;

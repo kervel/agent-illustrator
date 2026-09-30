@@ -195,5 +195,5 @@ text { white-space: pre; }
   </g>
   <g id="codes" class="ai-container">
   </g>
-  <rect id="hub" class="ai-shape ai-rect" x="799.5" y="470.25" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="hub" class="ai-shape ai-rect ai-point" x="800" y="470.75" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
 </svg>

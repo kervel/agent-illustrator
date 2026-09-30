@@ -27,11 +27,11 @@ constrain ben.bg.left = s.stage.center_x + 20
 constrain ben.bg.top = s.stage.top + 200
 // Centred on its own; while the choice card is up, it makes room (the file
 // and the card together are centred then).
-constrain merged.bg.center_x = s.stage.center_x as merged_centred
-rect beside [width: 1, height: 1, fill: none, stroke: none]
-constrain beside.left = s.stage.left + 272
-constrain beside.top = s.stage.top + 170
+constrain merged.bg.center_x = s.stage.center_x
 constrain merged.bg.top = s.stage.top + 170
+layout beside {
+    constrain merged.bg.left = s.stage.left + 272
+}
 
 // The tick on the merged file's corner.
 circle ok [size: 52, fill: role-ok, stroke: role-backdrop, stroke_width: 3, label: "✓", label_fill: role-surface,
@@ -67,29 +67,30 @@ keyframe "two" {
 keyframe "combine" {
     move anna to merged [duration: 0.7, ease: in]
     move ben to merged [duration: 0.7, ease: in]
-    at 0.65 { hide anna, ben [duration: 0.1] }
-    at 0.66 { show merged [enter: pop, duration: 0.55] }
-    at 1.05 { show ok [enter: pop] }
+    when anna arrives - 0.05 {
+        hide anna, ben [duration: 0.1]
+        show merged [enter: pop, duration: 0.55]
+    }
+    when merged shown - 0.15 { show ok [enter: pop] }
 }
 
 keyframe "conflict" {
     hide ok [exit: shrink, duration: 0.2]
-    disable merged_centred
-    constrain merged.bg.left = beside.left as merged_beside
-    at 0.1 { remove merged.line8 [duration: 0.3] }
-    at 0.15 {
-        insert merged after line 7 [name: conflict, tint: role-warn-soft, stagger: 0.05,
+    use layout beside
+    when ok hidden {
+        remove merged.line8 [duration: 0.3]
+        insert merged after line 7 [name: conflict, tint: role-warn-soft, stagger: 0.05, delay: 0.05,
             source: "<<<<<<< anna\n    return 0 if total > 40 else 4.95\n=======\n    return 0 if total > 60 else 4.95\n>>>>>>> ben"]
     }
-    at 0.5 { show card [enter: pop] }
+    when merged arrives { show card [enter: pop] }
 }
 
 keyframe "choose" {
     transform keep_anna [fill: role-series-1, label_fill: role-surface, duration: 0.2]
     transform keep_ben [opacity: 0.35, duration: 0.2]
     at 0.35 { remove .conflict [stagger: 0.04, order: end] }
-    at 0.5 { show merged.line8 [enter: expand] }
-    at 0.7 { hide card [exit: fall] }
-    at 0.75 { disable merged_beside; enable merged_centred }
-    at 0.8 { show ok [enter: pop] }
+    when merged.conflict5 hidden { show merged.line8 [enter: expand] }
+    when merged.conflict1 hidden { hide card [exit: fall] }
+    when card hidden { use layout default }
+    when merged arrives { show ok [enter: pop] }
 }

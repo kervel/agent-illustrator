@@ -3340,6 +3340,10 @@ fn check_unknown_colors(doc: &Document, warnings: &mut Vec<LintWarning>) {
             if matches!(lower.as_str(), "hatch" | "dots" | "grid" | "gradient" | "radial") {
                 continue;
             }
+            // `initial` in a transform: back to the declared colour.
+            if lower == "initial" {
+                continue;
+            }
             warnings.push(LintWarning {
                 category: LintCategory::UnknownModifier,
                 message: format!(

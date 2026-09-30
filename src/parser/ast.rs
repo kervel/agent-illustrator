@@ -167,6 +167,14 @@ pub enum Statement {
     MotionDefaults(Vec<Spanned<MotionOpt>>),
     /// `import "motion/git.ail"`: bring in another file's motion macros.
     Import(Spanned<String>),
+    /// `layout beside { constrain merged.bg.left = beside.left }`: an
+    /// alternative placement a keyframe switches to with `use layout beside`.
+    NamedLayout { name: Spanned<String>, constraints: Vec<Spanned<ConstrainDecl>> },
+    /// `state done { hide bg; transform txt [label: "Approved"] }` inside a
+    /// template: a named look of the component, entered with `set <inst> done`.
+    /// `owner` is the instance it belongs to, filled in when the template is
+    /// resolved (empty as parsed).
+    ComponentState { name: Spanned<String>, body: Vec<Spanned<MotionNode>>, owner: String },
 }
 
 /// Shape declaration
@@ -325,6 +333,27 @@ pub enum MotionNode {
     After(f64, Vec<Spanned<MotionNode>>),
     /// `at 0.4 { ... }`: starts this long after the keyframe starts.
     At(f64, Vec<Spanned<MotionNode>>),
+    /// `when branch reaches l1.dot { ... }`, `when anna arrives + 0.1 { ... }`,
+    /// `after tick { ... }`: starts at an event of something earlier in the
+    /// keyframe (plus a small nudge), not at a sum of offsets.
+    When(MotionEvent, f64, Vec<Spanned<MotionNode>>),
+    /// `beat tick { ... }`: a named group, so later ones can start `after tick`.
+    Beat(String, Vec<Spanned<MotionNode>>),
+}
+
+/// What a `when` waits for.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MotionEvent {
+    /// A line being drawn passes an element on it.
+    Reaches { line: Spanned<String>, target: Spanned<String> },
+    /// A move or flight of the element ends.
+    Arrives(Spanned<String>),
+    /// Its entrance ends.
+    Shown(Spanned<String>),
+    /// Its exit ends.
+    Hidden(Spanned<String>),
+    /// A named beat ends.
+    BeatEnd(Spanned<String>),
 }
 
 /// A motion statement: a verb, what it acts on, and its `[...]` options.
@@ -509,6 +538,11 @@ pub enum MotionVerb {
     /// code block, collapsed until this statement opens them. Rewritten into
     /// a `show [enter: expand]` when the code block is generated.
     Insert { code: Spanned<String>, after: usize },
+    /// `use layout beside` / `use layout default`
+    UseLayout(Spanned<String>),
+    /// `set review done [swap: fade]`: the instance enters one of its
+    /// template's named states.
+    SetState { target: Spanned<Selector>, state: Spanned<String> },
 }
 
 /// Keyframe operation (Feature 011)
@@ -720,6 +754,9 @@ pub enum StyleValue {
     IdentifierList(Vec<Identifier>),
     /// Bracketed list of values (e.g. `at: [1, 0]`, `col_labels: ["a", "b"]`)
     List(Vec<Spanned<StyleValue>>),
+    /// `{fname: "login.py", c1: role-primary}`: one item of `items:` on a
+    /// starred declaration (`code k* [items: [{...}, {...}]]`).
+    Record(Vec<(Spanned<Identifier>, Spanned<StyleValue>)>),
     /// Function-style value: `hatch(accent-1)`, `gradient(a, b, 90)`.
     /// Used for pattern/gradient fills. `name` is the function name; `args`
     /// are color/number atoms.
@@ -999,6 +1036,11 @@ pub enum ConstraintExpr {
         elements: Vec<Spanned<Identifier>>,
         padding: Option<f64>,
     },
+}
+
+/// `initial` as a transform value: back to what the file declares.
+pub fn is_initial(v: &StyleValue) -> bool {
+    matches!(v, StyleValue::Keyword(k) if k == "initial") || matches!(v, StyleValue::Identifier(i) if i.0 == "initial")
 }
 
 /// Constrain statement declaration

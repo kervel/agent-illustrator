@@ -19,8 +19,9 @@ template "stn" (name: "Station", side: below, tint: role-primary, d: 38, w: 8) {
              font_weight: 700, label_fill: role-ink, fill: none, stroke: none, max_width: 200, appears: later]
 }
 
-// A check on the merge request: a tick and what it checks.
-template "check" (says: "check") {
+// A check on the merge request: a tick and what it checks. Faint until
+// it reports; its states are how it reports.
+template "check" (says: "check", then_says: "") {
     rect bg [fill: role-warn, fill_opacity: 0.28, stroke: none, corner_radius: 8, opacity: 0]
     row item [gap: 10, align: center] {
         circle tick [size: 28, fill: role-ok, stroke: none, label: "✓", label_fill: role-surface,
@@ -29,6 +30,13 @@ template "check" (says: "check") {
                   label_fill: role-ink, align: start, max_width: 200]
     }
     constrain bg contains item [padding: 4]
+    state passed { transform self [opacity: 1, duration: 0.2]; show tick [enter: pop] }
+    state asked { transform self [opacity: 1]; transform bg [opacity: 1] }
+    state approved {
+        transform self [opacity: 1]
+        transform txt [label: then_says, swap: fade]
+        after 0.1 { show tick [enter: pop] }
+    }
 }
 
 slide s [num: "4", title: "Branches and merge requests"]
@@ -73,7 +81,7 @@ constrain branch_tag.right = c.dot.left - 20
 constrain branch_tag.center_y = midpoint(c.dot, l1.dot)
 
 // The merge request, hanging over the interchange.
-group mr [appears: review] {
+group mr [appears: later] {
     rect mr_bg [fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
     col mr_body [gap: 8] {
         rect mr_kind [fill: none, stroke: none, font_size: 16, font_family: mono, label_fill: role-muted,
@@ -81,7 +89,7 @@ group mr [appears: review] {
         rect mr_title [fill: none, stroke: none, font_size: 26, font_weight: 700, label_fill: role-ink,
                        label: "New checkout", align: start, max_width: 250]
         check tests [says: "218 tests passed", opacity: 0.3]
-        check review [says: "Ben: “add a test for coupons”", opacity: 0.3]
+        check review [says: "Ben: “add a test for coupons”", then_says: "Approved by Ben", opacity: 0.3]
     }
 }
 constrain mr_bg contains mr_body [padding: 20]
@@ -91,7 +99,7 @@ gate_top.bottom -- merged.dot.top as gate [stroke: role-ink, stroke_width: 3, st
                                        routing: direct, appears: merge]
 
 // The gate drops straight from the card's bottom edge onto the interchange.
-rect gate_top [width: 1, height: 1, fill: none, stroke: none]
+point gate_top
 constrain gate_top.center_x = merged.dot.center_x
 constrain gate_top.bottom = mr_body.bottom + 20
 
@@ -106,48 +114,41 @@ keyframe "main" {
     slide_in(s)
     at 0.25 { draw main_line [to: c.dot, duration: slow] }
     at 0.3 { show main_tag [enter: pop] }
-    at 0.35 { station(a) }
-    at 0.51 { station(b) }
-    at 0.67 { station(c) }
+    when main_line reaches a.dot { station(a) }
+    when main_line reaches b.dot { station(b) }
+    when main_line reaches c.dot { station(c) }
 }
 
 keyframe "branch" {
     draw branch [to: l1.dot, duration: 0.6]
-    after 0.2 { show branch_tag [enter: pop] }
-    after 0.3 { station(l1) }
-    after 0.4 { draw branch [to: l2.dot, duration: fast] }
-    after 0.3 { station(l2) }
+    at 0.2 { show branch_tag [enter: pop] }
+    when branch reaches l1.dot { station(l1) }
+    when branch reaches l1.dot + 0.3 { draw branch [to: l2.dot, duration: fast] }
+    when branch reaches l2.dot { station(l2) }
 }
 
 keyframe "hotfix" {
     draw main_line [to: hotfix.dot, duration: 0.6]
-    after 0.5 { station(hotfix) }
+    when main_line reaches hotfix.dot { station(hotfix) }
 }
 
 keyframe "review" {
     show mr [enter: pop]
-    after 0.6 {
-        transform tests [opacity: 1, duration: 0.2]
-        show tests.tick [enter: pop]
-    }
-    after 0.5 { transform review [opacity: 1]; transform review.bg [opacity: 1] }
+    when mr shown + 0.1 { set tests passed }
+    when tests.tick shown { set review asked }
 }
 
 keyframe "fixed" {
     draw branch [to: l3.dot, duration: fast]
-    after 0.3 { station(l3) }
-    after 0.5 {
-        transform review.txt [label: "Approved by Ben", swap: fade]
-        transform review.bg [opacity: 0]
-    }
-    after 0.1 { show review.tick [enter: pop] }
+    when branch reaches l3.dot { station(l3) }
+    when l3.dot shown { set review approved }
 }
 
 keyframe "merge" {
     show gate [enter: draw, duration: fast]
-    after 0.15 { draw branch [duration: 0.6] }
-    after 0.1 { draw main_line [duration: slow] }
-    after 0.35 { transform mr_bg [stroke: role-ok] }
-    after 0.05 { station(merged) }
-    after 0.45 { pulse merged.dot [scale: 1.2] }
+    when gate shown { draw branch [duration: 0.6] }
+    when gate shown + 0.1 { draw main_line [duration: slow] }
+    when branch reaches merged.dot { transform mr_bg [stroke: role-ok] }
+    when main_line reaches merged.dot { station(merged) }
+    when merged.dot shown { pulse merged.dot [scale: 1.2] }
 }

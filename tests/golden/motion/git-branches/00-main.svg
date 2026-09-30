@@ -179,5 +179,5 @@ text { white-space: pre; }
   </g>
   <rect id="main_tag" class="ai-shape ai-rect" x="83.7471" y="488.5" width="80" height="38.5" fill="var(--role-primary)" stroke="none" stroke-width="1.5" rx="18" style="rx:18px;ry:18px"/>
   <text class="ai-label" x="123.7471" y="507.75" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-surface)" style="font-weight:600;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="123.7471" dy="-0"><tspan>main</tspan></tspan></text>
-  <rect id="gate_top" class="ai-shape ai-rect" x="1380.4254" y="426.75" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="gate_top" class="ai-shape ai-rect ai-point" x="1380.9254" y="427.75" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
 </svg>

@@ -221,5 +221,5 @@ text { white-space: pre; }
       </g>
     </g>
   </g>
-  <rect id="gate_top" class="ai-shape ai-rect" x="1380.4254" y="426.75" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="gate_top" class="ai-shape ai-rect ai-point" x="1380.9254" y="427.75" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
 </svg>

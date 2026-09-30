@@ -8,6 +8,8 @@ circle [name] [modifiers]    Circle
 ellipse [name] [modifiers]   Ellipse
 text "content" [name] [mod]  Text element
 path [name] [mod] { ... }    Custom shape with vertices/arcs
+point name                   An invisible place with no size, for constraints to
+                             name (`point hub; constrain hub.center = docs.center`)
 callout [name] [mod]         Annotation pill with a triangular pointer
                              [pointer: up|down|left|right] (default down)
                              auto-sizes to its label; exposes a `tip` anchor at
@@ -171,6 +173,11 @@ constrain a.center_x = 50 as a_home    Name a constraint
 disable a_home                         Release a named constraint (top level
                                        or inside a keyframe)
 enable a_home                          Reactivate it
+layout beside { constrain ... }        A named alternative placement; a keyframe
+                                       switches with `use layout beside` and back
+                                       with `use layout default` (the declared one).
+                                       Its constraints replace declared ones on the
+                                       same elements and axis.
 
 Restating a constraint on the same element+property overrides the earlier one,
 whatever is on the right-hand side; --lint reports the override. Use `disable`
@@ -298,9 +305,15 @@ Motion statements (full guide: --skill-animation):
     show a, b [enter: pop|rise|drop|fade|grow|wipe(dir)|draw, from: other,
                delay, duration, ease, stagger, order: start|end|center|random, jitter: 4]
     hide a [exit: fade|shrink|fall|lift|wipe(dir)]
+    when line reaches a.dot { ... }   when a line being drawn passes a.dot
+    when a shown | hidden | arrives + 0.1 { ... }   when a's latest entrance / exit /
+                        move (or layout change) in this keyframe has FINISHED;
+                        --timeline prints each event's resolved time
+    beat name { ... }   a named group;  after name + 0.1 { ... }  when it has ended
     then { ... }        next beat: when everything before it has ended
-    after 0.2 { ... }   0.2s after the previous beat started
     at 1.0 { ... }      1.0s after the keyframe started
+    after 0.2 { ... }   0.2s after the previous beat started (a row of these is
+                        linted: time by events instead)
     keyframe "k" [auto, after: 0.3] { ... }   plays by itself after the previous one
     draw line [to: elem | 60% | vertex 2]   undraw line [to: ...]
     fly ghost(a) to b, c [scale, arc]   fly proxy from a to b
@@ -310,6 +323,14 @@ Motion statements (full guide: --skill-animation):
     transform cap [label: "...", swap: roll|fade|cut]
     swap a -> b [via: flip|fade|morph, flip: member]
     camera focus a [zoom: 1.4]   camera reset
+    use layout beside [duration: slow]   use layout default
+    set review done [swap: fade]   enter a state the component's template declares:
+        template "check" (...) { ...  state done { show tick; transform txt [label: ok] } }
+        (motion statements naming its parts; `self` is the instance; what other
+        states change and `done` does not goes back to the template's look;
+        `set x default` undoes them all). One element: state status broken { ... }
+    transform a [fill: initial]   back to the declared value
+    motion [title: s.heading, title_swap: roll]   the heading shows each keyframe's title
     motion name(p: element|group|path|anchor|number|text) { ... }   name(args)
     motion [enter: pop, exit: fade]     diagram-wide defaults
     import "file.ail" | "ail:motion/git"   templates + motion macros
@@ -343,6 +364,11 @@ Declarations that serve motion:
     many at once: doc d* [fname: ["a", "b", "c"]]  ->  d0, d1, d2
                   (templates and plain shapes alike; list-valued arguments zip
                   by index: rect l* [width: [88, 70], fill: [red, blue]])
+                  several arguments per instance: one record each, not
+                  parallel lists: code k* [items: [{fname: "a.py", c1: role-ok},
+                                                   {fname: "b.js", c1: role-primary}]]
+                  constrain k*.center = d*.center   one constraint per index
+                  (k0 on d0, ...); the lists must be the same length
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
                   the previous one; [no_resolve] keeps the previous frame's
                   layout (no constraint re-solve) for a pure style change;
@@ -372,6 +398,9 @@ CLI flags:
     --list-steps       One line per click step: its frame, then its [auto] frames
     --frame N --at T   A still T into frame N (0.35s, 350ms, 50%)
     --frames-strip N   Contact sheet of frame N at 0/25/50/75/100%
+    --states           The storyboard: per click step what is visible (a matrix)
+                       and what changes (entrances, exits, transforms, moves,
+                       draws, layouts); check it against the STORYBOARD comment
     --timeline         The compiled choreography as a table (--timeline-json: tracks)
     --animate          Embed the motion player (autoplay; click/arrows step)
     --player-js        Print the player for hosts that inline the SVG

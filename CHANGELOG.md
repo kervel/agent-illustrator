@@ -1,5 +1,48 @@
 # Changelog
 
+## v0.2.5
+
+Readability: a scene says what it means, so an author (or an agent) can read
+the motion section as the storyboard.
+
+- Timing by events: `when main_line reaches a.dot { ... }`, `when x shown`,
+  `when x hidden`, `when x arrives` (+/- a nudge), and named beats (`beat open
+  { ... }` + `after open + 0.2 { ... }`). `then` and `at` stay; `after 0.3`
+  still works, and two or more in a row are linted (each counts from the one
+  before). A station that appears before its line reaches it is linted.
+- Named layouts: `layout beside { constrain ... }`, switched with `use layout
+  beside` / `use layout default` (with timing options). Replaces pairs of
+  named constraints disabled and enabled by hand.
+- Component states: `state done { ... }` in a template (motion statements on
+  its parts, with its parameters), entered with `set review done [opts]`;
+  what another state changes and this one does not goes back to the
+  template's look. `transform x [fill: initial]` returns a property to its
+  declared value.
+- States on one element: `state status broken { ... }` at top level; `set x
+  default` returns any component to its declared look.
+- Constraints over starred lists: `constrain k*.pg.center = d*.pg.center`
+  (one per index).
+- `--timeline` prints each `when ...` with its resolved time, and a layout
+  switch as `use layout beside`. Events are documented as the moment
+  something finishes; `arrives` also covers a layout change.
+- Records for starred instances: `k* [items: [{fname: "a.py", c1: role-ok},
+  ...]]` instead of parallel lists.
+- `point hub`: an invisible place with no size (instead of a 1x1 rect).
+- One title: `motion [title: s.heading, title_swap: roll]` makes the heading
+  show each keyframe's `[title: ...]`.
+- `--states`: the storyboard per click step: a visibility matrix, then what
+  each step shows, hides, transforms, moves, draws and which layout it uses.
+- `transform x [fill: initial]` passes the colour lint.
+- An instance's `opacity:` (`check tests [opacity: 0.3]`) now applies to the
+  instance; it was dropped, so the merge request's checks were never faint.
+- Every motion scene is gated fully lint clean under git-deck.css and
+  kapernikov.css in the test suite.
+- Lints: `appears: <frame>` plus a `show` in that frame (say it once: `appears:
+  later` at the element, the verb for how); `swap a -> b` where b is not where
+  a is (for `flip: part`, that part).
+- The four git scenes are rewritten with these (no summed offsets, no
+  enable/disable pairs, no helper rects, no parallel lists), lint clean.
+
 ## v0.2.4
 
 - No more one-frame flash of the old page at the end of a flip (seen on a GPU

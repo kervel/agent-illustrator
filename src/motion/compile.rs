@@ -16,7 +16,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use crate::layout::keyframe::FrameState;
 use crate::layout::types::{ElementLayout, ElementType, LayoutResult, Point};
 use crate::layout::LayoutConfig;
-use crate::parser::ast::{
+use crate::parser::ast::{MotionEvent, 
     Document, DrawTo, FlySubject, KeyframeDecl, KeyframeOp, MotionNode, MotionOpt, MotionStmt,
     MotionValue, MotionVerb, PinTo, ShapeType, Span, Spanned, Statement,
 };
@@ -192,6 +192,9 @@ pub struct FrameMotion {
     pub note: Option<String>,
     pub atoms: Vec<Atom>,
     pub curves: BTreeMap<usize, Curve>,
+    /// Each `when ...` / beat end as resolved: (time, what, index of the
+    /// first atom of its block), for --timeline.
+    pub events: Vec<(f64, String, usize)>,
 }
 
 /// Auxiliary nodes the renderer must add for motion to have something to move.
@@ -835,6 +838,8 @@ fn verb_name(v: &MotionVerb) -> &'static str {
         MotionVerb::Camera(_) => "camera",
         MotionVerb::Call { .. } => "call",
         MotionVerb::Insert { .. } => "insert",
+        MotionVerb::UseLayout(_) => "use layout",
+        MotionVerb::SetState { .. } => "set",
     }
 }
 
@@ -925,12 +930,130 @@ struct TimedStmt<'a> {
     timing: Timing,
 }
 
+/// What events are timed against: the base layout, how far each line is
+/// drawn when the frame starts, and the beats seen so far.
+struct EventCtx<'b> {
+    base: &'b LayoutResult,
+    drawn: HashMap<String, f64>,
+    beats: HashMap<String, f64>,
+    show: &'b dyn Fn(&str) -> String,
+    /// Resolved events, for the timeline.
+    events: Vec<(f64, String, usize)>,
+}
+
+/// Progress p reached by an ease, as a fraction of its duration.
+fn ease_inverse(e: Ease, p: f64) -> f64 {
+    if p <= 0.0 {
+        return 0.0;
+    }
+    // The first time the curve reaches p (an overshooting ease may reach it
+    // twice): scan, then bisect.
+    let n = 200;
+    let mut lo = 0.0;
+    for k in 1..=n {
+        let x = k as f64 / n as f64;
+        if e.eval(x) >= p {
+            let mut hi = x;
+            for _ in 0..40 {
+                let mid = (lo + hi) / 2.0;
+                if e.eval(mid) >= p {
+                    hi = mid;
+                } else {
+                    lo = mid;
+                }
+            }
+            return hi;
+        }
+        lo = x;
+    }
+    1.0
+}
+
+fn event_time(ev: &MotionEvent, span: &Span, out: &[TimedStmt], ctx: &EventCtx) -> Result<f64, TimingError> {
+    let err = |m: String| TimingError(m, span.clone());
+    let last_of = |id: &str, pick: &dyn Fn(&MotionVerb) -> bool| -> Option<(f64, &TimedStmt)> {
+        out.iter().rev().find_map(|ts| {
+            if !pick(&ts.stmt.verb) {
+                return None;
+            }
+            let i = ts.stmt.targets.iter().position(|t| t == id)?;
+            Some((ts.starts.get(i).copied().unwrap_or(0.0), ts))
+        })
+    };
+    let show = ctx.show;
+    match ev {
+        MotionEvent::BeatEnd(b) => ctx
+            .beats
+            .get(&b.node)
+            .copied()
+            .ok_or_else(|| err(format!("after {}: no `beat {} {{ ... }}` earlier in this keyframe", b.node, b.node))),
+        MotionEvent::Arrives(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Move { .. } | MotionVerb::Fly { .. }))
+            .map(|(s, ts)| s + ts.timing.dur)
+            // Moved by a layout change (`use layout beside`, a constraint):
+            // when that change has played.
+            .or_else(|| {
+                out.iter()
+                    .rev()
+                    .find(|ts| matches!(ts.stmt.verb, MotionVerb::Constrain(_) | MotionVerb::Enable(_) | MotionVerb::Disable(_)))
+                    .map(|ts| ts.starts.first().copied().unwrap_or(0.0) + ts.timing.dur)
+            })
+            .ok_or_else(|| err(format!("when {} arrives: nothing moves or flies {} (and no layout changes) earlier in this keyframe", show(&e.node), show(&e.node)))),
+        MotionEvent::Shown(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Show(_)))
+            .map(|(s, ts)| s + ts.timing.dur)
+            .ok_or_else(|| err(format!("when {} shown: no `show {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
+        MotionEvent::Hidden(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Hide(_)))
+            .map(|(s, ts)| s + ts.timing.dur)
+            .ok_or_else(|| err(format!("when {} hidden: no `hide {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
+        MotionEvent::Reaches { line, target } => {
+            let is_draw = |v: &MotionVerb| matches!(v, MotionVerb::Draw(_) | MotionVerb::Undraw(_));
+            let draws: Vec<(f64, &TimedStmt)> = out
+                .iter()
+                .filter(|ts| is_draw(&ts.stmt.verb))
+                .filter_map(|ts| {
+                    let i = ts.stmt.targets.iter().position(|t| *t == line.node)?;
+                    Some((ts.starts.get(i).copied().unwrap_or(0.0), ts))
+                })
+                .collect();
+            let Some((start, ts)) = draws.last().copied() else {
+                return Err(err(format!(
+                    "when {} reaches {}: nothing draws {} earlier in this keyframe",
+                    show(&line.node), show(&target.node), show(&line.node)
+                )));
+            };
+            let to_of = |ts: &TimedStmt| -> Option<f64> {
+                let undraw = matches!(ts.stmt.verb, MotionVerb::Undraw(_));
+                let to = opt(&ts.stmt.opts, "to")
+                    .and_then(|v| crate::motion::draw_to(&v.node))
+                    .unwrap_or(DrawTo::Fraction(if undraw { 0.0 } else { 1.0 }));
+                resolve_draw_to(ctx.base, &line.node, &to)
+            };
+            let from = if draws.len() >= 2 {
+                to_of(draws[draws.len() - 2].1).unwrap_or(0.0)
+            } else {
+                ctx.drawn.get(&line.node).copied().unwrap_or(1.0)
+            };
+            let to = to_of(ts).unwrap_or(1.0);
+            let at = resolve_draw_to(ctx.base, &line.node, &DrawTo::Element(target.node.clone()))
+                .ok_or_else(|| err(format!("when {} reaches {}: {} is not on {}", show(&line.node), show(&target.node), show(&target.node), show(&line.node))))?;
+            let p = if (to - from).abs() < 1e-9 { -1.0 } else { (at - from) / (to - from) };
+            if !(-1e-6..=1.0 + 1e-6).contains(&p) {
+                return Err(err(format!(
+                    "when {} reaches {}: its last draw goes from {:.0}% to {:.0}% of the line, and {} is at {:.0}%",
+                    show(&line.node), show(&target.node), from * 100.0, to * 100.0, show(&target.node), at * 100.0
+                )));
+            }
+            Ok(start + ts.timing.dur * ease_inverse(ts.timing.ease, p.clamp(0.0, 1.0)))
+        }
+    }
+}
+
 fn walk<'a>(
     nodes: &'a [Spanned<MotionNode>],
     start: f64,
     tokens: &MotionTokens,
     defaults: &Defaults,
     out: &mut Vec<TimedStmt<'a>>,
+    ctx: &mut EventCtx,
 ) -> Result<f64, TimingError> {
     let mut cursor = start;
     let mut end = start;
@@ -954,20 +1077,42 @@ fn walk<'a>(
             }
             MotionNode::Then(b) => {
                 let s = end;
-                let e = walk(b, s, tokens, defaults, out)?;
+                let e = walk(b, s, tokens, defaults, out, ctx)?;
                 cursor = s;
                 end = end.max(e);
             }
             MotionNode::At(t, b) => {
                 let s = *t;
-                let e = walk(b, s, tokens, defaults, out)?;
+                let e = walk(b, s, tokens, defaults, out, ctx)?;
                 cursor = s;
                 end = end.max(e);
             }
             MotionNode::After(d, b) => {
                 let s = cursor + d;
-                let e = walk(b, s, tokens, defaults, out)?;
+                let e = walk(b, s, tokens, defaults, out, ctx)?;
                 cursor = s;
+                end = end.max(e);
+            }
+            MotionNode::When(ev, off, b) => {
+                let at = event_time(ev, &n.span, out, ctx)?;
+                let s = (at + off).max(0.0);
+                let show = ctx.show;
+                let what = match ev {
+                    MotionEvent::Reaches { line, target } => format!("{} reaches {}", show(&line.node), show(&target.node)),
+                    MotionEvent::Arrives(e) => format!("{} arrives", show(&e.node)),
+                    MotionEvent::Shown(e) => format!("{} shown", show(&e.node)),
+                    MotionEvent::Hidden(e) => format!("{} hidden", show(&e.node)),
+                    MotionEvent::BeatEnd(b) => format!("after {}", b.node),
+                };
+                let nudge = if off.abs() > 1e-9 { format!(" {} {}", if *off < 0.0 { "-" } else { "+" }, off.abs()) } else { String::new() };
+                ctx.events.push((s, format!("when {}{} (= {:.2}s{})", what, nudge, at, if nudge.is_empty() { String::new() } else { format!(", starts {:.2}s", s) }), out.len()));
+                let e = walk(b, s, tokens, defaults, out, ctx)?;
+                end = end.max(e);
+            }
+            MotionNode::Beat(name, b) => {
+                let e = walk(b, cursor, tokens, defaults, out, ctx)?;
+                ctx.events.push((e, format!("beat {} ends (= {:.2}s)", name, e), usize::MAX));
+                ctx.beats.insert(name.clone(), e);
                 end = end.max(e);
             }
         }
@@ -1215,7 +1360,23 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
     // Curves are keyed by channel index; collected per frame.
     for (fi, kf) in keyframes.iter().enumerate() {
         let mut timed = Vec::new();
-        let duration = walk(&kf.motion, 0.0, input.tokens, &c.defaults, &mut timed)
+        // How far each line is drawn as this frame starts.
+        let drawn: HashMap<String, f64> = c
+            .drawables
+            .keys()
+            .map(|id| {
+                let f = state
+                    .drawn
+                    .get(id)
+                    .and_then(|to| resolve_draw_to(input.base, id, to))
+                    .or_else(|| c.drawn_initial.get(id).copied())
+                    .unwrap_or(1.0);
+                (id.clone(), f)
+            })
+            .collect();
+        let show_fn = |id: &str| c.show(id);
+        let mut ctx = EventCtx { base: input.base, drawn, beats: HashMap::new(), show: &show_fn, events: Vec::new() };
+        let duration = walk(&kf.motion, 0.0, input.tokens, &c.defaults, &mut timed, &mut ctx)
             .map_err(|TimingError(m, s)| CompileError { message: m, span: s })?;
         let mut fm = FrameMotion {
             name: kf.name.node.clone(),
@@ -1225,9 +1386,15 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
             note: kf.note.clone(),
             atoms: Vec::new(),
             curves: BTreeMap::new(),
+            events: std::mem::take(&mut ctx.events),
         };
+        let mut first_atom = Vec::with_capacity(timed.len());
         for ts in &timed {
+            first_atom.push(fm.atoms.len());
             c.run_stmt(fi, &kf.name.node, ts, &mut state, &mut layout, &mut snap, &mut fm)?;
+        }
+        for ev in &mut fm.events {
+            ev.2 = first_atom.get(ev.2).copied().unwrap_or(usize::MAX);
         }
         // Loops and transients may outlast statements only by design; the
         // frame lasts as long as its longest non-looping segment.
@@ -2071,6 +2238,9 @@ fn wipe_hidden(dir: &str) -> Val {
 /// `show a [enter: pop]` for the timeline.
 fn describe_verb(s: &MotionStmt) -> String {
     let mut v = verb_name(&s.verb).to_string();
+    if let Some(l) = opt_name(&s.opts, "layout") {
+        return format!("use layout {}", l);
+    }
     match &s.verb {
         MotionVerb::Effect { name, .. } => v = name.node.clone(),
         MotionVerb::Loop { effect, .. } => v = format!("loop {}", effect.node),

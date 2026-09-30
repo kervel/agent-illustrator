@@ -100,92 +100,96 @@
 .frame-intro {
 }
 .frame-first_commit {
-  .kf-5c4c8f27-st1_dot { opacity: 1; }
-  .kf-5c4c8f27-st1_mt { opacity: 1; }
-  .kf-5c4c8f27-st1_nm { opacity: 1; }
+  .kf-66865764-st1_dot { opacity: 1; }
+  .kf-66865764-st1_mt { opacity: 1; }
+  .kf-66865764-st1_nm { opacity: 1; }
 }
 .frame-two_more {
-  .aitxt-5c4c8f27-f_style_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_style_val-v0 { opacity: 1; }
-  .kf-5c4c8f27-st1_dot { opacity: 1; }
-  .kf-5c4c8f27-st1_mt { opacity: 1; }
-  .kf-5c4c8f27-st1_nm { opacity: 1; }
-  .kf-5c4c8f27-st2_dot { opacity: 1; }
-  .kf-5c4c8f27-st2_mt { opacity: 1; }
-  .kf-5c4c8f27-st2_nm { opacity: 1; }
+  .aitxt-66865764-f_style_val-base { opacity: 0; }
+  .aitxt-66865764-f_style_val-v0 { opacity: 1; }
+  .kf-66865764-st1_dot { opacity: 1; }
+  .kf-66865764-st1_mt { opacity: 1; }
+  .kf-66865764-st1_nm { opacity: 1; }
+  .kf-66865764-st2_dot { opacity: 1; }
+  .kf-66865764-st2_mt { opacity: 1; }
+  .kf-66865764-st2_nm { opacity: 1; }
 }
 .frame-and_another {
-  .aitxt-5c4c8f27-f_cart_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_cart_val-v0 { opacity: 1; }
-  .aitxt-5c4c8f27-f_style_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_style_val-v0 { opacity: 1; }
-  .kf-5c4c8f27-st1_dot { opacity: 1; }
-  .kf-5c4c8f27-st1_mt { opacity: 1; }
-  .kf-5c4c8f27-st1_nm { opacity: 1; }
-  .kf-5c4c8f27-st2_dot { opacity: 1; }
-  .kf-5c4c8f27-st2_mt { opacity: 1; }
-  .kf-5c4c8f27-st2_nm { opacity: 1; }
-  .kf-5c4c8f27-st3_dot { opacity: 1; }
-  .kf-5c4c8f27-st3_mt { opacity: 1; }
-  .kf-5c4c8f27-st3_nm { opacity: 1; }
+  .aitxt-66865764-f_cart_val-base { opacity: 0; }
+  .aitxt-66865764-f_cart_val-v0 { opacity: 1; }
+  .aitxt-66865764-f_style_val-base { opacity: 0; }
+  .aitxt-66865764-f_style_val-v0 { opacity: 1; }
+  .kf-66865764-st1_dot { opacity: 1; }
+  .kf-66865764-st1_mt { opacity: 1; }
+  .kf-66865764-st1_nm { opacity: 1; }
+  .kf-66865764-st2_dot { opacity: 1; }
+  .kf-66865764-st2_mt { opacity: 1; }
+  .kf-66865764-st2_nm { opacity: 1; }
+  .kf-66865764-st3_dot { opacity: 1; }
+  .kf-66865764-st3_mt { opacity: 1; }
+  .kf-66865764-st3_nm { opacity: 1; }
 }
 .frame-details {
-  .kf-5c4c8f27-card { opacity: 1; }
-  .aitxt-5c4c8f27-f_cart_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_cart_val-v0 { opacity: 1; }
-  .aitxt-5c4c8f27-f_style_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_style_val-v0 { opacity: 1; }
-  .kf-5c4c8f27-st1_dot { opacity: 1; }
-  .kf-5c4c8f27-st1_mt { opacity: 1; }
-  .kf-5c4c8f27-st1_nm { opacity: 1; }
-  .kf-5c4c8f27-st2_dot { opacity: 1; }
-  .kf-5c4c8f27-st2_mt { opacity: 1; }
-  .kf-5c4c8f27-st2_nm { opacity: 1; }
-  .kf-5c4c8f27-st3_dot { opacity: 1; }
-  .kf-5c4c8f27-st3_mt { opacity: 1; }
-  .kf-5c4c8f27-st3_nm { opacity: 1; }
-  .kf-5c4c8f27-stick { opacity: 1; }
+  .kf-66865764-card { opacity: 1; }
+  .aitxt-66865764-f_cart_val-base { opacity: 0; }
+  .aitxt-66865764-f_cart_val-v0 { opacity: 1; }
+  .aitxt-66865764-f_style_val-base { opacity: 0; }
+  .aitxt-66865764-f_style_val-v0 { opacity: 1; }
+  .kf-66865764-st1_dot { opacity: 1; }
+  .kf-66865764-st1_mt { opacity: 1; }
+  .kf-66865764-st1_nm { opacity: 1; }
+  .kf-66865764-st2_dot { opacity: 1; }
+  .kf-66865764-st2_mt { opacity: 1; }
+  .kf-66865764-st2_nm { opacity: 1; }
+  .kf-66865764-st3_dot { opacity: 1; }
+  .kf-66865764-st3_mt { opacity: 1; }
+  .kf-66865764-st3_nm { opacity: 1; }
+  .kf-66865764-stick { opacity: 1; }
 }
 .frame-broke {
-  .kf-5c4c8f27-bad { opacity: 1; }
-  .aitxt-5c4c8f27-f_cart_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_cart_val-v0 { opacity: 1; }
-  .aitxt-5c4c8f27-f_style_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_style_val-v0 { opacity: 1; }
-  .aitxt-5c4c8f27-s_heading-base { opacity: 0; }
-  .aitxt-5c4c8f27-s_heading-v0 { opacity: 1; }
-  .kf-5c4c8f27-st1_dot { opacity: 1; }
-  .kf-5c4c8f27-st1_mt { opacity: 1; }
-  .kf-5c4c8f27-st1_nm { opacity: 1; }
-  .kf-5c4c8f27-st2_dot { opacity: 1; }
-  .kf-5c4c8f27-st2_mt { opacity: 1; }
-  .kf-5c4c8f27-st2_nm { opacity: 1; }
-  .kf-5c4c8f27-st3_dot { opacity: 1; }
-  .kfp-5c4c8f27-st3_dot { stroke: var(--role-error); }
-  .kf-5c4c8f27-st3_mt { opacity: 1; }
-  .kf-5c4c8f27-st3_nm { opacity: 1; }
-  .kf-5c4c8f27-st3_nm text { fill: var(--role-error); }
+  .aitxt-66865764-f_cart_val-base { opacity: 0; }
+  .aitxt-66865764-f_cart_val-v0 { opacity: 1; }
+  .aitxt-66865764-f_style_val-base { opacity: 0; }
+  .aitxt-66865764-f_style_val-v0 { opacity: 1; }
+  .aitxt-66865764-s_heading-base { opacity: 0; }
+  .aitxt-66865764-s_heading-v0 { opacity: 1; }
+  .kf-66865764-st1_dot { opacity: 1; }
+  .kf-66865764-st1_mt { opacity: 1; }
+  .kf-66865764-st1_nm { opacity: 1; }
+  .kf-66865764-st2_dot { opacity: 1; }
+  .kf-66865764-st2_mt { opacity: 1; }
+  .kf-66865764-st2_nm { opacity: 1; }
+  .kf-66865764-st3_dot { opacity: 1; }
+  .kfp-66865764-st3_dot { stroke: var(--role-error); }
+  .kf-66865764-st3_mt { opacity: 1; }
+  .kf-66865764-st3_nm { opacity: 1; }
+  .kf-66865764-st3_nm text { fill: var(--role-error); }
+  .kf-66865764-status { opacity: 1; }
+  .kfp-66865764-status { stroke: var(--role-error); }
+  .kf-66865764-status text { fill: var(--role-error); }
+  .aitxt-66865764-status-base { opacity: 0; }
+  .aitxt-66865764-status-v0 { opacity: 1; }
 }
 .frame-go_back {
-  .aitxt-5c4c8f27-f_style_val-base { opacity: 0; }
-  .aitxt-5c4c8f27-f_style_val-v0 { opacity: 1; }
-  .kf-5c4c8f27-ok { opacity: 1; }
-  .kf-5c4c8f27-ring { opacity: 1; }
-  .kf-5c4c8f27-ring { transform: translate(-230.8080000000001px, 0px); }
-  .aitxt-5c4c8f27-s_heading-base { opacity: 0; }
-  .aitxt-5c4c8f27-s_heading-v0 { opacity: 1; }
-  .kf-5c4c8f27-st1_dot { opacity: 1; }
-  .kf-5c4c8f27-st1_mt { opacity: 1; }
-  .kf-5c4c8f27-st1_nm { opacity: 1; }
-  .kf-5c4c8f27-st2_dot { opacity: 1; }
-  .kf-5c4c8f27-st2_mt { opacity: 1; }
-  .kf-5c4c8f27-st2_nm { opacity: 1; }
-  .kf-5c4c8f27-st3 { opacity: 0.28; }
-  .kf-5c4c8f27-st3_dot { opacity: 1; }
-  .kfp-5c4c8f27-st3_dot { stroke: var(--role-error); }
-  .kf-5c4c8f27-st3_mt { opacity: 1; }
-  .kf-5c4c8f27-st3_nm { opacity: 1; }
-  .kf-5c4c8f27-st3_nm text { fill: var(--role-error); }
+  .aitxt-66865764-f_style_val-base { opacity: 0; }
+  .aitxt-66865764-f_style_val-v0 { opacity: 1; }
+  .kf-66865764-ring { opacity: 1; }
+  .kf-66865764-ring { transform: translate(-230.8080000000001px, 0px); }
+  .aitxt-66865764-s_heading-base { opacity: 0; }
+  .aitxt-66865764-s_heading-v0 { opacity: 1; }
+  .kf-66865764-st1_dot { opacity: 1; }
+  .kf-66865764-st1_mt { opacity: 1; }
+  .kf-66865764-st1_nm { opacity: 1; }
+  .kf-66865764-st2_dot { opacity: 1; }
+  .kf-66865764-st2_mt { opacity: 1; }
+  .kf-66865764-st2_nm { opacity: 1; }
+  .kf-66865764-st3 { opacity: 0.28; }
+  .kf-66865764-st3_dot { opacity: 1; }
+  .kfp-66865764-st3_dot { stroke: var(--role-error); }
+  .kf-66865764-st3_mt { opacity: 1; }
+  .kf-66865764-st3_nm { opacity: 1; }
+  .kf-66865764-st3_nm text { fill: var(--role-error); }
+  .kf-66865764-status { opacity: 1; }
 }
     /* /home/kervel/projects/agent-illustrator/examples/motion/git-deck.css */
 /* Palette and type for the "git for non-git people" deck. */
@@ -239,251 +243,254 @@ svg { font-family: var(--font-sans); }
 text { white-space: pre; }
   /* motion: settled states (auto-generated) */
 svg[data-ail-player] * { transition: none !important; }
-.kf-5c4c8f27-s_badge { opacity: 1; }
-.kf-5c4c8f27-s_badge { scale: 1 1; }
-.kf-5c4c8f27-s_heading { opacity: 1; }
-.kf-5c4c8f27-s_heading { translate: 0px 0px; }
-.kf-5c4c8f27-folder { opacity: 1; }
-.kf-5c4c8f27-folder { translate: 0px 0px; }
-.aiflash-5c4c8f27-folder { opacity: 0; }
-.aighost-5c4c8f27-0 { translate: 0px 0px; }
-.aighost-5c4c8f27-0 { scale: 1 1; }
-.aighost-5c4c8f27-0 { opacity: 0; }
-.kf-5c4c8f27-st1_dot { opacity: 0; }
-.kf-5c4c8f27-st1_dot { scale: 1 1; }
-.kf-5c4c8f27-st1_nm { opacity: 0; }
-.kf-5c4c8f27-st1_nm { translate: 0px 0px; }
-.kf-5c4c8f27-st1_mt { opacity: 0; }
-.kf-5c4c8f27-st1_mt { translate: 0px 0px; }
-.aitxt-5c4c8f27-f_style_val-base { opacity: 1; }
-.aitxt-5c4c8f27-f_style_val-base { translate: 0px 0px; }
-.aitxt-5c4c8f27-f_style_val-v0 { opacity: 0; }
-.aitxt-5c4c8f27-f_style_val-v0 { translate: 0px 0px; }
-.aihl-5c4c8f27-f_style { opacity: 0; }
-.aighost-5c4c8f27-1 { translate: 0px 0px; }
-.aighost-5c4c8f27-1 { scale: 1 1; }
-.aighost-5c4c8f27-1 { opacity: 0; }
-.kf-5c4c8f27-st2_dot { opacity: 0; }
-.kf-5c4c8f27-st2_dot { scale: 1 1; }
-.kf-5c4c8f27-st2_nm { opacity: 0; }
-.kf-5c4c8f27-st2_nm { translate: 0px 0px; }
-.kf-5c4c8f27-st2_mt { opacity: 0; }
-.kf-5c4c8f27-st2_mt { translate: 0px 0px; }
-.aimask-5c4c8f27-track { stroke-dashoffset: 1.001; }
-.aitxt-5c4c8f27-f_cart_val-base { opacity: 1; }
-.aitxt-5c4c8f27-f_cart_val-base { translate: 0px 0px; }
-.aitxt-5c4c8f27-f_cart_val-v0 { opacity: 0; }
-.aitxt-5c4c8f27-f_cart_val-v0 { translate: 0px 0px; }
-.aihl-5c4c8f27-f_cart { opacity: 0; }
-.aighost-5c4c8f27-2 { translate: 0px 0px; }
-.aighost-5c4c8f27-2 { scale: 1 1; }
-.aighost-5c4c8f27-2 { opacity: 0; }
-.kf-5c4c8f27-st3_dot { opacity: 0; }
-.kf-5c4c8f27-st3_dot { scale: 1 1; }
-.kf-5c4c8f27-st3_nm { opacity: 0; }
-.kf-5c4c8f27-st3_nm { translate: 0px 0px; }
-.kf-5c4c8f27-st3_mt { opacity: 0; }
-.kf-5c4c8f27-st3_mt { translate: 0px 0px; }
-.kf-5c4c8f27-stick { opacity: 0; }
-.kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-.kf-5c4c8f27-card { opacity: 0; }
-.kf-5c4c8f27-card { scale: 1 1; }
-.aitxt-5c4c8f27-s_heading-base { opacity: 1; }
-.aitxt-5c4c8f27-s_heading-base { translate: 0px 0px; }
-.aitxt-5c4c8f27-s_heading-v0 { opacity: 0; }
-.aitxt-5c4c8f27-s_heading-v0 { translate: 0px 0px; }
-.kf-5c4c8f27-ok { opacity: 0; }
-.kfp-5c4c8f27-st3_dot { stroke: var(--role-primary); }
-.kf-5c4c8f27-st3_nm > text { fill: var(--role-ink); }
-.kf-5c4c8f27-bad { opacity: 0; }
-.kf-5c4c8f27-bad { translate: 0px 0px; }
-.kf-5c4c8f27-ring { opacity: 0; }
-.kf-5c4c8f27-ring { translate: 0px 0px; }
-.kf-5c4c8f27-st3 { opacity: 1; }
+.kf-66865764-s_badge { opacity: 1; }
+.kf-66865764-s_badge { scale: 1 1; }
+.kf-66865764-s_heading { opacity: 1; }
+.kf-66865764-s_heading { translate: 0px 0px; }
+.kf-66865764-folder { opacity: 1; }
+.kf-66865764-folder { translate: 0px 0px; }
+.aiflash-66865764-folder { opacity: 0; }
+.aighost-66865764-0 { translate: 0px 0px; }
+.aighost-66865764-0 { scale: 1 1; }
+.aighost-66865764-0 { opacity: 0; }
+.kf-66865764-st1_dot { opacity: 0; }
+.kf-66865764-st1_dot { scale: 1 1; }
+.kf-66865764-st1_nm { opacity: 0; }
+.kf-66865764-st1_nm { translate: 0px 0px; }
+.kf-66865764-st1_mt { opacity: 0; }
+.kf-66865764-st1_mt { translate: 0px 0px; }
+.aitxt-66865764-f_style_val-base { opacity: 1; }
+.aitxt-66865764-f_style_val-base { translate: 0px 0px; }
+.aitxt-66865764-f_style_val-v0 { opacity: 0; }
+.aitxt-66865764-f_style_val-v0 { translate: 0px 0px; }
+.aihl-66865764-f_style { opacity: 0; }
+.aighost-66865764-1 { translate: 0px 0px; }
+.aighost-66865764-1 { scale: 1 1; }
+.aighost-66865764-1 { opacity: 0; }
+.kf-66865764-st2_dot { opacity: 0; }
+.kf-66865764-st2_dot { scale: 1 1; }
+.kf-66865764-st2_nm { opacity: 0; }
+.kf-66865764-st2_nm { translate: 0px 0px; }
+.kf-66865764-st2_mt { opacity: 0; }
+.kf-66865764-st2_mt { translate: 0px 0px; }
+.aimask-66865764-track { stroke-dashoffset: 1.001; }
+.aitxt-66865764-f_cart_val-base { opacity: 1; }
+.aitxt-66865764-f_cart_val-base { translate: 0px 0px; }
+.aitxt-66865764-f_cart_val-v0 { opacity: 0; }
+.aitxt-66865764-f_cart_val-v0 { translate: 0px 0px; }
+.aihl-66865764-f_cart { opacity: 0; }
+.aighost-66865764-2 { translate: 0px 0px; }
+.aighost-66865764-2 { scale: 1 1; }
+.aighost-66865764-2 { opacity: 0; }
+.kf-66865764-st3_dot { opacity: 0; }
+.kf-66865764-st3_dot { scale: 1 1; }
+.kf-66865764-st3_nm { opacity: 0; }
+.kf-66865764-st3_nm { translate: 0px 0px; }
+.kf-66865764-st3_mt { opacity: 0; }
+.kf-66865764-st3_mt { translate: 0px 0px; }
+.kf-66865764-stick { opacity: 0; }
+.kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+.kf-66865764-card { opacity: 0; }
+.kf-66865764-card { scale: 1 1; }
+.kf-66865764-status { opacity: 0; }
+.kfp-66865764-st3_dot { stroke: var(--role-primary); }
+.kf-66865764-st3_nm > text { fill: var(--role-ink); }
+.aitxt-66865764-status-base { opacity: 1; }
+.aitxt-66865764-status-v0 { opacity: 0; }
+.kf-66865764-status > text { fill: var(--role-ok); }
+.kfp-66865764-status { stroke: var(--role-ok); }
+.kf-66865764-status { translate: 0px 0px; }
+.aitxt-66865764-s_heading-base { opacity: 1; }
+.aitxt-66865764-s_heading-base { translate: 0px 0px; }
+.aitxt-66865764-s_heading-v0 { opacity: 0; }
+.aitxt-66865764-s_heading-v0 { translate: 0px 0px; }
+.kf-66865764-ring { opacity: 0; }
+.kf-66865764-ring { translate: 0px 0px; }
+.kf-66865764-st3 { opacity: 1; }
 .frame-intro {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 1.001; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 1.001; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 .frame-first_commit {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 1.001; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 1.001; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 .frame-two_more {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 0.519; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 0.519; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 .frame-and_another {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 0; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 0; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 .frame-details {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 0; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 0; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 .frame-broke {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 0; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 0; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 .frame-go_back {
-  .kf-5c4c8f27-s_badge { scale: 1 1; }
-  .aighost-5c4c8f27-0 { scale: 1 1; }
-  .kf-5c4c8f27-st1_dot { scale: 1 1; }
-  .aighost-5c4c8f27-1 { scale: 1 1; }
-  .kf-5c4c8f27-st2_dot { scale: 1 1; }
-  .aimask-5c4c8f27-track { stroke-dashoffset: 0; }
-  .aighost-5c4c8f27-2 { scale: 1 1; }
-  .kf-5c4c8f27-st3_dot { scale: 1 1; }
-  .kf-5c4c8f27-stick { clip-path: inset(0% 0% 0% 0%); }
-  .kf-5c4c8f27-card { scale: 1 1; }
+  .kf-66865764-s_badge { scale: 1 1; }
+  .aighost-66865764-0 { scale: 1 1; }
+  .kf-66865764-st1_dot { scale: 1 1; }
+  .aighost-66865764-1 { scale: 1 1; }
+  .kf-66865764-st2_dot { scale: 1 1; }
+  .aimask-66865764-track { stroke-dashoffset: 0; }
+  .aighost-66865764-2 { scale: 1 1; }
+  .kf-66865764-st3_dot { scale: 1 1; }
+  .kf-66865764-stick { clip-path: inset(0% 0% 0% 0%); }
+  .kf-66865764-card { scale: 1 1; }
 }
 ]]></style>
   <defs>
-    <mask id="aim-5c4c8f27-track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-5c4c8f27-track aid-5c4c8f27-track" d="M807.85 359.00 L1021.54 359.00 L1252.35 359.00" fill="none" stroke="#fff" stroke-width="24.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
+    <mask id="aim-66865764-track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-66865764-track aid-66865764-track" d="M807.85 359.00 L1021.54 359.00 L1252.35 359.00" fill="none" stroke="#fff" stroke-width="24.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
   </defs>
-  <g class="kf-5c4c8f27-s kf-anim" style="transform-origin:800px 450px">
-    <g id="s" class="ai-container kfp-5c4c8f27-s">
-      <g class="kf-5c4c8f27-s_stage kf-anim" style="transform-origin:800px 450px">
-        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-5c4c8f27-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
+  <g class="kf-66865764-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-66865764-s">
+      <g class="kf-66865764-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-66865764-s_stage" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
       </g>
-      <g class="kf-5c4c8f27-s_badge kf-anim" style="transform-origin:129px 97px">
-        <rect id="s_badge" class="ai-shape ai-rect kfp-5c4c8f27-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+      <g class="kf-66865764-s_badge kf-anim" style="transform-origin:129px 97px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-66865764-s_badge" x="96" y="64" width="66" height="66" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
         <text class="ai-label" x="129" y="97" text-anchor="middle" dominant-baseline="middle" font-size="38" fill="var(--role-backdrop)" style="font-weight:800"><tspan x="129" dy="-0"><tspan>2</tspan></tspan></text>
       </g>
-      <g class="kf-5c4c8f27-s_heading kf-anim" style="transform-origin:545.83px 97px">
-        <text id="s_heading" class="ai-shape ai-text kfp-5c4c8f27-s_heading aitxt-5c4c8f27-s_heading-base" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Git takes snapshots</text>
-        <text class="ai-shape ai-text kfp-5c4c8f27-s_heading aitxt-5c4c8f27-s_heading-v0" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" opacity="0" style="font-weight:800">Broke something? Go back</text>
+      <g class="kf-66865764-s_heading kf-anim" style="transform-origin:545.83px 97px">
+        <text id="s_heading" class="ai-shape ai-text kfp-66865764-s_heading aitxt-66865764-s_heading-base" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" style="font-weight:800">Git takes snapshots</text>
+        <text class="ai-shape ai-text kfp-66865764-s_heading aitxt-66865764-s_heading-v0" x="184" y="97" text-anchor="start" dominant-baseline="middle" font-size="60" fill="var(--role-ink)" opacity="0" style="font-weight:800">Broke something? Go back</text>
       </g>
     </g>
   </g>
-  <g class="kf-5c4c8f27-folder kf-anim" style="transform-origin:361px 359px">
-    <g id="folder" class="ai-container kfp-5c4c8f27-folder">
-      <g class="kf-5c4c8f27-folder_bg kf-anim" style="transform-origin:361px 359px">
-        <rect id="folder_bg" class="ai-shape ai-rect kfp-5c4c8f27-folder_bg" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
+  <g class="kf-66865764-folder kf-anim" style="transform-origin:361px 359px">
+    <g id="folder" class="ai-container kfp-66865764-folder">
+      <g class="kf-66865764-folder_bg kf-anim" style="transform-origin:361px 359px">
+        <rect id="folder_bg" class="ai-shape ai-rect kfp-66865764-folder_bg" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
       </g>
-      <g class="kf-5c4c8f27-folder_body kf-anim" style="transform-origin:361px 359px">
-        <g id="folder_body" class="ai-container kfp-5c4c8f27-folder_body">
-          <g class="kf-5c4c8f27-fhead kf-anim" style="transform-origin:361px 245px">
-            <rect id="fhead" class="ai-shape ai-rect kfp-5c4c8f27-fhead" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+      <g class="kf-66865764-folder_body kf-anim" style="transform-origin:361px 359px">
+        <g id="folder_body" class="ai-container kfp-66865764-folder_body">
+          <g class="kf-66865764-fhead kf-anim" style="transform-origin:361px 245px">
+            <rect id="fhead" class="ai-shape ai-rect kfp-66865764-fhead" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
             <text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-f_login kf-anim" style="transform-origin:361px 309px">
-            <g id="f_login" class="ai-container kfp-5c4c8f27-f_login">
-              <g class="kf-5c4c8f27-f_login_bg kf-anim" style="transform-origin:361px 309px">
-                <rect id="f_login_bg" class="ai-shape ai-rect kfp-5c4c8f27-f_login_bg" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-f_login kf-anim" style="transform-origin:361px 309px">
+            <g id="f_login" class="ai-container kfp-66865764-f_login">
+              <g class="kf-66865764-f_login_bg kf-anim" style="transform-origin:361px 309px">
+                <rect id="f_login_bg" class="ai-shape ai-rect kfp-66865764-f_login_bg" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-f_login_sep kf-anim" style="transform-origin:361px 346px">
-                <rect id="f_login_sep" class="ai-shape ai-rect kfp-5c4c8f27-f_login_sep" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_login_sep kf-anim" style="transform-origin:361px 346px">
+                <rect id="f_login_sep" class="ai-shape ai-rect kfp-66865764-f_login_sep" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-f_login_chip kf-anim" style="transform-origin:142px 309px">
-                <rect id="f_login_chip" class="ai-shape ai-rect kfp-5c4c8f27-f_login_chip" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
+              <g class="kf-66865764-f_login_chip kf-anim" style="transform-origin:142px 309px">
+                <rect id="f_login_chip" class="ai-shape ai-rect kfp-66865764-f_login_chip" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
                 <text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-f_login_fname kf-anim" style="transform-origin:230.74px 309px">
-                <rect id="f_login_fname" class="ai-shape ai-rect kfp-5c4c8f27-f_login_fname" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_login_fname kf-anim" style="transform-origin:230.74px 309px">
+                <rect id="f_login_fname" class="ai-shape ai-rect kfp-66865764-f_login_fname" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
                 <text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-f_login_val kf-anim" style="transform-origin:547.26px 309px">
-                <rect id="f_login_val" class="ai-shape ai-rect kfp-5c4c8f27-f_login_val" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_login_val kf-anim" style="transform-origin:547.26px 309px">
+                <rect id="f_login_val" class="ai-shape ai-rect kfp-66865764-f_login_val" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
                 <text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text>
               </g>
             </g>
           </g>
-          <g class="kf-5c4c8f27-f_style kf-anim" style="transform-origin:361px 385px">
-            <rect class="aihl-5c4c8f27-f_style" x="95" y="341" width="532" height="88" rx="8" fill="var(--role-primary)" style="opacity:0"/>
-            <g id="f_style" class="ai-container kfp-5c4c8f27-f_style">
-              <g class="kf-5c4c8f27-f_style_bg kf-anim" style="transform-origin:361px 385px">
-                <rect id="f_style_bg" class="ai-shape ai-rect kfp-5c4c8f27-f_style_bg" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-f_style kf-anim" style="transform-origin:361px 385px">
+            <rect class="aihl-66865764-f_style" x="95" y="341" width="532" height="88" rx="8" fill="var(--role-primary)" style="opacity:0"/>
+            <g id="f_style" class="ai-container kfp-66865764-f_style">
+              <g class="kf-66865764-f_style_bg kf-anim" style="transform-origin:361px 385px">
+                <rect id="f_style_bg" class="ai-shape ai-rect kfp-66865764-f_style_bg" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-f_style_sep kf-anim" style="transform-origin:361px 422px">
-                <rect id="f_style_sep" class="ai-shape ai-rect kfp-5c4c8f27-f_style_sep" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_style_sep kf-anim" style="transform-origin:361px 422px">
+                <rect id="f_style_sep" class="ai-shape ai-rect kfp-66865764-f_style_sep" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-f_style_chip kf-anim" style="transform-origin:142px 385px">
-                <rect id="f_style_chip" class="ai-shape ai-rect kfp-5c4c8f27-f_style_chip" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
+              <g class="kf-66865764-f_style_chip kf-anim" style="transform-origin:142px 385px">
+                <rect id="f_style_chip" class="ai-shape ai-rect kfp-66865764-f_style_chip" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
                 <text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-f_style_fname kf-anim" style="transform-origin:237.21px 385px">
-                <rect id="f_style_fname" class="ai-shape ai-rect kfp-5c4c8f27-f_style_fname" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_style_fname kf-anim" style="transform-origin:237.21px 385px">
+                <rect id="f_style_fname" class="ai-shape ai-rect kfp-66865764-f_style_fname" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
                 <text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-f_style_val kf-anim" style="transform-origin:540.79px 385px">
-                <rect id="f_style_val" class="ai-shape ai-rect kfp-5c4c8f27-f_style_val" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-                <text class="ai-label aitxt-5c4c8f27-f_style_val-base" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text>
+              <g class="kf-66865764-f_style_val kf-anim" style="transform-origin:540.79px 385px">
+                <rect id="f_style_val" class="ai-shape ai-rect kfp-66865764-f_style_val" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label aitxt-66865764-f_style_val-base" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text>
                 <g class="ai-label-variants" fill="var(--role-ink)">
-                  <text class="ai-label aitxt-5c4c8f27-f_style_val-v0" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>246 lines</tspan></tspan></text>
+                  <text class="ai-label aitxt-66865764-f_style_val-v0" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>246 lines</tspan></tspan></text>
                 </g>
               </g>
             </g>
           </g>
-          <g class="kf-5c4c8f27-f_cart kf-anim" style="transform-origin:361px 461px">
-            <rect class="aihl-5c4c8f27-f_cart" x="95" y="417" width="532" height="88" rx="8" fill="var(--role-primary)" style="opacity:0"/>
-            <g id="f_cart" class="ai-container kfp-5c4c8f27-f_cart">
-              <g class="kf-5c4c8f27-f_cart_bg kf-anim" style="transform-origin:361px 461px">
-                <rect id="f_cart_bg" class="ai-shape ai-rect kfp-5c4c8f27-f_cart_bg" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-f_cart kf-anim" style="transform-origin:361px 461px">
+            <rect class="aihl-66865764-f_cart" x="95" y="417" width="532" height="88" rx="8" fill="var(--role-primary)" style="opacity:0"/>
+            <g id="f_cart" class="ai-container kfp-66865764-f_cart">
+              <g class="kf-66865764-f_cart_bg kf-anim" style="transform-origin:361px 461px">
+                <rect id="f_cart_bg" class="ai-shape ai-rect kfp-66865764-f_cart_bg" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-f_cart_sep kf-anim" style="transform-origin:361px 498px">
-                <rect id="f_cart_sep" class="ai-shape ai-rect kfp-5c4c8f27-f_cart_sep" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_cart_sep kf-anim" style="transform-origin:361px 498px">
+                <rect id="f_cart_sep" class="ai-shape ai-rect kfp-66865764-f_cart_sep" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-f_cart_chip kf-anim" style="transform-origin:142px 461px">
-                <rect id="f_cart_chip" class="ai-shape ai-rect kfp-5c4c8f27-f_cart_chip" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
+              <g class="kf-66865764-f_cart_chip kf-anim" style="transform-origin:142px 461px">
+                <rect id="f_cart_chip" class="ai-shape ai-rect kfp-66865764-f_cart_chip" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/>
                 <text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-f_cart_fname kf-anim" style="transform-origin:224.28px 461px">
-                <rect id="f_cart_fname" class="ai-shape ai-rect kfp-5c4c8f27-f_cart_fname" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-f_cart_fname kf-anim" style="transform-origin:224.28px 461px">
+                <rect id="f_cart_fname" class="ai-shape ai-rect kfp-66865764-f_cart_fname" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
                 <text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-f_cart_val kf-anim" style="transform-origin:547.26px 461px">
-                <rect id="f_cart_val" class="ai-shape ai-rect kfp-5c4c8f27-f_cart_val" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
-                <text class="ai-label aitxt-5c4c8f27-f_cart_val-base" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text>
+              <g class="kf-66865764-f_cart_val kf-anim" style="transform-origin:547.26px 461px">
+                <rect id="f_cart_val" class="ai-shape ai-rect kfp-66865764-f_cart_val" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label aitxt-66865764-f_cart_val-base" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text>
                 <g class="ai-label-variants" fill="var(--role-ink)">
-                  <text class="ai-label aitxt-5c4c8f27-f_cart_val-v0" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>58 lines</tspan></tspan></text>
+                  <text class="ai-label aitxt-66865764-f_cart_val-v0" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>58 lines</tspan></tspan></text>
                 </g>
               </g>
             </g>
@@ -491,120 +498,119 @@ svg[data-ail-player] * { transition: none !important; }
         </g>
       </g>
     </g>
-    <rect class="aiflash-5c4c8f27-folder" x="96" y="214" width="530" height="290" fill="#ffffff" style="opacity:0;pointer-events:none"/>
+    <rect class="aiflash-66865764-folder" x="96" y="214" width="530" height="290" fill="#ffffff" style="opacity:0;pointer-events:none"/>
   </g>
-  <g class="kf-hidden kf-5c4c8f27-ok kf-anim" style="transform-origin:193.15px 551.75px">
-    <rect id="ok" class="ai-shape ai-rect kfp-5c4c8f27-ok" x="96" y="530" width="194.3089" height="43.5" fill="var(--role-surface)" stroke="var(--role-ok)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
-    <text class="ai-label" x="193.1545" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-ok)" style="font-weight:700"><tspan x="193.1545" dy="-0"><tspan>● checkout works</tspan></tspan></text>
+  <g class="kf-hidden kf-66865764-status kf-anim" style="transform-origin:193.15px 551.75px">
+    <rect id="status" class="ai-shape ai-rect kfp-66865764-status" x="96" y="530" width="194.3089" height="43.5" fill="var(--role-surface)" stroke="var(--role-ok)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
+    <text class="ai-label aitxt-66865764-status-base" x="193.1545" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-ok)" style="font-weight:700"><tspan x="193.1545" dy="-0"><tspan>● checkout works</tspan></tspan></text>
+    <g class="ai-label-variants" fill="var(--role-ok)">
+      <text class="ai-label aitxt-66865764-status-v0" x="193.1545" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" opacity="0" style="font-weight:700"><tspan x="193.1545" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
+    </g>
   </g>
-  <g class="kf-hidden kf-5c4c8f27-bad kf-anim" style="transform-origin:198.31px 551.75px">
-    <rect id="bad" class="ai-shape ai-rect kfp-5c4c8f27-bad" x="96" y="530" width="204.6115" height="43.5" fill="var(--role-surface)" stroke="var(--role-error)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
-    <text class="ai-label" x="198.3058" y="551.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-error)" style="font-weight:700"><tspan x="198.3058" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
+  <g class="kf-66865764-rule kf-anim" style="transform-origin:1133.92px 359px">
+    <path id="rule" class="ai-shape ai-path dots kfp-66865764-rule" d="M747.85 359.00 L1520.00 359.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g class="kf-5c4c8f27-rule kf-anim" style="transform-origin:1133.67px 359px">
-    <path id="rule" class="ai-shape ai-path dots kfp-5c4c8f27-rule" d="M747.85 359.00 L1519.50 359.00"  fill="none" stroke="var(--role-rule)" stroke-width="5" stroke-dasharray="1,16" stroke-linejoin="round" stroke-linecap="round"/>
+  <g class="kf-66865764-rule_end kf-anim" style="transform-origin:1520px 359px">
+    <rect id="rule_end" class="ai-shape ai-rect ai-point kfp-66865764-rule_end" x="1520" y="359" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
   </g>
-  <g class="kf-5c4c8f27-rule_end kf-anim" style="transform-origin:1519.5px 359px">
-    <rect id="rule_end" class="ai-shape ai-rect kfp-5c4c8f27-rule_end" x="1519" y="358.5" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+  <g class="kf-66865764-track kf-anim" style="transform-origin:1030.1px 359px">
+    <path id="track" class="ai-shape ai-path kfp-66865764-track" d="M807.85 359.00 L1021.54 359.00 L1252.35 359.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-66865764-track)"/>
   </g>
-  <g class="kf-5c4c8f27-track kf-anim" style="transform-origin:1030.1px 359px">
-    <path id="track" class="ai-shape ai-path kfp-5c4c8f27-track" d="M807.85 359.00 L1021.54 359.00 L1252.35 359.00"  fill="none" stroke="var(--role-primary)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" mask="url(#aim-5c4c8f27-track)"/>
-  </g>
-  <g class="kf-5c4c8f27-stations kf-anim" style="transform-origin:1038.66px 354.63px">
-    <g id="stations" class="ai-container kfp-5c4c8f27-stations">
-      <g class="kf-5c4c8f27-st1 kf-anim" style="transform-origin:807.85px 354.63px">
-        <g id="st1" class="ai-container kfp-5c4c8f27-st1">
-          <g class="kf-hidden kf-5c4c8f27-st1_dot kf-anim" style="transform-origin:807.85px 359px">
-            <circle id="st1_dot" class="ai-shape ai-circle kfp-5c4c8f27-st1_dot" cx="807.848" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+  <g class="kf-66865764-stations kf-anim" style="transform-origin:1038.66px 354.63px">
+    <g id="stations" class="ai-container kfp-66865764-stations">
+      <g class="kf-66865764-st1 kf-anim" style="transform-origin:807.85px 354.63px">
+        <g id="st1" class="ai-container kfp-66865764-st1">
+          <g class="kf-hidden kf-66865764-st1_dot kf-anim" style="transform-origin:807.85px 359px">
+            <circle id="st1_dot" class="ai-shape ai-circle kfp-66865764-st1_dot" cx="807.848" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
           </g>
-          <g class="kf-hidden kf-5c4c8f27-st1_nm kf-anim" style="transform-origin:807.85px 301.63px">
-            <rect id="st1_nm" class="ai-shape ai-rect kfp-5c4c8f27-st1_nm" x="740.1009" y="279.25" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-hidden kf-66865764-st1_nm kf-anim" style="transform-origin:807.85px 301.63px">
+            <rect id="st1_nm" class="ai-shape ai-rect kfp-66865764-st1_nm" x="740.1009" y="279.25" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="807.848" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="807.848" dy="-0"><tspan>Login page</tspan></tspan></text>
           </g>
-          <g class="kf-hidden kf-5c4c8f27-st1_mt kf-anim" style="transform-origin:807.85px 412px">
-            <rect id="st1_mt" class="ai-shape ai-rect kfp-5c4c8f27-st1_mt" x="721" y="394" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-hidden kf-66865764-st1_mt kf-anim" style="transform-origin:807.85px 412px">
+            <rect id="st1_mt" class="ai-shape ai-rect kfp-66865764-st1_mt" x="721" y="394" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="807.848" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="807.848" dy="-0"><tspan>anna · Mon 09:12</tspan></tspan></text>
           </g>
         </g>
       </g>
-      <g class="kf-5c4c8f27-st2 kf-anim" style="transform-origin:1021.54px 354.63px">
-        <g id="st2" class="ai-container kfp-5c4c8f27-st2">
-          <g class="kf-hidden kf-5c4c8f27-st2_dot kf-anim" style="transform-origin:1021.54px 359px">
-            <circle id="st2_dot" class="ai-shape ai-circle kfp-5c4c8f27-st2_dot" cx="1021.544" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      <g class="kf-66865764-st2 kf-anim" style="transform-origin:1021.54px 354.63px">
+        <g id="st2" class="ai-container kfp-66865764-st2">
+          <g class="kf-hidden kf-66865764-st2_dot kf-anim" style="transform-origin:1021.54px 359px">
+            <circle id="st2_dot" class="ai-shape ai-circle kfp-66865764-st2_dot" cx="1021.544" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
           </g>
-          <g class="kf-hidden kf-5c4c8f27-st2_nm kf-anim" style="transform-origin:1021.54px 301.63px">
-            <rect id="st2_nm" class="ai-shape ai-rect kfp-5c4c8f27-st2_nm" x="954.4972" y="279.25" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-hidden kf-66865764-st2_nm kf-anim" style="transform-origin:1021.54px 301.63px">
+            <rect id="st2_nm" class="ai-shape ai-rect kfp-66865764-st2_nm" x="954.4972" y="279.25" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1021.544" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1021.544" dy="-0"><tspan>Dark mode</tspan></tspan></text>
           </g>
-          <g class="kf-hidden kf-5c4c8f27-st2_mt kf-anim" style="transform-origin:1021.54px 412px">
-            <rect id="st2_mt" class="ai-shape ai-rect kfp-5c4c8f27-st2_mt" x="934.696" y="394" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-hidden kf-66865764-st2_mt kf-anim" style="transform-origin:1021.54px 412px">
+            <rect id="st2_mt" class="ai-shape ai-rect kfp-66865764-st2_mt" x="934.696" y="394" width="173.696" height="36" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1021.544" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1021.544" dy="-0"><tspan>anna · Mon 16:40</tspan></tspan></text>
           </g>
         </g>
       </g>
-      <g class="kf-5c4c8f27-st3 kf-anim" style="transform-origin:1252.35px 354.63px">
-        <g id="st3" class="ai-container kfp-5c4c8f27-st3">
-          <g class="kf-hidden kf-5c4c8f27-st3_dot kf-anim" style="transform-origin:1252.35px 359px">
-            <circle id="st3_dot" class="ai-shape ai-circle kfp-5c4c8f27-st3_dot" cx="1252.352" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
+      <g class="kf-66865764-st3 kf-anim" style="transform-origin:1252.35px 354.63px">
+        <g id="st3" class="ai-container kfp-66865764-st3">
+          <g class="kf-hidden kf-66865764-st3_dot kf-anim" style="transform-origin:1252.35px 359px">
+            <circle id="st3_dot" class="ai-shape ai-circle kfp-66865764-st3_dot" cx="1252.352" cy="359" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
           </g>
-          <g class="kf-hidden kf-5c4c8f27-st3_nm kf-anim" style="transform-origin:1252.35px 301.63px">
-            <rect id="st3_nm" class="ai-shape ai-rect kfp-5c4c8f27-st3_nm" x="1148.392" y="279.25" width="207.9201" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-hidden kf-66865764-st3_nm kf-anim" style="transform-origin:1252.35px 301.63px">
+            <rect id="st3_nm" class="ai-shape ai-rect kfp-66865764-st3_nm" x="1148.392" y="279.25" width="207.9201" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1252.352" y="301.625" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="1252.352" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
           </g>
-          <g class="kf-hidden kf-5c4c8f27-st3_mt kf-anim" style="transform-origin:1252.35px 412px">
-            <rect id="st3_mt" class="ai-shape ai-rect kfp-5c4c8f27-st3_mt" x="1170.432" y="394" width="163.84" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-hidden kf-66865764-st3_mt kf-anim" style="transform-origin:1252.35px 412px">
+            <rect id="st3_mt" class="ai-shape ai-rect kfp-66865764-st3_mt" x="1170.432" y="394" width="163.84" height="36" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1252.352" y="412" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1252.352" dy="-0"><tspan>ben · Tue 14:03</tspan></tspan></text>
           </g>
         </g>
       </g>
     </g>
   </g>
-  <g class="kf-hidden kf-5c4c8f27-ring kf-anim" style="transform-origin:1252.35px 359px">
-    <circle id="ring" class="ai-shape ai-circle kfp-5c4c8f27-ring" cx="1252.352" cy="359" r="34" fill="none" stroke="var(--role-ink)" stroke-width="4"/>
+  <g class="kf-hidden kf-66865764-ring kf-anim" style="transform-origin:1252.35px 359px">
+    <circle id="ring" class="ai-shape ai-circle kfp-66865764-ring" cx="1252.352" cy="359" r="34" fill="none" stroke="var(--role-ink)" stroke-width="4"/>
   </g>
-  <g class="kf-hidden kf-5c4c8f27-stick kf-anim" style="transform-origin:1252.35px 450px">
-    <rect id="stick" class="ai-shape ai-rect kfp-5c4c8f27-stick" x="1250.852" y="436" width="3" height="28" fill="var(--role-ink)" stroke="none" stroke-width="1.5"/>
+  <g class="kf-hidden kf-66865764-stick kf-anim" style="transform-origin:1252.35px 450px">
+    <rect id="stick" class="ai-shape ai-rect kfp-66865764-stick" x="1250.852" y="436" width="3" height="28" fill="var(--role-ink)" stroke="none" stroke-width="1.5"/>
   </g>
-  <g class="kf-hidden kf-5c4c8f27-card kf-anim" style="transform-origin:1301.5px 607.88px">
-    <g id="card" class="ai-container kfp-5c4c8f27-card">
-      <g class="kf-5c4c8f27-card_bg kf-anim" style="transform-origin:1301.5px 607.88px">
-        <rect id="card_bg" class="ai-shape ai-rect kfp-5c4c8f27-card_bg" x="1061" y="464" width="481" height="287.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
+  <g class="kf-hidden kf-66865764-card kf-anim" style="transform-origin:1301.5px 607.88px">
+    <g id="card" class="ai-container kfp-66865764-card">
+      <g class="kf-66865764-card_bg kf-anim" style="transform-origin:1301.5px 607.88px">
+        <rect id="card_bg" class="ai-shape ai-rect kfp-66865764-card_bg" x="1061" y="464" width="481" height="287.75" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
       </g>
-      <g class="kf-5c4c8f27-card_body kf-anim" style="transform-origin:1301.5px 607.88px">
-        <g id="card_body" class="ai-container kfp-5c4c8f27-card_body">
-          <g class="kf-5c4c8f27-ck kf-anim" style="transform-origin:1164.99px 509px">
-            <rect id="ck" class="ai-shape ai-rect kfp-5c4c8f27-ck" x="1088" y="491" width="153.984" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+      <g class="kf-66865764-card_body kf-anim" style="transform-origin:1301.5px 607.88px">
+        <g id="card_body" class="ai-container kfp-66865764-card_body">
+          <g class="kf-66865764-ck kf-anim" style="transform-origin:1164.99px 509px">
+            <rect id="ck" class="ai-shape ai-rect kfp-66865764-ck" x="1088" y="491" width="153.984" height="36" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1096" y="509" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>COMMIT </tspan><tspan fill="var(--role-primary)">3f2a9c1</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-cm kf-anim" style="transform-origin:1204.48px 561.25px">
-            <rect id="cm" class="ai-shape ai-rect kfp-5c4c8f27-cm" x="1088" y="537" width="232.9531" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-cm kf-anim" style="transform-origin:1204.48px 561.25px">
+            <rect id="cm" class="ai-shape ai-rect kfp-66865764-cm" x="1088" y="537" width="232.9531" height="48.5" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1096" y="561.25" text-anchor="start" dominant-baseline="middle" font-size="26" fill="var(--role-ink)" style="font-weight:700"><tspan x="1096" dy="-0"><tspan>Fix price rounding</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-cmeta kf-anim" style="transform-origin:1268.79px 614.13px">
-            <rect id="cmeta" class="ai-shape ai-rect kfp-5c4c8f27-cmeta" x="1088" y="595.5" width="361.576" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-cmeta kf-anim" style="transform-origin:1268.79px 614.13px">
+            <rect id="cmeta" class="ai-shape ai-rect kfp-66865764-cmeta" x="1088" y="595.5" width="361.576" height="37.25" fill="none" stroke="none" stroke-width="1.5"/>
             <text class="ai-label" x="1096" y="614.125" text-anchor="start" dominant-baseline="middle" font-size="17" fill="var(--role-muted)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1096" dy="-0"><tspan>ben · Tue 29 Sep, 14:03 · cart.py</tspan></tspan></text>
           </g>
-          <g class="kf-5c4c8f27-diff_rule kf-anim" style="transform-origin:1288px 643.75px">
-            <rect id="diff_rule" class="ai-shape ai-rect kfp-5c4c8f27-diff_rule" x="1088" y="642.75" width="400" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-diff_rule kf-anim" style="transform-origin:1288px 643.75px">
+            <rect id="diff_rule" class="ai-shape ai-rect kfp-66865764-diff_rule" x="1088" y="642.75" width="400" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/>
           </g>
-          <g class="kf-5c4c8f27-diff kf-anim" style="transform-origin:1301.5px 689.75px">
-            <g id="diff" class="ai-container kfp-5c4c8f27-diff">
-              <g class="kf-5c4c8f27-diff_bg kf-anim" style="transform-origin:1301.5px 689.75px">
-                <rect id="diff_bg" class="ai-shape ai-rect kfp-5c4c8f27-diff_bg" x="1088" y="654.75" width="427" height="70" fill="none" stroke="none" stroke-width="1.5"/>
+          <g class="kf-66865764-diff kf-anim" style="transform-origin:1301.5px 689.75px">
+            <g id="diff" class="ai-container kfp-66865764-diff">
+              <g class="kf-66865764-diff_bg kf-anim" style="transform-origin:1301.5px 689.75px">
+                <rect id="diff_bg" class="ai-shape ai-rect kfp-66865764-diff_bg" x="1088" y="654.75" width="427" height="70" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-diff_top_pad kf-anim" style="transform-origin:1301.5px 657.75px">
-                <rect id="diff_top_pad" class="ai-shape ai-rect kfp-5c4c8f27-diff_top_pad" x="1091" y="657.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-diff_top_pad kf-anim" style="transform-origin:1301.5px 657.75px">
+                <rect id="diff_top_pad" class="ai-shape ai-rect kfp-66865764-diff_top_pad" x="1091" y="657.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
-              <g class="kf-5c4c8f27-diff_line1 kf-anim" style="transform-origin:1301.5px 672.75px">
-                <rect id="diff_line1" class="ai-shape ai-rect kfp-5c4c8f27-diff_line1" x="1091" y="657.75" width="421" height="30" fill="var(--code-del-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
+              <g class="kf-66865764-diff_line1 kf-anim" style="transform-origin:1301.5px 672.75px">
+                <rect id="diff_line1" class="ai-shape ai-rect kfp-66865764-diff_line1" x="1091" y="657.75" width="421" height="30" fill="var(--code-del-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
                 <text class="ai-label" x="1099" y="672.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-del-strong)">- </tspan><tspan fill="var(--code-del)">    return </tspan><tspan font-weight="bold" fill="var(--code-del-strong)">s</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-diff_line2 kf-anim" style="transform-origin:1301.5px 706.75px">
-                <rect id="diff_line2" class="ai-shape ai-rect kfp-5c4c8f27-diff_line2" x="1091" y="691.75" width="421" height="30" fill="var(--code-add-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
+              <g class="kf-66865764-diff_line2 kf-anim" style="transform-origin:1301.5px 706.75px">
+                <rect id="diff_line2" class="ai-shape ai-rect kfp-66865764-diff_line2" x="1091" y="691.75" width="421" height="30" fill="var(--code-add-bg)" stroke="none" stroke-width="1.5" rx="6" style="rx:6px;ry:6px"/>
                 <text class="ai-label" x="1099" y="706.75" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--code-plain)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="1099" dy="-0"><tspan fill="var(--code-add-strong)">+ </tspan><tspan fill="var(--code-add)">    return </tspan><tspan font-weight="bold" fill="var(--code-add-strong)">round(s, 2)</tspan></tspan></text>
               </g>
-              <g class="kf-5c4c8f27-diff_bottom_pad kf-anim" style="transform-origin:1301.5px 721.75px">
-                <rect id="diff_bottom_pad" class="ai-shape ai-rect kfp-5c4c8f27-diff_bottom_pad" x="1091" y="721.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+              <g class="kf-66865764-diff_bottom_pad kf-anim" style="transform-origin:1301.5px 721.75px">
+                <rect id="diff_bottom_pad" class="ai-shape ai-rect kfp-66865764-diff_bottom_pad" x="1091" y="721.75" width="421" height="0" fill="none" stroke="none" stroke-width="1.5"/>
               </g>
             </g>
           </g>
@@ -612,10 +618,10 @@ svg[data-ail-player] * { transition: none !important; }
       </g>
     </g>
   </g>
-  <g class="aighost-5c4c8f27-0" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
-  <g class="aighost-5c4c8f27-1" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
-  <g class="aighost-5c4c8f27-2" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
-<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"5c4c8f27-","frames":[{"name":"intro","duration":0.92,"auto":null,"title":"Git takes snapshots","note":"Every commit is a photo of the whole project."},{"name":"first_commit","duration":1.65,"auto":null,"title":null,"note":null},{"name":"two_more","duration":2.15,"auto":null,"title":null,"note":null},{"name":"and_another","duration":2.15,"auto":0.3,"title":null,"note":null},{"name":"details","duration":0.65,"auto":null,"title":null,"note":null},{"name":"broke","duration":1.3,"auto":null,"title":"Broke something? Go back","note":"Checkout broke after the price fix: go back one snapshot."},{"name":"go_back","duration":1.8,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","folder","folder_bg","folder_body","fhead","f_login","f_login_bg","f_login_sep","f_login_chip","f_login_fname","f_login_val","f_style","f_style_bg","f_style_sep","f_style_chip","f_style_fname","f_style_val","f_cart","f_cart_bg","f_cart_sep","f_cart_chip","f_cart_fname","f_cart_val","ok","bad","rule","rule_end","track","stations","st1","st1_dot","st1_nm","st1_mt","st2","st2_dot","st2_nm","st2_mt","st3","st3_dot","st3_nm","st3_mt","ring","stick","card","card_bg","card_body","ck","cm","cmeta","diff_rule","diff","diff_bg","diff_top_pad","diff_line1","diff_line2","diff_bottom_pad"],"channels":[[".kf-5c4c8f27-s_badge","opacity"],[".kf-5c4c8f27-s_badge","scale"],[".kf-5c4c8f27-s_heading","opacity"],[".kf-5c4c8f27-s_heading","translate"],[".kf-5c4c8f27-folder","opacity"],[".kf-5c4c8f27-folder","translate"],[".aiflash-5c4c8f27-folder","opacity"],[".aighost-5c4c8f27-0","translate"],[".aighost-5c4c8f27-0","scale"],[".aighost-5c4c8f27-0","opacity"],[".kf-5c4c8f27-st1_dot","opacity"],[".kf-5c4c8f27-st1_dot","scale"],[".kf-5c4c8f27-st1_nm","opacity"],[".kf-5c4c8f27-st1_nm","translate"],[".kf-5c4c8f27-st1_mt","opacity"],[".kf-5c4c8f27-st1_mt","translate"],[".aitxt-5c4c8f27-f_style_val-base","opacity"],[".aitxt-5c4c8f27-f_style_val-base","translate"],[".aitxt-5c4c8f27-f_style_val-v0","opacity"],[".aitxt-5c4c8f27-f_style_val-v0","translate"],[".aihl-5c4c8f27-f_style","opacity"],[".aighost-5c4c8f27-1","translate"],[".aighost-5c4c8f27-1","scale"],[".aighost-5c4c8f27-1","opacity"],[".kf-5c4c8f27-st2_dot","opacity"],[".kf-5c4c8f27-st2_dot","scale"],[".kf-5c4c8f27-st2_nm","opacity"],[".kf-5c4c8f27-st2_nm","translate"],[".kf-5c4c8f27-st2_mt","opacity"],[".kf-5c4c8f27-st2_mt","translate"],[".aimask-5c4c8f27-track","stroke-dashoffset"],[".aitxt-5c4c8f27-f_cart_val-base","opacity"],[".aitxt-5c4c8f27-f_cart_val-base","translate"],[".aitxt-5c4c8f27-f_cart_val-v0","opacity"],[".aitxt-5c4c8f27-f_cart_val-v0","translate"],[".aihl-5c4c8f27-f_cart","opacity"],[".aighost-5c4c8f27-2","translate"],[".aighost-5c4c8f27-2","scale"],[".aighost-5c4c8f27-2","opacity"],[".kf-5c4c8f27-st3_dot","opacity"],[".kf-5c4c8f27-st3_dot","scale"],[".kf-5c4c8f27-st3_nm","opacity"],[".kf-5c4c8f27-st3_nm","translate"],[".kf-5c4c8f27-st3_mt","opacity"],[".kf-5c4c8f27-st3_mt","translate"],[".kf-5c4c8f27-stick","opacity"],[".kf-5c4c8f27-stick","clip-path"],[".kf-5c4c8f27-card","opacity"],[".kf-5c4c8f27-card","scale"],[".aitxt-5c4c8f27-s_heading-base","opacity"],[".aitxt-5c4c8f27-s_heading-base","translate"],[".aitxt-5c4c8f27-s_heading-v0","opacity"],[".aitxt-5c4c8f27-s_heading-v0","translate"],[".kf-5c4c8f27-ok","opacity"],[".kfp-5c4c8f27-st3_dot","stroke"],[".kf-5c4c8f27-st3_nm \u003e text","fill"],[".kf-5c4c8f27-bad","opacity"],[".kf-5c4c8f27-bad","translate"],[".kf-5c4c8f27-ring","opacity"],[".kf-5c4c8f27-ring","translate"],[".kf-5c4c8f27-st3","opacity"]],"settled":[["0","1 1","0","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--role-primary)","var(--role-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--role-primary)","var(--role-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--role-primary)","var(--role-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0.519","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--role-primary)","var(--role-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","0px 0px","0","0px 0px","0","var(--role-primary)","var(--role-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","inset(0% 0% 0% 0%)","1","1 1","1","0px 0px","0","0px 0px","0","var(--role-primary)","var(--role-ink)","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","0px 0px","1","0px 0px","0","var(--role-error)","var(--role-error)","1","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","0px 0px","1","0px 0px","1","var(--role-error)","var(--role-error)","0","0px 0px","1","-230.808px 0px","0.28"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":5,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":6,"t":0,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":7,"t":0.12,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"27.928px -6.284px"],[0.125,"55.856px -11.73px"],[0.1875,"83.784px -16.338px"],[0.25,"111.712px -20.108px"],[0.3125,"139.64px -23.041px"],[0.375,"167.568px -25.135px"],[0.4375,"195.496px -26.392px"],[0.5,"223.424px -26.811px"],[0.5625,"251.352px -26.392px"],[0.625,"279.28px -25.135px"],[0.6875,"307.208px -23.041px"],[0.75,"335.136px -20.108px"],[0.8125,"363.064px -16.338px"],[0.875,"390.992px -11.73px"],[0.9375,"418.92px -6.284px"],[1,"446.848px 0px"]]},{"c":7,"t":0.92,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":8,"t":0.12,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":8,"t":0.92,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":9,"t":0.12,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":9,"t":0.92,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":10,"t":0.92,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0.92,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":12,"t":1.07,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":13,"t":1.07,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":14,"t":1.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":15,"t":1.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":6,"t":0.5,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":16,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":17,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":17,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":18,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":19,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":19,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":20,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":20,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":21,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"41.284px -9.289px"],[0.125,"82.568px -17.339px"],[0.1875,"123.852px -24.151px"],[0.25,"165.136px -29.724px"],[0.3125,"206.42px -34.059px"],[0.375,"247.704px -37.156px"],[0.4375,"288.988px -39.013px"],[0.5,"330.272px -39.633px"],[0.5625,"371.556px -39.013px"],[0.625,"412.84px -37.156px"],[0.6875,"454.124px -34.059px"],[0.75,"495.408px -29.724px"],[0.8125,"536.692px -24.151px"],[0.875,"577.976px -17.339px"],[0.9375,"619.26px -9.289px"],[1,"660.544px 0px"]]},{"c":21,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":22,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":22,"t":1.42,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":23,"t":0.62,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":23,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":24,"t":1.42,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":25,"t":1.42,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":26,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":27,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":28,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":29,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":30,"t":1.1,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.519"]]}],[{"c":6,"t":0.5,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":30,"t":1.1,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.519"],[1,"0"]]},{"c":31,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":32,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":32,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":34,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":34,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":35,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":36,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"55.71px -12.535px"],[0.125,"111.419px -23.398px"],[0.1875,"167.129px -32.59px"],[0.25,"222.838px -40.111px"],[0.3125,"278.548px -45.96px"],[0.375,"334.257px -50.139px"],[0.4375,"389.967px -52.645px"],[0.5,"445.676px -53.481px"],[0.5625,"501.386px -52.645px"],[0.625,"557.095px -50.139px"],[0.6875,"612.805px -45.96px"],[0.75,"668.514px -40.111px"],[0.8125,"724.224px -32.59px"],[0.875,"779.933px -23.398px"],[0.9375,"835.643px -12.535px"],[1,"891.352px 0px"]]},{"c":36,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":37,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":37,"t":1.42,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":38,"t":0.62,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":38,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":39,"t":1.42,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":1.42,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":41,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":42,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":43,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":44,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":45,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":46,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":47,"t":0.15,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":48,"t":0.15,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":40,"t":0.5,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.35 1.35"],[1,"1 1"]]},{"c":40,"t":1,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":45,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":47,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":49,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":50,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":50,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":51,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":52,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":52,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":53,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":53,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":54,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-primary)"],[1,"var(--role-error)"]]},{"c":55,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-ink)"],[1,"var(--role-error)"]]},{"c":56,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":57,"t":0.8,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":57,"t":1.3,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]}],[{"c":6,"t":1.3,"d":0.5,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":1.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":31,"t":1.45,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":32,"t":1.45,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":32,"t":1.7,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":1.3,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":34,"t":1.3,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":34,"t":1.55,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":35,"t":1.3,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":35,"t":1.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":53,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":56,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":58,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":59,"t":0.5,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"-230.808px 0px"]]},{"c":60,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0.28"]]}]]}]]></script>
+  <g class="aighost-66865764-0" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
+  <g class="aighost-66865764-1" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
+  <g class="aighost-66865764-2" style="opacity:0;transform-origin:361px 359px;pointer-events:none"><g data-ghost-of="folder" class="ai-container"><rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="530" height="290" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/><g data-ghost-of="folder_body" class="ai-container"><rect data-ghost-of="fhead" class="ai-shape ai-rect" x="101" y="219" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/><text class="ai-label" x="109" y="245" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="109" dy="-0"><tspan>webshop</tspan></tspan></text><g data-ghost-of="f_login" class="ai-container"><rect data-ghost-of="f_login_bg" class="ai-shape ai-rect" x="101" y="271" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_sep" class="ai-shape ai-rect" x="101" y="345" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_login_chip" class="ai-shape ai-rect" x="123" y="286" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="309" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_login_fname" class="ai-shape ai-rect" x="171" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="309" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>login.py</tspan></tspan></text><rect data-ghost-of="f_login_val" class="ai-shape ai-rect" x="487.512" y="287.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="309" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>84 lines</tspan></tspan></text></g><g data-ghost-of="f_style" class="ai-container"><rect data-ghost-of="f_style_bg" class="ai-shape ai-rect" x="101" y="347" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_sep" class="ai-shape ai-rect" x="101" y="421" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_style_chip" class="ai-shape ai-rect" x="123" y="362" width="38" height="46" fill="var(--role-secondary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="385" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>css</tspan></tspan></text><rect data-ghost-of="f_style_fname" class="ai-shape ai-rect" x="171" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="385" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>style.css</tspan></tspan></text><rect data-ghost-of="f_style_val" class="ai-shape ai-rect" x="474.576" y="363.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="540.788" y="385" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="540.788" dy="-0"><tspan>210 lines</tspan></tspan></text></g><g data-ghost-of="f_cart" class="ai-container"><rect data-ghost-of="f_cart_bg" class="ai-shape ai-rect" x="101" y="423" width="520" height="76" fill="none" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_sep" class="ai-shape ai-rect" x="101" y="497" width="520" height="2" fill="var(--role-rule)" stroke="none" stroke-width="1.5"/><rect data-ghost-of="f_cart_chip" class="ai-shape ai-rect" x="123" y="438" width="38" height="46" fill="var(--role-primary)" stroke="var(--role-ink)" stroke-width="3" rx="6" style="rx:6px;ry:6px"/><text class="ai-label" x="142" y="461" text-anchor="middle" dominant-baseline="middle" font-size="14" fill="var(--role-surface)" style="font-weight:800"><tspan x="142" dy="-0"><tspan>py</tspan></tspan></text><rect data-ghost-of="f_cart_fname" class="ai-shape ai-rect" x="171" y="439.875" width="106.552" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="179" y="461" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="179" dy="-0"><tspan>cart.py</tspan></tspan></text><rect data-ghost-of="f_cart_val" class="ai-shape ai-rect" x="487.512" y="439.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/><text class="ai-label" x="547.256" y="461" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="547.256" dy="-0"><tspan>57 lines</tspan></tspan></text></g></g></g></g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"66865764-","frames":[{"name":"intro","duration":0.92,"auto":null,"title":"Git takes snapshots","note":"Every commit is a photo of the whole project."},{"name":"first_commit","duration":1.65,"auto":null,"title":null,"note":null},{"name":"two_more","duration":2.15,"auto":null,"title":null,"note":null},{"name":"and_another","duration":2.15,"auto":0.3,"title":null,"note":null},{"name":"details","duration":0.65,"auto":null,"title":null,"note":null},{"name":"broke","duration":1.3,"auto":null,"title":"Broke something? Go back","note":"Checkout broke after the price fix: go back one snapshot."},{"name":"go_back","duration":1.8,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","folder","folder_bg","folder_body","fhead","f_login","f_login_bg","f_login_sep","f_login_chip","f_login_fname","f_login_val","f_style","f_style_bg","f_style_sep","f_style_chip","f_style_fname","f_style_val","f_cart","f_cart_bg","f_cart_sep","f_cart_chip","f_cart_fname","f_cart_val","status","rule","rule_end","track","stations","st1","st1_dot","st1_nm","st1_mt","st2","st2_dot","st2_nm","st2_mt","st3","st3_dot","st3_nm","st3_mt","ring","stick","card","card_bg","card_body","ck","cm","cmeta","diff_rule","diff","diff_bg","diff_top_pad","diff_line1","diff_line2","diff_bottom_pad"],"channels":[[".kf-66865764-s_badge","opacity"],[".kf-66865764-s_badge","scale"],[".kf-66865764-s_heading","opacity"],[".kf-66865764-s_heading","translate"],[".kf-66865764-folder","opacity"],[".kf-66865764-folder","translate"],[".aiflash-66865764-folder","opacity"],[".aighost-66865764-0","translate"],[".aighost-66865764-0","scale"],[".aighost-66865764-0","opacity"],[".kf-66865764-st1_dot","opacity"],[".kf-66865764-st1_dot","scale"],[".kf-66865764-st1_nm","opacity"],[".kf-66865764-st1_nm","translate"],[".kf-66865764-st1_mt","opacity"],[".kf-66865764-st1_mt","translate"],[".aitxt-66865764-f_style_val-base","opacity"],[".aitxt-66865764-f_style_val-base","translate"],[".aitxt-66865764-f_style_val-v0","opacity"],[".aitxt-66865764-f_style_val-v0","translate"],[".aihl-66865764-f_style","opacity"],[".aighost-66865764-1","translate"],[".aighost-66865764-1","scale"],[".aighost-66865764-1","opacity"],[".kf-66865764-st2_dot","opacity"],[".kf-66865764-st2_dot","scale"],[".kf-66865764-st2_nm","opacity"],[".kf-66865764-st2_nm","translate"],[".kf-66865764-st2_mt","opacity"],[".kf-66865764-st2_mt","translate"],[".aimask-66865764-track","stroke-dashoffset"],[".aitxt-66865764-f_cart_val-base","opacity"],[".aitxt-66865764-f_cart_val-base","translate"],[".aitxt-66865764-f_cart_val-v0","opacity"],[".aitxt-66865764-f_cart_val-v0","translate"],[".aihl-66865764-f_cart","opacity"],[".aighost-66865764-2","translate"],[".aighost-66865764-2","scale"],[".aighost-66865764-2","opacity"],[".kf-66865764-st3_dot","opacity"],[".kf-66865764-st3_dot","scale"],[".kf-66865764-st3_nm","opacity"],[".kf-66865764-st3_nm","translate"],[".kf-66865764-st3_mt","opacity"],[".kf-66865764-st3_mt","translate"],[".kf-66865764-stick","opacity"],[".kf-66865764-stick","clip-path"],[".kf-66865764-card","opacity"],[".kf-66865764-card","scale"],[".kf-66865764-status","opacity"],[".kfp-66865764-st3_dot","stroke"],[".kf-66865764-st3_nm \u003e text","fill"],[".aitxt-66865764-status-base","opacity"],[".aitxt-66865764-status-v0","opacity"],[".kf-66865764-status \u003e text","fill"],[".kfp-66865764-status","stroke"],[".kf-66865764-status","translate"],[".aitxt-66865764-s_heading-base","opacity"],[".aitxt-66865764-s_heading-base","translate"],[".aitxt-66865764-s_heading-v0","opacity"],[".aitxt-66865764-s_heading-v0","translate"],[".kf-66865764-ring","opacity"],[".kf-66865764-ring","translate"],[".kf-66865764-st3","opacity"]],"settled":[["0","1 1","0","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","var(--role-primary)","var(--role-ink)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","var(--role-primary)","var(--role-ink)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","1.001","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","var(--role-primary)","var(--role-ink)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0.519","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","0","1 1","0","0px 0px","0","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","var(--role-primary)","var(--role-ink)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","0","var(--role-primary)","var(--role-ink)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","1","inset(0% 0% 0% 0%)","1","1 1","0","var(--role-primary)","var(--role-ink)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","1","0px 0px","0","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","var(--role-error)","var(--role-error)","0","1","var(--role-error)","var(--role-error)","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1"],["1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","0px 0px","1","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","1","0px 0px","0","0px 0px","0","0px 0px","1 1","0","1","1 1","1","0px 0px","1","0px 0px","0","inset(0% 0% 0% 0%)","0","1 1","1","var(--role-error)","var(--role-error)","1","0","var(--role-ok)","var(--role-ok)","0px 0px","0","0px 0px","1","0px 0px","1","-230.808px 0px","0.28"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":2,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0.12,"d":0.8,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":4,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":5,"t":0.1,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":6,"t":0,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":7,"t":0.12,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"27.928px -6.284px"],[0.125,"55.856px -11.73px"],[0.1875,"83.784px -16.338px"],[0.25,"111.712px -20.108px"],[0.3125,"139.64px -23.041px"],[0.375,"167.568px -25.135px"],[0.4375,"195.496px -26.392px"],[0.5,"223.424px -26.811px"],[0.5625,"251.352px -26.392px"],[0.625,"279.28px -25.135px"],[0.6875,"307.208px -23.041px"],[0.75,"335.136px -20.108px"],[0.8125,"363.064px -16.338px"],[0.875,"390.992px -11.73px"],[0.9375,"418.92px -6.284px"],[1,"446.848px 0px"]]},{"c":7,"t":0.92,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":8,"t":0.12,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":8,"t":0.92,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":9,"t":0.12,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":9,"t":0.92,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":10,"t":0.92,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":11,"t":0.92,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":12,"t":1.07,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":13,"t":1.07,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":14,"t":1.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":15,"t":1.15,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":6,"t":0.5,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":16,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":17,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":17,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":18,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":19,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":19,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":20,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":20,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":21,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"41.284px -9.289px"],[0.125,"82.568px -17.339px"],[0.1875,"123.852px -24.151px"],[0.25,"165.136px -29.724px"],[0.3125,"206.42px -34.059px"],[0.375,"247.704px -37.156px"],[0.4375,"288.988px -39.013px"],[0.5,"330.272px -39.633px"],[0.5625,"371.556px -39.013px"],[0.625,"412.84px -37.156px"],[0.6875,"454.124px -34.059px"],[0.75,"495.408px -29.724px"],[0.8125,"536.692px -24.151px"],[0.875,"577.976px -17.339px"],[0.9375,"619.26px -9.289px"],[1,"660.544px 0px"]]},{"c":21,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":22,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":22,"t":1.42,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":23,"t":0.62,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":23,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":24,"t":1.42,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":25,"t":1.42,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":26,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":27,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":28,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":29,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":30,"t":1.1,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1.001"],[1,"0.519"]]}],[{"c":6,"t":0.5,"d":0.4,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":30,"t":1.1,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0.519"],[1,"0"]]},{"c":31,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":32,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":32,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":34,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":34,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":35,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":35,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":36,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0625,"55.71px -12.535px"],[0.125,"111.419px -23.398px"],[0.1875,"167.129px -32.59px"],[0.25,"222.838px -40.111px"],[0.3125,"278.548px -45.96px"],[0.375,"334.257px -50.139px"],[0.4375,"389.967px -52.645px"],[0.5,"445.676px -53.481px"],[0.5625,"501.386px -52.645px"],[0.625,"557.095px -50.139px"],[0.6875,"612.805px -45.96px"],[0.75,"668.514px -40.111px"],[0.8125,"724.224px -32.59px"],[0.875,"779.933px -23.398px"],[0.9375,"835.643px -12.535px"],[1,"891.352px 0px"]]},{"c":36,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":37,"t":0.62,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.072 0.072"]]},{"c":37,"t":1.42,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":38,"t":0.62,"d":0.8,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":38,"t":1.42,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":39,"t":1.42,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":1.42,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":41,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":42,"t":1.57,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":43,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":44,"t":1.65,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]}],[{"c":45,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":46,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"inset(0% 0% 100% 0%)"],[1,"inset(0% 0% 0% 0%)"]]},{"c":47,"t":0.15,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":48,"t":0.15,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":40,"t":0.5,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.35 1.35"],[1,"1 1"]]},{"c":40,"t":1,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":45,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":47,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":49,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":50,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-primary)"],[1,"var(--role-error)"]]},{"c":51,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-ink)"],[1,"var(--role-error)"]]},{"c":52,"t":0.75,"d":0.125,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":53,"t":0.8125,"d":0.1875,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":54,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-ok)"],[1,"var(--role-error)"]]},{"c":55,"t":0.75,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-ok)"],[1,"var(--role-error)"]]},{"c":56,"t":0.8,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":56,"t":1.3,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":57,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":58,"t":0,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":58,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":59,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":60,"t":0.15,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":60,"t":0.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]}],[{"c":6,"t":1.3,"d":0.5,"e":"linear","k":[[0,"0"],[0.5,"0.9"],[1,"0"]]},{"c":6,"t":1.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":31,"t":1.45,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":32,"t":1.45,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":32,"t":1.7,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":33,"t":1.3,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"1"],[1,"0"]]},{"c":34,"t":1.3,"d":0.25,"e":"cubic-bezier(0.55,0,1,0.45)","k":[[0,"0px 0px"],[1,"0px -12px"]]},{"c":34,"t":1.55,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":35,"t":1.3,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0"],[0.3333,"0.3"],[0.6667,"0.3"],[1,"0"]]},{"c":35,"t":1.8,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":52,"t":1.3625,"d":0.1875,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":53,"t":1.3,"d":0.125,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":54,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-error)"],[1,"var(--role-ok)"]]},{"c":55,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"var(--role-error)"],[1,"var(--role-ok)"]]},{"c":61,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":62,"t":0.5,"d":0.8,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"-230.808px 0px"]]},{"c":63,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0.28"]]}]]}]]></script>
 <script><![CDATA[
 /* agent-illustrator motion player: plays the tracks compiled into an SVG.
  * No dependencies; Web Animations API. The player has no semantics of its

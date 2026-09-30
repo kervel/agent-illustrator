@@ -13,6 +13,7 @@ pub mod expand;
 pub mod geom;
 pub mod lint;
 pub mod render;
+pub mod storyboard;
 pub mod tokens;
 
 use crate::parser::ast::{
@@ -303,7 +304,9 @@ fn base_stmt_ops(
         | MotionVerb::Effect { .. }
         | MotionVerb::Loop { .. }
         | MotionVerb::Call { .. }
-        | MotionVerb::Insert { .. } => vec![],
+        | MotionVerb::Insert { .. }
+        | MotionVerb::UseLayout(_)
+        | MotionVerb::SetState { .. } => vec![],
     }
 }
 
@@ -312,7 +315,11 @@ pub fn for_each_stmt<'a>(nodes: &'a [Spanned<MotionNode>], f: &mut dyn FnMut(&'a
     for n in nodes {
         match &n.node {
             MotionNode::Stmt(_) => f(n),
-            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) => for_each_stmt(b, f),
+            MotionNode::Then(b)
+            | MotionNode::After(_, b)
+            | MotionNode::At(_, b)
+            | MotionNode::When(_, _, b)
+            | MotionNode::Beat(_, b) => for_each_stmt(b, f),
         }
     }
 }

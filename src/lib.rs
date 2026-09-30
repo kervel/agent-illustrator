@@ -121,6 +121,9 @@ pub struct RenderConfig {
     pub sample_at: Vec<f64>,
     /// Output the motion timeline as text instead of SVG.
     pub timeline: bool,
+    /// Output the storyboard (`--states`): per click step, what is visible
+    /// and what changes, as declared.
+    pub states: bool,
     /// Output the motion manifest (tracks) as JSON instead of SVG.
     pub timeline_json: bool,
 }
@@ -146,6 +149,7 @@ impl Default for RenderConfig {
             crop: None,
             sample_at: Vec::new(),
             timeline: false,
+            states: false,
             timeline_json: false,
         }
     }
@@ -558,7 +562,7 @@ fn render_pipeline(
     // `code` blocks become generated templates of ordinary parts.
     let doc = {
         let aliases = doc.aliases;
-        let statements = code::expand_code_blocks(doc.statements, config.template_base_path.as_deref())
+        let statements = code::expand_code_blocks(code::expand_points(doc.statements), config.template_base_path.as_deref())
             .map_err(|(span, message)| RenderError::Layout(LayoutError::Located { message, span }))?;
         Document { statements, aliases }
     };
@@ -825,6 +829,13 @@ fn render_pipeline(
         }
     }
 
+    if config.states {
+        if frame_states.is_empty() {
+            return Err(RenderError::Layout(layout::LayoutError::validation_error("--states requires keyframes in the input")));
+        }
+        let display = motion::expand::ElementIndex::build(&doc).display;
+        return Ok((motion::storyboard::states_text(&doc, &frame_states, &result, &display), lint_warnings));
+    }
     if config.timeline || config.timeline_json {
         let Some(m) = &compiled else {
             return Err(RenderError::Layout(layout::LayoutError::validation_error(

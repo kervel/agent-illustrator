@@ -62,20 +62,19 @@ constrain folder_bg contains folder_body [padding: 0]
 constrain folder_body.left = s.stage.left + 96
 constrain folder_body.top = s.stage.top + 214
 
-// Status under the folder: one of the two is on stage at a time.
-rect ok [appears: broke, fill: role-surface, stroke: role-ok, stroke_width: 3, corner_radius: 10,
-         label: "● checkout works", label_fill: role-ok, font_size: 22, font_weight: 700]
-rect bad [appears: later, fill: role-surface, stroke: role-error, stroke_width: 3, corner_radius: 10,
-          label: "● checkout broken", label_fill: role-error, font_size: 22, font_weight: 700]
-constrain ok.left = folder_body.left
-constrain ok.top = folder_body.bottom + 26
-constrain bad.left = ok.left
-constrain bad.center_y = ok.center_y
+// Status under the folder.
+rect status [appears: later, fill: role-surface, stroke: role-ok, stroke_width: 3, corner_radius: 10,
+             label: "● checkout works", label_fill: role-ok, font_size: 22, font_weight: 700]
+constrain status.left = folder_body.left
+constrain status.top = folder_body.bottom + 26
+state status broken {
+    transform self [label: "● checkout broken", stroke: role-error, label_fill: role-error, swap: fade]
+}
 
 // The timeline: a dotted rule, the line that grows, and the stations on it.
 path rule [through: [st1.dot, rule_end], stroke: role-rule, stroke_width: 5, fill: none,
            stroke_dasharray: "1,16", extend_start: 60, class: dots]
-rect rule_end [width: 1, height: 1, fill: none, stroke: none]
+point rule_end
 constrain rule_end.right = s.stage.right - 80
 constrain rule_end.center_y = st1.dot.center_y
 path track [through: [st1.dot, st2.dot, st3.dot], drawn: 0, stroke: role-primary, stroke_width: 14, fill: none]
@@ -88,12 +87,12 @@ constrain stations.left = folder_body.right + 90
 constrain st1.dot.center_y = folder_body.center_y
 
 // A ring that marks where the project is now.
-circle ring [size: 68, fill: none, stroke: role-ink, stroke_width: 4, appears: go_back]
+circle ring [size: 68, fill: none, stroke: role-ink, stroke_width: 4, appears: later]
 constrain ring.center = st3.dot.center
 
 // The commit behind station 3.
-rect stick [width: 3, fill: role-ink, stroke: none, appears: details]
-group card [appears: details] {
+rect stick [width: 3, fill: role-ink, stroke: none, appears: later]
+group card [appears: later] {
     rect card_bg [fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
     col card_body [gap: 10] {
         rect ck [fill: none, stroke: none, font_size: 16, font_family: mono, label_fill: role-muted,
@@ -116,9 +115,12 @@ constrain stick.bottom = card_body.top - 22
 
 // ---------------------------------------------------------------- motion
 
+// The heading shows each keyframe's title.
+motion [title: s.heading, title_swap: roll]
+
 keyframe "intro" [title: "Git takes snapshots", note: "Every commit is a photo of the whole project."] {
     slide_in(s)
-    after 0.1 { show folder [enter: rise] }
+    at 0.1 { show folder [enter: rise] }
 }
 
 keyframe "first_commit" {
@@ -137,21 +139,20 @@ keyframe "and_another" [auto, after: 0.3] {
 
 keyframe "details" {
     show stick [enter: wipe(down), duration: fast]
-    after 0.15 { show card [enter: pop] }
+    at 0.15 { show card [enter: pop] }
 }
 
 keyframe "broke" [title: "Broke something? Go back", note: "Checkout broke after the price fix: go back one snapshot."] {
-    transform s.heading [label: "Broke something? Go back", swap: roll]
     hide card, stick
-    show ok [enter: fade]
-    after 0.5 {
+    show status [enter: fade]
+    at 0.5 {
         transform st3.dot [stroke: role-error]
         transform st3.nm [label_fill: role-error]
         pulse st3.dot [scale: 1.35]
     }
-    after 0.25 {
-        swap ok -> bad [via: fade, duration: fast]
-        shake bad [delay: 0.05]
+    at 0.75 {
+        set status broken [duration: fast]
+        shake status [delay: 0.05]
     }
 }
 
@@ -164,6 +165,6 @@ keyframe "go_back" {
     then {
         flash folder
         change(f_cart, "57 lines")
-        swap bad -> ok [via: fade, duration: fast]
+        set status default [swap: fade, duration: fast]
     }
 }

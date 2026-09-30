@@ -595,7 +595,17 @@ pub fn timeline_text(m: &Motion, tokens: &MotionTokens) -> String {
             }
         }
         let mut quiet = 0;
+        // Resolved events, each before the first statement of its block
+        // (a beat's end, after its last).
+        let mut shown_ev = vec![false; f.events.len()];
         for (ai, a) in f.atoms.iter().enumerate() {
+            let _ = a;
+            for (k, (t, what, first)) in f.events.iter().enumerate() {
+                if !shown_ev[k] && *first == ai {
+                    out.push_str(&format!("  {:>5.2}s  {}\n", t, what));
+                    shown_ev[k] = true;
+                }
+            }
             let Some(r) = rows.get(&ai) else {
                 quiet += 1;
                 continue;
@@ -606,6 +616,11 @@ pub fn timeline_text(m: &Motion, tokens: &MotionTokens) -> String {
             ));
             for line in r {
                 out.push_str(&format!("                        {}\n", line));
+            }
+        }
+        for (k, (t, what, _)) in f.events.iter().enumerate() {
+            if !shown_ev[k] {
+                out.push_str(&format!("  {:>5.2}s  {}\n", t, what));
             }
         }
         if quiet > 0 {

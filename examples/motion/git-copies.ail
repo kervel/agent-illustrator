@@ -52,20 +52,24 @@ grid docs [cols: 4, gap: 60, cell_width: 280, cell_height: 220] {
 constrain docs.center_x = s.stage.center_x
 constrain docs.top = s.stage.top + 200
 
-grid codes [cols: 4, gap: 60, cell_width: 280, cell_height: 220] {
-    code k* [fname: ["login.py", "cart.py", "checkout.js", "style.css",
-                     "orders_api.py", "README.md", "test_cart.py", "Dockerfile"],
-             c1: [role-primary, role-ok, role-secondary, role-primary, role-ok, role-secondary, role-primary, role-ok],
-             c3: [role-secondary, role-primary, role-ok, role-secondary, role-primary, role-ok, role-secondary, role-primary]]
+group codes {
+    code k* [items: [{fname: "login.py",     c1: role-primary,   c3: role-secondary},
+                     {fname: "cart.py",      c1: role-ok,        c3: role-primary},
+                     {fname: "checkout.js",  c1: role-secondary, c3: role-ok},
+                     {fname: "style.css",    c1: role-primary,   c3: role-secondary},
+                     {fname: "orders_api.py", c1: role-ok,       c3: role-primary},
+                     {fname: "README.md",    c1: role-secondary, c3: role-ok},
+                     {fname: "test_cart.py", c1: role-primary,   c3: role-secondary},
+                     {fname: "Dockerfile",   c1: role-ok,        c3: role-primary}]]
 }
-constrain codes.left = docs.left
-constrain codes.top = docs.top
+// Each code file sits exactly on its report, so the flip turns in place.
+constrain k*.pg.center = d*.pg.center
 
 // Where the first report appears: the middle of the grid.
-rect hub [width: 1, height: 1, fill: none, stroke: none]
+point hub
 constrain hub.center = docs.center
 
-rect caption [fill: none, stroke: none, font_size: 40, font_weight: 800, label_fill: role-ink, appears: code,
+rect caption [fill: none, stroke: none, font_size: 40, font_weight: 800, label_fill: role-ink, appears: later,
               label: "4,000 files <span fill=role-secondary>×</span> 30 developers <span fill=role-secondary>×</span> every day"]
 constrain caption.center_x = s.stage.center_x
 constrain caption.top = docs.bottom + 40
@@ -82,12 +86,14 @@ keyframe "one_file" {
 keyframe "copies" {
     show docs.* [from: d0, stagger: 0.1, duration: slow, jitter: 4]
     move d0 home [duration: slow, ease: glide]
-    after 1.2 { show .q [enter: pop, stagger: 0.05, order: random] }
-    after 0.15 { shake docs.* [stagger: 0.04, order: random] }
+    at 1.2 {
+        show .q [enter: pop, stagger: 0.05, order: random]
+        after 0.15 { shake docs.* [stagger: 0.04, order: random] }
+    }
 }
 
 keyframe "code" {
     hide .q [exit: shrink, duration: 0.2]
-    after 0.15 { swap docs.* -> codes.* [via: flip, flip: pg, stagger: 0.07] }
-    after 0.75 { show caption [enter: rise] }
+    at 0.15 { swap docs.* -> codes.* [via: flip, flip: pg, stagger: 0.07] }
+    at 0.9 { show caption [enter: rise] }
 }

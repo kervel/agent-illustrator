@@ -331,7 +331,7 @@ fn collect_element_template_mapping(
         | Statement::TemplateInstance(_)
         | Statement::Export(_)
         | Statement::AnchorDecl(_)
-        | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {}
+        | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => {}
     }
 }
 
@@ -811,7 +811,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
             | Statement::Constraint(_)
             | Statement::Constrain(_) | Statement::DisableConstraint(_)
             | Statement::Label(_)
-            | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => continue,
+            | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => continue,
             _ => {
                 let element = layout_statement(&stmt.node, position, config);
                 position.y += element.bounds.height + config.element_spacing;
@@ -949,7 +949,7 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // After template resolution, instances are replaced with their expanded content
             unreachable!("Template instances should be expanded before layout")
         }
-        Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {
+        Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => {
             // Keyframes are handled after layout, not during layout
             unreachable!("Keyframes should be filtered out before layout")
         }

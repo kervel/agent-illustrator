@@ -108,6 +108,44 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
 /// `doc d* [fname: ["a", "b", "c"]]` -> d0, d1, d2, each taking the i-th item
 /// of every list-valued argument (lists zip by index; other arguments are
 /// shared). Works for shapes too: `rect bar* [width: [88, 70, 55]]`.
+/// The style key a modifier name means (`font_size` -> FontSize), else a
+/// custom key.
+pub fn style_key_named(name: &str) -> StyleKey {
+    match name {
+                "label" => StyleKey::Label,
+                "role" => StyleKey::Role,
+                "fill" => StyleKey::Fill,
+                "stroke" => StyleKey::Stroke,
+                "stroke_width" => StyleKey::StrokeWidth,
+                "opacity" => StyleKey::Opacity,
+                "fill_opacity" => StyleKey::FillOpacity,
+                "stroke_opacity" => StyleKey::StrokeOpacity,
+                "font_size" => StyleKey::FontSize,
+                "class" => StyleKey::Class,
+                "gap" => StyleKey::Gap,
+                "size" => StyleKey::Size,
+                "width" => StyleKey::Width,
+                "height" => StyleKey::Height,
+                "routing" => StyleKey::Routing,
+                "label_position" => StyleKey::LabelPosition,
+                "caption_of" => StyleKey::CaptionOf,
+                "x" => StyleKey::X,
+                "y" => StyleKey::Y,
+                "stroke_dasharray" => StyleKey::StrokeDasharray,
+                "rotation" => StyleKey::Rotation,
+                "label_at" => StyleKey::LabelAt,
+                "label_offset" => StyleKey::LabelOffset,
+                "z_order" => StyleKey::ZOrder,
+                "pointer" => StyleKey::Pointer,
+                "dx" => StyleKey::Dx,
+                "dy" => StyleKey::Dy,
+                "scale" => StyleKey::Scale,
+                "align" => StyleKey::Align,
+                "label_fill" => StyleKey::LabelFill,
+                other => StyleKey::Custom(other.to_string()),
+            }
+}
+
 fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
     fn per_item(
         mods: &[Spanned<StyleValue>],
@@ -139,13 +177,28 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
             )
         })
     }
+    /// `items: [{a: 1, b: 2}, ...]`: item i's fields, as extra arguments.
+    fn record_fields(values: &[(String, Spanned<StyleValue>)], i: usize) -> Vec<(Spanned<Identifier>, Spanned<StyleValue>)> {
+        values
+            .iter()
+            .filter(|(k, _)| k == "items")
+            .filter_map(|(_, v)| match &v.node {
+                StyleValue::List(items) => items.get(i).map(|x| x.node.clone()),
+                _ => None,
+            })
+            .flat_map(|r| match r {
+                StyleValue::Record(fields) => fields,
+                _ => Vec::new(),
+            })
+            .collect()
+    }
     fn pick(v: &Spanned<StyleValue>, i: usize) -> Spanned<StyleValue> {
         match &v.node {
             StyleValue::List(items) => items[i].clone(),
             _ => v.clone(),
         }
     }
-    fn walk(stmts: Vec<Spanned<Statement>>) -> Result<Vec<Spanned<Statement>>, (Span, String)> {
+    fn walk(stmts: Vec<Spanned<Statement>>, counts: &mut std::collections::HashMap<String, usize>) -> Result<Vec<Spanned<Statement>>, (Span, String)> {
         let mut out = Vec::with_capacity(stmts.len());
         for st in stmts {
             let span = st.span.clone();
@@ -155,11 +208,25 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                     let base = name.node.0.trim_end_matches('*').to_string();
                     let values: Vec<Spanned<StyleValue>> = shape.modifiers.iter().map(|m| m.node.value.clone()).collect();
                     let n = per_item(&values, &base, &name.span)?;
+                    counts.insert(base.clone(), n);
+                    let named: Vec<(String, Spanned<StyleValue>)> = shape
+                        .modifiers
+                        .iter()
+                        .map(|m| (m.node.key.node.source_name(), m.node.value.clone()))
+                        .collect();
                     for i in 0..n {
                         let mut s = shape.clone();
                         s.name = Some(Spanned::new(Identifier::new(format!("{}{}", base, i)), name.span.clone()));
+                        s.modifiers.retain(|m| m.node.key.node.source_name() != "items");
                         for m in &mut s.modifiers {
                             m.node.value = pick(&m.node.value, i);
+                        }
+                        for (k, v) in record_fields(&named, i) {
+                            let sp = k.span.clone();
+                            s.modifiers.push(Spanned::new(
+                                StyleModifier { key: Spanned::new(style_key_named(&k.node.0), sp.clone()), value: v },
+                                sp,
+                            ));
                         }
                         out.push(Spanned::new(Statement::Shape(s), span.clone()));
                     }
@@ -168,26 +235,31 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                     let base = inst.instance_name.node.0.trim_end_matches('*').to_string();
                     let values: Vec<Spanned<StyleValue>> = inst.arguments.iter().map(|(_, v)| v.clone()).collect();
                     let n = per_item(&values, &base, &inst.instance_name.span)?;
+                    counts.insert(base.clone(), n);
+                    let named: Vec<(String, Spanned<StyleValue>)> =
+                        inst.arguments.iter().map(|(k, v)| (k.node.0.clone(), v.clone())).collect();
                     for i in 0..n {
                         let mut t = inst.clone();
                         t.instance_name = Spanned::new(Identifier::new(format!("{}{}", base, i)), inst.instance_name.span.clone());
+                        t.arguments.retain(|(k, _)| k.node.0 != "items");
                         for (_, v) in &mut t.arguments {
                             *v = pick(v, i);
                         }
+                        t.arguments.extend(record_fields(&named, i));
                         out.push(Spanned::new(Statement::TemplateInstance(t), span.clone()));
                     }
                 }
                 Statement::Layout(mut l) => {
-                    l.children = walk(l.children)?;
+                    l.children = walk(l.children, counts)?;
                     out.push(Spanned::new(Statement::Layout(l), span));
                 }
                 Statement::Group(mut g) => {
-                    g.children = walk(g.children)?;
+                    g.children = walk(g.children, counts)?;
                     out.push(Spanned::new(Statement::Group(g), span));
                 }
                 Statement::TemplateDecl(mut t) => {
                     if let Some(body) = t.body.take() {
-                        t.body = Some(walk(body)?);
+                        t.body = Some(walk(body, counts)?);
                     }
                     out.push(Spanned::new(Statement::TemplateDecl(t), span));
                 }
@@ -196,8 +268,102 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
         }
         Ok(out)
     }
-    doc.statements = walk(doc.statements)?;
+    let mut counts = std::collections::HashMap::new();
+    doc.statements = walk(doc.statements, &mut counts)?;
+    doc.statements = zip_constraints(doc.statements, &counts)?;
     Ok(doc)
+}
+
+/// `constrain k*.center = d*.center`: one constraint per index (k0 on d0,
+/// k1 on d1, ...), for elements declared with `name*`.
+fn zip_constraints(stmts: Vec<Spanned<Statement>>, counts: &std::collections::HashMap<String, usize>) -> Result<Vec<Spanned<Statement>>, (Span, String)> {
+    fn starred(p: &ElementPath) -> Vec<String> {
+        p.segments.iter().filter_map(|s| s.node.0.strip_suffix('*').map(str::to_string)).collect()
+    }
+    fn paths(e: &ConstraintExpr) -> Vec<&ElementPath> {
+        match e {
+            ConstraintExpr::Equal { left, right } | ConstraintExpr::EqualWithOffset { left, right, .. } => {
+                vec![&left.element.node, &right.element.node]
+            }
+            ConstraintExpr::Constant { left, .. } | ConstraintExpr::GreaterOrEqual { left, .. } | ConstraintExpr::LessOrEqual { left, .. } => {
+                vec![&left.element.node]
+            }
+            ConstraintExpr::Midpoint { target, .. } => vec![&target.element.node],
+            ConstraintExpr::Contains { .. } => vec![],
+        }
+    }
+    fn nth(e: &mut ConstraintExpr, i: usize) {
+        let fix = |p: &mut ElementPath| {
+            for s in &mut p.segments {
+                if let Some(b) = s.node.0.strip_suffix('*') {
+                    s.node = Identifier::new(format!("{}{}", b, i));
+                }
+            }
+        };
+        match e {
+            ConstraintExpr::Equal { left, right } | ConstraintExpr::EqualWithOffset { left, right, .. } => {
+                fix(&mut left.element.node);
+                fix(&mut right.element.node);
+            }
+            ConstraintExpr::Constant { left, .. } | ConstraintExpr::GreaterOrEqual { left, .. } | ConstraintExpr::LessOrEqual { left, .. } => {
+                fix(&mut left.element.node)
+            }
+            ConstraintExpr::Midpoint { target, .. } => fix(&mut target.element.node),
+            ConstraintExpr::Contains { .. } => {}
+        }
+    }
+    let mut out = Vec::with_capacity(stmts.len());
+    for st in stmts {
+        let span = st.span.clone();
+        match st.node {
+            Statement::Constrain(d) => {
+                let names: Vec<String> = paths(&d.expr).into_iter().flat_map(starred).collect();
+                if names.is_empty() {
+                    out.push(Spanned::new(Statement::Constrain(d), span));
+                    continue;
+                }
+                let mut n: Option<(usize, &str)> = None;
+                for name in &names {
+                    let Some(&k) = counts.get(name) else {
+                        return Err((span, format!("'{}*' in a constraint names the elements of a `{}*` declaration, and there is none", name, name)));
+                    };
+                    match n {
+                        Some((m, other)) if m != k => {
+                            return Err((
+                                span,
+                                format!("'{}*' has {} elements and '{}*' has {}: a constraint over both pairs them by index, so they must match", other, m, name, k),
+                            ))
+                        }
+                        _ => n = Some((k, name)),
+                    }
+                }
+                for i in 0..n.unwrap().0 {
+                    let mut c = d.clone();
+                    nth(&mut c.expr, i);
+                    if let Some(nm) = &mut c.name {
+                        nm.node = Identifier::new(format!("{}_{}", nm.node.0, i));
+                    }
+                    out.push(Spanned::new(Statement::Constrain(c), span.clone()));
+                }
+            }
+            Statement::Layout(mut l) => {
+                l.children = zip_constraints(l.children, counts)?;
+                out.push(Spanned::new(Statement::Layout(l), span));
+            }
+            Statement::Group(mut g) => {
+                g.children = zip_constraints(g.children, counts)?;
+                out.push(Spanned::new(Statement::Group(g), span));
+            }
+            Statement::TemplateDecl(mut t) => {
+                if let Some(body) = t.body.take() {
+                    t.body = Some(zip_constraints(body, counts)?);
+                }
+                out.push(Spanned::new(Statement::TemplateDecl(t), span));
+            }
+            other => out.push(Spanned::new(other, span)),
+        }
+    }
+    Ok(out)
 }
 
 /// Helper to extract span range from chumsky's MapExtra
@@ -283,37 +449,7 @@ where
         just(Token::Role).map_with(|_, e| Spanned::new(StyleKey::Role, span_range(&e.span()))),
         // Handle all other style keys as identifiers
         identifier.map(|id| {
-            let key = match id.node.as_str() {
-                "fill" => StyleKey::Fill,
-                "stroke" => StyleKey::Stroke,
-                "stroke_width" => StyleKey::StrokeWidth,
-                "opacity" => StyleKey::Opacity,
-                "fill_opacity" => StyleKey::FillOpacity,
-                "stroke_opacity" => StyleKey::StrokeOpacity,
-                "font_size" => StyleKey::FontSize,
-                "class" => StyleKey::Class,
-                "gap" => StyleKey::Gap,
-                "size" => StyleKey::Size,
-                "width" => StyleKey::Width,
-                "height" => StyleKey::Height,
-                "routing" => StyleKey::Routing,
-                "label_position" => StyleKey::LabelPosition,
-                "caption_of" => StyleKey::CaptionOf,
-                "x" => StyleKey::X,
-                "y" => StyleKey::Y,
-                "stroke_dasharray" => StyleKey::StrokeDasharray,
-                "rotation" => StyleKey::Rotation,
-                "label_at" => StyleKey::LabelAt,
-                "label_offset" => StyleKey::LabelOffset,
-                "z_order" => StyleKey::ZOrder,
-                "pointer" => StyleKey::Pointer,
-                "dx" => StyleKey::Dx,
-                "dy" => StyleKey::Dy,
-                "scale" => StyleKey::Scale,
-                "align" => StyleKey::Align,
-                "label_fill" => StyleKey::LabelFill,
-                other => StyleKey::Custom(other.to_string()),
-            };
+            let key = style_key_named(id.node.as_str());
             Spanned::new(key, id.span)
         }),
     ));
@@ -540,7 +676,21 @@ where
             }
             Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
         });
-    let value_list = choice((dotted_atom, value_atom.clone()))
+    // `{fname: "login.py", c1: role-primary}`: a record, one item of `items:`.
+    let record_key = choice((
+        identifier,
+        just(Token::Label).map_with(|_, e| Spanned::new(Identifier::new("label"), span_range(&e.span()))),
+        just(Token::Text).map_with(|_, e| Spanned::new(Identifier::new("text"), span_range(&e.span()))),
+    ));
+    let record = record_key
+        .then_ignore(just(Token::Colon))
+        .then(choice((dotted_atom.clone(), value_atom.clone())))
+        .separated_by(just(Token::Comma))
+        .allow_trailing()
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
+        .map_with(|fields, e| Spanned::new(StyleValue::Record(fields), span_range(&e.span())));
+    let value_list = choice((record, dotted_atom, value_atom.clone()))
         .separated_by(just(Token::Comma))
         .allow_trailing()
         .collect::<Vec<_>>()
@@ -875,8 +1025,12 @@ where
         just(Token::VerticalCenter).map_with(|_, e| {
             Spanned::new(Identifier::new("vertical_center"), span_range(&e.span()))
         }),
-        // Regular identifier
-        identifier,
+        // Regular identifier; `k*` (every instance of a starred
+        // declaration, zipped by index with the other side's)
+        identifier.then(just(Token::Star).or_not()).map(|(id, star)| match star {
+            Some(_) => Spanned::new(Identifier::new(format!("{}*", id.node.0)), id.span),
+            None => id,
+        }),
     ));
 
     // Grid cell reference in a constraint: `grid.cell(row, col)[.property]`.
@@ -1898,10 +2052,57 @@ where
             let then_beat = kw("then")
                 .ignore_then(block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
                 .map(MotionNode::Then);
+            // A small nudge after an event: `+ 0.2`, `- 0.1`.
+            let nudge = choice((just(Token::Plus).to(1.0), just(Token::Minus).to(-1.0)))
+                .then(number)
+                .map(|(sign, n)| sign * n.node)
+                .or_not()
+                .map(|v| v.unwrap_or(0.0));
+            let body = block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose));
             let after_beat = kw("after")
                 .ignore_then(number)
-                .then(block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+                .then(body.clone())
                 .map(|(n, b)| MotionNode::After(n.node, b));
+            // `after tick + 0.2 { }`: after a named beat ends.
+            let after_named = kw("after")
+                .ignore_then(identifier)
+                .then(nudge.clone())
+                .then(body.clone())
+                .map(|((name, off), b)| {
+                    MotionNode::When(MotionEvent::BeatEnd(Spanned::new(name.node.0, name.span)), off, b)
+                });
+            // `when branch reaches l1.dot { }`, `when anna arrives + 0.1 { }`,
+            // `when mr shown { }`, `when card hidden { }`
+            let event = choice((
+                dotted_name
+                    .clone()
+                    .then_ignore(kw("reaches"))
+                    .then(dotted_name.clone().labelled("what the line reaches"))
+                    .map(|(line, target)| MotionEvent::Reaches { line, target }),
+                dotted_name.clone().then_ignore(kw("arrives")).map(MotionEvent::Arrives),
+                dotted_name.clone().then_ignore(kw("shown")).map(MotionEvent::Shown),
+                dotted_name.clone().then_ignore(kw("hidden")).map(MotionEvent::Hidden),
+            ))
+            .labelled("an event: `<line> reaches <element>`, `<element> arrives`, `<element> shown` or `<element> hidden`");
+            let when_beat = kw("when")
+                .ignore_then(event)
+                .then(nudge.clone())
+                .then(body.clone())
+                .map(|((ev, off), b)| MotionNode::When(ev, off, b));
+            let use_layout = kw("use")
+                .ignore_then(kw("layout"))
+                .ignore_then(identifier.labelled("a layout name (or `default`)"))
+                .then(opts_or_none.clone())
+                .map(move |(name, o)| stmt(MotionVerb::UseLayout(Spanned::new(name.node.0, name.span)), o));
+            let set_state = kw("set")
+                .ignore_then(selector.clone())
+                .then(identifier.labelled("a state of the component's template"))
+                .then(opts_or_none.clone())
+                .map(move |((t, st), o)| stmt(MotionVerb::SetState { target: t, state: Spanned::new(st.node.0, st.span) }, o));
+            let named_beat = kw("beat")
+                .ignore_then(identifier)
+                .then(body.clone())
+                .map(|(name, b)| MotionNode::Beat(name.node.0, b));
             let at_beat = kw("at")
                 .ignore_then(number)
                 .then(block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
@@ -1910,6 +2111,11 @@ where
             choice((
                 then_beat,
                 after_beat,
+                after_named,
+                when_beat,
+                named_beat,
+                use_layout,
+                set_state,
                 at_beat,
                 show,
                 hide,
@@ -2066,8 +2272,36 @@ where
             )
             .map(Statement::DisableConstraint);
 
+        // `layout beside { constrain ...; constrain ... }`
+        let named_layout = identifier
+            .filter(|i: &Spanned<Identifier>| i.node.0 == "layout")
+            .ignore_then(identifier)
+            .then(
+                constrain_decl
+                    .clone()
+                    .map_with(|c, e| Spanned::new(c, span_range(&e.span())))
+                    .then_ignore(just(Token::Semicolon).or_not())
+                    .repeated()
+                    .collect::<Vec<_>>()
+                    .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
+            )
+            .map(|(name, constraints)| Statement::NamedLayout { name: Spanned::new(name.node.0, name.span), constraints });
+        // `state done { ... }` (in a template body)
+        // `state done { ... }` in a template (owned by each instance), or
+        // `state status broken { ... }` for one element anywhere.
+        let component_state = identifier
+            .filter(|i: &Spanned<Identifier>| i.node.0 == "state")
+            .ignore_then(identifier)
+            .then(identifier.or_not())
+            .then(motion_block.clone().delimited_by(just(Token::BraceOpen), just(Token::BraceClose)))
+            .map(|((first, second), body)| match second {
+                Some(name) => Statement::ComponentState { name: Spanned::new(name.node.0, name.span), body, owner: first.node.0 },
+                None => Statement::ComponentState { name: Spanned::new(first.node.0, first.span), body, owner: String::new() },
+            });
         choice((
             disable_stmt,
+            named_layout,
+            component_state,
             constrain_decl.clone().map(Statement::Constrain),
             constraint_decl.clone().map(Statement::Constraint),
             keyframe_decl.map(Statement::Keyframe), // Feature 011: before templates

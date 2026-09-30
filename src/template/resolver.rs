@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use crate::parser::ast::{
     AnchorDecl, AnchorPosition, ConstrainDecl, ConstraintExpr, Document, ElementPath, GroupDecl,
     Identifier, PropertyRef, ShapeDecl, ShapeType, Spanned, Statement, StyleKey, StyleModifier,
-    StyleValue, TemplateInstance,
+    MotionNode, MotionVerb, StyleValue, TemplateInstance,
 };
 
 use super::registry::{TemplateError, TemplateRegistry};
@@ -210,7 +210,7 @@ fn resolve_instance(
         }
         crate::parser::ast::TemplateSourceType::Inline => {
             // For inline templates, expand the body
-            resolve_inline_template(&def, instance_name, span, registry, ctx, &param_values)
+            resolve_inline_template(&def, instance_name, span, registry, ctx, &param_values, &instance_modifiers)
         }
     };
 
@@ -449,7 +449,11 @@ fn resolve_inline_template(
     registry: &mut TemplateRegistry,
     ctx: &mut ResolutionContext,
     param_values: &HashMap<String, StyleValue>,
+    instance_modifiers: &[Spanned<StyleModifier>],
 ) -> Result<Vec<Spanned<Statement>>, TemplateError> {
+    // `check tests [opacity: 0.3]`: the whole instance is faint.
+    let group_modifiers: Vec<Spanned<StyleModifier>> =
+        instance_modifiers.iter().filter(|m| matches!(m.node.key.node, StyleKey::Opacity)).cloned().collect();
     let body = match &def.body {
         Some(b) => b.clone(),
         None => return Ok(vec![]),
@@ -459,6 +463,7 @@ fn resolve_inline_template(
     let mut nested_ctx = ctx.nested(instance_name, param_values.clone());
 
     let mut expanded = Vec::new();
+    let mut states = Vec::new();
 
     for stmt in body {
         match &stmt.node {
@@ -466,6 +471,18 @@ fn resolve_inline_template(
                 // Exports and anchor declarations are metadata, skip during expansion
                 // Anchors are processed separately and attached to the group
                 continue;
+            }
+            Statement::ComponentState { name, body, .. } => {
+                // Kept for `set <instance> <state>`: owned by this instance,
+                // with the template's parameters filled in.
+                states.push(Spanned::new(
+                    Statement::ComponentState {
+                        name: name.clone(),
+                        body: substitute_motion_params(body, param_values),
+                        owner: instance_name.to_string(),
+                    },
+                    stmt.span.clone(),
+                ));
             }
             Statement::TemplateInstance(_) => {
                 // A component inside a component: its name is scoped by the
@@ -495,16 +512,19 @@ fn resolve_inline_template(
 
     // If there's only one shape and no custom anchors, rename it to the instance name
     // If there are multiple, or if there are custom anchors, wrap in a group
-    if expanded.len() == 1 && prefixed_anchors.is_empty() {
+    if expanded.len() == 1 && prefixed_anchors.is_empty() && group_modifiers.is_empty() {
         // Rename the single element to the instance name
         if let Statement::Shape(mut shape) = expanded[0].node.clone() {
             if let Some(part) = &shape.name {
                 registry.collapsed_parts.push((part.node.0.clone(), instance_name.to_string()));
             }
             shape.name = Some(Spanned::new(Identifier::new(instance_name), span.clone()));
-            return Ok(vec![Spanned::new(Statement::Shape(shape), span.clone())]);
+            let mut out = vec![Spanned::new(Statement::Shape(shape), span.clone())];
+            out.extend(states);
+            return Ok(out);
         }
     }
+    expanded.extend(states);
 
     // Multiple elements or custom anchors: wrap them in a group with the instance name
     // This allows the instance name to be used in connections and constraints
@@ -512,7 +532,7 @@ fn resolve_inline_template(
     let group = GroupDecl {
         name: Some(Spanned::new(Identifier::new(instance_name), span.clone())),
         children: expanded,
-        modifiers: vec![],
+        modifiers: group_modifiers,
         anchors: prefixed_anchors,
         is_template_instance: true,
     };
@@ -582,6 +602,37 @@ fn resolve_statement(
 }
 
 /// Substitute parameter references in a statement
+/// A state's transforms may use the template's parameters as values
+/// (`transform txt [label: done_text]`).
+fn substitute_motion_params(nodes: &[Spanned<MotionNode>], params: &HashMap<String, StyleValue>) -> Vec<Spanned<MotionNode>> {
+    nodes
+        .iter()
+        .map(|n| {
+            let node = match &n.node {
+                MotionNode::Stmt(st) => {
+                    let mut st = st.clone();
+                    if let MotionVerb::Transform { modifiers, .. } = &mut st.verb {
+                        for m in modifiers {
+                            if let StyleValue::Identifier(id) = &m.node.value.node {
+                                if let Some(v) = params.get(&id.0) {
+                                    m.node.value.node = v.clone();
+                                }
+                            }
+                        }
+                    }
+                    MotionNode::Stmt(st)
+                }
+                MotionNode::Then(b) => MotionNode::Then(substitute_motion_params(b, params)),
+                MotionNode::After(t, b) => MotionNode::After(*t, substitute_motion_params(b, params)),
+                MotionNode::At(t, b) => MotionNode::At(*t, substitute_motion_params(b, params)),
+                MotionNode::When(e, t, b) => MotionNode::When(e.clone(), *t, substitute_motion_params(b, params)),
+                MotionNode::Beat(nm, b) => MotionNode::Beat(nm.clone(), substitute_motion_params(b, params)),
+            };
+            Spanned::new(node, n.span.clone())
+        })
+        .collect()
+}
+
 fn substitute_parameters(
     stmt: Spanned<Statement>,
     params: &HashMap<String, StyleValue>,

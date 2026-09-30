@@ -117,7 +117,7 @@ fn collect_ids_from_statement(stmt: &Statement, ids: &mut HashSet<String>) {
             // Template instances define new element identifiers
             ids.insert(inst.instance_name.node.0.clone());
         }
-        Statement::Export(_) | Statement::AnchorDecl(_) | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {
+        Statement::Export(_) | Statement::AnchorDecl(_) | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => {
             // Exports, anchor declarations, and keyframes don't define new element identifiers
         }
     }
@@ -204,7 +204,7 @@ fn validate_refs_in_statement(
         Statement::Export(_) | Statement::AnchorDecl(_) => {
             // Exports and anchor declarations are validated during template resolution
         }
-        Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) => {
+        Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => {
             // Macros are expanded (and their references checked) by motion::expand.
         }
         Statement::Keyframe(kf) => {

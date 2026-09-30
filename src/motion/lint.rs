@@ -52,6 +52,10 @@ pub fn check(
     base: &LayoutResult,
 ) -> Vec<LintWarning> {
     let mut out = Vec::new();
+    appears_before_line(m, base, &mut out);
+    appears_and_show(doc, &mut out);
+    chained_after(doc, &mut out);
+    swap_apart(doc, base, &mut out);
     let show = |id: &str| m.display.get(id).cloned().unwrap_or_else(|| id.to_string());
     let mut parent_of = HashMap::new();
     parents(&base.root_elements, None, &mut parent_of);
@@ -244,12 +248,259 @@ pub fn check(
     out
 }
 
+/// Where along a polyline (0..1) a point sits, if it is within `tol` of it.
+fn fraction_on(pl: &crate::motion::geom::Polyline, p: crate::layout::types::Point, tol: f64) -> Option<f64> {
+    let total = *pl.cum.last()?;
+    if total <= 0.0 {
+        return None;
+    }
+    let mut best: Option<(f64, f64)> = None;
+    for i in 0..pl.pts.len().saturating_sub(1) {
+        let (a, b) = (pl.pts[i], pl.pts[i + 1]);
+        let (dx, dy) = (b.x - a.x, b.y - a.y);
+        let l2 = dx * dx + dy * dy;
+        let u = if l2 == 0.0 { 0.0 } else { (((p.x - a.x) * dx + (p.y - a.y) * dy) / l2).clamp(0.0, 1.0) };
+        let (qx, qy) = (a.x + dx * u, a.y + dy * u);
+        let d = ((p.x - qx).powi(2) + (p.y - qy).powi(2)).sqrt();
+        if d <= tol && best.is_none_or(|(bd, _)| d < bd) {
+            best = Some((d, (pl.cum[i] + u * l2.sqrt()) / total));
+        }
+    }
+    best.map(|(_, f)| f)
+}
+
+/// Something that sits on a line appears before the line, being drawn,
+/// has reached it (a station popping ahead of its track).
+fn appears_before_line(m: &Motion, base: &LayoutResult, out: &mut Vec<LintWarning>) {
+    use crate::motion::compile::{drawable_polyline, Prop, Val};
+    let tokens = crate::motion::tokens::MotionTokens::default();
+    let show = |id: &str| m.display.get(id).cloned().unwrap_or_else(|| id.to_string());
+    let lines: Vec<(String, crate::motion::geom::Polyline, usize)> = m
+        .aux
+        .drawables
+        .keys()
+        .filter_map(|id| {
+            let pl = drawable_polyline(base, id)?;
+            let mask = format!(".aimask-{}{}", m.scope, id);
+            let ch = m.channels.iter().position(|k| k.sel == mask && k.prop == Prop::DashOffset)?;
+            Some((id.clone(), pl, ch))
+        })
+        .collect();
+    for (fi, f) in m.frames.iter().enumerate() {
+        for a in f.atoms.iter().filter(|a| a.kind == "show") {
+            let Some(e) = base.get_element_by_name(&a.target_id) else { continue };
+            let c = e.bounds.center();
+            for (line, pl, ch) in &lines {
+                let Some(at) = fraction_on(pl, c, 3.0) else { continue };
+                let drawn = |t: f64| match &m.sample(fi, t, &tokens)[*ch] {
+                    Val::V(v) => 1.0 - v.first().copied().unwrap_or(0.0),
+                    _ => 1.0,
+                };
+                if drawn(a.start) + 0.01 >= at {
+                    continue;
+                }
+                let arrives = (0..=((f.duration - a.start) / 0.01).ceil() as usize)
+                    .map(|k| a.start + k as f64 * 0.01)
+                    .find(|t| drawn(*t) + 0.005 >= at);
+                out.push(warn(
+                    LintCategory::Motion,
+                    &f.name,
+                    match arrives {
+                        Some(t) => format!(
+                            "{} appears at {:.2}s but {} only reaches it at {:.2}s: time it on the line \
+                             (`when {} reaches {} {{ ... }}`)",
+                            show(&a.target_id), a.start, show(line), t, show(line), show(&a.target_id)
+                        ),
+                        None => format!(
+                            "{} appears at {:.2}s on {}, which is not drawn to it in this step",
+                            show(&a.target_id), a.start, show(line)
+                        ),
+                    },
+                ));
+            }
+        }
+    }
+}
+
+/// `appears: X` on an element and a `show` of it in X: two places say when
+/// it comes on. Keep one: `appears: later` with the show (when and how), or
+/// `appears: X` alone (it enters at the start of X with the default entrance).
+fn appears_and_show(doc: &Document, out: &mut Vec<LintWarning>) {
+    use crate::parser::ast::{MotionNode, MotionVerb, Selector, Statement, StyleKey, StyleValue};
+    fn decls(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<(String, String, std::ops::Range<usize>)>) {
+        for st in stmts {
+            let (name, mods, kids) = match &st.node {
+                Statement::Shape(s) => (s.name.as_ref().map(|n| n.node.0.clone()), &s.modifiers[..], &[][..]),
+                Statement::Group(g) => (g.name.as_ref().map(|n| n.node.0.clone()), &g.modifiers[..], &g.children[..]),
+                Statement::Layout(l) => (l.name.as_ref().map(|n| n.node.0.clone()), &l.modifiers[..], &l.children[..]),
+                _ => continue,
+            };
+            if let Some(name) = name {
+                for m in mods {
+                    if !matches!(&m.node.key.node, StyleKey::Custom(k) if k == "appears") {
+                        continue;
+                    }
+                    let when = match &m.node.value.node {
+                        StyleValue::String(s) | StyleValue::Keyword(s) => s.clone(),
+                        StyleValue::Identifier(i) => i.0.clone(),
+                        _ => continue,
+                    };
+                    if when != "later" {
+                        out.push((name.clone(), when, m.node.value.span.clone()));
+                    }
+                }
+            }
+            decls(kids, out);
+        }
+    }
+    fn explicit_show(nodes: &[crate::parser::ast::Spanned<MotionNode>], id: &str, inserted: &std::ops::Range<usize>) -> bool {
+        nodes.iter().any(|n| match &n.node {
+            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                explicit_show(b, id, inserted)
+            }
+            MotionNode::Stmt(st) => {
+                n.span != *inserted
+                    && matches!(&st.verb, MotionVerb::Show(v) if st.targets.iter().any(|t| t == id)
+                        || v.iter().any(|s| matches!(&s.node, Selector::Name(x) if x.replace('.', "_") == id)))
+            }
+        })
+    }
+    let mut found = Vec::new();
+    decls(&doc.statements, &mut found);
+    for (id, when, span) in found {
+        for st in &doc.statements {
+            let Statement::Keyframe(k) = &st.node else { continue };
+            if k.name.node == when && explicit_show(&k.motion, &id, &span) {
+                out.push(warn(
+                    LintCategory::Motion,
+                    &k.name.node,
+                    format!(
+                        "{} says when it comes on twice: `appears: {}` and a `show` in \"{}\". \
+                         Write `appears: later` and keep the show (it says when and how), or drop the show",
+                        id.replace('_', "."),
+                        when,
+                        when
+                    ),
+                ));
+            }
+        }
+    }
+}
+
+/// `swap a -> b` turns a into b where a is: b somewhere else pops there.
+/// (A morph travels; that is its point.)
+fn swap_apart(doc: &Document, base: &LayoutResult, out: &mut Vec<LintWarning>) {
+    use crate::parser::ast::{MotionNode, MotionOpt, MotionValue, MotionVerb, Spanned, Statement};
+    fn walk(nodes: &[Spanned<MotionNode>], f: &mut dyn FnMut(&crate::parser::ast::MotionStmt)) {
+        for n in nodes {
+            match &n.node {
+                MotionNode::Stmt(s) => f(s),
+                MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => walk(b, f),
+            }
+        }
+    }
+    let via = |opts: &[Spanned<MotionOpt>]| {
+        opts.iter().find(|o| o.node.key.node == "via").and_then(|o| match &o.node.value.node {
+            MotionValue::Name(n) => Some(n.clone()),
+            _ => None,
+        })
+    };
+    for st in &doc.statements {
+        let Statement::Keyframe(k) = &st.node else { continue };
+        walk(&k.motion, &mut |s| {
+            if !matches!(s.verb, MotionVerb::Swap { .. }) || via(&s.opts).as_deref() == Some("morph") {
+                return;
+            }
+            // `flip: pg`: that part turns, the rest crossfades; the part must
+            // be in place.
+            let member = s.opts.iter().find(|o| o.node.key.node == "flip").and_then(|o| match &o.node.value.node {
+                MotionValue::Name(n) => Some(n.replace('.', "_")),
+                _ => None,
+            });
+            for (a, b) in s.targets.iter().zip(&s.partners) {
+                let (a, b) = match &member {
+                    Some(m) => (format!("{}_{}", a, m), format!("{}_{}", b, m)),
+                    None => (a.clone(), b.clone()),
+                };
+                let (a, b) = (&a, &b);
+                let (Some(ea), Some(eb)) = (base.get_element_by_name(a), base.get_element_by_name(b)) else { continue };
+                let (ca, cb) = (ea.bounds.center(), eb.bounds.center());
+                if (ca.x - cb.x).abs() > 4.0 || (ca.y - cb.y).abs() > 4.0 {
+                    out.push(warn(
+                        LintCategory::Motion,
+                        &k.name.node,
+                        format!(
+                            "swap {} -> {}: {} is {:.0}px away from {}, so it turns into something elsewhere. \
+                             Place it there (`constrain {}.center = {}.center`), or change one element with \
+                             `transform {} [label: ..., swap: fade]`",
+                            a.replace('_', "."),
+                            b.replace('_', "."),
+                            b.replace('_', "."),
+                            ((ca.x - cb.x).powi(2) + (ca.y - cb.y).powi(2)).sqrt(),
+                            a.replace('_', "."),
+                            b.replace('_', "."),
+                            a.replace('_', "."),
+                            a.replace('_', "."),
+                        ),
+                    ));
+                }
+            }
+        });
+    }
+}
+
+/// `after 0.2 { a }  after 0.3 { b }  after 0.4 { c }`: each offset counts
+/// from the one before, so c's time is a sum nobody wrote down, and moving a
+/// comes with moving everything after it. Say what it waits for instead.
+fn chained_after(doc: &Document, out: &mut Vec<LintWarning>) {
+    use crate::parser::ast::{MotionNode, Statement};
+    fn walk(nodes: &[crate::parser::ast::Spanned<MotionNode>], frame: &str, out: &mut Vec<LintWarning>) {
+        let offsets: Vec<f64> = nodes
+            .iter()
+            .filter_map(|n| match &n.node {
+                MotionNode::After(t, _) if *t > 0.0 => Some(*t),
+                _ => None,
+            })
+            .collect();
+        if offsets.len() >= 2 {
+            let total: f64 = offsets.iter().sum();
+            out.push(warn(
+                LintCategory::Motion,
+                frame,
+                format!(
+                    "{} `after` offsets in a row ({} = {:.2}s): each counts from the one before. \
+                     Time by what they wait for (`when <line> reaches <el>`, `when <el> shown`, \
+                     `beat name {{ ... }}` + `after name`) or from the frame start (`at <t>`)",
+                    offsets.len(),
+                    offsets.iter().map(|t| format!("{}", t)).collect::<Vec<_>>().join(" + "),
+                    total
+                ),
+            ));
+        }
+        for n in nodes {
+            match &n.node {
+                // A macro's body is inlined as `after 0`: its own business.
+                MotionNode::After(t, _) if *t == 0.0 => {}
+                MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                    walk(b, frame, out)
+                }
+                MotionNode::Stmt(_) => {}
+            }
+        }
+    }
+    for st in &doc.statements {
+        if let Statement::Keyframe(k) = &st.node {
+            walk(&k.motion, &k.name.node, out);
+        }
+    }
+}
+
 /// Whether a keyframe is written with motion (beats, motion-only verbs,
 /// timing) rather than as a plain show/hide/transform state change.
 fn uses_motion(nodes: &[crate::parser::ast::Spanned<crate::parser::ast::MotionNode>]) -> bool {
     use crate::parser::ast::{MotionNode, MotionVerb, StyleKey};
     nodes.iter().any(|n| match &n.node {
-        MotionNode::Then(_) | MotionNode::After(..) | MotionNode::At(..) => true,
+        MotionNode::Then(_) | MotionNode::After(..) | MotionNode::At(..) | MotionNode::When(..) | MotionNode::Beat(..) => true,
         MotionNode::Stmt(st) => {
             !st.opts.is_empty()
                 || match &st.verb {

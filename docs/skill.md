@@ -37,6 +37,12 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Content kept inside a slide area | `rect stage [..., canvas: true]` (leaving it is an error) | checking by eye |
 | A transit/metro line through stations | `path p [through: [a, b, c], routing: metro]` (names get room) | a hand-drawn path |
 | Moving something in a keyframe | `move x to y` / `move x home` | `transform x [dx: ...]` |
+| A few elements placed differently for a while | `layout beside { constrain ... }` + `use layout beside` / `use layout default` | disable/enable pairs of named constraints |
+| An invisible place to anchor to | `point hub` | a 1×1 rect with no fill and no stroke |
+| Many instances, several arguments each | `k* [items: [{fname: "a", c1: role-ok}, ...]]` | parallel lists that must stay in step |
+| A component with looks (pending / done) | `state done { ... }` in the template, `set x done` | the same transforms repeated per keyframe |
+| Something that happens when a line arrives | `when line reaches st.dot { ... }` | summed `after` offsets |
+| Checking what each step shows | `--states` | rendering every frame to look |
 | Source code or a diff | `code c [lang: python, source: "..."]`, `code d [diff: "-a\n+b"]` | mono rects with hand-coloured spans |
 | A designed icon you can animate by part | `template "x" from "x.svg"` with ids in the file (`d.fold`) | a stack of rects |
 | Colours that survive a change of theme | roles: `role-primary`, `role-ink`, `role-surface` | palette slots in reusable files |
@@ -457,8 +463,9 @@ Create animated sequences where elements appear/disappear across frames.
    each one (`--list-frames` prints the names; `--frame <name>` renders one)
 4. Use `--animate` for self-contained playback, or add external CSS transitions
 
-Timed motion (draw a line, fly a copy, pulse, beats with `then` / `after` /
-`at`, entrances, the `--animate` player, stills with `--at`, the built-in
+Timed motion (draw a line, fly a copy, pulse, timing by events with `when` /
+`beat` / `then` / `at`, entrances, named layouts, component states, the
+`--animate` player, the `--states` storyboard, stills with `--at`, the built-in
 `ail:motion/git` macros) is a whole skill of its own: read `--skill-animation`.
 
 ### Syntax
