@@ -2,10 +2,12 @@
    Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate spa-classic.ail
 
    STORYBOARD
-     start   a browser showing the Orders page; the Django server with a page template and the database
-     click   "Order 42": the request goes to the server; template + data become a whole HTML page;
+     start   a browser on the home page, with a big "Go to orders" button; the Django server with a page
+             template and the database
+     click   "Go to orders": the request goes to the server; template + data become a whole HTML page;
              it travels back; the browser blanks and redraws everything
-     again   "Order 43": the same round trip; header and menu come back again though only the middle changed
+             the orders come back as a small datagrid
+     again   click order 42: the same round trip; header and menu come back again though only the middle changed
 */
 
 import "spa-parts.ail"
@@ -16,7 +18,7 @@ import "spa-parts.ail"
 
 slide s [num: "1", title: "Old style: the server builds every page"]
 
-browser web []
+browser web [url: "acme.example.com", shows: ""]
 constrain web.bg.left = s.stage.left + 90
 constrain web.bg.center_y = s.stage.center_y + 30
 
@@ -43,7 +45,7 @@ constrain data_lbl.center_x = data.center_x
 constrain data_lbl.top = tmpl_lbl.top
 
 // What travels: the request, and the whole page that comes back.
-rect req [label: "GET /orders/42", font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
+rect req [label: "GET /orders", font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
           fill: role-ink, stroke: none, corner_radius: 8, appears: later]
 constrain req.center_x = midpoint(web.bg.right, server.left)
 constrain req.bottom = web.bg.top + 110
@@ -70,7 +72,7 @@ motion request(url: text, bar: text) {
 // The reply: a whole page travels back; the browser blanks and redraws all of it.
 motion whole_page(shows: text) {
     fly reply from tmpl to web.content [duration: slow, scale: 1]
-    when reply arrives { hide web.header, web.menu, web.content [exit: fade, duration: fast] }
+    when reply arrives { hide web.header, web.menu, web.content, web.cta, web.table [exit: fade, duration: fast] }
     then {
         transform web.content [label: shows, swap: cut]
         show web.header, web.menu, web.content [enter: fade, stagger: 0.08]
@@ -84,18 +86,21 @@ keyframe "start" [title: "Old style: the server builds every page"] {
 }
 
 keyframe "click" {
-    request("GET /orders/42", "acme.example.com/orders/42")
+    pulse web.cta
+    request("GET /orders", "acme.example.com/orders")
 }
 
 keyframe "click_reply" [auto] {
-    whole_page("Order 42")
+    whole_page("")
+    then { show web.table [enter: fade] }
 }
 
 keyframe "again" {
-    request("GET /orders/43", "acme.example.com/orders/43")
+    highlight web.tr1 [color: role-primary]
+    request("GET /orders/42", "acme.example.com/orders/42")
 }
 
 keyframe "again_reply" [auto] {
-    whole_page("Order 43")
+    whole_page("Order 42")
     then { highlight web.header [color: role-warn]; highlight web.menu [color: role-warn] }
 }

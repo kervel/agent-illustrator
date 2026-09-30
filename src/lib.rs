@@ -13,6 +13,7 @@
 
 pub mod code;
 pub mod raster;
+pub mod table;
 pub mod error;
 pub mod layout;
 pub mod motion;
@@ -587,7 +588,9 @@ fn render_pipeline(
     // `code` blocks become generated templates of ordinary parts.
     let doc = {
         let aliases = doc.aliases;
-        let statements = code::expand_code_blocks(code::expand_points(doc.statements), config.template_base_path.as_deref())
+        let statements = table::expand_tables(doc.statements)
+            .map_err(|(span, message)| RenderError::Layout(LayoutError::Located { message, span }))?;
+        let statements = code::expand_code_blocks(code::expand_points(statements), config.template_base_path.as_deref())
             .map_err(|(span, message)| RenderError::Layout(LayoutError::Located { message, span }))?;
         Document { statements, aliases }
     };

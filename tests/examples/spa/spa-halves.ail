@@ -1,0 +1,79 @@
+/* Single-page apps, slide 3: "Screen and API: two halves of every feature".
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate spa-halves.ail
+
+   STORYBOARD
+     feature  one feature card: "Show the delivery date on the order"
+     split    it splits into the screen half (Angular) and the API half (Django), each with its questions
+     where    two examples land in the half they belong to: a button that looks wrong is the screen;
+              who may see the price is an API rule, because hiding it on the screen is not enough
+*/
+
+import "spa-parts.ail"
+
+// ---------------------------------------------------------------- parts
+
+// A card: a coloured title bar and a body of text.
+template "card" (title: "Title", body: "", tint: role-primary) {
+    rect bg [width: 470, height: 250, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+    rect bar [width: 470, height: 56, fill: tint, stroke: none, clip: bg,
+              label: title, align: start, font_size: 24, font_weight: 700, label_fill: role-surface]
+    rect text_area [fill: none, stroke: none, label: body, font_size: 21, label_fill: role-ink, align: start,
+                    max_width: 420]
+    constrain bar.top = bg.top
+    constrain bar.left = bg.left
+    constrain text_area.left = bg.left + 24
+    constrain text_area.top = bar.bottom + 20
+}
+
+// An example of a request or a problem, as a sticky note.
+template "note" (says: "example", tint: role-warn-soft) {
+    rect bg [fill: tint, stroke: role-ink, stroke_width: 2, corner_radius: 8, label: says, font_size: 20,
+             font_weight: 600, label_fill: role-ink, max_width: 400]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "3", title: "Screen and API: two halves of every feature"]
+
+rect feature [label: "Show the delivery date on the order", font_size: 28, font_weight: 700, label_fill: role-ink,
+              fill: role-surface-2, stroke: role-ink, stroke_width: 3, corner_radius: 14, width: 620, height: 110]
+constrain feature.center_x = s.stage.center_x
+constrain feature.top = s.stage.top + 130
+
+card screen [title: "Screen · Angular", tint: role-series-1, appears: later,
+             body: "Where does the date show?\nHow does it look?\nWhat if there is none yet?"]
+card api [title: "API · Django", tint: role-primary, appears: later,
+          body: "Where does the date come from?\nWho may see it?\nIs it right for every order?"]
+constrain screen.bg.right = s.stage.center_x - 30
+constrain screen.bg.top = feature.bottom + 60
+constrain api.bg.left = s.stage.center_x + 30
+constrain api.bg.top = screen.bg.top
+
+note ex_screen [says: "“The button looks wrong”", appears: later]
+note ex_api [says: "“Wrong people see the price”\nhiding it on screen is not enough", appears: later]
+constrain ex_screen.bg.center_x = screen.bg.center_x
+constrain ex_screen.bg.top = screen.bg.bottom + 36
+constrain ex_api.bg.center_x = api.bg.center_x
+constrain ex_api.bg.top = api.bg.bottom + 36
+
+// ---------------------------------------------------------------- motion
+
+keyframe "feature" [title: "Screen and API: two halves of every feature"] {
+    slide_in(s)
+    at 0.2 { show feature [enter: pop] }
+}
+
+keyframe "split" {
+    show screen, api [from: feature, duration: slow, stagger: 0.12]
+    when api arrives { transform feature [opacity: 0.45, duration: fast] }
+}
+
+keyframe "where" {
+    show ex_screen [from: feature, duration: slow]
+    when ex_screen arrives { pulse screen.bar }
+}
+
+keyframe "where_api" [auto, after: 0.4] {
+    show ex_api [from: feature, duration: slow]
+    when ex_api arrives { pulse api.bar }
+}

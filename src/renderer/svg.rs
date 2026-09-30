@@ -1583,7 +1583,7 @@ fn render_element_body(
             // `.ai-rect { rx: 4 }` would beat the attribute and square off a
             // rounded tag the author asked for.
             let styles = match element.styles.corner_radius {
-                Some(r) if r > 0.0 => format!(r#"{} rx="{r}" style="rx:{r}px;ry:{r}px""#, styles),
+                Some(r) => format!(r#"{} rx="{r}" style="rx:{r}px;ry:{r}px""#, styles),
                 _ => styles,
             };
             render_shape_with_rotation(element, builder, |b| {

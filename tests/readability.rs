@@ -446,3 +446,30 @@ fn something_shown_and_hidden_within_a_frame_is_not_hidden_throughout() {
     let w = lint(src);
     assert!(!w.iter().any(|m| m.contains("hidden the whole keyframe")), "{w:?}");
 }
+
+#[test]
+fn a_table_is_one_element_with_rows_as_parts() {
+    let src = r#"
+table orders [columns: ["#", "customer", "status"],
+              rows: [["41", "Stroopwafels BV", "shipped"], ["42", "Acme Bikes", "open"]],
+              widths: [60, 210, 114], font_size: 18]
+keyframe "a" { }
+keyframe "b" { highlight orders.row[2] [color: red]
+ transform orders.r2c2 [label: "shipped", swap: fade] }
+"#;
+    let svg = render(src);
+    for part in ["orders_bg", "orders_head", "orders_row2", "orders_r1c1"] {
+        assert!(svg.contains(&format!(r#"id="{part}""#)), "{part}");
+    }
+    assert!(svg.contains("Stroopwafels BV"));
+    assert_eq!(attr(&svg, "orders_r1c1", "x") - attr(&svg, "orders_r1c0", "x"), 60.0, "cells flush, by width");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+    let s = states(src);
+    assert!(s.contains(r#"orders.r2c2 [label: "shipped"]"#), "{s}");
+}
+
+#[test]
+fn an_explicit_zero_corner_radius_beats_the_stylesheet() {
+    let svg = render("rect a [width: 40, height: 20, corner_radius: 0]");
+    assert!(svg.contains(r#"style="rx:0px;ry:0px""#), "{svg}");
+}

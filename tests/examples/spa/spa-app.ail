@@ -16,7 +16,7 @@ import "spa-parts.ail"
 
 slide s [num: "2", title: "A single-page app: the app moves into the browser"]
 
-browser web [header.appears: later, menu.appears: later, content.appears: later]
+browser web [url: "acme.example.com", header.appears: later, menu.appears: later, content.appears: later, cta.appears: later]
 constrain web.bg.left = s.stage.left + 90
 constrain web.bg.center_y = s.stage.center_y + 30
 
@@ -73,11 +73,11 @@ rect bot_lbl [label: "AI agent", font_size: 17, font_weight: 600, label_fill: ro
 constrain phone.center_x = req.center_x - 40
 constrain phone.bottom = web.bg.bottom - 150
 constrain bot.center_x = phone.center_x
-constrain bot.top = phone.bottom + 50
-constrain phone_lbl.left = phone.right + 14
-constrain phone_lbl.center_y = phone.center_y
-constrain bot_lbl.left = bot.right + 14
-constrain bot_lbl.center_y = bot.center_y
+constrain bot.top = phone.bottom + 56
+constrain phone_lbl.center_x = phone.center_x
+constrain phone_lbl.top = phone.bottom + 6
+constrain bot_lbl.center_x = bot.center_x
+constrain bot_lbl.top = bot.bottom + 6
 phone.right -> api.left as phone_api [stroke: role-rule, stroke_width: 3, appears: later]
 bot.right -> api.left as bot_api [stroke: role-rule, stroke_width: 3, appears: later]
 
@@ -91,10 +91,15 @@ keyframe "start" [title: "A single-page app: the app moves into the browser"] {
 
 keyframe "load" {
     fly ghost(app_files) to web.bg [duration: slow, scale: 1]
-    when app_files arrives { show web.header, web.menu, web.content [enter: pop, stagger: 0.1] }
+    when app_files arrives {
+        transform web.bar [label: "acme.example.com/orders", swap: roll]
+        transform web.content [label: "", swap: cut]
+        show web.header, web.menu, web.content, web.table [enter: pop, stagger: 0.1]
+    }
 }
 
 keyframe "click" {
+    highlight web.tr1 [color: role-primary]
     transform web.bar [label: "acme.example.com/orders/42", swap: roll]
     fly req from web.content to api [duration: slow, scale: 1]
     when req arrives { flash data }
@@ -102,7 +107,10 @@ keyframe "click" {
 
 keyframe "click_reply" [auto] {
     fly answer from api to web.content [duration: slow, scale: 1]
-    when answer arrives { transform web.content [label: "Order 42 · shipped", swap: fade] }
+    when answer arrives {
+        hide web.table [exit: fade, duration: fast]
+        transform web.content [label: "Order 42 · shipped", swap: fade]
+    }
 }
 
 keyframe "push" {

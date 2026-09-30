@@ -1709,7 +1709,8 @@ fn collect_labels_in(
             .or_else(|| grid_cell_name(elem, siblings))
             .unwrap_or_else(|| "<anon>".to_string())
     };
-    if let Some(label) = &elem.label {
+    // An empty label ("") draws nothing, so it overlaps nothing.
+    if let Some(label) = elem.label.as_ref().filter(|l| !l.text.trim().is_empty()) {
         let bbox = estimate_label_bbox_styled(label, &elem.styles);
         let on_own_fill = is_visual_shape(elem)
             && is_opaque(elem)

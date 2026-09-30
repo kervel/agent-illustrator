@@ -710,6 +710,23 @@ fn write_node(n: roxmltree::Node, rules: &[Rule], vars: &HashMap<String, String>
         attrs.retain(|(k, _)| !k.starts_with("xmlns"));
         out.push_str(r#" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink""#);
     }
+    // `dominant-baseline: middle` on a label is not applied through its
+    // tspans by the rasteriser: shift the text down by what the browser does
+    // (the middle of the x-height sits on y), and drop the attribute.
+    if name == "text" {
+        let middle = attrs.iter().any(|(k, v)| k == "dominant-baseline" && (v == "middle" || v == "central"));
+        if middle {
+            let fs = attrs.iter().find(|(k, _)| k == "font-size").map(|(_, v)| num(v)).unwrap_or(16.0);
+            let dy = fs * 0.35;
+            attrs.retain(|(k, _)| k != "dominant-baseline");
+            let own = attrs.iter().find(|(k, _)| k == "transform").map(|(_, v)| v.clone());
+            let t = match own {
+                Some(o) => format!("{} translate(0 {})", o, dy),
+                None => format!("translate(0 {})", dy),
+            };
+            set(&mut attrs, "transform", t);
+        }
+    }
     for (k, v) in &attrs {
         out.push_str(&format!(r#" {}="{}""#, k, escape(v)));
     }

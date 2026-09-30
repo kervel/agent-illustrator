@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.13
+
+- `table`: a small datagrid as one element (`columns:`, `rows:` as lists or
+  records with `keys:`, `widths:`, `font_size:`, `mono:`). Square flush cells,
+  header band, rules, theme roles; rows are parts (`orders.row[2]`,
+  `orders.rows[2..4]`, cells `orders.r2c1`) for highlight, transform and
+  appears (G24). Value lists may hold lists (`[["a", "b"], ["c", "d"]]`).
+- `corner_radius: 0` is written out, so a stylesheet's default rounding no
+  longer wins over an explicit square corner (G25).
+- An empty label is not a label for the label-overlap lint (G23).
+- PNG: labels sit where the browser puts them (the vertical centring of
+  `dominant-baseline: middle` is applied as a shift; text sat a few pixels
+  high before).
+
 ## v0.2.12
 
 - Fix: a flying ghost of SVG artwork could glue two attributes together

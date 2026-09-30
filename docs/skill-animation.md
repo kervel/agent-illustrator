@@ -725,6 +725,21 @@ template "machine" (title: "Laptop") {
 In a `col` of rows under a header, `col body [gap: 0, padding: 0]` puts them
 flush with the frame. Code blocks' title bars do this already.
 
+### Tables on a slide
+
+A small datagrid is one element, not rows of rects fighting the defaults:
+```
+table orders [columns: ["#", "customer", "status"],
+              rows: [["41", "Stroopwafels BV", "shipped"], ["42", "Acme Bikes", "open"]],
+              widths: [60, 210, 114], font_size: 18, mono: [0]]
+keyframe "pick" { highlight orders.row[2] [color: role-primary] }
+keyframe "ship" { transform orders.r2c2 [label: "shipped", swap: fade] }
+```
+Cells are square and flush and keep their spacing; the header band and rules
+use theme roles. Rows are parts (`orders.row2`, `orders.rows[1..3]`), so they
+can appear later, be highlighted, or be recoloured (`transform orders.row2
+[fill: role-ok-soft]`).
+
 ### Code on a slide
 
 ```

@@ -354,6 +354,16 @@ Motion statements (full guide: --skill-animation):
     import "file.ail" | "ail:motion/git"   templates + motion macros
 Selectors: a, a.b.c (nested parts), group.*, .class, all except a, b
 
+TABLES
+    table orders [columns: ["#", "customer", "status"],
+                  rows: [["41", "Stroopwafels BV", "shipped"], ["42", "Acme Bikes", "open"]],
+                  widths: [60, 210, 114], font_size: 18, mono: [0], row_height: 42]
+    rows may be records with keys: [nr, who, state] naming the field per column.
+    Square cells, a header band, rules; widths default to the longest cell.
+    Parts: bg, head, h0.., row1.. (a band per row), r1c0.. (cells), rule1.., col1..
+    orders.row[2] = orders.row2; orders.rows[2..4] selects rows 2 to 4:
+    highlight orders.row[2]   transform orders.r2c2 [label: "shipped", swap: fade]
+
 CODE BLOCKS
     code c [lang: python, source: "def f():\n    return 1"]   highlighted, numbered lines
     code c [file: "cart.py", lines: "3-8"]                   from a file (lang from its extension)

@@ -690,7 +690,14 @@ where
         .collect::<Vec<_>>()
         .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
         .map_with(|fields, e| Spanned::new(StyleValue::Record(fields), span_range(&e.span())));
-    let value_list = choice((record, dotted_atom, value_atom.clone()))
+    // `[["41", "Acme"], ["42", "Delta"]]`: a list of lists (a table's rows).
+    let inner_list = choice((dotted_atom.clone(), value_atom.clone()))
+        .separated_by(just(Token::Comma))
+        .allow_trailing()
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
+        .map_with(|items, e| Spanned::new(StyleValue::List(items), span_range(&e.span())));
+    let value_list = choice((record, inner_list, dotted_atom, value_atom.clone()))
         .separated_by(just(Token::Comma))
         .allow_trailing()
         .collect::<Vec<_>>()
@@ -1782,6 +1789,10 @@ where
                             just(Token::Line).map_with(|_, e| {
                                 Some(Spanned::new(Identifier::new("line"), span_range(&e.span())))
                             }),
+                            // `t.row[2]`: `row` too.
+                            just(Token::Row).map_with(|_, e| {
+                                Some(Spanned::new(Identifier::new("row"), span_range(&e.span())))
+                            }),
                         )))
                         .repeated()
                         .collect::<Vec<_>>(),
@@ -1799,10 +1810,21 @@ where
                             .chain(rest.iter().filter_map(|p| p.as_ref().map(|i| i.node.0.clone())))
                             .collect();
                         let last = parts.last().cloned().unwrap_or_default();
+                        // A table's rows: `t.row[2]`, `t.rows[2..4]`.
+                        if parts.len() >= 2 && (last == "row" || last == "rows") {
+                            let table = parts[..parts.len() - 1].join(".");
+                            let a = a.node as usize;
+                            return Ok(match b {
+                                Some(b) => Selector::Many(
+                                    (a..=b.node as usize).map(|i| Selector::Name(format!("{}.row{}", table, i))).collect(),
+                                ),
+                                None => Selector::Name(format!("{}.row{}", table, a)),
+                            });
+                        }
                         if parts.len() < 2 || (last != "line" && last != "lines") {
                             return Err(Rich::custom(
                                 span,
-                                "an index goes on a code block's lines: `c.line[4]` or `c.lines[8..12]`",
+                                "an index goes on a code block's lines (`c.line[4]`, `c.lines[8..12]`) or a table's rows (`t.row[2]`, `t.rows[2..4]`)",
                             ));
                         }
                         let code = parts[..parts.len() - 1].join(".");
