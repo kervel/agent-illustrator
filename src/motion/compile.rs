@@ -989,6 +989,31 @@ fn event_time(ev: &MotionEvent, span: &Span, out: &[TimedStmt], ctx: &EventCtx) 
             .ok_or_else(|| err(format!("after {}: no `beat {} {{ ... }}` earlier in this keyframe", b.node, b.node))),
         MotionEvent::Arrives(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Move { .. } | MotionVerb::Fly { .. }))
             .map(|(s, ts)| s + ts.timing.dur)
+            // A transform that moves, turns or scales it: when that ends.
+            .or_else(|| {
+                use crate::parser::ast::StyleKey as K;
+                out.iter().rev().find_map(|ts| {
+                    let MotionVerb::Transform { modifiers, .. } = &ts.stmt.verb else { return None };
+                    let geometric = modifiers.iter().any(|m| {
+                        matches!(m.node.key.node, K::X | K::Y | K::Dx | K::Dy | K::Rotation | K::Scale | K::Width | K::Height)
+                    });
+                    if !geometric {
+                        return None;
+                    }
+                    let i = ts.stmt.targets.iter().position(|t| *t == e.node)?;
+                    Some(ts.starts.get(i).copied().unwrap_or(0.0) + ts.timing.dur)
+                })
+            })
+            // `show x [from: y]` flies it in: it arrives when it lands.
+            .or_else(|| {
+                out.iter().rev().find_map(|ts| {
+                    if !matches!(ts.stmt.verb, MotionVerb::Show(_)) || opt(&ts.stmt.opts, "from").is_none() {
+                        return None;
+                    }
+                    let i = ts.stmt.targets.iter().position(|t| *t == e.node)?;
+                    Some(ts.starts.get(i).copied().unwrap_or(0.0) + ts.timing.dur)
+                })
+            })
             // Moved by a layout change (`use layout beside`, a constraint):
             // when that change has played.
             .or_else(|| {
@@ -997,7 +1022,10 @@ fn event_time(ev: &MotionEvent, span: &Span, out: &[TimedStmt], ctx: &EventCtx) 
                     .find(|ts| matches!(ts.stmt.verb, MotionVerb::Constrain(_) | MotionVerb::Enable(_) | MotionVerb::Disable(_)))
                     .map(|ts| ts.starts.first().copied().unwrap_or(0.0) + ts.timing.dur)
             })
-            .ok_or_else(|| err(format!("when {} arrives: nothing moves or flies {} (and no layout changes) earlier in this keyframe", show(&e.node), show(&e.node)))),
+            .ok_or_else(|| err(format!(
+                "when {} arrives: nothing moves, flies, turns or resizes {} earlier in this keyframe (and no layout changes); for an entrance use `when {} shown`",
+                show(&e.node), show(&e.node), show(&e.node)
+            ))),
         MotionEvent::Shown(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Show(_)))
             .map(|(s, ts)| s + ts.timing.dur)
             .ok_or_else(|| err(format!("when {} shown: no `show {}` earlier in this keyframe", show(&e.node), show(&e.node)))),

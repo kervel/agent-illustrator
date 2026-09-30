@@ -1199,7 +1199,17 @@ fn resolve_shape_label(
     // `max_width:` lets a label keep its natural width until it would pass
     // this, then wrap: a translated or longer wording grows taller, not wider.
     let inside = own_label_position(&shape.modifiers) == ShapeLabelPosition::Inside;
-    let factor = font_width_factor(&shape.modifiers);
+    let mut factor = font_width_factor(&shape.modifiers);
+    // Monospace: the box is sized by characters times the advance, while
+    // wrapping measures proportionally. Convert with this label's own ratio,
+    // so the width that sized a code line never wraps it.
+    if is_mono(&shape.modifiers) {
+        let prop = crate::layout::text::measure_runs(&rich.lines, font_size).width;
+        let mono = mono_width(&rich, font_size);
+        if prop > 0.0 && mono > 0.0 {
+            factor = mono / prop;
+        }
+    }
     let wrap = crate::layout::types::LabelWrap {
         fixed: match (inside, extract_width_modifier(&shape.modifiers)) {
             (true, Some(w)) => Some((w - 2.0 * LABEL_INSET) / factor),

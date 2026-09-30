@@ -18,6 +18,9 @@ use std::sync::Arc;
 /// (assets/fonts/OFL.txt).
 const SANS: &[u8] = include_bytes!("../assets/fonts/Overpass[wght].ttf");
 const MONO: &[u8] = include_bytes!("../assets/fonts/OverpassMono[wght].ttf");
+/// Marks the text faces lack (✓ ✕ ★ ⚠ ☐ …): a subset of Noto Sans Symbols 2
+/// (OFL), used as the fallback for any character the chosen font has not.
+const SYMBOLS: &[u8] = include_bytes!("../assets/fonts/NotoSansSymbols2-subset.ttf");
 
 /// What happened on the way to the picture that the author should know.
 pub struct Raster {
@@ -34,15 +37,41 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
     let mut db = usvg::fontdb::Database::new();
     db.load_font_data(SANS.to_vec());
     db.load_font_data(MONO.to_vec());
+    db.load_font_data(SYMBOLS.to_vec());
     db.set_sans_serif_family("Overpass");
     db.set_serif_family("Overpass");
     db.set_monospace_family("Overpass Mono");
     let mut notes = Vec::new();
     for (family, data) in &flat.font_faces {
-        let before = db.len();
-        db.load_font_data(data.clone());
-        if db.len() == before {
-            notes.push(format!("@font-face '{}' could not be read as a font", family));
+        // Web fonts come as WOFF/WOFF2: unpack to the plain font first.
+        let data = match data.get(0..4) {
+            Some(b"wOF2") => wuff::decompress_woff2(data).map_err(|e| format!("{:?}", e)),
+            Some(b"wOFF") => wuff::decompress_woff1(data).map_err(|e| format!("{:?}", e)),
+            _ => Ok(data.clone()),
+        };
+        let data = match data {
+            Ok(d) => d,
+            Err(e) => {
+                notes.push(format!("@font-face '{}' could not be unpacked ({}); its text uses the fallback", family, e));
+                continue;
+            }
+        };
+        let before: std::collections::HashSet<usvg::fontdb::ID> = db.faces().map(|f| f.id).collect();
+        db.load_font_data(data);
+        let added: Vec<usvg::fontdb::ID> = db.faces().map(|f| f.id).filter(|id| !before.contains(id)).collect();
+        if added.is_empty() {
+            notes.push(format!("@font-face '{}' could not be read as a font (TTF, OTF, WOFF and WOFF2 are supported)", family));
+        }
+        // The stylesheet's name for it wins over the name inside the file
+        // (`'Avenir LT Std'` vs `AvenirLTStd-Book`).
+        for id in added {
+            if let Some(mut info) = db.face(id).cloned() {
+                if !info.families.iter().any(|(n, _)| n.eq_ignore_ascii_case(family)) {
+                    info.families.insert(0, (family.clone(), usvg::fontdb::Language::English_UnitedStates));
+                    db.remove_face(id);
+                    db.push_face_info(info);
+                }
+            }
         }
     }
     // Every family the text asks for first, and whether it is there.
@@ -58,6 +87,29 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
         notes.push(format!(
             "font '{}' is not available here (no system fonts are read); the next family in its list, or Overpass, is used. Embed it in the stylesheet as an @font-face data URI to use it",
             f
+        ));
+    }
+    // Characters no available font can draw (they come out as boxes).
+    let mut boxes: Vec<char> = flat
+        .chars
+        .iter()
+        .copied()
+        .filter(|c| !c.is_whitespace() && !c.is_control())
+        .filter(|c| {
+            !db.faces().any(|f| {
+                db.with_face_data(f.id, |data, index| {
+                    ttf_parser::Face::parse(data, index).ok().and_then(|face| face.glyph_index(*c)).is_some()
+                })
+                .unwrap_or(false)
+            })
+        })
+        .collect();
+    boxes.sort();
+    boxes.dedup();
+    if !boxes.is_empty() {
+        notes.push(format!(
+            "no available font has {}; they are drawn as boxes. Embed a font that has them as an @font-face data URI",
+            boxes.iter().map(|c| format!("'{}' (U+{:04X})", c, *c as u32)).collect::<Vec<_>>().join(", ")
         ));
     }
     if flat.remote_fonts {
@@ -84,6 +136,8 @@ struct Flat {
     font_faces: Vec<(String, Vec<u8>)>,
     /// The first family of every font-family list in use.
     families: Vec<String>,
+    /// Every character of the text.
+    chars: std::collections::BTreeSet<char>,
     remote_fonts: bool,
 }
 
@@ -406,7 +460,12 @@ fn flatten(svg: &str) -> Result<Flat, String> {
     let mut families = Vec::new();
     let mut out = String::with_capacity(svg.len());
     write_node(root, &rules, &vars, &mut out, &mut families);
-    Ok(Flat { svg: out, font_faces, families, remote_fonts: remote })
+    let chars = doc
+        .descendants()
+        .filter(|n| n.is_text() && n.ancestors().any(|a| a.tag_name().name() == "text"))
+        .flat_map(|n| n.text().unwrap_or("").chars().collect::<Vec<_>>())
+        .collect();
+    Ok(Flat { svg: out, font_faces, families, chars, remote_fonts: remote })
 }
 
 /// Length of an SVG path (M/L/H/V/C/Q/Z, absolute or relative; curves

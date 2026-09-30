@@ -154,7 +154,7 @@ text { white-space: pre; }
   <g id="codes" class="ai-container">
     <g id="k0" class="ai-container">
       <g id="k0_pg" class="ai-container">
-        <g id="k0_pg_art" class="ai-svg-embed" transform="translate(231.202, 225.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k0_pg__art" class="ai-svg-embed" transform="translate(231.202, 225.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -196,7 +196,7 @@ text { white-space: pre; }
     </g>
     <g id="k1" class="ai-container">
       <g id="k1_pg" class="ai-container">
-        <g id="k1_pg_art" class="ai-svg-embed" transform="translate(568.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k1_pg__art" class="ai-svg-embed" transform="translate(568.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -238,7 +238,7 @@ text { white-space: pre; }
     </g>
     <g id="k2" class="ai-container">
       <g id="k2_pg" class="ai-container">
-        <g id="k2_pg_art" class="ai-svg-embed" transform="translate(908.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k2_pg__art" class="ai-svg-embed" transform="translate(908.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -280,7 +280,7 @@ text { white-space: pre; }
     </g>
     <g id="k3" class="ai-container">
       <g id="k3_pg" class="ai-container">
-        <g id="k3_pg_art" class="ai-svg-embed" transform="translate(1248.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k3_pg__art" class="ai-svg-embed" transform="translate(1248.5, 225.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -322,7 +322,7 @@ text { white-space: pre; }
     </g>
     <g id="k4" class="ai-container">
       <g id="k4_pg" class="ai-container">
-        <g id="k4_pg_art" class="ai-svg-embed" transform="translate(228.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k4_pg__art" class="ai-svg-embed" transform="translate(228.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -364,7 +364,7 @@ text { white-space: pre; }
     </g>
     <g id="k5" class="ai-container">
       <g id="k5_pg" class="ai-container">
-        <g id="k5_pg_art" class="ai-svg-embed" transform="translate(568.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k5_pg__art" class="ai-svg-embed" transform="translate(568.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -406,7 +406,7 @@ text { white-space: pre; }
     </g>
     <g id="k6" class="ai-container">
       <g id="k6_pg" class="ai-container">
-        <g id="k6_pg_art" class="ai-svg-embed" transform="translate(908.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k6_pg__art" class="ai-svg-embed" transform="translate(908.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.
@@ -448,7 +448,7 @@ text { white-space: pre; }
     </g>
     <g id="k7" class="ai-container">
       <g id="k7_pg" class="ai-container">
-        <g id="k7_pg_art" class="ai-svg-embed" transform="translate(1248.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="k7_pg__art" class="ai-svg-embed" transform="translate(1248.5, 505.5) scale(1, 1) translate(-1.5, -1.5)">
           <title>Code file</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.

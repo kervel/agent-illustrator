@@ -438,8 +438,9 @@ keyframe "next_step" [auto, after: 0.3] { ... }   // plays by itself 0.3s after 
 Every event is a moment something **finishes**: `reaches` when the line's
 drawing passes the element's centre, `shown` when the latest `show` of it in this
 keyframe has finished entering, `hidden` when its latest exit has finished,
-`arrives` when its latest `move`/`fly` ends (or, if nothing moves it, when the
-latest layout change such as `use layout beside` has played), `after name` when
+`arrives` when its latest `move`/`fly` ends, or its `show [from: …]` flight
+lands, or a transform that moves, turns or resizes it ends (if nothing does,
+when the latest layout change such as `use layout beside` has played), `after name` when
 everything in `beat name` has ended. `+ 0.1` / `- 0.15` shift from that moment.
 Only statements earlier in the same keyframe count. `--timeline` prints each
 event with its resolved time (`when merged shown - 0.15 (= 1.20s, starts
@@ -459,6 +460,11 @@ show copy [from: original]        // appears at original's place and size, trave
 hide x [exit: fade | shrink | fall | lift | wipe(...)]
 motion [enter: pop, exit: fade]   // diagram-wide defaults (default: rise / fade)
 ```
+An outline around other elements (a dashed frame) enters with `[enter: draw]`
+or fades: popping or growing it scales its border through its contents, which
+reads as stray lines (`--lint` says so). Showing the parts of a container that
+is itself still hidden does nothing (`--lint` says that too).
+
 **One idiom:** declare at the element that it is not there from the start
 (`appears: later`), and let the verb that brings it on say when and how (`show
 ring [enter: fade]`, a `swap`, a macro, a `set`). `appears: go_back` (hidden
@@ -580,6 +586,13 @@ keyframe "go_back" { set status default [swap: fade] }
 ``` Name parameters so they do not shadow words used as values (a
 parameter called `later` would rewrite `appears: later`). Outside templates,
 `transform x [fill: initial]` returns a property to the declared value.
+
+### Many things at once
+
+A swarm is one statement: `move needs.* to box [stagger: 0.07]`,
+`move a, b, c to box`, `fly ghost(a, b, c) to box` (or `fly ghost(a),
+ghost(b) to box`), `transform m1, m2, m3 [fill: role-error]`. The busy-beat
+lint counts one statement as one gesture, however many targets it staggers.
 
 ### Selecting many things
 
@@ -721,6 +734,17 @@ git-copies.ail.
 Never paint the background colour to fake a hole (a backdrop-coloured
 triangle over a page's corner): on another background it shows. Cut the
 shape instead (the sheet in docx.svg is a path with its corner cut off).
+
+**Objects are artwork, not rects.** Agent Illustrator is not an icon-drawing
+tool. A recognisable object (a box, a laptop, a server, a person, a cloud, a
+document, a database) is best an SVG file with ids (`template "x" from
+"x.svg"`), themed with role colours. Its parts can then be animated. The
+language's defaults for scene primitives (corner radius, stroke and label
+defaults) are right for diagram elements, but they fight you when every shape
+of one object is deliberate. A hand-built page, a header bar made of two
+rects, or a box made of a rect and a lid all looked worse than the artwork
+that replaced them. Building an icon from shapes isn't forbidden, it's just
+not what the tool is for.
 
 ### A deck host's header and notes
 

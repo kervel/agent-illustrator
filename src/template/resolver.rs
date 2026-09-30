@@ -455,7 +455,10 @@ fn resolve_inline_template(
     // `[appears: later]`: it enters later.
     let group_modifiers: Vec<Spanned<StyleModifier>> = instance_modifiers
         .iter()
-        .filter(|m| matches!(&m.node.key.node, StyleKey::Opacity) || matches!(&m.node.key.node, StyleKey::Custom(k) if k == "appears"))
+        .filter(|m| {
+            matches!(&m.node.key.node, StyleKey::Opacity)
+                || matches!(&m.node.key.node, StyleKey::Custom(k) if k == "appears" || k == "overlaps")
+        })
         .cloned()
         .collect();
     let mut body = match &def.body {
@@ -829,6 +832,11 @@ fn substitute_parameters(
                     Identifier::new(format!("{}_{}", prefix, conn.from.element.node.0));
                 conn.to.element.node =
                     Identifier::new(format!("{}_{}", prefix, conn.to.element.node.0));
+                // `a.right -> b.left as w` names a part of this instance
+                // (`acme.w`), like any other part.
+                if let Some(n) = &mut conn.name {
+                    n.node = Identifier::new(format!("{}_{}", prefix, n.node.0));
+                }
                 conn.modifiers = substitute_modifiers(&conn.modifiers, params);
             }
             Spanned::new(Statement::Connection(conns), stmt.span)
@@ -957,6 +965,24 @@ fn prefix_identifier(id: &Spanned<Identifier>, prefix: &str) -> Spanned<Identifi
 }
 
 /// Substitute parameter references in modifiers
+/// `"release: {rname}"` with the template's parameters filled in.
+fn interpolate(text: &str, params: &HashMap<String, StyleValue>) -> String {
+    let mut out = text.to_string();
+    for (k, v) in params {
+        let needle = format!("{{{}}}", k);
+        if out.contains(&needle) {
+            let value = match v {
+                StyleValue::String(s) | StyleValue::Keyword(s) => s.clone(),
+                StyleValue::Number { value, .. } => format!("{}", value),
+                StyleValue::Identifier(id) => id.0.clone(),
+                _ => continue,
+            };
+            out = out.replace(&needle, &value);
+        }
+    }
+    out
+}
+
 fn substitute_modifiers(
     modifiers: &[Spanned<StyleModifier>],
     params: &HashMap<String, StyleValue>,
@@ -972,6 +998,10 @@ fn substitute_modifiers(
                     } else {
                         m.node.value.clone()
                     }
+                }
+                // `label: "release: {rname}"`: parameters inside a string.
+                StyleValue::String(text) if text.contains('{') => {
+                    Spanned::new(StyleValue::String(interpolate(text, params)), m.node.value.span.clone())
                 }
                 _ => m.node.value.clone(),
             };

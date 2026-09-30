@@ -45,6 +45,17 @@ impl ElementIndex {
         }
         fn dotted(stmts: &[Spanned<Statement>], scope: Option<(&str, &str)>, out: &mut HashMap<String, String>) {
             for st in stmts {
+                // Named connections in a component: `acme.w_front`.
+                if let (Statement::Connection(conns), Some((prefix, path))) = (&st.node, scope) {
+                    for c in conns {
+                        if let Some(n) = &c.name {
+                            if let Some(local) = n.node.0.strip_prefix(&format!("{}_", prefix)) {
+                                out.insert(n.node.0.clone(), format!("{}.{}", path, local));
+                            }
+                        }
+                    }
+                    continue;
+                }
                 let (id, kids, instance): (Option<String>, &[Spanned<Statement>], bool) = match &st.node {
                     Statement::Group(g) => (g.name.as_ref().map(|n| n.node.0.clone()), &g.children, g.is_template_instance),
                     Statement::Layout(l) => (l.name.as_ref().map(|n| n.node.0.clone()), &l.children, false),
@@ -66,6 +77,16 @@ impl ElementIndex {
                     (Some(i), None) => Some(i.clone()),
                     _ => None,
                 };
+                // An artwork's own drawing (`pg__art`, `lid__self`) is shown
+                // as the part it draws.
+                let shown = shown.map(|d| {
+                    d.strip_suffix(".__art")
+                        .or_else(|| d.strip_suffix(".__self"))
+                        .or_else(|| d.strip_suffix("__art"))
+                        .or_else(|| d.strip_suffix("__self"))
+                        .map(|x| x.trim_end_matches('.').to_string())
+                        .unwrap_or(d)
+                });
                 if let (Some(i), Some(d)) = (&id, &shown) {
                     out.insert(i.clone(), d.clone());
                 }
@@ -222,6 +243,17 @@ impl ElementIndex {
                     c, c
                 ))),
             },
+            Selector::Many(v) => {
+                let mut out = Vec::new();
+                for x in v {
+                    for id in self.resolve(&Spanned::new(x.clone(), sel.span.clone()))? {
+                        if !out.contains(&id) {
+                            out.push(id);
+                        }
+                    }
+                }
+                Ok(out)
+            }
             Selector::AllExcept(except) => {
                 for e in except {
                     if !self.ids.contains(e) {
@@ -403,6 +435,9 @@ fn subst_sel(sel: &Spanned<Selector>, env: &HashMap<String, Bound>) -> Spanned<S
         Selector::Class(c) => Selector::Class(c.clone()),
         Selector::AllExcept(v) => Selector::AllExcept(v.iter().map(|n| subst_name(n, env)).collect()),
         Selector::Lines(c, a, b) => Selector::Lines(subst_name(c, env), *a, *b),
+        Selector::Many(v) => Selector::Many(
+            v.iter().map(|x| subst_sel(&Spanned::new(x.clone(), sel.span.clone()), env).node).collect(),
+        ),
     };
     Spanned::new(node, sel.span.clone())
 }
@@ -604,23 +639,21 @@ fn each_stmt(nodes: &mut [Spanned<MotionNode>], f: &mut dyn FnMut(&mut MotionStm
     }
 }
 
-/// What a state sets: (part, property) for transforms, part for show/hide
-/// (true = shown).
-fn state_effects(nodes: &[Spanned<MotionNode>]) -> (Vec<(String, StyleKey)>, Vec<(String, bool)>) {
+/// What a state sets: (selector, property) for transforms, selector for
+/// show/hide (true = shown). Any selector: `meter.*` as much as `bg`.
+fn state_effects(nodes: &[Spanned<MotionNode>]) -> (Vec<(Selector, StyleKey)>, Vec<(Selector, bool)>) {
     let mut props = Vec::new();
     let mut vis = Vec::new();
     let mut nodes = nodes.to_vec();
     each_stmt(&mut nodes, &mut |s| match &s.verb {
-        MotionVerb::Transform { target: Spanned { node: Selector::Name(t), .. }, modifiers } => {
+        MotionVerb::Transform { target, modifiers } => {
             for m in modifiers {
-                props.push((t.clone(), m.node.key.node.clone()));
+                props.push((target.node.clone(), m.node.key.node.clone()));
             }
         }
         MotionVerb::Show(v) | MotionVerb::Hide(v) => {
             for sel in v {
-                if let Selector::Name(t) = &sel.node {
-                    vis.push((t.clone(), matches!(s.verb, MotionVerb::Show(_))));
-                }
+                vis.push((sel.node.clone(), matches!(s.verb, MotionVerb::Show(_))));
             }
         }
         _ => {}
@@ -852,8 +885,8 @@ impl Expander<'_> {
                     sp.clone(),
                 );
                 let exists = nodes.iter_mut().any(|n| match &mut n.node {
-                    MotionNode::Stmt(MotionStmt { verb: MotionVerb::Transform { target: Spanned { node: Selector::Name(t), .. }, modifiers }, .. })
-                        if *t == part =>
+                    MotionNode::Stmt(MotionStmt { verb: MotionVerb::Transform { target, modifiers }, .. })
+                        if target.node == part =>
                     {
                         if !modifiers.iter().any(|m| m.node.key.node == key) {
                             modifiers.push(modifier.clone());
@@ -865,7 +898,7 @@ impl Expander<'_> {
                 if !exists {
                     nodes.push(Spanned::new(
                         MotionNode::Stmt(MotionStmt {
-                            verb: MotionVerb::Transform { target: Spanned::new(Selector::Name(part.clone()), sp.clone()), modifiers: vec![modifier] },
+                            verb: MotionVerb::Transform { target: Spanned::new(part.clone(), sp.clone()), modifiers: vec![modifier] },
                             opts: vec![],
                             targets: vec![],
                             partners: vec![],
@@ -878,7 +911,7 @@ impl Expander<'_> {
                 if my_vis.iter().any(|(p, _)| *p == part) {
                     continue;
                 }
-                let sel = vec![Spanned::new(Selector::Name(part.clone()), span.clone())];
+                let sel = vec![Spanned::new(part.clone(), span.clone())];
                 let verb = if on { MotionVerb::Hide(sel) } else { MotionVerb::Show(sel) };
                 nodes.push(Spanned::new(MotionNode::Stmt(MotionStmt { verb, opts: vec![], targets: vec![], partners: vec![] }), span.clone()));
             }
@@ -1129,21 +1162,30 @@ fn resolve_initial(doc: &mut Document) {
         let Statement::Keyframe(kf) = &mut st.node else { continue };
         each_stmt(&mut kf.motion, &mut |s| {
             let MotionVerb::Transform { modifiers, .. } = &mut s.verb else { return };
-            let [id] = s.targets.as_slice() else { return };
+            if s.targets.is_empty() {
+                return;
+            }
             for m in modifiers.iter_mut() {
                 if !is_initial(&m.node.value.node) {
                     continue;
                 }
                 let key = &m.node.key.node;
-                let found = decl(&base, id).and_then(|(mods, text)| {
-                    mods.iter()
-                        .find(|x| x.node.key.node == *key)
-                        .map(|x| x.node.value.node.clone())
-                        .or_else(|| (*key == StyleKey::Label).then(|| text.map(|t| StyleValue::String(t.to_string()))).flatten())
-                });
-                let value = found.or_else(|| (*key == StyleKey::Opacity).then(|| StyleValue::Number { value: 1.0, unit: None }));
-                if let Some(v) = value {
-                    m.node.value.node = v;
+                let declared = |id: &str| {
+                    let found = decl(&base, id).and_then(|(mods, text)| {
+                        mods.iter()
+                            .find(|x| x.node.key.node == *key)
+                            .map(|x| x.node.value.node.clone())
+                            .or_else(|| (*key == StyleKey::Label).then(|| text.map(|t| StyleValue::String(t.to_string()))).flatten())
+                    });
+                    found.or_else(|| (*key == StyleKey::Opacity).then(|| StyleValue::Number { value: 1.0, unit: None }))
+                };
+                // Several targets (`meter.*`): when they all declare the
+                // same value, that is the value to go back to.
+                let values: Vec<Option<StyleValue>> = s.targets.iter().map(|t| declared(t)).collect();
+                if let Some(Some(v)) = values.first() {
+                    if values.iter().all(|x| x.as_ref() == Some(v)) {
+                        m.node.value.node = v.clone();
+                    }
                 }
             }
         });

@@ -206,7 +206,9 @@ Inline templates:
     machine anna [title: "A", hist.appears: later, bg.fill: role-ok]
                                          part.modifier: value overrides one part
                                          of this instance (nested: hist.d4.fill)
-    Instance modifiers opacity: and appears: apply to the whole instance.
+    Instance modifiers opacity:, appears: and overlaps: apply to the whole instance.
+    "{param}" is filled in in any string modifier of a template body (label: "v{n}").
+    Named connections in a template body are parts of each instance (acme.wire).
 
 File-based templates:
     template "icon" from "path/to/file.svg"     Import SVG file (embedded)
@@ -331,6 +333,7 @@ Motion statements (full guide: --skill-animation):
     draw line [to: elem | 60% | vertex 2]   undraw line [to: ...]
     fly ghost(a) to b, c [scale, arc]   fly proxy from a to b
     move a to b   move a home   move a along path [to: b]
+    move a, b, needs.* to box [stagger: 0.07]   transform m1, m2 [...]   fly ghost(a, b) to box
     pulse | shake | nudge | flash | ping | highlight  a [...]   loop a [pulse]
     count total [to: 14900, format: "€ {:,}"]
     transform cap [label: "...", swap: roll|fade|cut]

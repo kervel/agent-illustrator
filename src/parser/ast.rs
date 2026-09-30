@@ -407,6 +407,9 @@ pub enum Selector {
     AllExcept(Vec<String>),
     /// `c.lines[8..12]`: lines 8 to 12 of code block `c` (inclusive)
     Lines(String, usize, usize),
+    /// `a, b, needs.*`: several at once (in order), for verbs that take one
+    /// selector (`move`, `transform`, `fly ghost(...)`).
+    Many(Vec<Selector>),
 }
 
 impl Selector {
@@ -417,6 +420,7 @@ impl Selector {
             Selector::Class(c) => format!(".{}", c),
             Selector::AllExcept(v) => format!("all except {}", v.join(", ")),
             Selector::Lines(c, a, b) => format!("{}.lines[{}..{}]", c, a, b),
+            Selector::Many(v) => v.iter().map(|s| s.describe()).collect::<Vec<_>>().join(", "),
         }
     }
 }

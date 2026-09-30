@@ -152,7 +152,7 @@ text { white-space: pre; }
   <g id="docs" class="ai-container">
     <g id="d0" class="ai-container">
       <g id="d0_pg" class="ai-container">
-        <g id="d0_pg_art" class="ai-svg-embed" transform="translate(741.202, 376.125) scale(1, 1) translate(-1.5, -1.5)">
+        <g id="d0_pg__art" class="ai-svg-embed" transform="translate(741.202, 376.125) scale(1, 1) translate(-1.5, -1.5)">
           <title>Document</title>
           <!-- Parts (ids) are addressable from AIL: d.sheet, d.fold, d.bars, d.bar1..bar6.
           Colours are theme roles; the CSS variables b1 to b6 are instance arguments.

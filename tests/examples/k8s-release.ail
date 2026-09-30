@@ -1,0 +1,133 @@
+/* Kubernetes, slide 2: "A release: the whole app, wired in one go" (Helm).
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate k8s-release.ail
+
+   STORYBOARD
+     parts    six boxes, and a messy pile of what they need wired: addresses, passwords, settings
+     recipe   a recipe card (the Helm chart's values): a few plain knobs
+     install  `helm install acme`: the pile is absorbed, the boxes are wired, a frame
+              around it all is the release "acme"
+     again    the same recipe with other knobs gives a second release, "demo"
+*/
+
+import "k8s-deck.ail"
+
+// ---------------------------------------------------------------- parts
+
+// The box artwork (assets/box.svg): parts art.front, art.side, art.lid; "tint" colours it.
+template "boxart" from "assets/box.svg"
+
+// A small container box with its name.
+template "minibox" (name: "app", tint: role-primary) {
+    boxart art [width: 140, height: 122, tint: tint]
+    rect body [fill: none, stroke: none, label: name, font_family: mono, font_size: 17, font_weight: 700,
+               label_fill: role-ink]
+    constrain body.center_x = art.front.center_x
+    constrain body.center_y = art.front.center_y
+}
+
+// One release: the six boxes, wired, in a frame with the release's name.
+template "release" (tag_text: "release: acme") {
+    rect frame [fill: none, stroke: role-primary, stroke_width: 3, stroke_dasharray: "10,7", corner_radius: 18,
+                appears: later]
+    rect tag [label: tag_text,   // "{param}" is not interpolated inside label:
+              font_family: mono, font_size: 20, font_weight: 700, label_fill: role-surface,
+              fill: role-primary, stroke: none, corner_radius: 8, appears: later]
+    grid boxes [cols: 3, gap: 44, cell_width: 160, cell_height: 134] {
+        minibox b* [items: [
+            {name: "frontend", tint: role-series-1}, {name: "django", tint: role-primary},
+            {name: "celery", tint: role-series-2}, {name: "keycloak", tint: role-series-4},
+            {name: "postgres", tint: role-secondary}, {name: "redis", tint: role-series-3}]]
+    }
+    constrain frame contains boxes [padding: 30]
+    constrain tag.left = frame.left + 24
+    constrain tag.center_y = frame.top
+}
+
+// Something that still has to be wired by hand.
+template "loose" (what: "thing") {
+    rect chip [label: what, font_size: 20, font_weight: 600, label_fill: role-ink,
+               fill: role-surface-2, stroke: role-rule, stroke_width: 2, corner_radius: 8]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "2", title: "A release: the whole app, wired in one go"]
+
+release acme [tag_text: "release: acme"]
+constrain acme.frame.left = s.stage.left + 100
+constrain acme.frame.top = s.stage.top + 150
+
+release demo [tag_text: "release: demo", appears: later]
+constrain demo.frame.left = values.left
+constrain demo.frame.top = cmd.bottom + 50
+
+// acme's wiring (connections declared outside the template: named connections
+// inside a template clash between instances).
+acme.b0.art.right -> acme.b1.art.left as acme_front [stroke: role-rule, stroke_width: 3, appears: later]
+acme.b0.art.bottom -> acme.b3.art.top as acme_login [stroke: role-rule, stroke_width: 3, appears: later]
+acme.b1.art.bottom -> acme.b4.art.top as acme_db [stroke: role-rule, stroke_width: 3, appears: later]
+acme.b1.art.right -> acme.b2.art.left as acme_jobs [stroke: role-rule, stroke_width: 3, appears: later]
+acme.b2.art.bottom -> acme.b5.art.top as acme_cache [stroke: role-rule, stroke_width: 3, appears: later]
+
+// demo's wiring (connections declared outside the template: named connections
+// inside a template clash between instances).
+demo.b0.art.right -> demo.b1.art.left as demo_front [stroke: role-rule, stroke_width: 3, appears: later]
+demo.b0.art.bottom -> demo.b3.art.top as demo_login [stroke: role-rule, stroke_width: 3, appears: later]
+demo.b1.art.bottom -> demo.b4.art.top as demo_db [stroke: role-rule, stroke_width: 3, appears: later]
+demo.b1.art.right -> demo.b2.art.left as demo_jobs [stroke: role-rule, stroke_width: 3, appears: later]
+demo.b2.art.bottom -> demo.b5.art.top as demo_cache [stroke: role-rule, stroke_width: 3, appears: later]
+
+// The pile: what the boxes need, before anything wires it for you.
+row pile [gap: 26, align: center] {
+    loose t_addr [what: "4 web addresses"]
+    loose t_pass [what: "19 passwords"]
+    loose t_conf [what: "7 settings files"]
+    loose t_link [what: "12 connections"]
+}
+constrain pile.left = acme.frame.left
+constrain pile.top = acme.frame.bottom + 50
+
+// The recipe card: the chart's values, a few plain knobs.
+code values [lang: yaml, title: "values.yaml", font_size: 22, min_chars: 30, appears: later,
+             source: "domain: acme.example.com\nlogin: keycloak\ndatabase: postgres\nchat: on"]
+constrain values.left = acme.frame.right + 90
+constrain values.top = s.stage.top + 110
+
+// The command of the current step.
+rect cmd [label: "helm install acme", font_family: mono, font_size: 22, font_weight: 700, label_fill: role-surface,
+          fill: role-ink, stroke: none, corner_radius: 10, appears: later]
+constrain cmd.left = values.left
+constrain cmd.top = values.bottom + 30
+
+// ---------------------------------------------------------------- motion
+
+keyframe "parts" [title: "A release: the whole app, wired in one go"] {
+    slide_in(s)
+    at 0.2 { show acme.boxes.* [enter: pop, stagger: 0.08] }
+    when acme.b5 shown { show pile.* [enter: pop, stagger: 0.1, jitter: rotate(5)] }
+}
+
+keyframe "recipe" {
+    show values [enter: rise]
+}
+
+keyframe "install" {
+    show cmd [enter: pop]
+    when cmd shown { hide pile.* [exit: shrink, stagger: 0.05] }
+    when t_link hidden {
+        show acme_front, acme_login, acme_db, acme_jobs, acme_cache [enter: draw, stagger: 0.05]
+    }
+    when acme_cache shown { show acme.frame [enter: draw, duration: fast] }
+    when acme.frame shown { show acme.tag [enter: pop] }
+}
+
+keyframe "again" {
+    transform values.line1 [source: "domain: demo.example.com", swap: roll]
+    transform values.line4 [source: "chat: off", swap: roll]
+    transform cmd [label: "helm install demo", swap: roll]
+    then { show demo [from: acme, duration: slow] }
+    when demo shown {   // `arrives` does not count a show-from flight; `shown` does
+        show demo.frame, demo.tag [enter: pop]
+        show demo_front, demo_login, demo_db, demo_jobs, demo_cache [enter: draw, stagger: 0.05]
+    }
+}

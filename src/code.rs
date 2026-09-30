@@ -863,6 +863,12 @@ pub fn expand_points(stmts: Vec<Spanned<Statement>>) -> Vec<Spanned<Statement>> 
                     }
                     Statement::Layout(l) => l.children = walk(std::mem::take(&mut l.children)),
                     Statement::Group(g) => g.children = walk(std::mem::take(&mut g.children)),
+                    // A point is a part like any other inside a component.
+                    Statement::TemplateDecl(d) => {
+                        if let Some(body) = d.body.take() {
+                            d.body = Some(walk(body));
+                        }
+                    }
                     _ => {}
                 }
                 s

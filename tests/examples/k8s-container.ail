@@ -1,0 +1,145 @@
+/* Kubernetes, slide 1: "A container: the app in a box".
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate k8s-container.ail
+
+   STORYBOARD
+     start  the app on a laptop, with the loose things it needs to run around it
+     pack   a box opens; everything flies in; the lid closes: that box is a container
+     ship   the same box is copied to a test server and to the cloud; it runs on each
+     six    our project is not one box but six, each with a plain job
+*/
+
+import "k8s-deck.ail"
+
+// ---------------------------------------------------------------- parts
+
+// The box artwork (assets/box.svg): parts art.front, art.side, art.lid; "tint" colours it.
+template "boxart" from "assets/box.svg"
+
+// A container: a box with a lid and its name on the front.
+template "box" (name: "app", tint: role-primary) {
+    boxart art [width: 172, height: 150, tint: tint]
+    rect body [fill: none, stroke: none, label: name, font_family: mono, font_size: 20, font_weight: 700,
+               label_fill: role-ink]
+    constrain body.center_x = art.front.center_x
+    constrain body.center_y = art.front.center_y
+}
+
+// A machine the box can run on: a window with a title.
+template "machine" (title: "Laptop") {
+    rect bg [width: 260, height: 230, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+    rect head [width: 260, height: 42, fill: role-surface-2, stroke: none, clip: bg,
+               label: title, align: start, font_size: 20, font_weight: 700, label_fill: role-ink]
+    circle ok [size: 34, fill: role-ok, stroke: role-ink, stroke_width: 2, label: "✓", label_fill: role-surface,
+               font_size: 18, font_weight: 800, appears: later]
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+    constrain ok.center_x = bg.right - 6
+    constrain ok.center_y = bg.bottom - 6
+}
+
+// Something the app needs to run.
+template "need" (what: "library") {
+    rect chip [label: what, font_family: mono, font_size: 18, font_weight: 600, label_fill: role-ink,
+               fill: role-surface-2, stroke: role-rule, stroke_width: 2, corner_radius: 8]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "1", title: "A container: the app in a box"]
+
+// The laptop the app was built on, with what it needs around it.
+machine dev [title: "Your laptop"]
+constrain dev.bg.left = s.stage.left + 120
+constrain dev.bg.center_y = s.stage.center_y + 40
+
+rect app [width: 150, height: 104, fill: none, stroke: role-ink, stroke_width: 3, stroke_dasharray: "8,6",
+          corner_radius: 10, label: "the app", font_size: 20, font_weight: 700, label_fill: role-ink, overlaps: dev]
+constrain app.center_x = dev.bg.center_x
+constrain app.center_y = dev.bg.center_y + 22
+
+need n_py [what: "python 3.12"]
+need n_libs [what: "240 libraries"]
+need n_conf [what: "settings"]
+need n_web [what: "web server"]
+constrain n_py.chip.center_x = dev.bg.left + 40
+constrain n_py.chip.bottom = dev.bg.top - 36
+constrain n_libs.chip.left = dev.bg.right - 60
+constrain n_libs.chip.bottom = dev.bg.top - 36
+constrain n_conf.chip.center_x = dev.bg.left + 30
+constrain n_conf.chip.top = dev.bg.bottom + 36
+constrain n_web.chip.left = dev.bg.right - 70
+constrain n_web.chip.top = dev.bg.bottom + 36
+
+// The box, where the app gets packed.
+box pack [name: "django", appears: later]
+constrain pack.body.center_x = s.stage.center_x - 40
+constrain pack.body.center_y = dev.bg.center_y + 22
+
+// Where the box is shipped to: the same box runs on each.
+col targets [gap: 40] {
+    machine m_test [title: "Test server", appears: later]
+    machine m_cloud [title: "The cloud", appears: later]
+}
+constrain targets.right = s.stage.right - 120
+constrain targets.center_y = s.stage.center_y + 20
+box on_test [name: "django", appears: later, art.overlaps: m_test.bg]
+box on_cloud [name: "django", appears: later, art.overlaps: m_cloud.bg]
+constrain on_test.body.center_x = m_test.bg.center_x
+constrain on_test.body.center_y = m_test.bg.center_y + 22
+constrain on_cloud.body.center_x = m_cloud.bg.center_x
+constrain on_cloud.body.center_y = m_cloud.bg.center_y + 22
+
+// Our project: six boxes, each with a plain job.
+template "part" (name: "app", job: "does things", tint: role-primary) {
+    box b [name: name, tint: tint]
+    rect job_lbl [label: job, font_size: 22, font_weight: 600, label_fill: role-muted, fill: none, stroke: none,
+                  max_width: 220]
+    constrain job_lbl.center_x = b.art.center_x
+    constrain job_lbl.top = b.art.bottom + 14
+}
+grid project [cols: 3, gap: 70, cell_width: 250, cell_height: 250] {
+    part p* [items: [
+        {name: "frontend", job: "the website", tint: role-series-1},
+        {name: "django", job: "the API: the app's brain", tint: role-primary},
+        {name: "celery", job: "background jobs", tint: role-series-2},
+        {name: "postgres", job: "the database", tint: role-secondary},
+        {name: "redis", job: "fast shared memory", tint: role-series-3},
+        {name: "keycloak", job: "login", tint: role-series-4}], appears: later]
+}
+constrain project.center_x = s.stage.center_x
+constrain project.center_y = s.stage.center_y + 40
+
+// ---------------------------------------------------------------- motion
+
+keyframe "start" [title: "A container: the app in a box"] {
+    slide_in(s)
+    at 0.2 { show dev [enter: pop] }
+    when dev shown { show n_py, n_libs, n_conf, n_web [enter: pop, stagger: 0.12, jitter: rotate(4)] }
+}
+
+keyframe "pack" {
+    show pack [enter: pop]
+    when pack shown { hide pack.art.lid [exit: lift, duration: fast] }
+    when pack.art.lid hidden {
+        // one statement per element: `move` and `fly ghost()` take a single subject
+        move app to pack.body [duration: normal]
+        move n_py to pack.body [duration: normal, delay: 0.07]
+        move n_libs to pack.body [duration: normal, delay: 0.14]
+        move n_conf to pack.body [duration: normal, delay: 0.21]
+        move n_web to pack.body [duration: normal, delay: 0.28]
+    }
+    when n_web arrives { hide app, n_py, n_libs, n_conf, n_web [exit: shrink, duration: fast] }
+    when n_web hidden { show pack.art.lid [enter: drop, duration: fast] }
+}
+
+keyframe "ship" {
+    hide dev [exit: fade]
+    show m_test, m_cloud [enter: rise, stagger: 0.12]
+    when m_cloud shown { show on_test, on_cloud [from: pack, duration: slow, stagger: 0.15] }
+    when on_cloud shown { show m_test.ok, m_cloud.ok [enter: pop, stagger: 0.1] }
+}
+
+keyframe "six" {
+    hide pack, m_test, m_cloud, on_test, on_cloud [exit: fade]
+    then { show project.* [enter: pop, stagger: 0.1] }
+}

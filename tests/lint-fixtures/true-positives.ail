@@ -181,8 +181,9 @@ steep_src.right -> steep_dst.left [routing: direct]
 
 
 // ------------------------------------------------------------
-// TEST 10: Crowded row layout with >8 children
-// A row with too many children should suggest using constraints.
+// TEST 10: Crowded row layout with >8 children of different kinds
+// A mixed row with too many children should suggest using constraints (a row
+// of nine identical things is what a row is for, and is not reported).
 // ------------------------------------------------------------
 
 row crowded_row {
@@ -190,8 +191,8 @@ row crowded_row {
     rect cr_2 [width: 30, height: 30, fill: accent-1]
     rect cr_3 [width: 30, height: 30, fill: accent-1]
     rect cr_4 [width: 30, height: 30, fill: accent-1]
-    rect cr_5 [width: 30, height: 30, fill: accent-1]
-    rect cr_6 [width: 30, height: 30, fill: accent-1]
+    rect cr_5 [width: 60, height: 30, fill: accent-1]
+    circle cr_6 [size: 30, fill: accent-1]
     rect cr_7 [width: 30, height: 30, fill: accent-1]
     rect cr_8 [width: 30, height: 30, fill: accent-1]
     rect cr_9 [width: 30, height: 30, fill: accent-1]

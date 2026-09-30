@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 136" width="156" height="136">
+  <title>Container</title>
+  <!-- Parts (ids) are addressable from AIL: art.side, art.front, art.lid, art.tape.
+       Colours are theme roles; the CSS variable "tint" is an instance argument.
+       The box has a real outline: nothing paints the background to fake a hole. -->
+  <!-- the side face, in the box's colour -->
+  <path id="side" d="M121.5 44.5 L152.5 26.5 V112.5 L121.5 132.5 Z"
+        fill="var(--tint, var(--role-primary, #1d6e88))" stroke="var(--role-ink, #14171f)"
+        stroke-width="3" stroke-linejoin="round"/>
+  <!-- the front face, where the name goes -->
+  <rect id="front" x="3.5" y="44.5" width="118" height="88" rx="4"
+        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+  <!-- the lid: the top face, lifts off as one piece -->
+  <g id="lid">
+    <path d="M3.5 44.5 L34.5 26.5 H152.5 L121.5 44.5 Z"
+          fill="var(--tint, var(--role-primary, #1d6e88))" stroke="var(--role-ink, #14171f)"
+          stroke-width="3" stroke-linejoin="round"/>
+    <path id="tape" d="M58 44.5 L89 26.5 H101 L70 44.5 Z" fill="var(--role-surface, #ffffff)" fill-opacity="0.55"/>
+  </g>
+</svg>

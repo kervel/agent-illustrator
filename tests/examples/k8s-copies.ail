@@ -1,0 +1,132 @@
+/* Kubernetes, slide 3: "You say how many; Kubernetes keeps it so" (scaling + self-healing).
+   Render: agent-illustrator --stylesheet-css ../../../tools/slides/kapernikov-ail.css --animate k8s-copies.ail
+
+   STORYBOARD
+     one     three servers; the website, one API box and the database are running; a few users
+     busy    many more users: the one API box is overloaded (its meter goes red)
+     scale   one setting, api copies 1 -> 3: two more API boxes start; the load spreads
+     heal    a server dies; its API box is gone; Kubernetes starts a new one elsewhere: three again
+*/
+
+import "k8s-deck.ail"
+
+// ---------------------------------------------------------------- parts
+
+// The box artwork (assets/box.svg): parts art.front, art.side, art.lid; "tint" colours it.
+template "boxart" from "assets/box.svg"
+
+// A container box with a load meter: one green bar when fine, three red when busy.
+template "box" (name: "app", tint: role-primary) {
+    boxart art [width: 124, height: 108, tint: tint]
+    rect body [fill: none, stroke: none, label: name, font_family: mono, font_size: 16, font_weight: 700,
+               label_fill: role-ink]
+    row meter [gap: 4, align: bottom] {
+        rect m1 [width: 8, height: 10, fill: role-ok, stroke: none]
+        rect m2 [width: 8, height: 16, fill: role-ok, stroke: none, appears: later]
+        rect m3 [width: 8, height: 22, fill: role-ok, stroke: none, appears: later]
+    }
+    constrain body.center_x = art.front.center_x
+    constrain body.center_y = art.front.center_y - 10
+    constrain meter.right = art.front.right - 8
+    constrain meter.bottom = art.front.bottom - 8
+    state busy {
+        show m2, m3 [enter: grow]
+        transform meter.* [fill: role-error]   // `transform a, b, c` is not accepted; a selector is
+    }
+    // `set x default` hides m2/m3 again but leaves m1 red, so "fine" says it explicitly.
+    state fine { transform meter.* [fill: role-ok] }
+}
+
+// A server in the cluster: a window with room for three boxes.
+template "server" (title: "server") {
+    rect bg [width: 470, height: 200, fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 14]
+    rect head [width: 470, height: 42, fill: role-surface-2, stroke: none, clip: bg,
+               label: title, align: start, font_size: 20, font_weight: 700, label_fill: role-ink]
+    circle dead_x [size: 52, fill: role-error, stroke: role-ink, stroke_width: 3, label: "✕", label_fill: role-surface,
+                 font_size: 26, font_weight: 800, appears: later]
+    constrain head.top = bg.top
+    constrain head.left = bg.left
+    constrain dead_x.center_x = bg.right - 10
+    constrain dead_x.center_y = bg.top + 10
+    state dead { transform bg [opacity: 0.35]; transform head [opacity: 0.35]; show dead_x [enter: pop] }
+}
+
+// A user of the app.
+template "user" () {
+    circle head [size: 26, fill: role-muted, stroke: none]
+    rect torso [width: 40, height: 22, fill: role-muted, stroke: none, corner_radius: 11]
+    constrain torso.center_x = head.center_x
+    constrain torso.top = head.bottom + 3
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "3", title: "You say how many; Kubernetes keeps it so"]
+
+row cluster [gap: 50] {
+    server srv1 [title: "server 1"]
+    server srv2 [title: "server 2"]
+    server srv3 [title: "server 3"]
+}
+constrain cluster.center_x = s.stage.center_x
+constrain cluster.top = s.stage.top + 420
+
+// What runs where: three slots per server (left, middle, right).
+box web [name: "frontend", tint: role-series-1]
+box api1 [name: "django", tint: role-primary]
+box api2 [name: "django", tint: role-primary, appears: later]
+box api3 [name: "django", tint: role-primary, appears: later]
+box api2b [name: "django", tint: role-primary, appears: later]
+box db [name: "postgres", tint: role-secondary]
+constrain web.art.left = srv1.bg.left + 28
+constrain web.art.top = srv1.bg.top + 62
+constrain api1.art.center_x = srv1.bg.center_x
+constrain api1.art.top = web.art.top
+constrain api2.art.left = srv2.bg.left + 28
+constrain api2.art.top = web.art.top
+constrain db.art.left = srv3.bg.left + 28
+constrain db.art.top = web.art.top
+constrain api3.art.center_x = srv3.bg.center_x
+constrain api3.art.top = web.art.top
+// When server 2 dies, the replacement starts in server 1's free slot.
+constrain api2b.art.right = srv1.bg.right - 28
+constrain api2b.art.top = web.art.top
+
+// The users.
+row users [gap: 26, align: bottom] {
+    user u* [items: [{}, {}, {}, {}, {}, {}, {}, {}, {}]]
+}
+constrain users.left = srv1.bg.left
+constrain users.bottom = srv1.bg.top - 60
+
+// The one setting that says how many copies.
+code want [lang: yaml, title: "values.yaml", font_size: 24, min_chars: 18, source: "django:\n  replicas: 1"]
+constrain want.right = srv3.bg.right
+constrain want.bottom = srv3.bg.top - 40
+
+// ---------------------------------------------------------------- motion
+
+keyframe "one" [title: "You say how many; Kubernetes keeps it so"] {
+    hide u3, u4, u5, u6, u7, u8
+    slide_in(s)
+    at 0.2 { show cluster.* [enter: rise, stagger: 0.1] }
+    when srv3 shown { show web, api1, db [enter: pop, stagger: 0.1] }
+    when db shown { show want [enter: rise]; show u0, u1, u2 [enter: pop, stagger: 0.08] }
+}
+
+keyframe "busy" {
+    show u3, u4, u5, u6, u7, u8 [enter: pop, stagger: 0.06]
+    when u8 shown { set api1 busy; shake api1 }
+}
+
+keyframe "scale" {
+    transform want.line2 [source: "  replicas: 3", swap: roll]
+    then { show api2, api3 [from: api1, duration: slow, stagger: 0.15] }
+    when api3 shown { set api1 fine [duration: fast] }
+}
+
+keyframe "heal" {
+    set srv2 dead
+    hide api2 [exit: fall]
+    when api2 hidden + 0.4 { show api2b [enter: pop] }
+}

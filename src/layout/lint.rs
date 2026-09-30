@@ -573,6 +573,21 @@ fn is_reference_only(elem: &ElementLayout) -> bool {
     matches!(elem.element_type, ElementType::GridCell)
 }
 
+/// A bare container none of whose painting parts is visible in this frame.
+fn shows_nothing(e: &ElementLayout, scope: &FrameScope<'_>) -> bool {
+    fn any_visible(e: &ElementLayout, scope: &FrameScope<'_>) -> bool {
+        if scope.hides_element(e) || e.is_through_path() {
+            return false;
+        }
+        if e.children.is_empty() {
+            (!paints_nothing(e) || e.label.is_some()) && !is_reference_only(e)
+        } else {
+            e.children.iter().any(|c| any_visible(c, scope))
+        }
+    }
+    is_bare_container(e) && !e.children.is_empty() && !any_visible(e, scope)
+}
+
 /// A layout container with no fill and no border paints nothing: it renders as
 /// a bare `<g>` and only describes a region. Something drawn *inside* that
 /// region has not collided with anything — a rule laid across a grid, a
@@ -792,10 +807,14 @@ impl ContainsRelations {
     }
 
     /// `a [overlaps: x]` where `b` is x or a part of x.
+    /// `a [overlaps: x]` where `b` is x or a part of x; `a` may be a part of
+    /// the element that declares it (`on_test [overlaps: m.bg]` covers
+    /// `on_test.body`).
     fn declared_overlap(&self, a: &str, b: &str) -> bool {
-        self.overlaps
-            .get(a)
-            .is_some_and(|xs| xs.iter().any(|x| b == x || b.starts_with(&format!("{}_", x))))
+        self.overlaps.iter().any(|(owner, xs)| {
+            (a == owner || a.starts_with(&format!("{}_", owner)))
+                && xs.iter().any(|x| b == x || b.starts_with(&format!("{}_", x)))
+        })
     }
 
 }
@@ -1217,6 +1236,12 @@ fn check_overlap_siblings(
                 continue;
             }
 
+            // A container with nothing of its own on screen yet (every part
+            // still hidden) has nothing to collide with.
+            if shows_nothing(a, scope) || shows_nothing(b, scope) {
+                continue;
+            }
+
             if bare_pair_overlap(a, b, scope, contains_ids, warnings) {
                 continue;
             }
@@ -1353,6 +1378,10 @@ fn check_overlaps_recursive(
 
                 // A rule crossing what it rules over is the picture working.
                 if is_structural_crossing(a, b) {
+                    continue;
+                }
+
+                if shows_nothing(a, scope) || shows_nothing(b, scope) {
                     continue;
                 }
 
@@ -3008,7 +3037,43 @@ fn check_crowded_layouts_in_stmts(
                         }),
                         _ => false,
                     });
-                    if child_count > 8 && !is_code {
+                    // A row of the same thing (nine users, a history of
+                    // dots) is what a row is for: only mixed rows crowd.
+                    fn signature(st: &Statement) -> String {
+                        match st {
+                            Statement::Shape(sh) => {
+                                let size: Vec<String> = sh
+                                    .modifiers
+                                    .iter()
+                                    .filter(|m| {
+                                        matches!(
+                                            m.node.key.node,
+                                            crate::parser::ast::StyleKey::Width
+                                                | crate::parser::ast::StyleKey::Height
+                                                | crate::parser::ast::StyleKey::Size
+                                        )
+                                    })
+                                    .map(|m| format!("{:?}", m.node.value.node))
+                                    .collect();
+                                format!("{:?}{:?}", std::mem::discriminant(&sh.shape_type.node), size)
+                            }
+                            Statement::Group(g) => format!(
+                                "g{}:{}",
+                                g.children.len(),
+                                g.children.first().map(|c| signature(&c.node)).unwrap_or_default()
+                            ),
+                            Statement::Layout(l) => format!("l{}", l.children.len()),
+                            _ => String::new(),
+                        }
+                    }
+                    let sigs: std::collections::HashSet<String> = l
+                        .children
+                        .iter()
+                        .filter(|c| matches!(c.node, Statement::Shape(_) | Statement::Group(_) | Statement::Layout(_)))
+                        .map(|c| signature(&c.node))
+                        .collect();
+                    let regular = sigs.len() <= 1;
+                    if child_count > 8 && !is_code && !regular {
                         let layout_name = l
                             .name
                             .as_ref()

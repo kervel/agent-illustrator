@@ -405,3 +405,24 @@ fn a_through_line_stays_above_a_backdrop_declared_before_it() {
     assert!(at("stage") < at("track"), "the line is painted over the stage");
     assert!(at("track") < at("a"), "and under its stations");
 }
+
+#[test]
+fn default_reverts_what_a_state_did_through_a_selector() {
+    let src = r#"
+template "box" () {
+    row meter { rect m1 [width: 10, height: 10, fill: green]
+      rect m2 [width: 10, height: 10, fill: green, appears: later] }
+    state busy { show m2 [enter: grow]; transform meter.* [fill: red] }
+}
+box api
+keyframe "a" { }
+keyframe "b" { set api busy }
+keyframe "c" { set api default }
+"#;
+    let s = states(src);
+    let c = s.split("step 2").nth(1).unwrap();
+    assert!(c.contains("- api.m2"), "{c}");
+    assert!(c.contains("api.m1 [fill: initial]"), "the red goes back: {c}");
+    let t = timeline(src);
+    assert!(t.contains("-> green"), "tweens back to the declared colour: {t}");
+}

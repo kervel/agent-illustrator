@@ -368,7 +368,8 @@ pub fn instance_statements(
     let defs = defs_of(content);
     let finish = |m: &str| apply_vars(&namespace(m, &parts.ids, &ns), values);
     let (ox, oy, ow, oh) = origin;
-    let art_name = format!("{}_art", instance);
+    // Generated names (`__`): never an author's part, shown as their owner.
+    let art_name = format!("{}__art", instance);
     let embed = |name: &str, markup: &str, ext: (f64, f64, f64, f64), paint: (&Option<String>, &Option<String>)| -> Spanned<Statement> {
         let (x, y, w, h) = ext;
         let mut modifiers = vec![modifier(StyleKey::Width, num(w * scale), span), modifier(StyleKey::Height, num(h * scale), span)];
@@ -434,7 +435,7 @@ pub fn instance_statements(
         // A part with parts inside: a group of its own drawing and theirs.
         let mut kids = Vec::new();
         if let Some(ext) = own {
-            let self_name = format!("{}_self", name);
+            let self_name = format!("{}__self", name);
             kids.push(embed(&self_name, &p.snippet, ext, (&None, &None)));
             kids.extend(place(&self_name, (ext.0, ext.1)));
         }

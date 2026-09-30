@@ -1840,6 +1840,17 @@ where
             .at_least(1)
             .collect::<Vec<_>>()
             .boxed();
+        // `a, b, needs.*` where a verb takes one selector.
+        let many_selector = selector_list
+            .clone()
+            .map_with(|v: Vec<Spanned<Selector>>, e| {
+                if v.len() == 1 {
+                    v.into_iter().next().unwrap()
+                } else {
+                    Spanned::new(Selector::Many(v.into_iter().map(|s| s.node).collect()), span_range(&e.span()))
+                }
+            })
+            .boxed();
 
         // Motion option values
         let motion_value = recursive(|mv| {
@@ -1958,7 +1969,7 @@ where
                 .then(opts_or_none.clone())
                 .map(move |((code, after), o)| stmt(MotionVerb::Insert { code, after: after.node as usize }, o));
             let transform = just(Token::Transform)
-                .ignore_then(selector.clone())
+                .ignore_then(many_selector.clone())
                 .then(modifier_block.clone())
                 .map(move |(target, modifiers)| {
                     // Timing keys ride along in the same brackets; split them
@@ -2005,11 +2016,22 @@ where
                 .ignore_then(selector_list.clone())
                 .then(opts_or_none.clone())
                 .map(move |(t, o)| stmt(MotionVerb::Undraw(t), o));
+            // `ghost(a, b)` or `ghost(a), ghost(b)`: several copies at once.
+            let ghost = kw("ghost").ignore_then(many_selector.clone().delimited_by(just(Token::ParenOpen), just(Token::ParenClose)));
             let fly_subject = choice((
-                kw("ghost")
-                    .ignore_then(selector.clone().delimited_by(just(Token::ParenOpen), just(Token::ParenClose)))
-                    .map(FlySubject::Ghost),
-                selector.clone().map(FlySubject::Proxy),
+                ghost
+                    .separated_by(just(Token::Comma))
+                    .at_least(1)
+                    .collect::<Vec<_>>()
+                    .map(|v: Vec<Spanned<Selector>>| {
+                        if v.len() == 1 {
+                            FlySubject::Ghost(v.into_iter().next().unwrap())
+                        } else {
+                            let span = v[0].span.start..v[v.len() - 1].span.end;
+                            FlySubject::Ghost(Spanned::new(Selector::Many(v.into_iter().map(|s| s.node).collect()), span))
+                        }
+                    }),
+                many_selector.clone().map(FlySubject::Proxy),
             ));
             let fly = kw("fly")
                 .ignore_then(fly_subject)
@@ -2019,7 +2041,7 @@ where
                 .then(opts_or_none.clone())
                 .map(move |(((subject, from), to), o)| stmt(MotionVerb::Fly { subject, from, to }, o));
             let mv = kw("move")
-                .ignore_then(selector.clone())
+                .ignore_then(many_selector.clone())
                 .then(choice((
                     kw("home").map_with(|_, e| (Some(Spanned::new("home".to_string(), span_range(&e.span()))), None)),
                     kw("to").ignore_then(dotted_name.clone().labelled("where to move it (an element, or `home`)")).map(|n| (Some(n), None)),

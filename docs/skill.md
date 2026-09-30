@@ -392,6 +392,18 @@ constrain rule.top = g.cell(1, 3).bottom + 4
 - **Label placement**: Offset labels above/below elements with constraints to avoid connection overlap. Keep connection labels short (1-2 words).
 - **Template composition**: Templates can instantiate other templates. Internal elements stay with the instance when constrained.
 - **Test in isolation**: Before integrating a template, test it standalone in a minimal file. One component per test image.
+- **Parts of an instance**: named connections, points and states inside a template belong to each instance (`acme.w_front`); `machine anna [hist.appears: later, overlaps: m.bg]` sets something on the instance or one part; `label: "release: {rname}"` fills in parameters.
+
+**Objects are artwork, not rects.** Agent Illustrator is not an icon-drawing
+tool. A recognisable object (a box, a laptop, a server, a person, a cloud, a
+document, a database) is best an SVG file with ids (`template "x" from
+"x.svg"`), themed with role colours. Its parts can then be animated. The
+language's defaults for scene primitives (corner radius, stroke and label
+defaults) are right for diagram elements, but they fight you when every shape
+of one object is deliberate. A hand-built page, a header bar made of two
+rects, or a box made of a rect and a lid all looked worse than the artwork
+that replaced them. Building an icon from shapes isn't forbidden, it's just
+not what the tool is for.
 
 ### Colors
 

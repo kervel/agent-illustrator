@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.2.10
+
+From three Kubernetes scenes written from scratch (tests/examples):
+- Named connections in a template body are parts of each instance
+  (`acme.w_front`); two instances no longer clash (G9).
+- `{param}` is filled in inside any string modifier (`label: "release:
+  {rname}"`), not only in `text "{title}"` (G14).
+- Showing the parts of a container that is still hidden is linted (it did
+  nothing, silently) (G6).
+- PNG: `@font-face` WOFF/WOFF2 data URIs are unpacked and registered under
+  the stylesheet's family name (the Kapernikov Avenir renders); a symbol
+  fallback font is bundled (✓ ✕ ★ ⚠ …, a 143 KB Noto Sans Symbols 2 subset);
+  characters no font has are reported (G13, G18).
+- `set x default` reverts what a state did through a selector (`meter.*`),
+  and `[prop: initial]` resolves for several targets at once (G17).
+- Lists wherever one selector was taken: `move a, b, needs.* to box [stagger:
+  0.07]`, `transform m1, m2 [...]`, `fly ghost(a, b) to box` / `fly ghost(a),
+  ghost(b) to box`; one staggered statement is one gesture for the busy-beat
+  lint (G1, G15, G4).
+- `point` works inside templates (G2).
+- `when x arrives` also covers a `show x [from: y]` flight and a transform
+  that moves, turns or resizes x (G3, G10).
+- `overlaps:` on a template instance applies to its parts (G5).
+- The overlap lint ignores a container whose parts are all still hidden (G8).
+- The station lint ignores a connection between two parts of the element
+  shown, and reports the time a flight lands (G12).
+- Monospace labels wrap by the width that sized them: a code block's longest
+  line no longer wraps (it showed in yaml blocks) (G11).
+- Crowded-row lint only for mixed rows: a row of identical things is what a
+  row is for (G16).
+- An embedded SVG's own drawing is named `x__art` / `x__self` and shown as its
+  part (no more `on_test.art.art`) (G19).
+- New lint: an outline around other elements that pops or grows in scales its
+  border through them (looks like stray lines); use `enter: draw`.
+- Docs: objects (box, laptop, server, person, cloud, document, database)
+  are best embedded SVG artwork, not built from rects; the swarm idiom;
+  what `arrives` covers.
+
 ## v0.2.9
 
 - Fix (v0.2.8 regression): `through:` lines disappeared behind a slide's

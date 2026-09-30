@@ -60,6 +60,70 @@ pub fn check(
     let mut parent_of = HashMap::new();
     parents(&base.root_elements, None, &mut parent_of);
 
+    // An outline (no fill) that pops or grows in scales its border across
+    // what it encloses: its edges sweep through the contents like stray
+    // lines. Outlines draw in (or fade).
+    for f in &m.frames {
+        for a in f.atoms.iter().filter(|a| a.kind == "show" && (a.verb.contains("enter: pop") || a.verb.contains("enter: grow"))) {
+            let Some(e) = base.get_element_by_name(&a.target_id) else { continue };
+            let outline = e.styles.fill.as_deref().is_some_and(|f| f == "none")
+                && e.styles.stroke.as_deref().is_some_and(|s| s != "none");
+            if !outline {
+                continue;
+            }
+            let b = e.bounds;
+            let encloses = base.elements.iter().any(|(id, o)| {
+                id != &a.target_id
+                    && o.bounds.width > 0.0
+                    && o.bounds.x > b.x
+                    && o.bounds.y > b.y
+                    && o.bounds.right() < b.right()
+                    && o.bounds.bottom() < b.bottom()
+            });
+            if encloses {
+                out.push(warn(
+                    LintCategory::Motion,
+                    &f.name,
+                    format!(
+                        "{} is an outline around other elements: entering with pop/grow scales its border through them \
+                         (it reads as stray lines). Use `show {} [enter: draw]` (or fade)",
+                        show(&a.target_id),
+                        show(&a.target_id)
+                    ),
+                ));
+            }
+        }
+    }
+
+    // `show project.*` while `project` itself is hidden: nothing appears.
+    for (fi, f) in m.frames.iter().enumerate() {
+        let Some(st) = states.get(fi) else { continue };
+        let mut seen = std::collections::HashSet::new();
+        for a in f.atoms.iter().filter(|a| a.kind == "show") {
+            if st.hidden_elements.contains(&a.target_id) {
+                continue;
+            }
+            let mut cur = parent_of.get(&a.target_id).cloned();
+            while let Some(p) = cur {
+                if st.hidden_elements.contains(&p) {
+                    if seen.insert(p.clone()) {
+                        out.push(warn(
+                            LintCategory::Motion,
+                            &f.name,
+                            format!(
+                                "show {} has no effect: {} (which holds it) is still hidden at the end of \"{}\". \
+                                 Show {} too, or put `appears: later` on the parts instead of on {}",
+                                show(&a.target_id), show(&p), f.name, show(&p), show(&p)
+                            ),
+                        ));
+                    }
+                    break;
+                }
+                cur = parent_of.get(&p).cloned();
+            }
+        }
+    }
+
     // Numbers where names belong.
     for kf in crate::layout::keyframe::extract_keyframes(doc) {
         // In a keyframe written with motion statements a number is a
@@ -264,6 +328,12 @@ fn declared_at(
     use crate::parser::ast::ShapeType;
     let related = |n: &str| n == id || n.starts_with(&format!("{}_", id)) || id.starts_with(&format!("{}_", n));
     if let Some(conn) = base.connections.iter().find(|x| x.name.as_ref().is_some_and(|n| n.0 == line)) {
+        // A connection between two parts of what is shown is inside it,
+        // not a line it waits for.
+        let inside = |n: &str| n == id || n.starts_with(&format!("{}_", id));
+        if inside(&conn.from_id.0) && inside(&conn.to_id.0) {
+            return None;
+        }
         return if related(&conn.to_id.0) {
             Some(1.0)
         } else {
@@ -335,8 +405,8 @@ fn appears_before_line(m: &Motion, base: &LayoutResult, out: &mut Vec<LintWarnin
                 if drawn(lands) + 0.01 >= at {
                     continue;
                 }
-                let arrives = (0..=((f.duration - a.start) / 0.01).ceil() as usize)
-                    .map(|k| a.start + k as f64 * 0.01)
+                let arrives = (0..=((f.duration - lands) / 0.01).ceil().max(0.0) as usize)
+                    .map(|k| lands + k as f64 * 0.01)
                     .find(|t| drawn(*t) + 0.005 >= at);
                 out.push(warn(
                     LintCategory::Motion,
