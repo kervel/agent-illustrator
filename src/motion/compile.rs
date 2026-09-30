@@ -1688,7 +1688,11 @@ impl<'a> Compiler<'a> {
                 let pw = self.wrap(&partner);
                 let pk = ChKey { sel: pw.clone(), prop: Prop::Opacity };
                 let half = t.dur / 2.0;
-                let e_in = tokens.ease("in").unwrap_or(Ease::Linear);
+                // A flip is one continuous turn: accelerate into edge-on and
+                // decelerate out of it, so edge-on is an instant. Easing the
+                // first half out (fast, then crawling edge-on) left every
+                // page invisible for most of the turn: a blink.
+                let (e_in, e_out) = (t.ease.in_half(), t.ease.out_half());
                 match via {
                     "flip" => {
                         // `flip: pg` turns only that member over (the icon)
@@ -1705,7 +1709,7 @@ impl<'a> Compiler<'a> {
                                 // ...and stays turned away until the swap ends.
                                 self.overlay(fm, aw, Prop::Scale, Overlay { start: start + half, dur: half, ease: Ease::Linear, keys: vec![Val::xy(0.0, 1.0), Val::xy(0.0, 1.0)], mode: Mode::Mul, looping: false, atom });
                                 self.overlay(fm, bw.clone(), Prop::Scale, Overlay { start, dur: half, ease: Ease::Linear, keys: vec![Val::xy(0.0, 1.0), Val::xy(0.0, 1.0)], mode: Mode::Mul, looping: false, atom });
-                                self.overlay(fm, bw, Prop::Scale, Overlay { start: start + half, dur: half, ease: t.ease, keys: vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)], mode: Mode::Mul, looping: false, atom });
+                                self.overlay(fm, bw, Prop::Scale, Overlay { start: start + half, dur: half, ease: e_out, keys: vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)], mode: Mode::Mul, looping: false, atom });
                                 // The rest of each side crossfades over the whole turn.
                                 let kids = |of: &str, skip: &str| -> Vec<String> {
                                     self.elems
@@ -1728,7 +1732,7 @@ impl<'a> Compiler<'a> {
                                 self.tween(fm, &op_key, simple(start + half, 0.0, Ease::Linear, Val::n(0.0)));
                                 self.tween(fm, &pk, simple(start + half, 0.0, Ease::Linear, Val::n(1.0)));
                                 self.overlay(fm, wrap.clone(), Prop::Scale, Overlay { start, dur: half, ease: e_in, keys: vec![Val::xy(1.0, 1.0), Val::xy(0.0, 1.0)], mode: Mode::Mul, looping: false, atom });
-                                self.overlay(fm, pw.clone(), Prop::Scale, Overlay { start: start + half, dur: half, ease: t.ease, keys: vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)], mode: Mode::Mul, looping: false, atom });
+                                self.overlay(fm, pw.clone(), Prop::Scale, Overlay { start: start + half, dur: half, ease: e_out, keys: vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)], mode: Mode::Mul, looping: false, atom });
                             }
                         }
                     }

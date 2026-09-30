@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.2.2
+
+- The browser player now plays the opening half of `swap a -> b [via: flip]`.
+  The export combined that half with the value the previous overlay (the
+  edge-on hold, scale 0) left behind, so it animated 0 -> 0: every page was
+  blank for the second half of its flip and appeared at full width at the end.
+  Native stills were right, so the seek tests could not see it.
+- A flip eases as one turn: the closing half takes the ease-in form of the
+  statement's ease, the opening half its ease-out form, so edge-on is an
+  instant.
+- New test: the manifest's animations are replayed with the Web Animations
+  rules the player relies on and compared with the native sampler over time
+  (a flip, `show [from:]`, draws, lines opening and closing), plus a check that
+  a flip always shows at least 20% of a page outside its edge-on instant.
+
 ## v0.2.1
 
 - Template instances pass every argument through. Arguments whose key is a

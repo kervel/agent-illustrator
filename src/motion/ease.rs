@@ -60,6 +60,36 @@ impl Ease {
         }
     }
 
+    /// The accelerating half of a motion that runs through a midpoint (a
+    /// flip turning edge-on): an ease-out curve reflected into its ease-in,
+    /// an in-out curve's first half, an ease-in as it is.
+    pub fn in_half(&self) -> Ease {
+        match *self {
+            Ease::Linear => Ease::Linear,
+            Ease::Bezier(x1, y1, x2, y2) => {
+                let fast_start = y1 > x1; // ease-out family
+                let slow_end = y2 < x2; // ease-in family
+                if fast_start && !slow_end {
+                    // Reflect through the centre: out -> in.
+                    Ease::Bezier(1.0 - x2, 1.0 - y2, 1.0 - x1, 1.0 - y1)
+                } else if !fast_start && !slow_end && y2 > x2 {
+                    // In-out: keep the slow start, accelerate to the end.
+                    Ease::Bezier(x1, y1, 1.0, 1.0)
+                } else {
+                    *self
+                }
+            }
+        }
+    }
+
+    /// The decelerating half (the mirror of `in_half`).
+    pub fn out_half(&self) -> Ease {
+        match self.in_half() {
+            Ease::Linear => Ease::Linear,
+            Ease::Bezier(x1, y1, x2, y2) => Ease::Bezier(1.0 - x2, 1.0 - y2, 1.0 - x1, 1.0 - y1),
+        }
+    }
+
     pub fn css(&self) -> String {
         match *self {
             Ease::Linear => "linear".to_string(),

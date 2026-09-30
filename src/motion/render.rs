@@ -242,7 +242,12 @@ fn export_curve(curve: &Curve, init: &Val, tokens: &MotionTokens) -> Vec<Anim> {
                 }
                 Seg::O(i) => {
                     let ov = &curve.overlays[i];
-                    let base = curve.value(init, a - 1e-4, tokens);
+                    // An overlay shapes the tweens' value, not what another
+                    // overlay left behind: a flip's opening half follows its
+                    // edge-on hold (scale 0), and combining with that turned
+                    // the whole opening into 0 -> 0 in the player.
+                    let tweens_only = Curve { tweens: curve.tweens.clone(), overlays: Vec::new() };
+                    let base = tweens_only.value(init, a + 1e-6, tokens);
                     let n = ov.keys.len().max(2) - 1;
                     let keys = ov
                         .keys
