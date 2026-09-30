@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 fn config(dir: &Path) -> RenderConfig {
-    let css = std::fs::read_to_string(dir.join("git-deck.css")).unwrap();
+    let css = std::fs::read_to_string(dir.join("git-deck.css")).unwrap_or_default();
     RenderConfig::new().with_custom_css(css).with_template_base_path(dir.to_path_buf())
 }
 
@@ -136,7 +136,11 @@ fn played(m: &serde_json::Value, f: usize, c: usize, t: f64) -> Option<Vec<f64>>
 }
 
 fn check(scene: &str, frames: &[usize]) {
-    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/motion");
+    check_in("examples/motion", scene, frames)
+}
+
+fn check_in(dir: &str, scene: &str, frames: &[usize]) {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join(dir);
     let src = std::fs::read_to_string(dir.join(format!("{scene}.ail"))).unwrap();
     let mut cfg = config(&dir);
     cfg.animate = true;
@@ -223,6 +227,11 @@ fn draws_play_as_sampled() {
 #[test]
 fn fan_out_flights_and_nested_entrances_play_as_sampled() {
     check("git-history", &[1, 2, 3, 4]);
+}
+
+#[test]
+fn accents_play_as_sampled() {
+    check_in("tests/fixtures", "accents", &[1]);
 }
 
 #[test]

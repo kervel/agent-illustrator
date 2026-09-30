@@ -336,6 +336,8 @@ Motion statements (full guide: --skill-animation):
     fly ghost(a) to b, c [scale, arc]   fly proxy from a to b
     move a to b   move a home   move a along path [to: b]
     move a, b, needs.* to box [stagger: 0.07]   transform m1, m2 [...]   fly ghost(a, b) to box
+    accent a [tone: attention|error|ok, style: auto|underline|ring|outline|wiggle, hold: step]
+                        "look here": the style follows the element, the tone says why
     pulse | shake | nudge | flash | ping | highlight  a [...]   loop a [pulse]
     count total [to: 14900, format: "€ {:,}"]
     transform cap [label: "...", swap: roll|fade|cut]

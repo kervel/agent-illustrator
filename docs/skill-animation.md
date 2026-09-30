@@ -513,6 +513,22 @@ move d0 home                    // release a `move`
 move train along track [to: st3.dot]
 ```
 
+### Look here: `accent`
+
+The one verb for "this is what we are talking about":
+```
+accent orders.row[2]                     // a row or a label: underlined
+accent api.dot                           // something small: ringed
+accent panel                             // a panel: outlined
+accent step3 [tone: error]               // why: attention (default) | error (adds a "!") | ok
+accent code.line[4] [hold: step]         // stays until the next click (while you talk)
+accent icon [style: wiggle]              // or underline | ring | outline
+```
+The style follows the element; the tone picks a role colour. It is drawn over
+the element, moves nothing and leaves nothing behind; stills (`--at`, PNG)
+show it while it plays. Prefer it to building emphasis from pulse +
+highlight + a colour change.
+
 ### One-shot effects (leave nothing behind)
 
 `pulse x [scale: 1.3]`, `shake x`, `nudge x [direction: up]`, `flash x`,

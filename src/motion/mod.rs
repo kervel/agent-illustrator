@@ -31,7 +31,7 @@ pub fn is_timing_key(k: &str) -> bool {
 }
 
 /// The transient one-shot effects.
-pub const EFFECTS: &[&str] = &["pulse", "shake", "flash", "ping", "highlight", "nudge"];
+pub const EFFECTS: &[&str] = &["pulse", "shake", "flash", "ping", "highlight", "nudge", "accent"];
 
 /// Find an option by key.
 pub fn opt<'a>(opts: &'a [Spanned<MotionOpt>], key: &str) -> Option<&'a Spanned<MotionValue>> {

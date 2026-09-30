@@ -248,7 +248,7 @@ pub fn check(
             // Moving something nobody can see.
             let acts_on_visible = matches!(
                 a.kind.as_str(),
-                "pulse" | "shake" | "flash" | "ping" | "highlight" | "nudge" | "loop" | "move" | "transform"
+                "accent" | "pulse" | "shake" | "flash" | "ping" | "highlight" | "nudge" | "loop" | "move" | "transform"
             );
             if acts_on_visible && m.display.contains_key(&a.target_id) && hidden_throughout(&a.target_id) {
                 if seen.insert((a.kind.clone(), a.target_id.clone())) {

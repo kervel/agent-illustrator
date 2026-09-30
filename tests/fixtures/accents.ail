@@ -1,0 +1,20 @@
+rect stage [width: 900, height: 420, fill: white, stroke: none, canvas: true]
+constrain stage.left = 0
+constrain stage.top = 0
+table orders [columns: ["#", "customer", "status"],
+              rows: [["41", "Stroopwafels BV", "shipped"], ["42", "Acme Bikes", "open"]],
+              widths: [60, 210, 114], font_size: 18]
+circle dot [size: 26, fill: white, stroke: role-primary, stroke_width: 6]
+rect panel [width: 200, height: 120, fill: role-surface, stroke: role-ink, stroke_width: 2, corner_radius: 12, label: "API"]
+constrain orders.left = stage.left + 40
+constrain orders.top = stage.top + 60
+constrain dot.left = stage.left + 520
+constrain dot.top = stage.top + 80
+constrain panel.left = stage.left + 620
+constrain panel.top = stage.top + 180
+keyframe "a" { }
+keyframe "b" {
+    accent orders.row[2]
+    accent dot
+    accent panel [tone: error, hold: step]
+}

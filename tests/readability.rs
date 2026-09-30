@@ -473,3 +473,20 @@ fn an_explicit_zero_corner_radius_beats_the_stylesheet() {
     let svg = render("rect a [width: 40, height: 20, corner_radius: 0]");
     assert!(svg.contains(r#"style="rx:0px;ry:0px""#), "{svg}");
 }
+
+#[test]
+fn accent_picks_its_look_from_the_element() {
+    let src = "table t [columns: [\"a\", \"b\"], rows: [[\"1\", \"2\"]], widths: [120, 120]]\n\
+               circle dot [size: 24]\nrect panel [width: 200, height: 120]\nrow r [gap: 40] { t\n dot\n panel }\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { accent t.row[1]\n accent dot\n accent panel [tone: error, hold: step] }";
+    let t = timeline(src);
+    assert!(t.contains(".aiacu-") && t.contains(".aiacr-") && t.contains(".aiaco-") && t.contains(".aiacb-"), "{t}");
+    assert!(t.contains("(loop)"), "hold: step stays while the step is shown: {t}");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+}
+
+#[test]
+fn an_accent_on_something_hidden_is_linted() {
+    let src = "rect a [width: 40, height: 20, appears: later]\nkeyframe \"k\" { }\nkeyframe \"j\" { accent a }";
+    assert!(lint(src).iter().any(|m| m.contains("accent on a")), "{:?}", lint(src));
+}

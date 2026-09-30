@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.14
+
+- `accent x`: one verb for "look here". The style follows the element (a
+  label, row or code line is underlined, something small ringed, a panel
+  outlined; `style:` overrides, `wiggle` too); the tone says why
+  (`attention` / `error` with a "!" badge / `ok`, as role colours); `hold:
+  step` keeps it until the next click. Drawn over the element, moves nothing,
+  leaves nothing behind; the no-JS picture is unchanged, and it plays the same
+  in the player, the CSS loop and PNG stills. An accent on something hidden
+  is linted.
+
 ## v0.2.13
 
 - `table`: a small datagrid as one element (`columns:`, `rows:` as lists or

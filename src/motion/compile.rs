@@ -864,7 +864,10 @@ fn timing(
         }
         _ => ("normal", "settle"),
     };
+    // An accent must stay long enough to be seen.
+    let is_accent = matches!(&s.verb, MotionVerb::Effect { name, .. } if name.node == "accent");
     let dur = match opt(&s.opts, "duration") {
+        None if is_accent => 1.2,
         None => tokens.duration(def_dur).unwrap_or(0.5),
         Some(v) => match &v.node {
             MotionValue::Number(n) => *n,
@@ -2147,12 +2150,93 @@ impl<'a> Compiler<'a> {
                 let k = opt_number(opts, "scale").unwrap_or(1.8);
                 self.overlay(fm, hook, Prop::Scale, ov(vec![Val::xy(1.0, 1.0), Val::xy(k, k)], Mode::Abs, t.ease));
             }
+            "accent" => self.accent(opts, target, start, t, atom, fm)?,
             other => {
                 return Err(CompileError {
-                    message: format!("unknown effect '{}': use pulse, shake, flash, ping, highlight or nudge", other),
+                    message: format!("unknown effect '{}': use accent, pulse, shake, flash, ping, highlight or nudge", other),
                     span: fm.atoms[atom].span.clone(),
                 })
             }
+        }
+        Ok(())
+    }
+
+    /// `accent x [tone: attention | error | ok, style: auto | underline |
+    /// ring | outline | wiggle, hold: step]`: "look here". The style follows
+    /// the element (a label or row is underlined, a small thing ringed, a
+    /// panel outlined); the tone says why (a role colour; `error` adds a "!"
+    /// badge). It leaves nothing behind and never moves anything; with
+    /// `hold: step` it stays until the next click.
+    fn accent(
+        &mut self,
+        opts: &[Spanned<MotionOpt>],
+        target: &str,
+        start: f64,
+        t: &Timing,
+        atom: usize,
+        fm: &mut FrameMotion,
+    ) -> Result<(), CompileError> {
+        let span = fm.atoms[atom].span.clone();
+        let err = |m: String| CompileError { message: m, span: span.clone() };
+        let b = self.elems.get(target).map(|e| e.base).ok_or_else(|| err(format!("accent: '{}' is not an element", target)))?;
+        let tone = opt_name(opts, "tone").unwrap_or("attention");
+        let colour = match tone {
+            "attention" => "var(--role-warn, #E8A33D)",
+            "error" => "var(--role-error, #D64545)",
+            "ok" => "var(--role-ok, #2E9E5B)",
+            other => return Err(err(format!("accent: tone '{}': use attention, error or ok", other))),
+        };
+        let style = match opt_name(opts, "style").unwrap_or("auto") {
+            "auto" => {
+                if b.height <= 60.0 && b.width >= 2.5 * b.height {
+                    "underline"
+                } else if b.width.max(b.height) <= 80.0 {
+                    "ring"
+                } else {
+                    "outline"
+                }
+            }
+            s @ ("underline" | "ring" | "outline" | "wiggle") => s,
+            other => return Err(err(format!("accent: style '{}': use auto, underline, ring, outline or wiggle", other))),
+        };
+        let hold = opt_name(opts, "hold").is_some_and(|h| h == "step");
+        // Long enough to be seen: the default effect time is a blink.
+        let dur = t.dur;
+        let entr = (dur * 0.3).min(0.35);
+        let s = self.scope.clone();
+        let mut nodes: Vec<(&str, &str)> = Vec::new();
+        match style {
+            "wiggle" => {
+                let wrap = self.wrap(target);
+                let keys = [0.0, -5.0, 4.0, -3.0, 2.0, 0.0].iter().map(|a| Val::n(*a)).collect();
+                self.overlay(fm, wrap, Prop::Rotate, Overlay { start, dur: dur.min(0.7), ease: Ease::Linear, keys, mode: Mode::Add, looping: false, atom });
+            }
+            other => nodes.push((other, "aiac")),
+        }
+        if tone == "error" {
+            nodes.push(("badge", "aiac"));
+        }
+        for (what, prefix) in nodes {
+            let node_colour = if what == "badge" { "var(--role-error, #D64545)" } else { colour };
+            self.aux.overlays.entry(target.to_string()).or_default().insert(format!("accent-{}:{}", what, node_colour));
+            let hook = format!(".{}{}-{}{}", prefix, &what[..1], s, target);
+            // Opacity: in, hold, out; or in and held while the step is shown.
+            if hold {
+                self.overlay(fm, hook.clone(), Prop::Opacity, Overlay { start, dur: entr, ease: Ease::Linear, keys: vec![Val::n(0.0), Val::n(1.0)], mode: Mode::Abs, looping: false, atom });
+                self.overlay(fm, hook.clone(), Prop::Opacity, Overlay { start: start + entr, dur: 1.0, ease: Ease::Linear, keys: vec![Val::n(1.0), Val::n(1.0)], mode: Mode::Abs, looping: true, atom });
+            } else {
+                let keys = vec![Val::n(0.0), Val::n(1.0), Val::n(1.0), Val::n(1.0), Val::n(0.0)];
+                self.overlay(fm, hook.clone(), Prop::Opacity, Overlay { start, dur, ease: Ease::Linear, keys, mode: Mode::Abs, looping: false, atom });
+            }
+            // How it arrives: an underline draws from the left, a ring and an
+            // outline settle onto the element, a badge pops.
+            let arrive: Vec<Val> = match what {
+                "underline" => vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)],
+                "ring" => vec![Val::xy(1.35, 1.35), Val::xy(1.0, 1.0)],
+                "outline" => vec![Val::xy(1.06, 1.06), Val::xy(1.0, 1.0)],
+                _ => vec![Val::xy(0.0, 0.0), Val::xy(1.2, 1.2), Val::xy(1.0, 1.0)],
+            };
+            self.overlay(fm, hook, Prop::Scale, Overlay { start, dur: entr, ease: t.ease, keys: arrive, mode: Mode::Abs, looping: false, atom });
         }
         Ok(())
     }

@@ -43,6 +43,8 @@ Check here before writing coordinates or a run of `constrain` lines.
 | A component with looks (pending / done) | `state done { ... }` in the template, `set x done` | the same transforms repeated per keyframe |
 | Something that happens when a line arrives | `when line reaches st.dot { ... }` | summed `after` offsets |
 | Checking what each step shows | `--states` | rendering every frame to look |
+| "Look here" in a story | `accent x` (`[tone: error]`, `[hold: step]`) | pulse + highlight + a colour change |
+| A small datagrid | `table t [columns: [...], rows: [[...]]]` | rows of rect templates |
 | Source code or a diff | `code c [lang: python, source: "..."]`, `code d [diff: "-a\n+b"]` | mono rects with hand-coloured spans |
 | A designed icon you can animate by part | `template "x" from "x.svg"` with ids in the file (`d.fold`) | a stack of rects |
 | Colours that survive a change of theme | roles: `role-primary`, `role-ink`, `role-surface` | palette slots in reusable files |
