@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.4
+
+- No more one-frame flash of the old page at the end of a flip (seen on a GPU
+  desktop Chrome). The outgoing page was hidden in the same instant its
+  turned-away hold ended and its width reset to full (its name came back
+  too); a paint between the two showed the old page, full size, under the new
+  one. The rule now holds both ways: nothing about an element changes at the
+  instant it becomes hidden, or while it is hidden (a transient's reset is
+  left to the frame's atomic settle); v0.2.3 did the showing side.
+- Tests: the playback check sees an element as hidden when an ancestor is,
+  and a new test asserts that no step starts on an element or its parts at
+  the instant it is hidden, in all four example scenes.
+
 ## v0.2.3
 
 - No more one-frame flash of a full-size page at the start of a flip. When a

@@ -195,7 +195,44 @@ struct Anim {
     looping: bool,
 }
 
-fn export_curve(curve: &Curve, init: &Val, tokens: &MotionTokens) -> Vec<Anim> {
+/// The element a channel selector belongs to (`.kfp-<scope>d0_pg` -> d0_pg).
+fn channel_element<'a>(sel: &'a str, scope: &str) -> Option<&'a str> {
+    let rest = sel.strip_prefix('.')?;
+    let (_, after) = rest.split_once('-')?;
+    let id = after.strip_prefix(scope)?;
+    // Text variants: `.aitxt-<scope><id>-base`, `-v0`.
+    Some(id.rsplit_once("-base").map(|(a, _)| a).or_else(|| {
+        id.rsplit_once("-v").filter(|(_, n)| n.chars().all(|c| c.is_ascii_digit())).map(|(a, _)| a)
+    }).unwrap_or(id))
+}
+
+/// Whether the channel's element, or an ancestor, is at opacity 0 at time t
+/// of frame fi. An element's own opacity channel is its visibility, not
+/// something that must hold while hidden.
+fn hidden_at(m: &Motion, fi: usize, sel: &str, prop: Prop, t: f64, tokens: &MotionTokens) -> bool {
+    let Some(id) = channel_element(sel, &m.scope) else { return false };
+    let own_opacity = prop == Prop::Opacity && sel == format!(".kf-{}{}", m.scope, id);
+    let mut cur = if own_opacity { m.aux.parents.get(id).cloned().flatten() } else { Some(id.to_string()) };
+    while let Some(e) = cur {
+        let wrap = format!(".kf-{}{}", m.scope, e);
+        if let Some(c) = m.channels.iter().position(|k| k.sel == wrap && k.prop == Prop::Opacity) {
+            let v = match m.frames[fi].curves.get(&c) {
+                Some(curve) => curve.value(&m.settled[fi][c], t, tokens),
+                None => m.settled[fi][c].clone(),
+            };
+            if let Val::V(x) = &v {
+                if x.first().is_some_and(|o| *o <= 1e-6) {
+                    return true;
+                }
+            }
+        }
+        cur = m.aux.parents.get(&e).cloned().flatten();
+    }
+    false
+}
+
+/// `hidden(t)`: the channel's element (or an ancestor) is invisible at t.
+fn export_curve(curve: &Curve, init: &Val, tokens: &MotionTokens, hidden: &dyn Fn(f64) -> bool) -> Vec<Anim> {
     #[derive(Clone, Copy)]
     enum Seg {
         T(usize),
@@ -260,7 +297,14 @@ fn export_curve(curve: &Curve, init: &Val, tokens: &MotionTokens) -> Vec<Anim> {
                         keys.push((1.0, keys[0].1.clone()));
                     }
                     out.push(Anim { delay: a, dur, easing: ov.ease.css(), keys, looping: false });
-                    // After a transient the base value returns.
+                    // After a transient the base value returns, unless the
+                    // element is hidden by then: nothing about an element
+                    // changes at the instant it disappears (a paint between
+                    // the two showed the old flip page, full size, for one
+                    // frame). The frame's end settles it atomically.
+                    if hidden(b + 1e-6) {
+                        continue;
+                    }
                     let after = curve.value(init, b + 1e-6, tokens);
                     out.push(Anim {
                         delay: b,
@@ -275,13 +319,34 @@ fn export_curve(curve: &Curve, init: &Val, tokens: &MotionTokens) -> Vec<Anim> {
         }
         // Overlapping: sample.
         let steps = ((dur * SAMPLE_HZ).ceil() as usize).max(2);
-        let keys = (0..=steps)
-            .map(|j| {
-                let p = j as f64 / steps as f64;
-                (p, curve.value(init, a + dur * p, tokens))
+        // Once hidden for good (for the rest of this cluster), hold the last
+        // visible value, as above. Something hidden that appears later must
+        // keep tracking, so it is in place the moment it shows.
+        let ts: Vec<f64> = (0..=steps).map(|j| a + dur * j as f64 / steps as f64).collect();
+        let mut gone = vec![false; ts.len()];
+        let mut all_hidden = true;
+        for j in (0..ts.len()).rev() {
+            all_hidden = all_hidden && hidden(ts[j]);
+            gone[j] = all_hidden;
+        }
+        let mut last: Option<Val> = None;
+        let keys = ts
+            .iter()
+            .enumerate()
+            .map(|(j, t)| {
+                let v = match (&last, gone[j]) {
+                    (Some(prev), true) => prev.clone(),
+                    _ => curve.value(init, *t, tokens),
+                };
+                last = Some(v.clone());
+                (j as f64 / steps as f64, v)
             })
             .collect();
         out.push(Anim { delay: a, dur, easing: "linear".into(), keys, looping: false });
+        // Nothing steps at the instant (or while) the element is hidden.
+        if hidden(b + 1e-6) {
+            continue;
+        }
         let after = curve.value(init, b + 1e-6, tokens);
         out.push(Anim {
             delay: b,
@@ -372,7 +437,8 @@ pub fn manifest_json(m: &Motion, tokens: &MotionTokens, elements: &[String]) -> 
         let mut first = true;
         for (c, curve) in &f.curves {
             let k = &m.channels[*c];
-            for a in export_curve(curve, &m.settled[fi][*c], tokens) {
+            let hidden = |t: f64| hidden_at(m, fi, &k.sel, k.prop, t, tokens);
+            for a in export_curve(curve, &m.settled[fi][*c], tokens, &hidden) {
                 if !first {
                     j.push(',');
                 }

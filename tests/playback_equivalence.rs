@@ -69,6 +69,23 @@ fn wrapper_opacity(m: &serde_json::Value, c: usize) -> Option<usize> {
     m["channels"].as_array()?.iter().position(|x| x[0].as_str() == Some(&wrap) && x[1].as_str() == Some("opacity"))
 }
 
+/// Wrapper opacity channels of the channel's element and its ancestors, by
+/// the part naming (`d0_pg` is a part of `d0`).
+fn ancestors_and_self(m: &serde_json::Value, c: usize) -> Vec<usize> {
+    let sel = m["channels"][c][0].as_str().unwrap_or_default();
+    let Some(id) = sel.strip_prefix(".kfp-").or_else(|| sel.strip_prefix(".kf-")) else { return vec![] };
+    let chans = m["channels"].as_array().unwrap();
+    let mut out: Vec<usize> = wrapper_opacity(m, c).into_iter().collect();
+    let mut cur = format!(".kf-{}", id);
+    while let Some(i) = cur.rfind('_') {
+        cur.truncate(i);
+        if let Some(p) = chans.iter().position(|x| x[0].as_str() == Some(&cur) && x[1].as_str() == Some("opacity")) {
+            out.push(p);
+        }
+    }
+    out
+}
+
 /// Hidden when frame f starts (its wrapper at opacity 0).
 fn hidden_at_start(m: &serde_json::Value, f: usize, c: usize) -> bool {
     wrapper_opacity(m, c)
@@ -160,10 +177,11 @@ fn check(scene: &str, frames: &[usize]) {
                 if prop == "text" || prop == "clip-path" {
                     continue;
                 }
-                // What cannot be seen cannot flash: compare while visible.
-                let visible = wrapper_opacity(&m, ci)
-                    .and_then(|o| played(&m, f, o, t))
-                    .is_none_or(|v| v[0] > 0.0);
+                // What cannot be seen cannot flash: compare while it and
+                // every ancestor (a part `d0_pg` is inside `d0`) is visible.
+                let visible = ancestors_and_self(&m, ci).iter().all(|o| {
+                    played(&m, f, *o, t).is_none_or(|v| v[0] > 0.0)
+                });
                 if !visible {
                     continue;
                 }
@@ -232,4 +250,46 @@ fn a_flip_is_never_blank_except_at_its_turn() {
         }
         t += 0.005;
     }
+}
+
+#[test]
+fn nothing_changes_at_the_instant_something_is_hidden() {
+    // An element's appearance must never change in the same instant as its
+    // visibility: at the end of a flip the old page was hidden while its
+    // turned-away hold reset to full width, and a paint between the two
+    // showed it, full size, for one frame.
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/motion");
+    let mut bad = Vec::new();
+    for scene in ["git-copies", "git-snapshots", "git-branches", "git-merge"] {
+        let src = std::fs::read_to_string(dir.join(format!("{scene}.ail"))).unwrap();
+        let mut cfg = config(&dir);
+        cfg.animate = true;
+        let m = manifest(&render_with_config(&src, cfg).unwrap());
+        let chans = m["channels"].as_array().unwrap();
+        for (f, anims) in m["anims"].as_array().unwrap().iter().enumerate() {
+            let anims = anims.as_array().unwrap();
+            for hide in anims {
+                let c = hide["c"].as_u64().unwrap() as usize;
+                let (sel, prop) = (chans[c][0].as_str().unwrap(), chans[c][1].as_str().unwrap());
+                let last = hide["k"].as_array().unwrap().last().unwrap()[1].as_str().unwrap();
+                if !(prop == "opacity" && sel.starts_with(".kf-") && last == "0" && hide["d"].as_f64().unwrap() <= 0.002) {
+                    continue;
+                }
+                let t0 = hide["t"].as_f64().unwrap();
+                let id = &sel[".kf-".len()..];
+                for a in anims {
+                    let ac = a["c"].as_u64().unwrap() as usize;
+                    if ac == c || (a["t"].as_f64().unwrap() - t0).abs() > 0.002 || a["d"].as_f64().unwrap() > 0.002 {
+                        continue;
+                    }
+                    let asel = chans[ac][0].as_str().unwrap();
+                    let aid = asel.split_once('-').map(|x| x.1).unwrap_or("");
+                    if aid == id || aid.starts_with(&format!("{id}_")) {
+                        bad.push(format!("{scene} frame {f}: {asel} {} steps at {t0} as {sel} hides", chans[ac][1]));
+                    }
+                }
+            }
+        }
+    }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
 }

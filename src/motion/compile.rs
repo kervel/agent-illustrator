@@ -197,6 +197,8 @@ pub struct FrameMotion {
 /// Auxiliary nodes the renderer must add for motion to have something to move.
 #[derive(Debug, Clone, Default)]
 pub struct Aux {
+    /// Element -> its parent element (for "is it visible?" at export).
+    pub parents: HashMap<String, Option<String>>,
     /// Element ids that get a wrapper hook (all named elements).
     pub origins: HashMap<String, (f64, f64)>,
     /// Drawables: id -> is a connection (true) or path shape (false).
@@ -1010,6 +1012,7 @@ impl<'a> Compiler<'a> {
         }
         let (drawables, drawn_initial, heads) = drawable_info(input.doc, input.base);
         let aux = Aux {
+            parents: elems.iter().map(|(k, v): (&String, &ElemInfo)| (k.clone(), v.parent.clone())).collect(),
             origins,
             drawables: drawables.clone(),
             heads: heads.clone(),
