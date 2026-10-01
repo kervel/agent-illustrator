@@ -808,9 +808,16 @@ fn a_layer_change_is_one_switch_at_its_moment() {
                point spot\nconstrain card.left = 0\nconstrain card.top = 0\nconstrain server.left = 260\nconstrain server.top = 0\n\
                constrain spot.center_x = server.center_x\nconstrain spot.center_y = server.center_y\n\
                keyframe \"a\" { }\nkeyframe \"b\" { move card to spot [z_order: -1, duration: 1] }\n\
-               keyframe \"c\" { transform card [z_order: 1] }";
+               keyframe \"c\" { move card home [z_order: 1, duration: 1] }";
     let t = timeline(src);
-    assert!(t.contains("card-0 opacity: 0 -> 1  @0.50+0.00"), "mid-move: {t}");
+    // Unseen: going under just before it reaches the server (here exactly
+    // halfway), coming back over just after it has left it.
+    assert!(t.contains("card-0 opacity: 0 -> 1  @0.50+0.00"), "{t}");
+    assert!(t.contains("card-1 opacity: 0 -> 1  @0.50+0.00"), "{t}");
+    // Changing layer while overlapped cannot hide: it pops, and lint says so.
+    let pops = src.replace("move card home [z_order: 1, duration: 1]", "transform card [z_order: 1]");
+    assert!(lint(&pops).iter().any(|m| m.contains("z_order change on card happens while it overlaps server")), "{:?}", lint(&pops));
+    assert!(!lint(&pops.replace("[z_order: 1]", "[z_order: 1, z_at: start]")).iter().any(|m| m.contains("pops")));
     let svg = render(src);
     assert_eq!(svg.matches(r#"id="card""#).count(), 1, "one copy keeps the id");
     assert_eq!(svg.matches("data-zcopy-of=\"card\"").count(), 1, "the other layer's copy");

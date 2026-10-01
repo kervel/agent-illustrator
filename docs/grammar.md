@@ -148,8 +148,8 @@ Common modifiers:
                             on a template part, among the parts of its instance.
                             `z_order: scene(N)`: a part painted in the scene's own
                             layer. Animatable: `transform x [z_order: N]`,
-                            `move x to y [z_order: N]` (switches mid-move;
-                            `z_at: start|mid|end`)
+                            `move x to y [z_order: N]` (switches where it is
+                            not seen; or `z_at: start|mid|end`)
     routing: direct         Diagonal line (vs default orthogonal)
     routing: curved         Smooth curve (for loops, crossings)
 

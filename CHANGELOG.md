@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.27
+
+- A layer change in a keyframe now happens where it is not seen. By default
+  (`z_at: auto`) it goes under just before the element starts overlapping
+  what it goes under, and comes over just after it stops overlapping. Only
+  siblings that paint something count, so an empty stage frame doesn't.
+  Mid-move, the card popped in plain view at the server's edge.
+- Lint: a layer change that has to happen while overlapped (it pops), unless
+  `z_at: start|mid|end` accepts it. `z_at` is also read in a `transform`'s
+  brackets.
+
 ## v0.2.26
 
 - Explicit z-order, built on the one `z_order`. Scenes without it render

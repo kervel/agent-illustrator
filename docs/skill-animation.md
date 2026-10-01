@@ -658,15 +658,18 @@ big shape things sit on) *before* what sits on them, or they cover it; a line
 ```
 rect berg [..., z_order: -1]                   // under its siblings (higher = on top; default 0)
 circle badge [..., z_order: scene(1)]          // a template part over things OUTSIDE its instance
-move card to behind [z_order: -1]              // changes layer mid-move (z_at: start|mid|end)
-transform card [z_order: 1]                    // a layer change on its own: at the start
+move card to behind [z_order: -1]              // goes under the server unseen, just before it reaches it
+move card home [z_order: 1]                    // comes back over just after it has left it
 ```
 A `z_order: N` orders an element (a shape, a group, a row, an instance) among
 its siblings only; on a template part, that is inside its own instance.
 `scene(N)` paints the part in the scene's own layer. It stays `inst.part`,
 constrained and moved with its instance, and it shows and hides with it. A
-layer change in a keyframe works the same way in the player, the CSS loop, the
-no-JS picture and stills. `--lint` reports a `z_order` that changes nothing,
+layer change in a keyframe happens where it is not seen: outside the stretch
+where the element overlaps what it changes order with. `z_at: start|mid|end`
+picks the moment yourself. It works the same way in the player, the CSS loop,
+the no-JS picture and stills, and `--lint` reports a change that has to
+happen while overlapped (it pops). `--lint` reports a `z_order` that changes nothing,
 and a part's local `z_order` that something outside its instance still covers.
 
 Things that sit on something on purpose (a badge on a document's corner, a

@@ -2236,23 +2236,35 @@ impl<'a> Compiler<'a> {
             _ => {}
         }
 
-        // A change of paint layer is a switch, at one moment: the start of
-        // a z_order on its own, the middle of a move or of a transform that
-        // also moves it, or where `z_at:` says.
-        let z_only = match &s.verb {
-            MotionVerb::Transform { modifiers, .. } => modifiers.iter().all(|m| matches!(m.node.key.node, crate::parser::ast::StyleKey::ZOrder)),
-            _ => false,
-        };
-        let frac = match opt_name(&s.opts, "z_at") {
-            Some("start") => 0.0,
-            Some("end") => 1.0,
-            Some("mid") => 0.5,
-            _ => if z_only { 0.0 } else { 0.5 },
-        };
-        for k in changed.iter().filter(|k| k.sel.starts_with(".aiz-")) {
-            let to = snap.vals.get(k).cloned().unwrap_or(Val::n(0.0));
-            self.tween(fm, k, simple(start + t.dur * frac, 0.0, Ease::Linear, to));
-            handled.insert(k.clone());
+        // A change of paint layer is a switch, at one moment. By default
+        // (`z_at: auto`) it happens where nobody sees it: just before the
+        // element starts overlapping the siblings it goes under, or just
+        // after it stops overlapping those it comes over. `z_at:
+        // start|mid|end` says when instead.
+        let zkeys: Vec<ChKey> = changed.iter().filter(|k| k.sel.starts_with(".aiz-")).cloned().collect();
+        if !zkeys.is_empty() {
+            // `move ... [z_at: x]` is an option; in a transform's brackets it
+            // rides with the style keys.
+            let z_at = opt_name(&s.opts, "z_at").map(str::to_string).or_else(|| match &s.verb {
+                MotionVerb::Transform { modifiers, .. } => modifiers.iter().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+                    (crate::parser::ast::StyleKey::Custom(k), crate::parser::ast::StyleValue::Identifier(v)) if k == "z_at" => Some(v.0.clone()),
+                    (crate::parser::ast::StyleKey::Custom(k), crate::parser::ast::StyleValue::Keyword(v) | crate::parser::ast::StyleValue::String(v)) if k == "z_at" => Some(v.clone()),
+                    _ => None,
+                }),
+                _ => None,
+            });
+            let frac = match z_at.as_deref() {
+                Some("start") => 0.0,
+                Some("end") => 1.0,
+                Some("mid") => 0.5,
+                _ => self.unseen_swap(s, target, before, snap, layout, fm),
+            };
+            let at = start + t.dur * ease_inverse(t.ease, frac.clamp(0.0, 1.0));
+            for k in zkeys {
+                let to = snap.vals.get(&k).cloned().unwrap_or(Val::n(0.0));
+                self.tween(fm, &k, simple(at, 0.0, Ease::Linear, to));
+                handled.insert(k);
+            }
         }
 
         // Everything else that changed follows the statement's timing.
@@ -2268,6 +2280,108 @@ impl<'a> Compiler<'a> {
             self.tween(fm, k, simple(start, t.dur, t.ease, to));
         }
         Ok(())
+    }
+
+    /// The progress (0..1 of a statement's ease) at which a change of layer
+    /// is not seen: outside the stretch of its path where it overlaps a
+    /// sibling whose order against it flips. Overlapped at the start (going
+    /// under) or the end (coming over): it cannot hide, so it swaps there
+    /// and `--lint` says it pops.
+    fn unseen_swap(&mut self, s: &MotionStmt, target: &str, before: &Snap, snap: &Snap, layout: &LayoutResult, fm: &FrameMotion) -> f64 {
+        let Some(slots) = self.aux.zslots.get(target).cloned() else { return 0.0 };
+        let layer = |sn: &Snap| {
+            (0..slots.len())
+                .find(|k| matches!(sn.vals.get(&ChKey { sel: format!(".aiz-{}{}-{}", self.scope, target, k), prop: Prop::Opacity }), Some(Val::V(v)) if v.first().is_some_and(|x| *x > 0.5)))
+                .map(|k| slots[k])
+                .unwrap_or(slots[0])
+        };
+        let (z0, z1) = (layer(before), layer(snap));
+        if z0 == z1 {
+            return 0.0;
+        }
+        let going_under = z1 < z0;
+        // Siblings in declaration order, and the ones whose order flips.
+        let parent = self.elems.get(target).and_then(|e| e.parent.clone());
+        let sibs: Vec<&ElementLayout> = match parent.as_deref().and_then(|p| layout.get_element_by_name(p)) {
+            Some(p) => p.children.iter().collect(),
+            None => layout.root_elements.iter().collect(),
+        };
+        let me = sibs.iter().position(|e| e.id.as_ref().is_some_and(|i| i.0 == target)).unwrap_or(0);
+        let above = |zs: i32, js: usize, ze: i32| zs > ze || (zs == ze && js > me);
+        // An invisible frame (a stage without fill) hides nothing.
+        fn paints(e: &ElementLayout) -> bool {
+            crate::layout::lint::has_visible_fill(e)
+                || crate::layout::lint::has_visible_border(e)
+                || e.label.is_some()
+                || e.children.iter().any(paints)
+        }
+        let flipping: Vec<String> = sibs
+            .iter()
+            .enumerate()
+            .filter(|(j, e)| *j != me && above(e.z_order, *j, z0) != above(e.z_order, *j, z1) && paints(e))
+            .filter_map(|(_, e)| e.id.as_ref().map(|i| i.0.clone()))
+            .collect();
+        let tr = |sn: &Snap, id: &str| match sn.vals.get(&ChKey { sel: self.wrap(id), prop: Prop::Translate }) {
+            Some(Val::V(v)) if v.len() >= 2 => (v[0], v[1]),
+            _ => (0.0, 0.0),
+        };
+        let Some(info) = self.elems.get(target) else { return 0.0 };
+        let (a, b) = (tr(before, target), tr(snap, target));
+        let anc = self.ancestors_translate(snap, target);
+        let box_at = |p: f64| {
+            let mut bb = info.base;
+            bb.x += a.0 + (b.0 - a.0) * p + anc.0;
+            bb.y += a.1 + (b.1 - a.1) * p + anc.1;
+            bb
+        };
+        let others: Vec<(String, crate::layout::types::BoundingBox)> = flipping
+            .iter()
+            .filter_map(|id| {
+                let e = self.elems.get(id)?;
+                let (t, an) = (tr(snap, id), self.ancestors_translate(snap, id));
+                let mut bb = e.base;
+                bb.x += t.0 + an.0;
+                bb.y += t.1 + an.1;
+                Some((id.clone(), bb))
+            })
+            .collect();
+        let hits = |p: f64| -> Vec<&str> {
+            let bb = box_at(p);
+            others
+                .iter()
+                .filter(|(_, o)| {
+                    let w = bb.right().min(o.right()) - bb.x.max(o.x);
+                    let h = bb.bottom().min(o.bottom()) - bb.y.max(o.y);
+                    w > 0.5 && h > 0.5
+                })
+                .map(|(id, _)| id.as_str())
+                .collect()
+        };
+        const N: usize = 200;
+        let overl: Vec<bool> = (0..=N).map(|i| !hits(i as f64 / N as f64).is_empty()).collect();
+        let (first, last) = (overl.iter().position(|x| *x), overl.iter().rposition(|x| *x));
+        let (Some(first), Some(last)) = (first, last) else {
+            // Never overlapping: any moment is unseen; going under early and
+            // coming over late reads naturally.
+            return if going_under { 0.0 } else { 1.0 };
+        };
+        let frac = if going_under { (first as f64 - 0.5).max(0.0) / N as f64 } else { (last as f64 + 0.5).min(N as f64) / N as f64 };
+        let popping = if going_under { first == 0 } else { last == N };
+        if popping {
+            let who = hits(if going_under { 0.0 } else { 1.0 });
+            self.misses.push((
+                fm.name.clone(),
+                format!(
+                    "z_order change on {} happens while it overlaps {}: it pops {} in plain view. Move it clear first, \
+                     or accept it with `z_at: start|mid|end`",
+                    self.show(target),
+                    who.iter().map(|w| self.show(w)).collect::<Vec<_>>().join(", "),
+                    if going_under { "under them" } else { "over them" }
+                ),
+            ));
+        }
+        let _ = s;
+        frac
     }
 
     fn is_descendant(&self, id: &str, ancestor: &str) -> bool {
