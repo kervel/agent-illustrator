@@ -526,20 +526,25 @@ move train along track [to: st3.dot]
 
 The one verb for "this is what we are talking about":
 ```
-accent orders.row[2]                     // a row or a label: underlined
+accent orders.row[2]                     // a row, a line, a label, a bar: highlighter (marker)
+accent code.lines[4..6] [hold: step]     // a range of lines: one highlighter box
 accent api.dot                           // something small: ringed
 accent panel                             // a panel: outlined
 accent step3 [tone: error]               // why: attention (default) | error (adds a "!") | ok
 accent code.line[4] [hold: step]         // stays until the next click (while you talk)
-accent icon [style: wiggle]              // or underline | ring | outline
+when step3 accented { ... }              // when it has finished calling for attention
+accent icon [style: wiggle]              // or marker | underline | ring | outline
 ```
-The style follows the element: text and rows (things with no fill or border
-of their own) are underlined, something small (up to 80px) is ringed, any
-other box is outlined; the tone picks a role colour. An accent lasts 1.2s:
-a `then` after it waits for it (use `when x shown` to go on sooner). It is drawn over
-the element, moves nothing and leaves nothing behind; stills (`--at`, PNG)
-show it while it plays. Prefer it to building emphasis from pulse +
-highlight + a colour change.
+The style follows the element: anything thin and wide (a line of text or
+code, a table row, a bar; up to 60px high, 2.5 times as wide) gets a
+translucent highlighter box over it that stays inside it, something small (up
+to 80px) is ringed, any other box is outlined; the tone picks a role colour.
+An accent lasts 1.2s: a `then` after it waits for it (use `when x shown` to
+go on sooner). It is drawn over the element, moves nothing and leaves nothing
+behind; stills (`--at`, PNG) show it while it plays. Prefer it to building
+emphasis from pulse + highlight + a colour change. A ring, outline, underline
+or "!" badge sticks out of the element: `--lint` says when it runs into a
+neighbour on screen (give it room, or use the marker).
 
 ### One-shot effects (leave nothing behind)
 
@@ -790,13 +795,17 @@ A small datagrid is one element, not rows of rects fighting the defaults:
 table orders [columns: ["#", "customer", "status"],
               rows: [["41", "Stroopwafels BV", "shipped"], ["42", "Acme Bikes", "open"]],
               widths: [60, 210, 114], font_size: 18, mono: [0]]
-keyframe "pick" { highlight orders.row[2] [color: role-primary] }
-keyframe "ship" { transform orders.r2c2 [label: "shipped", swap: fade] }
+keyframe "pick" { accent orders.row[2] [hold: step] }
+keyframe "ship" { transform orders.cell[2][3] [label: "shipped", swap: fade] }
 ```
 Cells are square and flush and keep their spacing; the header band and rules
-use theme roles. Rows are parts (`orders.row2`, `orders.rows[1..3]`), so they
-can appear later, be highlighted, or be recoloured (`transform orders.row2
-[fill: role-ok-soft]`).
+use theme roles. Rows and cells are parts, so they can appear later, be
+accented, or be recoloured (`transform orders.row[2] [fill: role-ok-soft]`).
+Rows and columns count from 1: `orders.row[2]`, `orders.rows[1..3]`,
+`orders.cell[2][3]` (row 2, column 3). The bracket forms work everywhere, in
+constraints too (`constrain tag.center_y = orders.row[2].center_y`,
+`code.line[4].right`). The older spellings `orders.row2` and `orders.r2c2`
+(column from 0) still work.
 
 ### Code on a slide
 

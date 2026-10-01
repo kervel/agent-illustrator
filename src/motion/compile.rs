@@ -238,6 +238,8 @@ pub struct Motion {
     pub display: HashMap<String, String>,
     /// (frame, message): moves that do not end where they say.
     pub misses: Vec<(String, String)>,
+    /// (frame, target, style, with an error badge): every accent, for lint.
+    pub accents: Vec<(String, String, String, bool)>,
 }
 
 // ------------------------------------------------------------ evaluation
@@ -578,6 +580,7 @@ struct Compiler<'a> {
     /// start), by span: they set the scene and do not animate.
     pre_applied: HashSet<(usize, usize)>,
     misses: Vec<(String, String)>,
+    accents: Vec<(String, String, String, bool)>,
 }
 
 fn has_marker(layout: &LayoutResult, id: &str) -> bool {
@@ -1246,6 +1249,7 @@ impl<'a> Compiler<'a> {
             display: super::expand::ElementIndex::build(input.doc).display,
             pre_applied: HashSet::new(),
             misses: Vec::new(),
+            accents: Vec::new(),
         }
     }
 }
@@ -1540,7 +1544,7 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
 
     // Fill the settled table; defaults for channels that only animate.
     let neutral = |k: &ChKey| -> Val {
-        let aux_hook = ["aighost-", "aiflash-", "aihl-", "aiping-", "aitick-", "aiacu-", "aiacr-", "aiaco-", "aiacb-"]
+        let aux_hook = ["aighost-", "aiflash-", "aihl-", "aiping-", "aitick-", "aiacu-", "aiacr-", "aiaco-", "aiacb-", "aiacm-"]
             .iter()
             .any(|p| k.sel.starts_with(&format!(".{}", p)));
         match k.prop {
@@ -1568,6 +1572,7 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
     Ok(Motion {
         display,
         misses: std::mem::take(&mut c.misses),
+        accents: std::mem::take(&mut c.accents),
         scope: c.scope.clone(),
         channels: c.channels,
         settled,
@@ -2323,17 +2328,21 @@ impl<'a> Compiler<'a> {
         };
         let style = match opt_name(opts, "style").unwrap_or("auto") {
             "auto" => {
-                if text_like && b.height <= 60.0 && b.width >= 2.5 * b.height {
-                    "underline"
+                // A line of text, a table row, a bar: a highlighter stroke
+                // over it reads from the back of a room and stays inside it.
+                if b.height <= 60.0 && b.width >= 2.5 * b.height {
+                    "marker"
                 } else if b.width.max(b.height) <= 80.0 {
                     "ring"
                 } else {
                     "outline"
                 }
             }
-            s @ ("underline" | "ring" | "outline" | "wiggle") => s,
-            other => return Err(err(format!("accent: style '{}': use auto, underline, ring, outline or wiggle", other))),
+            s @ ("marker" | "underline" | "ring" | "outline" | "wiggle") => s,
+            other => return Err(err(format!("accent: style '{}': use auto, marker, underline, ring, outline or wiggle", other))),
         };
+        let _ = text_like;
+        self.accents.push((fm.name.clone(), target.to_string(), style.to_string(), tone == "error"));
         let hold = opt_name(opts, "hold").is_some_and(|h| h == "step");
         // Long enough to be seen: the default effect time is a blink.
         let dur = t.dur;
@@ -2368,7 +2377,7 @@ impl<'a> Compiler<'a> {
             // How it arrives: an underline draws from the left, a ring and an
             // outline settle onto the element, a badge pops.
             let arrive: Vec<Val> = match what {
-                "underline" => vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)],
+                "underline" | "marker" => vec![Val::xy(0.0, 1.0), Val::xy(1.0, 1.0)],
                 "ring" => vec![Val::xy(1.35, 1.35), Val::xy(1.0, 1.0)],
                 "outline" => vec![Val::xy(1.06, 1.06), Val::xy(1.0, 1.0)],
                 _ => vec![Val::xy(0.0, 0.0), Val::xy(1.2, 1.2), Val::xy(1.0, 1.0)],

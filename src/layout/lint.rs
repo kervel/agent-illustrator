@@ -684,7 +684,7 @@ pub(crate) fn paints_nothing(elem: &ElementLayout) -> bool {
 }
 
 /// Counterpart to [`has_visible_border`]: does this element paint any fill?
-fn has_visible_fill(elem: &ElementLayout) -> bool {
+pub(crate) fn has_visible_fill(elem: &ElementLayout) -> bool {
     if elem.styles.fill_pattern.is_some() {
         return true;
     }
@@ -740,7 +740,7 @@ fn is_substantially_visible(elem: &ElementLayout) -> bool {
 
 /// A non-opaque shape is "borderless" if it has no visible stroke
 /// (stroke is "none" or stroke_width is 0).
-fn has_visible_border(elem: &ElementLayout) -> bool {
+pub(crate) fn has_visible_border(elem: &ElementLayout) -> bool {
     if let Some(ref stroke) = elem.styles.stroke {
         if stroke.eq_ignore_ascii_case("none") {
             return false;
@@ -796,7 +796,7 @@ impl ContainsRelations {
         self.by_container.contains_key(id)
     }
 
-    fn wraps(&self, a: Option<&str>, b: Option<&str>) -> bool {
+    pub(crate) fn wraps(&self, a: Option<&str>, b: Option<&str>) -> bool {
         let (Some(a), Some(b)) = (a, b) else {
             return false;
         };
@@ -819,7 +819,7 @@ impl ContainsRelations {
 
 }
 
-fn collect_contains_ids(doc: &Document) -> ContainsRelations {
+pub(crate) fn collect_contains_ids(doc: &Document) -> ContainsRelations {
     let mut relations = ContainsRelations::default();
     collect_contains_ids_from_stmts(&doc.statements, &mut relations);
     relations

@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.22
+
+- `accent` gets a `marker` style: a translucent highlighter box over the
+  target that stays inside it. It is the automatic choice for anything thin
+  and wide: a line of text or code, a table row, a bar. An underline on an
+  inner table row sat on the next row's border; an outline round a bar ran
+  into its neighbours. `accent code.lines[4..6]` marks a range as one box.
+- Lint: an accent's ring, outline, underline or "!" badge that runs into a
+  neighbour on screen. Declared `overlaps:` and the target's own parts and
+  containers don't count.
+- Parts by number work everywhere, constraints included: `c.line[4].right`,
+  `t.row[2].center_y`, and the new `t.cell[2][3]` (row and column from 1).
+  The older `t.r2c2` (column from 0) still works.
+
 ## v0.2.21
 
 - Fix: `transform x [label: "new", label_fill: role-ok]` drew the new text in

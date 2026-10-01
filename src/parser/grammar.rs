@@ -76,6 +76,58 @@ fn reserved_word_as_name(input: &str) -> Option<crate::ParseError> {
     None
 }
 
+/// `x.line[4]`, `t.row[3]`, `t.cell[3][2]` name one part wherever a name
+/// goes (constraints, selectors, references): they become `x.line4`,
+/// `t.row3` and `t.r3c1` (rows and columns count from 1; a table's cell
+/// parts number columns from 0). Ranges (`x.lines[4..6]`) are left to the
+/// selector grammar.
+fn indexed_parts(toks: Vec<(Token, std::ops::Range<usize>)>) -> Vec<(Token, std::ops::Range<usize>)> {
+    let int = |t: Option<&(Token, std::ops::Range<usize>)>| match t {
+        Some((Token::Number(n), _)) if n.fract() == 0.0 && *n >= 0.0 => Some(*n as usize),
+        _ => None,
+    };
+    let is = |t: Option<&(Token, std::ops::Range<usize>)>, want: &Token| t.is_some_and(|(x, _)| x == want);
+    let mut out = Vec::with_capacity(toks.len());
+    let mut i = 0;
+    while i < toks.len() {
+        let after_dot = i > 0 && toks[i - 1].0 == Token::Dot;
+        let word = match &toks[i].0 {
+            Token::Line => Some("line"),
+            Token::Row => Some("row"),
+            Token::Ident(w) if w == "line" || w == "lines" => Some("line"),
+            Token::Ident(w) if w == "row" || w == "rows" => Some("row"),
+            Token::Ident(w) if w == "cell" => Some("cell"),
+            _ => None,
+        };
+        if let (true, Some(word)) = (after_dot, word) {
+            let one = |at: usize| -> Option<usize> {
+                (is(toks.get(at), &Token::BracketOpen) && is(toks.get(at + 2), &Token::BracketClose))
+                    .then(|| int(toks.get(at + 1)))
+                    .flatten()
+            };
+            if let Some(a) = one(i + 1) {
+                let (name, used) = if word == "cell" {
+                    match one(i + 4) {
+                        Some(c) if c >= 1 => (format!("r{}c{}", a, c - 1), 7),
+                        _ => (String::new(), 0),
+                    }
+                } else {
+                    (format!("{}{}", word, a), 4)
+                };
+                if used > 0 {
+                    let span = toks[i].1.start..toks[i + used - 1].1.end;
+                    out.push((Token::Ident(name), span));
+                    i += used;
+                    continue;
+                }
+            }
+        }
+        out.push(toks[i].clone());
+        i += 1;
+    }
+    out
+}
+
 pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     let len = input.len();
     if let Some(e) = reserved_word_as_name(input) {
@@ -83,7 +135,8 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     }
 
     // Create a logos lexer and convert to token stream
-    let token_iter = crate::parser::lexer::lex(input).map(|(tok, span)| (tok, span.into()));
+    let tokens = indexed_parts(crate::parser::lexer::lex(input).collect());
+    let token_iter = tokens.into_iter().map(|(tok, span)| (tok, span.into()));
 
     // Turn the token iterator into a stream that chumsky can use
     let token_stream = Stream::from_iter(token_iter)

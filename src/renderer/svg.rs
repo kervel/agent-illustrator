@@ -1234,6 +1234,18 @@ fn render_motion_overlays(element: &ElementLayout, builder: &mut SvgBuilder, beh
                 let class = format!("aiac{}-{s}{id}-{tone}", &style[..1]);
                 let c = b.center();
                 match style {
+                    "marker" => {
+                        // A highlighter stroke over it: translucent, flush
+                        // top and bottom so a range of lines reads as one.
+                        // Inset a little from the sides (a line of code spans
+                        // its frame), square so lines in a range join.
+                        let inset = (b.width * 0.02).min(4.0);
+                        let (x, y) = (b.x + inset, b.y);
+                        builder.add_raw(&format!(
+                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="{}" fill="{colour}" fill-opacity="0.32" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(x), r2(y), r2(b.width - 2.0 * inset), r2(b.height), r2(x), r2(b.center().y)
+                        ));
+                    }
                     "underline" => {
                         let (x, y, w) = (b.x, b.bottom() + 5.0, b.width);
                         builder.add_raw(&format!(

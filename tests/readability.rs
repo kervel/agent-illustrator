@@ -480,7 +480,8 @@ fn accent_picks_its_look_from_the_element() {
                circle dot [size: 24]\nrect panel [width: 200, height: 120] }\n\
                keyframe \"a\" { }\nkeyframe \"b\" { accent t.row[1]\n accent dot\n accent panel [tone: error, hold: step] }";
     let t = timeline(src);
-    assert!(t.contains(".aiacu-") && t.contains(".aiacr-") && t.contains(".aiaco-") && t.contains(".aiacb-"), "{t}");
+    // A row gets a marker, a dot a ring, a panel an outline (+ "!" badge).
+    assert!(t.contains(".aiacm-") && t.contains(".aiacr-") && t.contains(".aiaco-") && t.contains(".aiacb-"), "{t}");
     assert!(t.contains("(loop)"), "hold: step stays while the step is shown: {t}");
     assert!(lint(src).is_empty(), "{:?}", lint(src));
 }
@@ -528,10 +529,14 @@ fn a_held_accent_ends_with_its_step() {
 }
 
 #[test]
-fn a_filled_box_is_outlined_not_underlined() {
+fn a_bar_gets_a_marker_and_a_box_an_outline() {
+    // An outline around a thin bar runs into its neighbours; a marker stays
+    // inside. An underline on a table's inner row sat on the next row's border.
     let src = "rect layer [width: 180, height: 44, fill: white, stroke: black]\nkeyframe \"k\" { }\nkeyframe \"j\" { accent layer }";
     let t = timeline(src);
-    assert!(t.contains(".aiaco-") && !t.contains(".aiacu-"), "{t}");
+    assert!(t.contains(".aiacm-") && !t.contains(".aiacu-") && !t.contains(".aiaco-"), "{t}");
+    let src = "rect card [width: 180, height: 120, fill: white, stroke: black]\nkeyframe \"k\" { }\nkeyframe \"j\" { accent card }";
+    assert!(timeline(src).contains(".aiaco-"));
 }
 
 #[test]
@@ -663,4 +668,26 @@ fn a_move_to_something_that_moves_along_is_linted() {
     let ok = "rect agent [width: 40, height: 40]\npoint p\nconstrain p.left = 300\nconstrain p.top = 100\n\
               keyframe \"a\" { }\nkeyframe \"b\" { move agent to p }";
     assert!(!lint(ok).iter().any(|m| m.contains("moves along")), "{:?}", lint(ok));
+}
+
+#[test]
+fn an_accent_mark_that_runs_into_a_neighbour_is_linted() {
+    let src = "col ctx [gap: 6] { rect c3 [width: 280, height: 20, fill: gray]\n rect c4 [width: 280, height: 34, fill: gray]\n \
+               rect c5 [width: 280, height: 20, fill: gray] }\nkeyframe \"a\" { }\n\
+               keyframe \"b\" { accent c4 [style: outline, hold: step] }\nkeyframe \"c\" { accent c4 [tone: error] }";
+    let w = lint(src);
+    assert!(w.iter().any(|m| m.contains("accent c4 (outline) runs into c3, c5")), "{w:?}");
+    assert_eq!(w.iter().filter(|m| m.contains("runs into")).count(), 1, "the marker stays inside: {w:?}");
+}
+
+#[test]
+fn bracket_parts_work_everywhere() {
+    // `c.line[2]` in a constraint, `t.cell[2][2]` (row 2, column 2) anywhere.
+    let src = "code c [lang: python, source: \"a = 1\\nb = 2\"]\n\
+               table t [columns: [\"n\", \"s\"], rows: [[\"one\", \"\"], [\"two\", \"\"]], widths: [100, 80]]\n\
+               rect tag [width: 40, height: 20]\nconstrain t.left = c.right + 40\nconstrain t.top = c.top + 100\n\
+               constrain tag.left = c.line[2].right + 10\nconstrain tag.center_y = c.line[2].center_y\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { transform t.cell[2][2] [label: \"x\"]\n accent c.lines[1..2] }";
+    let st = states(src);
+    assert!(st.contains("t.r2c1 [label: \"x\"]"), "{st}");
 }

@@ -180,6 +180,8 @@ pub fn check(
     for (c, p) in &parent_of {
         kids.entry(p.as_str()).or_default().push(c.as_str());
     }
+    accent_collisions(m, doc, states, base, &parent_of, &mut out);
+
     for (frame, msg) in &m.misses {
         out.push(warn(LintCategory::Motion, frame, msg.clone()));
     }
@@ -695,4 +697,102 @@ fn uses_motion(nodes: &[crate::parser::ast::Spanned<crate::parser::ast::MotionNo
                 }
         }
     })
+}
+
+/// An accent's mark (outline, ring, underline, "!" badge) sticks out of its
+/// element: when it runs into a neighbour that is on screen, it reads as a
+/// box drawn over the neighbour. A marker stays inside, a wiggle has none.
+fn accent_collisions(
+    m: &Motion,
+    doc: &Document,
+    states: &[FrameState],
+    base: &LayoutResult,
+    parent_of: &HashMap<String, String>,
+    out: &mut Vec<LintWarning>,
+) {
+    use crate::layout::types::BoundingBox;
+    let show = |id: &str| m.display.get(id).cloned().unwrap_or_else(|| id.to_string());
+    let related = |a: &str, b: &str| {
+        let up = |from: &str, to: &str| {
+            let mut cur = Some(from.to_string());
+            while let Some(c) = cur {
+                if c == to {
+                    return true;
+                }
+                cur = parent_of.get(&c).cloned();
+            }
+            false
+        };
+        up(a, b) || up(b, a)
+    };
+    let declared = crate::layout::lint::collect_contains_ids(doc);
+    let mut seen: HashSet<(String, String, String)> = HashSet::new();
+    for (frame, target, style, badge) in &m.accents {
+        let Some(fi) = m.frames.iter().position(|f| &f.name == frame) else { continue };
+        let Some(el) = base.get_element_by_name(target) else { continue };
+        let b = el.bounds;
+        let c = b.center();
+        let mut marks: Vec<(&str, BoundingBox)> = Vec::new();
+        match style.as_str() {
+            // Pad plus half the stroke, as drawn.
+            "outline" => marks.push(("outline", BoundingBox::new(b.x - 9.0, b.y - 9.0, b.width + 18.0, b.height + 18.0))),
+            "ring" => {
+                let r = b.width.max(b.height) / 2.0 + 11.0;
+                marks.push(("ring", BoundingBox::new(c.x - r, c.y - r, 2.0 * r, 2.0 * r)));
+            }
+            "underline" => marks.push(("underline", BoundingBox::new(b.x, b.bottom() + 5.0, b.width, 5.0))),
+            _ => {}
+        }
+        if *badge {
+            marks.push(("badge", BoundingBox::new(b.right() + 13.0, c.y - 13.0, 26.0, 26.0)));
+        }
+        let st = &states[fi];
+        for (what, mb) in marks {
+            let mut hit: Vec<(String, f64)> = Vec::new();
+            for (id, o) in &base.elements {
+                // Itself, its parts and containers, and what sits on it on
+                // purpose (`overlaps:`).
+                if id == target || related(id, target) || hidden_in(st, id, parent_of) || declared.wraps(Some(id), Some(target)) {
+                    continue;
+                }
+                let drawn = crate::layout::lint::has_visible_fill(o) || crate::layout::lint::has_visible_border(o);
+                // Something the mark sits on (a band, the stage) is no neighbour.
+                if !drawn || o.bounds.contains_bbox(&mb) || !o.bounds.intersects(&mb) {
+                    continue;
+                }
+                let ob = o.bounds;
+                let by = if what == "ring" || what == "badge" {
+                    // Round: how far the circle reaches into the box.
+                    let (cx, cy, r) = (mb.center().x, mb.center().y, mb.width / 2.0);
+                    let (nx, ny) = (cx.clamp(ob.x, ob.right()), cy.clamp(ob.y, ob.bottom()));
+                    r - ((cx - nx).powi(2) + (cy - ny).powi(2)).sqrt()
+                } else {
+                    (mb.right().min(ob.right()) - mb.x.max(ob.x)).min(mb.bottom().min(ob.bottom()) - mb.y.max(ob.y))
+                };
+                if by > 1.0 {
+                    let name = show(id);
+                    if !hit.iter().any(|h| h.0 == name) {
+                        hit.push((name, by));
+                    }
+                }
+            }
+            if hit.is_empty() || !seen.insert((frame.clone(), target.clone(), what.to_string())) {
+                continue;
+            }
+            hit.sort_by(|a, b| a.0.cmp(&b.0));
+            let by = hit.iter().map(|h| h.1).fold(0.0, f64::max);
+            let names: Vec<String> = hit.into_iter().map(|h| h.0).take(4).collect();
+            out.push(warn(
+                LintCategory::Motion,
+                frame,
+                format!(
+                    "accent {} ({}) runs into {} by {:.0}px: give it more room, or use `style: marker` (stays inside it)",
+                    show(target),
+                    what,
+                    names.join(", "),
+                    by
+                ),
+            ));
+        }
+    }
 }
