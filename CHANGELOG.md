@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.21
+
+- Fix: `transform x [label: "new", label_fill: role-ok]` drew the new text in
+  the default ink. The colour reached only the old text, not the text swapped
+  in. This affected every output (player, CSS loop, no-JS, PNG); the player
+  is checked in Chrome.
+- Lint: `move x to y` that ends away from y. This happens when y is placed
+  (through constraints) relative to x and re-solves along with it, which
+  used to be a silent no-op.
+- `when x accented { ... }`: fires when the latest accent of x has finished
+  calling for attention.
+- `when x shown` for an x already on screen as the keyframe starts now means
+  the keyframe's start (was a compile error).
+- docs/z-order-cases.md: a log of the scenes that needed a paint order, to
+  design explicit z-order from if it is ever needed.
+
 ## v0.2.20
 
 - Fix: `fly ghost(group)` copied every child, including ones not shown yet

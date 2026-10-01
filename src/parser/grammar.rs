@@ -2159,6 +2159,7 @@ where
                 dotted_name.clone().then_ignore(kw("arrives")).map(MotionEvent::Arrives),
                 dotted_name.clone().then_ignore(kw("shown")).map(MotionEvent::Shown),
                 dotted_name.clone().then_ignore(kw("hidden")).map(MotionEvent::Hidden),
+                dotted_name.clone().then_ignore(kw("accented")).map(MotionEvent::Accented),
             ))
             .labelled("an event: `<line> reaches <element>`, `<element> arrives`, `<element> shown` or `<element> hidden`");
             let when_beat = kw("when")

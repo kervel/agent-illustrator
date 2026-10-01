@@ -236,6 +236,8 @@ pub struct Motion {
     pub view_center: (f64, f64),
     /// How to write each id (dotted component paths).
     pub display: HashMap<String, String>,
+    /// (frame, message): moves that do not end where they say.
+    pub misses: Vec<(String, String)>,
 }
 
 // ------------------------------------------------------------ evaluation
@@ -575,6 +577,7 @@ struct Compiler<'a> {
     /// Frame 0's statements already applied in the pre-state (those at its
     /// start), by span: they set the scene and do not animate.
     pre_applied: HashSet<(usize, usize)>,
+    misses: Vec<(String, String)>,
 }
 
 fn has_marker(layout: &LayoutResult, id: &str) -> bool {
@@ -700,7 +703,8 @@ impl<'a> Compiler<'a> {
                 vals.insert(ChKey { sel: shape.clone(), prop: Prop::Height }, Val::n(e.bounds.height));
             }
             if let Some(lf) = &e.styles.label_fill {
-                vals.insert(ChKey { sel: format!("{} > text", w), prop: Prop::Fill }, Val::S(lf.clone()));
+                // The label and its swapped-in texts (in their own group).
+                vals.insert(ChKey { sel: label_sel(&w), prop: Prop::Fill }, Val::S(lf.clone()));
             }
             if let Some(variants) = self.input.text_variants.get(id) {
                 let cur = element_text(e);
@@ -942,11 +946,25 @@ struct TimedStmt<'a> {
 
 /// What events are timed against: the base layout, how far each line is
 /// drawn when the frame starts, and the beats seen so far.
+/// The label colour channel of a wrapper: its label, and the texts a
+/// transform swaps in.
+pub(crate) fn label_sel(wrap: &str) -> String {
+    format!("{w} > text, {w} > .aitxtv > text", w = wrap)
+}
+
+/// The wrapper id of a label colour channel (`label_sel`), if it is one.
+pub(crate) fn label_sel_id(sel: &str) -> Option<&str> {
+    let (first, _) = sel.split_once(", ")?;
+    first.strip_suffix(" > text").filter(|w| sel == label_sel(w))
+}
+
 struct EventCtx<'b> {
     base: &'b LayoutResult,
     drawn: HashMap<String, f64>,
     beats: HashMap<String, f64>,
     show: &'b dyn Fn(&str) -> String,
+    /// On screen as the keyframe starts (`when x shown` then means now).
+    visible: HashSet<String>,
     /// Resolved events, for the timeline.
     events: Vec<(f64, String, usize)>,
 }
@@ -1038,7 +1056,12 @@ fn event_time(ev: &MotionEvent, span: &Span, out: &[TimedStmt], ctx: &EventCtx) 
             ))),
         MotionEvent::Shown(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Show(_)))
             .map(|(s, ts)| s + ts.timing.dur)
+            // Already on screen as the keyframe starts: shown, as of now.
+            .or_else(|| ctx.visible.contains(&e.node).then_some(0.0))
             .ok_or_else(|| err(format!("when {} shown: no `show {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
+        MotionEvent::Accented(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Effect { name, .. } if name.node == "accent"))
+            .map(|(s, ts)| s + ts.timing.dur)
+            .ok_or_else(|| err(format!("when {} accented: no `accent {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
         MotionEvent::Hidden(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Hide(_)))
             .map(|(s, ts)| s + ts.timing.dur)
             .ok_or_else(|| err(format!("when {} hidden: no `hide {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
@@ -1140,6 +1163,7 @@ fn walk<'a>(
                     MotionEvent::Arrives(e) => format!("{} arrives", show(&e.node)),
                     MotionEvent::Shown(e) => format!("{} shown", show(&e.node)),
                     MotionEvent::Hidden(e) => format!("{} hidden", show(&e.node)),
+                    MotionEvent::Accented(e) => format!("{} accented", show(&e.node)),
                     MotionEvent::BeatEnd(b) => format!("after {}", b.node),
                 };
                 let nudge = if off.abs() > 1e-9 { format!(" {} {}", if *off < 0.0 { "-" } else { "+" }, off.abs()) } else { String::new() };
@@ -1221,6 +1245,7 @@ impl<'a> Compiler<'a> {
             current_opts: Vec::new(),
             display: super::expand::ElementIndex::build(input.doc).display,
             pre_applied: HashSet::new(),
+            misses: Vec::new(),
         }
     }
 }
@@ -1441,7 +1466,22 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
             })
             .collect();
         let show_fn = |id: &str| c.show(id);
-        let mut ctx = EventCtx { base: input.base, drawn, beats: HashMap::new(), show: &show_fn, events: Vec::new() };
+        let visible: HashSet<String> = c
+            .elems
+            .keys()
+            .filter(|id| {
+                let mut cur = Some(id.to_string());
+                while let Some(x) = cur {
+                    if matches!(snap.vals.get(&ChKey { sel: c.wrap(&x), prop: Prop::Opacity }), Some(v) if v.close(&Val::n(0.0))) {
+                        return false;
+                    }
+                    cur = c.elems.get(&x).and_then(|e| e.parent.clone());
+                }
+                true
+            })
+            .cloned()
+            .collect();
+        let mut ctx = EventCtx { base: input.base, drawn, beats: HashMap::new(), show: &show_fn, visible, events: Vec::new() };
         let duration = walk(&kf.motion, 0.0, input.tokens, &c.defaults, &mut timed, &mut ctx)
             .map_err(|TimingError(m, s)| CompileError { message: m, span: s })?;
         let mut fm = FrameMotion {
@@ -1527,6 +1567,7 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
     let display = c.display.clone();
     Ok(Motion {
         display,
+        misses: std::mem::take(&mut c.misses),
         scope: c.scope.clone(),
         channels: c.channels,
         settled,
@@ -1667,6 +1708,30 @@ impl<'a> Compiler<'a> {
             }
             if geometry {
                 *layout = self.solve(state);
+            }
+            // `move x to y` ends with x on y, unless y is placed relative
+            // to x and moved along with it.
+            let move_to = match &s.verb {
+                MotionVerb::Move { to: Some(t), along: None, .. } => s.partners.get(i).cloned().or_else(|| Some(t.node.replace('.', "_"))),
+                _ => None,
+            };
+            if let Some(dest) = move_to.as_ref() {
+                if let (Some(me), Some(there)) = (layout.get_element_by_name(&target), layout.get_element_by_name(dest)) {
+                    let (a, b) = (me.bounds.center(), there.bounds.center());
+                    if (a.x - b.x).abs() > 1.0 || (a.y - b.y).abs() > 1.0 {
+                        self.misses.push((
+                            frame_name.to_string(),
+                            format!(
+                                "move {x} to {y} ends {dx:.0}px, {dy:.0}px away from {y}: {y} is placed relative to {x} \
+                                 (through constraints) and moves along with it. Place {y} relative to something that stays put",
+                                x = self.show(&target),
+                                y = self.show(dest),
+                                dx = b.x - a.x,
+                                dy = b.y - a.y
+                            ),
+                        ));
+                    }
+                }
             }
             let before = std::mem::replace(snap, self.snapshot(state, layout, Some(frame_name)));
             let mut changed: Vec<ChKey> = Vec::new();

@@ -180,6 +180,10 @@ pub fn check(
     for (c, p) in &parent_of {
         kids.entry(p.as_str()).or_default().push(c.as_str());
     }
+    for (frame, msg) in &m.misses {
+        out.push(warn(LintCategory::Motion, frame, msg.clone()));
+    }
+
     // (A show in the first keyframe is an entrance: what it shows starts hidden.)
     for (fi, f) in m.frames.iter().enumerate().skip(1) {
         let prev = &states[fi - 1];

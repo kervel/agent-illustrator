@@ -2053,7 +2053,7 @@ fn render_element_body(
             // for a label right after its shape, and would otherwise turn a
             // variant white on a white card.
             let inner = format!("{}{}", size, font_attrs(&element.styles));
-            builder.start_group_attrs(&[format!("{}label-variants", builder.prefix())], &colour);
+            builder.start_group_attrs(&[format!("{}label-variants", builder.prefix()), "aitxtv".to_string()], &colour);
             for (n, text) in variants.iter().enumerate() {
                 let rich = crate::layout::text::parse_markup(text)
                     .unwrap_or_else(|_| crate::layout::text::RichText::from_plain(text));

@@ -352,6 +352,8 @@ pub enum MotionEvent {
     Shown(Spanned<String>),
     /// Its exit ends.
     Hidden(Spanned<String>),
+    /// Its accent's call for attention ends (a held mark stays on).
+    Accented(Spanned<String>),
     /// A named beat ends.
     BeatEnd(Spanned<String>),
 }

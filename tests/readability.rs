@@ -622,3 +622,45 @@ fn a_show_of_something_already_on_screen_is_linted() {
     assert!(w.iter().any(|m| m.contains("show panel: it is already on screen")), "{w:?}");
     assert!(!w.iter().any(|m| m.contains("show tip")), "hidden first in the keyframe, or entering: {w:?}");
 }
+
+#[test]
+fn when_accented_and_when_shown_on_something_already_there() {
+    let src = "rect a [width: 40, height: 20]\nrect b [width: 40, height: 20, appears: later]\n\
+               keyframe \"k\" { show b }\n\
+               keyframe \"j\" { accent b [tone: error]\n when b accented + 0.2 { move b to a }\n when a shown { accent a } }";
+    let t = timeline(src);
+    assert!(t.contains("b accented"), "{t}");
+    assert!(t.contains("a shown"), "already on screen: shown as of the keyframe's start: {t}");
+    // Something hidden at the start still needs its show.
+    let bad = "rect a [width: 40, height: 20, appears: later]\nkeyframe \"k\" { }\nkeyframe \"j\" { when a shown { accent a } }";
+    assert!(render_with_config(bad, RenderConfig::new()).is_err());
+}
+
+#[test]
+fn a_new_label_takes_the_new_label_colour() {
+    // The swapped-in text sits in its own group; the colour reached only
+    // the old text, so `[label: "✕", label_fill: role-error]` drew a black ✕.
+    let src = "rect c [width: 200, height: 40, label: \"old\", fill: none]\nkeyframe \"a\" { }\n\
+               keyframe \"b\" { transform c [label: \"new\", label_fill: red] }";
+    let svg = render(src);
+    assert!(svg.contains("aitxtv\""), "the variants' group is addressable: {svg}");
+    let rule = svg.lines().find(|l| l.contains("> .aitxtv > text") && l.contains("red")).map(str::to_string);
+    let player = svg.contains(r#".aitxtv \u003e text","fill"]"#);
+    assert!(rule.is_some() || player, "the label colour reaches the new text: {svg}");
+}
+
+#[test]
+fn a_move_to_something_that_moves_along_is_linted() {
+    // The target was placed (through constraints) relative to the mover:
+    // the move re-solved it along, and silently went nowhere.
+    let src = "rect agent [width: 40, height: 40]\nrect tests [width: 60, height: 40]\npoint at_tests\n\
+               rect home_spot [width: 10, height: 10]\n\
+               constrain tests.left = agent.right + 200\nconstrain at_tests.center_x = tests.center_x\n\
+               constrain at_tests.top = tests.bottom + 20\nconstrain home_spot.top = agent.bottom + 100\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { move agent to at_tests }\nkeyframe \"c\" { move agent to home_spot }";
+    let w = lint(src);
+    assert!(w.iter().any(|m| m.contains("move agent to at_tests ends") && m.contains("moves along with it")), "{w:?}");
+    let ok = "rect agent [width: 40, height: 40]\npoint p\nconstrain p.left = 300\nconstrain p.top = 100\n\
+              keyframe \"a\" { }\nkeyframe \"b\" { move agent to p }";
+    assert!(!lint(ok).iter().any(|m| m.contains("moves along")), "{:?}", lint(ok));
+}

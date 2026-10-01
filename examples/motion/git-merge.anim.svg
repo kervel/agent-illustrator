@@ -196,7 +196,7 @@ text { white-space: pre; }
 .kf-4daa88cb-anna { animation: ailfilm4 13.08s linear infinite, ailfilm5 13.08s linear infinite; }
 .kf-4daa88cb-ben { animation: ailfilm6 13.08s linear infinite, ailfilm7 13.08s linear infinite; }
 .kf-4daa88cb-card { animation: ailfilm12 13.08s linear infinite, ailfilm40 13.08s linear infinite, ailfilm41 13.08s linear infinite; }
-.kf-4daa88cb-keep_anna > text { animation: ailfilm42 13.08s linear infinite; }
+.kf-4daa88cb-keep_anna > text, .kf-4daa88cb-keep_anna > .aitxtv > text { animation: ailfilm42 13.08s linear infinite; }
 .kf-4daa88cb-keep_ben { animation: ailfilm44 13.08s linear infinite; }
 .kf-4daa88cb-merged { animation: ailfilm8 13.08s linear infinite, ailfilm9 13.08s linear infinite, ailfilm13 13.08s linear infinite; }
 .kf-4daa88cb-merged_bottom_pad { animation: ailfilm17 13.08s linear infinite; }

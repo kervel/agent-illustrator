@@ -950,6 +950,7 @@ impl Expander<'_> {
             MotionEvent::Arrives(e) => MotionEvent::Arrives(id(e)?),
             MotionEvent::Shown(e) => MotionEvent::Shown(id(e)?),
             MotionEvent::Hidden(e) => MotionEvent::Hidden(id(e)?),
+            MotionEvent::Accented(e) => MotionEvent::Accented(id(e)?),
             MotionEvent::BeatEnd(b) => MotionEvent::BeatEnd(b.clone()),
         })
     }

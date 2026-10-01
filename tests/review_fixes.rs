@@ -108,7 +108,7 @@ fn swapped_label_variants_do_not_follow_a_sibling_with_a_fill() {
     let lines: Vec<&str> = svg.lines().map(str::trim).collect();
     for (i, l) in lines.iter().enumerate() {
         if l.contains("-v0") && l.starts_with("<text") {
-            assert!(lines[i - 1].starts_with("<g class=\"ai-label-variants\""), "{}", lines[i - 1]);
+            assert!(lines[i - 1].starts_with("<g class=\"ai-label-variants"), "{}", lines[i - 1]);
             assert!(!l.contains(" fill="), "the colour is on the wrapper: {l}");
         }
     }

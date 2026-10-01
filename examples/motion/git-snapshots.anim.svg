@@ -242,9 +242,9 @@ text { white-space: pre; }
 .kf-f8126697-st3_dot { animation: ailfilm39 21.32s linear infinite, ailfilm40 21.32s linear infinite; }
 .kf-f8126697-st3_mt { animation: ailfilm43 21.32s linear infinite, ailfilm44 21.32s linear infinite; }
 .kf-f8126697-st3_nm { animation: ailfilm41 21.32s linear infinite, ailfilm42 21.32s linear infinite; }
-.kf-f8126697-st3_nm > text { animation: ailfilm51 21.32s linear infinite; }
+.kf-f8126697-st3_nm > text, .kf-f8126697-st3_nm > .aitxtv > text { animation: ailfilm51 21.32s linear infinite; }
 .kf-f8126697-status { animation: ailfilm49 21.32s linear infinite, ailfilm56 21.32s linear infinite; }
-.kf-f8126697-status > text { animation: ailfilm54 21.32s linear infinite; }
+.kf-f8126697-status > text, .kf-f8126697-status > .aitxtv > text { animation: ailfilm54 21.32s linear infinite; }
 .kf-f8126697-stick { animation: ailfilm45 21.32s linear infinite, ailfilm46 21.32s linear infinite; }
 .kfp-f8126697-st3_dot { animation: ailfilm50 21.32s linear infinite; }
 .kfp-f8126697-status { animation: ailfilm55 21.32s linear infinite; }
@@ -327,7 +327,7 @@ text { white-space: pre; }
               <g class="kf-f8126697-f_style_val kf-anim" style="transform-origin:535.79px 380px">
                 <rect id="f_style_val" class="ai-shape ai-rect kfp-f8126697-f_style_val" x="469.576" y="358.875" width="132.424" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
                 <text class="ai-label aitxt-f8126697-f_style_val-base" x="535.788" y="380" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="535.788" dy="-0"><tspan>210 lines</tspan></tspan></text>
-                <g class="ai-label-variants" fill="var(--role-ink)">
+                <g class="ai-label-variants aitxtv" fill="var(--role-ink)">
                   <text class="ai-label aitxt-f8126697-f_style_val-v0" x="535.788" y="380" text-anchor="middle" dominant-baseline="middle" font-size="21" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="535.788" dy="-0"><tspan>246 lines</tspan></tspan></text>
                 </g>
               </g>
@@ -353,7 +353,7 @@ text { white-space: pre; }
               <g class="kf-f8126697-f_cart_val kf-anim" style="transform-origin:542.26px 456px">
                 <rect id="f_cart_val" class="ai-shape ai-rect kfp-f8126697-f_cart_val" x="482.512" y="434.875" width="119.488" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
                 <text class="ai-label aitxt-f8126697-f_cart_val-base" x="542.256" y="456" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="542.256" dy="-0"><tspan>57 lines</tspan></tspan></text>
-                <g class="ai-label-variants" fill="var(--role-ink)">
+                <g class="ai-label-variants aitxtv" fill="var(--role-ink)">
                   <text class="ai-label aitxt-f8126697-f_cart_val-v0" x="542.256" y="456" text-anchor="middle" dominant-baseline="middle" font-size="21" opacity="0" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="542.256" dy="-0"><tspan>58 lines</tspan></tspan></text>
                 </g>
               </g>
@@ -367,7 +367,7 @@ text { white-space: pre; }
   <g class="kf-hidden kf-f8126697-status kf-anim" style="transform-origin:198.31px 541.75px">
     <rect id="status" class="ai-shape ai-rect kfp-f8126697-status" x="96" y="520" width="204.6115" height="43.5" fill="var(--role-surface)" stroke="var(--role-ok)" stroke-width="3" rx="10" style="rx:10px;ry:10px"/>
     <text class="ai-label aitxt-f8126697-status-base" x="198.3058" y="541.75" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-ok)" style="font-weight:700"><tspan x="198.3058" dy="-0"><tspan>● checkout works</tspan></tspan></text>
-    <g class="ai-label-variants" fill="var(--role-ok)">
+    <g class="ai-label-variants aitxtv" fill="var(--role-ok)">
       <text class="ai-label aitxt-f8126697-status-v0" x="198.3058" y="541.75" text-anchor="middle" dominant-baseline="middle" font-size="22" opacity="0" style="font-weight:700"><tspan x="198.3058" dy="-0"><tspan>● checkout broken</tspan></tspan></text>
     </g>
   </g>

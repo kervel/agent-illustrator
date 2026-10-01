@@ -428,6 +428,7 @@ keyframe "main" {
     when l1.dot shown + 0.1 { ... }               // an entrance ended (+/- a nudge)
     when ring arrives { flash folder }            // a move or flight ended
     when card hidden { use layout default }       // an exit ended
+    when d2 accented + 0.3 { move d2 to at_r2 }   // an accent's call for attention ended
     beat open { show mr [enter: pop] }            // a named group ...
     after open + 0.2 { set tests passed }         // ... and when it ends
     then { pulse merged.dot }                     // when everything before it has ended
@@ -441,8 +442,11 @@ keyframe has finished entering, `hidden` when its latest exit has finished,
 `arrives` when its latest `move`/`fly` ends, or its `show [from: …]` flight
 lands, or a transform that moves, turns or resizes it ends (if nothing does,
 when the latest layout change such as `use layout beside` has played), `after name` when
-everything in `beat name` has ended. `+ 0.1` / `- 0.15` shift from that moment.
-Only statements earlier in the same keyframe count. `--timeline` prints each
+everything in `beat name` has ended, `accented` when its latest `accent` has
+finished calling for attention (a held mark stays on). `+ 0.1` / `- 0.15`
+shift from that moment. Only statements earlier in the same keyframe count,
+with one exception: `when x shown` for an x that is already on screen as the
+keyframe starts means its start. `--timeline` prints each
 event with its resolved time (`when merged shown - 0.15 (= 1.20s, starts
 1.05s)`) above the statements it starts.
 

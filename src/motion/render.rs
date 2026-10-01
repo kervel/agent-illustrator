@@ -183,7 +183,7 @@ pub fn film_css(m: &Motion, tokens: &MotionTokens, hold: f64, lead: f64, end_hol
     let text_anims: BTreeMap<String, Vec<String>> = by_sel
         .iter()
         .filter_map(|(sel, a)| {
-            let id = sel.strip_prefix(".kf-")?.strip_suffix(" > text")?;
+            let id = super::compile::label_sel_id(sel)?.strip_prefix(".kf-")?;
             Some((id.to_string(), a.clone()))
         })
         .collect();
@@ -629,11 +629,13 @@ fn pretty_sel(sel: &str, scope: &str, display: &HashMap<String, String>) -> Stri
 
 fn pretty_sel_raw(sel: &str, scope: &str) -> String {
     let strip = |p: &str| sel.strip_prefix(&format!(".{}{}", p, scope)).map(str::to_string);
+    if let Some(w) = super::compile::label_sel_id(sel) {
+        if let Some(id) = w.strip_prefix(&format!(".kf-{}", scope)) {
+            return format!("{} (label)", id);
+        }
+    }
     if let Some(rest) = strip("kf-") {
-        return match rest.strip_suffix(" > text") {
-            Some(id) => format!("{} (label)", id),
-            None => rest,
-        };
+        return rest;
     }
     for (p, what) in [
         ("kfp-", "shape"),

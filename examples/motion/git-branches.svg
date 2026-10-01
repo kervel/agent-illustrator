@@ -565,7 +565,7 @@ svg[data-ail-player] * { transition: none !important; }
                   <g class="kf-8ba2ce6e-review_txt kf-anim" style="transform-origin:1433.16px 362px">
                     <rect id="review_txt" class="ai-shape ai-rect kfp-8ba2ce6e-review_txt" x="1340.3252" y="330.25" width="185.6748" height="63.5" fill="none" stroke="none" stroke-width="1.5"/>
                     <text class="ai-label aitxt-8ba2ce6e-review_txt-base" x="1348.3252" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)" style="font-weight:600"><tspan x="1348.3252" dy="-11.875"><tspan>Ben: “add a test for</tspan></tspan><tspan x="1348.3252" dy="23.75"><tspan>coupons”</tspan></tspan></text>
-                    <g class="ai-label-variants" fill="var(--role-ink)">
+                    <g class="ai-label-variants aitxtv" fill="var(--role-ink)">
                       <text class="ai-label aitxt-8ba2ce6e-review_txt-v0" x="1348.3252" y="362" text-anchor="start" dominant-baseline="middle" font-size="19" opacity="0" style="font-weight:600"><tspan x="1348.3252" dy="-0"><tspan>Approved by Ben</tspan></tspan></text>
                     </g>
                   </g>

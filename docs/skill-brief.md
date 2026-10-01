@@ -106,8 +106,9 @@ keyframe "clone" {
   `appears: later` on the thing you `show`, not on its container.
 - Time by what things wait for:
   - `when line reaches st.dot { ... }`
-  - `when x shown { ... }`, `when x arrives + 0.3 { ... }` (they fire when
-    that finishes; `+`/`-` shifts them)
+  - `when x shown { ... }`, `when x arrives + 0.3 { ... }`,
+    `when x accented { ... }` (they fire when that finishes; `+`/`-` shifts
+    them; x already on screen counts as shown at the start)
   - `then { ... }` waits for EVERYTHING before it, a 1.2s accent or a slow
     move included (to go on sooner use `when x shown`)
   - `at 0.4 { ... }` (from the start of the keyframe)
