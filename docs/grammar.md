@@ -144,7 +144,12 @@ Common modifiers:
     padding: <number>       On row/col: room between its edge and its children
                             (default 5); `padding: 0` puts them flush
     z_order: <number>       Render order among siblings (higher = on top; default 0,
-                            a `through:` line -1 so it runs under its stations)
+                            a `through:` line -1 so it runs under its stations);
+                            on a template part, among the parts of its instance.
+                            `z_order: scene(N)`: a part painted in the scene's own
+                            layer. Animatable: `transform x [z_order: N]`,
+                            `move x to y [z_order: N]` (switches mid-move;
+                            `z_at: start|mid|end`)
     routing: direct         Diagonal line (vs default orthogonal)
     routing: curved         Smooth curve (for loops, crossings)
 
@@ -311,7 +316,7 @@ written (--lint reports text that does not fit it).
 Position + rotation animate via a transform on the element's wrapper group (so the
 label rides along); size animates via the shape's width/height.
 
-    A key that cannot be animated (z_order, font_size, routing, ...) is
+    A key that cannot be animated (font_size, routing, ...) is
     reported by --lint rather than silently ignored. stroke_dasharray only
     interpolates between patterns with the same dash count, so dashed -> solid
     is written as a zero-length pattern ("0,0"), not `none`, if a smooth

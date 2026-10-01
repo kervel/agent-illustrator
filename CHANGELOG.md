@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.26
+
+- Explicit z-order, built on the one `z_order`. Scenes without it render
+  byte-identical (checked on every example and all 52 deck scenes).
+  - `z_order: N` orders an element (shape, group, row, instance) among its
+    siblings; on a template part, inside its own instance.
+  - `z_order: scene(N)`: a part painted in the scene's own layer, over
+    things outside its instance. It stays `inst.part`, constrained and moved
+    with its instance, and shows and hides with it.
+  - Layer changes in keyframes: `transform x [z_order: N]` (at the start),
+    `move x to y [z_order: N]` (mid-move), `z_at: start|mid|end`. The same in
+    the player, the CSS loop, the no-JS picture and stills; covered by
+    the playback-equivalence test.
+  - Lint: a `z_order` that changes nothing, and a part's local `z_order`
+    that something outside its instance still covers.
+- `caption_style: strong`: a caption for a name or an actor (20px, bold,
+  ink), next to the default note look.
+- Lint: a caption closer than 8px to something other than its element.
+
 ## v0.2.25
 
 - `code p [lang: prose, ...]`: a prompt, chat or design document in the body

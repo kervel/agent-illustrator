@@ -651,9 +651,23 @@ of SVG artwork, set it at the instance: `barrier gate [arm.pivot: left]`, then
 ### Layering and overlaps on purpose
 
 What is declared later is drawn on top. Declare backgrounds (bands, lanes, a
-big shape things sit on) *before* what sits on them, or they cover it.
-`z_order: 1` lifts one element above its siblings; a line `through:` stations
-runs under them by itself.
+big shape things sit on) *before* what sits on them, or they cover it; a line
+`through:` stations runs under them by itself. That is the first tool.
+
+`z_order` is for what declaration order cannot say:
+```
+rect berg [..., z_order: -1]                   // under its siblings (higher = on top; default 0)
+circle badge [..., z_order: scene(1)]          // a template part over things OUTSIDE its instance
+move card to behind [z_order: -1]              // changes layer mid-move (z_at: start|mid|end)
+transform card [z_order: 1]                    // a layer change on its own: at the start
+```
+A `z_order: N` orders an element (a shape, a group, a row, an instance) among
+its siblings only; on a template part, that is inside its own instance.
+`scene(N)` paints the part in the scene's own layer. It stays `inst.part`,
+constrained and moved with its instance, and it shows and hides with it. A
+layer change in a keyframe works the same way in the player, the CSS loop, the
+no-JS picture and stills. `--lint` reports a `z_order` that changes nothing,
+and a part's local `z_order` that something outside its instance still covers.
 
 Things that sit on something on purpose (a badge on a document's corner, a
 chip on an environment box, a tag on a frame's border) say so, so the lint
@@ -669,8 +683,10 @@ rect st [..., caption: "staging", caption_position: above]       // or left, rig
 ```
 The caption is a part, `r1.caption` (accent it, transform its label). It
 comes and goes with its element: it copies the element's `appears`, and
-`show r1` / `hide r1` bring it along. It uses the caption look (18px,
-semibold, `role-muted`).
+`show r1` / `hide r1` bring it along. It uses the caption look: a note
+(18px, semibold, `role-muted`), or with `caption_style: strong` a name, an
+actor (20px, bold, `role-ink`). `--lint` reports a caption that comes within
+8px of something other than its element.
 
 For another look, or a caption with an entrance of its own, write the long
 form: `text "Hotfix" nm [caption_of: dot, label_position: below,

@@ -275,6 +275,24 @@ fn base_stmt_ops(
                 .map(|t| KeyframeOp::Draw { target: t.clone(), to: to.clone() })
                 .collect()
         }
+        MotionVerb::Move { to, along, .. } if opt_number(opts, "z_order").is_some() => {
+            // `move x to y [z_order: -1]`: the move, and a change of layer.
+            let z = opt_number(opts, "z_order").unwrap_or(0.0);
+            let mut ops = base_stmt_ops(&MotionVerb::Move { target: Spanned::new(Selector::Name(String::new()), 0..0), to: to.clone(), to_list: vec![], along: along.clone() }, &opts.iter().filter(|o| o.node.key.node != "z_order").cloned().collect::<Vec<_>>(), targets, partners);
+            for t in targets {
+                ops.push(KeyframeOp::Transform {
+                    target: t.clone(),
+                    modifiers: vec![Spanned::new(
+                        StyleModifier {
+                            key: Spanned::new(StyleKey::ZOrder, t.span.clone()),
+                            value: Spanned::new(StyleValue::Number { value: z, unit: None }, t.span.clone()),
+                        },
+                        t.span.clone(),
+                    )],
+                });
+            }
+            ops
+        }
         MotionVerb::Move { to, along, .. } => {
             let pin = match (to, along) {
                 (Some(to), _) if to.node == "home" => PinTo::Home,

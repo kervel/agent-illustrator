@@ -213,6 +213,10 @@ pub struct Aux {
     pub overlays: BTreeMap<String, BTreeSet<String>>,
     /// Text elements that get a counter ticker node.
     pub tickers: BTreeSet<String>,
+    /// Elements whose `z_order` changes in a keyframe: every value they take,
+    /// lowest first. The renderer paints one copy per value, and a slot
+    /// channel (`.aiz-<id>-<k>`) shows the one in use.
+    pub zslots: BTreeMap<String, Vec<i32>>,
     /// Whether a camera group is needed.
     pub camera: bool,
     /// Drawn connections whose arrowhead is its own node.
@@ -502,6 +506,10 @@ struct ElemInfo {
     /// Text, or a box that paints nothing of its own (a label, a table row,
     /// a code line): accented with an underline rather than an outline.
     text_like: bool,
+    /// `z_order: scene(N)`: painted at the scene's root, so its wrapper
+    /// does not sit in its parent's (it moves absolutely, and takes its
+    /// ancestors' visibility explicitly).
+    lifted: bool,
 }
 
 fn element_text(elem: &ElementLayout) -> Option<String> {
@@ -707,6 +715,15 @@ impl<'a> Compiler<'a> {
                 _ => (0.0, 0.0),
             }
         };
+        for (id, slots) in &self.aux.zslots {
+            let z = solved.get(id).map(|e| e.z_order).unwrap_or(slots[0]);
+            for (k, v) in slots.iter().enumerate() {
+                vals.insert(
+                    ChKey { sel: format!(".aiz-{}{}-{}", s, id, k), prop: Prop::Opacity },
+                    Val::n(if *v == z { 1.0 } else { 0.0 }),
+                );
+            }
+        }
         for (id, kind, hook) in &self.mark_hooks {
             let on = state.marks.get(id).is_some_and(|ks| ks.contains(kind));
             // Two kinds can share a look: on if any of them is.
@@ -718,14 +735,24 @@ impl<'a> Compiler<'a> {
             let Some(e) = solved.get(id) else { continue };
             let base_el = self.input.base.get_element_by_name(id);
             let w = self.wrap(id);
-            let hidden = state.hidden_elements.contains(id);
+            let hidden = state.hidden_elements.contains(id)
+                || info.lifted && {
+                    // Outside its ancestors' wrappers: hidden with any of them.
+                    let mut cur = info.parent.clone();
+                    let mut h = false;
+                    while let Some(p) = cur {
+                        h |= state.hidden_elements.contains(&p);
+                        cur = self.elems.get(&p).and_then(|e| e.parent.clone());
+                    }
+                    h
+                };
             // The wrapper carries the element's whole opacity (the renderer
             // moves a declared `opacity:` onto it), so one channel owns it.
             let _ = base_el;
             let opacity = if hidden { 0.0 } else { e.styles.opacity.unwrap_or(1.0) };
             vals.insert(ChKey { sel: w.clone(), prop: Prop::Opacity }, Val::n(opacity));
             let (dx, dy) = delta(id);
-            let (px, py) = info.parent.as_deref().map(delta).unwrap_or((0.0, 0.0));
+            let (px, py) = if info.lifted { (0.0, 0.0) } else { info.parent.as_deref().map(delta).unwrap_or((0.0, 0.0)) };
             vals.insert(ChKey { sel: w.clone(), prop: Prop::Translate }, Val::xy(dx - px, dy - py));
             let rot = e.styles.rotation.unwrap_or(0.0)
                 - base_el.and_then(|b| b.styles.rotation).unwrap_or(0.0);
@@ -1251,6 +1278,7 @@ impl<'a> Compiler<'a> {
                             || (matches!(e.element_type, ElementType::Shape(ShapeType::Rectangle))
                                 && e.styles.fill.as_deref().is_none_or(|f| f == "none")
                                 && e.styles.stroke.as_deref().is_none_or(|s| s == "none")),
+                        lifted: e.styles.z_scene && parent.is_some(),
                     },
                 );
             }
@@ -1528,6 +1556,44 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
             }
         }
     }
+    // Every z_order an element takes in a keyframe: one paint slot each.
+    {
+        fn zs(nodes: &[Spanned<MotionNode>], out: &mut Vec<(String, i32)>) {
+            for n in nodes {
+                match &n.node {
+                    MotionNode::Stmt(st) => {
+                        let z = match &st.verb {
+                            MotionVerb::Transform { modifiers, .. } => modifiers.iter().rev().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+                                (crate::parser::ast::StyleKey::ZOrder, crate::parser::ast::StyleValue::Number { value, .. }) => Some(*value as i32),
+                                _ => None,
+                            }),
+                            MotionVerb::Move { .. } => opt_number(&st.opts, "z_order").map(|v| v as i32),
+                            _ => None,
+                        };
+                        if let Some(z) = z {
+                            for t in &st.targets {
+                                out.push((t.clone(), z));
+                            }
+                        }
+                    }
+                    MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => zs(b, out),
+                }
+            }
+        }
+        let mut found = Vec::new();
+        for kf in &keyframes {
+            zs(&kf.motion, &mut found);
+        }
+        for (id, z) in found {
+            let Some(e) = input.base.get_element_by_name(&id) else { continue };
+            let slots = c.aux.zslots.entry(id).or_insert_with(|| vec![e.z_order]);
+            if !slots.contains(&z) {
+                slots.push(z);
+                slots.sort();
+            }
+        }
+        c.aux.zslots.retain(|_, v| v.len() > 1);
+    }
     let mut snap = c.snapshot(&state, &layout, keyframes.first().map(|k| k.name.node.as_str()));
 
     let mut settled_maps: Vec<BTreeMap<ChKey, Val>> = vec![snap.vals.clone()];
@@ -1710,6 +1776,9 @@ impl<'a> Compiler<'a> {
     /// Sum of ancestors' translates: what the wrapper's own translate sits on.
     fn ancestors_translate(&self, snap: &Snap, id: &str) -> (f64, f64) {
         let mut acc = (0.0, 0.0);
+        if self.elems.get(id).is_some_and(|e| e.lifted) {
+            return acc;
+        }
         let mut cur = self.elems.get(id).and_then(|e| e.parent.clone());
         while let Some(p) = cur {
             let t = self.translate_now(snap, &p);
@@ -2165,6 +2234,25 @@ impl<'a> Compiler<'a> {
                 self.count(s, target, start, t, atom, before, snap, fm, &mut handled);
             }
             _ => {}
+        }
+
+        // A change of paint layer is a switch, at one moment: the start of
+        // a z_order on its own, the middle of a move or of a transform that
+        // also moves it, or where `z_at:` says.
+        let z_only = match &s.verb {
+            MotionVerb::Transform { modifiers, .. } => modifiers.iter().all(|m| matches!(m.node.key.node, crate::parser::ast::StyleKey::ZOrder)),
+            _ => false,
+        };
+        let frac = match opt_name(&s.opts, "z_at") {
+            Some("start") => 0.0,
+            Some("end") => 1.0,
+            Some("mid") => 0.5,
+            _ => if z_only { 0.0 } else { 0.5 },
+        };
+        for k in changed.iter().filter(|k| k.sel.starts_with(".aiz-")) {
+            let to = snap.vals.get(k).cloned().unwrap_or(Val::n(0.0));
+            self.tween(fm, k, simple(start + t.dur * frac, 0.0, Ease::Linear, to));
+            handled.insert(k.clone());
         }
 
         // Everything else that changed follows the statement's timing.

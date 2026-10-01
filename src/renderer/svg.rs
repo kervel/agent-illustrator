@@ -1095,9 +1095,7 @@ pub fn render_svg_with_keyframes(
     builder.set_text_variants(collect_text_variants(frame_diffs));
 
     builder.set_clip_targets(&result.root_elements);
-    for element in render_order(&result.root_elements) {
-        render_element_with_visibility(element, &mut builder, frame0_hidden, &kf_referenced);
-    }
+    render_siblings(root_order(&result.root_elements), &mut builder, frame0_hidden, &kf_referenced);
 
     // Render connections, with hidden connections getting opacity: 0
     let frame0_hidden_conns = if !frame_states.is_empty() {
@@ -1525,7 +1523,7 @@ pub fn render_svg_with_stylesheet(
 
     // Render all root elements, sorted by z_order (stable sort preserves document order)
     builder.set_clip_targets(&result.root_elements);
-    for element in render_order(&result.root_elements) {
+    for element in root_order(&result.root_elements) {
         render_element(element, &mut builder);
     }
 
@@ -1588,12 +1586,89 @@ fn render_element(element: &ElementLayout, builder: &mut SvgBuilder) {
     );
 }
 
+/// Render siblings in paint order. An element whose `z_order` changes in a
+/// keyframe is painted once per layer it takes, each copy in a slot group
+/// (`aiz-<id>-<k>`) that the motion shows when that layer is in use; every
+/// other channel is a class, so all copies move as one. Only the copy shown
+/// first keeps the ids.
+fn render_siblings(
+    ordered: Vec<&ElementLayout>,
+    builder: &mut SvgBuilder,
+    hidden: &std::collections::HashSet<String>,
+    kf_referenced: &std::collections::HashSet<String>,
+) {
+    let slots = builder.motion.as_ref().map(|m| m.zslots.clone()).unwrap_or_default();
+    // (element, its slot) in paint order.
+    let mut list: Vec<(&ElementLayout, Option<usize>)> = ordered.iter().map(|e| (*e, None)).collect();
+    for e in &ordered {
+        let Some(id) = e.id.as_ref().map(|i| i.0.clone()) else { continue };
+        let Some(zs) = slots.get(&id) else { continue };
+        let at = list.iter().position(|(x, _)| std::ptr::eq(*x, *e)).unwrap_or(0);
+        list.remove(at);
+        for (k, z) in zs.iter().enumerate() {
+            let pos = if *z == e.z_order {
+                at.min(list.len())
+            } else if *z > e.z_order {
+                // Above everything up to its layer.
+                list.iter().rposition(|(x, _)| x.z_order <= *z).map(|p| p + 1).unwrap_or(0)
+            } else {
+                list.iter().position(|(x, _)| x.z_order >= *z).unwrap_or(list.len())
+            };
+            list.insert(pos, (*e, Some(k)));
+        }
+    }
+    for (e, slot) in list {
+        let Some(k) = slot else {
+            render_element_with_visibility(e, builder, hidden, kf_referenced);
+            continue;
+        };
+        let id = e.id.as_ref().map(|i| i.0.clone()).unwrap_or_default();
+        let shown = builder.motion.as_ref().is_some_and(|m| m.zslot_shown(&id, k));
+        let primary = shown;
+        let scope = builder.scope().to_string();
+        builder.add_raw(&format!(
+            r#"<g class="aiz-{scope}{id}-{k}"{}>"#,
+            if shown { "" } else { r#" opacity="0""# }
+        ));
+        let start = builder.elements.len();
+        render_element_with_visibility(e, builder, hidden, kf_referenced);
+        if !primary {
+            for line in builder.elements[start..].iter_mut() {
+                *line = line.replace(" id=\"", " data-zcopy-of=\"");
+            }
+        }
+        builder.add_raw("</g>");
+    }
+}
+
 /// Siblings in paint order: by `z_order` (ties keep document order), and a
 /// `through:` line without its own z_order just before the first sibling
 /// that holds one of its stations, so it runs under them and nowhere lower
 /// (never under a backdrop declared before it).
-fn render_order(elems: &[ElementLayout]) -> Vec<&ElementLayout> {
-    let mut v: Vec<&ElementLayout> = elems.iter().collect();
+pub(crate) fn render_order(elems: &[ElementLayout]) -> Vec<&ElementLayout> {
+    // A `z_order: scene(N)` part paints with the scene's root, not here.
+    order_refs(elems.iter().filter(|e| !e.styles.z_scene).collect())
+}
+
+/// The scene's root in paint order, with the `z_order: scene(N)` parts of
+/// every instance lifted into it.
+pub(crate) fn root_order(roots: &[ElementLayout]) -> Vec<&ElementLayout> {
+    fn lifted<'a>(elems: &'a [ElementLayout], out: &mut Vec<&'a ElementLayout>) {
+        for e in elems {
+            for c in &e.children {
+                if c.styles.z_scene {
+                    out.push(c);
+                }
+            }
+            lifted(&e.children, out);
+        }
+    }
+    let mut v: Vec<&ElementLayout> = roots.iter().collect();
+    lifted(roots, &mut v);
+    order_refs(v)
+}
+
+fn order_refs(mut v: Vec<&ElementLayout>) -> Vec<&ElementLayout> {
     v.sort_by_key(|e| e.z_order);
     fn holds(e: &ElementLayout, ids: &[String]) -> bool {
         e.id.as_ref().is_some_and(|i| ids.contains(&i.0)) || e.children.iter().any(|c| holds(c, ids))
@@ -2015,9 +2090,7 @@ fn render_element_body(
 
             // Render children (with visibility checks for keyframe
             // animations), lowest z_order first; ties keep document order.
-            for child in render_order(&element.children) {
-                render_element_with_visibility(child, builder, hidden, kf_referenced);
-            }
+            render_siblings(render_order(&element.children), builder, hidden, kf_referenced);
 
             builder.end_group();
             if faded.is_some() {

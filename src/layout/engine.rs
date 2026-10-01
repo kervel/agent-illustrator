@@ -1024,14 +1024,9 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
     let anchors = AnchorSet::for_element_type(&element_type, &bounds);
     // `z_order: N` puts a shape above (or below) its siblings; a line
     // `through:` stations runs under them unless told otherwise.
-    let z_order = shape
-        .modifiers
-        .iter()
-        .find_map(|m| match (&m.node.key.node, &m.node.value.node) {
-            (StyleKey::ZOrder, StyleValue::Number { value, .. }) => Some(*value as i32),
-            _ => None,
-        })
-        .unwrap_or(0);
+    let (z_order, z_scene) = z_order_of(&shape.modifiers);
+    let mut styles = styles;
+    styles.z_scene = z_scene;
 
     ElementLayout {
         id,
@@ -1911,6 +1906,9 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
     // Feature 009: Containers get simple shape anchors
     let anchors = AnchorSet::simple_shape(&bounds);
 
+    let (z_order, z_scene) = z_order_of(&layout.modifiers);
+    let mut styles = styles;
+    styles.z_scene = z_scene;
     ElementLayout {
         id: layout.name.as_ref().map(|n| n.node.clone()),
         element_type: ElementType::Layout(layout.layout_type.node),
@@ -1920,8 +1918,27 @@ fn layout_container(layout: &LayoutDecl, position: Point, config: &LayoutConfig)
         label,
         anchors,
         path_normalize: true,
-        z_order: 0,
+        z_order,
     }
+}
+
+/// `z_order: N` (among its siblings) or `z_order: scene(N)` (in the
+/// scene's own layer).
+pub(crate) fn z_order_of(mods: &[Spanned<StyleModifier>]) -> (i32, bool) {
+    mods.iter()
+        .rev()
+        .find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+            (StyleKey::ZOrder, StyleValue::Number { value, .. }) => Some((*value as i32, false)),
+            (StyleKey::ZOrder, StyleValue::Call { name, args }) if name == "scene" => {
+                let n = match args.first().map(|a| &a.node) {
+                    Some(StyleValue::Number { value, .. }) => *value as i32,
+                    _ => 0,
+                };
+                Some((n, true))
+            }
+            _ => None,
+        })
+        .unwrap_or((0, false))
 }
 
 fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> ElementLayout {
@@ -1977,18 +1994,9 @@ fn layout_group(group: &GroupDecl, position: Point, config: &LayoutConfig) -> El
         resolve_custom_anchors(&group.anchors, &children, &mut anchors);
     }
 
-    // Extract z_order from group modifiers
-    let z_order = group.modifiers.iter().find_map(|m| {
-        if matches!(m.node.key.node, StyleKey::ZOrder) {
-            if let StyleValue::Number { value, .. } = &m.node.value.node {
-                Some(*value as i32)
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }).unwrap_or(0);
+    let (z_order, z_scene) = z_order_of(&group.modifiers);
+    let mut styles = styles;
+    styles.z_scene = z_scene;
 
     ElementLayout {
         id: group.name.as_ref().map(|n| n.node.clone()),

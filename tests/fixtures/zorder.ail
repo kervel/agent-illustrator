@@ -1,0 +1,28 @@
+// A card slides behind the server (its layer changes mid-move), comes back
+// in front; a badge part paints over the neighbouring instance.
+template "chip" {
+  rect bg [width: 140, height: 60, fill: role-surface-2, stroke: role-ink, stroke_width: 2]
+  circle badge [size: 30, fill: role-error, stroke: none, z_order: scene(1)]
+  constrain badge.center_x = bg.right
+  constrain badge.center_y = bg.center_y
+}
+rect card [width: 120, height: 80, fill: role-warn, stroke: role-ink, stroke_width: 2, z_order: 1]
+rect server [width: 160, height: 160, fill: role-primary, stroke: role-ink, stroke_width: 2]
+point spot
+chip k1
+chip k2 [appears: later]
+constrain card.left = 0
+constrain card.top = 0
+constrain server.left = 260
+constrain server.top = 0
+constrain spot.center_x = server.center_x
+constrain spot.center_y = server.center_y
+constrain k1.bg.left = 0
+constrain k1.bg.top = 220
+constrain k2.bg.left = k1.bg.right
+constrain k2.bg.top = 220
+keyframe "a" { }
+keyframe "b" { move card to spot [z_order: -1, duration: slow]
+ show k2 [enter: rise] }
+keyframe "c" { transform card [z_order: 1]
+ move card home }

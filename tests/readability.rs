@@ -783,3 +783,61 @@ fn a_status_column_colours_its_marks_and_their_changes() {
     assert!(frame(src, "a").contains("role-ok"), "a ✓ cell is green from the start");
     assert!(lint(src).is_empty(), "{:?}", lint(src));
 }
+
+#[test]
+fn a_scene_part_paints_over_the_next_instance() {
+    let tpl = |z: &str| format!(
+        "template \"chip\" {{\n rect bg [width: 140, height: 60, fill: white, stroke: black]\n \
+         circle badge [size: 30, fill: red, stroke: none, z_order: {z}]\n \
+         constrain badge.center_x = bg.right\n constrain badge.center_y = bg.center_y\n}}\n\
+         chip k1\nchip k2\nconstrain k1.bg.left = 0\nconstrain k1.bg.top = 0\n\
+         constrain k2.bg.left = k1.bg.right\nconstrain k2.bg.top = k1.bg.top\n"
+    );
+    let scene = render(&tpl("scene(1)"));
+    assert!(scene.find(r#"id="k1_badge""#).unwrap() > scene.find(r#"id="k2_bg""#).unwrap(), "lifted over k2");
+    let local = tpl("1");
+    let svg = render(&local);
+    assert!(svg.find(r#"id="k1_badge""#).unwrap() < svg.find(r#"id="k2_bg""#).unwrap(), "local: under k2");
+    assert!(lint(&local).iter().any(|m| m.contains("is local to \"k1\"") && m.contains("scene(1)")), "{:?}", lint(&local));
+    assert!(!lint(&tpl("scene(1)")).iter().any(|m| m.contains("is local")));
+}
+
+#[test]
+fn a_layer_change_is_one_switch_at_its_moment() {
+    let src = "rect card [width: 120, height: 80, fill: orange, z_order: 1]\nrect server [width: 160, height: 160, fill: blue]\n\
+               point spot\nconstrain card.left = 0\nconstrain card.top = 0\nconstrain server.left = 260\nconstrain server.top = 0\n\
+               constrain spot.center_x = server.center_x\nconstrain spot.center_y = server.center_y\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { move card to spot [z_order: -1, duration: 1] }\n\
+               keyframe \"c\" { transform card [z_order: 1] }";
+    let t = timeline(src);
+    assert!(t.contains("card-0 opacity: 0 -> 1  @0.50+0.00"), "mid-move: {t}");
+    let svg = render(src);
+    assert_eq!(svg.matches(r#"id="card""#).count(), 1, "one copy keeps the id");
+    assert_eq!(svg.matches("data-zcopy-of=\"card\"").count(), 1, "the other layer's copy");
+    // Static frames paint it where its layer is.
+    let b = frame(src, "b");
+    assert!(b.find(r#"id="card""#).unwrap() < b.find(r#"id="server""#).unwrap());
+    let c = frame(src, "c");
+    assert!(c.find(r#"id="card""#).unwrap() > c.find(r#"id="server""#).unwrap());
+    assert!(!lint(src).iter().any(|m| m.contains("z_order")), "{:?}", lint(src));
+}
+
+#[test]
+fn a_z_order_that_changes_nothing_is_linted() {
+    let src = "rect a [width: 40, height: 40]\nrect b [width: 40, height: 40, z_order: 2]\nconstrain b.left = a.left + 10\nconstrain b.top = a.top + 10";
+    assert!(lint(src).iter().any(|m| m.contains("z_order on \"b\" changes nothing")), "{:?}", lint(src));
+    let needed = src.replace("rect a [width: 40, height: 40]\nrect b [width: 40, height: 40, z_order: 2]", "rect b [width: 40, height: 40, z_order: 2]\nrect a [width: 40, height: 40]");
+    assert!(!lint(&needed).iter().any(|m| m.contains("changes nothing")), "{:?}", lint(&needed));
+}
+
+#[test]
+fn a_strong_caption_and_a_caption_too_close_to_a_neighbour() {
+    let src = "circle r1 [size: 50, caption: \"driver\", caption_style: strong]\nrect chip [width: 120, height: 30]\n\
+               constrain r1.center_x = 100\nconstrain r1.top = 0\nconstrain chip.center_x = 100\nconstrain chip.top = r1.bottom + 45";
+    let svg = render(src);
+    let cap = &svg[svg.find(">driver<").unwrap() - 300..svg.find(">driver<").unwrap()];
+    assert!(cap.contains("font-size=\"20\"") && cap.contains("role-ink") && cap.contains("700"), "{cap}");
+    assert!(lint(src).iter().any(|m| m.contains("caption \"r1.caption\"") && m.contains("from \"chip\"")), "{:?}", lint(src));
+    let roomy = src.replace("r1.bottom + 45", "r1.bottom + 60");
+    assert!(!lint(&roomy).iter().any(|m| m.contains("caption \"")), "{:?}", lint(&roomy));
+}

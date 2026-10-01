@@ -92,13 +92,13 @@ rect item [width: 100, height: 40, fill: accent-light]
 constrain item.center_x = 100
 constrain item.center_y = 60
 keyframe "a" { }
-keyframe "b" { transform item [z_order: 5] }
+keyframe "b" { transform item [font_size: 30] }
 "#,
     );
     assert!(
         msgs.iter()
-            .any(|m| m.contains("z_order") && m.contains("animat")),
-        "expected a warning that z_order cannot be animated, got: {msgs:?}"
+            .any(|m| m.contains("font_size") && m.contains("animat")),
+        "expected a warning that font_size cannot be animated, got: {msgs:?}"
     );
 }
 

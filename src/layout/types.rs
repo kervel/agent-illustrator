@@ -563,6 +563,9 @@ pub enum GradientKind {
 /// Resolved style properties ready for rendering
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct ResolvedStyles {
+    /// `z_order: scene(N)`: a part painted in the scene's own layer (over
+    /// neighbours outside its instance), not among its siblings.
+    pub z_scene: bool,
     pub fill: Option<String>,
     /// Non-solid fill (pattern/gradient). When `Some`, takes precedence over `fill`
     /// and is rendered as an SVG `<defs>` entry referenced via `url(#id)`.
@@ -634,6 +637,7 @@ impl ResolvedStyles {
     /// Create styles with sensible defaults
     pub fn with_defaults() -> Self {
         Self {
+            z_scene: false,
             fill: Some("#f0f0f0".to_string()),
             fill_pattern: None,
             stroke: Some("#333333".to_string()),
@@ -910,6 +914,7 @@ impl ResolvedStyles {
     /// Merge another style set, with other taking precedence
     pub fn merge(&self, other: &ResolvedStyles) -> ResolvedStyles {
         ResolvedStyles {
+            z_scene: self.z_scene || other.z_scene,
             width_is_derived: self.width_is_derived || other.width_is_derived,
             fill: other.fill.clone().or_else(|| self.fill.clone()),
             fill_pattern: other

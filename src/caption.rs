@@ -40,14 +40,16 @@ struct Want {
     text: String,
     position: String,
     appears: Option<String>,
+    /// `caption_style: strong`: a name (an actor), not a note.
+    strong: bool,
     span: std::ops::Range<usize>,
 }
 
 fn from_modifiers(name: &str, mods: &mut Vec<Spanned<StyleModifier>>, span: &std::ops::Range<usize>) -> Result<Option<Want>, Err> {
     let key = |m: &Spanned<StyleModifier>, k: &str| matches!(&m.node.key.node, StyleKey::Custom(c) if c == k);
     let Some(i) = mods.iter().position(|m| key(m, "caption")) else {
-        if let Some(m) = mods.iter().find(|m| key(m, "caption_position")) {
-            return Err((m.span.clone(), format!("{}: `caption_position` without a `caption: \"...\"`", name)));
+        if let Some(m) = mods.iter().find(|m| key(m, "caption_position") || key(m, "caption_style")) {
+            return Err((m.span.clone(), format!("{}: `caption_position`/`caption_style` without a `caption: \"...\"`", name)));
         }
         return Ok(None);
     };
@@ -64,8 +66,15 @@ fn from_modifiers(name: &str, mods: &mut Vec<Spanned<StyleModifier>>, span: &std
         }
         None => "below".to_string(),
     };
+    let strong = match mods.iter().position(|m| key(m, "caption_style")) {
+        Some(j) => {
+            let p = mods.remove(j);
+            style_of(name, &p.node.value.node, &p.span)?
+        }
+        None => false,
+    };
     let appears = mods.iter().find(|m| key(m, "appears")).and_then(|m| text(&m.node.value.node));
-    Ok(Some(Want { subject: name.to_string(), text: words, position, appears, span: span.clone() }))
+    Ok(Some(Want { subject: name.to_string(), text: words, position, appears, strong, span: span.clone() }))
 }
 
 fn from_arguments(name: &str, args: &mut Vec<(Spanned<crate::parser::ast::Identifier>, Spanned<StyleValue>)>, span: &std::ops::Range<usize>) -> Result<Option<Want>, Err> {
@@ -85,14 +94,31 @@ fn from_arguments(name: &str, args: &mut Vec<(Spanned<crate::parser::ast::Identi
         }
         None => "below".to_string(),
     };
+    let strong = match args.iter().position(|(k, _)| k.node.0 == "caption_style") {
+        Some(j) => {
+            let (_, p) = args.remove(j);
+            style_of(name, &p.node, &p.span)?
+        }
+        None => false,
+    };
     let appears = args.iter().find(|(k, _)| k.node.0 == "appears").and_then(|(_, v)| text(&v.node));
-    Ok(Some(Want { subject: name.to_string(), text: words, position, appears, span: span.clone() }))
+    Ok(Some(Want { subject: name.to_string(), text: words, position, appears, strong, span: span.clone() }))
+}
+
+fn style_of(name: &str, v: &StyleValue, span: &std::ops::Range<usize>) -> Result<bool, Err> {
+    match text(v).as_deref() {
+        Some("strong") => Ok(true),
+        Some("normal") => Ok(false),
+        other => Err((span.clone(), format!("{}: caption_style: {}: use normal or strong", name, other.unwrap_or("?")))),
+    }
 }
 
 fn source(w: &Want) -> String {
+    // Normal: a note (muted). Strong: a name, an actor (ink, bold).
+    let look = if w.strong { "font_size: 20, font_weight: 700, label_fill: role-ink" } else { "font_size: 18, font_weight: 600, label_fill: role-muted" };
     format!(
-        "rect {s}_caption [caption_of: {s}, label_position: {p}, label_offset: 8, label: {t}, font_size: 18, \
-         font_weight: 600, label_fill: role-muted, fill: none, stroke: none{a}]\n",
+        "rect {s}_caption [caption_of: {s}, label_position: {p}, label_offset: 8, label: {t}, {look}, \
+         fill: none, stroke: none{a}]\n",
         s = w.subject,
         p = w.position,
         t = lit(&w.text),

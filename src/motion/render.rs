@@ -25,9 +25,17 @@ pub struct MotionHooks {
     pub ghosts: Vec<(String, String, Vec<String>)>,
     /// Text elements that get a counter ticker node.
     pub tickers: BTreeSet<String>,
+    /// Elements painted in several layers over time: their z values.
+    pub zslots: BTreeMap<String, Vec<i32>>,
 }
 
 impl MotionHooks {
+    /// Whether slot `k` of `id` is the one shown first (the no-JS picture).
+    pub fn zslot_shown(&self, id: &str, k: usize) -> bool {
+        let sel = format!(".aiz-{}{}-{}", self.scope, id, k);
+        self.initial_num(sel, Prop::Opacity, 0.0) > 0.5
+    }
+
     pub fn from_motion(m: &Motion, base: &LayoutResult) -> Self {
         let initial = m
             .channels
@@ -52,6 +60,7 @@ impl MotionHooks {
             overlays: m.aux.overlays.clone(),
             ghosts: m.aux.ghosts.clone(),
             tickers: m.aux.tickers.clone(),
+            zslots: m.aux.zslots.clone(),
         }
     }
 

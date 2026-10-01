@@ -236,6 +236,13 @@ fn accents_play_as_sampled() {
 }
 
 #[test]
+fn layer_changes_play_as_sampled() {
+    // `z_order` changing mid-move and back, and a lifted part entering with
+    // its instance.
+    check_in("tests/fixtures", "zorder", &[1, 2]);
+}
+
+#[test]
 fn lines_opening_and_closing_play_as_sampled() {
     check("git-merge", &[2, 3]);
 }

@@ -224,6 +224,7 @@ pub fn check(
     check_unknown_colors(doc, &mut warnings);
     check_overridden_constraints(result, &mut warnings);
     check_overridden_captions(doc, &mut warnings);
+    check_z_orders(result, doc, &mut warnings);
     {
         let idx = crate::motion::expand::ElementIndex::build(doc);
         warnings.extend(super::canvas::check(result, doc, config, &|id| idx.show(id)));
@@ -280,8 +281,94 @@ fn check_collisions(
     check_connections(result, scope, warnings);
     check_label_connection_overlaps(result, scope, warnings);
     check_near_misses(result, scope, warnings);
+    check_caption_clearance(result, contains_ids, scope, warnings);
     check_routed_line_crossings(result, scope, warnings);
     check_text_in_view(result, scope, warnings);
+}
+
+/// A caption closer than this to a box it faces reads as that box's label.
+const CAPTION_CLEARANCE: f64 = 8.0;
+
+/// A caption (`caption:` / `caption_of:`) almost touching something other
+/// than its element: it reads as belonging to the wrong thing.
+fn check_caption_clearance(
+    result: &LayoutResult,
+    relations: &ContainsRelations,
+    scope: &FrameScope<'_>,
+    warnings: &mut Vec<LintWarning>,
+) {
+    if relations.captions.is_empty() {
+        return;
+    }
+    let mut elements: Vec<OpaqueElement> = Vec::new();
+    for (i, elem) in result.root_elements.iter().enumerate() {
+        collect_visible_elements(elem, None, i, scope, &mut elements);
+    }
+    let mut parent_of: HashMap<String, String> = HashMap::new();
+    fn parents(elems: &[ElementLayout], parent: Option<&str>, out: &mut HashMap<String, String>) {
+        for e in elems {
+            let me = e.id.as_ref().map(|i| i.0.as_str());
+            if let (Some(m), Some(p)) = (me, parent) {
+                out.insert(m.to_string(), p.to_string());
+            }
+            parents(&e.children, me.or(parent), out);
+        }
+    }
+    parents(&result.root_elements, None, &mut parent_of);
+    let within = |a: &str, b: &str| {
+        let mut cur = Some(a.to_string());
+        while let Some(c) = cur {
+            if c == b {
+                return true;
+            }
+            cur = parent_of.get(&c).cloned();
+        }
+        false
+    };
+    let mut seen: HashSet<(String, String)> = HashSet::new();
+    for (cap, subject) in &relations.captions {
+        let Some(c) = result.get_element_by_name(cap) else { continue };
+        if scope.hides_element(c) || hidden_by_ancestor(cap, &parent_of, scope) {
+            continue;
+        }
+        // The words, not the (taller) box that holds them.
+        let cb = c.label.as_ref().map(|l| estimate_label_bbox_styled(l, &c.styles)).unwrap_or(c.bounds);
+        for o in &elements {
+            if o.id == *cap || within(&o.id, subject) || within(subject, &o.id) || within(cap, &o.id) {
+                continue;
+            }
+            if o.bounds.intersects(&cb) || o.bounds.contains_bbox(&cb) {
+                continue;
+            }
+            let gap_x = (o.bounds.x - cb.right()).max(cb.x - o.bounds.right());
+            let gap_y = (o.bounds.y - cb.bottom()).max(cb.y - o.bounds.bottom());
+            // Facing each other across a small gap on one axis.
+            let gap = if gap_x < 0.0 { gap_y } else if gap_y < 0.0 { gap_x } else { continue };
+            if gap >= 0.0 && gap < CAPTION_CLEARANCE && seen.insert((cap.clone(), o.id.clone())) {
+                warnings.push(LintWarning {
+                    category: LintCategory::Overlap,
+                    message: format!(
+                        "caption \"{}\" is {:.0}px from \"{}\" (its element is \"{}\"): that close it reads as the other's label; \
+                         give it room (at least {}px)",
+                        cap, gap, o.id, subject, CAPTION_CLEARANCE
+                    ),
+                    frames: Vec::new(),
+                    pair: Some(sorted_pair(cap, &o.id)),
+                });
+            }
+        }
+    }
+}
+
+fn hidden_by_ancestor(id: &str, parent_of: &HashMap<String, String>, scope: &FrameScope<'_>) -> bool {
+    let mut cur = parent_of.get(id).cloned();
+    while let Some(p) = cur {
+        if scope.hidden_elements.contains(&p) {
+            return true;
+        }
+        cur = parent_of.get(&p).cloned();
+    }
+    false
 }
 
 /// Neighbouring stations on a `through:` line closer than their names need.
@@ -788,6 +875,8 @@ pub(crate) struct ContainsRelations {
     /// `overlaps: x` on an element: it sits on x on purpose (a badge on a
     /// card's corner).
     overlaps: HashMap<String, HashSet<String>>,
+    /// `caption_of: x`: caption -> its element.
+    captions: HashMap<String, String>,
 }
 
 impl ContainsRelations {
@@ -838,6 +927,11 @@ fn collect_contains_ids_from_stmts(
         };
         if let Some((Some(name), mods)) = mods {
             for m in mods {
+                if matches!(m.node.key.node, crate::parser::ast::StyleKey::CaptionOf) {
+                    if let crate::parser::ast::StyleValue::Identifier(i) = &m.node.value.node {
+                        relations.captions.insert(name.node.0.clone(), i.0.replace('.', "_"));
+                    }
+                }
                 // `clip: bg` draws inside bg: on it by design.
                 if !matches!(&m.node.key.node, crate::parser::ast::StyleKey::Custom(k) if k == "overlaps" || k == "clip") {
                     continue;
@@ -4595,4 +4689,170 @@ fn unrecognised_tags(raw: &str) -> Vec<String> {
         i += 1;
     }
     found
+}
+
+/// `z_order` that does nothing, or less than its author thinks:
+/// - a `z_order: N` that leaves its paint order against every sibling it
+///   overlaps as it was (or overlaps none);
+/// - a template part's `z_order` is local to its instance: something outside
+///   the instance painted later still covers it, unless it is `scene(N)`.
+fn check_z_orders(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
+    let idx = crate::motion::expand::ElementIndex::build(doc);
+    let show = |id: &str| idx.show(id);
+    let overlap = |a: &BoundingBox, b: &BoundingBox| {
+        let w = a.right().min(b.right()) - a.x.max(b.x);
+        let h = a.bottom().min(b.bottom()) - a.y.max(b.y);
+        w > 1.0 && h > 1.0
+    };
+    // 1. Among siblings.
+    fn siblings(elems: &[ElementLayout], out: &mut Vec<Vec<ElementLayout>>) {
+        out.push(elems.to_vec());
+        for e in elems {
+            if !e.children.is_empty() {
+                siblings(&e.children, out);
+            }
+        }
+    }
+    let mut groups = Vec::new();
+    siblings(&result.root_elements, &mut groups);
+    // What moves or changes in a keyframe may overlap later: its z_order can
+    // matter then (a layout change can move anything).
+    let mut moving: HashSet<String> = HashSet::new();
+    let mut moves_all = false;
+    {
+        use crate::parser::ast::{MotionNode, MotionVerb, Selector};
+        fn names(sel: &Selector, out: &mut HashSet<String>) {
+            match sel {
+                Selector::Name(n) | Selector::Children(n) => {
+                    out.insert(n.replace('.', "_"));
+                }
+                Selector::Many(v) => v.iter().for_each(|x| names(x, out)),
+                _ => {}
+            }
+        }
+        fn walk_m(nodes: &[crate::parser::ast::Spanned<MotionNode>], out: &mut HashSet<String>, all: &mut bool) {
+            for n in nodes {
+                match &n.node {
+                    MotionNode::Stmt(st) => match &st.verb {
+                        MotionVerb::Move { target, .. } | MotionVerb::Transform { target, .. } => names(&target.node, out),
+                        MotionVerb::Fly { .. } | MotionVerb::UseLayout(_) | MotionVerb::Constrain(_) | MotionVerb::SetState { .. } => *all = true,
+                        _ => {}
+                    },
+                    MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => walk_m(b, out, all),
+                }
+            }
+        }
+        for st in &doc.statements {
+            if let Statement::Keyframe(kf) = &st.node {
+                walk_m(&kf.motion, &mut moving, &mut moves_all);
+            }
+        }
+    }
+    let moves = |id: &str| moving.iter().any(|m| id == m || id.starts_with(&format!("{}_", m)) || m.starts_with(&format!("{}_", id)));
+    for sibs in &groups {
+        if moves_all || sibs.iter().any(|o| o.id.as_ref().is_some_and(|i| moves(&i.0))) {
+            continue;
+        }
+        let painted = crate::renderer::svg::render_order(sibs);
+        let pos = |e: &ElementLayout| painted.iter().position(|p| std::ptr::eq(*p, e));
+        for (i, e) in sibs.iter().enumerate() {
+            let Some(id) = e.id.as_ref().map(|x| x.0.clone()) else { continue };
+            if e.z_order == 0 || e.styles.z_scene {
+                continue;
+            }
+            let Some(me) = pos(e) else { continue };
+            let changes = sibs.iter().enumerate().any(|(j, o)| {
+                j != i && overlap(&e.bounds, &o.bounds) && pos(o).is_some_and(|p| (p > me) != (j > i))
+            });
+            if !changes {
+                warnings.push(LintWarning {
+                    category: LintCategory::Overlap,
+                    message: format!(
+                        "z_order on \"{}\" changes nothing: it paints in the same order against every sibling it overlaps \
+                         (declaration order already does that); drop it",
+                        show(&id)
+                    ),
+                    frames: vec![],
+                    pair: None,
+                });
+            }
+        }
+    }
+    // 2. A part's z_order stays inside its instance.
+    let mut instances: HashSet<String> = HashSet::new();
+    fn find_instances(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut HashSet<String>) {
+        for st in stmts {
+            match &st.node {
+                Statement::Group(g) => {
+                    if g.is_template_instance {
+                        if let Some(n) = &g.name {
+                            out.insert(n.node.0.clone());
+                        }
+                    }
+                    find_instances(&g.children, out);
+                }
+                Statement::Layout(l) => find_instances(&l.children, out),
+                _ => {}
+            }
+        }
+    }
+    find_instances(&doc.statements, &mut instances);
+    // Paint order of everything, as drawn.
+    let mut order: HashMap<String, usize> = HashMap::new();
+    fn paint(list: Vec<&ElementLayout>, order: &mut HashMap<String, usize>) {
+        for e in list {
+            let n = order.len();
+            if let Some(id) = &e.id {
+                order.insert(id.0.clone(), n);
+            }
+            paint(crate::renderer::svg::render_order(&e.children), order);
+        }
+    }
+    paint(crate::renderer::svg::root_order(&result.root_elements), &mut order);
+    fn walk<'a>(e: &'a ElementLayout, out: &mut Vec<&'a ElementLayout>) {
+        out.push(e);
+        for c in &e.children {
+            walk(c, out);
+        }
+    }
+    let mut all = Vec::new();
+    for r in &result.root_elements {
+        walk(r, &mut all);
+    }
+    let mut seen: HashSet<(String, String)> = HashSet::new();
+    for inst in all.iter().filter(|e| e.id.as_ref().is_some_and(|i| instances.contains(&i.0))) {
+        let inst_id = inst.id.as_ref().unwrap().0.clone();
+        let mut inside = Vec::new();
+        walk(inst, &mut inside);
+        let inside_ids: HashSet<String> = inside.iter().filter_map(|e| e.id.as_ref().map(|i| i.0.clone())).collect();
+        let Some(&inst_at) = order.get(&inst_id) else { continue };
+        for part in inside.iter().filter(|p| p.z_order > 0 && !p.styles.z_scene) {
+            let Some(pid) = part.id.as_ref().map(|i| i.0.clone()) else { continue };
+            for o in &all {
+                let Some(oid) = o.id.as_ref().map(|i| i.0.clone()) else { continue };
+                let drawn = matches!(o.element_type, ElementType::Shape(_)) && (has_visible_fill(o) || has_visible_border(o));
+                // Outside the instance (not one of its containers either),
+                // painted after it, over the part.
+                let container = o.bounds.contains_bbox(&inst.bounds);
+                if !drawn || inside_ids.contains(&oid) || container || !overlap(&part.bounds, &o.bounds) {
+                    continue;
+                }
+                if order.get(&oid).is_some_and(|&p| p > inst_at) && seen.insert((pid.clone(), oid.clone())) {
+                    warnings.push(LintWarning {
+                        category: LintCategory::Overlap,
+                        message: format!(
+                            "z_order on \"{}\" is local to \"{}\": \"{}\" (painted later) still covers it; \
+                             use `z_order: scene({})` to paint it over things outside its instance",
+                            show(&pid),
+                            show(&inst_id),
+                            show(&oid),
+                            part.z_order
+                        ),
+                        frames: vec![],
+                        pair: None,
+                    });
+                }
+            }
+        }
+    }
 }

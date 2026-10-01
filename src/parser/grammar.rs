@@ -828,6 +828,8 @@ where
                 "hatch" | "cross_hatch" | "dots" | "grid" => argc <= 2,
                 "gradient" => argc == 2 || argc == 3,
                 "radial_gradient" => argc == 2,
+                // `z_order: scene(N)`: paint in the scene's own layer.
+                "scene" => argc == 1,
                 _ => {
                     return Err(Rich::custom(
                         span,

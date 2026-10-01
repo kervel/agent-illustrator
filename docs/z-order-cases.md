@@ -1,8 +1,11 @@
 # Z-order pressure cases
 
 Paint order is declaration order (later draws on top), plus automatic rules
-(through-lines under their stations). There is no explicit z-order, by choice:
-when one is needed, it should be designed from the real cases logged here.
+(through-lines under their stations). Explicit `z_order` exists for what
+order cannot say: local `z_order: N`, `z_order: scene(N)` for parts, and layer
+changes in keyframes (see `--doc layering`). Keep logging the scenes that
+needed one, and how they were solved. This is what tells us whether the
+defaults are right.
 
 Log a case when a scene needs a particular paint order. Note how it was solved.
 

@@ -859,6 +859,7 @@ pub fn is_animatable(key: &StyleKey) -> bool {
         | StyleKey::Y
         | StyleKey::Dx
         | StyleKey::Dy
+        | StyleKey::ZOrder
         | StyleKey::Scale => true,
         // Recognised, but the renderer cannot vary them per frame. Several
         // (fill_opacity, stroke_opacity, font_size, size) are genuinely
@@ -876,8 +877,7 @@ pub fn is_animatable(key: &StyleKey) -> bool {
         | StyleKey::Routing
         | StyleKey::Size
         | StyleKey::StrokeOpacity
-        | StyleKey::CaptionOf
-        | StyleKey::ZOrder => false,
+        | StyleKey::CaptionOf => false,
         // Anything not yet classified: treat as not animatable and say so,
         // rather than pretending it worked.
         _ => false,
@@ -900,6 +900,8 @@ fn apply_modifiers_ordered(
             StyleKey::Label => { if let Some(text) = string_value(&m.node.value.node) { set_element_text(elem, text); } }
             StyleKey::Align => { elem.styles.align = crate::layout::types::parse_align(&m.node.value.node); }
             StyleKey::Rotation => { if let Some(v) = num(&m.node.value.node) { elem.styles.rotation = Some(v); } }
+            // A change of paint layer (the renderer gives it a slot).
+            StyleKey::ZOrder => { if let Some(v) = num(&m.node.value.node) { elem.z_order = v as i32; } }
             StyleKey::Fill => { elem.styles.fill = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::LabelFill => { elem.styles.label_fill = ResolvedStyles::color_to_css(&m.node.value.node); }
             StyleKey::Stroke => { elem.styles.stroke = ResolvedStyles::color_to_css(&m.node.value.node); }
