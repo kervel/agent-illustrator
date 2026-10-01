@@ -755,7 +755,11 @@ fn accent_collisions(
                 if id == target || related(id, target) || hidden_in(st, id, parent_of) || declared.wraps(Some(id), Some(target)) {
                     continue;
                 }
-                let drawn = crate::layout::lint::has_visible_fill(o) || crate::layout::lint::has_visible_border(o);
+                // Shapes; not the rows and groups that place them, nor a
+                // caption and its element.
+                let shape = matches!(o.element_type, crate::layout::types::ElementType::Shape(_));
+                let captioned = *id == format!("{}_caption", target) || *target == format!("{}_caption", id);
+                let drawn = shape && !captioned && (crate::layout::lint::has_visible_fill(o) || crate::layout::lint::has_visible_border(o));
                 // Something the mark sits on (a band, the stage) is no neighbour.
                 if !drawn || o.bounds.contains_bbox(&mb) || !o.bounds.intersects(&mb) {
                     continue;

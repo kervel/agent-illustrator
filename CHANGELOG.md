@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.2.24
+
+- `caption: "NVIDIA"` (and `caption_position: above|below|left|right`) on
+  any element or instance: a caption part `x.caption` in the caption look. It
+  copies the element's `appears`, and `show x` / `hide x` bring it along.
+  Replaces the long `rect x_nm [caption_of: x, ...]` block.
+- `rect t* [count: 10, ...]` makes identical elements t0..t9. With a count,
+  `items:` may be shorter and sets just the first few. An item's own value
+  now replaces the shared one (it used to lose to it).
+- `meter cost [segments: 10, value: 2]`: a bar that fills up. Segments are
+  `s1..sN`, `grow: up` makes a column, and `on` / `off` set the colours.
+  `set cost 6` (or `set cost level6`) animates it to a level.
+- Accent collision lint: rows, groups and a caption's own element no longer
+  count as neighbours.
+
 ## v0.2.23
 
 - Lists pair up by position: `show d1, d2, d3 [from: r1, r2, r3]` (each

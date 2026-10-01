@@ -230,6 +230,34 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
             )
         })
     }
+    /// How many elements `name*` makes: `count: N`, or one per item of its
+    /// lists. With a count, `items:` may be shorter (it sets the first ones);
+    /// other lists must have one value each.
+    fn how_many(named: &[(String, Spanned<StyleValue>)], name: &str, span: &Span) -> Result<usize, (Span, String)> {
+        let count = named.iter().find(|(k, _)| k == "count");
+        let Some((_, c)) = count else {
+            let values: Vec<Spanned<StyleValue>> = named.iter().map(|(_, v)| v.clone()).collect();
+            return per_item(&values, name, span);
+        };
+        let n = match &c.node {
+            StyleValue::Number { value, .. } if *value >= 1.0 && value.fract() == 0.0 => *value as usize,
+            _ => return Err((c.span.clone(), format!("'{}*': count: a whole number, at least 1", name))),
+        };
+        for (k, v) in named {
+            if let StyleValue::List(items) = &v.node {
+                if k == "items" && items.len() > n {
+                    return Err((v.span.clone(), format!("'{}*': {} items for count: {}", name, items.len(), n)));
+                }
+                if k != "items" && items.len() != n {
+                    return Err((
+                        v.span.clone(),
+                        format!("'{}*': {} has {} values for count: {}; give one each, or one for all", name, k, items.len(), n),
+                    ));
+                }
+            }
+        }
+        Ok(n)
+    }
     /// `items: [{a: 1, b: 2}, ...]`: item i's fields, as extra arguments.
     fn record_fields(values: &[(String, Spanned<StyleValue>)], i: usize) -> Vec<(Spanned<Identifier>, Spanned<StyleValue>)> {
         values
@@ -257,10 +285,16 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
             let span = st.span.clone();
             match st.node {
                 Statement::Shape(shape) if shape.name.as_ref().is_some_and(|n| n.node.0.ends_with('*')) => {
-                    let name = shape.name.as_ref().unwrap();
+                    let name = shape.name.clone().unwrap();
                     let base = name.node.0.trim_end_matches('*').to_string();
-                    let values: Vec<Spanned<StyleValue>> = shape.modifiers.iter().map(|m| m.node.value.clone()).collect();
-                    let n = per_item(&values, &base, &name.span)?;
+                    let named_vals: Vec<(String, Spanned<StyleValue>)> = shape
+                        .modifiers
+                        .iter()
+                        .map(|m| (m.node.key.node.source_name(), m.node.value.clone()))
+                        .collect();
+                    let n = how_many(&named_vals, &base, &name.span)?;
+                    let mut shape = shape;
+                    shape.modifiers.retain(|m| m.node.key.node.source_name() != "count");
                     counts.insert(base.clone(), n);
                     let named: Vec<(String, Spanned<StyleValue>)> = shape
                         .modifiers
@@ -276,6 +310,8 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                         }
                         for (k, v) in record_fields(&named, i) {
                             let sp = k.span.clone();
+                            // An item's own value replaces the shared one.
+                            s.modifiers.retain(|m| m.node.key.node.source_name() != k.node.0);
                             s.modifiers.push(Spanned::new(
                                 StyleModifier { key: Spanned::new(style_key_named(&k.node.0), sp.clone()), value: v },
                                 sp,
@@ -286,8 +322,11 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                 }
                 Statement::TemplateInstance(inst) if inst.instance_name.node.0.ends_with('*') => {
                     let base = inst.instance_name.node.0.trim_end_matches('*').to_string();
-                    let values: Vec<Spanned<StyleValue>> = inst.arguments.iter().map(|(_, v)| v.clone()).collect();
-                    let n = per_item(&values, &base, &inst.instance_name.span)?;
+                    let named_vals: Vec<(String, Spanned<StyleValue>)> =
+                        inst.arguments.iter().map(|(k, v)| (k.node.0.clone(), v.clone())).collect();
+                    let n = how_many(&named_vals, &base, &inst.instance_name.span)?;
+                    let mut inst = inst;
+                    inst.arguments.retain(|(k, _)| k.node.0 != "count");
                     counts.insert(base.clone(), n);
                     let named: Vec<(String, Spanned<StyleValue>)> =
                         inst.arguments.iter().map(|(k, v)| (k.node.0.clone(), v.clone())).collect();
@@ -298,7 +337,10 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                         for (_, v) in &mut t.arguments {
                             *v = pick(v, i);
                         }
-                        t.arguments.extend(record_fields(&named, i));
+                        for (k, v) in record_fields(&named, i) {
+                            t.arguments.retain(|(a, _)| a.node.0 != k.node.0);
+                            t.arguments.push((k, v));
+                        }
                         out.push(Spanned::new(Statement::TemplateInstance(t), span.clone()));
                     }
                 }
@@ -2259,7 +2301,11 @@ where
                 .map(move |(name, o)| stmt(MotionVerb::UseLayout(Spanned::new(name.node.0, name.span)), o));
             let set_state = kw("set")
                 .ignore_then(selector.clone())
-                .then(identifier.labelled("a state of the component's template"))
+                .then(choice((
+                    identifier.labelled("a state of the component's template"),
+                    // `set cost 6`: a meter's level.
+                    number.map(|n| Spanned::new(Identifier::new(format!("level{}", n.node)), n.span)),
+                )))
                 .then(opts_or_none.clone())
                 .map(move |((t, st), o)| stmt(MotionVerb::SetState { target: t, state: Spanned::new(st.node.0, st.span) }, o));
             let named_beat = kw("beat")

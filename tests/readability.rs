@@ -725,3 +725,39 @@ fn a_mark_stays_until_unmarked_in_every_output() {
     assert!(svg.contains(r#""settled":[["0""#) && svg.contains("aimkm-"), "{svg}");
     assert!(lint(src).is_empty(), "{:?}", lint(src));
 }
+
+#[test]
+fn a_caption_is_one_modifier_and_comes_with_its_element() {
+    let src = "template \"bot\" { circle c [size: 40] }\n\
+               row rs [gap: 60] { bot r1 [caption: \"NVIDIA\"]\n bot r2 [caption: \"AMD\", caption_position: above, appears: later] }\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { show r2 [enter: pop]\n accent r1.caption }\nkeyframe \"c\" { hide r2 }";
+    let st = states(src);
+    assert!(st.contains("+ r2, r2.caption") && st.contains("- r2, r2.caption"), "{st}");
+    let svg = frame(src, "b");
+    assert!(svg.contains(">NVIDIA<") && svg.contains(">AMD<"), "{svg}");
+    assert!(!frame(src, "a").contains(">AMD<"), "it follows its element's appears");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+}
+
+#[test]
+fn count_makes_identical_elements_and_items_override_some() {
+    let src = "col ctx [gap: 6] { rect c* [count: 8, width: 280, height: 20, fill: gray, items: [{}, {}, {}, {fill: orange, height: 34}]] }";
+    let svg = render(src);
+    assert!(svg.contains(r#"id="c7""#) && !svg.contains(r#"id="c8""#), "c0..c7");
+    let c3 = &svg[svg.find(r#"id="c3""#).unwrap()..];
+    let c3 = &c3[..c3.find("/>").unwrap()];
+    assert!(c3.contains(r#"height="34""#) && c3.contains("orange"), "an item's own value wins: {c3}");
+    let bad = "row r { rect c* [count: 3, width: [10, 20], height: 10] }";
+    assert!(render_with_config(bad, RenderConfig::new()).is_err());
+}
+
+#[test]
+fn a_meter_fills_up_by_level() {
+    let src = "meter cost [segments: 10, value: 2]\nkeyframe \"a\" { }\nkeyframe \"b\" { set cost 6 }\nkeyframe \"c\" { set cost level9 }";
+    let st = states(src);
+    assert!(st.contains("cost.s6 [fill: role-primary]") && st.contains("cost.s9 [fill: role-primary]"), "{st}");
+    assert!(!st.contains("cost.s7 [fill: role-primary]\n  step 2"), "{st}");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+    let bad = "meter cost [segments: 4, value: 6]";
+    assert!(render_with_config(bad, RenderConfig::new()).is_err());
+}

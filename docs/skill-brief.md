@@ -82,10 +82,13 @@ keyframe "clone" {
 - Later declarations draw on top. Declare backgrounds (bands, lanes, a big
   shape) before what sits on them. An intended overlap (a badge on a corner,
   a chip on a box) needs `overlaps: other`.
-- Captions: `text "Hotfix" nm [caption_of: dot, label_position: below]`.
-  Don't constrain other things against a caption.
+- Captions: `robot r1 [caption: "NVIDIA"]` (`caption_position: above`) makes
+  a part `r1.caption` that comes and goes with r1. Don't constrain other
+  things against a caption.
 - Many alike from one line: `box b* [items: [{tint: role-ok}, {tint: role-warn}]]`
-  gives `b0`, `b1`, … (in a `row`/`grid` they line up).
+  gives `b0`, `b1`, … (in a `row`/`grid` they line up); `rect t* [count: 10, ...]`
+  makes identical ones. A bar that fills up: `meter cost [segments: 10]` +
+  `set cost 6`.
 - A few words are reserved (`line`, `row`, `label`, `left`, `top`, …); the
   parse error says so.
 - Colours are roles: `role-primary`, `role-ink`, `role-surface`,

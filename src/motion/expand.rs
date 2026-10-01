@@ -101,6 +101,16 @@ impl ElementIndex {
             }
         }
         dotted(&doc.statements, None, &mut idx.display);
+        // `x [caption: "..."]` made `x_caption`: written `x.caption`.
+        let caps: Vec<(String, String)> = idx
+            .ids
+            .iter()
+            .filter_map(|id| {
+                let subject = id.strip_suffix("_caption")?;
+                idx.ids.contains(subject).then(|| (id.clone(), format!("{}.caption", idx.show(subject))))
+            })
+            .collect();
+        idx.display.extend(caps);
         idx
     }
 
@@ -666,6 +676,26 @@ fn state_effects(nodes: &[Spanned<MotionNode>]) -> (Vec<(Selector, StyleKey)>, V
 }
 
 impl Expander<'_> {
+    /// `x [caption: "..."]` made a part `x_caption`: it comes and goes with x.
+    fn follow_captions(&self, s: &mut MotionStmt) {
+        let caps: Vec<String> = s
+            .targets
+            .iter()
+            .map(|t| {
+                let c = format!("{}_caption", t);
+                if self.idx.ids.contains(&c) { c } else { String::new() }
+            })
+            .collect();
+        if caps.iter().all(|c| c.is_empty()) {
+            return;
+        }
+        let items = caps.into_iter().map(|c| Spanned::new(MotionValue::Name(c), 0..0)).collect();
+        s.opts.push(Spanned::new(
+            MotionOpt { key: Spanned::new(super::CAPTIONS_KEY.to_string(), 0..0), value: Spanned::new(MotionValue::List(items), 0..0) },
+            0..0,
+        ));
+    }
+
     fn check_arg(
         &self,
         call: &Spanned<String>,
@@ -998,9 +1028,13 @@ impl Expander<'_> {
                     }
                     s.partners = srcs;
                 }
+                self.follow_captions(&mut s);
             }
-            MotionVerb::Hide(v)
-            | MotionVerb::Draw(v)
+            MotionVerb::Hide(v) => {
+                s.targets = all(v)?;
+                self.follow_captions(&mut s);
+            }
+            MotionVerb::Draw(v)
             | MotionVerb::Undraw(v)
             | MotionVerb::Effect { targets: v, .. }
             | MotionVerb::Loop { targets: v, .. } => s.targets = all(v)?,
@@ -1496,6 +1530,13 @@ pub fn atom_state_ops(s: &MotionStmt, i: usize, span: &Span) -> Vec<KeyframeOp> 
         one.targets = vec![s.targets[i].clone()];
         if i < s.partners.len() {
             one.partners = vec![s.partners[i].clone()];
+        }
+        // Its own caption only.
+        for o in one.opts.iter_mut().filter(|o| o.node.key.node == super::CAPTIONS_KEY) {
+            if let MotionValue::List(items) = &o.node.value.node {
+                let mine: Vec<_> = items.get(i).cloned().into_iter().collect();
+                o.node.value.node = MotionValue::List(mine);
+            }
         }
     }
     stmt_state_ops(&one, span)

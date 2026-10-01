@@ -21,6 +21,10 @@ use crate::parser::ast::{
     Selector, Spanned, StyleKey, StyleModifier, StyleValue,
 };
 
+/// Internal option: the `caption:` part of each target of a show/hide
+/// ("" for none), paired by position.
+pub const CAPTIONS_KEY: &str = "__captions";
+
 /// Option keys that time a statement rather than change state.
 pub const TIMING_KEYS: &[&str] = &[
     "delay", "duration", "ease", "stagger", "order", "from", "swap", "enter", "exit", "jitter",
@@ -141,6 +145,23 @@ pub fn stmt_ops(
 ) -> Vec<KeyframeOp> {
     let mut ops = base_stmt_ops(verb, opts, targets, partners);
     ops.extend(jitter_ops(opts, targets));
+    // `caption:` parts come and go with their element.
+    if let Some(MotionValue::List(items)) = opt(opts, CAPTIONS_KEY).map(|v| &v.node) {
+        let ids: Vec<Spanned<Identifier>> = items
+            .iter()
+            .filter_map(|x| match &x.node {
+                MotionValue::Name(n) if !n.is_empty() => Some(Spanned::new(Identifier::new(n.as_str()), x.span.clone())),
+                _ => None,
+            })
+            .collect();
+        if !ids.is_empty() {
+            match verb {
+                MotionVerb::Show(_) => ops.push(KeyframeOp::Show(ids)),
+                MotionVerb::Hide(_) => ops.push(KeyframeOp::Hide(ids)),
+                _ => {}
+            }
+        }
+    }
     ops
 }
 

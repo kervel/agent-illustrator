@@ -52,6 +52,8 @@ const ALIASES: &[(&str, &str)] = &[
     ("rotate", "hinges"),
     ("rotation", "hinges"),
     ("stagger", "swarm"),
+    ("count", "swarm"),
+    ("meter", "swarm"),
     ("many", "swarm"),
     ("timing", "beats"),
     ("when", "events"),

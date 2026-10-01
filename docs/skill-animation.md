@@ -662,16 +662,38 @@ stops reporting them: `circle badge [..., overlaps: doc]`, or on an instance
 
 ### Captions
 
-A caption follows its subject: `text "Hotfix" nm [caption_of: dot,
-label_position: below]` (or `above`, `left`, `right`). Place the subject, not
-the caption; do not constrain other things against a `caption_of` element
-(the lint says so).
+Give any element a caption with one modifier:
+```
+agent_art r1 [width: 60, height: 60, caption: "NVIDIA"]          // below, by default
+rect st [..., caption: "staging", caption_position: above]       // or left, right
+```
+The caption is a part, `r1.caption` (accent it, transform its label). It
+comes and goes with its element: it copies the element's `appears`, and
+`show r1` / `hide r1` bring it along. It uses the caption look (18px,
+semibold, `role-muted`).
+
+For another look, or a caption with an entrance of its own, write the long
+form: `text "Hotfix" nm [caption_of: dot, label_position: below,
+label_offset: 8, ...]`. Either way, place the subject, not the caption, and
+don't constrain other things against a caption (the lint says so).
 
 ### Many things at once
 
 Many similar instances from one line: `boxart b* [items: [{tint: role-ok},
 {tint: role-error}]]` makes `b0`, `b1`, … (inside a `row` or `grid` they line
 up); `constrain k*.center = d*.center` pairs two such lists by index.
+Identical ones: `rect t* [count: 10, width: 22, height: 34]` makes `t0` …
+`t9` (`t.*` in a selector). With a count, `items:` may be shorter and sets
+just the first few: `items: [{}, {}, {}, {fill: role-warn}]` makes `t3` the
+odd one out. An item's own value replaces the shared one.
+
+A bar that fills up (cost, load, progress) is the built-in `meter`:
+```
+meter cost [segments: 10, value: 2]              // segments s1..s10, the first 2 lit
+meter load [segments: 6, grow: up, on: role-error]
+keyframe "more" { set cost 6 }                   // light the first 6 (also: set cost level6)
+```
+`segment_width`, `segment_height`, `gap`, `on` and `off` (colours) adjust it.
 
 A swarm is one statement: `move needs.* to box [stagger: 0.07]`,
 `move a, b, c to box`, `fly ghost(a, b, c) to box` (or `fly ghost(a),
