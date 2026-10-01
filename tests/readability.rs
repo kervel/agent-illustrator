@@ -848,3 +848,16 @@ fn a_strong_caption_and_a_caption_too_close_to_a_neighbour() {
     let roomy = src.replace("r1.bottom + 45", "r1.bottom + 60");
     assert!(!lint(&roomy).iter().any(|m| m.contains("caption \"")), "{:?}", lint(&roomy));
 }
+
+#[test]
+fn being_covered_after_a_layer_change_is_not_an_overlap() {
+    let src = "rect server [width: 260, height: 220, fill: blue, label: \"server\"]\nrect card [width: 160, height: 90, fill: orange, label: \"card\", z_order: 1]\n\
+               point spot\nconstrain server.left = 300\nconstrain server.top = 0\nconstrain card.left = 0\nconstrain card.top = 60\n\
+               constrain spot.center_x = server.center_x\nconstrain spot.center_y = server.center_y\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { move card to spot [z_order: -1] }";
+    let w = lint(src);
+    assert!(!w.iter().any(|m| m.contains("overlap")), "{w:?}");
+    // Without the layer change, the same end state is an overlap.
+    let plain = src.replace("move card to spot [z_order: -1]", "move card to spot");
+    assert!(lint(&plain).iter().any(|m| m.contains("overlap")), "{:?}", lint(&plain));
+}

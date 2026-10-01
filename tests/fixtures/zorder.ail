@@ -24,5 +24,4 @@ constrain k2.bg.top = 220
 keyframe "a" { }
 keyframe "b" { move card to spot [z_order: -1, duration: slow]
  show k2 [enter: rise] }
-keyframe "c" { transform card [z_order: 1]
- move card home }
+keyframe "c" { move card home [z_order: 1] }

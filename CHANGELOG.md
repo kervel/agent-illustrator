@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.28
+
+- Lint: an element a keyframe puts in another layer (`z_order` in a move
+  or transform) is covered, or covers, on purpose. Its overlaps and label
+  overlaps in that frame are no longer reported.
+
 ## v0.2.27
 
 - A layer change in a keyframe now happens where it is not seen. By default

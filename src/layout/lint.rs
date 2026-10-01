@@ -178,9 +178,21 @@ pub fn check(
     } else {
         let mut per_frame: Vec<(String, Vec<LintWarning>)> = Vec::with_capacity(frame_states.len());
         for state in &frame_states {
+            // Elements a keyframe has put in another layer: their overlaps
+            // are on purpose.
+            let layered: HashSet<String> = state
+                .transforms
+                .iter()
+                .filter(|(_, mods)| mods.iter().any(|m| matches!(m.node.key.node, crate::parser::ast::StyleKey::ZOrder)))
+                .map(|(id, _)| id.clone())
+                .collect();
+            let mut frame_contains = contains_ids.clone();
+            frame_contains.layered = layered.clone();
+            let contains_ids = &frame_contains;
             let scope = FrameScope {
                 hidden_elements: &state.hidden_elements,
                 hidden_connections: &state.hidden_connections,
+                layered: &layered,
             };
             // Ask the frame its own question. A keyframe that moves an element
             // changes what collides with what, so checking a later frame's
@@ -241,6 +253,8 @@ pub fn check(
 pub(crate) struct FrameScope<'a> {
     hidden_elements: &'a HashSet<String>,
     hidden_connections: &'a HashSet<String>,
+    /// Put in another layer by this frame (see `ContainsRelations::layered`).
+    layered: &'a HashSet<String>,
 }
 
 /// An empty scope: nothing is hidden (documents without keyframes).
@@ -252,6 +266,7 @@ impl FrameScope<'static> {
         FrameScope {
             hidden_elements: empty,
             hidden_connections: empty,
+            layered: empty,
         }
     }
 }
@@ -869,7 +884,7 @@ fn is_text_shape_straddle(text: &ElementLayout, shape: &ElementLayout) -> bool {
 /// so that pair is exempt. Everything else is not: being wrapped by a box does
 /// not stop an element from colliding with the rest of the diagram, and the
 /// container itself can still land on something unrelated.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub(crate) struct ContainsRelations {
     by_container: HashMap<String, HashSet<String>>,
     /// `overlaps: x` on an element: it sits on x on purpose (a badge on a
@@ -877,6 +892,9 @@ pub(crate) struct ContainsRelations {
     overlaps: HashMap<String, HashSet<String>>,
     /// `caption_of: x`: caption -> its element.
     captions: HashMap<String, String>,
+    /// Put in another layer by a keyframe (`z_order` in a transform or a
+    /// move): covering, or being covered, is what it is for.
+    layered: HashSet<String>,
 }
 
 impl ContainsRelations {
@@ -889,6 +907,9 @@ impl ContainsRelations {
         let (Some(a), Some(b)) = (a, b) else {
             return false;
         };
+        if self.layered.contains(a) || self.layered.contains(b) {
+            return true;
+        }
         self.by_container.get(a).is_some_and(|c| c.contains(b))
             || self.by_container.get(b).is_some_and(|c| c.contains(a))
             || self.declared_overlap(a, b)
@@ -1863,8 +1884,8 @@ fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Ve
             let a = &labels[i];
             let b = &labels[j];
 
-            // Skip if same owner
-            if a.owner == b.owner {
+            // Skip if same owner, or one was put under the other on purpose.
+            if a.owner == b.owner || scope.layered.contains(&a.owner) || scope.layered.contains(&b.owner) {
                 continue;
             }
 
