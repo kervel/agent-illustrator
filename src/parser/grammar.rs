@@ -1977,10 +1977,29 @@ where
             just(Token::Direction).map_with(|_, e| Spanned::new("direction".to_string(), span_range(&e.span()))),
         ));
 
+        // `from: r1, r2, r3`: more names after the value, up to the next
+        // `key:`, make a list (one per target).
+        let more_names = just(Token::Comma)
+            .ignore_then(dotted_name.clone())
+            .then_ignore(just(Token::Colon).not().rewind())
+            .repeated()
+            .collect::<Vec<_>>();
         let motion_opt = motion_key
             .then_ignore(just(Token::Colon))
             .then(motion_value.clone())
-            .map_with(|(key, value), e| Spanned::new(MotionOpt { key, value }, span_range(&e.span())))
+            .then(more_names)
+            .map_with(|((key, value), more), e| {
+                let value = if more.is_empty() {
+                    value
+                } else {
+                    let span = value.span.start..more.last().map(|m| m.span.end).unwrap_or(value.span.end);
+                    let items = std::iter::once(value)
+                        .chain(more.into_iter().map(|m| Spanned::new(MotionValue::Name(m.node), m.span)))
+                        .collect();
+                    Spanned::new(MotionValue::List(items), span)
+                };
+                Spanned::new(MotionOpt { key, value }, span_range(&e.span()))
+            })
             .boxed();
 
         let motion_opts = motion_opt
@@ -2118,12 +2137,25 @@ where
             let mv = kw("move")
                 .ignore_then(many_selector.clone())
                 .then(choice((
-                    kw("home").map_with(|_, e| (Some(Spanned::new("home".to_string(), span_range(&e.span()))), None)),
-                    kw("to").ignore_then(dotted_name.clone().labelled("where to move it (an element, or `home`)")).map(|n| (Some(n), None)),
+                    kw("home").map_with(|_, e| (Some(vec![Spanned::new("home".to_string(), span_range(&e.span()))]), None)),
+                    kw("to")
+                        .ignore_then(
+                            dotted_name
+                                .clone()
+                                .labelled("where to move it (an element, or `home`)")
+                                .separated_by(just(Token::Comma))
+                                .at_least(1)
+                                .collect::<Vec<_>>(),
+                        )
+                        .map(|ns: Vec<Spanned<String>>| (Some(ns), None)),
                     kw("along").ignore_then(dotted_name.clone().labelled("a path to move along")).map(|n| (None, Some(n))),
                 )).labelled("`to <element>`, `home` or `along <path>` after `move <element>`"))
                 .then(opts_or_none.clone())
-                .map(move |((target, (to, along)), o)| stmt(MotionVerb::Move { target, to, along }, o));
+                .map(move |((target, (to, along)), o)| {
+                    let to: Vec<Spanned<String>> = to.unwrap_or_default();
+                    let to_list = if to.len() > 1 { to.clone() } else { vec![] };
+                    stmt(MotionVerb::Move { target, to: to.into_iter().next(), to_list, along }, o)
+                });
             let effect_name = any()
                 .filter(|t: &Token| {
                     matches!(t, Token::Ident(s) if crate::motion::EFFECTS.contains(&s.as_str()))

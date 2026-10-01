@@ -240,6 +240,8 @@ fn validate_refs_in_statement(
                         // These reference constraint names (not element ids); not validated here.
                     }
                     crate::parser::ast::KeyframeOp::Draw { target, .. }
+                    | crate::parser::ast::KeyframeOp::Mark { target, .. }
+                    | crate::parser::ast::KeyframeOp::Unmark(target)
                     | crate::parser::ast::KeyframeOp::Pin { target, .. } => {
                         if !defined.contains(&target.node.0) {
                             return Err(LayoutError::UndefinedIdentifier {

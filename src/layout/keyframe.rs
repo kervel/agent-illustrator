@@ -34,6 +34,8 @@ pub struct FrameState {
     pub pins: BTreeMap<String, crate::parser::ast::PinTo>,
     /// Camera focus (element, zoom), None = the whole diagram.
     pub camera: Option<(String, f64)>,
+    /// Persistent marks (`mark x`), cumulative: element -> "<style>-<tone>".
+    pub marks: BTreeMap<String, std::collections::BTreeSet<String>>,
 }
 
 /// Complete keyframe processing result
@@ -150,6 +152,7 @@ impl FrameState {
             drawn: BTreeMap::new(),
             pins: BTreeMap::new(),
             camera: None,
+            marks: BTreeMap::new(),
         }
     }
 
@@ -205,6 +208,12 @@ impl FrameState {
             }
             KeyframeOp::Camera { focus, zoom } => {
                 self.camera = focus.as_ref().map(|f| (f.node.0.clone(), *zoom));
+            }
+            KeyframeOp::Mark { target, kind } => {
+                self.marks.entry(target.node.0.clone()).or_default().insert(kind.clone());
+            }
+            KeyframeOp::Unmark(target) => {
+                self.marks.remove(&target.node.0);
             }
         }
     }

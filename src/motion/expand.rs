@@ -454,6 +454,7 @@ fn subst_value(v: &Spanned<MotionValue>, env: &HashMap<String, Bound>) -> Spanne
         MotionValue::Call(f, args) => {
             MotionValue::Call(f.clone(), args.iter().map(|a| subst_value(a, env)).collect())
         }
+        MotionValue::List(items) => MotionValue::List(items.iter().map(|a| subst_value(a, env)).collect()),
         other => other.clone(),
     };
     Spanned::new(node, v.span.clone())
@@ -539,9 +540,10 @@ fn subst_stmt(s: &MotionStmt, env: &HashMap<String, Bound>) -> MotionStmt {
             from: from.as_ref().map(|f| subst_str(f, env)),
             to: to.iter().map(|x| subst_sel(x, env)).collect(),
         },
-        MotionVerb::Move { target, to, along } => MotionVerb::Move {
+        MotionVerb::Move { target, to, to_list, along } => MotionVerb::Move {
             target: subst_sel(target, env),
             to: to.as_ref().map(|t| subst_str(t, env)),
+            to_list: to_list.iter().map(|t| subst_str(t, env)).collect(),
             along: along.as_ref().map(|t| subst_str(t, env)),
         },
         MotionVerb::Effect { name, targets } => MotionVerb::Effect {
@@ -976,8 +978,28 @@ impl Expander<'_> {
             }
         };
         match &s.verb {
-            MotionVerb::Show(v)
-            | MotionVerb::Hide(v)
+            MotionVerb::Show(v) => {
+                s.targets = all(v)?;
+                // `show d1, d2 [from: r1, r2]`: each from its own place.
+                if let Some(MotionValue::List(items)) = super::opt(&s.opts, "from").map(|v| &v.node) {
+                    let mut srcs = Vec::new();
+                    for it in items {
+                        let MotionValue::Name(n) = &it.node else {
+                            return Err(LayoutError::validation_error("show ... [from: a, b, ...]: list element names"));
+                        };
+                        srcs.push(check_name(&Spanned::new(n.clone(), it.span.clone()))?);
+                    }
+                    if srcs.len() != s.targets.len() {
+                        return Err(LayoutError::validation_error(&format!(
+                            "show ... [from: ...]: {} places for {} things to show; give one each, or one for all",
+                            srcs.len(),
+                            s.targets.len()
+                        )));
+                    }
+                    s.partners = srcs;
+                }
+            }
+            MotionVerb::Hide(v)
             | MotionVerb::Draw(v)
             | MotionVerb::Undraw(v)
             | MotionVerb::Effect { targets: v, .. }
@@ -985,10 +1007,23 @@ impl Expander<'_> {
             MotionVerb::Transform { target, .. } | MotionVerb::Count(target) => {
                 s.targets = self.idx.resolve(target)?
             }
-            MotionVerb::Move { target, to, along } => {
+            MotionVerb::Move { target, to, to_list, along } => {
                 s.targets = self.idx.resolve(target)?;
                 if let Some(t) = to.as_ref().filter(|t| t.node != "home") {
                     check_name(t)?;
+                }
+                // `move a, b, c to x, y, z`: one destination each.
+                if !to_list.is_empty() {
+                    let dests = to_list.iter().map(check_name).collect::<Result<Vec<_>, _>>()?;
+                    if dests.len() != s.targets.len() {
+                        return Err(LayoutError::validation_error(&format!(
+                            "move ... to {}: {} destinations for {} things to move; give one each, or one for all",
+                            to_list.iter().map(|t| t.node.as_str()).collect::<Vec<_>>().join(", "),
+                            dests.len(),
+                            s.targets.len()
+                        )));
+                    }
+                    s.partners = dests;
                 }
                 if let Some(p) = along {
                     let id = check_name(p)?;

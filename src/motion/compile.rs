@@ -460,6 +460,39 @@ struct Defaults {
     exit: String,
 }
 
+/// The colour of an accent or mark tone.
+pub(crate) fn tone_colour(tone: &str) -> Result<&'static str, String> {
+    match tone {
+        "attention" | "warn" => Ok("var(--role-warn, #E8A33D)"),
+        "error" => Ok("var(--role-error, #D64545)"),
+        "ok" => Ok("var(--role-ok, #2E9E5B)"),
+        other => Err(format!("tone '{}': use attention (or warn), error or ok", other)),
+    }
+}
+
+/// The look of an accent or mark on a box this size.
+pub(crate) fn accent_style(b: &crate::layout::types::BoundingBox, style: &str) -> Result<&'static str, String> {
+    Ok(match style {
+        "auto" => {
+            // A line of text, a table row, a bar: a highlighter stroke
+            // over it reads from the back of a room and stays inside it.
+            if b.height <= 60.0 && b.width >= 2.5 * b.height {
+                "marker"
+            } else if b.width.max(b.height) <= 80.0 {
+                "ring"
+            } else {
+                "outline"
+            }
+        }
+        "marker" => "marker",
+        "underline" => "underline",
+        "ring" => "ring",
+        "outline" => "outline",
+        "wiggle" => "wiggle",
+        other => return Err(format!("style '{}': use auto, marker, underline, ring, outline or wiggle", other)),
+    })
+}
+
 #[derive(Debug, Clone)]
 struct ElemInfo {
     parent: Option<String>,
@@ -581,6 +614,8 @@ struct Compiler<'a> {
     pre_applied: HashSet<(usize, usize)>,
     misses: Vec<(String, String)>,
     accents: Vec<(String, String, String, bool)>,
+    /// Persistent marks: (element, kind as in the state, hook class).
+    mark_hooks: Vec<(String, String, String)>,
 }
 
 fn has_marker(layout: &LayoutResult, id: &str) -> bool {
@@ -672,6 +707,13 @@ impl<'a> Compiler<'a> {
                 _ => (0.0, 0.0),
             }
         };
+        for (id, kind, hook) in &self.mark_hooks {
+            let on = state.marks.get(id).is_some_and(|ks| ks.contains(kind));
+            // Two kinds can share a look: on if any of them is.
+            let key = ChKey { sel: hook.clone(), prop: Prop::Opacity };
+            let prev = matches!(vals.get(&key), Some(Val::V(v)) if v.first().is_some_and(|x| *x > 0.5));
+            vals.insert(key, Val::n(if on || prev { 1.0 } else { 0.0 }));
+        }
         for (id, info) in &self.elems {
             let Some(e) = solved.get(id) else { continue };
             let base_el = self.input.base.get_element_by_name(id);
@@ -1250,6 +1292,7 @@ impl<'a> Compiler<'a> {
             pre_applied: HashSet::new(),
             misses: Vec::new(),
             accents: Vec::new(),
+            mark_hooks: Vec::new(),
         }
     }
 }
@@ -1448,6 +1491,43 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
             .map_err(|m| CompileError { message: c.dotted(&m), span })?;
     }
     let mut layout = c.solve(&state);
+    // Every `mark` anywhere: its look, and a node of its own.
+    {
+        fn marks(nodes: &[Spanned<MotionNode>], out: &mut Vec<(String, Vec<Spanned<MotionOpt>>, std::ops::Range<usize>)>) {
+            for n in nodes {
+                match &n.node {
+                    MotionNode::Stmt(st) => {
+                        if matches!(&st.verb, MotionVerb::Effect { name, .. } if name.node == "mark") {
+                            for t in &st.targets {
+                                out.push((t.clone(), st.opts.clone(), n.span.clone()));
+                            }
+                        }
+                    }
+                    MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => marks(b, out),
+                }
+            }
+        }
+        let mut found = Vec::new();
+        for kf in &keyframes {
+            marks(&kf.motion, &mut found);
+        }
+        for (target, opts, span) in found {
+            let err = |m: String| CompileError { message: format!("mark {}: {}", c.show(&target), m), span: span.clone() };
+            let info = c.elems.get(&target).ok_or_else(|| err("not an element".into()))?;
+            let tone = opt_name(&opts, "tone").unwrap_or("attention");
+            let colour = tone_colour(tone).map_err(err)?;
+            let style = match accent_style(&info.base, opt_name(&opts, "style").unwrap_or("auto")).map_err(err)? {
+                "wiggle" => return Err(err("a wiggle cannot stay; use marker, underline, ring or outline".into())),
+                st => st,
+            };
+            let kind = super::mark_kind(&opts);
+            let hook = format!(".aimk{}-{}{}-{}", &style[..1], c.scope, target, tone);
+            c.aux.overlays.entry(target.clone()).or_default().insert(format!("mark-{}-{}:{}", style, tone, colour));
+            if !c.mark_hooks.iter().any(|(t, k, _)| *t == target && *k == kind) {
+                c.mark_hooks.push((target, kind, hook));
+            }
+        }
+    }
     let mut snap = c.snapshot(&state, &layout, keyframes.first().map(|k| k.name.node.as_str()));
 
     let mut settled_maps: Vec<BTreeMap<ChKey, Val>> = vec![snap.vals.clone()];
@@ -1797,7 +1877,10 @@ impl<'a> Compiler<'a> {
                     Some(Val::V(v)) => (v[0], v[1]),
                     _ => (0.0, 0.0),
                 };
-                if let Some(from) = opt_name(&s.opts, "from").filter(|f| !matches!(*f, "start" | "end" | "center" | "random")) {
+                // `[from: r1, r2]` pairs a place with each target.
+                let paired = matches!(opt(&s.opts, "from").map(|v| &v.node), Some(MotionValue::List(_)));
+                let from_name = if paired { s.partners.get(i).map(|p| p.as_str()) } else { opt_name(&s.opts, "from") };
+                if let Some(from) = from_name.filter(|f| !matches!(*f, "start" | "end" | "center" | "random")) {
                     let from = from.replace('.', "_");
                     let (Some(src), Some(me)) = (self.center_now(layout, &from), self.center_now(layout, target)) else {
                         return Err(CompileError { message: format!("show {} [from: {}]: '{}' is not an element", target, from, from), span: fm.atoms[atom].span.clone() });
@@ -2242,6 +2325,10 @@ impl<'a> Compiler<'a> {
         looping: bool,
         fm: &mut FrameMotion,
     ) -> Result<(), CompileError> {
+        if name == "mark" || name == "unmark" {
+            // State: its node fades in or out with the statement's timing.
+            return Ok(());
+        }
         let d = opt_number(opts, "distance").unwrap_or(self.input.tokens.distance);
         let dur = if looping { opt_number(opts, "period").unwrap_or(t.dur.max(1.2)) } else { t.dur };
         let wrap = self.wrap(target);
@@ -2320,27 +2407,8 @@ impl<'a> Compiler<'a> {
         let info = self.elems.get(target).ok_or_else(|| err(format!("accent: '{}' is not an element", target)))?;
         let (b, text_like) = (info.base, info.text_like);
         let tone = opt_name(opts, "tone").unwrap_or("attention");
-        let colour = match tone {
-            "attention" => "var(--role-warn, #E8A33D)",
-            "error" => "var(--role-error, #D64545)",
-            "ok" => "var(--role-ok, #2E9E5B)",
-            other => return Err(err(format!("accent: tone '{}': use attention, error or ok", other))),
-        };
-        let style = match opt_name(opts, "style").unwrap_or("auto") {
-            "auto" => {
-                // A line of text, a table row, a bar: a highlighter stroke
-                // over it reads from the back of a room and stays inside it.
-                if b.height <= 60.0 && b.width >= 2.5 * b.height {
-                    "marker"
-                } else if b.width.max(b.height) <= 80.0 {
-                    "ring"
-                } else {
-                    "outline"
-                }
-            }
-            s @ ("marker" | "underline" | "ring" | "outline" | "wiggle") => s,
-            other => return Err(err(format!("accent: style '{}': use auto, marker, underline, ring, outline or wiggle", other))),
-        };
+        let colour = tone_colour(tone).map_err(|m| err(format!("accent: {}", m)))?;
+        let style = accent_style(&b, opt_name(opts, "style").unwrap_or("auto")).map_err(|m| err(format!("accent: {}", m)))?;
         let _ = text_like;
         self.accents.push((fm.name.clone(), target.to_string(), style.to_string(), tone == "error"));
         let hold = opt_name(opts, "hold").is_some_and(|h| h == "step");
@@ -2535,6 +2603,7 @@ pub fn value_text(v: &MotionValue) -> String {
         ),
         MotionValue::Vertex(n) => format!("vertex {}", n),
         MotionValue::Style(_) => "…".into(),
+        MotionValue::List(items) => items.iter().map(|x| value_text(&x.node)).collect::<Vec<_>>().join(", "),
     }
 }
 

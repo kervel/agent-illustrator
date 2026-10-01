@@ -394,6 +394,8 @@ pub enum MotionValue {
     Vertex(usize),
     /// Anything a style modifier accepts (colours), for `highlight` etc.
     Style(StyleValue),
+    /// `from: r1, r2, r3`: one per target, paired by position.
+    List(Vec<Spanned<MotionValue>>),
 }
 
 /// What a motion statement acts on.
@@ -514,6 +516,8 @@ pub enum MotionVerb {
     Move {
         target: Spanned<Selector>,
         to: Option<Spanned<String>>,
+        /// `move a, b to x, y`: every destination, paired by position.
+        to_list: Vec<Spanned<String>>,
         along: Option<Spanned<String>>,
     },
     /// `pulse x`, `shake x`, `flash x`, `ping x`, `highlight x`, `nudge x`
@@ -586,6 +590,14 @@ pub enum KeyframeOp {
         focus: Option<Spanned<Identifier>>,
         zoom: f64,
     },
+    /// `mark x [style, tone]`: a persistent accent mark, until `unmark x`.
+    /// `kind` is "<style>-<tone>" as written (`auto-error`).
+    Mark {
+        target: Spanned<Identifier>,
+        kind: String,
+    },
+    /// `unmark x`: remove its marks.
+    Unmark(Spanned<Identifier>),
 }
 
 /// How far a drawable is drawn.

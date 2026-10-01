@@ -120,10 +120,12 @@ keyframe "clone" {
     placed beside it.
   - `transform x [fill: role-ok, label: "...", swap: fade]`
   - `swap a -> b [via: flip]`
-  - lists work: `move a, b, needs.* to box [stagger: 0.07, order: random]`
+  - lists work: `move a, b, needs.* to box [stagger: 0.07, order: random]`;
+    pairs too: `move a, b to x, y`, `show d1, d2 [from: r1, r2]`
 - "Look here": `accent x` (a line, row or bar gets a highlighter box;
   `accent code.lines[4..6]` marks a range). Use `[tone: error]` for a
-  problem and `[hold: step]` to keep it until the next click.
+  problem and `[hold: step]` to keep it until the next click. `mark x
+  [tone: error]` is the same look, but it stays until `unmark x`.
 - Parts by number, anywhere (constraints too): `code.line[4]`,
   `t.row[2]`, `t.cell[2][3]` (from 1).
 - States live in the template:

@@ -1228,55 +1228,20 @@ fn render_motion_overlays(element: &ElementLayout, builder: &mut SvgBuilder, beh
             )),
             // `accent`: drawn over the element, hidden until the accent plays
             // (so the no-JS picture and stills of other moments show none).
-            (w, false) if w.starts_with("accent-") => {
+            (w, false) if w.starts_with("accent-") || w.starts_with("mark-") => {
                 // `accent-<style>-<tone>`: one mark per element, style and tone.
-                let (style, tone) = w["accent-".len()..].split_once('-').unwrap_or((&w["accent-".len()..], "attention"));
-                let class = format!("aiac{}-{s}{id}-{tone}", &style[..1]);
-                let c = b.center();
-                match style {
-                    "marker" => {
-                        // A highlighter stroke over it: translucent, flush
-                        // top and bottom so a range of lines reads as one.
-                        // Inset a little from the sides (a line of code spans
-                        // its frame), square so lines in a range join.
-                        let inset = (b.width * 0.02).min(4.0);
-                        let (x, y) = (b.x + inset, b.y);
-                        builder.add_raw(&format!(
-                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="{}" fill="{colour}" fill-opacity="0.32" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                            r2(x), r2(y), r2(b.width - 2.0 * inset), r2(b.height), r2(x), r2(b.center().y)
-                        ));
+                // `mark-...`: the same look, but it stays (state): hidden by
+                // an attribute, so the settled CSS can show it without JS.
+                let persistent = w.starts_with("mark-");
+                let rest = w.split_once('-').map(|x| x.1).unwrap_or("");
+                let (style, tone) = rest.split_once('-').unwrap_or((rest, "attention"));
+                let class = format!("{}{}-{s}{id}-{tone}", if persistent { "aimk" } else { "aiac" }, &style[..1]);
+                let start = builder.elements.len();
+                builder.add_raw(&accent_markup(style, colour, &b, &class));
+                if persistent {
+                    for el in builder.elements[start..].iter_mut() {
+                        *el = el.replacen(r#" style="opacity:0;"#, r#" opacity="0" style=""#, 1);
                     }
-                    "underline" => {
-                        let (x, y, w) = (b.x, b.bottom() + 5.0, b.width);
-                        builder.add_raw(&format!(
-                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="5" rx="2.5" fill="{colour}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                            r2(x), r2(y), r2(w), r2(x), r2(y + 2.5)
-                        ));
-                    }
-                    "ring" => {
-                        let r = b.width.max(b.height) / 2.0 + 9.0;
-                        builder.add_raw(&format!(
-                            r#"<circle class="{class}" cx="{}" cy="{}" r="{}" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                            r2(c.x), r2(c.y), r2(r), r2(c.x), r2(c.y)
-                        ));
-                    }
-                    "outline" => {
-                        let pad = 7.0;
-                        builder.add_raw(&format!(
-                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="{}" rx="10" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
-                            r2(b.x - pad), r2(b.y - pad), r2(b.width + 2.0 * pad), r2(b.height + 2.0 * pad), r2(c.x), r2(c.y)
-                        ));
-                    }
-                    "badge" => {
-                        // Just outside the right edge, level with the element:
-                        // it says which row it means.
-                        let (cx, cy) = (b.right() + 26.0, c.y);
-                        builder.add_raw(&format!(
-                            r##"<g class="{class}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"><circle cx="{}" cy="{}" r="13" fill="{colour}"/><text x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="#ffffff">!</text></g>"##,
-                            r2(cx), r2(cy), r2(cx), r2(cy), r2(cx), r2(cy + 1.0)
-                        ));
-                    }
-                    _ => {}
                 }
             }
             ("ping", false) => {
@@ -1294,6 +1259,60 @@ fn render_motion_overlays(element: &ElementLayout, builder: &mut SvgBuilder, beh
             _ => {}
         }
     }
+}
+
+/// The mark an accent (or a persistent `mark`) draws on a box: hidden
+/// (`opacity:0`) until the player or the settled CSS shows it.
+pub(crate) fn accent_markup(style: &str, colour: &str, b: &crate::layout::types::BoundingBox, class: &str) -> String {
+    let b = *b;
+    let c = b.center();
+    let mut out = String::new();
+                match style {
+                    "marker" => {
+                        // A highlighter stroke over it: translucent, flush
+                        // top and bottom so a range of lines reads as one.
+                        // Inset a little from the sides (a line of code spans
+                        // its frame), square so lines in a range join.
+                        let inset = (b.width * 0.02).min(4.0);
+                        let (x, y) = (b.x + inset, b.y);
+                        out.push_str(&format!(
+                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="{}" fill="{colour}" fill-opacity="0.32" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(x), r2(y), r2(b.width - 2.0 * inset), r2(b.height), r2(x), r2(b.center().y)
+                        ));
+                    }
+                    "underline" => {
+                        let (x, y, w) = (b.x, b.bottom() + 5.0, b.width);
+                        out.push_str(&format!(
+                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="5" rx="2.5" fill="{colour}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(x), r2(y), r2(w), r2(x), r2(y + 2.5)
+                        ));
+                    }
+                    "ring" => {
+                        let r = b.width.max(b.height) / 2.0 + 9.0;
+                        out.push_str(&format!(
+                            r#"<circle class="{class}" cx="{}" cy="{}" r="{}" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(c.x), r2(c.y), r2(r), r2(c.x), r2(c.y)
+                        ));
+                    }
+                    "outline" => {
+                        let pad = 7.0;
+                        out.push_str(&format!(
+                            r#"<rect class="{class}" x="{}" y="{}" width="{}" height="{}" rx="10" fill="none" stroke="{colour}" stroke-width="4" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                            r2(b.x - pad), r2(b.y - pad), r2(b.width + 2.0 * pad), r2(b.height + 2.0 * pad), r2(c.x), r2(c.y)
+                        ));
+                    }
+                    "badge" => {
+                        // Just outside the right edge, level with the element:
+                        // it says which row it means.
+                        let (cx, cy) = (b.right() + 26.0, c.y);
+                        out.push_str(&format!(
+                            r##"<g class="{class}" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"><circle cx="{}" cy="{}" r="13" fill="{colour}"/><text x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="#ffffff">!</text></g>"##,
+                            r2(cx), r2(cy), r2(cx), r2(cy), r2(cx), r2(cy + 1.0)
+                        ));
+                    }
+                    _ => {}
+                }
+    out
 }
 
 /// Ghost copies for `fly ghost(el)`: a plain re-render of the source (no

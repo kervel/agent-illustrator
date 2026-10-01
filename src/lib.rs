@@ -989,13 +989,29 @@ fn render_pipeline(
             frame_result.bounds = b;
         }
 
-        render_svg_with_stylesheet(
+        let mut svg = render_svg_with_stylesheet(
             &frame_result,
             &config.svg,
             &config.stylesheet,
             config.custom_css.as_deref(),
             config.debug,
-        )
+        );
+        // Persistent marks (`mark x`) of this frame, on top.
+        let mut marks = String::new();
+        for (id, kinds) in &state.marks {
+            let Some(el) = frame_result.get_element_by_name(id) else { continue };
+            for kind in kinds {
+                let (style, tone) = kind.split_once('-').unwrap_or((kind.as_str(), "attention"));
+                let (Ok(style), Ok(colour)) = (motion::compile::accent_style(&el.bounds, style), motion::compile::tone_colour(tone)) else {
+                    continue;
+                };
+                marks.push_str(&renderer::svg::accent_markup(style, colour, &el.bounds, "aimark").replace("opacity:0;", ""));
+            }
+        }
+        if let Some(pos) = svg.rfind("</svg>") {
+            svg.insert_str(pos, &marks);
+        }
+        svg
     } else if !frame_diffs.is_empty() {
         let hooks = compiled
             .as_ref()

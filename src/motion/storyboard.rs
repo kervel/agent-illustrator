@@ -210,6 +210,19 @@ pub fn states_text(
                 out.push_str(&format!("    > {} moved to {}\n", show(id), where_));
             }
         }
+        // Marks put on and taken off (`mark x [tone: error]`).
+        for (id, kinds) in &st.marks {
+            for k in kinds {
+                if !prev.marks.get(id).is_some_and(|p| p.contains(k)) {
+                    out.push_str(&format!("    ! {} marked ({})\n", show(id), k.trim_start_matches("auto-")));
+                }
+            }
+        }
+        for id in prev.marks.keys() {
+            if !st.marks.contains_key(id) {
+                out.push_str(&format!("    ! {} unmarked\n", show(id)));
+            }
+        }
         for (id, d) in &st.drawn {
             if prev.drawn.get(id) != Some(d) {
                 out.push_str(&format!("    / {} drawn {}\n", show(id), draw_text(d, &show)));

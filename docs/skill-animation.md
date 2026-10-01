@@ -515,12 +515,18 @@ fly token from a to b                                    // a real (hidden) elem
 move ring to st2.dot            // persistent: dependents re-solve around it
 move d0 home                    // release a `move`
 move train along track [to: st3.dot]
+move a, b, c to x, y, z [stagger: 0.1]                  // paired by position: a to x, b to y, c to z
+show d1, d2, d3 [from: r1, r2, r3, stagger: 0.1]        // each flies in from its own place
 // `move x to y` centres x ON y. To stand next to it, move to a point beside it:
 //   point at_row3
-//   constrain at_row3.left = t.row3.right + 30
-//   constrain at_row3.center_y = t.row3.center_y
+//   constrain at_row3.left = t.row[3].right + 30
+//   constrain at_row3.center_y = t.row[3].center_y
 //   move robot to at_row3
 ```
+A list on both sides pairs by position. If the counts differ, that is an
+error: give one each, or one for all. Prefer this to chains of `when d1 shown { show d2 ... }`.
+The `--lint` reports a `move x to y` that ends away from y, which happens
+when y is placed relative to x and moves along with it.
 
 ### Look here: `accent`
 
@@ -545,6 +551,15 @@ behind; stills (`--at`, PNG) show it while it plays. Prefer it to building
 emphasis from pulse + highlight + a colour change. A ring, outline, underline
 or "!" badge sticks out of the element: `--lint` says when it runs into a
 neighbour on screen (give it room, or use the marker).
+
+`mark` is the same look, but it **stays**: state, like `set`, shown in
+stills and in the picture without JavaScript, until `unmark`:
+```
+mark found.row[3] [tone: error]          // this finding is now failed, and stays marked
+mark prompt.lines[4..6] [tone: ok]       // style and tone as for accent (warn = attention)
+unmark found.row[3]                      // take its marks off
+```
+Use `accent` for "look here" while you talk, `mark` for "this is now so".
 
 ### One-shot effects (leave nothing behind)
 

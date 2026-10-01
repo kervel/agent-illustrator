@@ -31,7 +31,12 @@ pub fn is_timing_key(k: &str) -> bool {
 }
 
 /// The transient one-shot effects.
-pub const EFFECTS: &[&str] = &["pulse", "shake", "flash", "ping", "highlight", "nudge", "accent"];
+pub const EFFECTS: &[&str] = &["pulse", "shake", "flash", "ping", "highlight", "nudge", "accent", "mark", "unmark"];
+
+/// `mark x [style: s, tone: t]` as state: "<style>-<tone>".
+pub fn mark_kind(opts: &[Spanned<MotionOpt>]) -> String {
+    format!("{}-{}", opt_name(opts, "style").unwrap_or("auto"), opt_name(opts, "tone").unwrap_or("attention"))
+}
 
 /// Find an option by key.
 pub fn opt<'a>(opts: &'a [Spanned<MotionOpt>], key: &str) -> Option<&'a Spanned<MotionValue>> {
@@ -263,7 +268,15 @@ fn base_stmt_ops(
             };
             targets
                 .iter()
-                .map(|t| KeyframeOp::Pin { target: t.clone(), to: pin.clone() })
+                .enumerate()
+                .map(|(i, t)| {
+                    // Paired destinations (`move a, b to x, y`).
+                    let to = match (&pin, partners.get(i)) {
+                        (PinTo::Element(_), Some(p)) => PinTo::Element(p.node.0.clone()),
+                        _ => pin.clone(),
+                    };
+                    KeyframeOp::Pin { target: t.clone(), to }
+                })
                 .collect()
         }
         MotionVerb::Count(_) => {
@@ -300,6 +313,11 @@ fn base_stmt_ops(
                 zoom,
             }]
         }
+        MotionVerb::Effect { name, .. } if name.node == "mark" => all()
+            .into_iter()
+            .map(|t| KeyframeOp::Mark { target: t, kind: mark_kind(opts) })
+            .collect(),
+        MotionVerb::Effect { name, .. } if name.node == "unmark" => all().into_iter().map(KeyframeOp::Unmark).collect(),
         MotionVerb::Fly { .. }
         | MotionVerb::Effect { .. }
         | MotionVerb::Loop { .. }

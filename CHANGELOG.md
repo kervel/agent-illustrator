@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.23
+
+- Lists pair up by position: `show d1, d2, d3 [from: r1, r2, r3]` (each
+  flies in from its own place) and `move a, b, c to x, y, z`. If the counts
+  differ, that is an error.
+- `mark x [tone: error]` / `unmark x`: the accent look, but it stays. It is
+  state: `--states` lists it, and every output shows it until unmarked
+  (stills, `--frames-to-dir`, PNG, and the picture without JavaScript).
+  Same styles and tones as `accent` (`warn` is accepted for attention).
+
 ## v0.2.22
 
 - `accent` gets a `marker` style: a translucent highlighter box over the

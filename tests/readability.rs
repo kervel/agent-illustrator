@@ -691,3 +691,37 @@ fn bracket_parts_work_everywhere() {
     let st = states(src);
     assert!(st.contains("t.r2c1 [label: \"x\"]"), "{st}");
 }
+
+#[test]
+fn lists_pair_up_by_position() {
+    let src = "row rs [gap: 80] { rect r1 [width: 40, height: 40]  rect r2 [width: 40, height: 40] }\n\
+               rect d1 [width: 30, height: 30, appears: later]\nrect d2 [width: 30, height: 30, appears: later]\n\
+               point x\npoint y\nconstrain d1.top = 200\nconstrain d2.top = 200\nconstrain d2.left = d1.right + 200\n\
+               constrain x.left = 600\nconstrain x.top = 0\nconstrain y.left = 600\nconstrain y.top = 300\n\
+               keyframe \"a\" { show d1, d2 [from: r1, r2, stagger: 0.1] }\n\
+               keyframe \"b\" { move d1, d2 to y, x }";
+    let t = timeline(src);
+    assert!(t.contains("d1 -> r1") && t.contains("d2 -> r2"), "{t}");
+    assert!(t.contains("move d1 -> y") && t.contains("move d2 -> x"), "{t}");
+    assert!(!lint(src).iter().any(|m| m.contains("ends")), "{:?}", lint(src));
+    let bad = src.replace("to y, x", "to y, x, y");
+    let e = render_with_config(&bad, RenderConfig::new()).unwrap_err().to_string();
+    assert!(e.contains("3 destinations for 2"), "{e}");
+}
+
+#[test]
+fn a_mark_stays_until_unmarked_in_every_output() {
+    let src = "table found [columns: [\"finding\", \"\"], rows: [[\"one\", \"✓\"], [\"three\", \"✕\"]], widths: [200, 60]]\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { mark found.row[2] [tone: error] }\n\
+               keyframe \"c\" { accent found.row[1] }\nkeyframe \"d\" { unmark found.row[2] }";
+    let st = states(src);
+    assert!(st.contains("found.row2 marked (error)") && st.contains("found.row2 unmarked"), "{st}");
+    // Static frames (also --frames-to-dir and --png without --at).
+    assert!(!frame(src, "a").contains("aimark"));
+    assert!(frame(src, "b").contains("aimark") && frame(src, "c").contains("aimark"));
+    assert!(!frame(src, "d").contains("aimark"));
+    // The player and the no-JS picture: a settled channel, not a transient.
+    let svg = render(src);
+    assert!(svg.contains(r#""settled":[["0""#) && svg.contains("aimkm-"), "{svg}");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+}
