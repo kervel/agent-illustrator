@@ -83,6 +83,8 @@ const SYMBOL_ADVANCES: [(char, u16); 26] = [
 
 /// Advance width of a single character, in em.
 pub fn advance_em(c: char) -> f64 {
+    // A no-break space (code and prose keep their spacing with it) is a space.
+    let c = if c == '\u{a0}' { ' ' } else { c };
     let code = c as u32;
     if (0x20..=0x7E).contains(&code) {
         return ASCII_ADVANCES[(code - 0x20) as usize] as f64 / 1000.0;

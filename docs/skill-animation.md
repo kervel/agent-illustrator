@@ -844,6 +844,11 @@ constraints too (`constrain tag.center_y = orders.row[2].center_y`,
 `code.line[4].right`). The older spellings `orders.row2` and `orders.r2c2`
 (column from 0) still work.
 
+A status column colours its marks: with `status: 3` (or `status: [2, 3]`),
+a cell starting with ✓ is `role-ok`, ✕ is `role-error` and ! is `role-warn`.
+A later `transform orders.cell[2][3] [label: "✕"]` recolours it as well
+(unless you give a `label_fill`).
+
 ### Code on a slide
 
 ```
@@ -866,6 +871,11 @@ grows and shrinks with its lines, and what is constrained below it follows. A di
 `code d [diff: "-    return s\n+    return round(s, 2)", frame: false]`. Full scene:
 examples/motion/git-merge.ail.
 
+
+Prose (a prompt, a chat transcript, a design document) is a code block with
+`lang: prose`. It keeps the title bar, the `line[n]` parts and accents, but
+uses the body font, no colouring, and no line numbers (`line_numbers: true`
+adds them).
 ### Artwork with parts
 
 An SVG file whose elements have ids is a component: `template "docx" from

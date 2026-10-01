@@ -761,3 +761,25 @@ fn a_meter_fills_up_by_level() {
     let bad = "meter cost [segments: 4, value: 6]";
     assert!(render_with_config(bad, RenderConfig::new()).is_err());
 }
+
+#[test]
+fn prose_is_a_code_block_in_the_body_font() {
+    let src = "code prompt [lang: prose, title: \"prompt.md\", source: \"You are a reviewer.\\nIf a test is missing, send it back.\"]\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { accent prompt.line[2] [hold: step] }";
+    let svg = render(src);
+    let line = &svg[svg.find(r#"id="prompt_line2""#).unwrap()..];
+    let label = &line[line.find("<text").unwrap()..line.find("</text>").unwrap()];
+    assert!(!label.contains("mono"), "body font: {label}");
+    assert!(!label.contains("code-ln"), "no line numbers unless asked: {label}");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+}
+
+#[test]
+fn a_status_column_colours_its_marks_and_their_changes() {
+    let src = "table j [columns: [\"journey\", \"ok?\"], rows: [[\"log in\", \"✓\"], [\"see date\", \"\"]], widths: [200, 70], status: 2]\n\
+               keyframe \"a\" { }\nkeyframe \"b\" { transform j.cell[2][2] [label: \"✕\"] }";
+    let st = states(src);
+    assert!(st.contains("j.r2c1 [label: \"✕\", label_fill: role-error]"), "{st}");
+    assert!(frame(src, "a").contains("role-ok"), "a ✓ cell is green from the start");
+    assert!(lint(src).is_empty(), "{:?}", lint(src));
+}

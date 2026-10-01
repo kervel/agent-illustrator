@@ -15,7 +15,22 @@
 
 use crate::parser::ast::{Spanned, Statement, StyleValue, TemplateInstance};
 
-const KEYS: &[&str] = &["columns", "rows", "widths", "font_size", "row_height", "mono", "keys"];
+const KEYS: &[&str] = &["columns", "rows", "widths", "font_size", "row_height", "mono", "keys", "status"];
+
+/// The colour a status mark stands for: ✓ ok, ✕ error, ! warn (by the
+/// first character, so "✓ delivered" counts too).
+pub fn status_colour(text: &str) -> Option<&'static str> {
+    match text.trim_start().chars().next()? {
+        '✓' | '✔' => Some("role-ok"),
+        '✕' | '✗' | '✘' | '✖' | '×' => Some("role-error"),
+        '!' | '⚠' => Some("role-warn"),
+        _ => None,
+    }
+}
+
+/// The class a status cell carries, so a later `transform` of its label
+/// recolours it too.
+pub const STATUS_CLASS: &str = "ail_status";
 
 fn arg<'a>(t: &'a TemplateInstance, key: &str) -> Option<&'a StyleValue> {
     t.arguments.iter().find(|(k, _)| k.node.0 == key).map(|(_, v)| &v.node)
@@ -55,6 +70,8 @@ struct Spec {
     font_size: f64,
     row_height: f64,
     mono: Vec<usize>,
+    /// Status columns (from 0).
+    status: Vec<usize>,
 }
 
 fn spec_for(t: &TemplateInstance) -> Result<Spec, String> {
@@ -98,6 +115,18 @@ fn spec_for(t: &TemplateInstance) -> Result<Spec, String> {
     let font_size = num(arg(t, "font_size")).unwrap_or(17.0);
     let row_height = num(arg(t, "row_height")).unwrap_or((font_size * 2.4).round());
     let mono: Vec<usize> = list(arg(t, "mono")).iter().filter_map(|v| num(Some(v)).map(|n| n as usize)).collect();
+    // `status: [3]` or `status: 3`: columns counted from 1, as `cell[r][c]`.
+    let status_given: Vec<f64> = match arg(t, "status") {
+        Some(StyleValue::List(_)) => list(arg(t, "status")).iter().filter_map(|v| num(Some(v))).collect(),
+        other => num(other).into_iter().collect(),
+    };
+    let mut status = Vec::new();
+    for c in status_given {
+        if c < 1.0 || c.fract() != 0.0 || c as usize > columns.len() {
+            return Err(format!("table {}: status: {}: a column from 1 to {}", name, c, columns.len()));
+        }
+        status.push(c as usize - 1);
+    }
     let given: Vec<f64> = list(arg(t, "widths")).iter().filter_map(|v| num(Some(v))).collect();
     let widths = (0..columns.len())
         .map(|j| {
@@ -108,7 +137,7 @@ fn spec_for(t: &TemplateInstance) -> Result<Spec, String> {
             })
         })
         .collect();
-    Ok(Spec { columns, rows, widths, font_size, row_height, mono })
+    Ok(Spec { columns, rows, widths, font_size, row_height, mono, status })
 }
 
 fn template_source(name: &str, s: &Spec) -> String {
@@ -152,9 +181,14 @@ fn template_source(name: &str, s: &Spec) -> String {
              \x20   constrain rule{r}.left = bg.left\n    constrain rule{r}.top = row{r}.top\n"
         ));
         for (j, cell) in row.iter().enumerate() {
+            let (ink, extra) = if s.status.contains(&j) {
+                (status_colour(cell).unwrap_or("role-ink"), format!(", font_weight: 700, class: {}", STATUS_CLASS))
+            } else {
+                ("role-ink", String::new())
+            };
             src.push_str(&format!(
                 "    rect r{r}c{j} [width: {}, height: {rh}, fill: none, stroke: none, corner_radius: 0, label: {}, \
-                 align: start, font_size: {fs}, label_fill: role-ink{}]\n    constrain r{r}c{j}.top = row{r}.top\n",
+                 align: start, font_size: {fs}, label_fill: {ink}{}{extra}]\n    constrain r{r}c{j}.top = row{r}.top\n",
                 s.widths[j],
                 lit(cell),
                 font(j)

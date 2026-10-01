@@ -89,14 +89,14 @@ keyframe "clone" {
   gives `b0`, `b1`, … (in a `row`/`grid` they line up); `rect t* [count: 10, ...]`
   makes identical ones. A bar that fills up: `meter cost [segments: 10]` +
   `set cost 6`.
-- A few words are reserved (`line`, `row`, `label`, `left`, `top`, …); the
-  parse error says so.
 - Colours are roles: `role-primary`, `role-ink`, `role-surface`,
   `role-ok`/`-error`/`-warn` (with `-soft` variants), `role-rule`.
 - Objects (a laptop, a person, a box, a database) are SVG artwork with ids:
   `template "box" from "box.svg"`, with parts `b.lid`. Don't build them from rects.
-- Built-ins: `code c [lang: python, source: "..."]` (lines `c.line[4]`) and
-  `table t [columns: [...], rows: [[...]]]` (rows `t.row[2]`).
+- Built-ins: `code c [lang: python, source: "..."]` (lines `c.line[4]`;
+  `lang: prose` for a prompt or a document) and
+  `table t [columns: [...], rows: [[...]], status: 3]` (rows `t.row[2]`; a
+  status column colours ✓ ✕ !).
 
 ## Motion
 
@@ -129,8 +129,7 @@ keyframe "clone" {
   `accent code.lines[4..6]` marks a range). Use `[tone: error]` for a
   problem and `[hold: step]` to keep it until the next click. `mark x
   [tone: error]` is the same look, but it stays until `unmark x`.
-- Parts by number, anywhere (constraints too): `code.line[4]`,
-  `t.row[2]`, `t.cell[2][3]` (from 1).
+- Parts by number, anywhere: `code.line[4]`, `t.row[2]`, `t.cell[2][3]`.
 - States live in the template:
   `state done { transform txt [label: "ok"]; show tick }`. Enter one with
   `set inst done`; go back with `set inst default`.

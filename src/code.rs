@@ -169,8 +169,17 @@ pub fn escape(s: &str) -> String {
     s.replace('&', "&amp;").replace('<', "&lt;").replace(' ', "\u{a0}")
 }
 
+/// `lang: prose`: a prompt, a chat, a design document. Body font, no
+/// colouring, no line numbers unless asked for; lines stay addressable.
+pub fn is_prose(lang: &str) -> bool {
+    matches!(lang.trim().to_ascii_lowercase().as_str(), "prose" | "text" | "plain")
+}
+
 /// One line of source as label markup.
 pub fn highlight(lang: &str, line: &str) -> String {
+    if is_prose(lang) {
+        return escape(line);
+    }
     runs_markup(tokenize(lang, line))
 }
 
@@ -410,7 +419,27 @@ pub fn template_source(name: &str, spec: &CodeSpec, inserts: &[Insert]) -> Strin
     }
     let fs = spec.font_size;
     let chars = lines.iter().map(|l| l.chars).max().unwrap_or(0).max(spec.min_chars);
-    let width = (chars as f64 * crate::layout::text::mono_advance() * fs + 2.0 * INSET + 16.0).ceil();
+    let width = if is_prose(&spec.lang) {
+        // The body font: measure each line's words.
+        let plain = |m: &str| {
+            let mut out = String::new();
+            let mut tag = false;
+            for c in m.replace("&lt;", "<").replace("&amp;", "&").chars() {
+                match c {
+                    '<' if !tag => tag = true,
+                    '>' if tag => tag = false,
+                    c if !tag => out.push(if c == '\u{a0}' { ' ' } else { c }),
+                    _ => {}
+                }
+            }
+            out
+        };
+        let widest = lines.iter().map(|l| crate::layout::text::measure_str(&plain(&l.markup), fs)).fold(0.0, f64::max);
+        let min = spec.min_chars as f64 * 0.5 * fs;
+        (widest.max(min) + 2.0 * INSET + 16.0).ceil()
+    } else {
+        (chars as f64 * crate::layout::text::mono_advance() * fs + 2.0 * INSET + 16.0).ceil()
+    };
     let mut s = format!("template {} () {{\n", lit(name));
     if spec.frame {
         s.push_str("    rect bg [fill: code-bg, stroke: code-frame, stroke_width: 3, corner_radius: 14]\n");
@@ -444,7 +473,8 @@ pub fn template_source(name: &str, spec: &CodeSpec, inserts: &[Insert]) -> Strin
     for l in &lines {
         s.push_str(&format!(
             "    rect {n} [width: {w}, height: {h}, fill: {f}, stroke: none, label: {l}, font_size: {fs}, \
-             font_family: mono, align: start, label_fill: code-plain, code_lang: {lang}{c}{r}]\n",
+             {font}align: start, label_fill: code-plain, code_lang: {lang}{c}{r}]\n",
+            font = if is_prose(&spec.lang) { "" } else { "font_family: mono, " },
             n = l.name,
             w = width,
             h = spec.line_height,
@@ -583,12 +613,14 @@ pub fn spec_for(t: &TemplateInstance, base: Option<&std::path::Path>) -> Result<
             .unwrap_or_default()
     });
     let font_size = arg_num(t, "font_size").unwrap_or(17.0);
+    let prose = is_prose(&lang);
     Ok(CodeSpec {
         lang,
         source,
         diff,
         title: arg_text(t, "title"),
-        line_numbers: arg_bool(t, "line_numbers").unwrap_or(true),
+        // Prose (a prompt, a design doc) has no line numbers by default.
+        line_numbers: arg_bool(t, "line_numbers").unwrap_or(!prose),
         first,
         font_size,
         line_height: arg_num(t, "line_height").unwrap_or((font_size * 1.65).round()),

@@ -676,6 +676,37 @@ fn state_effects(nodes: &[Spanned<MotionNode>]) -> (Vec<(Selector, StyleKey)>, V
 }
 
 impl Expander<'_> {
+    /// A table's status cell (`status: [3]`) takes the colour of the mark
+    /// a transform writes in it (✓ ok, ✕ error, ! warn), unless told.
+    fn status_colour(&self, s: &mut MotionStmt) {
+        let Some(cells) = self.idx.by_class.get(crate::table::STATUS_CLASS) else { return };
+        if s.targets.is_empty() || !s.targets.iter().all(|t| cells.contains(t)) {
+            return;
+        }
+        let MotionVerb::Transform { modifiers, .. } = &mut s.verb else { return };
+        if modifiers.iter().any(|m| matches!(m.node.key.node, StyleKey::LabelFill)) {
+            return;
+        }
+        let Some(label) = modifiers.iter().find(|m| matches!(m.node.key.node, StyleKey::Label)) else { return };
+        let text = match &label.node.value.node {
+            StyleValue::String(t) | StyleValue::Keyword(t) => t.clone(),
+            _ => return,
+        };
+        let colour = crate::table::status_colour(&text).unwrap_or("role-ink");
+        let sp = label.span.clone();
+        // The value exactly as the parser reads `label_fill: role-ok`.
+        let parsed = crate::parser::parse(&format!("rect x [label_fill: {}]", colour)).ok().and_then(|d| match d.statements.into_iter().next()?.node {
+            Statement::Shape(sh) => sh.modifiers.into_iter().next(),
+            _ => None,
+        });
+        if let Some(mut m) = parsed {
+            m.span = sp.clone();
+            m.node.key.span = sp.clone();
+            m.node.value.span = sp;
+            modifiers.push(m);
+        }
+    }
+
     /// `x [caption: "..."]` made a part `x_caption`: it comes and goes with x.
     fn follow_captions(&self, s: &mut MotionStmt) {
         let caps: Vec<String> = s
@@ -1039,7 +1070,8 @@ impl Expander<'_> {
             | MotionVerb::Effect { targets: v, .. }
             | MotionVerb::Loop { targets: v, .. } => s.targets = all(v)?,
             MotionVerb::Transform { target, .. } | MotionVerb::Count(target) => {
-                s.targets = self.idx.resolve(target)?
+                s.targets = self.idx.resolve(target)?;
+                self.status_colour(&mut s);
             }
             MotionVerb::Move { target, to, to_list, along } => {
                 s.targets = self.idx.resolve(target)?;

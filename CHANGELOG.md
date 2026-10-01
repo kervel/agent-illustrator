@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.25
+
+- `code p [lang: prose, ...]`: a prompt, chat or design document in the body
+  font, with no colouring and no line numbers by default. It keeps the title
+  bar, `line[n]` parts and accents.
+- Tables: `status: 3` (or a list) marks status columns. A cell starting with
+  ✓ is `role-ok`, ✕ is `role-error` and ! is `role-warn`, and a later
+  `transform t.cell[r][c] [label: "✕"]` recolours it (unless it gives a
+  `label_fill`).
+- Fix: a no-break space was measured as an unknown character, so text
+  that keeps its spacing with one (code, prose) measured too wide.
+
 ## v0.2.24
 
 - `caption: "NVIDIA"` (and `caption_position: above|below|left|right`) on
