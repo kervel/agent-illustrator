@@ -1,5 +1,9 @@
 # Agent Illustrator Skill
 
+> **Write idiomatic AIL:** layout primitives (`row`, `col`, `grid`, `stack`) and
+> constraints between elements. Avoid fixed coordinates or you get stuck sooner
+> or later; pin one only where something must sit exactly there.
+
 Create diagrams with Agent Illustrator.
 
 ## Sub-Skills

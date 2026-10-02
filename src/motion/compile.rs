@@ -583,6 +583,42 @@ pub fn resolve_draw_to(layout: &LayoutResult, id: &str, to: &DrawTo) -> Option<f
     })
 }
 
+/// A flight from `a` to `b` that rides a connection or path: it joins the
+/// line where the line passes nearest `a`, follows it, and leaves it where it
+/// passes nearest `b`.
+pub fn route_along(layout: &LayoutResult, path: &str, a: Point, b: Point) -> Option<Vec<Point>> {
+    let pl = drawable_polyline(layout, path)?;
+    let (fa, fb) = (pl.project(a).0, pl.project(b).0);
+    let mut pts = vec![a];
+    pts.extend(pl.sub_points(fa, fb, 24));
+    pts.push(b);
+    // Even steps of distance, so the hops on and off the line take as long
+    // as their length and the speed stays the same throughout.
+    let mut acc = vec![0.0];
+    for w in pts.windows(2) {
+        acc.push(acc.last().unwrap() + (w[1].x - w[0].x).hypot(w[1].y - w[0].y));
+    }
+    let total = *acc.last().unwrap();
+    if total < 1e-9 {
+        return Some(pts);
+    }
+    let n = 32;
+    let mut j = 0;
+    Some(
+        (0..=n)
+            .map(|i| {
+                let d = total * i as f64 / n as f64;
+                while j + 2 < acc.len() && acc[j + 1] < d {
+                    j += 1;
+                }
+                let seg = (acc[j + 1] - acc[j]).max(1e-9);
+                let u = ((d - acc[j]) / seg).clamp(0.0, 1.0);
+                Point::new(pts[j].x + (pts[j + 1].x - pts[j].x) * u, pts[j].y + (pts[j + 1].y - pts[j].y) * u)
+            })
+            .collect(),
+    )
+}
+
 /// Where a pin sends an element's centre, given the base layout.
 pub fn resolve_pin_point(layout: &LayoutResult, to: &PinTo) -> Option<Point> {
     match to {
@@ -1939,8 +1975,11 @@ impl<'a> Compiler<'a> {
                     _ => self.defaults.enter.clone(),
                 };
                 let settled_op = snap.vals.get(&op_key).cloned().unwrap_or(Val::n(1.0));
-                let op_dur = if enter_name == "pop" { t.dur.min(fast) } else { t.dur };
-                self.tween(fm, &op_key, simple(start, op_dur, if enter_name == "pop" { Ease::Linear } else { t.ease }, settled_op));
+                // A pop, or something travelling in from elsewhere, is there
+                // at once: it is seen on its way, not fading in as it lands.
+                let quick = enter_name == "pop" || opt(&s.opts, "from").is_some_and(|v| !matches!(&v.node, MotionValue::Name(n) if matches!(n.as_str(), "start" | "end" | "center" | "random")));
+                let op_dur = if quick { t.dur.min(fast) } else { t.dur };
+                self.tween(fm, &op_key, simple(start, op_dur, if quick { Ease::Linear } else { t.ease }, settled_op));
                 handled.insert(op_key.clone());
                 let settled_tr = match snap.vals.get(&tr_key) {
                     Some(Val::V(v)) => (v[0], v[1]),
@@ -1954,12 +1993,22 @@ impl<'a> Compiler<'a> {
                     let (Some(src), Some(me)) = (self.center_now(layout, &from), self.center_now(layout, target)) else {
                         return Err(CompileError { message: format!("show {} [from: {}]: '{}' is not an element", target, from, from), span: fm.atoms[atom].span.clone() });
                     };
-                    let (ox, oy) = (src.x - me.x, src.y - me.y);
-                    self.tween(fm, &tr_key, Tween {
-                        start, dur: t.dur, ease: t.ease,
-                        from: Some(Val::xy(settled_tr.0 + ox, settled_tr.1 + oy)),
-                        to: Val::xy(settled_tr.0, settled_tr.1), atom,
-                    });
+                    if let Some(path) = opt_name(&s.opts, "along") {
+                        let route = route_along(layout, &path.replace('.', "_"), src, me).ok_or_else(|| CompileError {
+                            message: format!("show {} [along: {}]: '{}' is not a connection or path", target, path, path),
+                            span: fm.atoms[atom].span.clone(),
+                        })?;
+                        let keys = route.into_iter().map(|p| Val::xy(settled_tr.0 + p.x - me.x, settled_tr.1 + p.y - me.y)).collect();
+                        self.overlay(fm, wrap.clone(), Prop::Translate, Overlay { start, dur: t.dur, ease: t.ease, keys, mode: Mode::Abs, looping: false, atom });
+                        self.tween(fm, &tr_key, simple(start + t.dur, 0.0, Ease::Linear, Val::xy(settled_tr.0, settled_tr.1)));
+                    } else {
+                        let (ox, oy) = (src.x - me.x, src.y - me.y);
+                        self.tween(fm, &tr_key, Tween {
+                            start, dur: t.dur, ease: t.ease,
+                            from: Some(Val::xy(settled_tr.0 + ox, settled_tr.1 + oy)),
+                            to: Val::xy(settled_tr.0, settled_tr.1), atom,
+                        });
+                    }
                     handled.insert(tr_key.clone());
                     let scale0 = opt_number(&s.opts, "scale").unwrap_or_else(|| {
                         match (layout.get_element_by_name(&from), layout.get_element_by_name(target)) {
@@ -2117,20 +2166,21 @@ impl<'a> Compiler<'a> {
                     handled.insert(hk);
                 }
             }
-            MotionVerb::Move { along: Some(path), .. } if changed.contains(&tr_key) => {
-                // Ride the path from where the element is to where it is pinned.
-                if let Some(pl) = drawable_polyline(layout, &path.node.replace('.', "_")) {
+            MotionVerb::Move { along, .. }
+                if changed.contains(&tr_key) && (along.is_some() || opt_name(&s.opts, "along").is_some()) =>
+            {
+                // Ride the path from where the element is to where it is pinned
+                // (`move x along p [to: …]`, or `move x to y [along: p]`).
+                let path = along.as_ref().map(|p| p.node.as_str()).or_else(|| opt_name(&s.opts, "along")).unwrap_or_default();
+                if drawable_polyline(layout, &path.replace('.', "_")).is_some() {
                     let cur_center = self.center_before(before, target);
                     let end_center = self.center_now(layout, target);
                     if let (Some(a), Some(b)) = (cur_center, end_center) {
-                        let fa = pl.project(a).0;
-                        let fb = pl.project(b).0;
                         let base = self.base_center(target).unwrap_or(a);
                         let anc = self.ancestors_translate(snap, target);
-                        let mut pts = pl.sub_points(fa, fb, 24);
                         // Start exactly where the element is, even if that is
                         // just off the line (a token sitting on a station).
-                        pts[0] = a;
+                        let pts = route_along(layout, &path.replace('.', "_"), a, b).unwrap_or_default();
                         let keys: Vec<Val> = pts
                             .into_iter()
                             .map(|p| Val::xy(p.x - base.x - anc.0, p.y - base.y - anc.1))
@@ -2488,7 +2538,16 @@ impl<'a> Compiler<'a> {
         let arc = opt_number(&opts, "arc").unwrap_or(0.0);
         let (ax, ay) = (src.x - base_c.x - anc.0, src.y - base_c.y - anc.1);
         let (bx, by) = (dst.x - base_c.x - anc.0, dst.y - base_c.y - anc.1);
-        let keys: Vec<Val> = if arc.abs() > 1e-9 {
+        let keys: Vec<Val> = if let Some(path) = opt_name(&opts, "along") {
+            if arc.abs() > 1e-9 {
+                return Err(err(format!("fly [arc: …, along: {}]: the flight follows {}; drop the arc", path, path)));
+            }
+            route_along(layout, &path.replace('.', "_"), src, dst)
+                .ok_or_else(|| err(format!("fly [along: {}]: '{}' is not a connection or path", path, path)))?
+                .into_iter()
+                .map(|p| Val::xy(p.x - base_c.x - anc.0, p.y - base_c.y - anc.1))
+                .collect()
+        } else if arc.abs() > 1e-9 {
             // Quadratic arc bowing to the left of travel (up, for left-to-right).
             let (mx, my) = ((ax + bx) / 2.0, (ay + by) / 2.0);
             let (dx, dy) = (bx - ax, by - ay);

@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -65 815 390" font-size="14" data-frames="ask,call,answer">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #ffebee;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e8f5e9;
+    --role-primary: var(--accent-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--secondary-1);
+    --role-series-1: #0e8a8a;
+    --role-series-1-soft: #d6eeee;
+    --role-series-2: #e07a12;
+    --role-series-2-soft: #fbe6d2;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fff8e1;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe animation CSS (auto-generated) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+.frame-ask {
+}
+.frame-call {
+  .conn-eb586e30-request { opacity: 1; }
+}
+.frame-answer {
+  .kf-eb586e30-m3 { opacity: 1; }
+  .conn-eb586e30-reply { opacity: 1; }
+  .conn-eb586e30-request { opacity: 1; }
+}
+  /* motion: settled states (auto-generated) */
+svg[data-ail-player] * { transition: none !important; }
+.aiacm-eb586e30-m2-attention { opacity: 0; }
+.aiacm-eb586e30-m2-attention { scale: 1 1; }
+.conn-eb586e30-request { opacity: 0; }
+.aimask-eb586e30-request { stroke-dashoffset: 0; }
+.aihead-eb586e30-request { opacity: 1; }
+.aighost-eb586e30-0 { translate: 0px 0px; }
+.aighost-eb586e30-0 { scale: 1 1; }
+.aighost-eb586e30-0 { opacity: 0; }
+.conn-eb586e30-reply { opacity: 0; }
+.aimask-eb586e30-reply { stroke-dashoffset: 0; }
+.aihead-eb586e30-reply { opacity: 1; }
+.kf-eb586e30-m3 { opacity: 0; }
+.kf-eb586e30-m3 { translate: 0px 0px; }
+.frame-ask {
+  .aiacm-eb586e30-m2-attention { scale: 1 1; }
+  .aimask-eb586e30-request { stroke-dashoffset: 0; }
+  .aihead-eb586e30-request { opacity: 1; }
+  .aighost-eb586e30-0 { scale: 1 1; }
+  .aimask-eb586e30-reply { stroke-dashoffset: 0; }
+  .aihead-eb586e30-reply { opacity: 1; }
+}
+.frame-call {
+  .aiacm-eb586e30-m2-attention { scale: 1 1; }
+  .aimask-eb586e30-request { stroke-dashoffset: 0; }
+  .aihead-eb586e30-request { opacity: 1; }
+  .aighost-eb586e30-0 { scale: 1 1; }
+  .aimask-eb586e30-reply { stroke-dashoffset: 0; }
+  .aihead-eb586e30-reply { opacity: 1; }
+}
+.frame-answer {
+  .aiacm-eb586e30-m2-attention { scale: 1 1; }
+  .aimask-eb586e30-request { stroke-dashoffset: 0; }
+  .aihead-eb586e30-request { opacity: 1; }
+  .aighost-eb586e30-0 { scale: 1 1; }
+  .aimask-eb586e30-reply { stroke-dashoffset: 0; }
+  .aihead-eb586e30-reply { opacity: 1; }
+}
+]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <mask id="aim-eb586e30-request" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-request aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-eb586e30-reply" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-reply aid-eb586e30-reply" d="M585 64 L170.8 64" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-eb586e30-stage kf-anim" style="transform-origin:355px 135px">
+    <g id="stage" class="ai-container kfp-eb586e30-stage">
+      <g class="kf-eb586e30-client kf-anim" style="transform-origin:165px 140px">
+        <g id="client" class="ai-container kfp-eb586e30-client">
+          <g class="kf-eb586e30-app kf-anim" style="transform-origin:85px 55px">
+            <rect id="app" class="ai-shape ai-rect kfp-eb586e30-app" x="10" y="10" width="150" height="90" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="12" style="rx:12px;ry:12px"/>
+            <text class="ai-label" x="85" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="85" dy="-0"><tspan>Chat app</tspan></tspan></text>
+          </g>
+          <g class="kf-eb586e30-log kf-anim" style="transform-origin:165px 197px">
+            <g id="log" class="ai-container kfp-eb586e30-log">
+              <g class="kf-eb586e30-m1 kf-anim" style="transform-origin:165px 149px">
+                <rect id="m1" class="ai-shape ai-rect kfp-eb586e30-m1" x="15" y="129" width="300" height="40" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+                <text class="ai-label" x="165" y="149" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>system: be helpful</tspan></tspan></text>
+              </g>
+              <g class="kf-eb586e30-m2 kf-anim" style="transform-origin:165px 197px">
+                <rect id="m2" class="ai-shape ai-rect kfp-eb586e30-m2" x="15" y="177" width="300" height="40" fill="var(--role-series-4-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+                <text class="ai-label" x="165" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>you: capital of Belgium?</tspan></tspan></text>
+                <rect class="aiacm-eb586e30-m2-attention" x="19" y="177" width="292" height="40" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:19px 197px;pointer-events:none"/>
+              </g>
+              <g class="kf-hidden kf-eb586e30-m3 kf-anim" style="transform-origin:165px 245px">
+                <rect id="m3" class="ai-shape ai-rect kfp-eb586e30-m3" x="15" y="225" width="300" height="40" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+                <text class="ai-label" x="165" y="245" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>LLM: Brussels.</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="kf-eb586e30-llm kf-anim" style="transform-origin:645px 55px">
+        <rect id="llm" class="ai-shape ai-rect kfp-eb586e30-llm" x="585" y="-5" width="120" height="120" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
+        <text class="ai-label" x="645" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="645" dy="-0"><tspan>LLM</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <text class="ai-label conn-eb586e30-request" x="372.5" y="36" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="372.5" dy="-0"><tspan>whole log</tspan></tspan></text>
+  <text class="ai-label conn-eb586e30-reply" x="372.5" y="74" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="372.5" dy="-0"><tspan>one message</tspan></tspan></text>
+  <path class="ai-connection conn-eb586e30-request conn-eb586e30-request-base aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-eb586e30-request)"/>
+  <g class="conn-eb586e30-request"><path class="aihead-eb586e30-request" d="M573 52 L583.8 46 L573 40 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <path class="ai-connection conn-eb586e30-reply conn-eb586e30-reply-base aid-eb586e30-reply" d="M585 64 L170.8 64" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-eb586e30-reply)"/>
+  <g class="conn-eb586e30-reply"><path class="aihead-eb586e30-reply" d="M172 58 L161.2 64 L172 70 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <g class="aighost-eb586e30-0" style="opacity:0;transform-origin:165px 197px;pointer-events:none">
+<g data-ghost-of="log" class="ai-container">
+<rect data-ghost-of="m1" class="ai-shape ai-rect" x="15" y="129" width="300" height="40" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+<text class="ai-label" x="165" y="149" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>system: be helpful</tspan></tspan></text>
+<rect data-ghost-of="m2" class="ai-shape ai-rect" x="15" y="177" width="300" height="40" fill="var(--role-series-4-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+<text class="ai-label" x="165" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>you: capital of Belgium?</tspan></tspan></text>
+</g>
+</g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"eb586e30-","frames":[{"name":"ask","duration":1.2,"auto":null,"title":"The app keeps the conversation","note":null},{"name":"call","duration":1.4,"auto":null,"title":"Every call sends the whole log","note":null},{"name":"answer","duration":1.4,"auto":null,"title":"The LLM answers with one message","note":null}],"elements":["stage","client","app","log","m1","m2","m3","llm","request","reply"],"channels":[[".aiacm-eb586e30-m2-attention","opacity"],[".aiacm-eb586e30-m2-attention","scale"],[".conn-eb586e30-request","opacity"],[".aimask-eb586e30-request","stroke-dashoffset"],[".aihead-eb586e30-request","opacity"],[".aighost-eb586e30-0","translate"],[".aighost-eb586e30-0","scale"],[".aighost-eb586e30-0","opacity"],[".conn-eb586e30-reply","opacity"],[".aimask-eb586e30-reply","stroke-dashoffset"],[".aihead-eb586e30-reply","opacity"],[".kf-eb586e30-m3","opacity"],[".kf-eb586e30-m3","translate"]],"settled":[["0","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px"],["0","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px"],["0","1 1","1","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px"],["0","1 1","1","0","1","0px 0px","1 1","0","1","0","1","1","0px 0px"]],"anims":[[{"c":0,"t":0,"d":1.2,"e":"linear","k":[[0,"0"],[0.25,"1"],[0.5,"1"],[0.75,"1"],[1,"0"]]},{"c":0,"t":1.2,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":1,"t":0,"d":0.35,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":1,"t":0.35,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]}],[{"c":2,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":3,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":4,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":4,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":5,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0313,"0px -19.737px"],[0.0625,"0px -39.473px"],[0.0938,"0px -59.21px"],[0.125,"0px -78.946px"],[0.1563,"0px -98.683px"],[0.1875,"0px -118.419px"],[0.2188,"0px -138.156px"],[0.25,"6.892px -151px"],[0.2813,"26.629px -151px"],[0.3125,"46.366px -151px"],[0.3438,"66.102px -151px"],[0.375,"85.839px -151px"],[0.4063,"105.575px -151px"],[0.4375,"125.312px -151px"],[0.4688,"145.048px -151px"],[0.5,"164.785px -151px"],[0.5313,"184.521px -151px"],[0.5625,"204.258px -151px"],[0.5938,"223.995px -151px"],[0.625,"243.731px -151px"],[0.6563,"263.468px -151px"],[0.6875,"283.204px -151px"],[0.7188,"302.941px -151px"],[0.75,"322.677px -151px"],[0.7813,"342.414px -151px"],[0.8125,"362.15px -151px"],[0.8438,"381.887px -151px"],[0.875,"401.624px -151px"],[0.9063,"421.263px -149.467px"],[0.9375,"440.842px -146.978px"],[0.9688,"460.421px -144.489px"],[1,"480px -142px"]]},{"c":5,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":6,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.387 0.387"]]},{"c":6,"t":1.4,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":7,"t":0.5,"d":0.9,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":7,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]}],[{"c":8,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":9,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":10,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":10,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":11,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":12,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"480px -190px"],[0.0313,"459.728px -186.959px"],[0.0625,"439.456px -183.918px"],[0.0938,"419.175px -181px"],[0.125,"398.676px -181px"],[0.1563,"378.177px -181px"],[0.1875,"357.678px -181px"],[0.2188,"337.179px -181px"],[0.25,"316.68px -181px"],[0.2813,"296.181px -181px"],[0.3125,"275.682px -181px"],[0.3438,"255.184px -181px"],[0.375,"234.685px -181px"],[0.4063,"214.186px -181px"],[0.4375,"193.687px -181px"],[0.4688,"173.188px -181px"],[0.5,"152.689px -181px"],[0.5313,"132.19px -181px"],[0.5625,"111.691px -181px"],[0.5938,"91.193px -181px"],[0.625,"70.694px -181px"],[0.6563,"50.195px -181px"],[0.6875,"29.696px -181px"],[0.7188,"9.197px -181px"],[0.75,"5.252px -163.907px"],[0.7813,"4.596px -143.419px"],[0.8125,"3.939px -122.93px"],[0.8438,"3.283px -102.442px"],[0.875,"2.626px -81.953px"],[0.9063,"1.97px -61.465px"],[0.9375,"1.313px -40.977px"],[0.9688,"0.657px -20.488px"],[1,"0px 0px"]]},{"c":12,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":12,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]}]]}]]></script>
+<script><![CDATA[
+/* agent-illustrator motion player: plays the tracks compiled into an SVG.
+ * No dependencies; Web Animations API. The player has no semantics of its
+ * own: every value it sets comes from the embedded manifest.
+ *
+ *   var p = ail.player(svgElement);        // shows frame 0, settled
+ *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
+ *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
+ *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
+ *
+ * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
+ * "...", note: "..."]`); a title holds until a later frame sets another, a
+ * note belongs to its step. Both come with every 'step' event:
+ *   p.on('step', function (k, meta) { header.textContent = meta.title; });
+ *
+ * A step is what one click shows: a frame and the `[auto]` frames that play
+ * on after it by themselves. Hosts that advance on clicks use the step API
+ * and never need to know which frames are automatic; `p.steps` lists each
+ * step's first frame (also `agent-illustrator --list-steps`).
+ *
+ * Forward plays the segment; backward and jumps are instant and exact.
+ */
+(function (root) {
+  'use strict';
+  if (root.ail && root.ail.player) return;
+
+  function camel(p) {
+    return p.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); });
+  }
+  function mq(q) {
+    return root.matchMedia ? root.matchMedia(q) : { matches: false, addListener: function () {} };
+  }
+
+  function Player(svg, opts) {
+    opts = opts || {};
+    var node = svg.querySelector('script.ail-motion');
+    if (!node) throw new Error('ail.player: this SVG has no motion manifest');
+    var m = JSON.parse(node.textContent);
+    if (m.v !== 1) throw new Error('ail.player: unsupported manifest version ' + m.v);
+    var self = this;
+    this.svg = svg;
+    this.manifest = m;
+    this.frames = m.frames.map(function (f) { return f.name; });
+    this.steps = [];
+    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
+    this.frame = 0;
+    this.playing = false;
+    this._anims = [];
+    this._loops = [];
+    this._timers = [];
+    this._listeners = {};
+    this._nodes = m.channels.map(function (c) {
+      return Array.prototype.slice.call(svg.querySelectorAll(c[0]));
+    });
+    this._reduced = mq('(prefers-reduced-motion: reduce)');
+    svg.setAttribute('data-ail-player', '');
+
+    // Print shows the finished story.
+    var saved = null;
+    function toLast() { saved = self.frame; self.goTo(self.frames.length - 1); }
+    function restore() { if (saved !== null) { self.goTo(saved); saved = null; } }
+    if (root.addEventListener) {
+      root.addEventListener('beforeprint', toLast);
+      root.addEventListener('afterprint', restore);
+    }
+
+    if (opts.autoplay) {
+      this._autoplay(opts.dwell == null ? 1.6 : opts.dwell);
+    } else {
+      this.goTo(opts.frame == null ? 0 : opts.frame);
+    }
+  }
+
+  var P = Player.prototype;
+
+  P.on = function (evt, cb) {
+    (this._listeners[evt] = this._listeners[evt] || []).push(cb);
+    return this;
+  };
+  P._emit = function (evt) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    (this._listeners[evt] || []).forEach(function (cb) { cb.apply(null, args); });
+  };
+  P._index = function (i) {
+    if (typeof i === 'string') {
+      var k = this.frames.indexOf(i);
+      if (k < 0) throw new Error('ail.player: no frame named "' + i + '"');
+      return k;
+    }
+    return Math.max(0, Math.min(this.frames.length - 1, i | 0));
+  };
+  P._set = function (c, v) {
+    var prop = this.manifest.channels[c][1];
+    this._nodes[c].forEach(function (n) {
+      if (prop === 'text') n.textContent = v;
+      else n.style.setProperty(prop, v);
+    });
+  };
+  P._apply = function (row) {
+    var vals = this.manifest.settled[row];
+    for (var c = 0; c < vals.length; c++) this._set(c, vals[c]);
+  };
+  P._stop = function () {
+    this._anims.concat(this._loops).forEach(function (a) { a.cancel(); });
+    this._anims = [];
+    this._loops = [];
+    this._timers.forEach(clearTimeout);
+    this._timers = [];
+    this.playing = false;
+  };
+  /** True when every node of channel c is invisible right now (it or an
+   *  ancestor at opacity 0). */
+  P._hidden = function (c) {
+    var svg = this.svg;
+    return this._nodes[c].every(function (n) {
+      for (var e = n; e && e !== svg; e = e.parentNode) {
+        if (e.nodeType === 1 && getComputedStyle(e).opacity === '0') return true;
+      }
+      return false;
+    });
+  };
+
+  /** Start frame i's animations. A channel of something hidden when the
+   *  frame starts takes its first animation's starting value at once (fill
+   *  both): an element must never become visible before its geometry is in
+   *  place. A page about to flip in held scale 1 until its hold began, and
+   *  the frame that showed it before the hold did was a full-size flash. */
+  P._animateFrame = function (i) {
+    var self = this, seen = {};
+    this.manifest.anims[i].forEach(function (a) {
+      var first = !a.loop && !(a.c in seen);
+      seen[a.c] = true;
+      self._animate(a, false, first && self._hidden(a.c));
+    });
+  };
+
+  P._animate = function (a, loopNow, backfill) {
+    var self = this;
+    var prop = this.manifest.channels[a.c][1];
+    if (prop === 'text') {
+      a.k.forEach(function (kv) {
+        self._timers.push(setTimeout(function () { self._set(a.c, kv[1]); },
+          (a.t + kv[0] * a.d) * 1000));
+      });
+      return;
+    }
+    var key = camel(prop);
+    var frames = a.k.map(function (kv) { var f = { offset: kv[0] }; f[key] = kv[1]; return f; });
+    var timing = {
+      delay: loopNow ? 0 : a.t * 1000,
+      duration: Math.max(a.d * 1000, 1),
+      easing: a.e,
+      fill: a.loop ? 'none' : (backfill ? 'both' : 'forwards'),
+      iterations: a.loop ? Infinity : 1
+    };
+    this._nodes[a.c].forEach(function (n) {
+      if (!n.animate) return;
+      var anim = n.animate(frames, timing);
+      (a.loop ? self._loops : self._anims).push(anim);
+    });
+  };
+  P._startLoops = function (i) {
+    var self = this;
+    this.manifest.anims[i].forEach(function (a) { if (a.loop) self._animate(a, true); });
+  };
+
+  /** Jump to frame i (index or name): instant, exact. */
+  P.goTo = function (i) {
+    i = this._index(i);
+    this._stop();
+    this._apply(i + 1);
+    this.frame = i;
+    this._startLoops(i);
+    this._emit('frame', i, this.frames[i]);
+    return this;
+  };
+
+  /** Play frame i from the state before it. */
+  P.play = function (i) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    var f = this.manifest.frames[i];
+    if (this._reduced.matches || !f.duration) {
+      this.goTo(i);
+      this._chain(i);
+      return this;
+    }
+    this._apply(i);
+    this.frame = i;
+    this.playing = true;
+    this._emit('framestart', i, this.frames[i]);
+    this._animateFrame(i);
+    this._timers.push(setTimeout(function () {
+      self._apply(i + 1);
+      self._anims.forEach(function (a) { a.cancel(); });
+      self._anims = [];
+      self.playing = false;
+      self._emit('frame', i, self.frames[i]);
+      self._chain(i);
+    }, f.duration * 1000 + 20));
+    return this;
+  };
+
+  P._chain = function (i) {
+    var self = this;
+    var nf = this.manifest.frames[i + 1];
+    if (nf && nf.auto != null) {
+      this._timers.push(setTimeout(function () { self.play(i + 1); }, nf.auto * 1000));
+    } else if (this._auto) {
+      this._auto(i);
+    }
+  };
+
+  /** The step frame i belongs to. */
+  P._stepOf = function (i) {
+    var k = 0;
+    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
+    return k;
+  };
+  /** Last frame of step k: its own frame and the automatic ones after it. */
+  P._stepEnd = function (k) {
+    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
+  };
+  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
+  /** Host metadata at step k: the latest title set up to its end, its notes. */
+  P.meta = function (k) {
+    if (k == null) k = this.step;
+    var fr = this.manifest.frames, title = null, notes = [];
+    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
+    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
+    return { title: title, note: notes.length ? notes.join('\n') : null };
+  };
+  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
+  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
+
+  /** Jump to the end of step k (its automatic frames included): instant. */
+  P.goToStep = function (k) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
+    this.goTo(this._stepEnd(k));
+    this._emit('step', k, this.meta(k));
+    return this;
+  };
+
+  /** One click: finish the current step, then play the next one through. */
+  P.nextStep = function () {
+    var k = this.step;
+    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
+    if (k + 1 < this.steps.length) {
+      this.play(this.steps[k + 1]);
+      this._emit('step', k + 1, this.meta(k + 1));
+      return true;
+    }
+    return false;
+  };
+
+  /** One click back: the end of the previous step, instantly. */
+  P.prevStep = function () {
+    var k = this.step;
+    if (k > 0) { this.goToStep(k - 1); return true; }
+    this.goToStep(0);
+    return false;
+  };
+
+  /** Advance: play the next frame (finishing the current one first). */
+  P.next = function () {
+    if (this.playing) this.goTo(this.frame);
+    if (this.frame < this.frames.length - 1) { this.play(this.frame + 1); return true; }
+    return false;
+  };
+
+  /** Step back: instant. */
+  P.prev = function () {
+    if (this.frame > 0) { this.goTo(this.frame - 1); return true; }
+    this.goTo(0);
+    return false;
+  };
+
+  /** Freeze frame i at t seconds into it (for tests and previews). */
+  P.at = function (i, t) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    this._apply(i);
+    this.frame = i;
+    this.manifest.anims[i].forEach(function (a) {
+      var prop = self.manifest.channels[a.c][1];
+      if (prop === 'text') {
+        var cur = null;
+        a.k.forEach(function (kv) { if (a.t + kv[0] * a.d <= t + 1e-9) cur = kv[1]; });
+        if (cur !== null) self._set(a.c, cur);
+        return;
+      }
+      self._animate(a, false);
+    });
+    this._anims.concat(this._loops).forEach(function (an) { an.pause(); an.currentTime = t * 1000; });
+    return this;
+  };
+
+  P._autoplay = function (dwell) {
+    var self = this;
+    this._auto = function (i) {
+      self._timers.push(setTimeout(function () {
+        if (i < self.frames.length - 1) self.play(i + 1);
+        else { self._apply(0); self.play(0); }
+      }, dwell * 1000));
+    };
+    function manual() { self._auto = null; }
+    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
+    if (root.document) {
+      root.document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
+      });
+    }
+    this._apply(0);
+    this.play(0);
+  };
+
+  root.ail = root.ail || {};
+  root.ail.player = function (svg, opts) {
+    if (!svg.__ailPlayer) svg.__ailPlayer = new Player(svg, opts);
+    return svg.__ailPlayer;
+  };
+})(typeof window !== 'undefined' ? window : this);
+
+(function(){var svg=document.currentScript&&document.currentScript.closest?document.currentScript.closest('svg'):null;if(!svg){var all=document.querySelectorAll('svg[data-frames]');svg=all[all.length-1];}if(svg&&window.ail){window.ail.player(svg,{autoplay:true});}})();
+]]></script>
+</svg>

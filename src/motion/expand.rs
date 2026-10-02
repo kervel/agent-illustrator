@@ -1038,6 +1038,28 @@ impl Expander<'_> {
                 })
             }
         };
+        // `[along: l]`: a flight rides a connection or path.
+        if let Some(v) = super::opt(&s.opts, "along") {
+            let MotionValue::Name(n) = &v.node else {
+                return Err(LayoutError::validation_error("[along: ...]: name one connection or path"));
+            };
+            let id = check_name(&Spanned::new(n.clone(), v.span.clone()))?;
+            if !self.idx.drawables.contains(&id) {
+                return Err(LayoutError::validation_error(&format!("[along: {}]: '{}' is not a connection or path", n, n)));
+            }
+            let travels = match &s.verb {
+                MotionVerb::Show(_) => super::opt(&s.opts, "from").is_some(),
+                MotionVerb::Fly { .. } => true,
+                MotionVerb::Move { to, along, .. } => to.is_some() && along.is_none(),
+                _ => false,
+            };
+            if !travels {
+                return Err(LayoutError::validation_error(&format!(
+                    "[along: {}] goes with something that travels: `show x [from: y, along: {}]`, `fly ... [along: {}]` or `move x to y [along: {}]`",
+                    n, n, n, n
+                )));
+            }
+        }
         match &s.verb {
             MotionVerb::Show(v) => {
                 s.targets = all(v)?;

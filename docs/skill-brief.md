@@ -1,10 +1,13 @@
 # Agent Illustrator — the short version
 
-AIL describes a picture by meaning: shapes, components and how they relate.
-The engine does the layout, animation, checking and rendering. You never write
-coordinates. This page is enough for most tasks. Fetch a detail with
-`agent-illustrator --doc <topic>`; the topics are listed at the end. The full
-guides are `--skill` (diagrams) and `--skill-animation` (motion).
+> **Write idiomatic AIL:** layout primitives (`row`, `col`, `grid`, `stack`) and
+> constraints between elements. Avoid fixed coordinates or you get stuck sooner
+> or later; pin one only where something must sit exactly there.
+
+AIL describes a picture by meaning; the engine does layout, animation,
+checking and rendering. This page is enough for most tasks. Details:
+`agent-illustrator --doc <topic>`; full guides: `--skill`
+and `--skill-animation`.
 
 ## The loop (do every step, every time)
 
@@ -16,8 +19,7 @@ guides are `--skill` (diagrams) and `--skill-animation` (motion).
 5. Look at it: `agent-illustrator --frames-to-dir out --png scene.ail`, and
    a mid-motion still with `--frame clone --at 0.6s --png -o mid.png` (at can
    also be `50%`). Look at the PNGs before you say it is done. `--frame` takes
-   a keyframe name (best) or index; `--states` numbers click steps, and an
-   `[auto]` keyframe joins the step before it.
+   a keyframe name (best) or index.
 
 ## A whole scene
 
@@ -111,8 +113,8 @@ keyframe "clone" {
 - Time by what things wait for:
   - `when line reaches st.dot { ... }`
   - `when x shown { ... }`, `when x arrives + 0.3 { ... }`,
-    `when x accented { ... }` (they fire when that finishes; `+`/`-` shifts
-    them; x already on screen counts as shown at the start)
+    `when x accented { ... }` (fire when that finishes; `+`/`-` shifts them;
+    x already on screen counts as shown)
   - `then { ... }` waits for EVERYTHING before it, a 1.2s accent or a slow
     move included (to go on sooner use `when x shown`)
   - `at 0.4 { ... }` (from the start of the keyframe)
@@ -120,6 +122,7 @@ keyframe "clone" {
   Avoid chains of `after 0.3`.
 - Verbs:
   - `hide`, `move x to y`, `fly ghost(x) to y`, `draw line [to: st.dot]`
+  - ride an arrow: `fly ghost(x) to y [along: l]` (`--doc travel`)
   - `move x to y` centres x on y. To stand beside y, move to a `point`
     placed beside it.
   - `transform x [fill: role-ok, label: "...", swap: fade]`

@@ -323,7 +323,7 @@ label rides along); size animates via the shape's width/height.
     transition is wanted.
 
 Motion statements (full guide: --skill-animation):
-    show a, b [enter: pop|rise|drop|fade|grow|wipe(dir)|draw, from: other,
+    show a, b [enter: pop|rise|drop|fade|grow|wipe(dir)|draw, from: other, along: conn, scale,
                delay, duration, ease, stagger, order: start|end|center|random,
                jitter: rotate(4) (degrees) | move(6) (px)]
     hide a [exit: fade|shrink|fall|lift|wipe(dir)]
@@ -338,8 +338,10 @@ Motion statements (full guide: --skill-animation):
                         linted: time by events instead)
     keyframe "k" [auto, after: 0.3] { ... }   plays by itself after the previous one
     draw line [to: elem | 60% | vertex 2]   undraw line [to: ...]
-    fly ghost(a) to b, c [scale, arc]   fly proxy from a to b
-    move a to b   move a home   move a along path [to: b]
+    fly ghost(a) to b, c [scale, arc | along: conn]   fly proxy from a to b
+    move a to b [along: conn]   move a home   move a along path [to: b]
+    along: a connection or path the flight rides (joins it nearest the start,
+           leaves it nearest the end)
     move a, b, needs.* to box [stagger: 0.07]   transform m1, m2 [...]   fly ghost(a, b) to box
     accent a [tone: attention|error|ok, style: auto|underline|ring|outline|wiggle, hold: step]
                         "look here": the style follows the element, the tone says why

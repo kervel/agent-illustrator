@@ -1075,6 +1075,8 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
     process_statements(&doc.statements, result, &mut label_element_ids)?;
 
+    spread_coinciding_connections(result);
+
     // Resolve overlapping connection labels
     resolve_label_overlaps(&mut result.connections);
 
@@ -1085,6 +1087,104 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
     result.compute_bounds();
     Ok(())
+}
+
+/// Two or more straight connections between the same pair of elements whose
+/// routes coincide (a request and its reply, `a -> b` drawn twice) would be
+/// drawn on top of each other. Spread them into parallel lanes instead: each
+/// arrow keeps to its left, so `a -> b` and `b -> a` read as two-way traffic,
+/// and its label (left of travel by default) stays outside the pair.
+fn spread_coinciding_connections(result: &mut LayoutResult) {
+    let close = |a: Point, b: Point| (a.x - b.x).abs() < 1.0 && (a.y - b.y).abs() < 1.0;
+    let n = result.connections.len();
+    let mut done = vec![false; n];
+    for i in 0..n {
+        if done[i] || result.connections[i].path.len() != 2 {
+            continue;
+        }
+        let (p, q) = (result.connections[i].path[0], result.connections[i].path[1]);
+        // Members in declaration order: the first sets the reference direction.
+        let lane: Vec<(usize, bool)> = (i..n)
+            .filter(|&j| !done[j] && result.connections[j].path.len() == 2)
+            .filter_map(|j| {
+                let c = &result.connections[j].path;
+                if close(c[0], p) && close(c[1], q) {
+                    Some((j, false))
+                } else if close(c[0], q) && close(c[1], p) {
+                    Some((j, true))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        if lane.len() < 2 {
+            continue;
+        }
+        let (dx, dy) = (q.x - p.x, q.y - p.y);
+        let len = dx.hypot(dy);
+        if len < 1e-6 {
+            continue;
+        }
+        // Left of the reference direction (up, for left to right).
+        let (nx, ny) = (dy / len, -dx / len);
+        let sw = lane
+            .iter()
+            .map(|(j, _)| result.connections[*j].styles.stroke_width.unwrap_or(2.0))
+            .fold(0.0, f64::max);
+        let gap = (6.0 * sw).max(18.0);
+        // Same-direction arrows first (on the left), then the returning ones.
+        let mut order: Vec<(usize, bool)> = lane.iter().filter(|(_, r)| !r).cloned().collect();
+        order.extend(lane.iter().filter(|(_, r)| *r).cloned());
+        let from_box = result.connections[i].from_id.0.clone();
+        let to_box = result.connections[i].to_id.0.clone();
+        let boxes = (
+            result.get_element_by_name(&from_box).map(|e| e.bounds),
+            result.get_element_by_name(&to_box).map(|e| e.bounds),
+        );
+        let k = order.len() as f64;
+        for (slot, (j, reversed)) in order.iter().enumerate() {
+            done[*j] = true;
+            let off = ((k - 1.0) / 2.0 - slot as f64) * gap;
+            let (ox, oy) = (nx * off, ny * off);
+            let (mut a, mut b) = (Point::new(p.x + ox, p.y + oy), Point::new(q.x + ox, q.y + oy));
+            // Slide the ends along the shifted line back onto the boxes' edges.
+            if let (Some(fb), Some(tb)) = boxes {
+                let d = (b.x - a.x, b.y - a.y);
+                let origin = a;
+                if let (Some((_, t_exit)), Some((t_enter, _))) = (clip_line(origin, d, &fb), clip_line(origin, d, &tb)) {
+                    if t_exit < t_enter {
+                        a = Point::new(origin.x + d.0 * t_exit, origin.y + d.1 * t_exit);
+                        b = Point::new(origin.x + d.0 * t_enter, origin.y + d.1 * t_enter);
+                    }
+                }
+            }
+            let c = &mut result.connections[*j];
+            c.path = if *reversed { vec![b, a] } else { vec![a, b] };
+            if let Some(l) = c.label.as_mut() {
+                l.position = Point::new(l.position.x + ox, l.position.y + oy);
+            }
+        }
+    }
+}
+
+/// Where the line `origin + t * d` enters and leaves a box (Liang-Barsky).
+fn clip_line(origin: Point, d: (f64, f64), b: &BoundingBox) -> Option<(f64, f64)> {
+    let (mut t0, mut t1) = (f64::NEG_INFINITY, f64::INFINITY);
+    for (dd, lo, hi, o) in [(d.0, b.x, b.x + b.width, origin.x), (d.1, b.y, b.y + b.height, origin.y)] {
+        if dd.abs() < 1e-12 {
+            if o < lo || o > hi {
+                return None;
+            }
+        } else {
+            let (mut ta, mut tb) = ((lo - o) / dd, (hi - o) / dd);
+            if ta > tb {
+                std::mem::swap(&mut ta, &mut tb);
+            }
+            t0 = t0.max(ta);
+            t1 = t1.min(tb);
+        }
+    }
+    (t0 <= t1).then_some((t0, t1))
 }
 
 /// Resolve overlapping connection labels by nudging them apart

@@ -298,12 +298,12 @@ text {
       </g>
     </g>
   </g>
-  <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-base aid-77d0d05f-prompt_arrow" d="M168 115 L407.2 115" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-req_arrow conn-77d0d05f-req_arrow-base aid-77d0d05f-req_arrow" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-resp_arrow conn-77d0d05f-resp_arrow-base aid-77d0d05f-resp_arrow" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-base aid-77d0d05f-prompt_arrow" d="M168 106 L407.2 106" fill="none" stroke="var(--accent-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-req_arrow conn-77d0d05f-req_arrow-base aid-77d0d05f-req_arrow" d="M542 88 L807.2 88" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-resp_arrow conn-77d0d05f-resp_arrow-base aid-77d0d05f-resp_arrow" d="M818 124 L552.8 124" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-base aid-77d0d05f-exec_arrow" d="M480 165 C480 317.9706 672.0294 330 814.2 330" fill="none" stroke="var(--foreground-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-base aid-77d0d05f-return_to_cli" d="M825 330 C672.0294 330 480 317.9706 480 175.8" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-base aid-77d0d05f-return_to_cloud" d="M542 115 L807.2 115" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-final_to_cli conn-77d0d05f-final_to_cli-base aid-77d0d05f-final_to_cli" d="M818 115 L552.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection conn-77d0d05f-final_to_user conn-77d0d05f-final_to_user-base aid-77d0d05f-final_to_user" d="M418 115 L178.8 115" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-base aid-77d0d05f-return_to_cloud" d="M542 106 L807.2 106" fill="none" stroke="var(--accent-1)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-final_to_cli conn-77d0d05f-final_to_cli-base aid-77d0d05f-final_to_cli" d="M818 142 L552.8 142" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-final_to_user conn-77d0d05f-final_to_user-base aid-77d0d05f-final_to_user" d="M418 124 L178.8 124" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
 </svg>

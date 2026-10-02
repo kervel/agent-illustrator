@@ -461,6 +461,7 @@ reaches <station>` fixes it). A keyframe's length is derived, never declared.
 ```
 show x [enter: fade | pop | rise | drop | grow | wipe(left|right|up|down) | draw]
 show copy [from: original]        // appears at original's place and size, travels home
+show copy [from: original, scale: 1]   // ... at its own size
 hide x [exit: fade | shrink | fall | lift | wipe(...)]
 motion [enter: pop, exit: fade]   // diagram-wide defaults (default: rise / fade)
 ```
@@ -515,6 +516,9 @@ fly token from a to b                                    // a real (hidden) elem
 move ring to st2.dot            // persistent: dependents re-solve around it
 move d0 home                    // release a `move`
 move train along track [to: st3.dot]
+fly ghost(convo) to llm [along: l_call]                 // rides the arrow instead of cutting across
+show e3 [from: llm, along: l_reply, scale: 1]           // a reply comes back over the wire and lands in place
+move chip to tray [along: belt]
 move a, b, c to x, y, z [stagger: 0.1]                  // paired by position: a to x, b to y, c to z
 show d1, d2, d3 [from: r1, r2, r3, stagger: 0.1]        // each flies in from its own place
 // `move x to y` centres x ON y. To stand next to it, move to a point beside it:
@@ -523,6 +527,22 @@ show d1, d2, d3 [from: r1, r2, r3, stagger: 0.1]        // each flies in from it
 //   constrain at_row3.center_y = t.row[3].center_y
 //   move robot to at_row3
 ```
+**Over a wire: `along:`.** Any flight (`show … [from:]`, `fly`, `move … to`)
+can ride a connection or path: it joins the line where it passes nearest the
+start, follows it, and leaves it where it passes nearest the end, at an even
+speed. So the payload and the arrow read as one thing. It replaces `arc:`.
+
+**Size on the way.** `scale:` says how big the traveller is: on `show [from: y]`
+its size as it leaves y (default: shrunk to fit y), on `fly` its size as it
+lands (a ghost shrinks to fit the target, a real element keeps its size).
+`scale: 1` keeps its own size, so "the whole log goes in" and "one message
+comes out" do not both look like a tiny box at the LLM.
+
+**One thing becomes another.** `show row [from: chip]` with `hide chip` in the
+same block: the row leaves from the chip's place at the chip's size while the
+chip fades, so the chip turns into the row. To leave the original standing
+until the copy lands, write `when row shown { hide chip }` instead.
+
 A list on both sides pairs by position. If the counts differ, that is an
 error: give one each, or one for all. Prefer this to chains of `when d1 shown { show d2 ... }`.
 The `--lint` reports a `move x to y` that ends away from y, which happens

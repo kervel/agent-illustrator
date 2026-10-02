@@ -44,3 +44,9 @@ git config core.hooksPath githooks
 This re-renders all example SVGs (with Kapernikov stylesheet) and runs tests before each commit, catching rendering regressions early.
 
 To re-render examples manually: `bash examples/render-all.sh`
+
+## Rules for language changes
+
+- Every new feature is discoverable: docs (`docs/skill*.md`, `grammar.md`, `examples.md`, `--doc` aliases) and an example.
+- No single-purpose hacks. Guard readability and ergonomics strictly; prefer general, composable constructs.
+- Two animation renderers: the JS player and the pure-CSS SVG renderer (no JS). Both must stay fully functional; where CSS genuinely can't express something, degrade gracefully.

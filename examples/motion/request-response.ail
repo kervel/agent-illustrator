@@ -1,0 +1,41 @@
+/* Request and response over a connection: what travels rides the wire.
+   Render: agent-illustrator --animate request-response.ail
+
+   STORYBOARD
+     ask      the app's conversation log holds a question
+     call     the whole log rides the request arrow into the LLM
+     answer   ONE new message rides the reply arrow back, at its own size,
+              and lands as the next row of the log
+*/
+
+row stage [gap: 260] {
+    col client [gap: 24] {
+        rect app [width: 150, height: 90, label: "Chat app", fill: role-surface-2, corner_radius: 12]
+        col log [gap: 8] {
+            rect m1 [width: 300, height: 40, label: "system: be helpful", fill: role-surface-2, corner_radius: 8]
+            rect m2 [width: 300, height: 40, label: "you: capital of Belgium?", fill: role-series-4-soft, corner_radius: 8]
+            rect m3 [width: 300, height: 40, label: "LLM: Brussels.", fill: role-series-1-soft, corner_radius: 8,
+                     appears: later]
+        }
+    }
+    rect llm [width: 120, height: 120, label: "LLM", fill: role-surface-2, corner_radius: 16]
+}
+constrain llm.center_y = app.center_y
+
+app -> llm as request [stroke: role-primary, stroke_width: 3, label: "whole log", appears: later]
+llm -> app as reply [stroke: role-primary, stroke_width: 3, label: "one message",
+                     appears: later]
+
+keyframe "ask" [title: "The app keeps the conversation"] {
+    accent m2
+}
+
+keyframe "call" [title: "Every call sends the whole log"] {
+    show request [enter: draw]
+    when request shown { fly ghost(log) to llm [along: request] }
+}
+
+keyframe "answer" [title: "The LLM answers with one message"] {
+    show reply [enter: draw]
+    when reply shown { show m3 [from: llm, along: reply, scale: 1, duration: slow, ease: glide] }
+}

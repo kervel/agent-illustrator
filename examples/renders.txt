@@ -30,3 +30,5 @@ examples/motion/git-branches.last.svg   examples/motion/git-branches.ail   --sty
 examples/motion/git-merge.svg           examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --animate
 examples/motion/git-merge.anim.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --animate-css
 examples/motion/git-merge.last.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --frame choose
+examples/motion/request-response.svg      examples/motion/request-response.ail  --animate
+examples/motion/request-response.anim.svg examples/motion/request-response.ail  --animate-css
