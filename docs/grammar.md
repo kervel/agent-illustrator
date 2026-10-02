@@ -75,6 +75,11 @@ Connection modifiers:
     label_at: <number>      Label position along path (0.0=start, 1.0=end, default 0.5)
     label_offset: <number>  Perpendicular distance from path to label (default 10)
 
+Routing is automatic about two things: straight connections between the same
+pair (a -> b and b -> a) are drawn as side-by-side lanes, each keeping to its
+left; and right-angle connections leaving one point the same way (a fan-out)
+branch off at one place, as do ones converging on one point.
+
 STYLE MODIFIERS
 ---------------
 Modifiers go in brackets after the element name:

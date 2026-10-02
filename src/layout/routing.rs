@@ -1076,6 +1076,7 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
     process_statements(&doc.statements, result, &mut label_element_ids)?;
 
     spread_coinciding_connections(result);
+    share_branch_points(&mut result.connections);
 
     // Resolve overlapping connection labels
     resolve_label_overlaps(&mut result.connections);
@@ -1162,6 +1163,79 @@ fn spread_coinciding_connections(result: &mut LayoutResult) {
             c.path = if *reversed { vec![b, a] } else { vec![a, b] };
             if let Some(l) = c.label.as_mut() {
                 l.position = Point::new(l.position.x + ox, l.position.y + oy);
+            }
+        }
+    }
+}
+
+/// Orthogonal connections that leave one point the same way (a fan-out from
+/// an element's bottom) are each routed through their own midpoint, so they
+/// branch off at slightly different places when their targets are not level.
+/// Give them one branch line: the one nearest the shared end, so every
+/// branch keeps a final run at least as long as it had. The same holds for
+/// connections converging on one point.
+fn share_branch_points(conns: &mut [ConnectionLayout]) {
+    let close = |a: Point, b: Point| (a.x - b.x).abs() < 1.0 && (a.y - b.y).abs() < 1.0;
+    // A Z route: start, two bends on one cross line, end. `vertical` when the
+    // ends run vertically (the cross line is horizontal, at y).
+    let z = |p: &[Point]| -> Option<bool> {
+        if p.len() != 4 {
+            return None;
+        }
+        if (p[0].x - p[1].x).abs() < 0.5 && (p[1].y - p[2].y).abs() < 0.5 && (p[2].x - p[3].x).abs() < 0.5 {
+            Some(true)
+        } else if (p[0].y - p[1].y).abs() < 0.5 && (p[1].x - p[2].x).abs() < 0.5 && (p[2].y - p[3].y).abs() < 0.5 {
+            Some(false)
+        } else {
+            None
+        }
+    };
+    for converge in [false, true] {
+        // Which end is shared: the start (fan-out) or the end (fan-in).
+        let shared = |p: &[Point]| if converge { p[3] } else { p[0] };
+        let n = conns.len();
+        let mut done = vec![false; n];
+        for i in 0..n {
+            if done[i] || conns[i].routing_mode != RoutingMode::Orthogonal {
+                continue;
+            }
+            let Some(vert) = z(&conns[i].path) else { continue };
+            let hub = shared(&conns[i].path);
+            // Leaving (or arriving) the same way: the same side of the hub.
+            let side = |p: &[Point]| {
+                let (a, b) = if converge { (p[3], p[2]) } else { (p[0], p[1]) };
+                if vert { (b.y - a.y).signum() } else { (b.x - a.x).signum() }
+            };
+            let s0 = side(&conns[i].path);
+            let group: Vec<usize> = (i..n)
+                .filter(|&j| {
+                    !done[j]
+                        && conns[j].routing_mode == RoutingMode::Orthogonal
+                        && z(&conns[j].path) == Some(vert)
+                        && close(shared(&conns[j].path), hub)
+                        && side(&conns[j].path) == s0
+                })
+                .collect();
+            if group.len() < 2 {
+                continue;
+            }
+            let cross = |p: &[Point]| if vert { p[1].y } else { p[1].x };
+            let at = if vert { hub.y } else { hub.x };
+            let line = group
+                .iter()
+                .map(|&j| cross(&conns[j].path))
+                .min_by(|a, b| (a - at).abs().total_cmp(&(b - at).abs()))
+                .unwrap();
+            for &j in &group {
+                done[j] = true;
+                let p = &mut conns[j].path;
+                if vert {
+                    p[1].y = line;
+                    p[2].y = line;
+                } else {
+                    p[1].x = line;
+                    p[2].x = line;
+                }
             }
         }
     }
