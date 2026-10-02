@@ -79,9 +79,10 @@ keyframe "clone" {
 - `point hub` is an invisible anchor. `clip: bg` draws a part inside its frame.
 - Stage: give every scene one, `rect stage [..., canvas: true]`. It is the
   picture's frame; anything drawn outside it is a lint error.
-- Later declarations draw on top. Declare backgrounds (bands, lanes, a big
-  shape) before what sits on them. An intended overlap (a badge on a corner,
-  a chip on a box) needs `overlaps: other`.
+- Later declarations draw on top. Declare backgrounds before what sits on
+  them, or give them `z_order: -1`; a part over a neighbour: `z_order:
+  scene(1)`; under something mid-story: `move card to x [z_order: -1]`
+  (`--doc layering`). An intended overlap needs `overlaps: other`.
 - Captions: `robot r1 [caption: "NVIDIA"]` (`caption_position: above`) makes
   a part `r1.caption` that comes and goes with r1. Don't constrain other
   things against a caption.

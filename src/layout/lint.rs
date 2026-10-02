@@ -1252,9 +1252,16 @@ fn is_canvas(e: &ElementLayout) -> bool {
 fn overlap_warning(name_a: &str, name_b: &str, w: f64, h: f64) -> LintWarning {
     LintWarning {
         category: LintCategory::Overlap,
+        // Say the way out: the overlap is either a layering question or
+        // intended.
         message: format!(
-            "elements {} and {} overlap by {:.0}x{:.0}px",
-            name_a, name_b, w, h
+            "elements {} and {} overlap by {:.0}x{:.0}px. If one belongs under the other: declare it first or give it \
+             `z_order: -1` (--doc layering); if one sits on the other on purpose: `overlaps: {}` on it",
+            name_a,
+            name_b,
+            w,
+            h,
+            name_b.trim_matches('"')
         ),
         frames: Vec::new(),
         pair: Some(sorted_pair(name_a, name_b)),
@@ -1904,7 +1911,11 @@ fn check_labels(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Ve
             if a.bbox.intersects(&b.bbox) {
                 warnings.push(LintWarning {
                     category: LintCategory::Label,
-                    message: format!("labels on \"{}\" and \"{}\" overlap", a.owner, b.owner),
+                    message: format!(
+                        "labels on \"{}\" and \"{}\" overlap: move them apart, or if one element covers the other \
+                         on purpose, layer them (`z_order`, --doc layering)",
+                        a.owner, b.owner
+                    ),
                     frames: Vec::new(),
                     pair: None,
                 });

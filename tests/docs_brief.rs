@@ -81,3 +81,25 @@ fn the_text_section_lists_the_safe_marks() {
     assert!(text.contains(agent_illustrator::raster::SAFE_MARKS), "{text}");
     assert!(agent_illustrator::docs::section("symbols").is_some());
 }
+
+#[test]
+fn every_entry_point_says_z_order_exists() {
+    // An agent that reads only one of these must still learn that layering
+    // can be said explicitly, and where to read more.
+    use agent_illustrator::docs;
+    let examples = include_str!("../docs/examples.md");
+    for (name, text) in [
+        ("--skill-brief", docs::skill_brief()),
+        ("--skill", docs::SKILL.to_string()),
+        ("--skill-animation", docs::SKILL_ANIMATION.to_string()),
+        ("--grammar", docs::GRAMMAR.to_string()),
+        ("--examples", examples.to_string()),
+    ] {
+        assert!(text.contains("z_order"), "{name} never mentions z_order");
+        assert!(text.contains("scene("), "{name} never mentions z_order: scene(N)");
+        assert!(text.contains("[z_order:") || text.contains("z_order: N]"), "{name} never shows a layer change in motion");
+    }
+    for w in ["zorder", "z-index", "front", "behind", "under", "stacking", "paint", "z_order", "z-order"] {
+        assert_eq!(docs::section(w), docs::section("layering"), "--doc {w}");
+    }
+}

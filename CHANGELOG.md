@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.29
+
+- z_order is now findable from every entry point:
+  - the brief and the diagram skill say how to layer (`z_order: -1`,
+    `scene(1)`, `move ... [z_order: -1]`);
+  - `--examples` has EXAMPLE 11 (under, over a neighbour, changing layer);
+  - `--doc` takes zorder, z-index, front, behind, under, over, stacking,
+    paint and scene.
+  - A test checks every entry point keeps mentioning it.
+- The overlap and label-overlap lints now say the way out: declare first or
+  `z_order: -1` if one belongs under the other, `overlaps:` if it sits on it
+  on purpose.
+
 ## v0.2.28
 
 - Lint: an element a keyframe puts in another layer (`z_order` in a move

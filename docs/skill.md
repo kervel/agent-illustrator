@@ -376,7 +376,11 @@ rect bg [fill: accent-light, stroke: accent-dark, opacity: 0.3]
 constrain bg contains svc1, svc2, svc3 [padding: 30]
 ```
 The box grows to fit everything listed, plus the padding. Declare backgrounds
-FIRST in a `group` so they render behind the foreground.
+FIRST in a `group` so they render behind the foreground, or give them
+`z_order: -1` (higher is on top among siblings; default 0). In a template, a
+part's `z_order` only orders it inside its instance; `z_order: scene(1)`
+paints it over things outside (a badge over the neighbouring card). Layer
+changes in a story: `move card to x [z_order: -1]`. See `--doc layering`.
 
 `contains` frees **both** dimensions, so it cannot draw a line: a `height: 3`
 rule told to contain a row of cells comes back 52px tall (`--lint` reports it as

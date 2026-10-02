@@ -280,7 +280,8 @@ template "data_store" (name: "DB") {
 // fall back to column stacking. Declare backgrounds FIRST.
 
 group diagram {
-    // Background rects (drawn first = behind everything else)
+    // Background rects (drawn first = behind everything else; or give
+    // them z_order: -1 to declare them anywhere, see EXAMPLE 11)
     rect prod_bg [width: 550, height: 200, fill: accent-light, stroke: accent-dark, stroke_width: 2, opacity: 0.25,
                   label: "Production Zone", label_position: above, align: start, label_fill: accent-dark]
     rect data_bg [width: 550, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, opacity: 0.25,
@@ -471,6 +472,46 @@ frame gives it, so it never resizes and the text holds its position from
 frame to frame. `--frames-to-dir out/` renders them all; `--animate`
 plays them back.
 
+
+EXAMPLE 11: Layering with z_order (under, over, and changing layer)
+-------------------------------------------------------------------
+// Declaration order first: later is drawn on top. z_order is for what
+// order cannot say.
+template "doc" (title: "design.md") {
+    rect page [width: 200, height: 120, fill: background-1, stroke: foreground-1, stroke_width: 2,
+               label: title, label_position: inside]
+    // A part over things OUTSIDE its instance: scene(N). A plain z_order
+    // on a part only orders it among the parts of its own instance.
+    circle badge [size: 34, fill: accent-dark, stroke: none, z_order: scene(1)]
+    constrain badge.center_x = page.right
+    constrain badge.center_y = page.top
+}
+doc spec [title: "design.md"]
+// Declared after the document, to keep the file in reading order, yet
+// drawn under it: z_order: -1 (siblings default to 0).
+rect berg [width: 260, height: 160, fill: secondary-light, stroke: none, z_order: -1, overlaps: spec]
+rect server [width: 160, height: 160, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "server"]
+rect card [width: 110, height: 60, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "card", z_order: 1]
+point behind
+constrain berg.center_x = spec.page.center_x
+constrain berg.top = spec.page.center_y
+constrain server.left = spec.page.right + 200
+constrain server.top = spec.page.top
+constrain card.left = spec.page.right + 40
+constrain card.top = server.bottom + 40
+constrain behind.center_x = server.center_x
+constrain behind.center_y = server.center_y
+
+keyframe "start" { }
+// A layer change rides on the move: by default it happens where it is
+// not seen (just before the card reaches the server; z_at: start|mid|end
+// to choose yourself).
+keyframe "hide" { move card to behind [z_order: -1] }
+keyframe "back" { move card home [z_order: 1] }
+
+Static `z_order: N` orders siblings (higher on top); `scene(N)` lifts a
+template part out of its instance's layer; `move ... [z_order: N]` changes
+layer mid-story without a visible pop. Details: `--doc layering`.
 
 MULTI-LINE CARDS
 ================
