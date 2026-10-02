@@ -518,6 +518,16 @@ fn combine_pub(base: &Val, key: &Val, mode: Mode) -> Val {
     }
 }
 
+/// `when x shown + 0.1 (= 1.20s, starts 1.30s)`: an event with its
+/// resolved time, and when its block starts if a nudge moves it.
+fn event_text(what: &str, start: f64, at: f64) -> String {
+    if (start - at).abs() > 1e-9 {
+        format!("{} (= {:.2}s, starts {:.2}s)", what, at, start)
+    } else {
+        format!("{} (= {:.2}s)", what, at)
+    }
+}
+
 pub const MANIFEST_VERSION: u32 = 1;
 
 /// The schema-versioned manifest + tracks, as JSON.
@@ -737,9 +747,9 @@ pub fn timeline_text(m: &Motion, tokens: &MotionTokens) -> String {
         let mut shown_ev = vec![false; f.events.len()];
         for (ai, a) in f.atoms.iter().enumerate() {
             let _ = a;
-            for (k, (t, what, first)) in f.events.iter().enumerate() {
+            for (k, (t, what, first, at)) in f.events.iter().enumerate() {
                 if !shown_ev[k] && *first == ai {
-                    out.push_str(&format!("  {:>5.2}s  {}\n", t, what));
+                    out.push_str(&format!("  {:>5.2}s  {}\n", t, event_text(what, *t, *at)));
                     shown_ev[k] = true;
                 }
             }
@@ -755,9 +765,9 @@ pub fn timeline_text(m: &Motion, tokens: &MotionTokens) -> String {
                 out.push_str(&format!("                        {}\n", line));
             }
         }
-        for (k, (t, what, _)) in f.events.iter().enumerate() {
+        for (k, (t, what, _, at)) in f.events.iter().enumerate() {
             if !shown_ev[k] {
-                out.push_str(&format!("  {:>5.2}s  {}\n", t, what));
+                out.push_str(&format!("  {:>5.2}s  {}\n", t, event_text(what, *t, *at)));
             }
         }
         if quiet > 0 {

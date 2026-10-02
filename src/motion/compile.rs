@@ -192,9 +192,10 @@ pub struct FrameMotion {
     pub note: Option<String>,
     pub atoms: Vec<Atom>,
     pub curves: BTreeMap<usize, Curve>,
-    /// Each `when ...` / beat end as resolved: (time, what, index of the
-    /// first atom of its block), for --timeline.
-    pub events: Vec<(f64, String, usize)>,
+    /// Each `when ...` / beat end as resolved: (when its block starts, what,
+    /// index of the first atom of its block, when the event itself is), for
+    /// --timeline.
+    pub events: Vec<(f64, String, usize, f64)>,
 }
 
 /// Auxiliary nodes the renderer must add for motion to have something to move.
@@ -244,6 +245,41 @@ pub struct Motion {
     pub misses: Vec<(String, String)>,
     /// (frame, target, style, with an error badge): every accent, for lint.
     pub accents: Vec<(String, String, String, bool)>,
+}
+
+impl Motion {
+    /// Play everything `speed` times as fast: every time in every frame is
+    /// divided by it, so the choreography keeps its shape.
+    pub fn retime(&mut self, speed: f64) {
+        if (speed - 1.0).abs() < 1e-9 || speed <= 0.0 {
+            return;
+        }
+        let k = 1.0 / speed;
+        for f in &mut self.frames {
+            f.duration *= k;
+            if let Some(a) = f.auto.as_mut() {
+                *a *= k;
+            }
+            for a in &mut f.atoms {
+                a.start *= k;
+                a.dur *= k;
+            }
+            for c in f.curves.values_mut() {
+                for t in &mut c.tweens {
+                    t.start *= k;
+                    t.dur *= k;
+                }
+                for o in &mut c.overlays {
+                    o.start *= k;
+                    o.dur *= k;
+                }
+            }
+            for e in &mut f.events {
+                e.0 *= k;
+                e.3 *= k;
+            }
+        }
+    }
 }
 
 // ------------------------------------------------------------ evaluation
@@ -1088,7 +1124,7 @@ struct EventCtx<'b> {
     /// On screen as the keyframe starts (`when x shown` then means now).
     visible: HashSet<String>,
     /// Resolved events, for the timeline.
-    events: Vec<(f64, String, usize)>,
+    events: Vec<(f64, String, usize, f64)>,
 }
 
 /// Progress p reached by an ease, as a fraction of its duration.
@@ -1308,13 +1344,13 @@ fn walk<'a>(
                     MotionEvent::BeatEnd(b) => format!("after {}", b.node),
                 };
                 let nudge = if off.abs() > 1e-9 { format!(" {} {}", if *off < 0.0 { "-" } else { "+" }, off.abs()) } else { String::new() };
-                ctx.events.push((s, format!("when {}{} (= {:.2}s{})", what, nudge, at, if nudge.is_empty() { String::new() } else { format!(", starts {:.2}s", s) }), out.len()));
+                ctx.events.push((s, format!("when {}{}", what, nudge), out.len(), at));
                 let e = walk(b, s, tokens, defaults, out, ctx)?;
                 end = end.max(e);
             }
             MotionNode::Beat(name, b) => {
                 let e = walk(b, cursor, tokens, defaults, out, ctx)?;
-                ctx.events.push((e, format!("beat {} ends (= {:.2}s)", name, e), usize::MAX));
+                ctx.events.push((e, format!("beat {} ends", name), usize::MAX, e));
                 ctx.beats.insert(name.clone(), e);
                 end = end.max(e);
             }

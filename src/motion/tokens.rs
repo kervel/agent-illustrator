@@ -17,6 +17,9 @@ pub struct MotionTokens {
     pub distance: f64,
     /// CSS custom properties (colours) for interpolating `var(--x)`.
     pub vars: HashMap<String, String>,
+    /// `--ail-motion-speed: 1.3`: everything plays 1.3 times as fast
+    /// (durations, delays, staggers, `at`, event shifts, `[auto, after:]`).
+    pub speed: f64,
 }
 
 impl Default for MotionTokens {
@@ -38,7 +41,7 @@ impl Default for MotionTokens {
         eases.insert("snap".into(), Ease::Bezier(0.2, 0.0, 0.0, 1.0));
         // power2-in
         eases.insert("in".into(), Ease::Bezier(0.55, 0.0, 1.0, 0.45));
-        MotionTokens { durations, eases, distance: 12.0, vars: HashMap::new() }
+        MotionTokens { durations, eases, distance: 12.0, vars: HashMap::new(), speed: 1.0 }
     }
 }
 
@@ -88,7 +91,13 @@ impl MotionTokens {
         if let Some(css) = custom_css {
             for (name, value) in css_custom_properties(css) {
                 if let Some(d) = name.strip_prefix("ail-motion-") {
-                    if d == "distance" {
+                    if d == "speed" {
+                        if let Ok(k) = value.trim().parse::<f64>() {
+                            if k > 0.0 {
+                                t.speed = k;
+                            }
+                        }
+                    } else if d == "distance" {
                         if let Ok(px) = value.trim_end_matches("px").trim().parse() {
                             t.distance = px;
                         }
@@ -192,5 +201,12 @@ mod tests {
         assert_eq!(t.duration("normal"), Some(0.4));
         assert_eq!(t.ease("pop"), Some(Ease::Bezier(0.3, 1.8, 0.6, 1.0)));
         assert_eq!(t.rgb("var(--main)"), Some((35.0, 70.0, 216.0)));
+    }
+
+    #[test]
+    fn speed_is_a_factor_not_a_duration() {
+        let t = MotionTokens::from_styles(&HashMap::new(), Some(":root { --ail-motion-speed: 1.3; }"));
+        assert_eq!(t.speed, 1.3);
+        assert_eq!(t.duration("speed"), None);
     }
 }

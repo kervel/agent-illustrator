@@ -415,6 +415,12 @@ Durations: seconds or `fast | normal | slow`. Eases: `pop` (overshoot), `settle`
 (power3-out), `glide` (in-out), `snap`, `in`, `linear`. Both are **theme tokens**:
 retime a whole deck in its stylesheet CSS —
 `:root { --ail-motion-normal: .4s; --ail-ease-pop: cubic-bezier(.3,1.8,.6,1); }`.
+To make everything faster or slower at once, set the speed:
+`:root { --ail-motion-speed: 1.3; }` plays 1.3 times as fast. It divides
+every time (token and numeric durations, delays, staggers, `at`, the shifts
+in `when x shown + 0.3`, `[auto, after: …]`), so the choreography keeps its
+shape; `--timeline`, stills and lint all see the retimed version. (The
+pauses between steps of the `--animate-css` loop are reading time and stay.)
 
 ### Beats: say what a thing waits for
 

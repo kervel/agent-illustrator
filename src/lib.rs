@@ -828,13 +828,15 @@ fn render_pipeline(
                 })
                 .collect(),
         };
-        Some(motion::compile::compile(&input).map_err(|e| {
+        let mut m = motion::compile::compile(&input).map_err(|e| {
             RenderError::Layout(layout::LayoutError::validation_error(&format!(
                 "{} (at {})",
                 e.message,
                 line_col(source, e.span.start)
             )))
-        })?)
+        })?;
+        m.retime(tokens.speed);
+        Some(m)
     };
 
     // Motion lints need the compiled tracks.

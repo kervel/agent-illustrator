@@ -117,6 +117,11 @@ svg * {
 }
 ```
 
+Keyframe motion is timed by theme tokens in the same stylesheet:
+`--ail-motion-fast | normal | slow` (durations), `--ail-ease-<name>` (eases)
+and `--ail-motion-speed: 1.3` (everything 1.3 times as fast). See
+`--doc timing`.
+
 ---
 
 ## Part 4: Pattern & Gradient Fills
