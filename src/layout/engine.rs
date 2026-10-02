@@ -27,7 +27,7 @@
 //! - [`partition_constraints`]: Group constraints by scope
 //! - [`build_element_to_template_map`]: Map elements to their template instances
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::parser::ast::*;
 
@@ -1058,6 +1058,8 @@ fn layout_shape(shape: &ShapeDecl, position: Point, config: &LayoutConfig) -> El
 /// mean there.
 pub fn place_captions(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
     let captions = collect_captions(&doc.statements);
+    // (caption, side, the subject's centre line across that side)
+    let mut placed: Vec<(String, ShapeLabelPosition, f64)> = Vec::new();
     for (caption_id, subject_id, placement, span) in captions {
         let Some(subject) = result.get_element_by_name(&subject_id) else {
             let known: HashSet<String> = result.elements.keys().cloned().collect();
@@ -1104,8 +1106,56 @@ pub fn place_captions(result: &mut LayoutResult, doc: &Document) -> Result<(), L
         if dy != 0.0 {
             shift_element_by_name(result, &caption_id, dy, Axis::Vertical)?;
         }
+        let line = match placement.position {
+            ShapeLabelPosition::Left | ShapeLabelPosition::Right => bounds.center().x,
+            _ => bounds.center().y,
+        };
+        placed.push((caption_id, placement.position, line));
     }
+    line_up_captions(result, &placed)?;
     result.compute_bounds();
+    Ok(())
+}
+
+/// Things centred on one line get their captions on one line: above a row of
+/// icons of different heights, each caption hugging its own icon would step
+/// up and down. Captions on the same side of subjects that share a centre
+/// line move out to the outermost of them (above: the highest).
+fn line_up_captions(result: &mut LayoutResult, placed: &[(String, ShapeLabelPosition, f64)]) -> Result<(), LayoutError> {
+    let mut groups: BTreeMap<(u8, i64), Vec<&str>> = BTreeMap::new();
+    for (id, side, line) in placed {
+        let k = match side {
+            ShapeLabelPosition::Above => 0,
+            ShapeLabelPosition::Below => 1,
+            ShapeLabelPosition::Left => 2,
+            ShapeLabelPosition::Right => 3,
+            ShapeLabelPosition::Inside => continue,
+        };
+        groups.entry((k, (line * 2.0).round() as i64)).or_default().push(id);
+    }
+    for ((side, _), ids) in groups.into_iter().filter(|(_, v)| v.len() > 1) {
+        let b: Vec<crate::layout::types::BoundingBox> = ids.iter().filter_map(|id| result.elements.get(*id).map(|e| e.bounds)).collect();
+        if b.len() != ids.len() {
+            continue;
+        }
+        let (target, axis) = match side {
+            0 => (b.iter().map(|b| b.y).fold(f64::INFINITY, f64::min), Axis::Vertical),
+            1 => (b.iter().map(|b| b.y + b.height).fold(f64::NEG_INFINITY, f64::max), Axis::Vertical),
+            2 => (b.iter().map(|b| b.x + b.width).fold(f64::INFINITY, f64::min), Axis::Horizontal),
+            _ => (b.iter().map(|b| b.x).fold(f64::NEG_INFINITY, f64::max), Axis::Horizontal),
+        };
+        for (id, bb) in ids.iter().zip(&b) {
+            let d = match side {
+                0 => target - bb.y,
+                1 => target - (bb.y + bb.height),
+                2 => target - (bb.x + bb.width),
+                _ => target - bb.x,
+            };
+            if d.abs() > 1e-6 {
+                shift_element_by_name(result, id, d, axis)?;
+            }
+        }
+    }
     Ok(())
 }
 

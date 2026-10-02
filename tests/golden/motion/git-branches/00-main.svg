@@ -153,18 +153,18 @@ text { white-space: pre; }
   <g id="mains" class="ai-container">
     <g id="a" class="ai-container">
       <circle id="a_dot" class="ai-shape ai-circle" cx="172.7471" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
-      <rect id="a_nm" class="ai-shape ai-rect" x="105" y="607" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="172.7471" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="172.7471" dy="-0"><tspan>Login page</tspan></tspan></text>
+      <rect id="a_nm" class="ai-shape ai-rect" x="105" y="616" width="135.4942" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="172.7471" y="638.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="172.7471" dy="-0"><tspan>Login page</tspan></tspan></text>
     </g>
     <g id="b" class="ai-container">
       <circle id="b_dot" class="ai-shape ai-circle" cx="357.541" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
-      <rect id="b_nm" class="ai-shape ai-rect" x="290.4942" y="607" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="357.5411" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="357.5411" dy="-0"><tspan>Dark mode</tspan></tspan></text>
+      <rect id="b_nm" class="ai-shape ai-rect" x="290.4942" y="616" width="134.0935" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="357.5411" y="638.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="357.5411" dy="-0"><tspan>Dark mode</tspan></tspan></text>
     </g>
     <g id="c" class="ai-container">
       <circle id="c_dot" class="ai-shape ai-circle" cx="525.5264" cy="580" r="19" fill="var(--role-surface)" stroke="var(--role-primary)" stroke-width="8"/>
-      <rect id="c_nm" class="ai-shape ai-rect" x="474.5877" y="607" width="101.8774" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
-      <text class="ai-label" x="525.5264" y="629.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="525.5264" dy="-0"><tspan>Price fix</tspan></tspan></text>
+      <rect id="c_nm" class="ai-shape ai-rect" x="474.5877" y="616" width="101.8774" height="44.75" fill="none" stroke="none" stroke-width="1.5"/>
+      <text class="ai-label" x="525.5264" y="638.375" text-anchor="middle" dominant-baseline="middle" font-size="23" fill="var(--role-ink)" style="font-weight:700"><tspan x="525.5264" dy="-0"><tspan>Price fix</tspan></tspan></text>
     </g>
   </g>
   <g id="l1" class="ai-container">

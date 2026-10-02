@@ -353,7 +353,9 @@ pub enum MotionEvent {
     /// Its exit ends.
     Hidden(Spanned<String>),
     /// Its accent's call for attention ends (a held mark stays on).
-    Accented(Spanned<String>),
+    /// A one-shot effect on an element finished: `when x accented`,
+    /// `when x pulsed` (`effect` is the verb: accent, pulse, ...).
+    Effected { effect: String, target: Spanned<String> },
     /// A named beat ends.
     BeatEnd(Spanned<String>),
 }
@@ -518,7 +520,8 @@ pub enum MotionVerb {
         to: Option<Spanned<String>>,
         /// `move a, b to x, y`: every destination, paired by position.
         to_list: Vec<Spanned<String>>,
-        along: Option<Spanned<String>>,
+        /// `along a, b`: the lines ridden in turn; it ends on the last.
+        along: Vec<Spanned<String>>,
     },
     /// `pulse x`, `shake x`, `flash x`, `ping x`, `highlight x`, `nudge x`
     Effect {

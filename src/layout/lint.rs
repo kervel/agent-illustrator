@@ -293,7 +293,7 @@ fn check_collisions(
     check_overlaps(result, contains_ids, scope, warnings);
     check_labels(result, scope, warnings);
     check_label_element_overlaps(result, scope, warnings);
-    check_connections(result, scope, warnings);
+    check_connections(result, contains_ids, scope, warnings);
     check_label_connection_overlaps(result, scope, warnings);
     check_near_misses(result, scope, warnings);
     check_caption_clearance(result, contains_ids, scope, warnings);
@@ -932,7 +932,51 @@ impl ContainsRelations {
 pub(crate) fn collect_contains_ids(doc: &Document) -> ContainsRelations {
     let mut relations = ContainsRelations::default();
     collect_contains_ids_from_stmts(&doc.statements, &mut relations);
+    // Whatever rides a line (`[along: l]`, `move x along l`) is on it on
+    // purpose, as if it said `overlaps: l`.
+    for stmt in &doc.statements {
+        let body = match &stmt.node {
+            Statement::Keyframe(kf) => &kf.motion,
+            Statement::MotionMacro(m) => &m.body,
+            _ => continue,
+        };
+        collect_riders(body, &mut relations);
+    }
     relations
+}
+
+fn collect_riders(nodes: &[crate::parser::ast::Spanned<crate::parser::ast::MotionNode>], relations: &mut ContainsRelations) {
+    use crate::parser::ast::{FlySubject, MotionNode, MotionVerb, Selector};
+    for n in nodes {
+        let st = match &n.node {
+            MotionNode::Stmt(st) => st,
+            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                collect_riders(b, relations);
+                continue;
+            }
+        };
+        let mut lines = crate::motion::along_paths(&st.opts);
+        let sels: Vec<&Selector> = match &st.verb {
+            MotionVerb::Move { target, along, .. } => {
+                lines.extend(along.iter().map(|a| a.node.replace('.', "_")));
+                vec![&target.node]
+            }
+            MotionVerb::Show(v) => v.iter().map(|s| &s.node).collect(),
+            MotionVerb::Fly { subject: FlySubject::Proxy(x), .. } => vec![&x.node],
+            _ => vec![],
+        };
+        if lines.is_empty() {
+            continue;
+        }
+        let mut who: Vec<String> = st.targets.clone();
+        who.extend(sels.into_iter().filter_map(|s| match s {
+            Selector::Name(n) => Some(n.replace('.', "_")),
+            _ => None,
+        }));
+        for w in who {
+            relations.overlaps.entry(w).or_default().extend(lines.iter().cloned());
+        }
+    }
 }
 
 fn collect_contains_ids_from_stmts(
@@ -2255,6 +2299,7 @@ fn collect_visible_elements_in(
 
 fn check_connections(
     result: &LayoutResult,
+    relations: &ContainsRelations,
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
@@ -2272,6 +2317,10 @@ fn check_connections(
 
         let from_id = &conn.from_id.0;
         let to_id = &conn.to_id.0;
+        // `overlaps: line` on the element (or it rides the line).
+        let on_purpose = |id: &str| {
+            conn.name.as_ref().is_some_and(|n| relations.overlaps.get(id).is_some_and(|o| o.contains(&n.0)))
+        };
 
         let path_start = match conn.path.first() {
             Some(p) => p,
@@ -2300,7 +2349,7 @@ fn check_connections(
                 if crossed.contains(&oe.id) {
                     continue;
                 }
-                if oe.rule_like {
+                if oe.rule_like || on_purpose(&oe.id) {
                     continue;
                 }
                 if oe.bounds.contains(*path_start) || oe.bounds.contains(*path_end) {
@@ -2336,7 +2385,7 @@ fn check_connections(
                     // drawn ACROSS the diagram. The overlap rule already exempts
                     // the bar case, and leaving the connection case in meant the
                     // same geometry reported under a different name.
-                    if oe.rule_like {
+                    if oe.rule_like || on_purpose(&oe.id) {
                         continue;
                     }
 

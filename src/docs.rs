@@ -28,6 +28,7 @@ const TOPICS: &[(&str, &str, &str)] = &[
     ("hinges", "animation", "Hinges"),
     ("swarm", "animation", "Many things at once"),
     ("effects", "animation", "One-shot effects"),
+    ("reserved", "skill", "Reserved words"),
     ("text", "animation", "Text and numbers"),
     ("selectors", "animation", "Selecting many things"),
     ("macros", "animation", "Reuse: motion macros"),

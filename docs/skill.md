@@ -470,12 +470,19 @@ A shape's `label:` takes `<br>`, `<b>`, `<i>`, `<small>` and `<span fill=…>`.
 3. **Don't skip visual verification** — render to PNG and check every time.
 4. **Use exact color names** — `foreground-1` not `foreground`.
 5. **Don't over-constrain** — constraining both edges AND size on the same axis conflicts.
-6. **Avoid reserved names** — `left`, `right`, `top`, `bottom`, `x`, `y`, `width`, `height`.
+6. **Avoid reserved names** — see Reserved words below (`--doc reserved`).
 7. **Constraint coords are local** — property refs use pre-rotation coordinates.
 8. **Path vertices are local** — coordinates start from (0,0). Use `constrain path.left = X` / `constrain path.top = Y` to position the path in the diagram.
 9. **Use `path` for complex shapes** — not overlapping rectangles.
 10. **Consistent visual style** — decide stroke-only vs filled before creating templates.
 11. **Don't overclaim quality** — compile success ≠ good diagram. Always check visually.
+
+### Reserved words
+
+These are keywords: they cannot name an element, a part, a connection or a
+parameter. Pick a more specific name (`app_icon`, `log_row`, `wire`).
+
+`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
 
 ---
 

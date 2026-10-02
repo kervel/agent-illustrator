@@ -1,0 +1,42 @@
+/* A token runs an agent's loop: it rides the arrows, laps round the retry
+   while the check fails, then passes under the check and out to the result.
+   Render: agent-illustrator --animate token-loop.ail
+
+   STORYBOARD
+     start   execute, check and result; captions on one line
+     fail    the token rides to the check; the check fails; it laps back
+     pass    the token rides to the check, under it, and out to the result
+*/
+
+row stage [gap: 120, align: center] {
+    rect execute [width: 90, height: 110, fill: role-surface-2, corner_radius: 10, caption: "Execute",
+                  caption_position: above]
+    rect check [width: 160, height: 80, label: "Check", fill: role-surface, corner_radius: 10,
+                caption: "Tests", caption_position: above]
+    circle result [size: 60, fill: role-ok-soft, caption: "Result", caption_position: above, appears: later]
+}
+
+execute.right -> check.left as run [stroke: role-primary, stroke_width: 3]
+check.left -> execute.right as retry [stroke: role-primary, stroke_width: 3, label: "retry"]
+check.right -> result.left as out [stroke: role-primary, stroke_width: 3, appears: later]
+
+// The token lives in Execute; every ride starts and ends there or on an arrow.
+circle token [size: 20, fill: role-primary, stroke: role-surface, stroke_width: 3, appears: later, overlaps: execute]
+constrain token.center = execute.center
+
+keyframe "start" [title: "Run, check, retry"] {
+    show token [enter: pop]
+}
+
+keyframe "fail" {
+    move token along run [duration: fast]                    // to the end of the arrow
+    when token arrives { shake check }
+    when check shaken { move token home [along: retry] }     // round the retry: a lap
+}
+
+keyframe "pass" {
+    move token along run [duration: fast]
+    when token arrives { pulse check; show out [enter: draw] }
+    when check pulsed { move token along run, out }          // through the check, out the other side
+    when token arrives { hide token [exit: fade]; show result [enter: pop] }
+}

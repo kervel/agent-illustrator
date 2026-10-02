@@ -23,6 +23,13 @@ use agent_illustrator::{
     Stylesheet,
 };
 
+/// `-q`: progress and notices are not printed.
+static QUIET: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+fn quiet() -> bool {
+    QUIET.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 /// Render every keyframe into `dir` as `<NN>-<name>.svg`.
 ///
 /// One command instead of a shell loop over hand-copied frame names, so
@@ -31,7 +38,7 @@ use agent_illustrator::{
 fn to_png(svg: &str, scale: f32) -> Vec<u8> {
     match agent_illustrator::raster::svg_to_png(svg, scale) {
         Ok(r) => {
-            for n in r.notes {
+            for n in r.notes.iter().filter(|_| !quiet()) {
                 eprintln!("png: {}", n);
             }
             r.png
@@ -98,7 +105,9 @@ fn write_all_frames(source: &str, config: RenderConfig, dir: &std::path::Path, p
             eprintln!("Error writing '{}': {}", path.display(), e);
             std::process::exit(1);
         }
-        println!("{}", path.display());
+        if !quiet() {
+            println!("{}", path.display());
+        }
     }
 }
 
@@ -271,6 +280,11 @@ struct Cli {
     #[arg(long)]
     png: bool,
 
+    /// Quiet: no progress or notices (the files --frames-to-dir writes, font
+    /// notes for --png). Errors and the output you asked for still appear.
+    #[arg(short = 'q', long)]
+    quiet: bool,
+
     /// Write the output to FILE instead of stdout
     #[arg(short = 'o', long, value_name = "FILE")]
     output: Option<PathBuf>,
@@ -353,6 +367,7 @@ impl From<ImageHrefArg> for ImageHrefMode {
 
 fn main() {
     let cli = Cli::parse();
+    QUIET.store(cli.quiet, std::sync::atomic::Ordering::Relaxed);
 
     // Handle documentation flags first
     if cli.grammar {

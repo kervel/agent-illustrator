@@ -37,6 +37,17 @@ pub fn is_timing_key(k: &str) -> bool {
 /// The transient one-shot effects.
 pub const EFFECTS: &[&str] = &["pulse", "shake", "flash", "ping", "highlight", "nudge", "accent", "mark", "unmark"];
 
+/// Each one-shot effect and the word for "it has finished": `when x pulsed`.
+pub const EFFECT_EVENTS: &[(&str, &str)] = &[
+    ("accent", "accented"),
+    ("pulse", "pulsed"),
+    ("shake", "shaken"),
+    ("flash", "flashed"),
+    ("ping", "pinged"),
+    ("highlight", "highlighted"),
+    ("nudge", "nudged"),
+];
+
 /// `mark x [style: s, tone: t]` as state: "<style>-<tone>".
 pub fn mark_kind(opts: &[Spanned<MotionOpt>]) -> String {
     format!("{}-{}", opt_name(opts, "style").unwrap_or("auto"), opt_name(opts, "tone").unwrap_or("attention"))
@@ -52,6 +63,22 @@ pub fn opt_number(opts: &[Spanned<MotionOpt>], key: &str) -> Option<f64> {
         Some(MotionValue::Number(n)) => Some(*n),
         Some(MotionValue::Percent(p)) => Some(*p),
         _ => None,
+    }
+}
+
+/// `[along: l]` or `[along: [l1, l2]]`: the lines a flight rides, in order
+/// (ids, dots replaced).
+pub fn along_paths(opts: &[Spanned<MotionOpt>]) -> Vec<String> {
+    match opt(opts, "along").map(|v| &v.node) {
+        Some(MotionValue::Name(n)) => vec![n.replace('.', "_")],
+        Some(MotionValue::List(items)) => items
+            .iter()
+            .filter_map(|it| match &it.node {
+                MotionValue::Name(n) => Some(n.replace('.', "_")),
+                _ => None,
+            })
+            .collect(),
+        _ => vec![],
     }
 }
 
@@ -297,13 +324,13 @@ fn base_stmt_ops(
             let pin = match (to, along) {
                 (Some(to), _) if to.node == "home" => PinTo::Home,
                 (Some(to), _) => PinTo::Element(to.node.replace('.', "_")),
-                (None, Some(path)) => PinTo::Along {
-                    path: path.node.replace('.', "_"),
+                (None, lines) if !lines.is_empty() => PinTo::Along {
+                    path: lines.last().unwrap().node.replace('.', "_"),
                     at: opt(opts, "to")
                         .and_then(|v| draw_to(&v.node))
                         .unwrap_or(DrawTo::Fraction(1.0)),
                 },
-                (None, None) => return vec![],
+                (None, _) => return vec![],
             };
             targets
                 .iter()

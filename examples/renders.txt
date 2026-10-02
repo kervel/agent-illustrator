@@ -32,3 +32,5 @@ examples/motion/git-merge.anim.svg      examples/motion/git-merge.ail      --sty
 examples/motion/git-merge.last.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --frame choose
 examples/motion/request-response.svg      examples/motion/request-response.ail  --animate
 examples/motion/request-response.anim.svg examples/motion/request-response.ail  --animate-css
+examples/motion/token-loop.svg            examples/motion/token-loop.ail        --animate
+examples/motion/token-loop.anim.svg       examples/motion/token-loop.ail        --animate-css

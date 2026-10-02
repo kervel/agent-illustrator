@@ -554,7 +554,7 @@ fn subst_stmt(s: &MotionStmt, env: &HashMap<String, Bound>) -> MotionStmt {
             target: subst_sel(target, env),
             to: to.as_ref().map(|t| subst_str(t, env)),
             to_list: to_list.iter().map(|t| subst_str(t, env)).collect(),
-            along: along.as_ref().map(|t| subst_str(t, env)),
+            along: along.iter().map(|t| subst_str(t, env)).collect(),
         },
         MotionVerb::Effect { name, targets } => MotionVerb::Effect {
             name: name.clone(),
@@ -1013,7 +1013,7 @@ impl Expander<'_> {
             MotionEvent::Arrives(e) => MotionEvent::Arrives(id(e)?),
             MotionEvent::Shown(e) => MotionEvent::Shown(id(e)?),
             MotionEvent::Hidden(e) => MotionEvent::Hidden(id(e)?),
-            MotionEvent::Accented(e) => MotionEvent::Accented(id(e)?),
+            MotionEvent::Effected { effect, target } => MotionEvent::Effected { effect: effect.clone(), target: id(target)? },
             MotionEvent::BeatEnd(b) => MotionEvent::BeatEnd(b.clone()),
         })
     }
@@ -1040,17 +1040,26 @@ impl Expander<'_> {
         };
         // `[along: l]`: a flight rides a connection or path.
         if let Some(v) = super::opt(&s.opts, "along") {
-            let MotionValue::Name(n) = &v.node else {
-                return Err(LayoutError::validation_error("[along: ...]: name one connection or path"));
+            let items: Vec<Spanned<MotionValue>> = match &v.node {
+                MotionValue::List(items) => items.clone(),
+                _ => vec![v.clone()],
             };
-            let id = check_name(&Spanned::new(n.clone(), v.span.clone()))?;
-            if !self.idx.drawables.contains(&id) {
-                return Err(LayoutError::validation_error(&format!("[along: {}]: '{}' is not a connection or path", n, n)));
+            let mut names = Vec::new();
+            for it in &items {
+                let MotionValue::Name(n) = &it.node else {
+                    return Err(LayoutError::validation_error("[along: ...]: name a connection or path, or a list of them in order"));
+                };
+                let id = check_name(&Spanned::new(n.clone(), it.span.clone()))?;
+                if !self.idx.drawables.contains(&id) {
+                    return Err(LayoutError::validation_error(&format!("[along: {}]: '{}' is not a connection or path", n, n)));
+                }
+                names.push(n.clone());
             }
+            let n = names.join(", ");
             let travels = match &s.verb {
                 MotionVerb::Show(_) => super::opt(&s.opts, "from").is_some(),
                 MotionVerb::Fly { .. } => true,
-                MotionVerb::Move { to, along, .. } => to.is_some() && along.is_none(),
+                MotionVerb::Move { to, along, .. } => to.is_some() && along.is_empty(),
                 _ => false,
             };
             if !travels {
@@ -1113,7 +1122,7 @@ impl Expander<'_> {
                     }
                     s.partners = dests;
                 }
-                if let Some(p) = along {
+                for p in along {
                     let id = check_name(p)?;
                     if !self.idx.drawables.contains(&id) {
                         return Err(LayoutError::validation_error(&format!(

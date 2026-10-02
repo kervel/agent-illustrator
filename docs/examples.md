@@ -613,3 +613,35 @@ the repository: examples/motion/git-copies.ail, git-snapshots.ail, git-branches.
 No coordinates in any motion statement: stations, lines and flights are found by
 name, so relabelling or moving things never touches the choreography. Check it
 with --timeline, --frame N --at 50%, and --frames-strip N.
+
+EXAMPLE: Traffic on a wire (request, response, a token's loop)
+--------------------------------------------------------------
+What travels rides the arrow it travels on (`along:`). Two arrows between the
+same pair are drawn as two lanes, so request and reply never overlap.
+
+```
+app.right -> llm.left as request [label: "whole log"]
+llm.left -> app.right as reply [label: "one message"]   // second lane, label outside
+
+keyframe "call" {
+    show request [enter: draw]
+    when request shown { fly ghost(log) to llm [along: request] }   // the whole log goes in
+}
+keyframe "answer" {
+    show reply [enter: draw]
+    // ONE message comes back over the wire, at its own size, and lands in the log
+    when reply shown { show m3 [from: llm, along: reply, scale: 1, ease: glide] }
+}
+
+keyframe "fail" {
+    move token along run                                  // to the end of the arrow
+    when token arrives { shake check }
+    when check shaken { move token home [along: retry] }  // a lap
+}
+keyframe "pass" {
+    move token along run
+    when token arrives { pulse check }
+    when check pulsed { move token along run, out }       // through the check and out
+}
+```
+Full scenes: examples/motion/request-response.ail and token-loop.ail.

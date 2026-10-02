@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -101.5 680 276.5" font-size="14" data-frames="start,fail,pass">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #ffebee;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e8f5e9;
+    --role-primary: var(--accent-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--secondary-1);
+    --role-series-1: #0e8a8a;
+    --role-series-1-soft: #d6eeee;
+    --role-series-2: #e07a12;
+    --role-series-2-soft: #fbe6d2;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fff8e1;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe animation CSS (auto-generated) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+.frame-start {
+}
+.frame-fail {
+}
+.frame-pass {
+  .kf-80e80ad0-result { opacity: 1; }
+  .kf-80e80ad0-result_caption { opacity: 1; }
+  .kf-80e80ad0-token { opacity: 0; }
+  .conn-80e80ad0-out { opacity: 1; }
+}
+  /* motion: settled states (auto-generated) */
+svg[data-ail-player] * { transition: none !important; }
+.kf-80e80ad0-token { opacity: 1; }
+.kf-80e80ad0-token { scale: 1 1; }
+.kf-80e80ad0-token { translate: 0px 0px; }
+.kf-80e80ad0-check { translate: 0px 0px; }
+.kf-80e80ad0-check { scale: 1 1; }
+.conn-80e80ad0-out { opacity: 0; }
+.aimask-80e80ad0-out { stroke-dashoffset: 0; }
+.aihead-80e80ad0-out { opacity: 1; }
+.kf-80e80ad0-result { opacity: 0; }
+.kf-80e80ad0-result { scale: 1 1; }
+.kf-80e80ad0-result_caption { opacity: 0; }
+.frame-start {
+  .kf-80e80ad0-token { scale: 1 1; }
+  .kf-80e80ad0-check { scale: 1 1; }
+  .aimask-80e80ad0-out { stroke-dashoffset: 0; }
+  .aihead-80e80ad0-out { opacity: 1; }
+  .kf-80e80ad0-result { scale: 1 1; }
+}
+.frame-fail {
+  .kf-80e80ad0-token { scale: 1 1; }
+  .kf-80e80ad0-check { scale: 1 1; }
+  .aimask-80e80ad0-out { stroke-dashoffset: 0; }
+  .aihead-80e80ad0-out { opacity: 1; }
+  .kf-80e80ad0-result { scale: 1 1; }
+}
+.frame-pass {
+  .kf-80e80ad0-token { scale: 1 1; }
+  .kf-80e80ad0-check { scale: 1 1; }
+  .aimask-80e80ad0-out { stroke-dashoffset: 0; }
+  .aihead-80e80ad0-out { opacity: 1; }
+  .kf-80e80ad0-result { scale: 1 1; }
+}
+]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <mask id="aim-80e80ad0-out" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-80e80ad0-out aid-80e80ad0-out" d="M375 60 L484.2 60" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-80e80ad0-stage kf-anim" style="transform-origin:280px 60px">
+    <g id="stage" class="ai-container kfp-80e80ad0-stage">
+      <g class="kf-80e80ad0-execute kf-anim" style="transform-origin:50px 60px">
+        <rect id="execute" class="ai-shape ai-rect kfp-80e80ad0-execute" x="5" y="5" width="90" height="110" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+      </g>
+      <g class="kf-80e80ad0-check kf-anim" style="transform-origin:295px 60px">
+        <rect id="check" class="ai-shape ai-rect kfp-80e80ad0-check" x="215" y="20" width="160" height="80" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+        <text class="ai-label" x="295" y="60" text-anchor="middle" dominant-baseline="middle"><tspan x="295" dy="-0"><tspan>Check</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-80e80ad0-result kf-anim" style="transform-origin:525px 60px">
+        <circle id="result" class="ai-shape ai-circle kfp-80e80ad0-result" cx="525" cy="60" r="30" fill="var(--role-ok-soft)" stroke="#333333" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-80e80ad0-token kf-anim" style="transform-origin:50px 60px">
+    <circle id="token" class="ai-shape ai-circle kfp-80e80ad0-token" cx="50" cy="60" r="10" fill="var(--role-primary)" stroke="var(--role-surface)" stroke-width="3"/>
+  </g>
+  <g class="kf-80e80ad0-execute_caption kf-anim" style="transform-origin:50px -22.25px">
+    <rect id="execute_caption" class="ai-shape ai-rect kfp-80e80ad0-execute_caption" x="7.8571" y="-41.5" width="84.2857" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="50" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="50" dy="-0"><tspan>Execute</tspan></tspan></text>
+  </g>
+  <g class="kf-80e80ad0-check_caption kf-anim" style="transform-origin:295px -22.25px">
+    <rect id="check_caption" class="ai-shape ai-rect kfp-80e80ad0-check_caption" x="255" y="-41.5" width="80" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="295" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="295" dy="-0"><tspan>Tests</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-80e80ad0-result_caption kf-anim" style="transform-origin:525px -22.25px">
+    <rect id="result_caption" class="ai-shape ai-rect kfp-80e80ad0-result_caption" x="485" y="-41.5" width="80" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="525" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="525" dy="-0"><tspan>Result</tspan></tspan></text>
+  </g>
+  <text class="ai-label conn-80e80ad0-retry" x="155" y="79" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="155" dy="-0"><tspan>retry</tspan></tspan></text>
+  <path class="ai-connection conn-80e80ad0-run conn-80e80ad0-run-base aid-80e80ad0-run" d="M95 51 L204.2 51" fill="none" stroke="var(--role-primary)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-80e80ad0-retry conn-80e80ad0-retry-base aid-80e80ad0-retry" d="M215 69 L105.8 69" fill="none" stroke="var(--role-primary)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-80e80ad0-out conn-80e80ad0-out-base aid-80e80ad0-out" d="M375 60 L484.2 60" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-80e80ad0-out)"/>
+  <g class="conn-80e80ad0-out"><path class="aihead-80e80ad0-out" d="M483 66 L493.8 60 L483 54 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"80e80ad0-","frames":[{"name":"start","duration":0.5,"auto":null,"title":"Run, check, retry","note":null},{"name":"fail","duration":1.25,"auto":null,"title":null,"note":null},{"name":"pass","duration":1.75,"auto":null,"title":null,"note":null}],"elements":["stage","execute","check","result","token","execute_caption","check_caption","result_caption","run","retry","out"],"channels":[[".kf-80e80ad0-token","opacity"],[".kf-80e80ad0-token","scale"],[".kf-80e80ad0-token","translate"],[".kf-80e80ad0-check","translate"],[".kf-80e80ad0-check","scale"],[".conn-80e80ad0-out","opacity"],[".aimask-80e80ad0-out","stroke-dashoffset"],[".aihead-80e80ad0-out","opacity"],[".kf-80e80ad0-result","opacity"],[".kf-80e80ad0-result","scale"],[".kf-80e80ad0-result_caption","opacity"]],"settled":[["0","1 1","0px 0px","0px 0px","1 1","0","0","1","0","1 1","0"],["1","1 1","0px 0px","0px 0px","1 1","0","0","1","0","1 1","0"],["1","1 1","0px 0px","0px 0px","1 1","0","0","1","0","1 1","0"],["0","1 1","434.2px 0px","0px 0px","1 1","1","0","1","1","1 1","1"]],"anims":[[{"c":0,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]}],[{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0313,"4.752px -0.95px"],[0.0625,"9.505px -1.901px"],[0.0938,"14.257px -2.851px"],[0.125,"19.01px -3.802px"],[0.1563,"23.762px -4.752px"],[0.1875,"28.515px -5.703px"],[0.2188,"33.267px -6.653px"],[0.25,"38.02px -7.604px"],[0.2813,"42.772px -8.554px"],[0.3125,"47.575px -9px"],[0.3438,"52.421px -9px"],[0.375,"57.268px -9px"],[0.4063,"62.115px -9px"],[0.4375,"66.961px -9px"],[0.4688,"71.808px -9px"],[0.5,"76.654px -9px"],[0.5313,"81.501px -9px"],[0.5625,"86.348px -9px"],[0.5938,"91.194px -9px"],[0.625,"96.041px -9px"],[0.6563,"100.887px -9px"],[0.6875,"105.734px -9px"],[0.7188,"110.581px -9px"],[0.75,"115.427px -9px"],[0.7813,"120.274px -9px"],[0.8125,"125.12px -9px"],[0.8438,"129.967px -9px"],[0.875,"134.814px -9px"],[0.9063,"139.66px -9px"],[0.9375,"144.507px -9px"],[0.9688,"149.353px -9px"],[1,"154.2px -9px"]]},{"c":2,"t":0.25,"d":0.001,"e":"linear","k":[[0,"154.2px -9px"],[1,"154.2px -9px"]]},{"c":2,"t":0.25,"d":0.001,"e":"linear","k":[[0,"154.2px -9px"],[1,"154.2px -9px"]]},{"c":2,"t":0.75,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"154.2px -9px"],[0.0313,"154.2px -3.596px"],[0.0625,"154.2px 1.808px"],[0.0938,"154.2px 7.211px"],[0.125,"150.585px 9px"],[0.1563,"145.181px 9px"],[0.1875,"139.777px 9px"],[0.2188,"134.373px 9px"],[0.25,"128.97px 9px"],[0.2813,"123.566px 9px"],[0.3125,"118.162px 9px"],[0.3438,"112.758px 9px"],[0.375,"107.355px 9px"],[0.4063,"101.951px 9px"],[0.4375,"96.547px 9px"],[0.4688,"91.143px 9px"],[0.5,"85.739px 9px"],[0.5313,"80.336px 9px"],[0.5625,"74.932px 9px"],[0.5938,"69.528px 9px"],[0.625,"64.124px 9px"],[0.6563,"58.72px 9px"],[0.6875,"53.348px 8.605px"],[0.7188,"48.014px 7.744px"],[0.75,"42.679px 6.884px"],[0.7813,"37.344px 6.023px"],[0.8125,"32.009px 5.163px"],[0.8438,"26.674px 4.302px"],[0.875,"21.339px 3.442px"],[0.9063,"16.005px 2.581px"],[0.9375,"10.67px 1.721px"],[0.9688,"5.335px 0.86px"],[1,"0px 0px"]]},{"c":2,"t":1.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":2,"t":1.25,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":3,"t":0.25,"d":0.5,"e":"linear","k":[[0,"0px 0px"],[0.2,"-12px 0px"],[0.4,"9.6px 0px"],[0.6,"-6px 0px"],[0.8,"3px 0px"],[1,"0px 0px"]]},{"c":3,"t":0.75,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]}],[{"c":0,"t":1.25,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":2,"t":0,"d":0.25,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0313,"4.752px -0.95px"],[0.0625,"9.505px -1.901px"],[0.0938,"14.257px -2.851px"],[0.125,"19.01px -3.802px"],[0.1563,"23.762px -4.752px"],[0.1875,"28.515px -5.703px"],[0.2188,"33.267px -6.653px"],[0.25,"38.02px -7.604px"],[0.2813,"42.772px -8.554px"],[0.3125,"47.575px -9px"],[0.3438,"52.421px -9px"],[0.375,"57.268px -9px"],[0.4063,"62.115px -9px"],[0.4375,"66.961px -9px"],[0.4688,"71.808px -9px"],[0.5,"76.654px -9px"],[0.5313,"81.501px -9px"],[0.5625,"86.348px -9px"],[0.5938,"91.194px -9px"],[0.625,"96.041px -9px"],[0.6563,"100.887px -9px"],[0.6875,"105.734px -9px"],[0.7188,"110.581px -9px"],[0.75,"115.427px -9px"],[0.7813,"120.274px -9px"],[0.8125,"125.12px -9px"],[0.8438,"129.967px -9px"],[0.875,"134.814px -9px"],[0.9063,"139.66px -9px"],[0.9375,"144.507px -9px"],[0.9688,"149.353px -9px"],[1,"154.2px -9px"]]},{"c":2,"t":0.25,"d":0.001,"e":"linear","k":[[0,"154.2px -9px"],[1,"154.2px -9px"]]},{"c":2,"t":0.25,"d":0.001,"e":"linear","k":[[0,"154.2px -9px"],[1,"154.2px -9px"]]},{"c":2,"t":0.75,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"154.2px -9px"],[0.0156,"158.573px -8.77px"],[0.0313,"162.945px -8.539px"],[0.0469,"167.318px -8.309px"],[0.0625,"171.691px -8.078px"],[0.0781,"176.063px -7.848px"],[0.0938,"180.436px -7.618px"],[0.1094,"184.808px -7.387px"],[0.125,"189.181px -7.157px"],[0.1406,"193.554px -6.926px"],[0.1563,"197.926px -6.696px"],[0.1719,"202.299px -6.466px"],[0.1875,"206.672px -6.235px"],[0.2031,"211.044px -6.005px"],[0.2188,"215.417px -5.774px"],[0.2344,"219.79px -5.544px"],[0.25,"224.162px -5.313px"],[0.2656,"228.535px -5.083px"],[0.2813,"232.907px -4.853px"],[0.2969,"237.28px -4.622px"],[0.3125,"241.653px -4.392px"],[0.3281,"246.025px -4.161px"],[0.3438,"250.398px -3.931px"],[0.3594,"254.771px -3.701px"],[0.375,"259.143px -3.47px"],[0.3906,"263.516px -3.24px"],[0.4063,"267.889px -3.009px"],[0.4219,"272.261px -2.779px"],[0.4375,"276.634px -2.549px"],[0.4531,"281.006px -2.318px"],[0.4688,"285.379px -2.088px"],[0.4844,"289.752px -1.857px"],[0.5,"294.124px -1.627px"],[0.5156,"298.497px -1.397px"],[0.5313,"302.87px -1.166px"],[0.5469,"307.242px -0.936px"],[0.5625,"311.615px -0.705px"],[0.5781,"315.988px -0.475px"],[0.5938,"320.36px -0.244px"],[0.6094,"324.733px -0.014px"],[0.625,"329.111px 0px"],[0.6406,"333.49px 0px"],[0.6563,"337.869px 0px"],[0.6719,"342.247px 0px"],[0.6875,"346.626px 0px"],[0.7031,"351.005px 0px"],[0.7188,"355.383px 0px"],[0.7344,"359.762px 0px"],[0.75,"364.141px 0px"],[0.7656,"368.519px 0px"],[0.7813,"372.898px 0px"],[0.7969,"377.277px 0px"],[0.8125,"381.656px 0px"],[0.8281,"386.034px 0px"],[0.8438,"390.413px 0px"],[0.8594,"394.792px 0px"],[0.875,"399.17px 0px"],[0.8906,"403.549px 0px"],[0.9063,"407.928px 0px"],[0.9219,"412.306px 0px"],[0.9375,"416.685px 0px"],[0.9531,"421.064px 0px"],[0.9688,"425.443px 0px"],[0.9844,"429.821px 0px"],[1,"434.2px 0px"]]},{"c":2,"t":1.25,"d":0.001,"e":"linear","k":[[0,"434.2px 0px"],[1,"434.2px 0px"]]},{"c":2,"t":1.25,"d":0.001,"e":"linear","k":[[0,"434.2px 0px"],[1,"434.2px 0px"]]},{"c":4,"t":0.25,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.15 1.15"],[1,"1 1"]]},{"c":4,"t":0.75,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":5,"t":0.25,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":6,"t":0.25,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":6,"t":0.75,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":7,"t":0.25,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":7,"t":0.75,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":8,"t":1.25,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":9,"t":1.25,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":10,"t":1.25,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0"],[1,"1"]]}]]}]]></script>
+<script><![CDATA[
+/* agent-illustrator motion player: plays the tracks compiled into an SVG.
+ * No dependencies; Web Animations API. The player has no semantics of its
+ * own: every value it sets comes from the embedded manifest.
+ *
+ *   var p = ail.player(svgElement);        // shows frame 0, settled
+ *   p.nextStep(); p.prevStep(); p.goToStep(2); p.step; p.steps;
+ *   p.next(); p.prev(); p.goTo(3); p.goTo('merge'); p.frame; p.frames;
+ *   p.on('frame', function (i, name) { ... }); p.on('step', function (i) { ... });
+ *
+ * `p.title` / `p.note`: the host metadata in effect (`keyframe "k" [title:
+ * "...", note: "..."]`); a title holds until a later frame sets another, a
+ * note belongs to its step. Both come with every 'step' event:
+ *   p.on('step', function (k, meta) { header.textContent = meta.title; });
+ *
+ * A step is what one click shows: a frame and the `[auto]` frames that play
+ * on after it by themselves. Hosts that advance on clicks use the step API
+ * and never need to know which frames are automatic; `p.steps` lists each
+ * step's first frame (also `agent-illustrator --list-steps`).
+ *
+ * Forward plays the segment; backward and jumps are instant and exact.
+ */
+(function (root) {
+  'use strict';
+  if (root.ail && root.ail.player) return;
+
+  function camel(p) {
+    return p.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); });
+  }
+  function mq(q) {
+    return root.matchMedia ? root.matchMedia(q) : { matches: false, addListener: function () {} };
+  }
+
+  function Player(svg, opts) {
+    opts = opts || {};
+    var node = svg.querySelector('script.ail-motion');
+    if (!node) throw new Error('ail.player: this SVG has no motion manifest');
+    var m = JSON.parse(node.textContent);
+    if (m.v !== 1) throw new Error('ail.player: unsupported manifest version ' + m.v);
+    var self = this;
+    this.svg = svg;
+    this.manifest = m;
+    this.frames = m.frames.map(function (f) { return f.name; });
+    this.steps = [];
+    m.frames.forEach(function (f, i) { if (i === 0 || f.auto == null) self.steps.push(i); });
+    this.frame = 0;
+    this.playing = false;
+    this._anims = [];
+    this._loops = [];
+    this._timers = [];
+    this._listeners = {};
+    this._nodes = m.channels.map(function (c) {
+      return Array.prototype.slice.call(svg.querySelectorAll(c[0]));
+    });
+    this._reduced = mq('(prefers-reduced-motion: reduce)');
+    svg.setAttribute('data-ail-player', '');
+
+    // Print shows the finished story.
+    var saved = null;
+    function toLast() { saved = self.frame; self.goTo(self.frames.length - 1); }
+    function restore() { if (saved !== null) { self.goTo(saved); saved = null; } }
+    if (root.addEventListener) {
+      root.addEventListener('beforeprint', toLast);
+      root.addEventListener('afterprint', restore);
+    }
+
+    if (opts.autoplay) {
+      this._autoplay(opts.dwell == null ? 1.6 : opts.dwell);
+    } else {
+      this.goTo(opts.frame == null ? 0 : opts.frame);
+    }
+  }
+
+  var P = Player.prototype;
+
+  P.on = function (evt, cb) {
+    (this._listeners[evt] = this._listeners[evt] || []).push(cb);
+    return this;
+  };
+  P._emit = function (evt) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    (this._listeners[evt] || []).forEach(function (cb) { cb.apply(null, args); });
+  };
+  P._index = function (i) {
+    if (typeof i === 'string') {
+      var k = this.frames.indexOf(i);
+      if (k < 0) throw new Error('ail.player: no frame named "' + i + '"');
+      return k;
+    }
+    return Math.max(0, Math.min(this.frames.length - 1, i | 0));
+  };
+  P._set = function (c, v) {
+    var prop = this.manifest.channels[c][1];
+    this._nodes[c].forEach(function (n) {
+      if (prop === 'text') n.textContent = v;
+      else n.style.setProperty(prop, v);
+    });
+  };
+  P._apply = function (row) {
+    var vals = this.manifest.settled[row];
+    for (var c = 0; c < vals.length; c++) this._set(c, vals[c]);
+  };
+  P._stop = function () {
+    this._anims.concat(this._loops).forEach(function (a) { a.cancel(); });
+    this._anims = [];
+    this._loops = [];
+    this._timers.forEach(clearTimeout);
+    this._timers = [];
+    this.playing = false;
+  };
+  /** True when every node of channel c is invisible right now (it or an
+   *  ancestor at opacity 0). */
+  P._hidden = function (c) {
+    var svg = this.svg;
+    return this._nodes[c].every(function (n) {
+      for (var e = n; e && e !== svg; e = e.parentNode) {
+        if (e.nodeType === 1 && getComputedStyle(e).opacity === '0') return true;
+      }
+      return false;
+    });
+  };
+
+  /** Start frame i's animations. A channel of something hidden when the
+   *  frame starts takes its first animation's starting value at once (fill
+   *  both): an element must never become visible before its geometry is in
+   *  place. A page about to flip in held scale 1 until its hold began, and
+   *  the frame that showed it before the hold did was a full-size flash. */
+  P._animateFrame = function (i) {
+    var self = this, seen = {};
+    this.manifest.anims[i].forEach(function (a) {
+      var first = !a.loop && !(a.c in seen);
+      seen[a.c] = true;
+      self._animate(a, false, first && self._hidden(a.c));
+    });
+  };
+
+  P._animate = function (a, loopNow, backfill) {
+    var self = this;
+    var prop = this.manifest.channels[a.c][1];
+    if (prop === 'text') {
+      a.k.forEach(function (kv) {
+        self._timers.push(setTimeout(function () { self._set(a.c, kv[1]); },
+          (a.t + kv[0] * a.d) * 1000));
+      });
+      return;
+    }
+    var key = camel(prop);
+    var frames = a.k.map(function (kv) { var f = { offset: kv[0] }; f[key] = kv[1]; return f; });
+    var timing = {
+      delay: loopNow ? 0 : a.t * 1000,
+      duration: Math.max(a.d * 1000, 1),
+      easing: a.e,
+      fill: a.loop ? 'none' : (backfill ? 'both' : 'forwards'),
+      iterations: a.loop ? Infinity : 1
+    };
+    this._nodes[a.c].forEach(function (n) {
+      if (!n.animate) return;
+      var anim = n.animate(frames, timing);
+      (a.loop ? self._loops : self._anims).push(anim);
+    });
+  };
+  P._startLoops = function (i) {
+    var self = this;
+    this.manifest.anims[i].forEach(function (a) { if (a.loop) self._animate(a, true); });
+  };
+
+  /** Jump to frame i (index or name): instant, exact. */
+  P.goTo = function (i) {
+    i = this._index(i);
+    this._stop();
+    this._apply(i + 1);
+    this.frame = i;
+    this._startLoops(i);
+    this._emit('frame', i, this.frames[i]);
+    return this;
+  };
+
+  /** Play frame i from the state before it. */
+  P.play = function (i) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    var f = this.manifest.frames[i];
+    if (this._reduced.matches || !f.duration) {
+      this.goTo(i);
+      this._chain(i);
+      return this;
+    }
+    this._apply(i);
+    this.frame = i;
+    this.playing = true;
+    this._emit('framestart', i, this.frames[i]);
+    this._animateFrame(i);
+    this._timers.push(setTimeout(function () {
+      self._apply(i + 1);
+      self._anims.forEach(function (a) { a.cancel(); });
+      self._anims = [];
+      self.playing = false;
+      self._emit('frame', i, self.frames[i]);
+      self._chain(i);
+    }, f.duration * 1000 + 20));
+    return this;
+  };
+
+  P._chain = function (i) {
+    var self = this;
+    var nf = this.manifest.frames[i + 1];
+    if (nf && nf.auto != null) {
+      this._timers.push(setTimeout(function () { self.play(i + 1); }, nf.auto * 1000));
+    } else if (this._auto) {
+      this._auto(i);
+    }
+  };
+
+  /** The step frame i belongs to. */
+  P._stepOf = function (i) {
+    var k = 0;
+    for (var s = 0; s < this.steps.length; s++) if (this.steps[s] <= i) k = s;
+    return k;
+  };
+  /** Last frame of step k: its own frame and the automatic ones after it. */
+  P._stepEnd = function (k) {
+    return k + 1 < this.steps.length ? this.steps[k + 1] - 1 : this.frames.length - 1;
+  };
+  Object.defineProperty(P, 'step', { get: function () { return this._stepOf(this.frame); } });
+  /** Host metadata at step k: the latest title set up to its end, its notes. */
+  P.meta = function (k) {
+    if (k == null) k = this.step;
+    var fr = this.manifest.frames, title = null, notes = [];
+    for (var i = 0; i <= this._stepEnd(k); i++) if (fr[i].title != null) title = fr[i].title;
+    for (var j = this.steps[k]; j <= this._stepEnd(k); j++) if (fr[j].note != null) notes.push(fr[j].note);
+    return { title: title, note: notes.length ? notes.join('\n') : null };
+  };
+  Object.defineProperty(P, 'title', { get: function () { return this.meta().title; } });
+  Object.defineProperty(P, 'note', { get: function () { return this.meta().note; } });
+
+  /** Jump to the end of step k (its automatic frames included): instant. */
+  P.goToStep = function (k) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k | 0));
+    this.goTo(this._stepEnd(k));
+    this._emit('step', k, this.meta(k));
+    return this;
+  };
+
+  /** One click: finish the current step, then play the next one through. */
+  P.nextStep = function () {
+    var k = this.step;
+    if (this.playing || this.frame < this._stepEnd(k)) this.goToStep(k);
+    if (k + 1 < this.steps.length) {
+      this.play(this.steps[k + 1]);
+      this._emit('step', k + 1, this.meta(k + 1));
+      return true;
+    }
+    return false;
+  };
+
+  /** One click back: the end of the previous step, instantly. */
+  P.prevStep = function () {
+    var k = this.step;
+    if (k > 0) { this.goToStep(k - 1); return true; }
+    this.goToStep(0);
+    return false;
+  };
+
+  /** Advance: play the next frame (finishing the current one first). */
+  P.next = function () {
+    if (this.playing) this.goTo(this.frame);
+    if (this.frame < this.frames.length - 1) { this.play(this.frame + 1); return true; }
+    return false;
+  };
+
+  /** Step back: instant. */
+  P.prev = function () {
+    if (this.frame > 0) { this.goTo(this.frame - 1); return true; }
+    this.goTo(0);
+    return false;
+  };
+
+  /** Freeze frame i at t seconds into it (for tests and previews). */
+  P.at = function (i, t) {
+    var self = this;
+    i = this._index(i);
+    this._stop();
+    this._apply(i);
+    this.frame = i;
+    this.manifest.anims[i].forEach(function (a) {
+      var prop = self.manifest.channels[a.c][1];
+      if (prop === 'text') {
+        var cur = null;
+        a.k.forEach(function (kv) { if (a.t + kv[0] * a.d <= t + 1e-9) cur = kv[1]; });
+        if (cur !== null) self._set(a.c, cur);
+        return;
+      }
+      self._animate(a, false);
+    });
+    this._anims.concat(this._loops).forEach(function (an) { an.pause(); an.currentTime = t * 1000; });
+    return this;
+  };
+
+  P._autoplay = function (dwell) {
+    var self = this;
+    this._auto = function (i) {
+      self._timers.push(setTimeout(function () {
+        if (i < self.frames.length - 1) self.play(i + 1);
+        else { self._apply(0); self.play(0); }
+      }, dwell * 1000));
+    };
+    function manual() { self._auto = null; }
+    this.svg.addEventListener('click', function () { manual(); if (!self.nextStep()) self.goToStep(0); });
+    if (root.document) {
+      root.document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { manual(); self.nextStep(); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { manual(); self.prevStep(); e.preventDefault(); }
+      });
+    }
+    this._apply(0);
+    this.play(0);
+  };
+
+  root.ail = root.ail || {};
+  root.ail.player = function (svg, opts) {
+    if (!svg.__ailPlayer) svg.__ailPlayer = new Player(svg, opts);
+    return svg.__ailPlayer;
+  };
+})(typeof window !== 'undefined' ? window : this);
+
+(function(){var svg=document.currentScript&&document.currentScript.closest?document.currentScript.closest('svg'):null;if(!svg){var all=document.querySelectorAll('svg[data-frames]');svg=all[all.length-1];}if(svg&&window.ail){window.ail.player(svg,{autoplay:true});}})();
+]]></script>
+</svg>

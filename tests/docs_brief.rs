@@ -103,3 +103,24 @@ fn every_entry_point_says_z_order_exists() {
         assert_eq!(docs::section(w), docs::section("layering"), "--doc {w}");
     }
 }
+
+#[test]
+fn the_reserved_words_are_listed_once_and_completely() {
+    // Every keyword the lexer knows, in the one list errors point to...
+    let lexer = include_str!("../src/parser/lexer.rs");
+    let mut from_lexer: Vec<&str> = lexer
+        .split("#[token(\"")
+        .skip(1)
+        .filter_map(|s| s.split('"').next())
+        .filter(|w| w.chars().next().is_some_and(|c| c.is_ascii_alphabetic()))
+        .collect();
+    let mut listed: Vec<&str> = agent_illustrator::error::RESERVED.to_vec();
+    from_lexer.sort();
+    listed.sort();
+    assert_eq!(from_lexer, listed, "error::RESERVED is out of step with the lexer");
+    // ...and every one of them in `--doc reserved`.
+    let doc = docs::section("reserved").expect("--doc reserved");
+    for w in agent_illustrator::error::RESERVED {
+        assert!(doc.contains(&format!("`{w}`")), "--doc reserved does not list {w}");
+    }
+}

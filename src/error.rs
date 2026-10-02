@@ -164,7 +164,8 @@ impl<'a> From<chumsky::error::Rich<'a, crate::parser::lexer::Token>> for ParseEr
                     match found.as_ref().and_then(|t| keyword_spelling(t)) {
                         Some(w) => format!(
                             "Unexpected {}. '{}' is a reserved word in AIL: it cannot name an element, \
-                             parameter or connection; rename it (e.g. '{}_1' or something more specific)",
+                             parameter or connection; rename it (e.g. '{}_1' or something more specific). \
+                             All reserved words: `agent-illustrator --doc reserved`",
                             found_str, w, w
                         ),
                         None => format!("Unexpected {}", found_str),
@@ -200,6 +201,69 @@ impl<'a> From<chumsky::error::Rich<'a, crate::parser::lexer::Token>> for ParseEr
 }
 
 /// The source spelling of a keyword token, if it is one.
+/// Every reserved word (`--doc reserved` lists them; a test keeps this in
+/// step with the lexer and the docs).
+pub const RESERVED: &[&str] = &[
+    "rect",
+    "circle",
+    "ellipse",
+    "polygon",
+    "line",
+    "icon",
+    "text",
+    "callout",
+    "path",
+    "vertex",
+    "line_to",
+    "arc_to",
+    "curve_to",
+    "close",
+    "clockwise",
+    "cw",
+    "counterclockwise",
+    "ccw",
+    "row",
+    "col",
+    "grid",
+    "stack",
+    "group",
+    "label",
+    "template",
+    "from",
+    "export",
+    "anchor",
+    "direction",
+    "position",
+    "up",
+    "down",
+    "place",
+    "right-of",
+    "left-of",
+    "above",
+    "below",
+    "inside",
+    "left",
+    "right",
+    "top",
+    "bottom",
+    "horizontal_center",
+    "vertical_center",
+    "role",
+    "as",
+    "keyframe",
+    "show",
+    "hide",
+    "transform",
+    "disable",
+    "enable",
+    "constrain",
+    "midpoint",
+    "contains",
+    "center_x",
+    "center_y",
+    "center",
+];
+
 pub fn keyword_spelling(tok: &crate::parser::lexer::Token) -> Option<&'static str> {
     use crate::parser::lexer::Token;
     Some(match tok {

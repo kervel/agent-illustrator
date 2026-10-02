@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -101.5 680 276.5" font-size="14" data-frames="start,fail,pass">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #2196f3;
+    --accent-2: #e3f2fd;
+    --accent-3: #bbdefb;
+    --accent-dark: #1565c0;
+    --accent-light: #e3f2fd;
+    --background-1: #ffffff;
+    --background-2: #f5f5f5;
+    --background-3: #eeeeee;
+    --background-dark: #333333;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #333333;
+    --foreground-2: #666666;
+    --foreground-3: #999999;
+    --foreground-dark: #1a1a1a;
+    --foreground-light: #e0e0e0;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #ffebee;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e8f5e9;
+    --role-primary: var(--accent-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--secondary-1);
+    --role-series-1: #0e8a8a;
+    --role-series-1-soft: #d6eeee;
+    --role-series-2: #e07a12;
+    --role-series-2-soft: #fbe6d2;
+    --role-series-3: #7b4bb7;
+    --role-series-3-soft: #e8def3;
+    --role-series-4: #c2185b;
+    --role-series-4-soft: #f6d7e3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fff8e1;
+    --secondary-1: #ff9800;
+    --secondary-2: #fff3e0;
+    --secondary-3: #ffe0b2;
+    --secondary-dark: #e65100;
+    --secondary-light: #fff3e0;
+    --status-error: #f44336;
+    --status-success: #4caf50;
+    --status-warning: #ff9800;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #999999;
+    --text-dark: #1a1a1a;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    /* Keyframe CSS suppressed (--no-frame-css) */
+.kf-hidden { opacity: 0; }
+.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
+.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
+.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+  /* motion: the whole story as CSS (auto-generated) */
+@keyframes ailfilm0 { 0% { opacity: 0; } 4.1237% { opacity: 0; } 6.5292% { opacity: 0.933; } 6.8729% { opacity: 1; } 63.7457% { opacity: 1; } 64.0893% { opacity: 0.813; } 64.433% { opacity: 0.492; } 64.7766% { opacity: 0.278; } 65.1203% { opacity: 0.148; } 65.4639% { opacity: 0.071; } 65.8076% { opacity: 0.028; } 66.1512% { opacity: 0.006; } 66.8385% { opacity: 0; } 99.9897% { opacity: 0; } }
+@keyframes ailfilm1 { 0% { scale: 0 0; } 4.1237% { scale: 0 0; } 4.4674% { scale: 0.281 0.281; } 4.811% { scale: 0.515 0.515; } 5.1546% { scale: 0.703 0.703; } 5.4983% { scale: 0.849 0.849; } 5.8419% { scale: 0.957 0.957; } 6.1856% { scale: 1.03 1.03; } 6.5292% { scale: 1.075 1.075; } 6.8729% { scale: 1.095 1.095; } 7.2165% { scale: 1.097 1.097; } 7.5601% { scale: 1.085 1.085; } 8.5911% { scale: 1.021 1.021; } 8.9347% { scale: 1.006 1.006; } 9.2784% { scale: 1 1; } 99.9897% { scale: 1 1; } }
+@keyframes ailfilm2 { 0% { translate: 0px 0px; } 23.7113% { translate: 0px 0px; } 24.055% { translate: 2.533px -0.507px; } 24.3986% { translate: 12.639px -2.528px; } 24.7423% { translate: 38.342px -7.668px; } 25.0859% { translate: 91.142px -9px; } 25.4296% { translate: 131.08px -9px; } 25.7732% { translate: 147.758px -9px; } 26.1168% { translate: 153.61px -9px; } 26.4605% { translate: 154.2px -9px; } 31.6151% { translate: 154.2px -8.842px; } 31.9588% { translate: 154.2px -7.454px; } 32.3024% { translate: 154.2px -4.27px; } 32.646% { translate: 154.2px 1.349px; } 32.9897% { translate: 152.044px 8.278px; } 33.3333% { translate: 138.49px 9px; } 33.677% { translate: 116.422px 9px; } 34.3643% { translate: 55.078px 8.732px; } 34.7079% { translate: 33.28px 5.368px; } 35.0515% { translate: 19.186px 3.095px; } 35.3952% { translate: 10.216px 1.648px; } 35.7388% { translate: 4.67px 0.753px; } 36.0825% { translate: 1.527px 0.246px; } 36.4261% { translate: 0.156px 0.025px; } 51.0309% { translate: 0px 0px; } 51.3746% { translate: 2.533px -0.507px; } 51.7182% { translate: 12.639px -2.528px; } 52.0619% { translate: 38.342px -7.668px; } 52.4055% { translate: 91.142px -9px; } 52.7491% { translate: 131.08px -9px; } 53.0928% { translate: 147.758px -9px; } 53.4364% { translate: 153.61px -9px; } 53.7801% { translate: 154.2px -9px; } 58.9347% { translate: 154.455px -8.987px; } 59.2784% { translate: 156.703px -8.868px; } 59.622% { translate: 161.855px -8.597px; } 59.9656% { translate: 170.948px -8.118px; } 60.3093% { translate: 185.651px -7.343px; } 60.6529% { translate: 208.756px -6.125px; } 60.9966% { translate: 244.469px -4.243px; } 61.3402% { translate: 294.124px -1.627px; } 61.6838% { translate: 343.806px 0px; } 62.0275% { translate: 379.569px 0px; } 62.3711% { translate: 402.705px 0px; } 62.7148% { translate: 417.429px 0px; } 63.0584% { translate: 426.535px 0px; } 63.4021% { translate: 431.694px 0px; } 63.7457% { translate: 433.944px 0px; } 69.0722% { translate: 434.2px 0px; } 99.9897% { translate: 434.2px 0px; } }
+@keyframes ailfilm3 { 0% { translate: 0px 0px; } 26.1168% { translate: 0px 0px; } 26.4605% { translate: -2px 0px; } 27.1478% { translate: -10px 0px; } 27.4914% { translate: -8.4px 0px; } 28.1787% { translate: 6px 0px; } 28.5223% { translate: 7px 0px; } 29.2096% { translate: -3.4px 0px; } 29.5533% { translate: -4.5px 0px; } 30.2405% { translate: 1.5px 0px; } 30.5842% { translate: 2.5px 0px; } 31.2715% { translate: 0.5px 0px; } 31.6151% { translate: 0px 0px; } 99.9897% { translate: 0px 0px; } }
+@keyframes ailfilm4 { 0% { scale: 1 1; } 54.1237% { scale: 1.003 1.003; } 54.811% { scale: 1.018 1.018; } 55.1546% { scale: 1.034 1.034; } 55.4983% { scale: 1.058 1.058; } 55.8419% { scale: 1.097 1.097; } 56.1856% { scale: 1.15 1.15; } 56.5292% { scale: 1.097 1.097; } 56.8729% { scale: 1.058 1.058; } 57.2165% { scale: 1.034 1.034; } 57.9038% { scale: 1.008 1.008; } 59.2784% { scale: 1 1; } 99.9897% { scale: 1 1; } }
+@keyframes ailfilm5 { 0% { opacity: 0; } 53.4364% { opacity: 0; } 53.7801% { opacity: 1; } 99.9897% { opacity: 1; } }
+@keyframes ailfilm6 { 0% { stroke-dashoffset: 0; } 53.4364% { stroke-dashoffset: 0; } 53.7801% { stroke-dashoffset: 0.907; } 54.1237% { stroke-dashoffset: 0.725; } 54.4674% { stroke-dashoffset: 0.563; } 54.811% { stroke-dashoffset: 0.429; } 55.1546% { stroke-dashoffset: 0.322; } 55.4983% { stroke-dashoffset: 0.239; } 55.8419% { stroke-dashoffset: 0.175; } 56.1856% { stroke-dashoffset: 0.125; } 56.5292% { stroke-dashoffset: 0.087; } 57.2165% { stroke-dashoffset: 0.036; } 57.9038% { stroke-dashoffset: 0.01; } 58.9347% { stroke-dashoffset: 0; } 99.9897% { stroke-dashoffset: 0; } }
+@keyframes ailfilm7 { 0% { opacity: 1; } 53.4364% { opacity: 1; } 53.7801% { opacity: 0; } 57.9038% { opacity: 0; } 58.2474% { opacity: 0.2; } 58.5911% { opacity: 0.733; } 58.9347% { opacity: 1; } 99.9897% { opacity: 1; } }
+@keyframes ailfilm8 { 0% { opacity: 0; } 63.7457% { opacity: 0; } 64.0893% { opacity: 0.067; } 66.4948% { opacity: 1; } 99.9897% { opacity: 1; } }
+@keyframes ailfilm9 { 0% { scale: 1 1; } 63.7457% { scale: 1 1; } 64.0893% { scale: 0.147 0.147; } 64.433% { scale: 0.404 0.404; } 64.7766% { scale: 0.614 0.614; } 65.1203% { scale: 0.781 0.781; } 65.4639% { scale: 0.907 0.907; } 65.8076% { scale: 0.997 0.997; } 66.1512% { scale: 1.056 1.056; } 66.4948% { scale: 1.087 1.087; } 66.8385% { scale: 1.098 1.098; } 67.1821% { scale: 1.092 1.092; } 68.5567% { scale: 1.013 1.013; } 69.0722% { scale: 1 1; } 99.9897% { scale: 1 1; } }
+@keyframes ailfilm10 { 0% { opacity: 0; } 63.7457% { opacity: 0; } 64.0893% { opacity: 0.147; } 64.433% { opacity: 0.404; } 64.7766% { opacity: 0.614; } 65.1203% { opacity: 0.781; } 65.4639% { opacity: 0.907; } 65.8076% { opacity: 0.997; } 66.1512% { opacity: 1.056; } 66.4948% { opacity: 1.087; } 66.8385% { opacity: 1.098; } 67.1821% { opacity: 1.092; } 68.5567% { opacity: 1.013; } 69.0722% { opacity: 1; } 99.9897% { opacity: 1; } }
+.aihead-80e80ad0-out { animation: ailfilm7 9.7s linear infinite; }
+.aimask-80e80ad0-out { animation: ailfilm6 9.7s linear infinite; }
+.conn-80e80ad0-out { animation: ailfilm5 9.7s linear infinite; }
+.kf-80e80ad0-check { animation: ailfilm3 9.7s linear infinite, ailfilm4 9.7s linear infinite; }
+.kf-80e80ad0-result { animation: ailfilm8 9.7s linear infinite, ailfilm9 9.7s linear infinite; }
+.kf-80e80ad0-result_caption { animation: ailfilm10 9.7s linear infinite; }
+.kf-80e80ad0-token { animation: ailfilm0 9.7s linear infinite, ailfilm1 9.7s linear infinite, ailfilm2 9.7s linear infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
+]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <mask id="aim-80e80ad0-out" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-80e80ad0-out aid-80e80ad0-out" d="M375 60 L484.2 60" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+  </defs>
+  <g class="kf-80e80ad0-stage kf-anim" style="transform-origin:280px 60px">
+    <g id="stage" class="ai-container kfp-80e80ad0-stage">
+      <g class="kf-80e80ad0-execute kf-anim" style="transform-origin:50px 60px">
+        <rect id="execute" class="ai-shape ai-rect kfp-80e80ad0-execute" x="5" y="5" width="90" height="110" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+      </g>
+      <g class="kf-80e80ad0-check kf-anim" style="transform-origin:295px 60px">
+        <rect id="check" class="ai-shape ai-rect kfp-80e80ad0-check" x="215" y="20" width="160" height="80" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+        <text class="ai-label" x="295" y="60" text-anchor="middle" dominant-baseline="middle"><tspan x="295" dy="-0"><tspan>Check</tspan></tspan></text>
+      </g>
+      <g class="kf-hidden kf-80e80ad0-result kf-anim" style="transform-origin:525px 60px">
+        <circle id="result" class="ai-shape ai-circle kfp-80e80ad0-result" cx="525" cy="60" r="30" fill="var(--role-ok-soft)" stroke="#333333" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <g class="kf-80e80ad0-token kf-anim" style="transform-origin:50px 60px">
+    <circle id="token" class="ai-shape ai-circle kfp-80e80ad0-token" cx="50" cy="60" r="10" fill="var(--role-primary)" stroke="var(--role-surface)" stroke-width="3"/>
+  </g>
+  <g class="kf-80e80ad0-execute_caption kf-anim" style="transform-origin:50px -22.25px">
+    <rect id="execute_caption" class="ai-shape ai-rect kfp-80e80ad0-execute_caption" x="7.8571" y="-41.5" width="84.2857" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="50" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="50" dy="-0"><tspan>Execute</tspan></tspan></text>
+  </g>
+  <g class="kf-80e80ad0-check_caption kf-anim" style="transform-origin:295px -22.25px">
+    <rect id="check_caption" class="ai-shape ai-rect kfp-80e80ad0-check_caption" x="255" y="-41.5" width="80" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="295" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="295" dy="-0"><tspan>Tests</tspan></tspan></text>
+  </g>
+  <g class="kf-hidden kf-80e80ad0-result_caption kf-anim" style="transform-origin:525px -22.25px">
+    <rect id="result_caption" class="ai-shape ai-rect kfp-80e80ad0-result_caption" x="485" y="-41.5" width="80" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="525" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="525" dy="-0"><tspan>Result</tspan></tspan></text>
+  </g>
+  <text class="ai-label conn-80e80ad0-retry" x="155" y="79" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="155" dy="-0"><tspan>retry</tspan></tspan></text>
+  <path class="ai-connection conn-80e80ad0-run conn-80e80ad0-run-base aid-80e80ad0-run" d="M95 51 L204.2 51" fill="none" stroke="var(--role-primary)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-80e80ad0-retry conn-80e80ad0-retry-base aid-80e80ad0-retry" d="M215 69 L105.8 69" fill="none" stroke="var(--role-primary)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-80e80ad0-out conn-80e80ad0-out-base aid-80e80ad0-out" d="M375 60 L484.2 60" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-80e80ad0-out)"/>
+  <g class="conn-80e80ad0-out"><path class="aihead-80e80ad0-out" d="M483 66 L493.8 60 L483 54 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+</svg>

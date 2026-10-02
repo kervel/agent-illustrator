@@ -330,6 +330,9 @@ Motion statements (full guide: --skill-animation):
     when line reaches a.dot { ... }   when a line being drawn passes a.dot
     when a shown | hidden | arrives + 0.1 { ... }   when a's latest entrance / exit /
                         move (or layout change) in this keyframe has FINISHED;
+                        a flight's event is its subject's: `when sk2 arrives`
+    when a accented | pulsed | shaken | flashed | pinged | highlighted | nudged
+                        when a's latest one-shot effect has finished;
                         --timeline prints each event's resolved time
     beat name { ... }   a named group;  after name + 0.1 { ... }  when it has ended
     then { ... }        next beat: when everything before it has ended
@@ -339,9 +342,9 @@ Motion statements (full guide: --skill-animation):
     keyframe "k" [auto, after: 0.3] { ... }   plays by itself after the previous one
     draw line [to: elem | 60% | vertex 2]   undraw line [to: ...]
     fly ghost(a) to b, c [scale, arc | along: conn]   fly proxy from a to b
-    move a to b [along: conn]   move a home   move a along path [to: b]
+    move a to b [along: conn]   move a home   move a along l1, l2 [to: b | 60%]
     along: a connection or path the flight rides (joins it nearest the start,
-           leaves it nearest the end)
+           leaves it nearest the end); `along: a_run, a_out` rides them in turn
     move a, b, needs.* to box [stagger: 0.07]   transform m1, m2 [...]   fly ghost(a, b) to box
     accent a [tone: attention|error|ok, style: auto|underline|ring|outline|wiggle, hold: step]
                         "look here": the style follows the element, the tone says why
@@ -437,6 +440,8 @@ CLI flags:
     --png [-o FILE]    PNG instead of SVG (with --frame/--at, --frames-strip,
                        --frames-to-dir); --scale 2 zooms. No browser needed
     -o FILE            Write the output to FILE instead of stdout
+    -q, --quiet        No progress or notices (the paths --frames-to-dir writes,
+                       --png font notes); errors and requested output remain
     --frames-strip N   Contact sheet of frame N at 0/25/50/75/100%
     --states           The storyboard: per click step what is visible (a matrix)
                        and what changes (entrances, exits, transforms, moves,

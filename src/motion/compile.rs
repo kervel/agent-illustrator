@@ -583,14 +583,23 @@ pub fn resolve_draw_to(layout: &LayoutResult, id: &str, to: &DrawTo) -> Option<f
     })
 }
 
-/// A flight from `a` to `b` that rides a connection or path: it joins the
-/// line where the line passes nearest `a`, follows it, and leaves it where it
-/// passes nearest `b`.
-pub fn route_along(layout: &LayoutResult, path: &str, a: Point, b: Point) -> Option<Vec<Point>> {
-    let pl = drawable_polyline(layout, path)?;
-    let (fa, fb) = (pl.project(a).0, pl.project(b).0);
+/// A flight from `a` to `b` that rides connections or paths in turn: it
+/// joins each line where the line passes nearest where it is, follows it,
+/// and leaves it where it passes nearest the next line's start (or `b`).
+/// Between two lines it crosses straight over, under whatever is between
+/// them (a token passing under the card two arrows meet at). `Err` names a
+/// line that is not one.
+pub fn route_along(layout: &LayoutResult, paths: &[String], a: Point, b: Point) -> Result<Vec<Point>, String> {
+    let lines = paths
+        .iter()
+        .map(|p| drawable_polyline(layout, p).ok_or_else(|| p.clone()))
+        .collect::<Result<Vec<_>, _>>()?;
     let mut pts = vec![a];
-    pts.extend(pl.sub_points(fa, fb, 24));
+    for (i, pl) in lines.iter().enumerate() {
+        let next = lines.get(i + 1).map(|n| n.point_at(0.0)).unwrap_or(b);
+        let cur = *pts.last().unwrap();
+        pts.extend(pl.sub_points(pl.project(cur).0, pl.project(next).0, 24));
+    }
     pts.push(b);
     // Even steps of distance, so the hops on and off the line take as long
     // as their length and the speed stays the same throughout.
@@ -600,11 +609,11 @@ pub fn route_along(layout: &LayoutResult, path: &str, a: Point, b: Point) -> Opt
     }
     let total = *acc.last().unwrap();
     if total < 1e-9 {
-        return Some(pts);
+        return Ok(pts);
     }
-    let n = 32;
+    let n = 32 * lines.len().max(1);
     let mut j = 0;
-    Some(
+    Ok(
         (0..=n)
             .map(|i| {
                 let d = total * i as f64 / n as f64;
@@ -617,6 +626,11 @@ pub fn route_along(layout: &LayoutResult, path: &str, a: Point, b: Point) -> Opt
             })
             .collect(),
     )
+}
+
+/// "pulsed" for `pulse`: the event word of an effect.
+fn past(effect: &str) -> &'static str {
+    super::EFFECT_EVENTS.iter().find(|(v, _)| *v == effect).map(|(_, p)| *p).unwrap_or("done")
 }
 
 /// Where a pin sends an element's centre, given the base layout.
@@ -1158,18 +1172,37 @@ fn event_time(ev: &MotionEvent, span: &Span, out: &[TimedStmt], ctx: &EventCtx) 
                     .find(|ts| matches!(ts.stmt.verb, MotionVerb::Constrain(_) | MotionVerb::Enable(_) | MotionVerb::Disable(_)))
                     .map(|ts| ts.starts.first().copied().unwrap_or(0.0) + ts.timing.dur)
             })
-            .ok_or_else(|| err(format!(
-                "when {} arrives: nothing moves, flies, turns or resizes {} earlier in this keyframe (and no layout changes); for an entrance use `when {} shown`",
-                show(&e.node), show(&e.node), show(&e.node)
-            ))),
+            .ok_or_else(|| {
+                // Something flies TO it: the event belongs to what flies.
+                let flier = out.iter().rev().find_map(|ts| {
+                    if !matches!(ts.stmt.verb, MotionVerb::Fly { .. }) {
+                        return None;
+                    }
+                    let i = ts.stmt.partners.iter().position(|p| *p == e.node)?;
+                    ts.stmt.targets.get(i).cloned()
+                });
+                match flier {
+                    Some(f) => err(format!(
+                        "when {} arrives: {} does not move; what flies to it does: `when {} arrives`",
+                        show(&e.node), show(&e.node), show(&f)
+                    )),
+                    None => err(format!(
+                        "when {} arrives: nothing moves, flies, turns or resizes {} earlier in this keyframe (and no layout changes); for an entrance use `when {} shown`",
+                        show(&e.node), show(&e.node), show(&e.node)
+                    )),
+                }
+            }),
         MotionEvent::Shown(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Show(_)))
             .map(|(s, ts)| s + ts.timing.dur)
             // Already on screen as the keyframe starts: shown, as of now.
             .or_else(|| ctx.visible.contains(&e.node).then_some(0.0))
             .ok_or_else(|| err(format!("when {} shown: no `show {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
-        MotionEvent::Accented(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Effect { name, .. } if name.node == "accent"))
+        MotionEvent::Effected { effect, target: e } => last_of(&e.node, &|v| matches!(v, MotionVerb::Effect { name, .. } if name.node == *effect))
             .map(|(s, ts)| s + ts.timing.dur)
-            .ok_or_else(|| err(format!("when {} accented: no `accent {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
+            .ok_or_else(|| err(format!(
+                "when {} {}: no `{} {}` earlier in this keyframe",
+                show(&e.node), past(effect), effect, show(&e.node)
+            ))),
         MotionEvent::Hidden(e) => last_of(&e.node, &|v| matches!(v, MotionVerb::Hide(_)))
             .map(|(s, ts)| s + ts.timing.dur)
             .ok_or_else(|| err(format!("when {} hidden: no `hide {}` earlier in this keyframe", show(&e.node), show(&e.node)))),
@@ -1271,7 +1304,7 @@ fn walk<'a>(
                     MotionEvent::Arrives(e) => format!("{} arrives", show(&e.node)),
                     MotionEvent::Shown(e) => format!("{} shown", show(&e.node)),
                     MotionEvent::Hidden(e) => format!("{} hidden", show(&e.node)),
-                    MotionEvent::Accented(e) => format!("{} accented", show(&e.node)),
+                    MotionEvent::Effected { effect, target } => format!("{} {}", show(&target.node), past(effect)),
                     MotionEvent::BeatEnd(b) => format!("after {}", b.node),
                 };
                 let nudge = if off.abs() > 1e-9 { format!(" {} {}", if *off < 0.0 { "-" } else { "+" }, off.abs()) } else { String::new() };
@@ -1902,7 +1935,7 @@ impl<'a> Compiler<'a> {
             // `move x to y` ends with x on y, unless y is placed relative
             // to x and moved along with it.
             let move_to = match &s.verb {
-                MotionVerb::Move { to: Some(t), along: None, .. } => s.partners.get(i).cloned().or_else(|| Some(t.node.replace('.', "_"))),
+                MotionVerb::Move { to: Some(t), along, .. } if along.is_empty() => s.partners.get(i).cloned().or_else(|| Some(t.node.replace('.', "_"))),
                 _ => None,
             };
             if let Some(dest) = move_to.as_ref() {
@@ -1993,9 +2026,10 @@ impl<'a> Compiler<'a> {
                     let (Some(src), Some(me)) = (self.center_now(layout, &from), self.center_now(layout, target)) else {
                         return Err(CompileError { message: format!("show {} [from: {}]: '{}' is not an element", target, from, from), span: fm.atoms[atom].span.clone() });
                     };
-                    if let Some(path) = opt_name(&s.opts, "along") {
-                        let route = route_along(layout, &path.replace('.', "_"), src, me).ok_or_else(|| CompileError {
-                            message: format!("show {} [along: {}]: '{}' is not a connection or path", target, path, path),
+                    let along = super::along_paths(&s.opts);
+                    if !along.is_empty() {
+                        let route = route_along(layout, &along, src, me).map_err(|bad| CompileError {
+                            message: format!("show {} [along: …]: '{}' is not a connection or path", target, bad),
                             span: fm.atoms[atom].span.clone(),
                         })?;
                         let keys = route.into_iter().map(|p| Val::xy(settled_tr.0 + p.x - me.x, settled_tr.1 + p.y - me.y)).collect();
@@ -2167,12 +2201,18 @@ impl<'a> Compiler<'a> {
                 }
             }
             MotionVerb::Move { along, .. }
-                if changed.contains(&tr_key) && (along.is_some() || opt_name(&s.opts, "along").is_some()) =>
+                // An explicit `[along:]` rides even when it ends where it
+                // started: `move token home [along: run, retry]` is a lap.
+                if (!along.is_empty() && changed.contains(&tr_key)) || !super::along_paths(&s.opts).is_empty() =>
             {
                 // Ride the path from where the element is to where it is pinned
                 // (`move x along p [to: …]`, or `move x to y [along: p]`).
-                let path = along.as_ref().map(|p| p.node.as_str()).or_else(|| opt_name(&s.opts, "along")).unwrap_or_default();
-                if drawable_polyline(layout, &path.replace('.', "_")).is_some() {
+                let paths = if along.is_empty() {
+                    super::along_paths(&s.opts)
+                } else {
+                    along.iter().map(|p| p.node.replace('.', "_")).collect()
+                };
+                {
                     let cur_center = self.center_before(before, target);
                     let end_center = self.center_now(layout, target);
                     if let (Some(a), Some(b)) = (cur_center, end_center) {
@@ -2180,7 +2220,7 @@ impl<'a> Compiler<'a> {
                         let anc = self.ancestors_translate(snap, target);
                         // Start exactly where the element is, even if that is
                         // just off the line (a token sitting on a station).
-                        let pts = route_along(layout, &path.replace('.', "_"), a, b).unwrap_or_default();
+                        let pts = route_along(layout, &paths, a, b).unwrap_or_default();
                         let keys: Vec<Val> = pts
                             .into_iter()
                             .map(|p| Val::xy(p.x - base.x - anc.0, p.y - base.y - anc.1))
@@ -2538,12 +2578,13 @@ impl<'a> Compiler<'a> {
         let arc = opt_number(&opts, "arc").unwrap_or(0.0);
         let (ax, ay) = (src.x - base_c.x - anc.0, src.y - base_c.y - anc.1);
         let (bx, by) = (dst.x - base_c.x - anc.0, dst.y - base_c.y - anc.1);
-        let keys: Vec<Val> = if let Some(path) = opt_name(&opts, "along") {
+        let along = super::along_paths(&opts);
+        let keys: Vec<Val> = if !along.is_empty() {
             if arc.abs() > 1e-9 {
-                return Err(err(format!("fly [arc: …, along: {}]: the flight follows {}; drop the arc", path, path)));
+                return Err(err("fly [arc: …, along: …]: the flight follows the line; drop the arc".to_string()));
             }
-            route_along(layout, &path.replace('.', "_"), src, dst)
-                .ok_or_else(|| err(format!("fly [along: {}]: '{}' is not a connection or path", path, path)))?
+            route_along(layout, &along, src, dst)
+                .map_err(|bad| err(format!("fly [along: …]: '{}' is not a connection or path", bad)))?
                 .into_iter()
                 .map(|p| Val::xy(p.x - base_c.x - anc.0, p.y - base_c.y - anc.1))
                 .collect()

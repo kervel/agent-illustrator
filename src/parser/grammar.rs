@@ -66,7 +66,7 @@ fn reserved_word_as_name(input: &str) -> Option<crate::ParseError> {
                 span: sb.clone(),
                 message: format!(
                     "`{}` is a reserved word and cannot name an element; call it something else \
-                     (e.g. `{}_1`, `track`)",
+                     (e.g. `{}_1`, `track`). All reserved words: `agent-illustrator --doc reserved`",
                     word, word
                 ),
                 expected: vec![],
@@ -2181,7 +2181,7 @@ where
             let mv = kw("move")
                 .ignore_then(many_selector.clone())
                 .then(choice((
-                    kw("home").map_with(|_, e| (Some(vec![Spanned::new("home".to_string(), span_range(&e.span()))]), None)),
+                    kw("home").map_with(|_, e| (Some(vec![Spanned::new("home".to_string(), span_range(&e.span()))]), vec![])),
                     kw("to")
                         .ignore_then(
                             dotted_name
@@ -2191,8 +2191,17 @@ where
                                 .at_least(1)
                                 .collect::<Vec<_>>(),
                         )
-                        .map(|ns: Vec<Spanned<String>>| (Some(ns), None)),
-                    kw("along").ignore_then(dotted_name.clone().labelled("a path to move along")).map(|n| (None, Some(n))),
+                        .map(|ns: Vec<Spanned<String>>| (Some(ns), vec![])),
+                    kw("along")
+                        .ignore_then(
+                            dotted_name
+                                .clone()
+                                .labelled("a path to move along")
+                                .separated_by(just(Token::Comma))
+                                .at_least(1)
+                                .collect::<Vec<_>>(),
+                        )
+                        .map(|ns| (None, ns)),
                 )).labelled("`to <element>`, `home` or `along <path>` after `move <element>`"))
                 .then(opts_or_none.clone())
                 .map(move |((target, (to, along)), o)| {
@@ -2288,9 +2297,23 @@ where
                 dotted_name.clone().then_ignore(kw("arrives")).map(MotionEvent::Arrives),
                 dotted_name.clone().then_ignore(kw("shown")).map(MotionEvent::Shown),
                 dotted_name.clone().then_ignore(kw("hidden")).map(MotionEvent::Hidden),
-                dotted_name.clone().then_ignore(kw("accented")).map(MotionEvent::Accented),
+                dotted_name
+                    .clone()
+                    .then(any().try_map(|t: Token, span| match &t {
+                        Token::Ident(w) => crate::motion::EFFECT_EVENTS
+                            .iter()
+                            .find(|(_, past)| past == w)
+                            .map(|(verb, _)| verb.to_string())
+                            .ok_or_else(|| Rich::custom(span, format!(
+                                "`{}` is not an event: use reaches, arrives, shown, hidden, or an effect finished: {}",
+                                w,
+                                crate::motion::EFFECT_EVENTS.iter().map(|(_, p)| *p).collect::<Vec<_>>().join(", ")
+                            ))),
+                        _ => Err(Rich::custom(span, "an event word (shown, hidden, arrives, pulsed, ...)")),
+                    }))
+                    .map(|(target, effect)| MotionEvent::Effected { effect, target }),
             ))
-            .labelled("an event: `<line> reaches <element>`, `<element> arrives`, `<element> shown` or `<element> hidden`");
+            .labelled("an event: `<line> reaches <element>`, `<element> arrives | shown | hidden`, or an effect finished: `<element> accented | pulsed | shaken | flashed | pinged | highlighted | nudged`");
             let when_beat = kw("when")
                 .ignore_then(event)
                 .then(nudge.clone())

@@ -429,6 +429,7 @@ keyframe "main" {
     when ring arrives { flash folder }            // a move or flight ended
     when card hidden { use layout default }       // an exit ended
     when d2 accented + 0.3 { move d2 to at_r2 }   // an accent's call for attention ended
+    when agent pulsed { show reply }              // any one-shot effect ended: pulsed, shaken, flashed, pinged, highlighted, nudged
     beat open { show mr [enter: pop] }            // a named group ...
     after open + 0.2 { set tests passed }         // ... and when it ends
     then { pulse merged.dot }                     // when everything before it has ended
@@ -439,11 +440,13 @@ keyframe "next_step" [auto, after: 0.3] { ... }   // plays by itself 0.3s after 
 Every event is a moment something **finishes**: `reaches` when the line's
 drawing passes the element's centre, `shown` when the latest `show` of it in this
 keyframe has finished entering, `hidden` when its latest exit has finished,
-`arrives` when its latest `move`/`fly` ends, or its `show [from: …]` flight
+`arrives` when its latest `move`/`fly` ends (for `fly ghost(sk2) to agent`
+that is `when sk2 arrives`: the event belongs to what flies), or its `show [from: …]` flight
 lands, or a transform that moves, turns or resizes it ends (if nothing does,
 when the latest layout change such as `use layout beside` has played), `after name` when
 everything in `beat name` has ended, `accented` when its latest `accent` has
-finished calling for attention (a held mark stays on). `+ 0.1` / `- 0.15`
+finished calling for attention (a held mark stays on), and likewise `pulsed`,
+`shaken`, `flashed`, `pinged`, `highlighted`, `nudged` for the other effects. `+ 0.1` / `- 0.15`
 shift from that moment. Only statements earlier in the same keyframe count,
 with one exception: `when x shown` for an x that is already on screen as the
 keyframe starts means its start. `--timeline` prints each
@@ -519,6 +522,7 @@ move train along track [to: st3.dot]
 fly ghost(convo) to llm [along: l_call]                 // rides the arrow instead of cutting across
 show e3 [from: llm, along: l_reply, scale: 1]           // a reply comes back over the wire and lands in place
 move chip to tray [along: belt]
+move token along run, out                               // rides run, then out, to out's tip
 move a, b, c to x, y, z [stagger: 0.1]                  // paired by position: a to x, b to y, c to z
 show d1, d2, d3 [from: r1, r2, r3, stagger: 0.1]        // each flies in from its own place
 // `move x to y` centres x ON y. To stand next to it, move to a point beside it:
@@ -531,6 +535,13 @@ show d1, d2, d3 [from: r1, r2, r3, stagger: 0.1]        // each flies in from it
 can ride a connection or path: it joins the line where it passes nearest the
 start, follows it, and leaves it where it passes nearest the end, at an even
 speed. So the payload and the arrow read as one thing. It replaces `arc:`.
+Name several lines to ride them in turn, crossing straight from one to the
+next (through the card two arrows meet at): `move token along a_run, a_out`
+ends at the tip of `a_out` (`[to: 60%]` or `[to: st2.dot]` stops earlier on
+the last line). `move token home [along: run, retry]` rides out and back: a
+lap. Riding needs no helper points: lanes (two arrows between the same pair
+are drawn side by side) are routed after layout, so a point constrained "on
+the arrow" misses it, and the ride does not.
 
 **Size on the way.** `scale:` says how big the traveller is: on `show [from: y]`
 its size as it leaves y (default: shrunk to fit y), on `fly` its size as it
@@ -695,7 +706,9 @@ and a part's local `z_order` that something outside its instance still covers.
 Things that sit on something on purpose (a badge on a document's corner, a
 chip on an environment box, a tag on a frame's border) say so, so the lint
 stops reporting them: `circle badge [..., overlaps: doc]`, or on an instance
-`machine m [overlaps: env.bg]`.
+`machine m [overlaps: env.bg]`. A connection can be named too (`overlaps:
+[a_run, a_out]`); something that rides a line with `along:` is on it on
+purpose without saying so.
 
 ### Captions
 
@@ -706,7 +719,9 @@ rect st [..., caption: "staging", caption_position: above]       // or left, rig
 ```
 The caption is a part, `r1.caption` (accent it, transform its label). It
 comes and goes with its element: it copies the element's `appears`, and
-`show r1` / `hide r1` bring it along. It uses the caption look: a note
+`show r1` / `hide r1` bring it along. Captions on the same side of things
+centred on one line (a row of icons of different heights) line up with the
+outermost of them. It uses the caption look: a note
 (18px, semibold, `role-muted`), or with `caption_style: strong` a name, an
 actor (20px, bold, `role-ink`). `--lint` reports a caption that comes within
 8px of something other than its element.
