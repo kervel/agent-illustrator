@@ -1,0 +1,18 @@
+// A flight that starts late in its keyframe: the traveller stays hidden
+// until it sets off (the player must not back-fill its opacity).
+row r [gap: 200, align: center] {
+    rect a [width: 60, height: 40]
+    rect b [width: 60, height: 40]
+}
+circle tok [size: 20, fill: role-primary, appears: later]
+a.right -> b.left as wire [appears: later]
+rect card [width: 60, height: 40, appears: later]
+constrain card.center_x = a.center_x
+constrain card.top = a.bottom + 40
+
+keyframe "start" { }
+keyframe "go" {
+    show wire [enter: draw]
+    when wire shown { fly tok from a to b [along: wire] }
+    when wire shown + 0.2 { show card [from: a] }
+}

@@ -101,7 +101,8 @@ fn played(m: &serde_json::Value, f: usize, c: usize, t: f64) -> Option<Vec<f64>>
         if a["c"].as_u64()? as usize != c || a.get("loop").and_then(|l| l.as_bool()).unwrap_or(false) {
             continue;
         }
-        let backfill = first && hidden_at_start(m, f, c);
+        // Geometry only: a back-filled opacity would show a late entrance early.
+        let backfill = first && m["channels"][c][1] != "opacity" && hidden_at_start(m, f, c);
         first = false;
         let (start, dur) = (a["t"].as_f64()?, a["d"].as_f64()?.max(0.001));
         if t < start {
@@ -315,4 +316,9 @@ fn nothing_changes_at_the_instant_something_is_hidden() {
         }
     }
     assert!(bad.is_empty(), "{}", bad.join("\n"));
+}
+
+#[test]
+fn a_late_flight_stays_hidden_until_it_sets_off() {
+    check_in("tests/fixtures", "late-flight", &[1]);
 }

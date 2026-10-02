@@ -703,6 +703,11 @@ the no-JS picture and stills, and `--lint` reports a change that has to
 happen while overlapped (it pops). `--lint` reports a `z_order` that changes nothing,
 and a part's local `z_order` that something outside its instance still covers.
 
+Connections are drawn over the scene's elements at `z_order` 0 and below,
+and under those above 0: `z_order: 1` (or `scene(1)` on a part) lifts a chip
+over the arrows too. Something that rides a line (`along:`) is drawn above
+the lines by itself, unless it sets its own `z_order`.
+
 Things that sit on something on purpose (a badge on a document's corner, a
 chip on an environment box, a tag on a frame's border) say so, so the lint
 stops reporting them: `circle badge [..., overlaps: doc]`, or on an instance

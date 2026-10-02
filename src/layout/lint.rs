@@ -934,49 +934,10 @@ pub(crate) fn collect_contains_ids(doc: &Document) -> ContainsRelations {
     collect_contains_ids_from_stmts(&doc.statements, &mut relations);
     // Whatever rides a line (`[along: l]`, `move x along l`) is on it on
     // purpose, as if it said `overlaps: l`.
-    for stmt in &doc.statements {
-        let body = match &stmt.node {
-            Statement::Keyframe(kf) => &kf.motion,
-            Statement::MotionMacro(m) => &m.body,
-            _ => continue,
-        };
-        collect_riders(body, &mut relations);
+    for (who, lines) in crate::motion::riders(doc) {
+        relations.overlaps.entry(who).or_default().extend(lines);
     }
     relations
-}
-
-fn collect_riders(nodes: &[crate::parser::ast::Spanned<crate::parser::ast::MotionNode>], relations: &mut ContainsRelations) {
-    use crate::parser::ast::{FlySubject, MotionNode, MotionVerb, Selector};
-    for n in nodes {
-        let st = match &n.node {
-            MotionNode::Stmt(st) => st,
-            MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
-                collect_riders(b, relations);
-                continue;
-            }
-        };
-        let mut lines = crate::motion::along_paths(&st.opts);
-        let sels: Vec<&Selector> = match &st.verb {
-            MotionVerb::Move { target, along, .. } => {
-                lines.extend(along.iter().map(|a| a.node.replace('.', "_")));
-                vec![&target.node]
-            }
-            MotionVerb::Show(v) => v.iter().map(|s| &s.node).collect(),
-            MotionVerb::Fly { subject: FlySubject::Proxy(x), .. } => vec![&x.node],
-            _ => vec![],
-        };
-        if lines.is_empty() {
-            continue;
-        }
-        let mut who: Vec<String> = st.targets.clone();
-        who.extend(sels.into_iter().filter_map(|s| match s {
-            Selector::Name(n) => Some(n.replace('.', "_")),
-            _ => None,
-        }));
-        for w in who {
-            relations.overlaps.entry(w).or_default().extend(lines.iter().cloned());
-        }
-    }
 }
 
 fn collect_contains_ids_from_stmts(

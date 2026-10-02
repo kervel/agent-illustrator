@@ -876,11 +876,14 @@ svg[data-ail-player] * { transition: none !important; }
    *  place. A page about to flip in held scale 1 until its hold began, and
    *  the frame that showed it before the hold did was a full-size flash. */
   P._animateFrame = function (i) {
-    var self = this, seen = {};
+    var self = this, seen = {}, channels = this.manifest.channels;
     this.manifest.anims[i].forEach(function (a) {
       var first = !a.loop && !(a.c in seen);
       seen[a.c] = true;
-      self._animate(a, false, first && self._hidden(a.c));
+      // Never opacity: back-filling a late entrance's opacity would show
+      // it from the frame's start, before it sets off.
+      var geometry = channels[a.c][1] !== 'opacity';
+      self._animate(a, false, first && geometry && self._hidden(a.c));
     });
   };
 

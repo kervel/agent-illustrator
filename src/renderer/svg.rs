@@ -49,6 +49,9 @@ pub struct SvgBuilder {
     fill_def_ids: Vec<String>,
     styles: Vec<String>,
     elements: Vec<String>,
+    /// Where the connections go among the elements: the scene's root
+    /// elements with `z_order` above 0 paint over them.
+    lines_at: Option<usize>,
     connections: Vec<String>,
     indent: usize,
     /// Prefix that makes this document's keyframe classes unique. See
@@ -87,6 +90,7 @@ impl SvgBuilder {
             fill_def_ids: vec![],
             styles: vec![],
             elements: vec![],
+            lines_at: None,
             connections: vec![],
             indent: 1,
             scope,
@@ -977,15 +981,19 @@ impl SvgBuilder {
             svg.push_str(nl);
         }
 
-        // Elements
-        for elem in &self.elements {
+        // Elements, the connections over those at z_order 0 and below, then
+        // the elements above them.
+        let split = self.lines_at.unwrap_or(self.elements.len()).min(self.elements.len());
+        for elem in &self.elements[..split] {
             svg.push_str(elem);
             svg.push_str(nl);
         }
-
-        // Connections (rendered on top)
         for conn in &self.connections {
             svg.push_str(conn);
+            svg.push_str(nl);
+        }
+        for elem in &self.elements[split..] {
+            svg.push_str(elem);
             svg.push_str(nl);
         }
         if camera {
@@ -1095,7 +1103,10 @@ pub fn render_svg_with_keyframes(
     builder.set_text_variants(collect_text_variants(frame_diffs));
 
     builder.set_clip_targets(&result.root_elements);
-    render_siblings(root_order(&result.root_elements), &mut builder, frame0_hidden, &kf_referenced);
+    let (under, over): (Vec<_>, Vec<_>) = root_order(&result.root_elements).into_iter().partition(|e| e.z_order <= 0);
+    render_siblings(under, &mut builder, frame0_hidden, &kf_referenced);
+    builder.lines_at = Some(builder.elements.len());
+    render_siblings(over, &mut builder, frame0_hidden, &kf_referenced);
 
     // Render connections, with hidden connections getting opacity: 0
     let frame0_hidden_conns = if !frame_states.is_empty() {
@@ -1524,6 +1535,9 @@ pub fn render_svg_with_stylesheet(
     // Render all root elements, sorted by z_order (stable sort preserves document order)
     builder.set_clip_targets(&result.root_elements);
     for element in root_order(&result.root_elements) {
+        if element.z_order > 0 && builder.lines_at.is_none() {
+            builder.lines_at = Some(builder.elements.len());
+        }
         render_element(element, &mut builder);
     }
 

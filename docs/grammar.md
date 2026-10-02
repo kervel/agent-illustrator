@@ -154,7 +154,9 @@ Common modifiers:
                             `z_order: scene(N)`: a part painted in the scene's own
                             layer. Animatable: `transform x [z_order: N]`,
                             `move x to y [z_order: N]` (switches where it is
-                            not seen; or `z_at: start|mid|end`)
+                            not seen; or `z_at: start|mid|end`). Connections
+                            paint between the scene's z_order <= 0 and > 0;
+                            a rider (`along:`) defaults to 1, above its line
     routing: direct         Diagonal line (vs default orthogonal)
     routing: curved         Smooth curve (for loops, crossings)
 

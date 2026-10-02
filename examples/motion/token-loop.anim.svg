@@ -120,9 +120,6 @@
       </g>
     </g>
   </g>
-  <g class="kf-80e80ad0-token kf-anim" style="transform-origin:50px 60px">
-    <circle id="token" class="ai-shape ai-circle kfp-80e80ad0-token" cx="50" cy="60" r="10" fill="var(--role-primary)" stroke="var(--role-surface)" stroke-width="3"/>
-  </g>
   <g class="kf-80e80ad0-execute_caption kf-anim" style="transform-origin:50px -22.25px">
     <rect id="execute_caption" class="ai-shape ai-rect kfp-80e80ad0-execute_caption" x="7.8571" y="-41.5" width="84.2857" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
     <text class="ai-label" x="50" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="50" dy="-0"><tspan>Execute</tspan></tspan></text>
@@ -135,9 +132,12 @@
     <rect id="result_caption" class="ai-shape ai-rect kfp-80e80ad0-result_caption" x="485" y="-41.5" width="80" height="38.5" fill="none" stroke="none" stroke-width="1.5"/>
     <text class="ai-label" x="525" y="-22.25" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="var(--role-muted)" style="font-weight:600"><tspan x="525" dy="-0"><tspan>Result</tspan></tspan></text>
   </g>
-  <text class="ai-label conn-80e80ad0-retry" x="155" y="79" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="155" dy="-0"><tspan>retry</tspan></tspan></text>
   <path class="ai-connection conn-80e80ad0-run conn-80e80ad0-run-base aid-80e80ad0-run" d="M95 51 L204.2 51" fill="none" stroke="var(--role-primary)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-80e80ad0-retry conn-80e80ad0-retry-base aid-80e80ad0-retry" d="M215 69 L105.8 69" fill="none" stroke="var(--role-primary)" stroke-width="3" marker-end="url(#ai-arrow)"/>
   <path class="ai-connection conn-80e80ad0-out conn-80e80ad0-out-base aid-80e80ad0-out" d="M375 60 L484.2 60" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-80e80ad0-out)"/>
   <g class="conn-80e80ad0-out"><path class="aihead-80e80ad0-out" d="M483 66 L493.8 60 L483 54 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <g class="kf-80e80ad0-token kf-anim" style="transform-origin:50px 60px">
+    <circle id="token" class="ai-shape ai-circle kfp-80e80ad0-token" cx="50" cy="60" r="10" fill="var(--role-primary)" stroke="var(--role-surface)" stroke-width="3"/>
+  </g>
+  <text class="ai-label conn-80e80ad0-retry" x="155" y="79" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="155" dy="-0"><tspan>retry</tspan></tspan></text>
 </svg>

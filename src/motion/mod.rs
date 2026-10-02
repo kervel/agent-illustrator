@@ -82,6 +82,87 @@ pub fn along_paths(opts: &[Spanned<MotionOpt>]) -> Vec<String> {
     }
 }
 
+/// What rides which lines (`[along: l]`, `move x along l`): element id ->
+/// line ids, from every keyframe and motion macro.
+pub fn riders(doc: &crate::parser::ast::Document) -> std::collections::BTreeMap<String, std::collections::BTreeSet<String>> {
+    use crate::parser::ast::{FlySubject, Statement};
+    fn walk(nodes: &[Spanned<MotionNode>], out: &mut std::collections::BTreeMap<String, std::collections::BTreeSet<String>>) {
+        for n in nodes {
+            let st = match &n.node {
+                MotionNode::Stmt(st) => st,
+                MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => {
+                    walk(b, out);
+                    continue;
+                }
+            };
+            let mut lines = along_paths(&st.opts);
+            let sels: Vec<&Selector> = match &st.verb {
+                MotionVerb::Move { target, along, .. } => {
+                    lines.extend(along.iter().map(|a| a.node.replace('.', "_")));
+                    vec![&target.node]
+                }
+                MotionVerb::Show(v) => v.iter().map(|s| &s.node).collect(),
+                MotionVerb::Fly { subject: FlySubject::Proxy(x), .. } => vec![&x.node],
+                _ => vec![],
+            };
+            if lines.is_empty() {
+                continue;
+            }
+            let mut who: Vec<String> = st.targets.clone();
+            who.extend(sels.into_iter().filter_map(|s| match s {
+                Selector::Name(n) => Some(n.replace('.', "_")),
+                _ => None,
+            }));
+            for w in who {
+                out.entry(w).or_default().extend(lines.iter().cloned());
+            }
+        }
+    }
+    let mut out = std::collections::BTreeMap::new();
+    for stmt in &doc.statements {
+        match &stmt.node {
+            Statement::Keyframe(kf) => walk(&kf.motion, &mut out),
+            Statement::MotionMacro(m) => walk(&m.body, &mut out),
+            _ => {}
+        }
+    }
+    out
+}
+
+/// A traveller on a line is drawn above it: a top-level element that rides
+/// a line (`along:`) and sets no `z_order` of its own gets `z_order: 1`,
+/// which paints it over the connections and the shapes it passes.
+pub fn lift_riders(mut doc: crate::parser::ast::Document) -> crate::parser::ast::Document {
+    use crate::parser::ast::Statement;
+    let riders = riders(&doc);
+    if riders.is_empty() {
+        return doc;
+    }
+    for stmt in &mut doc.statements {
+        let (name, mods) = match &mut stmt.node {
+            Statement::Shape(s) => (s.name.as_ref().map(|n| n.node.0.clone()), &mut s.modifiers),
+            Statement::Group(g) => (g.name.as_ref().map(|n| n.node.0.clone()), &mut g.modifiers),
+            Statement::Layout(l) => (l.name.as_ref().map(|n| n.node.0.clone()), &mut l.modifiers),
+            _ => continue,
+        };
+        if !name.is_some_and(|n| riders.contains_key(&n)) {
+            continue;
+        }
+        if mods.iter().any(|m| matches!(m.node.key.node, StyleKey::ZOrder)) {
+            continue;
+        }
+        let span = stmt.span.clone();
+        mods.push(Spanned::new(
+            StyleModifier {
+                key: Spanned::new(StyleKey::ZOrder, span.clone()),
+                value: Spanned::new(StyleValue::Number { value: 1.0, unit: None }, span.clone()),
+            },
+            span,
+        ));
+    }
+    doc
+}
+
 pub fn opt_name<'a>(opts: &'a [Spanned<MotionOpt>], key: &str) -> Option<&'a str> {
     match opt(opts, key).map(|v| &v.node) {
         Some(MotionValue::Name(n)) => Some(n.as_str()),

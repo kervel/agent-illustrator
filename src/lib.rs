@@ -627,6 +627,9 @@ fn render_pipeline(
         &motion::expand::ImportContext { base_path: config.template_base_path.as_deref() },
     )?;
 
+    // A traveller on a line is drawn above it.
+    let doc = motion::lift_riders(doc);
+
     // Desugar point-constraints (e.g. `a.tip = b.top - 4`) into scalar component
     // constraints before layout and the constraint solver see them.
     let doc = crate::parser::ast::expand_point_constraints(doc);
