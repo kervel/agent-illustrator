@@ -5,6 +5,10 @@ A declarative illustration language for AI agents: describe *what* to draw and
 engine lays it out, animates it and checks it. I use it for the explainer
 slides of a workshop deck (reveal.js / MARP).
 
+**[Try it in the playground →](https://kervel.github.io/agent-illustrator/)**
+Write a scene in your browser and watch it render as you type. Start from the
+git deck below.
+
 [![Branches and merge requests](examples/motion/git-branches.anim.svg)](examples/motion/git-branches.ail)
 
 | | |
@@ -17,9 +21,6 @@ slides of a workshop deck (reveal.js / MARP).
 Every image above is a plain SVG playing a pure-CSS loop (`--animate-css`), so
 it runs inside an `<img>` on GitHub. With `--animate`, the same scene gets a
 player that steps on click, as in a slide deck. Click an image for its source.
-
-**Try it in the browser:** the [playground](https://kervel.github.io/agent-illustrator/)
-renders as you type, with every example here to start from.
 
 ## What this is
 
