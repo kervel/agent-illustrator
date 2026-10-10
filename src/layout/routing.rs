@@ -1441,13 +1441,14 @@ fn extract_connection_label_with_ref(
         }
     });
 
-    // Extract label_offset modifier (perpendicular distance from path, default 10.0)
+    // Extract label_offset modifier (perpendicular distance from path, default
+    // 10.0). Negative puts the label that far on the other side of the line.
     let label_offset = modifiers
         .iter()
         .find_map(|m| {
             if matches!(m.node.key.node, StyleKey::LabelOffset) {
                 match &m.node.value.node {
-                    StyleValue::Number { value, .. } => Some(value.max(0.0)),
+                    StyleValue::Number { value, .. } => Some(*value),
                     _ => None,
                 }
             } else {
@@ -2041,6 +2042,17 @@ mod tests {
             label.position.x, 50.0,
             "Zero offset should keep label on path"
         );
+    }
+
+    #[test]
+    fn test_label_offset_negative_flips_side() {
+        // A negative offset puts the label the same distance on the other side.
+        let path = vec![Point::new(50.0, 0.0), Point::new(50.0, 100.0)];
+        let modifiers = make_label_modifiers_with_offset("Test", -25.0);
+
+        let label = extract_connection_label(&modifiers, &path, &empty_result()).unwrap();
+
+        assert_eq!(label.position.x, 25.0, "offset -25 should be 25 to the other side");
     }
 
     #[test]
