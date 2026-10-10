@@ -48,6 +48,7 @@ struct DiagnosticOut {
     end_column: Option<usize>,
     hint: Option<String>,
     frames: Vec<String>,
+    elements: Vec<String>,
     text: String,
 }
 
@@ -63,6 +64,7 @@ impl From<Diagnostic> for DiagnosticOut {
             end_column: d.range.map(|r| r.end_column),
             hint: d.hint,
             frames: d.frames,
+            elements: d.elements,
             text: d.text,
         }
     }

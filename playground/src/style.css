@@ -367,19 +367,27 @@ input {
 /* ---------- Report under the editor ---------- */
 
 .report {
-  max-height: 34vh;
+  max-height: 38vh;
   overflow: auto;
   border-top: 1px solid var(--ink-line);
   background: var(--ink-deep);
   font-size: 13px;
 }
 
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  min-height: 38px;
+}
+
 .status {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 14px;
   color: var(--ink-dim);
+  min-width: 0;
 }
 
 .status::before {
@@ -403,6 +411,48 @@ input {
   background: var(--ink-dim);
 }
 
+/* The findings count: the list stays folded until asked for. */
+.count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 3px 10px;
+  background: rgb(255 194 71 / 0.12);
+  border: 1px solid rgb(255 194 71 / 0.35);
+  border-radius: 999px;
+  color: var(--warn);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.count.is-error {
+  background: rgb(255 107 107 / 0.12);
+  border-color: rgb(255 107 107 / 0.4);
+  color: var(--error);
+}
+
+.count::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s;
+}
+
+.count[aria-expanded="true"]::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+
+.findings {
+  max-height: 30vh;
+  overflow: auto;
+}
+
 .diag {
   display: grid;
   grid-template-columns: 68px 1fr;
@@ -416,11 +466,12 @@ input {
   cursor: default;
 }
 
-.diag[data-line] {
+.diag[title] {
   cursor: pointer;
 }
 
-.diag[data-line]:hover {
+.diag:hover,
+.diag:focus-visible {
   background: #1b2842;
 }
 

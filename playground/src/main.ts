@@ -282,11 +282,41 @@ function paint(svg: string) {
   const page = `<!doctype html><meta charset="utf-8"><style>
 html,body{margin:0;height:100%;overflow:hidden;background:transparent}
 body>svg{display:block;width:100%;height:100%}
-</style>${svg}`;
+${HIGHLIGHT_CSS}</style>${svg}<script>${HIGHLIGHT_JS}<\/script>`;
   const frame = $<HTMLIFrameElement>("out");
   frame.srcdoc = page;
   layoutSheet();
 }
+
+/** Inside the frame: outline the elements the page names (lint findings). */
+const HIGHLIGHT_CSS = `.ail-hl{fill:rgb(255 178 26/.16);stroke:#ffb21a;stroke-width:2.5px;vector-effect:non-scaling-stroke;pointer-events:none;animation:ail-hl .9s ease-in-out infinite alternate}
+@keyframes ail-hl{to{stroke-opacity:.35;fill-opacity:.06}}
+@media (prefers-reduced-motion:reduce){.ail-hl{animation:none}}`;
+const HIGHLIGHT_JS = `addEventListener("message", (e) => {
+  const names = e.data && e.data.ailHighlight;
+  if (!Array.isArray(names)) return;
+  document.querySelectorAll(".ail-hl").forEach((n) => n.remove());
+  const svg = document.querySelector("body > svg");
+  if (!svg) return;
+  const toSvg = svg.getScreenCTM().inverse();
+  for (const name of names) {
+    const el = document.getElementById(name) || document.getElementById(name.replace(/\\./g, "_"));
+    if (!el || !el.getBBox || !el.getScreenCTM()) continue;
+    const b = el.getBBox();
+    const m = toSvg.multiply(el.getScreenCTM());
+    const pts = [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]]
+      .map(([x, y]) => new DOMPoint(x, y).matrixTransform(m));
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y), pad = 5;
+    const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    r.setAttribute("class", "ail-hl");
+    r.setAttribute("x", Math.min(...xs) - pad);
+    r.setAttribute("y", Math.min(...ys) - pad);
+    r.setAttribute("width", Math.max(...xs) - Math.min(...xs) + 2 * pad);
+    r.setAttribute("height", Math.max(...ys) - Math.min(...ys) + 2 * pad);
+    r.setAttribute("rx", 6);
+    svg.appendChild(r);
+  }
+});`;
 
 function svgSize(svg: string): { w: number; h: number } {
   const tag = /<svg\b[^>]*>/.exec(svg)?.[0] ?? "";
@@ -322,13 +352,19 @@ function currentScale(): number {
 
 // ---------- Report ----------
 
+/** Whether the findings list is open; the reader decides, renders keep it. */
+let findingsOpen = false;
+
 function setStatus(kind: "ok" | "error" | "warn" | "busy", text: string) {
   const report = $("report");
-  let s = report.querySelector<HTMLElement>(".status");
-  if (!s) {
-    s = document.createElement("div");
-    report.prepend(s);
+  let bar = report.querySelector<HTMLElement>(".statusbar");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.className = "statusbar";
+    bar.append(document.createElement("span"));
+    report.prepend(bar);
   }
+  const s = bar.firstElementChild as HTMLElement;
   s.className = `status is-${kind}`;
   s.textContent = text;
 }
@@ -336,13 +372,14 @@ function setStatus(kind: "ok" | "error" | "warn" | "busy", text: string) {
 function renderReport(r: RenderResult, ms: number) {
   const report = $("report");
   report.replaceChildren();
-  const errors = r.diagnostics.filter((d) => d.severity === "error").length;
-  const warnings = r.diagnostics.length - errors;
+  const errors = r.diagnostics.filter((d) => d.severity === "error");
+  const warnings = r.diagnostics.filter((d) => d.severity === "warning");
   if (!r.output) setStatus("error", "Not rendered: the source has an error.");
-  else if (errors) setStatus("error", `Rendered in ${ms} ms, with ${plural(errors, "layout error")}.`);
-  else if (warnings) setStatus("warn", `Rendered in ${ms} ms, with ${plural(warnings, "lint warning")}.`);
+  else if (errors.length) setStatus("error", `Rendered in ${ms} ms`);
+  else if (warnings.length) setStatus("warn", `Rendered in ${ms} ms`);
   else setStatus("ok", `Rendered in ${ms} ms${lint ? ", lint clean" : ""}.`);
 
+  // Files the document asked for that do not exist: always in view, they block.
   for (const path of r.missingFiles) {
     const row = document.createElement("div");
     row.className = "missing";
@@ -361,35 +398,97 @@ function renderReport(r: RenderResult, ms: number) {
     report.append(row);
   }
 
-  for (const d of r.diagnostics) {
-    if (d.code === "missing-file" && r.missingFiles.length) continue;
-    const row = document.createElement("button");
-    row.className = "diag";
-    const sev = document.createElement("span");
-    sev.className = `diag-sev ${d.severity}`;
-    sev.textContent = d.severity === "error" ? "Error" : "Warning";
-    const msg = document.createElement("span");
-    msg.className = "diag-msg";
-    msg.textContent = d.message;
-    row.append(sev, msg);
-    const meta = [d.code, d.line != null ? `line ${d.line}` : "", d.frames.length ? `in ${d.frames.join(", ")}` : ""].filter(Boolean);
-    const m = document.createElement("span");
-    m.className = "diag-meta";
-    m.textContent = meta.join("  ·  ");
-    row.append(m);
-    if (d.hint) {
-      const h = document.createElement("span");
-      h.className = "diag-hint";
-      h.textContent = d.hint;
-      row.append(h);
+  const shown = r.diagnostics.filter((d) => !(d.code === "missing-file" && r.missingFiles.length));
+  if (!shown.length) return;
+  // A failed render has nothing else to show: open the list for it.
+  if (!r.output) findingsOpen = true;
+
+  const toggle = document.createElement("button");
+  toggle.className = `count ${errors.length ? "is-error" : "is-warn"}`;
+  toggle.setAttribute("aria-expanded", String(findingsOpen));
+  toggle.setAttribute("aria-controls", "findings");
+  const parts = [errors.length ? plural(errors.length, "error") : "", warnings.length ? plural(warnings.length, "warning") : ""];
+  toggle.textContent = parts.filter(Boolean).join(", ");
+  const list = document.createElement("div");
+  list.className = "findings";
+  list.id = "findings";
+  list.hidden = !findingsOpen;
+  toggle.onclick = () => {
+    findingsOpen = !findingsOpen;
+    list.hidden = !findingsOpen;
+    toggle.setAttribute("aria-expanded", String(findingsOpen));
+  };
+  report.querySelector(".statusbar")!.append(toggle);
+
+  for (const d of shown) list.append(findingRow(d));
+  list.addEventListener("mouseleave", () => highlight([]));
+  report.append(list);
+}
+
+function findingRow(d: Diagnostic): HTMLElement {
+  const row = document.createElement("button");
+  row.className = "diag";
+  const sev = document.createElement("span");
+  sev.className = `diag-sev ${d.severity}`;
+  sev.textContent = d.severity === "error" ? "Error" : "Warning";
+  const msg = document.createElement("span");
+  msg.className = "diag-msg";
+  msg.textContent = d.message;
+  row.append(sev, msg);
+  const meta = [d.code, d.line != null ? `line ${d.line}` : "", d.frames.length ? `in ${d.frames.join(", ")}` : ""].filter(Boolean);
+  const m = document.createElement("span");
+  m.className = "diag-meta";
+  m.textContent = meta.join("  ·  ");
+  row.append(m);
+  if (d.hint) {
+    const h = document.createElement("span");
+    h.className = "diag-hint";
+    h.textContent = d.hint;
+    row.append(h);
+  }
+  // Point at the elements it is about, on the drawing.
+  const point = () => highlight(d.elements);
+  row.addEventListener("mouseenter", point);
+  row.addEventListener("focus", point);
+  row.addEventListener("blur", () => highlight([]));
+  if (d.line != null) {
+    row.title = "Go to the line";
+    row.onclick = () => jumpTo(d.line!, d.column ?? 1);
+  } else if (d.elements.length) {
+    row.title = "Go to where it is declared";
+    row.onclick = () => jumpToName(d.elements[0]);
+  }
+  return row;
+}
+
+/** Outline these elements on the drawing (none: clear). */
+function highlight(names: string[]) {
+  $<HTMLIFrameElement>("out").contentWindow?.postMessage({ ailHighlight: names }, "*");
+}
+
+/** Put the cursor on the first mention of an element (its first path segment) outside a comment. */
+function jumpToName(name: string) {
+  if (active !== mainPath) openTab(mainPath);
+  const word = name.split(".")[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`\\b${word}\\b`);
+  const doc = view.state.doc;
+  let inBlock = false;
+  for (let i = 1; i <= doc.lines; i++) {
+    const text = doc.line(i).text;
+    const code = text.replace(/\/\/.*$/, "");
+    if (inBlock) {
+      if (text.includes("*/")) inBlock = false;
+      continue;
     }
-    if (d.line != null) {
-      row.dataset.line = String(d.line);
-      row.onclick = () => jumpTo(d.line!, d.column ?? 1);
-    } else {
-      row.tabIndex = -1;
+    if (code.trimStart().startsWith("/*") && !code.includes("*/")) {
+      inBlock = true;
+      continue;
     }
-    report.append(row);
+    const m = re.exec(code);
+    if (m) {
+      jumpTo(i, m.index + 1);
+      return;
+    }
   }
 }
 

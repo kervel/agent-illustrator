@@ -69,6 +69,8 @@ export interface Diagnostic {
   hint?: string;
   /** Keyframes a lint finding occurs in; empty when frame-independent. */
   frames: string[];
+  /** The elements a lint finding is about, as the message names them (dotted paths for parts). */
+  elements: string[];
   /** The full report as the CLI prints it: location, source line, caret. */
   text: string;
 }
@@ -169,7 +171,7 @@ export class Illustrator {
       // Bad options throw a JsError; a trap is a RuntimeError.
       const message = e instanceof WebAssembly.RuntimeError ? trapped(e) : e instanceof Error ? e.message : String(e);
       const code = e instanceof WebAssembly.RuntimeError ? "internal" : "options";
-      return { ok: false, diagnostics: [{ severity: "error", code, message, frames: [], text: message }], missingFiles: [] };
+      return { ok: false, diagnostics: [{ severity: "error", code, message, frames: [], elements: [], text: message }], missingFiles: [] };
     }
   }
 

@@ -77,6 +77,7 @@ SVG, absent only when the render failed; a lint error keeps it),
 | `line`, `column`, `endLine`, `endColumn` | 1-based. Present when the diagnostic points at the source. |
 | `hint` | What would fix it, when known (`did you mean: server?`). |
 | `frames` | The keyframes a lint finding occurs in. |
+| `elements` | The elements a lint finding is about (dotted paths for parts), to point at them in the drawing. |
 | `text` | The full report as the CLI prints it: location, source line, caret. |
 
 ## Not in the WebAssembly build

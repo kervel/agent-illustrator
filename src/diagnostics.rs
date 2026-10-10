@@ -47,6 +47,9 @@ pub struct Diagnostic {
     pub hint: Option<String>,
     /// Keyframes a lint finding occurs in; empty when frame-independent.
     pub frames: Vec<String>,
+    /// The elements a lint finding is about (as the message names them:
+    /// dotted paths for parts), so a front end can point at them.
+    pub elements: Vec<String>,
     /// The whole report as the CLI prints it: location, source line, caret.
     pub text: String,
 }
@@ -105,7 +108,7 @@ fn first_line(text: &str) -> String {
 }
 
 fn error(code: &str, message: String, range: Option<SourceRange>, hint: Option<String>, text: String) -> Diagnostic {
-    Diagnostic { severity: Severity::Error, code: code.into(), message, range, hint, frames: Vec::new(), text }
+    Diagnostic { severity: Severity::Error, code: code.into(), message, range, hint, frames: Vec::new(), elements: Vec::new(), text }
 }
 
 /// One diagnostic per error in `e` (a syntax error can come with several).
@@ -198,8 +201,31 @@ pub fn from_lint(w: &LintWarning) -> Diagnostic {
         range: None,
         hint: None,
         frames: w.frames.clone(),
+        elements: lint_elements(w),
         text: format!("lint: {}{}: {}", w.category, w.frame_suffix(), w.message),
     }
+}
+
+/// The names a finding quotes (`"api"`, `"browser→api"` → both ends), in
+/// the message's order so its subject comes first; else the pair it is about.
+fn lint_elements(w: &LintWarning) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for (i, quoted) in w.message.split('"').enumerate() {
+        if i % 2 == 0 || quoted.is_empty() || quoted.contains(char::is_whitespace) {
+            continue;
+        }
+        for name in quoted.split('→') {
+            if !name.is_empty() && !out.iter().any(|n| n == name) {
+                out.push(name.to_string());
+            }
+        }
+    }
+    if out.is_empty() {
+        if let Some((a, b)) = &w.pair {
+            out = vec![a.clone(), b.clone()];
+        }
+    }
+    out
 }
 
 #[cfg(test)]
@@ -233,6 +259,22 @@ mod tests {
         });
         assert_eq!(r.diagnostics[0].code, "missing-file");
         assert_eq!(missing, vec!["deck.ail".to_string()]);
+    }
+
+    #[test]
+    fn overlap_names_its_elements() {
+        let src = "rect api [width: 120]\nrect db [width: 120]\nconstrain db.left = api.left + 30\nconstrain db.top = api.top + 10";
+        let r = check(src, RenderConfig::default().with_lint(true));
+        let d = r.diagnostics.iter().find(|d| d.code == "overlap").expect("an overlap");
+        assert_eq!(d.elements, vec!["api".to_string(), "db".to_string()]);
+    }
+
+    #[test]
+    fn a_label_finding_names_the_label_owner_first() {
+        let src = "rect api [label: \"API\"]\nrect note [label: \"A note\"]\nconstrain note.center_x = api.center_x + 20\nconstrain note.center_y = api.center_y + 8";
+        let r = check(src, RenderConfig::default().with_lint(true));
+        let d = r.diagnostics.iter().find(|d| d.message.starts_with("label on")).expect("a straddle");
+        assert_eq!(d.elements.first().map(String::as_str), Some("note"), "{:?}", d);
     }
 
     #[test]
