@@ -394,7 +394,7 @@ fn resolve_ail_template(
 
     // Load the AIL file content
     let content =
-        std::fs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
+        crate::vfs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
             path: full_path.clone(),
             message: e.to_string(),
         })?;

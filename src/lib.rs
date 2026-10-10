@@ -13,6 +13,7 @@
 
 pub mod caption;
 pub mod code;
+pub mod diagnostics;
 pub mod docs;
 pub mod raster;
 pub mod table;
@@ -24,6 +25,7 @@ pub mod parser;
 pub mod renderer;
 pub mod stylesheet;
 pub mod template;
+pub mod vfs;
 
 pub use error::ParseError;
 pub use layout::lint::{LintCategory, LintWarning};
@@ -33,6 +35,9 @@ pub use renderer::{render_svg, render_svg_with_keyframes, render_svg_with_styles
 pub use template::{resolve_templates, TemplateError, TemplateRegistry};
 
 use thiserror::Error;
+
+/// The version this library was built as (the release tag, or `git describe`).
+pub const VERSION: &str = env!("AI_VERSION");
 
 // Re-export Stylesheet for public API
 pub use stylesheet::Stylesheet;
@@ -411,7 +416,7 @@ pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, 
 
 /// Point an error that knows its span at the source: `line L, column C`,
 /// the line itself, a caret, and any suggestions.
-fn locate_error(e: RenderError, source: &str) -> RenderError {
+pub(crate) fn locate_error(e: RenderError, source: &str) -> RenderError {
     if let RenderError::Layout(LayoutError::Located { message, span }) = &e {
         if span.end <= source.len() && span.start < span.end {
             let start = span.start;
@@ -557,7 +562,7 @@ pub fn render_frames_strip(source: &str, config: RenderConfig, frame: &str) -> R
     Ok(out)
 }
 
-fn render_pipeline(
+pub(crate) fn render_pipeline(
     source: &str,
     mut config: RenderConfig,
 ) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {

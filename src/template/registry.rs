@@ -264,7 +264,7 @@ impl TemplateRegistry {
             }
             ImageHrefMode::Base64 => {
                 let full = self.resolve_path(relative);
-                match std::fs::read(&full) {
+                match crate::vfs::read(&full) {
                     Ok(bytes) => {
                         let mime = mime_from_extension(relative);
                         let encoded = base64::Engine::encode(
@@ -314,7 +314,7 @@ impl TemplateRegistry {
         let full_path = self.resolve_path(path.to_str().unwrap_or(""));
 
         let content =
-            std::fs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
+            crate::vfs::read_to_string(&full_path).map_err(|e| TemplateError::FileReadError {
                 path: full_path.clone(),
                 message: e.to_string(),
             })?;

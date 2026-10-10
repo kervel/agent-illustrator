@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AIL Playground</title>
+    <meta name="description" content="Write Agent Illustrator code and watch the renderer lay it out, live in your browser." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a2740'/%3E%3Crect x='20' y='8' width='5' height='16' fill='%23ffb21a'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="bar">
+      <a class="mark" href="https://github.com/kervel/agent-illustrator" title="Agent Illustrator on GitHub">
+        <span class="mark-word">ail</span><span class="mark-cursor" aria-hidden="true"></span>
+        <span class="mark-sub">playground</span>
+      </a>
+
+      <div class="picker">
+        <button id="examples-btn" class="picker-btn" aria-haspopup="true" aria-expanded="false" aria-controls="examples-panel">
+          <span class="picker-label">Example</span>
+          <span id="example-title" class="picker-title">…</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" /></svg>
+        </button>
+        <div id="examples-panel" class="panel" hidden></div>
+      </div>
+
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="Output">
+          <button role="radio" data-mode="none" title="A static picture; pick a keyframe to see that moment">Still</button>
+          <button role="radio" data-mode="js" title="Click to step through the keyframes">Player</button>
+          <button role="radio" data-mode="css" title="Plays on its own, no JavaScript (works in a README)">Loop</button>
+        </div>
+        <label class="field" title="Stylesheet layered over the default palette">
+          <span>Style</span>
+          <select id="style-select"></select>
+        </label>
+        <label class="toggle" title="Check the layout for overlaps, clipped labels and other defects">
+          <input type="checkbox" id="lint-toggle" checked />
+          <span>Lint</span>
+        </label>
+        <button id="share-btn" class="btn" title="Copy a link to exactly this">Copy link</button>
+        <div class="dl">
+          <button id="svg-btn" class="btn" title="Download the SVG">SVG</button>
+          <button id="png-btn" class="btn" title="Download a PNG at twice the size">PNG</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="work" id="work">
+      <section class="code" aria-label="Source">
+        <nav class="tabs" id="tabs" role="tablist"></nav>
+        <div class="editor" id="editor"></div>
+        <div class="report" id="report" aria-live="polite"></div>
+      </section>
+
+      <div class="split" id="split" role="separator" aria-orientation="vertical" tabindex="0" title="Drag to resize"></div>
+
+      <section class="table" aria-label="Rendering">
+        <div class="stage" id="stage">
+          <div class="sheet" id="sheet">
+            <i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
+            <iframe id="out" title="Rendered illustration" sandbox="allow-scripts"></iframe>
+            <span class="dims" id="dims"></span>
+          </div>
+          <div class="empty" id="empty" hidden></div>
+        </div>
+        <div class="frames" id="frames" hidden>
+          <div class="chips" id="chips"></div>
+          <label class="scrub" id="scrub" hidden>
+            <span>At</span>
+            <input type="range" id="at" min="0" max="100" step="1" value="100" />
+            <output id="at-out">end</output>
+          </label>
+        </div>
+        <div class="zoom" role="group" aria-label="Zoom">
+          <button id="zoom-out" class="zbtn" title="Zoom out" aria-label="Zoom out">−</button>
+          <button id="zoom-fit" class="zbtn zfit" title="Fit to the table">Fit</button>
+          <button id="zoom-in" class="zbtn" title="Zoom in" aria-label="Zoom in">+</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span id="version"></span>
+      <span class="foot-sep"></span>
+      <a href="https://github.com/kervel/agent-illustrator/blob/main/docs/skill.md">Language guide</a>
+      <a href="https://github.com/kervel/agent-illustrator/blob/main/docs/grammar.md">Grammar</a>
+      <a href="https://github.com/kervel/agent-illustrator/tree/main/wasm">Use it in your app</a>
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "ail-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "examples": "node scripts/gen-examples.mjs",
+    "dev": "npm run examples && vite",
+    "build": "npm run examples && tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.14",
+    "@lezer/highlight": "^1.2.5",
+    "codemirror": "^6.0.2"
+  }
+}

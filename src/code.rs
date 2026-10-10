@@ -591,7 +591,7 @@ pub fn spec_for(t: &TemplateInstance, base: Option<&std::path::Path>) -> Result<
     if let Some(f) = arg_text(t, "file") {
         let path = base.map(|b| b.join(&f)).unwrap_or_else(|| f.clone().into());
         source = Some(
-            std::fs::read_to_string(&path).map_err(|e| format!("code {}: cannot read {}: {}", name, path.display(), e))?,
+            crate::vfs::read_to_string(&path).map_err(|e| format!("code {}: cannot read {}: {}", name, path.display(), e))?,
         );
     }
     let mut first = 1;

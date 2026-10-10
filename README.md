@@ -18,6 +18,9 @@ Every image above is a plain SVG playing a pure-CSS loop (`--animate-css`), so
 it runs inside an `<img>` on GitHub. With `--animate`, the same scene gets a
 player that steps on click, as in a slide deck. Click an image for its source.
 
+**Try it in the browser:** the [playground](https://kervel.github.io/agent-illustrator/)
+renders as you type, with every example here to start from.
+
 ## What this is
 
 - **Constraints, not coordinates.** `row`, `col`, `grid`, templates and
@@ -171,6 +174,16 @@ Download from [GitHub Releases](https://github.com/kervel/agent-illustrator/rele
 
 ```bash
 cargo install --git https://github.com/kervel/agent-illustrator
+```
+
+### In the browser or a Node app (WebAssembly)
+
+Each release attaches `agent-illustrator-wasm.tgz`, the renderer compiled to
+WebAssembly with a TypeScript API. It never touches a filesystem: you supply the
+files a document imports. See [wasm/README.md](wasm/README.md).
+
+```bash
+npm install https://github.com/kervel/agent-illustrator/releases/download/vX.Y.Z/agent-illustrator-wasm.tgz
 ```
 
 ## Quick Start

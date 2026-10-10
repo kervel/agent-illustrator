@@ -3,6 +3,9 @@ name = "agent-illustrator"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members = [".", "wasm"]
+
 [dependencies]
 logos = "0.14"
 chumsky = "1.0.0-alpha.7"

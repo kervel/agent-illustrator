@@ -334,7 +334,7 @@ fn collect_macros(
                         Some(b) => b.join(&path.node),
                         None => PathBuf::from(&path.node),
                     };
-                    let src = std::fs::read_to_string(&p).map_err(|e| {
+                    let src = crate::vfs::read_to_string(&p).map_err(|e| {
                         LayoutError::validation_error(&format!(
                             "import \"{}\": cannot read {}: {}",
                             path.node,
@@ -384,7 +384,7 @@ pub fn inline_imports(doc: Document, ctx: &ImportContext) -> Result<Document, La
                             Some(b) => b.join(&path.node),
                             None => PathBuf::from(&path.node),
                         };
-                        let src = std::fs::read_to_string(&p).map_err(|e| {
+                        let src = crate::vfs::read_to_string(&p).map_err(|e| {
                             LayoutError::validation_error(&format!(
                                 "import \"{}\": cannot read {}: {}",
                                 path.node,

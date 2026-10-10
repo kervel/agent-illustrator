@@ -80,8 +80,55 @@ jobs:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
 
+  # The WebAssembly build: the npm package (attached to the release) and
+  # the playground (deployed to GitHub Pages).
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: jetli/wasm-pack-action@v0.4.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build and test the wasm package
+        working-directory: wasm
+        env:
+          AI_RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          npm ci
+          npm run build
+          npm test
+          npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version
+          npm pack
+          mv agent-illustrator-wasm-*.tgz ../agent-illustrator-wasm.tgz
+
+      - name: Build the playground
+        working-directory: playground
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload the npm package
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-illustrator-wasm.tgz
+          path: agent-illustrator-wasm.tgz
+
+      - name: Upload the playground
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playground/dist
+
   release:
-    needs: build
+    needs: [build, web]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -91,9 +138,24 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          # Not the playground: that goes to Pages.
+          pattern: agent-illustrator-*
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: artifacts/*/*
           generate_release_notes: true
+
+  playground:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

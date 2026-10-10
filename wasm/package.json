@@ -1,0 +1,30 @@
+{
+  "name": "agent-illustrator-wasm",
+  "version": "0.0.0",
+  "description": "Agent Illustrator (declarative illustration language) compiled to WebAssembly, with a TypeScript API",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "pkg/agent_illustrator_wasm.js",
+    "pkg/agent_illustrator_wasm.d.ts",
+    "pkg/agent_illustrator_wasm_bg.wasm",
+    "pkg/agent_illustrator_wasm_bg.wasm.d.ts"
+  ],
+  "scripts": {
+    "build:wasm": "wasm-pack build --release --target web --out-dir pkg --no-pack",
+    "build:ts": "tsc -p tsconfig.json",
+    "build": "npm run build:wasm && npm run build:ts",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
