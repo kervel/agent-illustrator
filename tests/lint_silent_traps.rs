@@ -117,3 +117,62 @@ constrain bg contains a, b [padding: 10]
         .collect();
     assert!(noisy.is_empty(), "false positives: {:?}", noisy);
 }
+
+/// Four cards across a 1000-wide stage, leaving `margin` px each side.
+fn cards_on_stage(card: u32, gap: u32, stroke: f64) -> String {
+    format!(
+        r#"
+rect stage [width: 1000, height: 300, canvas: true, fill: none, stroke: none]
+row cards [gap: {gap}] {{
+  rect you [width: {card}, height: 120, stroke_width: {stroke}, label: "You"]
+  rect agent [width: {card}, height: 120, stroke_width: {stroke}, label: "Agent"]
+  rect tool [width: {card}, height: 120, stroke_width: {stroke}, label: "Tool"]
+  rect data [width: {card}, height: 120, stroke_width: {stroke}, label: "Data"]
+}}
+constrain cards.center_x = stage.center_x
+constrain cards.center_y = stage.center_y
+"#
+    )
+}
+
+#[test]
+fn a_stroke_past_the_canvas_edge_is_cut_off() {
+    // 4×200 + 3×66 = 998: 1px each side, but a 3px stroke reaches 1.5px out.
+    let warnings = lint(&cards_on_stage(200, 66, 3.0));
+    let cut: Vec<_> = warnings
+        .iter()
+        .filter(|w| w.category == agent_illustrator::LintCategory::CanvasOverflow)
+        .map(|w| w.message.clone())
+        .collect();
+    assert!(cut.iter().any(|m| m.contains("'you'") && m.contains("stroke")), "{:?}", messages(&warnings));
+    assert!(cut.iter().any(|m| m.contains("'data'") && m.contains("stroke")), "{:?}", messages(&warnings));
+}
+
+#[test]
+fn content_hugging_the_canvas_edge_is_reported() {
+    // 4px from each side, stroke well inside: legal, but it reads as cramped.
+    let warnings = lint(&cards_on_stage(200, 64, 1.0));
+    assert!(
+        warnings.iter().any(|w| w.category == agent_illustrator::LintCategory::CrowdedLayout
+            && w.message.contains("'you'")
+            && w.message.contains("edge")),
+        "{:?}",
+        messages(&warnings)
+    );
+}
+
+#[test]
+fn a_comfortable_margin_or_a_full_bleed_band_is_quiet() {
+    let roomy = lint(&cards_on_stage(180, 60, 3.0));
+    assert!(!roomy.iter().any(|w| w.message.contains("edge")), "{:?}", messages(&roomy));
+    // Flush on purpose: a band spanning the stage, with no stroke to clip.
+    let band = lint(
+        r#"
+rect stage [width: 800, height: 400, canvas: true, fill: none, stroke: none]
+rect band [width: 800, height: 60, fill: accent-1, stroke: none]
+constrain band.left = stage.left
+constrain band.top = stage.top
+"#,
+    );
+    assert!(!band.iter().any(|w| w.message.contains("edge")), "{:?}", messages(&band));
+}

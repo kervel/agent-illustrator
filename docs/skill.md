@@ -42,7 +42,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
 | Colouring the words on a shape | `label_fill:` | `fill:` (that is the shape) |
 | A label that must not widen its box | `max_width: 240` (wraps past it) | a hand-broken `<br>` guess |
-| Content kept inside a slide area | `rect stage [..., canvas: true]` (leaving it is an error) | checking by eye |
+| Content kept inside a slide area | `rect stage [..., canvas: true]` (leaving it, or a stroke cut off at its edge, is an error; within 8px of an edge, a warning) | checking by eye |
 | A transit/metro line through stations | `path p [through: [a, b, c], routing: metro]` (names get room) | a hand-drawn path |
 | Moving something in a keyframe | `move x to y` / `move x home` | `transform x [dx: ...]` |
 | A few elements placed differently for a while | `layout beside { constrain ... }` + `use layout beside` / `use layout default` | disable/enable pairs of named constraints |

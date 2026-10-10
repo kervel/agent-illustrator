@@ -407,7 +407,8 @@ Declarations that serve motion:
     path p [through: [a.dot, b.dot], routing: metro, drawn: 0|60%|elem, extend: 40]
         stations side by side on the line get room for their names (the line
         stretches); list every station. spread: even  -> equal steps on a flat run
-    rect stage [..., canvas: true]   the picture's bounds; leaving it is reported
+    rect stage [..., canvas: true]   the picture's bounds; leaving it (stroke included) is
+                                     an error, stopping <8px short of an edge a warning
     label wrapping: max_width: 240    rows of components: [align: member, pack: tight]
     many at once: doc d* [fname: ["a", "b", "c"]]  ->  d0, d1, d2
                   (templates and plain shapes alike; list-valued arguments zip

@@ -80,7 +80,7 @@ keyframe "clone" {
   Set one part per instance with `machine anna [hist.appears: later]`.
 - `point hub` is an invisible anchor. `clip: bg` draws a part inside its frame.
 - Stage: give every scene one, `rect stage [..., canvas: true]`. It is the
-  picture's frame; anything drawn outside it is a lint error.
+  picture's frame; leaving it, stroke included, is a lint error.
 - Later declarations draw on top. Declare backgrounds before what sits on
   them, or give them `z_order: -1`; a part over a neighbour: `z_order:
   scene(1)`; under something mid-story: `move card to x [z_order: -1]`
