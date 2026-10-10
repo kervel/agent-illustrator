@@ -759,7 +759,7 @@ async function main() {
   if (shared) {
     await loadExample(byId(shared.example) ?? BLANK, shared);
   } else {
-    await loadExample(byId("architecture") ?? manifest.examples[0] ?? BLANK);
+    await loadExample(manifest.examples[0] ?? BLANK);
   }
 }
 

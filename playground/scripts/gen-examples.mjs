@@ -1,5 +1,6 @@
-// Build the playground's example set from examples/renders.txt — the same
-// list the repo renders — so the picker never drifts from the repo.
+// Build the playground's example set. examples.txt picks the examples and
+// their order; examples/renders.txt (what the repo renders) supplies each
+// one's stylesheet and animation mode.
 //
 // Copies every example source file (and the stylesheets) into public/ at its
 // repo path, skipping the rendered outputs, and writes public/examples.json.
@@ -26,23 +27,27 @@ for (const line of readFileSync(join(root, "examples/renders.txt"), "utf8").spli
   bySource.set(src, e);
 }
 
-/** First sentence of the file's leading comment, cleaned up. */
+/** The first sentence of the file's leading comment, cleaned up. */
 function describe(text) {
-  const lines = text.split("\n").map((l) => l.trim());
-  for (const l of lines) {
+  // The leading comment's first paragraph, as one line.
+  const para = [];
+  let inBlock = false;
+  for (const raw of text.trimStart().split("\n")) {
+    const l = raw.trim();
+    if (l.startsWith("/*")) inBlock = true;
+    const isComment = inBlock || l.startsWith("//");
     const s = l.replace(/^\/\*+|\*+\/$|^\/\/+/g, "").trim();
+    if (!isComment || !s || /^(Render|Usage):/.test(s)) break;
     // A storyboard is notes for the author, not a summary.
     if (/^STORYBOARD\b/.test(s)) return "";
-    if (!s || /^INTENT\b|^Render:|^Usage:/.test(s)) continue;
-    return s
-      .replace(/^Scene( \d+ of the git deck)?:\s*/, "")
-      .replace(/" -> "/g, " → ")
-      .replace(/^"|"\.?$/g, "")
-      .replace(/"\s*(\(.*\))?\.?$/, " $1")
-      .replace(/^"/, "")
-      .trim();
+    if (/^INTENT\b/.test(s)) continue;
+    para.push(s);
+    if (l.endsWith("*/")) break;
   }
-  return "";
+  const line = para.join(" ").replace(/^Scene( \d+ of the git deck)?:\s*/, "");
+  // `"Title" -> "Next title".` scene headers read as titles.
+  if (line.startsWith('"')) return line.replace(/" -> "/g, " → ").replace(/"/g, "").replace(/\.$/, "");
+  return line.match(/^.*?\.(?=\s|$)/)?.[0] ?? line;
 }
 
 const title = (path) =>
@@ -53,20 +58,27 @@ const title = (path) =>
     .replace(/-/g, " ")
     .replace(/^./, (c) => c.toUpperCase());
 
-const examples = [...bySource.values()].map((e) => {
+const examples = [];
+let group = "";
+for (const line of readFileSync(join(here, "..", "examples.txt"), "utf8").split("\n")) {
+  const l = line.trim();
+  if (l.startsWith("## ")) group = l.slice(3).trim();
+  if (!l || l.startsWith("#")) continue;
+  const e = bySource.get(l);
+  if (!e) throw new Error(`examples.txt: ${l} is not in examples/renders.txt`);
   const text = readFileSync(join(root, e.path), "utf8");
   // Prefer the click-through player for a deck; a CSS loop otherwise.
   const animate = e.modes.has("js") ? "js" : e.modes.has("css") ? "css" : "none";
-  return {
+  examples.push({
     id: e.path.replace(/^examples\//, "").replace(/\.ail$/, ""),
     title: title(e.path),
     description: describe(text),
     path: e.path,
     css: e.css,
     animate,
-    group: animate === "none" ? "Diagrams" : "Animations",
-  };
-});
+    group,
+  });
+}
 
 function copyTree(from, to) {
   for (const name of readdirSync(from)) {
