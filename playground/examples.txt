@@ -3,10 +3,10 @@
 # `## Name` starts a group.
 
 ## The git deck
-examples/motion/git-branches.ail
+examples/motion/git-history.ail
 examples/motion/git-copies.ail
 examples/motion/git-snapshots.ail
-examples/motion/git-history.ail
+examples/motion/git-branches.ail
 examples/motion/git-merge.ail
 
 ## Motion
