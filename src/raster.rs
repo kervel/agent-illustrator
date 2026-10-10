@@ -61,8 +61,15 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
             }
         };
         let before: std::collections::HashSet<usvg::fontdb::ID> = db.faces().map(|f| f.id).collect();
-        db.load_font_data(data);
-        let added: Vec<usvg::fontdb::ID> = db.faces().map(|f| f.id).filter(|id| !before.contains(id)).collect();
+        db.load_font_data(data.clone());
+        let mut added: Vec<usvg::fontdb::ID> = db.faces().map(|f| f.id).filter(|id| !before.contains(id)).collect();
+        // A subsetter can drop the `name` table, and fontdb skips a face it
+        // cannot name. The stylesheet names it, so that is enough.
+        if added.is_empty() {
+            if let Some(info) = unnamed_face(data, family) {
+                added.push(db.push_face_info(info));
+            }
+        }
         if added.is_empty() {
             notes.push(format!("@font-face '{}' could not be read as a font (TTF, OTF, WOFF and WOFF2 are supported)", family));
         }
@@ -125,6 +132,27 @@ pub fn svg_to_png(svg: &str, scale: f32) -> Result<Raster, String> {
     resvg::render(&tree, resvg::tiny_skia::Transform::from_scale(scale, scale), &mut pixmap.as_mut());
     let png = pixmap.encode_png().map_err(|e| format!("PNG: {}", e))?;
     Ok(Raster { png, notes })
+}
+
+/// A face fontdb would not load for want of a `name` table, described from
+/// its OS/2 and post tables under the @font-face `family`.
+fn unnamed_face(data: Vec<u8>, family: &str) -> Option<usvg::fontdb::FaceInfo> {
+    use usvg::fontdb::{FaceInfo, Language, Source, Stretch, Style, Weight, ID};
+    let face = ttf_parser::Face::parse(&data, 0).ok()?;
+    let style = if face.is_italic() { Style::Italic } else if face.is_oblique() { Style::Oblique } else { Style::Normal };
+    let weight = Weight(face.weight().to_number());
+    let monospaced = face.is_monospaced();
+    Some(FaceInfo {
+        id: ID::dummy(),
+        source: Source::Binary(Arc::new(data)),
+        index: 0,
+        families: vec![(family.to_string(), Language::English_UnitedStates)],
+        post_script_name: family.replace(' ', ""),
+        style,
+        weight,
+        stretch: Stretch::Normal,
+        monospaced,
+    })
 }
 
 fn is_generic(f: &str) -> bool {
@@ -781,5 +809,34 @@ mod tests {
         assert!(f.svg.contains(r##"fill="#ff0000""##), "{}", f.svg);
         assert!(f.svg.contains("translate(5 0)"), "{}", f.svg);
         assert!(f.svg.contains(r#"<text fill="blue""#), "{}", f.svg);
+    }
+
+    /// `font` with its `name` table hidden, as a subsetter that drops names
+    /// leaves it: the tag is renamed in place, keeping the directory sorted.
+    fn without_name_table(font: &[u8]) -> Vec<u8> {
+        let mut out = font.to_vec();
+        let tables = u16::from_be_bytes([font[4], font[5]]) as usize;
+        for i in 0..tables {
+            let at = 12 + 16 * i;
+            if &out[at..at + 4] == b"name" {
+                out[at..at + 4].copy_from_slice(b"namf");
+            }
+        }
+        out
+    }
+
+    #[test]
+    fn a_font_without_names_is_used_under_its_font_face_family() {
+        let font = without_name_table(MONO);
+        assert!(ttf_parser::Face::parse(&font, 0).is_ok());
+        let b64 = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &font);
+        let svg = format!(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40"><style>
+            @font-face {{ font-family: "AIL Sans"; src: url(data:font/ttf;base64,{}) }}
+            </style><text x="5" y="25" font-family="'AIL Sans', sans-serif">iiii</text></svg>"#,
+            b64
+        );
+        let r = svg_to_png(&svg, 1.0).unwrap();
+        assert!(r.notes.is_empty(), "{:?}", r.notes);
     }
 }
