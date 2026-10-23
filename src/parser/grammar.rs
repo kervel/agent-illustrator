@@ -1210,7 +1210,26 @@ where
         just(Token::CenterXProp).to(ConstraintProperty::CenterX),
         just(Token::CenterYProp).to(ConstraintProperty::CenterY),
     ));
-    let midpoint_arg = joined_path.clone().then(just(Token::Dot).ignore_then(edge).or_not()).boxed();
+    // A `contains` element may be a plain identifier or a grid cell reference
+    // `grid.cell(row, col)` (desugared to the cell's synthetic id). The plain
+    // identifier parser stops at the dot, so the cell form is tried first.
+    let cell_as_identifier = identifier
+        .then_ignore(just(Token::Dot))
+        .then_ignore(just(Token::Ident("cell".to_string())))
+        .then_ignore(just(Token::ParenOpen))
+        .then(number)
+        .then_ignore(just(Token::Comma))
+        .then(number)
+        .then_ignore(just(Token::ParenClose))
+        .map(|((grid, row), col)| {
+            let cell_id = grid_cell_id(&grid.node.0, row.node as usize, col.node as usize);
+            Spanned::new(Identifier::new(cell_id), grid.span.clone())
+        });
+    // A midpoint argument is a name, a dotted part, or a grid cell, each
+    // optionally followed by an edge: `grid.cell(1, 2).center_x`.
+    let midpoint_arg = choice((cell_as_identifier.clone(), joined_path.clone()))
+        .then(just(Token::Dot).ignore_then(edge).or_not())
+        .boxed();
 
     // Midpoint: target.prop = midpoint(a, b) or target.prop = midpoint(a, b) + offset
     let midpoint_expr = property_ref
@@ -1232,21 +1251,6 @@ where
             b_edge,
         });
 
-    // A `contains` element may be a plain identifier or a grid cell reference
-    // `grid.cell(row, col)` (desugared to the cell's synthetic id). The plain
-    // identifier parser stops at the dot, so the cell form is tried first.
-    let cell_as_identifier = identifier
-        .then_ignore(just(Token::Dot))
-        .then_ignore(just(Token::Ident("cell".to_string())))
-        .then_ignore(just(Token::ParenOpen))
-        .then(number)
-        .then_ignore(just(Token::Comma))
-        .then(number)
-        .then_ignore(just(Token::ParenClose))
-        .map(|((grid, row), col)| {
-            let cell_id = grid_cell_id(&grid.node.0, row.node as usize, col.node as usize);
-            Spanned::new(Identifier::new(cell_id), grid.span.clone())
-        });
     let contains_element = choice((cell_as_identifier, identifier));
 
     // Contains: container contains a, b, c [padding: N]
@@ -3233,6 +3237,24 @@ mod tests {
                     assert!((value - 200.0).abs() < 0.001);
                 }
                 other => panic!("Expected LessOrEqual, got {:?}", other),
+            },
+            other => panic!("Expected Constrain, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_constrain_midpoint_grid_cells() {
+        let doc = parse("constrain m.center_x = midpoint(g.cell(0, 0), g.cell(0, 2).right)")
+            .expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Midpoint { a, b, a_edge, b_edge, .. } => {
+                    assert_eq!(a.node.as_str(), grid_cell_id("g", 0, 0));
+                    assert_eq!(b.node.as_str(), grid_cell_id("g", 0, 2));
+                    assert!(a_edge.is_none());
+                    assert!(matches!(b_edge, Some(ConstraintProperty::Right)));
+                }
+                other => panic!("Expected Midpoint, got {:?}", other),
             },
             other => panic!("Expected Constrain, got {:?}", other),
         }

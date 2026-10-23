@@ -223,6 +223,7 @@ constrain a.center_x = b.center_x        // align centers
 constrain a.bottom = b.top - 10          // 10px gap
 constrain a.center_x = midpoint(b, c)    // center between two elements
 constrain a.center_y = midpoint(b.bottom, c.top)   // centred in the gap between them
+constrain a.center_x = midpoint(g.cell(0,0), g.cell(0,2))   // grid cells work too
 ```
 
 #### Shape and routing selection
