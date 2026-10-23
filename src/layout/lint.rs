@@ -2452,12 +2452,23 @@ fn check_label_connection_overlaps(
         }
     }
 
+    // A `label_mask` connection cuts the lines behind its label on purpose.
+    let masked_owners: std::collections::HashSet<String> = result
+        .connections
+        .iter()
+        .filter(|c| c.label.is_some() && c.label_mask.is_some())
+        .map(|c| format!("{}→{}", c.from_id.0, c.to_id.0))
+        .collect();
+
     for label in &labels {
         // Skip transparent labels
         if let Some(op) = label.parent_opacity {
             if op < 1.0 {
                 continue;
             }
+        }
+        if masked_owners.contains(&label.owner) {
+            continue;
         }
 
         for conn in &result.connections {
@@ -3649,6 +3660,7 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "trim",         // svg templates
     "via",          // connection routing
     "padding",      // contains
+    "label_mask",   // connection: cut lines away behind the label
     "corner_radius", // rect rx
     "font_weight",  // label/text weight
     "font_family",  // label/text family
@@ -4342,6 +4354,7 @@ mod tests {
             path,
             styles: super::super::types::ResolvedStyles::default(),
             label: None,
+            label_mask: None,
             routing_mode,
             name: None,
         }

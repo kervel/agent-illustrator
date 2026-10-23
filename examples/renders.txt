@@ -8,6 +8,7 @@ examples/feedback-loops.svg        examples/feedback-loops.ail        --styleshe
 examples/gallic-wars-timeline.svg  examples/gallic-wars-timeline.ail  --stylesheet-css stylesheets/kapernikov.css
 examples/mosfet-driver.svg         examples/mosfet-driver.ail         --stylesheet-css stylesheets/kapernikov-schematic.css
 examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
+examples/sequence-diagram.svg      examples/sequence-diagram.ail      --stylesheet-css stylesheets/kapernikov.css
 
 # Animated showcases (CSS only: they play inside an <img>)
 examples/token-prediction.svg      examples/token-prediction.ail      --stylesheet-css stylesheets/kapernikov.css --animate-css

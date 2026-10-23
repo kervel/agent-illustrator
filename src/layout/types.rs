@@ -1253,6 +1253,9 @@ pub struct ConnectionLayout {
     pub path: Vec<Point>,
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,
+    /// `label_mask: N`: lines drawn on the connection layer are cut away
+    /// within N of the label's box, so the text reads clean over them.
+    pub label_mask: Option<f64>,
     pub routing_mode: RoutingMode, // Feature 008: track routing mode for rendering
     /// Optional name for referencing in keyframes (Feature 011)
     pub name: Option<Identifier>,

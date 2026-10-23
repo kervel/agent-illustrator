@@ -53,6 +53,9 @@ pub struct SvgBuilder {
     /// elements with `z_order` above 0 paint over them.
     lines_at: Option<usize>,
     connections: Vec<String>,
+    /// Boxes (label plus its `label_mask` padding) to cut out of the
+    /// connection layer.
+    label_masks: Vec<BoundingBox>,
     indent: usize,
     /// Prefix that makes this document's keyframe classes unique. See
     /// `SvgConfig::scope`.
@@ -92,6 +95,7 @@ impl SvgBuilder {
             elements: vec![],
             lines_at: None,
             connections: vec![],
+            label_masks: vec![],
             indent: 1,
             scope,
             // Seeded with the default palette so a document that supplies no
@@ -988,8 +992,27 @@ impl SvgBuilder {
             svg.push_str(elem);
             svg.push_str(nl);
         }
+        let masked = !self.label_masks.is_empty();
+        if masked {
+            let holes: String = self
+                .label_masks
+                .iter()
+                .map(|b| format!(r##"<rect x="{}" y="{}" width="{}" height="{}" fill="#000"/>"##, b.x, b.y, b.width, b.height))
+                .collect();
+            svg.push_str(&format!(
+                r##"  <mask id="aimlabel-{s}" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><rect x="-100000" y="-100000" width="200000" height="200000" fill="#fff"/>{holes}</mask>"##,
+                s = self.scope
+            ));
+            svg.push_str(nl);
+            svg.push_str(&format!(r#"  <g mask="url(#aimlabel-{})">"#, self.scope));
+            svg.push_str(nl);
+        }
         for conn in &self.connections {
             svg.push_str(conn);
+            svg.push_str(nl);
+        }
+        if masked {
+            svg.push_str("  </g>");
             svg.push_str(nl);
         }
         for elem in &self.elements[split..] {
@@ -2280,6 +2303,21 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
 
     // Render connection label if present
     if let Some(label) = &conn.label {
+        if let Some(pad) = conn.label_mask {
+            let font_size = label.styles.as_ref().and_then(|s| s.font_size).unwrap_or(label.font_size);
+            let m = crate::layout::text::measure_runs(&label.rich.lines, font_size);
+            let x = match label.anchor {
+                TextAnchor::Start => label.position.x,
+                TextAnchor::Middle => label.position.x - m.width / 2.0,
+                TextAnchor::End => label.position.x - m.width,
+            };
+            builder.label_masks.push(BoundingBox::new(
+                x - pad,
+                label.position.y - m.height / 2.0 - pad,
+                m.width + 2.0 * pad,
+                m.height + 2.0 * pad,
+            ));
+        }
         // Use label's own styles if available (from referenced element),
         // otherwise apply subtle defaults for connector labels
         let mut label_styles = label
@@ -3008,6 +3046,7 @@ mod tests {
             path: vec![Point::new(50.0, 25.0), Point::new(100.0, 25.0)],
             styles: ResolvedStyles::default(),
             label: None,
+            label_mask: None,
             routing_mode: RoutingMode::default(),
             name: None,
         });

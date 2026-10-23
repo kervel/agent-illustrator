@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 690 313" font-size="14">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
+    --background-1: #ffffff;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #f6dedb;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    
+/* stylesheets/kapernikov.css */
+/* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+  ]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <g id="actors" class="ai-container">
+    <rect id="client" class="ai-shape ai-rect" x="5" y="5" width="90" height="36" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+    <text class="ai-label" x="50" y="23" text-anchor="middle" dominant-baseline="middle"><tspan x="50" dy="-0"><tspan>Client</tspan></tspan></text>
+    <rect id="api" class="ai-shape ai-rect" x="245" y="5" width="90" height="36" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+    <text class="ai-label" x="290" y="23" text-anchor="middle" dominant-baseline="middle"><tspan x="290" dy="-0"><tspan>API</tspan></tspan></text>
+    <rect id="db" class="ai-shape ai-rect" x="485" y="5" width="90" height="36" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+    <text class="ai-label" x="530" y="23" text-anchor="middle" dominant-baseline="middle"><tspan x="530" dy="-0"><tspan>DB</tspan></tspan></text>
+  </g>
+  <rect id="c1" class="ai-shape ai-rect" x="49" y="92" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="a1" class="ai-shape ai-rect" x="289" y="92" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="d1" class="ai-shape ai-rect" x="529" y="92" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="c2" class="ai-shape ai-rect" x="49" y="144" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="a2" class="ai-shape ai-rect" x="289" y="144" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="d2" class="ai-shape ai-rect" x="529" y="144" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="c3" class="ai-shape ai-rect" x="49" y="196" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="a3" class="ai-shape ai-rect" x="289" y="196" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="d3" class="ai-shape ai-rect" x="529" y="196" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <text class="ai-label" x="290" y="93" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="290" dy="-0"><tspan>SELECT without asking the API</tspan></tspan></text>
+  <text class="ai-label" x="170.5" y="133" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170.5" dy="-0"><tspan>rows</tspan></tspan></text>
+  <text class="ai-label" x="170" y="185" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170" dy="-0"><tspan>ack</tspan></tspan></text>
+  <mask id="aimlabel-9c45017c-" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><rect x="-100000" y="-100000" width="200000" height="200000" fill="#fff"/><rect x="187.56599999999997" y="80.25" width="204.86800000000005" height="25.5" fill="#000"/></mask>
+  <g mask="url(#aimlabel-9c45017c-)">
+  <path class="ai-connection" d="M50 41 L50 92" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M50 94 L50 144" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M50 146 L50 196" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M290 41 L290 92" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M290 94 L290 144" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M290 146 L290 196" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M530 41 L530 92" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M530 94 L530 144" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M530 146 L530 196" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection" d="M51 93 L521.8 93" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M529 145 L58.2 145" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M51 197 L281.8 197" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  </g>
+</svg>

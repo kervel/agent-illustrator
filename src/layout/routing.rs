@@ -1056,6 +1056,7 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
                             path,
                             styles,
                             label,
+                            label_mask: extract_label_mask(&conn.modifiers),
                             routing_mode,
                             name: conn.name.as_ref().map(|n| n.node.clone()),
                         });
@@ -1379,6 +1380,15 @@ fn extract_connection_label(
     result: &LayoutResult,
 ) -> Option<LabelLayout> {
     extract_connection_label_with_ref(modifiers, path, result).0
+}
+
+/// `label_mask: N` on a connection: the padding around its label's box inside
+/// which lines behind the label are cut away. Absent means no cutting.
+fn extract_label_mask(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
+    modifiers.iter().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+        (StyleKey::Custom(k), StyleValue::Number { value, .. }) if k == "label_mask" => Some(*value),
+        _ => None,
+    })
 }
 
 /// Extract connection label and return both the label and the referenced element ID (if any)

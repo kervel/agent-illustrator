@@ -575,6 +575,79 @@ has to remember to move the word underneath it: three scenario files in a real
 deck lost a named constraint and the `disable` that went with it.
 
 
+EXAMPLE 12: Sequence diagram (lifelines, messages, a label that masks a line)
+-----------------------------------------------------------------------------
+No dedicated construct: a lifeline is a dashed connection chained through one
+invisible point per message, a message is an arrow between two such points.
+`label_mask: 4` on the first message cuts the API's lifeline (and the arrow
+itself) away behind its long label; `label_offset` (negative = other side) and
+`label_at` place the others. Each message is one row of the same shape, so a
+generator can emit them from data. Full file: examples/sequence-diagram.ail.
+
+```
+// A sequence diagram, built from the same parts as any other drawing:
+// a lifeline is a dashed connection chained through one point per message,
+// a message is an arrow between two such points, and `label_mask` cuts the
+// lifeline (and the arrow itself) away behind a label that crosses it.
+//
+// Every message is one row in the same shape, so a generator can emit the
+// lines below from data: ("msg", from, to, label).
+row actors [gap: 150] {
+  rect client [label: "Client", width: 90, height: 36]
+  rect api    [label: "API",    width: 90, height: 36]
+  rect db     [label: "DB",     width: 90, height: 36]
+}
+
+// One point per actor per message, 52 below the one before.
+rect c1 [size: 2, stroke: none, fill: none]
+rect a1 [size: 2, stroke: none, fill: none]
+rect d1 [size: 2, stroke: none, fill: none]
+rect c2 [size: 2, stroke: none, fill: none]
+rect a2 [size: 2, stroke: none, fill: none]
+rect d2 [size: 2, stroke: none, fill: none]
+rect c3 [size: 2, stroke: none, fill: none]
+rect a3 [size: 2, stroke: none, fill: none]
+rect d3 [size: 2, stroke: none, fill: none]
+
+constrain c1.center_x = client.center_x
+constrain a1.center_x = api.center_x
+constrain d1.center_x = db.center_x
+constrain c2.center_x = client.center_x
+constrain a2.center_x = api.center_x
+constrain d2.center_x = db.center_x
+constrain c3.center_x = client.center_x
+constrain a3.center_x = api.center_x
+constrain d3.center_x = db.center_x
+
+constrain c1.center_y = client.bottom + 52
+constrain a1.center_y = c1.center_y
+constrain d1.center_y = c1.center_y
+constrain c2.center_y = c1.center_y + 52
+constrain a2.center_y = c2.center_y
+constrain d2.center_y = c2.center_y
+constrain c3.center_y = c2.center_y + 52
+constrain a3.center_y = c3.center_y
+constrain d3.center_y = c3.center_y
+
+// Chained connections style only their last segment, so each gets its own.
+client -- c1 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+c1 -- c2 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+c2 -- c3 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+api -- a1 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+a1 -- a2 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+a2 -- a3 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+db -- d1 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+d1 -- d2 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+d2 -- d3 [stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+
+// The first message reaches over the API's lifeline to the DB: the label is
+// wider than the gap, so it sits on the arrow and masks what is behind it.
+c1 -> d1 [label: "SELECT without asking the API", label_offset: 0, label_mask: 4]
+d2 -> c2 [label: "rows", label_at: 0.75, label_offset: -12]
+c3 -> a3 [label: "ack", label_offset: 12]
+```
+
+
 EXAMPLE: First-class motion (commits on a timeline)
 ---------------------------------------------------
 Self-contained: the built-in library brings the macros AND templates they fit

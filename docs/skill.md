@@ -37,6 +37,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
 | Text that must not jump when its wording changes | leave it auto-sized, add `align: start` | guessing a `width` for the longest wording |
+| A message label wider than the gap, crossing a lifeline or another line | `a -> b [label: "...", label_offset: 0, label_mask: 4]` | painting a background-coloured box behind the text |
 | One caption across a walkthrough | `transform cap [label: "..."]` per keyframe | one text element per step |
 | Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
 | Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
@@ -345,6 +346,23 @@ in that space: `gap: 8` with `constrain rule.top = g.cell(1,1).bottom + 2`.
 Worked sums, tables and anything with subtotals need this. `col_labels: [...]`
 / `row_labels: [...]` add aligned text gutters. For a heatmap, use one hue with
 per-cell `fill_opacity`. See `--examples`.
+
+#### Sequence diagrams (lifelines, messages, a label that crosses a line)
+
+There is no sequence-diagram construct; it is built from parts you have. A
+lifeline is a dashed connection down from the actor's box, chained through one
+tiny invisible `rect` per message (`client -- c1`, `c1 -- c2`, ...). A message is
+an arrow between two of those points at the same height. Chained connections
+style only their last segment, so write each lifeline segment on its own line.
+
+`label_offset:` moves a label off the arrow (negative = the other side).
+`label_at:` slides it along the arrow, so it can clear a lifeline. When a label
+is wider than the gap and has to cross a line anyway, give its connection
+`label_mask: 4`: every line behind the label's box (plus 4 px) is cut away
+there, the arrow's own line included. It cuts the connection layer only
+(`a -- b`, arrows); a lifeline drawn as a thin rect is not cut. Each message is
+one row of the same shape, so a generator can emit them from data. Example in
+`--examples` (EXAMPLE 12) and `examples/sequence-diagram.ail`.
 
 ### Layout Strategy
 
