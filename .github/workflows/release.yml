@@ -92,7 +92,13 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
 
-      - uses: jetli/wasm-pack-action@v0.4.0
+      # Not jetli/wasm-pack-action: on the Ubuntu 26 runners its rename from
+      # /tmp into ~/.cargo/bin fails with EXDEV (cross-device link).
+      - name: Install wasm-pack
+        run: |
+          curl -sSfL https://github.com/rustwasm/wasm-pack/releases/download/v0.15.0/wasm-pack-v0.15.0-x86_64-unknown-linux-musl.tar.gz \
+            | tar xz --strip-components=1 -C ~/.cargo/bin --wildcards '*/wasm-pack'
+          wasm-pack --version
 
       - uses: actions/setup-node@v4
         with:
