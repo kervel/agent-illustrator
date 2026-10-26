@@ -174,6 +174,21 @@ fn collect_appears(stmts: &[Spanned<Statement>], out: &mut std::collections::Has
                     out.insert(n.node.0.clone(), m.clone());
                 }
             }
+            // An instance (artwork or template) carries `appears:` as an argument.
+            Statement::TemplateInstance(t) => {
+                if let Some((k, v)) = t.arguments.iter().find(|(k, _)| k.node.0 == "appears") {
+                    out.insert(
+                        t.instance_name.node.0.clone(),
+                        Spanned::new(
+                            StyleModifier {
+                                key: Spanned::new(StyleKey::Custom("appears".to_string()), k.span.clone()),
+                                value: v.clone(),
+                            },
+                            k.span.clone(),
+                        ),
+                    );
+                }
+            }
             Statement::Group(g) => {
                 if let (Some(n), Some(m)) = (&g.name, g.modifiers.iter().find(|m| is(m))) {
                     out.insert(n.node.0.clone(), m.clone());

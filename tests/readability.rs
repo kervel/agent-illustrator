@@ -381,9 +381,9 @@ fn a_clipped_header_stays_inside_its_frame() {
                rect head [width: 300, height: 48, fill: red, stroke: none, clip: bg]\n\
                constrain head.top = bg.top\nconstrain head.left = bg.left";
     let svg = render(src);
-    assert!(svg.contains(r#"<clipPath id="ai-clip-head"><rect class="ai-shape kf-anim kfc-"#), "{svg}");
+    assert!(svg.contains(r#"<clipPath id="ai-clip-"#) && svg.contains(r#"-head"><rect class="ai-shape kf-anim kfc-"#), "{svg}");
     assert!(svg.contains(r#"-head" x="2" y="2" width="296" height="146" rx="14" ry="14"/>"#), "{svg}");
-    assert!(svg.contains(r#"clip-path="url(#ai-clip-head)""#));
+    assert!(svg.contains(r#"-head)""#));
     assert!(lint(src).is_empty(), "{:?}", lint(src));
 }
 

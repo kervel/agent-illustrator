@@ -1109,13 +1109,22 @@ pub fn route_connections_hiding(
         share_branch_points(&mut result.connections);
     } else {
         let all = std::mem::take(&mut result.connections);
+        let is_off: Vec<bool> = all
+            .iter()
+            .map(|c| c.name.as_ref().is_some_and(|n| hidden.contains(&n.0)))
+            .collect();
         let (off, on): (Vec<_>, Vec<_>) = all
             .into_iter()
             .partition(|c| c.name.as_ref().is_some_and(|n| hidden.contains(&n.0)));
         result.connections = on;
         spread_coinciding_connections(result);
         share_branch_points(&mut result.connections);
-        result.connections.extend(off);
+        // Back in declaration order: frames are compared with the base by index.
+        let (mut on, mut off) = (std::mem::take(&mut result.connections).into_iter(), off.into_iter());
+        result.connections = is_off
+            .iter()
+            .filter_map(|o| if *o { off.next() } else { on.next() })
+            .collect();
     }
 
     // Resolve overlapping connection labels

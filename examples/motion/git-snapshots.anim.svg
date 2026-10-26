@@ -251,11 +251,11 @@ text { white-space: pre; }
 @media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
 ]]></style>
   <defs>
-    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-f8126697-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
     <mask id="aim-f8126697-track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-f8126697-track aid-f8126697-track" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00" fill="none" stroke="#fff" stroke-width="24.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
-    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-f8126697-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-f8126697-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-f8126697-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
   </defs>
   <g class="kf-f8126697-s kf-anim" style="transform-origin:800px 450px">
     <g id="s" class="ai-container kfp-f8126697-s">
@@ -280,7 +280,7 @@ text { white-space: pre; }
       <g class="kf-f8126697-folder_body kf-anim" style="transform-origin:356px 354px">
         <g id="folder_body" class="ai-container kfp-f8126697-folder_body">
           <g class="kf-f8126697-fhead kf-anim" style="transform-origin:356px 240px">
-            <g clip-path="url(#ai-clip-fhead)">
+            <g clip-path="url(#ai-clip-f8126697-fhead)">
               <rect id="fhead" class="ai-shape ai-rect kfp-f8126697-fhead" x="96" y="214" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
               <text class="ai-label" x="104" y="240" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="104" dy="-0"><tspan>webshop</tspan></tspan></text>
             </g>
@@ -486,7 +486,7 @@ text { white-space: pre; }
 <g data-ghost-of="folder" class="ai-container">
 <rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="520" height="280" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
 <g data-ghost-of="folder_body" class="ai-container">
-<g clip-path="url(#ai-clip-fhead)">
+<g clip-path="url(#ai-clip-f8126697-fhead)">
 <rect data-ghost-of="fhead" class="ai-shape ai-rect" x="96" y="214" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
 <text class="ai-label" x="104" y="240" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="104" dy="-0"><tspan>webshop</tspan></tspan></text>
 </g>
@@ -527,7 +527,7 @@ text { white-space: pre; }
 <g data-ghost-of="folder" class="ai-container">
 <rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="520" height="280" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
 <g data-ghost-of="folder_body" class="ai-container">
-<g clip-path="url(#ai-clip-fhead)">
+<g clip-path="url(#ai-clip-f8126697-fhead)">
 <rect data-ghost-of="fhead" class="ai-shape ai-rect" x="96" y="214" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
 <text class="ai-label" x="104" y="240" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="104" dy="-0"><tspan>webshop</tspan></tspan></text>
 </g>
@@ -568,7 +568,7 @@ text { white-space: pre; }
 <g data-ghost-of="folder" class="ai-container">
 <rect data-ghost-of="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="520" height="280" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
 <g data-ghost-of="folder_body" class="ai-container">
-<g clip-path="url(#ai-clip-fhead)">
+<g clip-path="url(#ai-clip-f8126697-fhead)">
 <rect data-ghost-of="fhead" class="ai-shape ai-rect" x="96" y="214" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
 <text class="ai-label" x="104" y="240" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="104" dy="-0"><tspan>webshop</tspan></tspan></text>
 </g>

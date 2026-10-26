@@ -144,7 +144,7 @@ svg { font-family: var(--font-sans); }
 text { white-space: pre; }
   ]]></style>
   <defs>
-    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-f8126697-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
   </defs>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
@@ -155,7 +155,7 @@ text { white-space: pre; }
   <g id="folder" class="ai-container">
     <rect id="folder_bg" class="ai-shape ai-rect" x="96" y="214" width="520" height="280" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="3" rx="16" style="rx:16px;ry:16px"/>
     <g id="folder_body" class="ai-container">
-      <g clip-path="url(#ai-clip-fhead)">
+      <g clip-path="url(#ai-clip-f8126697-fhead)">
         <rect id="fhead" class="ai-shape ai-rect" x="96" y="214" width="520" height="52" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
         <text class="ai-label" x="104" y="240" text-anchor="start" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="104" dy="-0"><tspan>webshop</tspan></tspan></text>
       </g>

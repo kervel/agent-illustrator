@@ -144,7 +144,7 @@ svg { font-family: var(--font-sans); }
 text { white-space: pre; }
   ]]></style>
   <defs>
-    <clipPath id="ai-clip-merged_title"><rect class="ai-shape kf-anim kfc-4daa88cb-merged_title" x="494" y="171.5" width="612" height="407" rx="12.5" ry="12.5"/></clipPath>
+    <clipPath id="ai-clip-4daa88cb-merged_title"><rect class="ai-shape kf-anim kfc-4daa88cb-merged_title" x="494" y="171.5" width="612" height="407" rx="12.5" ry="12.5"/></clipPath>
   </defs>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>
@@ -154,7 +154,7 @@ text { white-space: pre; }
   </g>
   <g id="merged" class="ai-container">
     <rect id="merged_bg" class="ai-shape ai-rect" x="492.5" y="170" width="615" height="410" fill="var(--code-bg)" stroke="var(--code-frame)" stroke-width="3" rx="14" style="rx:14px;ry:14px"/>
-    <g clip-path="url(#ai-clip-merged_title)">
+    <g clip-path="url(#ai-clip-4daa88cb-merged_title)">
       <rect id="merged_title" class="ai-shape ai-rect" x="495.5" y="173" width="609" height="65" fill="var(--code-title-bg)" stroke="none" stroke-width="1.5"/>
       <text class="ai-label" x="503.5" y="205.5" text-anchor="start" dominant-baseline="middle" font-size="27" fill="var(--code-title)" style="font-weight:700"><tspan x="503.5" dy="-0"><tspan>cart.py · merged</tspan></tspan></text>
     </g>

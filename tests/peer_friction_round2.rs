@@ -109,3 +109,35 @@ a.plug_top -> p
     let d = svg.split(r#"class="ai-connection""#).nth(1).and_then(|s| s.split(" d=\"").nth(1)).and_then(|s| s.split('"').next()).unwrap();
     assert_eq!(d.matches('L').count(), 2, "up, then across: one bend, got {d}");
 }
+
+#[test]
+fn a_strip_gives_each_panel_its_own_clip() {
+    let src = r#"
+rect frame [width: 200, height: 120, fill: none, stroke: role-ink]
+rect bar [width: 700, height: 36, fill: role-primary, stroke: none, clip: frame]
+constrain bar.left = frame.left
+constrain bar.top = frame.top
+keyframe "start" { }
+keyframe "grow" { transform frame [width: 600] }
+"#;
+    let svg = agent_illustrator::render_frames_strip(src, RenderConfig::default(), "grow").unwrap();
+    let ids: Vec<&str> = svg.split(r#"<clipPath id=""#).skip(1).map(|s| s.split('"').next().unwrap()).collect();
+    assert_eq!(ids.len(), 5, "{ids:?}");
+    let mut uniq = ids.clone();
+    uniq.sort();
+    uniq.dedup();
+    assert_eq!(uniq.len(), 5, "one clip per panel: {ids:?}");
+}
+
+#[test]
+fn a_caption_of_an_artwork_comes_with_it() {
+    let src = r#"
+template "plug" { rect body [width: 40, height: 40] }
+plug p [appears: later]
+rect p_nm [caption_of: p, label_position: right, label: "artwork caption", fill: none, stroke: none]
+keyframe "start" { }
+keyframe "show" { show p }
+"#;
+    let svg = render_with_config(src, RenderConfig { frame: Some("start".into()), ..Default::default() }).unwrap();
+    assert!(!svg.contains("artwork caption"), "hidden with its subject:\n{svg}");
+}

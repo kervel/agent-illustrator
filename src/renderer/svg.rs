@@ -708,7 +708,7 @@ impl SvgBuilder {
 
     /// Add a hidden crossfade variant path for a connection whose route reshapes in a
     /// given frame. Shown only in that frame via `.frame-<frame> .conn-<id>-f<frame>`.
-    pub fn add_connection_variant(&mut self, d: &str, id: &str, frame: &str, marker_end: bool) {
+    pub fn add_connection_variant(&mut self, d: &str, id: &str, frame: &str, marker_end: bool, style: &str) {
         let prefix = self.prefix();
         let marker = if marker_end {
             format!(r#" marker-end="url(#{prefix}arrow)""#)
@@ -720,7 +720,7 @@ impl SvgBuilder {
             self.connections.push(format!(r#"<g class="aivar-{}{}-f{}">"#, self.scope, id, frame));
         }
         self.connections.push(format!(
-            r#"{}<path class="{}connection conn-{}{} conn-{}{}-f{}" d="{}" fill="none"{}{}/>"#,
+            r#"{}<path class="{}connection conn-{}{} conn-{}{}-f{}" d="{}" fill="none"{}{}{}/>"#,
             self.indent_str(),
             prefix,
             self.scope,
@@ -729,6 +729,7 @@ impl SvgBuilder {
             id,
             frame,
             d,
+            style,
             // The wrapper carries the fade; a hidden path inside it would stay hidden.
             if wrap { "" } else { r#" opacity="0""# },
             marker
@@ -789,7 +790,7 @@ impl SvgBuilder {
     /// there is no such element (nothing to close).
     pub fn start_clip(&mut self, owner: &str, target: &str) -> bool {
         let Some(&(x, y, w, h, r)) = self.clip_targets.get(target) else { return false };
-        let id = format!("{}clip-{}", self.prefix(), owner);
+        let id = format!("{}clip-{}{}", self.prefix(), self.scope, owner);
         self.defs.push(format!(
             r#"<clipPath id="{id}"><rect class="ai-shape kf-anim kfc-{scope}{owner}" x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" ry="{r}"/></clipPath>"#,
             scope = self.scope()
@@ -1169,7 +1170,21 @@ pub fn render_svg_with_keyframes(
                 if !diff.morphable {
                     if let Some((routing, marker, sw)) = conn_meta.get(conn_id) {
                         let d = connection_path_d(pts, *routing, *marker, *sw);
-                        builder.add_connection_variant(&d, conn_id, &frame.name, *marker);
+                        // Same look as the base path (stroke, width, dashes).
+                        let style = result
+                            .connections
+                            .iter()
+                            .enumerate()
+                            .find(|(i, c)| {
+                                c.name.as_ref().map(|n| n.0.clone()).unwrap_or_else(|| format!("idx{}", i)) == *conn_id
+                            })
+                            .map(|(_, c)| {
+                                let mut st = c.styles.clone();
+                                st.opacity = None;
+                                format_connection_styles(&st)
+                            })
+                            .unwrap_or_default();
+                        builder.add_connection_variant(&d, conn_id, &frame.name, *marker, &style);
                     }
                 }
             }
