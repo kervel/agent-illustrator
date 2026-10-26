@@ -128,7 +128,7 @@ pub fn check(
 ) -> Vec<LintWarning> {
     let Some(canvas) = canvas_id(doc) else { return vec![] };
     let keyframes = crate::layout::keyframe::extract_keyframes(doc);
-    let states = crate::layout::keyframe::compute_frame_states(&keyframes);
+    let states = crate::layout::keyframe::compute_frame_states_for(doc, &keyframes);
     let frames: Vec<(String, LayoutResult, HashSet<String>)> = if states.is_empty() {
         vec![(String::new(), result.clone(), HashSet::new())]
     } else {

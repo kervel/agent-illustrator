@@ -700,6 +700,8 @@ struct Compiler<'a> {
     defaults: Defaults,
     /// Elements a keyframe gives a `fill_opacity`: their base is 1 when undeclared.
     fo_ids: BTreeSet<String>,
+    /// The document has a `contains`: showing or hiding may resize its frame.
+    has_contains: bool,
     channels: Vec<ChKey>,
     ch_index: HashMap<ChKey, usize>,
     aux: Aux,
@@ -777,6 +779,9 @@ impl<'a> Compiler<'a> {
     }
 
     fn solve(&self, state: &FrameState) -> LayoutResult {
+        let mut state = state.clone();
+        state.refresh_wraps(self.input.doc);
+        let state = &state;
         if state.needs_resolve() {
             crate::layout::keyframe::resolve_frame_for_static(
                 self.input.base,
@@ -1439,6 +1444,7 @@ impl<'a> Compiler<'a> {
             defaults,
             channels: Vec::new(),
             fo_ids: BTreeSet::new(),
+            has_contains: input.doc.statements.iter().any(|s| matches!(&s.node, Statement::Constrain(c) if matches!(c.expr, crate::parser::ast::ConstraintExpr::Contains { .. }))),
             ch_index: HashMap::new(),
             aux,
             scope: input.scope.to_string(),
@@ -2004,7 +2010,8 @@ impl<'a> Compiler<'a> {
             };
             let mut geometry = false;
             for op in &ops {
-                geometry |= FrameState::op_changes_geometry(op);
+                geometry |= FrameState::op_changes_geometry(op)
+                    || (self.has_contains && matches!(op, KeyframeOp::Show(_) | KeyframeOp::Hide(_)));
                 state.apply(op);
             }
             if geometry {

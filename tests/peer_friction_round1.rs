@@ -141,3 +141,28 @@ constrain pin.center_y = b1.g.cell(0,1).top - 14
     assert!(svg.contains(r#"id="b1_hl"  x="43" y="43"#) || svg.contains(r#"id="b1_hl" class"#), "{svg}");
     assert!(svg.contains(r#"x="43" y="43" width="36""#), "hl on its cell:\n{svg}");
 }
+
+#[test]
+fn a_contains_frame_grows_as_hidden_members_appear() {
+    let src = r#"
+rect ctx [fill: role-surface, stroke: role-ink, stroke_width: 3, corner_radius: 16]
+row toks [gap: 14, align: center, overlaps: ctx] {
+    rect t1 [width: 100, height: 50, label: "The"]
+    rect t2 [width: 100, height: 50, label: "cat"]
+    rect t3 [width: 100, height: 50, label: "sat", appears: later]
+}
+constrain ctx contains toks [padding: 20]
+keyframe "a" { }
+keyframe "b" { show t3 }
+"#;
+    let width = |f: &str| {
+        let svg = render_with_config(src, RenderConfig { frame: Some(f.into()), ..Default::default() }).unwrap();
+        let at = svg.find(r#"id="ctx""#).unwrap();
+        let rest = &svg[at..];
+        let i = rest.find(r#" width=""#).unwrap() + 8;
+        rest[i..i + rest[i..].find('"').unwrap()].parse::<f64>().unwrap()
+    };
+    let (a, b) = (width("a"), width("b"));
+    assert!(b > a + 100.0, "the frame grows with the row: {a} -> {b}");
+    assert_eq!(b, 378.0, "all visible: the whole row, as written");
+}

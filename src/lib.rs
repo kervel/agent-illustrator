@@ -763,7 +763,7 @@ pub(crate) fn render_pipeline(
 
     // Keyframe processing (Feature 011)
     let keyframes = layout::keyframe::extract_keyframes(&doc);
-    let frame_states = layout::keyframe::compute_frame_states(&keyframes);
+    let frame_states = layout::keyframe::compute_frame_states_for(&doc, &keyframes);
     let frame_diffs = layout::keyframe::compute_frame_diffs(&result, &frame_states, &doc, &config.layout);
 
     // Lint pass

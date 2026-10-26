@@ -27,6 +27,9 @@ pub struct FrameState {
     pub disabled_constraints: HashSet<String>,
     /// If true, skip constraint re-solving for this frame
     pub no_resolve: bool,
+    /// A `contains` wraps something hidden in this frame, so the frame is
+    /// solved again with the container fitting what is on screen.
+    pub wraps_visible: bool,
     /// How far each drawable (connection or path) is drawn, cumulative.
     /// Drawables no `draw` ever touches are absent (= fully drawn).
     pub drawn: BTreeMap<String, crate::parser::ast::DrawTo>,
@@ -136,6 +139,7 @@ impl FrameState {
     /// diagnose from the outside.
     pub fn needs_resolve(&self) -> bool {
         !self.transforms.is_empty()
+            || self.wraps_visible
             || !self.added_constraints.is_empty()
             || !self.disabled_constraints.is_empty()
             || !self.pins.is_empty()
@@ -151,6 +155,7 @@ impl FrameState {
             added_constraints: Vec::new(),
             disabled_constraints: HashSet::new(),
             no_resolve: false,
+            wraps_visible: false,
             drawn: BTreeMap::new(),
             pins: BTreeMap::new(),
             camera: None,
@@ -248,6 +253,96 @@ pub fn compute_frame_states(keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
         frames.push(snapshot);
     }
     frames
+}
+
+/// The frame states of a document: `compute_frame_states`, plus which frames
+/// have a `contains` wrapping something hidden (see `fit_contains_to_visible`).
+pub fn compute_frame_states_for(doc: &Document, keyframes: &[&KeyframeDecl]) -> Vec<FrameState> {
+    let mut states = compute_frame_states(keyframes);
+    for st in &mut states {
+        st.refresh_wraps(doc);
+    }
+    states
+}
+
+impl FrameState {
+    /// Does a `contains` wrap something hidden in this frame?
+    pub fn refresh_wraps(&mut self, doc: &Document) {
+        use crate::parser::ast::ConstraintExpr;
+        let names = layout_members(doc);
+        self.wraps_visible = doc.statements.iter().any(|s| match &s.node {
+            Statement::Constrain(c) => match &c.expr {
+                ConstraintExpr::Contains { elements, .. } => elements
+                    .iter()
+                    .any(|e| self.hidden_elements.contains(&e.node.0) || hides_member(&e.node.0, &names, &self.hidden_elements)),
+                _ => false,
+            },
+            _ => false,
+        });
+    }
+}
+
+/// Named layout/group -> its children (None for an unnamed child: it cannot
+/// be listed in a `contains`).
+fn layout_members(doc: &Document) -> HashMap<String, Vec<Option<String>>> {
+    use crate::parser::ast::Spanned;
+    fn visit(stmts: &[Spanned<Statement>], out: &mut HashMap<String, Vec<Option<String>>>) {
+        for st in stmts {
+            let (name, kids) = match &st.node {
+                Statement::Layout(l) => (l.name.as_ref(), &l.children),
+                Statement::Group(g) => (g.name.as_ref(), &g.children),
+                _ => continue,
+            };
+            if let Some(n) = name {
+                let list = kids
+                    .iter()
+                    .filter(|k| !matches!(k.node, Statement::Connection(_) | Statement::Constrain(_) | Statement::Constraint(_) | Statement::AnchorDecl(_)))
+                    .map(|k| match &k.node {
+                        Statement::Shape(s) => s.name.as_ref().map(|n| n.node.0.clone()),
+                        Statement::Layout(l) => l.name.as_ref().map(|n| n.node.0.clone()),
+                        Statement::Group(g) => g.name.as_ref().map(|n| n.node.0.clone()),
+                        _ => None,
+                    })
+                    .collect();
+                out.insert(n.node.0.clone(), list);
+            }
+            visit(kids, out);
+        }
+    }
+    let mut out = HashMap::new();
+    visit(&doc.statements, &mut out);
+    out
+}
+
+/// Some member, however deep, of the named layout is hidden.
+fn hides_member(id: &str, members: &HashMap<String, Vec<Option<String>>>, hidden: &HashSet<String>) -> bool {
+    members.get(id).is_some_and(|kids| {
+        kids.iter().flatten().any(|k| hidden.contains(k) || hides_member(k, members, hidden))
+    })
+}
+
+/// What a `contains` wraps in a frame: the visible members. A hidden one is
+/// dropped; a row, column or group with hidden members is replaced by the
+/// members that are on screen (so a frame grows as members appear). `None`
+/// when a layout cannot be listed (an unnamed child): it is wrapped whole.
+fn visible_part(
+    id: &str,
+    members: &HashMap<String, Vec<Option<String>>>,
+    hidden: &HashSet<String>,
+    out: &mut Vec<String>,
+) -> Option<()> {
+    if hidden.contains(id) {
+        return Some(());
+    }
+    match members.get(id) {
+        Some(kids) if hides_member(id, members, hidden) => {
+            for k in kids {
+                visible_part(k.as_ref()?, members, hidden, out)?;
+            }
+        }
+        _ => out.push(id.to_string()),
+    }
+    Some(())
 }
 
 /// Compute layout diffs for all frames against frame 0 (the base layout).
@@ -427,7 +522,7 @@ fn resolve_frame_layout(
     if !state.no_resolve {
         // Build the per-frame active constraint set: drop constraints on
         // geometry-transformed elements + disabled/overridden ones, append added.
-        let mut modified_doc = build_active_document(doc, state);
+        let mut modified_doc = build_active_document(doc, state, base_result);
         // Pins along a path resolve against the base geometry.
         for (elem, to) in &state.pins {
             if let crate::parser::ast::PinTo::Along { .. } = to {
@@ -490,7 +585,7 @@ fn resolve_frame_layout(
 /// (3) drop base/earlier constraints overridden by an added constraint on the same
 /// (element, property), then (4) append the keyframe-added constraints. The solver
 /// re-runs on this active set so dependents cascade to their new positions.
-fn build_active_document(doc: &Document, state: &FrameState) -> Document {
+fn build_active_document(doc: &Document, state: &FrameState, base: &LayoutResult) -> Document {
     use crate::parser::ast::*;
 
     // (a) elements with geometry transforms — their own positioning constraints drop.
@@ -554,6 +649,48 @@ fn build_active_document(doc: &Document, state: &FrameState) -> Document {
         }
         true
     });
+
+    // (b2) a `contains` wraps what is on screen in this frame.
+    if state.wraps_visible {
+        let members = layout_members(doc);
+        for stmt in &mut new_doc.statements {
+            let Statement::Constrain(c) = &mut stmt.node else { continue };
+            let ConstraintExpr::Contains { elements, padding, .. } = &mut c.expr else { continue };
+            let mut fitted: Vec<Spanned<Identifier>> = Vec::new();
+            // A row's own padding is lost when its members are wrapped
+            // instead, so it is added back: the frame keeps its look as
+            // members appear.
+            let mut extra = 0.0f64;
+            for e in elements.iter() {
+                let mut vis = Vec::new();
+                if visible_part(&e.node.0, &members, &state.hidden_elements, &mut vis).is_none() {
+                    vis = vec![e.node.0.clone()];
+                }
+                if vis.len() != 1 || vis[0] != e.node.0 {
+                    if let Some(l) = base.get_element_by_name(&e.node.0) {
+                        let left = members
+                            .get(&e.node.0)
+                            .into_iter()
+                            .flatten()
+                            .flatten()
+                            .filter_map(|k| base.get_element_by_name(k))
+                            .map(|k| k.bounds.x)
+                            .fold(f64::INFINITY, f64::min);
+                        if left.is_finite() {
+                            extra = extra.max((left - l.bounds.x).max(0.0));
+                        }
+                    }
+                }
+                fitted.extend(vis.into_iter().map(|v| Spanned::new(Identifier::new(v), e.span.clone())));
+            }
+            if !fitted.is_empty() {
+                *elements = fitted;
+                if extra > 0.0 {
+                    *padding = Some(padding.unwrap_or(0.0) + extra);
+                }
+            }
+        }
+    }
 
     // (c) append the keyframe-added constraints (active from this frame forward).
     for decl in &state.added_constraints {
