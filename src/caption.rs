@@ -164,9 +164,60 @@ fn walk(stmts: &mut [Spanned<Statement>], out: &mut Vec<Want>) -> Result<(), Err
     Ok(())
 }
 
+/// Every element's `appears:` (by name), at any depth of one scope.
+fn collect_appears(stmts: &[Spanned<Statement>], out: &mut std::collections::HashMap<String, Spanned<StyleModifier>>) {
+    let is = |m: &Spanned<StyleModifier>| matches!(&m.node.key.node, StyleKey::Custom(c) if c == "appears");
+    for st in stmts {
+        match &st.node {
+            Statement::Shape(sh) => {
+                if let (Some(n), Some(m)) = (&sh.name, sh.modifiers.iter().find(|m| is(m))) {
+                    out.insert(n.node.0.clone(), m.clone());
+                }
+            }
+            Statement::Group(g) => {
+                if let (Some(n), Some(m)) = (&g.name, g.modifiers.iter().find(|m| is(m))) {
+                    out.insert(n.node.0.clone(), m.clone());
+                }
+                collect_appears(&g.children, out);
+            }
+            Statement::Layout(l) => {
+                if let (Some(n), Some(m)) = (&l.name, l.modifiers.iter().find(|m| is(m))) {
+                    out.insert(n.node.0.clone(), m.clone());
+                }
+                collect_appears(&l.children, out);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// A long-form caption (`caption_of: x`) comes and goes with x, as the short
+/// `caption:` does: it takes x's `appears:` unless it says its own.
+fn inherit_appears(stmts: &mut [Spanned<Statement>], from: &std::collections::HashMap<String, Spanned<StyleModifier>>) {
+    let is = |m: &Spanned<StyleModifier>, k: &str| matches!(&m.node.key.node, StyleKey::Custom(c) if c == k) || (k == "caption_of" && matches!(m.node.key.node, StyleKey::CaptionOf));
+    for st in stmts.iter_mut() {
+        match &mut st.node {
+            Statement::Shape(sh) => {
+                let subject = sh.modifiers.iter().find(|m| is(m, "caption_of")).and_then(|m| text(&m.node.value.node));
+                if let Some(a) = subject.and_then(|s| from.get(&s)) {
+                    if !sh.modifiers.iter().any(|m| is(m, "appears")) {
+                        sh.modifiers.push(a.clone());
+                    }
+                }
+            }
+            Statement::Group(g) => inherit_appears(&mut g.children, from),
+            Statement::Layout(l) => inherit_appears(&mut l.children, from),
+            _ => {}
+        }
+    }
+}
+
 fn expand_scope(mut stmts: Vec<Spanned<Statement>>) -> Result<Vec<Spanned<Statement>>, Err> {
     let mut wants = Vec::new();
     walk(&mut stmts, &mut wants)?;
+    let mut appears = std::collections::HashMap::new();
+    collect_appears(&stmts, &mut appears);
+    inherit_appears(&mut stmts, &appears);
     for w in wants {
         let doc = crate::parser::parse(&source(&w)).map_err(|e| (w.span.clone(), format!("caption of {}: {:?}", w.subject, e)))?;
         stmts.extend(doc.statements.into_iter().map(|mut s| {

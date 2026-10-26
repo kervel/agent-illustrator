@@ -2729,7 +2729,7 @@ impl<'a> Compiler<'a> {
     /// ring | outline | wiggle, hold: step]`: "look here". The style follows
     /// the element (a label or row is underlined, a small thing ringed, a
     /// panel outlined); the tone says why (a role colour; `error` adds a "!"
-    /// badge). It leaves nothing behind and never moves anything; with
+    /// badge, except with `style: marker`, which stays inside). It leaves nothing behind and never moves anything; with
     /// `hold: step` it stays until the next click.
     fn accent(
         &mut self,
@@ -2748,7 +2748,10 @@ impl<'a> Compiler<'a> {
         let colour = tone_colour(tone).map_err(|m| err(format!("accent: {}", m)))?;
         let style = accent_style(&b, opt_name(opts, "style").unwrap_or("auto")).map_err(|m| err(format!("accent: {}", m)))?;
         let _ = text_like;
-        self.accents.push((fm.name.clone(), target.to_string(), style.to_string(), tone == "error"));
+        // `style: marker` stays inside the element, so it carries no "!" badge
+        // sticking out beside it.
+        let badge = tone == "error" && style != "marker";
+        self.accents.push((fm.name.clone(), target.to_string(), style.to_string(), badge));
         let hold = opt_name(opts, "hold").is_some_and(|h| h == "step");
         // Long enough to be seen: the default effect time is a blink.
         let dur = t.dur;
@@ -2763,7 +2766,7 @@ impl<'a> Compiler<'a> {
             }
             other => nodes.push((other, "aiac")),
         }
-        if tone == "error" {
+        if badge {
             nodes.push(("badge", "aiac"));
         }
         for (what, prefix) in nodes {

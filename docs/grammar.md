@@ -133,7 +133,9 @@ Common modifiers:
                             frame. Use it for a caption that has to change
                             between frames, which a shape's own label cannot do
                             without also changing the box. A `constrain` on a
-                            captioned element is overridden — --lint says so.
+                            captioned element is overridden — --lint says so. The caption
+                            comes and goes with its subject (`appears: later`,
+                            `show`, `hide`), as the short `caption:` does.
     label_fill: <color>     Colour of the label text (fill colours the shape)
     font_size: <number>     Size of the label / text in px (default 14; the
                             SVG root says font-size="14", so a stylesheet

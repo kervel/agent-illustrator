@@ -32,6 +32,8 @@ pub struct ElementIndex {
     pub display: HashMap<String, String>,
     /// A part folded into its instance -> the instance (`f_val` -> `f`).
     pub aliases: HashMap<String, String>,
+    /// A subject -> its long-form captions (`caption_of: subject`).
+    pub captions: HashMap<String, Vec<String>>,
 }
 
 impl ElementIndex {
@@ -145,6 +147,16 @@ impl ElementIndex {
 
     fn add(&mut self, id: &str, mods: &[Spanned<StyleModifier>]) {
         self.ids.insert(id.to_string());
+        for m in mods.iter().filter(|m| matches!(m.node.key.node, StyleKey::CaptionOf)) {
+            let subject = match &m.node.value.node {
+                StyleValue::Identifier(i) => Some(i.0.clone()),
+                StyleValue::Keyword(k) => Some(k.clone()),
+                _ => None,
+            };
+            if let Some(subject) = subject {
+                self.captions.entry(subject).or_default().push(id.to_string());
+            }
+        }
         for c in Self::class_of(mods) {
             self.by_class.entry(c).or_default().push(id.to_string());
         }
@@ -707,17 +719,23 @@ impl Expander<'_> {
         }
     }
 
-    /// `x [caption: "..."]` made a part `x_caption`: it comes and goes with x.
+    /// `x [caption: "..."]` made a part `x_caption` (or `caption_of: x` names one):
+    /// it comes and goes with x.
     fn follow_captions(&self, s: &mut MotionStmt) {
-        let caps: Vec<String> = s
-            .targets
-            .iter()
-            .map(|t| {
-                let c = format!("{}_caption", t);
-                if self.idx.ids.contains(&c) { c } else { String::new() }
-            })
-            .collect();
-        if caps.iter().all(|c| c.is_empty()) {
+        let mut caps: Vec<String> = Vec::new();
+        for t in &s.targets {
+            let c = format!("{}_caption", t);
+            if self.idx.ids.contains(&c) {
+                caps.push(c.clone());
+            }
+            // `caption_of: t` written out by hand.
+            for l in self.idx.captions.get(t).into_iter().flatten() {
+                if *l != c {
+                    caps.push(l.clone());
+                }
+            }
+        }
+        if caps.is_empty() {
             return;
         }
         let items = caps.into_iter().map(|c| Spanned::new(MotionValue::Name(c), 0..0)).collect();

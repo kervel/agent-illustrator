@@ -573,7 +573,7 @@ accent orders.row[2]                     // a row, a line, a label, a bar: highl
 accent code.lines[4..6] [hold: step]     // a range of lines: one highlighter box
 accent api.dot                           // something small: ringed
 accent panel                             // a panel: outlined
-accent step3 [tone: error]               // why: attention (default) | error (adds a "!") | ok
+accent step3 [tone: error]               // why: attention (default) | error (adds a "!", not with style: marker) | ok
 accent code.line[4] [hold: step]         // stays until the next click (while you talk)
 when step3 accented { ... }              // when it has finished calling for attention
 accent icon [style: wiggle]              // or marker | underline | ring | outline
