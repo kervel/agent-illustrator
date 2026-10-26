@@ -1251,10 +1251,11 @@ where
             b_edge,
         });
 
-    let contains_element = choice((cell_as_identifier, identifier));
+    // Either side may be a path into components: `card.inner.x`.
+    let contains_element = choice((cell_as_identifier.clone(), joined_path.clone()));
 
     // Contains: container contains a, b, c [padding: N]
-    let contains_expr = identifier
+    let contains_expr = choice((cell_as_identifier, joined_path.clone()))
         .then_ignore(just(Token::Contains))
         .then(
             contains_element

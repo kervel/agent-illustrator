@@ -64,3 +64,54 @@ keyframe "t" { transform a [fill_opacity: 0.2, duration: 1]
     let (_s, w) = render_with_lint(src, RenderConfig::new().with_lint(true)).unwrap();
     assert!(w.iter().all(|w| !w.message.contains("cannot be animated")), "{:?}", w.iter().map(|w| &w.message).collect::<Vec<_>>());
 }
+
+#[test]
+fn contains_takes_a_path_into_a_component() {
+    let src = r#"
+template "card" {
+  rect x [size: 20]
+  rect y [size: 20]
+}
+card c1
+rect frame [fill: none, stroke: role-rule]
+constrain frame contains c1.x, c1.y [padding: 10]
+"#;
+    render_with_config(src, RenderConfig::default()).expect("a dotted path in contains");
+}
+
+fn lint_msgs(src: &str) -> Vec<String> {
+    let (_s, w) = render_with_lint(src, RenderConfig::new().with_lint(true)).unwrap();
+    w.into_iter().map(|w| w.message).collect()
+}
+
+#[test]
+fn overlaps_on_a_grid_covers_what_is_inside_it() {
+    let src = r#"
+grid g [cols: 2, gap: 10] {
+  rect a [size: 40, fill: role-surface]
+  rect b [size: 40, fill: role-surface]
+}
+rect hl [width: 70, height: 40, fill: none, stroke: role-primary, overlaps: g]
+constrain hl.center_x = g.center_x
+constrain hl.center_y = g.center_y
+"#;
+    assert!(lint_msgs(src).is_empty(), "{:?}", lint_msgs(src));
+}
+
+#[test]
+fn many_cells_hit_by_one_thing_is_one_warning_naming_the_fix() {
+    let src = r#"
+grid g [cols: 2, gap: 10] {
+  rect [size: 40, fill: role-surface]
+  rect [size: 40, fill: role-surface]
+  rect [size: 40, fill: role-surface]
+  rect [size: 40, fill: role-surface]
+}
+rect hl [width: 70, height: 70, fill: none, stroke: role-primary]
+constrain hl.center_x = g.center_x
+constrain hl.center_y = g.center_y
+"#;
+    let m = lint_msgs(src);
+    assert_eq!(m.len(), 1, "{m:?}");
+    assert!(m[0].contains("overlaps 4 cells") && m[0].contains("`overlaps: g`"), "{m:?}");
+}

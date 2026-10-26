@@ -610,6 +610,7 @@ fn merge_frame_warnings(
 fn dedup_warnings(warnings: &mut Vec<LintWarning>) {
     let mut seen: HashSet<(LintCategory, String)> = HashSet::new();
     warnings.retain(|w| seen.insert((w.category, w.message.clone())));
+    merge_cell_overlaps(warnings);
 
     // The same geometry reported twice — once as an overlap, once as a label
     // straddle — reads as two problems. Keep the label one: it names the text.
@@ -622,6 +623,73 @@ fn dedup_warnings(warnings: &mut Vec<LintWarning>) {
         !(matches!(w.category, LintCategory::Overlap)
             && w.pair.as_ref().is_some_and(|p| labelled.contains(p)))
     });
+}
+
+/// One thing sitting over several cells of a grid is one finding, with one
+/// fix (`overlaps: grid` on it), not a warning per cell.
+fn merge_cell_overlaps(warnings: &mut Vec<LintWarning>) {
+    fn cell_of(name: &str) -> Option<&str> {
+        name.strip_prefix("cell [")?.split_once("] of ").map(|(_, g)| g)
+    }
+    // (other, grid) -> (indices, worst w x h)
+    let mut groups: Vec<((String, String), Vec<usize>)> = Vec::new();
+    for (i, w) in warnings.iter().enumerate() {
+        if !matches!(w.category, LintCategory::Overlap) {
+            continue;
+        }
+        let Some((a, b)) = &w.pair else { continue };
+        let key = match (cell_of(a), cell_of(b)) {
+            (Some(g), None) => (b.clone(), g.to_string()),
+            (None, Some(g)) => (a.clone(), g.to_string()),
+            _ => continue,
+        };
+        match groups.iter_mut().find(|(k, _)| *k == key) {
+            Some((_, v)) => v.push(i),
+            None => groups.push((key, vec![i])),
+        }
+    }
+    let mut drop: HashSet<usize> = HashSet::new();
+    let mut merged: Vec<(usize, LintWarning)> = Vec::new();
+    for ((other, grid), idx) in groups.into_iter().filter(|(_, v)| v.len() > 1) {
+        let (mut bw, mut bh) = (0.0f64, 0.0f64);
+        for &i in &idx {
+            // "... overlap by 30x30px. ..."
+            if let Some(dims) = warnings[i].message.split("overlap by ").nth(1).and_then(|r| r.split("px").next()) {
+                if let Some((w, h)) = dims.split_once('x') {
+                    let (w, h) = (w.parse::<f64>().unwrap_or(0.0), h.parse::<f64>().unwrap_or(0.0));
+                    if w * h > bw * bh {
+                        (bw, bh) = (w, h);
+                    }
+                }
+            }
+        }
+        drop.extend(idx.iter().copied());
+        merged.push((
+            idx[0],
+            LintWarning {
+                category: LintCategory::Overlap,
+                message: format!(
+                    "\"{other}\" overlaps {} cells of \"{grid}\" (up to {bw:.0}x{bh:.0}px). If it belongs under the grid: declare it \
+                     first or give it `z_order: -1` (--doc layering); if it sits on the grid on purpose: `overlaps: {grid}` on it",
+                    idx.len()
+                ),
+                frames: warnings[idx[0]].frames.clone(),
+                pair: Some(sorted_pair(&other, &grid)),
+            },
+        ));
+    }
+    if merged.is_empty() {
+        return;
+    }
+    let mut out = Vec::with_capacity(warnings.len());
+    for (i, w) in std::mem::take(warnings).into_iter().enumerate() {
+        if let Some((_, m)) = merged.iter().find(|(at, _)| *at == i) {
+            out.push(m.clone());
+        } else if !drop.contains(&i) {
+            out.push(w);
+        }
+    }
+    *warnings = out;
 }
 
 /// Display name for an element: its ID if named, or positional path if anonymous.
@@ -892,6 +960,9 @@ pub(crate) struct ContainsRelations {
     overlaps: HashMap<String, HashSet<String>>,
     /// `caption_of: x`: caption -> its element.
     captions: HashMap<String, String>,
+    /// Each named element -> the named layouts and groups it sits in, so
+    /// `overlaps: g` on a grid or row covers everything inside it.
+    ancestors: HashMap<String, Vec<String>>,
     /// Put in another layer by a keyframe (`z_order` in a transform or a
     /// move): covering, or being covered, is what it is for.
     layered: HashSet<String>,
@@ -921,10 +992,15 @@ impl ContainsRelations {
     /// the element that declares it (`on_test [overlaps: m.bg]` covers
     /// `on_test.body`).
     fn declared_overlap(&self, a: &str, b: &str) -> bool {
-        self.overlaps.iter().any(|(owner, xs)| {
-            (a == owner || a.starts_with(&format!("{}_", owner)))
-                && xs.iter().any(|x| b == x || b.starts_with(&format!("{}_", x)))
-        })
+        self.overlaps
+            .iter()
+            .any(|(owner, xs)| self.within(a, owner) && xs.iter().any(|x| self.within(b, x)))
+    }
+
+    /// `id` is `x`, a part of it (`x_part`), or inside it (a grid's cell or child).
+    fn within(&self, id: &str, x: &str) -> bool {
+        let part = |s: &str| s == x || s.starts_with(&format!("{}_", x));
+        part(id) || self.ancestors.get(id).is_some_and(|up| up.iter().any(|u| part(u)))
     }
 
 }
@@ -944,7 +1020,26 @@ fn collect_contains_ids_from_stmts(
     stmts: &[crate::parser::ast::Spanned<Statement>],
     relations: &mut ContainsRelations,
 ) {
+    collect_contains_ids_in(stmts, relations, &[]);
+}
+
+fn collect_contains_ids_in(
+    stmts: &[crate::parser::ast::Spanned<Statement>],
+    relations: &mut ContainsRelations,
+    up: &[String],
+) {
     for stmt in stmts {
+        if let (Statement::Shape(_) | Statement::Group(_) | Statement::Layout(_), true) = (&stmt.node, !up.is_empty()) {
+            let name = match &stmt.node {
+                Statement::Shape(sh) => sh.name.as_ref(),
+                Statement::Group(g) => g.name.as_ref(),
+                Statement::Layout(l) => l.name.as_ref(),
+                _ => None,
+            };
+            if let Some(n) = name {
+                relations.ancestors.insert(n.node.0.clone(), up.to_vec());
+            }
+        }
         let mods = match &stmt.node {
             Statement::Shape(sh) => Some((sh.name.as_ref(), &sh.modifiers)),
             Statement::Group(g) => Some((g.name.as_ref(), &g.modifiers)),
@@ -994,10 +1089,14 @@ fn collect_contains_ids_from_stmts(
                 }
             }
             Statement::Layout(l) => {
-                collect_contains_ids_from_stmts(&l.children, relations);
+                let mut next = up.to_vec();
+                next.extend(l.name.as_ref().map(|n| n.node.0.clone()));
+                collect_contains_ids_in(&l.children, relations, &next);
             }
             Statement::Group(g) => {
-                collect_contains_ids_from_stmts(&g.children, relations);
+                let mut next = up.to_vec();
+                next.extend(g.name.as_ref().map(|n| n.node.0.clone()));
+                collect_contains_ids_in(&g.children, relations, &next);
             }
             _ => {}
         }
@@ -1242,7 +1341,8 @@ fn bare_pair_overlap(
     for x in &la {
         for y in &lb {
             if let Some((w, h)) = reportable_overlap(x, y, contains_ids) {
-                warnings.push(overlap_warning(x.id_str().unwrap_or("?"), y.id_str().unwrap_or("?"), w, h));
+                let named = |e: &ElementLayout| e.id_str().map(|i| format!("\"{}\"", i)).unwrap_or_else(|| "<unnamed shape>".to_string());
+                warnings.push(overlap_warning(&named(x), &named(y), w, h));
                 return true;
             }
         }

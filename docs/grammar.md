@@ -197,7 +197,7 @@ constrain a.center_x = midpoint(b, c)  Center between two elements
 constrain a.center_y = midpoint(b.bottom, c.top)   Center in the gap between edges
 constrain a.center_x = midpoint(g.cell(0,0), g.cell(0,2))   Grid cells work too
                                        (there is no other arithmetic: no ( ) or /)
-constrain bg contains a, b [padding: 10]   Auto-size container
+constrain bg contains a, b [padding: 10]   Auto-size container (either side may be a path: `card.row.x`)
 constrain a.center_x = 50 as a_home    Name a constraint
 disable a_home                         Release a named constraint (top level
                                        or inside a keyframe)
