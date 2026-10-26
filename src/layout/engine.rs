@@ -314,6 +314,15 @@ fn collect_element_template_mapping(
             // other part (constraints on it are the template's own).
             if let (Some(name), Some(template)) = (l.name.as_ref(), current_template) {
                 map.insert(name.node.0.clone(), template.to_string());
+                // A grid's cells (`g.cell(r, c)`) are parts of it too.
+                if matches!(l.layout_type.node, crate::parser::ast::LayoutType::Grid) {
+                    let (rows, cols, _) = plan_grid(l);
+                    for r in 0..rows {
+                        for c in 0..cols {
+                            map.insert(grid_cell_id(&name.node.0, r, c), template.to_string());
+                        }
+                    }
+                }
             }
             // Layouts don't change template context, just recurse
             for child in &l.children {

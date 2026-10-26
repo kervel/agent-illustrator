@@ -957,8 +957,29 @@ where
     ))
     .map_with(|name, e| Spanned::new(name, span_range(&e.span())));
 
+    // The grid of a cell reference: its name, or a path into components
+    // (`board.g` for the grid `g` inside the instance `board`), joined as the
+    // instance's parts are. Stops before `.cell(`.
+    let grid_path = identifier
+        .then(
+            just(Token::Dot)
+                .ignore_then(identifier.then_ignore(just(Token::ParenOpen).not().rewind()))
+                .repeated()
+                .collect::<Vec<_>>(),
+        )
+        .map(|(head, rest)| {
+            let mut n = head.node.0.clone();
+            for r in rest {
+                n.push('_');
+                n.push_str(&r.node.0);
+            }
+            Spanned::new(Identifier::new(n), head.span.clone())
+        })
+        .boxed();
+
     // Grid cell as a connection endpoint: `grid.cell(row, col)[.anchor]`.
-    let cell_anchor_reference = identifier
+    let cell_anchor_reference = grid_path
+        .clone()
         .then_ignore(just(Token::Dot))
         .then_ignore(just(Token::Ident("cell".to_string())))
         .then_ignore(just(Token::ParenOpen))
@@ -1140,7 +1161,8 @@ where
 
     // Grid cell reference in a constraint: `grid.cell(row, col)[.property]`.
     // Desugars to a property ref on the reference-only cell element.
-    let cell_property_ref = identifier
+    let cell_property_ref = grid_path
+        .clone()
         .then_ignore(just(Token::Dot))
         .then_ignore(just(Token::Ident("cell".to_string())))
         .then_ignore(just(Token::ParenOpen))
@@ -1213,7 +1235,8 @@ where
     // A `contains` element may be a plain identifier or a grid cell reference
     // `grid.cell(row, col)` (desugared to the cell's synthetic id). The plain
     // identifier parser stops at the dot, so the cell form is tried first.
-    let cell_as_identifier = identifier
+    let cell_as_identifier = grid_path
+        .clone()
         .then_ignore(just(Token::Dot))
         .then_ignore(just(Token::Ident("cell".to_string())))
         .then_ignore(just(Token::ParenOpen))

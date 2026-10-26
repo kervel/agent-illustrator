@@ -52,7 +52,8 @@ Grid children:
                                   without `at:` fill row-major. Unoccupied cells
                                   stay empty (transparent) — sparse/triangular ok.
 Grid cell addressing (in constrain / connections / contains):
-    grid.cell(row, col)           Resolves to that cell's box, e.g.
+    grid.cell(row, col)           Resolves to that cell's box (a grid inside a template
+                                  instance: `inst.grid.cell(r, c)`), e.g.
                                   constrain tag.tip = heat.cell(1,1).top - 4
                                   constrain hl contains g.cell(1,0), g.cell(1,5)  // highlight a row
 

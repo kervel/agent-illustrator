@@ -115,3 +115,29 @@ constrain hl.center_y = g.center_y
     assert_eq!(m.len(), 1, "{m:?}");
     assert!(m[0].contains("overlaps 4 cells") && m[0].contains("`overlaps: g`"), "{m:?}");
 }
+
+#[test]
+fn grid_cells_are_reachable_through_a_template_instance_and_stay_put() {
+    let src = r#"
+template "board" {
+  grid g [cols: 2, gap: 6] {
+    rect [size: 30, fill: role-surface]
+    rect [size: 30, fill: role-surface]
+    rect [size: 30, fill: role-surface]
+    rect [size: 30, fill: role-surface]
+  }
+  rect hl [width: 36, height: 36, fill: none, stroke: role-primary, overlaps: g]
+  constrain hl.center_x = g.cell(1,1).center_x
+  constrain hl.center_y = g.cell(1,1).center_y
+}
+board b1
+rect pin [size: 10, fill: role-primary]
+constrain pin.center_x = b1.g.cell(0,1).center_x
+constrain pin.center_y = b1.g.cell(0,1).top - 14
+"#;
+    assert!(lint_msgs(src).is_empty(), "{:?}", lint_msgs(src));
+    let svg = render_with_config(src, RenderConfig::default()).unwrap();
+    // hl is centred on cell (1,1): x 43..79 around 61.
+    assert!(svg.contains(r#"id="b1_hl"  x="43" y="43"#) || svg.contains(r#"id="b1_hl" class"#), "{svg}");
+    assert!(svg.contains(r#"x="43" y="43" width="36""#), "hl on its cell:\n{svg}");
+}
