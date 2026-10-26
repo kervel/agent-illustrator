@@ -1490,6 +1490,9 @@ fn generate_keyframe_css(
             if let Some(sw) = diff.stroke_width {
                 props.push(format!("stroke-width: {}px", sw));
             }
+            if let Some(fo) = diff.fill_opacity {
+                props.push(format!("fill-opacity: {}", fo));
+            }
             // What `clip:`s to this element follows it: same size (inside the
             // stroke) and same move, relative to the clipped part's own.
             for (owner, sw) in clip_owners.get(elem_id).into_iter().flatten() {

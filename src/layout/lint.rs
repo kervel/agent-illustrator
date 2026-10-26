@@ -4643,8 +4643,9 @@ fn check_hand_placed_labels(
             category: LintCategory::Label,
             message: format!(
                 "{subject} {names} sit inside \"{}\" — write {} [label: \"…\"] instead of \
-                 positioning them (<br> for more lines, label_position: below for a caption)",
-                shape.id, shape.id
+                 positioning them (<br> for more lines, label_position: below for a caption); \
+                 if they belong there on purpose (a big number, a drawing on a panel), add `overlaps: {}` to them",
+                shape.id, shape.id, shape.id
             ),
             frames: Vec::new(),
             // Only a single text identifies a pair the overlap check could

@@ -46,3 +46,21 @@ keyframe "go" { accent a [tone: error, style: marker] }
     let (_svg, w) = render_with_lint(src, RenderConfig::new().with_lint(true)).unwrap();
     assert!(w.iter().all(|w| !w.message.contains("accent")), "{:?}", w.iter().map(|w| &w.message).collect::<Vec<_>>());
 }
+
+#[test]
+fn fill_opacity_animates_from_its_default() {
+    let src = r#"
+row r [gap: 20] {
+  rect a [size: 60, fill: role-primary]
+  rect b [size: 60, fill: role-primary, fill_opacity: 0.5]
+}
+keyframe "s" { }
+keyframe "t" { transform a [fill_opacity: 0.2, duration: 1]
+  transform b [fill_opacity: 1, duration: 1] }
+"#;
+    let svg = render_with_config(src, RenderConfig { animate: true, ..Default::default() }).unwrap();
+    assert!(svg.contains(r#"[[0,"1"],[1,"0.2"]]"#), "undeclared base is 1:\n{svg}");
+    assert!(svg.contains(r#"[[0,"0.5"],[1,"1"]]"#), "declared base kept:\n{svg}");
+    let (_s, w) = render_with_lint(src, RenderConfig::new().with_lint(true)).unwrap();
+    assert!(w.iter().all(|w| !w.message.contains("cannot be animated")), "{:?}", w.iter().map(|w| &w.message).collect::<Vec<_>>());
+}

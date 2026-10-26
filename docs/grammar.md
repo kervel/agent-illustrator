@@ -321,8 +321,8 @@ Transform geometry keys (inside keyframe transform [...]):
     width: N, height: N   Absolute target size
     scale: N           Uniform scale about the element's center
     rotation: N        Rotation in degrees
-Other transform keys: fill, stroke, stroke_width, stroke_dasharray, opacity,
-align, label_fill, and label
+Other transform keys: fill, fill_opacity (a wash that fades while the outline
+stays), stroke, stroke_width, stroke_dasharray, opacity, align, label_fill, and label
 (rewrites the element's words for that frame -- a text element's content or any
 element's label). The box never changes size: auto-sized text is laid out for
 the longest wording any frame gives it, and an explicit width is kept as

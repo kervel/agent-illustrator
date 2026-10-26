@@ -64,6 +64,7 @@ pub enum Prop {
     Fill,
     Stroke,
     StrokeWidth,
+    FillOpacity,
     StrokeDasharray,
     Width,
     Height,
@@ -83,6 +84,7 @@ impl Prop {
             Prop::Fill => "fill",
             Prop::Stroke => "stroke",
             Prop::StrokeWidth => "stroke-width",
+            Prop::FillOpacity => "fill-opacity",
             Prop::StrokeDasharray => "stroke-dasharray",
             Prop::Width => "width",
             Prop::Height => "height",
@@ -696,6 +698,8 @@ struct Compiler<'a> {
     drawn_initial: BTreeMap<String, f64>,
     heads: BTreeSet<String>,
     defaults: Defaults,
+    /// Elements a keyframe gives a `fill_opacity`: their base is 1 when undeclared.
+    fo_ids: BTreeSet<String>,
     channels: Vec<ChKey>,
     ch_index: HashMap<ChKey, usize>,
     aux: Aux,
@@ -852,6 +856,9 @@ impl<'a> Compiler<'a> {
             }
             if let Some(sw) = e.styles.stroke_width {
                 vals.insert(ChKey { sel: shape.clone(), prop: Prop::StrokeWidth }, Val::n(sw));
+            }
+            if let Some(fo) = e.styles.fill_opacity.or(self.fo_ids.contains(id).then_some(1.0)) {
+                vals.insert(ChKey { sel: shape.clone(), prop: Prop::FillOpacity }, Val::n(fo));
             }
             if let Some(d) = &e.styles.stroke_dasharray {
                 vals.insert(ChKey { sel: shape.clone(), prop: Prop::StrokeDasharray }, Val::S(d.clone()));
@@ -1431,6 +1438,7 @@ impl<'a> Compiler<'a> {
             heads,
             defaults,
             channels: Vec::new(),
+            fo_ids: BTreeSet::new(),
             ch_index: HashMap::new(),
             aux,
             scope: input.scope.to_string(),
@@ -1673,6 +1681,26 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
             if !c.mark_hooks.iter().any(|(t, k, _)| *t == target && *k == kind) {
                 c.mark_hooks.push((target, kind, hook));
             }
+        }
+    }
+    // Every element a keyframe gives a `fill_opacity`.
+    {
+        fn fo(nodes: &[Spanned<MotionNode>], out: &mut BTreeSet<String>) {
+            for n in nodes {
+                match &n.node {
+                    MotionNode::Stmt(st) => {
+                        if let MotionVerb::Transform { modifiers, .. } = &st.verb {
+                            if modifiers.iter().any(|m| matches!(m.node.key.node, crate::parser::ast::StyleKey::FillOpacity)) {
+                                out.extend(st.targets.iter().cloned());
+                            }
+                        }
+                    }
+                    MotionNode::Then(b) | MotionNode::After(_, b) | MotionNode::At(_, b) | MotionNode::When(_, _, b) | MotionNode::Beat(_, b) => fo(b, out),
+                }
+            }
+        }
+        for kf in &keyframes {
+            fo(&kf.motion, &mut c.fo_ids);
         }
     }
     // Every z_order an element takes in a keyframe: one paint slot each.

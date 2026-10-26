@@ -301,6 +301,7 @@ Use transforms to draw attention to the active part of the story:
 keyframe "tool_execution" {
     transform cli [opacity: 0.4]      // Dim inactive actors
     transform tool [opacity: 1.0]     // Full opacity for active actor
+    transform wash [fill_opacity: 0.2] // only the fill fades; the outline and label stay
     show exec_arrow, exec_result
 }
 ```

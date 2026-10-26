@@ -76,6 +76,7 @@ pub struct ElementDiff {
     /// beat of "a planned thing becomes a confirmed thing".
     pub stroke_dasharray: Option<String>,
     pub stroke_width: Option<f64>,
+    pub fill_opacity: Option<f64>,
     /// Replacement text for this frame (a text shape's content, or an
     /// element's label), when a keyframe rewrote it.
     pub label: Option<String>,
@@ -105,6 +106,7 @@ impl ElementDiff {
             && self.label_fill.is_none()
             && self.stroke_dasharray.is_none()
             && self.stroke_width.is_none()
+            && self.fill_opacity.is_none()
             && self.label.is_none()
     }
 }
@@ -853,6 +855,7 @@ pub fn is_animatable(key: &StyleKey) -> bool {
         | StyleKey::StrokeDasharray
         | StyleKey::StrokeWidth
         | StyleKey::Opacity
+        | StyleKey::FillOpacity
         | StyleKey::Width
         | StyleKey::Height
         | StyleKey::X
@@ -866,7 +869,6 @@ pub fn is_animatable(key: &StyleKey) -> bool {
         // CSS-animatable and are candidates for a later pass; the point here
         // is that saying so out loud beats dropping them quietly.
         StyleKey::Class
-        | StyleKey::FillOpacity
         | StyleKey::FontSize
         | StyleKey::Gap
         | StyleKey::LabelAt
@@ -908,6 +910,7 @@ fn apply_modifiers_ordered(
             StyleKey::Opacity => { if let Some(v) = num(&m.node.value.node) { elem.styles.opacity = Some(v); } }
             StyleKey::StrokeDasharray => { elem.styles.stroke_dasharray = string_value(&m.node.value.node).map(|s| s.to_string()); }
             StyleKey::StrokeWidth => { if let Some(v) = num(&m.node.value.node) { elem.styles.stroke_width = Some(v); } }
+            StyleKey::FillOpacity => { if let Some(v) = num(&m.node.value.node) { elem.styles.fill_opacity = Some(v); } }
             StyleKey::Width => { if let Some(v) = num(&m.node.value.node) { elem.bounds.width = v; } }
             StyleKey::Height => { if let Some(v) = num(&m.node.value.node) { elem.bounds.height = v; } }
             StyleKey::X => { if let Some(v) = num(&m.node.value.node) { elem.bounds.x = v; } }
@@ -992,6 +995,9 @@ fn diff_element(base: &ElementLayout, solved: &ElementLayout) -> ElementDiff {
     }
     if base.styles.stroke_width != solved.styles.stroke_width {
         diff.stroke_width = solved.styles.stroke_width;
+    }
+    if base.styles.fill_opacity != solved.styles.fill_opacity {
+        diff.fill_opacity = Some(solved.styles.fill_opacity.unwrap_or(1.0));
     }
     if base.styles.label_fill != solved.styles.label_fill {
         diff.label_fill = solved.styles.label_fill.clone();
