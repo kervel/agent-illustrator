@@ -270,7 +270,31 @@ impl FrameState {
     pub fn refresh_wraps(&mut self, doc: &Document) {
         use crate::parser::ast::ConstraintExpr;
         let names = layout_members(doc);
-        self.wraps_visible = doc.statements.iter().any(|s| match &s.node {
+        // A hidden connection that shares an end with another one can push it
+        // aside (lanes, branch points): the frame is routed again without it.
+        let shares_end = {
+            fn conns(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<(Option<String>, String, String)>) {
+                for st in stmts {
+                    match &st.node {
+                        Statement::Connection(cs) => out.extend(cs.iter().map(|c| {
+                            (c.name.as_ref().map(|n| n.node.0.clone()), c.from.element.node.0.clone(), c.to.element.node.0.clone())
+                        })),
+                        Statement::Layout(l) => conns(&l.children, out),
+                        Statement::Group(g) => conns(&g.children, out),
+                        _ => {}
+                    }
+                }
+            }
+            let mut all = Vec::new();
+            if !self.hidden_connections.is_empty() {
+                conns(&doc.statements, &mut all);
+            }
+            all.iter().any(|(n, f, t)| {
+                n.as_ref().is_some_and(|n| self.hidden_connections.contains(n))
+                    && all.iter().any(|(m, f2, t2)| m != n && (f == f2 || t == t2 || f == t2 || t == f2))
+            })
+        };
+        self.wraps_visible = shares_end || doc.statements.iter().any(|s| match &s.node {
             Statement::Constrain(c) => match &c.expr {
                 ConstraintExpr::Contains { elements, .. } => elements
                     .iter()
@@ -571,7 +595,7 @@ fn resolve_frame_layout(
     if super::through::place_through_paths(&mut result).is_err() {
         return None;
     }
-    if let Err(_e) = super::routing::route_connections(&mut result, doc) {
+    if let Err(_e) = super::routing::route_connections_hiding(&mut result, doc, &state.hidden_connections) {
         return None;
     }
     result.snap_geometry();

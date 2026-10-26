@@ -166,3 +166,23 @@ keyframe "b" { show t3 }
     assert!(b > a + 100.0, "the frame grows with the row: {a} -> {b}");
     assert_eq!(b, 378.0, "all visible: the whole row, as written");
 }
+
+#[test]
+fn a_hidden_connection_does_not_push_a_visible_one_aside() {
+    let src = r#"
+row r [gap: 150] {
+  rect a [size: 50]
+  rect b [size: 50]
+}
+a.right -> b.left as go [appears: later]
+b.left -> a.right as back
+keyframe "s" { }
+keyframe "t" { show go }
+"#;
+    let d = |f: &str| {
+        let svg = render_with_config(src, RenderConfig { frame: Some(f.into()), ..Default::default() }).unwrap();
+        svg.lines().filter(|l| l.contains(" d=\"M2")).map(str::to_string).collect::<Vec<_>>().join("\n")
+    };
+    assert!(d("s").contains("M205 30 L"), "alone it runs on the centre line:\n{}", d("s"));
+    assert!(d("t").contains(" 39 ") || d("t").contains("39"), "with go shown they share lanes:\n{}", d("t"));
+}

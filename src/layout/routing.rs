@@ -975,6 +975,17 @@ fn resolve_via_points(
 
 /// Route all connections in a document
 pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<(), LayoutError> {
+    route_connections_hiding(result, doc, &std::collections::HashSet::new())
+}
+
+/// Route every connection; the ones named in `hidden` are routed too but take
+/// no part in how the others share lanes and branch points, so a connection
+/// that is not on screen does not push a visible one aside.
+pub fn route_connections_hiding(
+    result: &mut LayoutResult,
+    doc: &Document,
+    hidden: &std::collections::HashSet<String>,
+) -> Result<(), LayoutError> {
     // Track element IDs that are used as connection labels (to remove them from rendering)
     let mut label_element_ids: std::collections::HashSet<String> = std::collections::HashSet::new();
 
@@ -1076,8 +1087,19 @@ pub fn route_connections(result: &mut LayoutResult, doc: &Document) -> Result<()
 
     process_statements(&doc.statements, result, &mut label_element_ids)?;
 
-    spread_coinciding_connections(result);
-    share_branch_points(&mut result.connections);
+    if hidden.is_empty() {
+        spread_coinciding_connections(result);
+        share_branch_points(&mut result.connections);
+    } else {
+        let all = std::mem::take(&mut result.connections);
+        let (off, on): (Vec<_>, Vec<_>) = all
+            .into_iter()
+            .partition(|c| c.name.as_ref().is_some_and(|n| hidden.contains(&n.0)));
+        result.connections = on;
+        spread_coinciding_connections(result);
+        share_branch_points(&mut result.connections);
+        result.connections.extend(off);
+    }
 
     // Resolve overlapping connection labels
     resolve_label_overlaps(&mut result.connections);
