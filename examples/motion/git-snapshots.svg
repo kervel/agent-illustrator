@@ -393,11 +393,11 @@ svg[data-ail-player] * { transition: none !important; }
 }
 ]]></style>
   <defs>
-    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
     <mask id="aim-f8126697-track" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-f8126697-track aid-f8126697-track" d="M797.85 354.00 L1011.54 354.00 L1242.35 354.00" fill="none" stroke="#fff" stroke-width="24.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:1.001"/></mask>
-    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-fhead"><rect x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-fhead"><rect class="ai-shape kf-anim kfc-f8126697-fhead" x="97.5" y="215.5" width="517" height="277" rx="14.5" ry="14.5"/></clipPath>
   </defs>
   <g class="kf-f8126697-s kf-anim" style="transform-origin:800px 450px">
     <g id="s" class="ai-container kfp-f8126697-s">

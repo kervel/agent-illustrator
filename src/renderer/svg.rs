@@ -789,7 +789,8 @@ impl SvgBuilder {
         let Some(&(x, y, w, h, r)) = self.clip_targets.get(target) else { return false };
         let id = format!("{}clip-{}", self.prefix(), owner);
         self.defs.push(format!(
-            r#"<clipPath id="{id}"><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" ry="{r}"/></clipPath>"#
+            r#"<clipPath id="{id}"><rect class="ai-shape kf-anim kfc-{scope}{owner}" x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" ry="{r}"/></clipPath>"#,
+            scope = self.scope()
         ));
         self.elements.push(format!(r#"{}<g clip-path="url(#{id})">"#, self.indent_str()));
         self.indent += 1;
@@ -1068,7 +1069,7 @@ pub fn render_svg_with_keyframes(
     let keyframe_css = if no_frame_css {
         String::from("/* Keyframe CSS suppressed (--no-frame-css) */\n.kf-hidden { opacity: 0; }\n.kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }\n.ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }\n.ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }\n")
     } else {
-        generate_keyframe_css(frame_states, frame_diffs, &conn_meta, &config.scope)
+        generate_keyframe_css(frame_states, frame_diffs, &conn_meta, &config.scope, &result.root_elements)
     };
     builder.add_custom_css(&keyframe_css);
 
@@ -1406,8 +1407,30 @@ fn generate_keyframe_css(
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
     conn_meta: &std::collections::HashMap<String, (RoutingMode, bool, f64)>,
     scope: &str,
+    elements: &[ElementLayout],
 ) -> String {
     let text_variants = collect_text_variants(frame_diffs);
+    // `clip: bg`: (owner, stroke of bg) per target, so the clip follows bg.
+    let mut clip_owners: std::collections::HashMap<String, Vec<(String, f64)>> = std::collections::HashMap::new();
+    {
+        fn walk(elems: &[ElementLayout], all: &mut Vec<ElementLayout>) {
+            for e in elems {
+                all.push(e.clone());
+                walk(&e.children, all);
+            }
+        }
+        let mut all = Vec::new();
+        walk(elements, &mut all);
+        for e in &all {
+            let (Some(owner), Some(target)) = (&e.id, &e.styles.clip) else { continue };
+            let sw = all
+                .iter()
+                .find(|t| t.id.as_ref().is_some_and(|i| &i.0 == target))
+                .map(|t| if t.styles.stroke.as_deref().is_none_or(|s| s != "none") { t.styles.stroke_width.unwrap_or(1.5) } else { 0.0 })
+                .unwrap_or(0.0);
+            clip_owners.entry(target.clone()).or_default().push((owner.0.clone(), sw));
+        }
+    }
     let mut css = String::new();
     css.push_str("/* Keyframe animation CSS (auto-generated) */\n");
     css.push_str(".kf-hidden { opacity: 0; }\n");
@@ -1466,6 +1489,25 @@ fn generate_keyframe_css(
             }
             if let Some(sw) = diff.stroke_width {
                 props.push(format!("stroke-width: {}px", sw));
+            }
+            // What `clip:`s to this element follows it: same size (inside the
+            // stroke) and same move, relative to the clipped part's own.
+            for (owner, sw) in clip_owners.get(elem_id).into_iter().flatten() {
+                let mut cp = Vec::new();
+                if let Some(w) = diff.width {
+                    cp.push(format!("width: {}px", (w - sw).max(0.0)));
+                }
+                if let Some(h) = diff.height {
+                    cp.push(format!("height: {}px", (h - sw).max(0.0)));
+                }
+                let own = frame.element_diffs.get(owner);
+                let (ox, oy) = (own.and_then(|d| d.tx).unwrap_or(0.0), own.and_then(|d| d.ty).unwrap_or(0.0));
+                if let Some(t) = frame_transform_css(Some(diff.tx.unwrap_or(0.0) - ox), Some(diff.ty.unwrap_or(0.0) - oy), None) {
+                    cp.push(format!("transform: {}", t));
+                }
+                if !cp.is_empty() {
+                    css.push_str(&format!("  .kfc-{}{} {{ {}; }}\n", scope, owner, cp.join("; ")));
+                }
             }
             if !props.is_empty() {
                 // A CSS rule beats a presentation attribute, so this overrides

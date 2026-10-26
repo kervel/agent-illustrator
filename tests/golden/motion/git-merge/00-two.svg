@@ -144,8 +144,8 @@ svg { font-family: var(--font-sans); }
 text { white-space: pre; }
   ]]></style>
   <defs>
-    <clipPath id="ai-clip-anna_title"><rect x="310.5" y="201.5" width="468" height="311" rx="12.5" ry="12.5"/></clipPath>
-    <clipPath id="ai-clip-ben_title"><rect x="821.5" y="201.5" width="468" height="311" rx="12.5" ry="12.5"/></clipPath>
+    <clipPath id="ai-clip-anna_title"><rect class="ai-shape kf-anim kfc-4daa88cb-anna_title" x="310.5" y="201.5" width="468" height="311" rx="12.5" ry="12.5"/></clipPath>
+    <clipPath id="ai-clip-ben_title"><rect class="ai-shape kf-anim kfc-4daa88cb-ben_title" x="821.5" y="201.5" width="468" height="311" rx="12.5" ry="12.5"/></clipPath>
   </defs>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>

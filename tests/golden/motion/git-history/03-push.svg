@@ -147,10 +147,10 @@ text { white-space: pre; }
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
-    <clipPath id="ai-clip-hub_head"><rect x="651.5" y="151.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-anna_head"><rect x="201.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-ben_head"><rect x="651.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
-    <clipPath id="ai-clip-chris_head"><rect x="1101.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-hub_head"><rect class="ai-shape kf-anim kfc-4de854cc-hub_head" x="651.5" y="151.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-anna_head"><rect class="ai-shape kf-anim kfc-4de854cc-anna_head" x="201.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-ben_head"><rect class="ai-shape kf-anim kfc-4de854cc-ben_head" x="651.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
+    <clipPath id="ai-clip-chris_head"><rect class="ai-shape kf-anim kfc-4de854cc-chris_head" x="1101.5" y="496.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>
   </defs>
   <g id="s" class="ai-container">
     <rect id="s_stage" class="ai-shape ai-rect ai-canvas" x="0" y="0" width="1600" height="900" fill="var(--role-backdrop)" stroke="none" stroke-width="1.5"/>

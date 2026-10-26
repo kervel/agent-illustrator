@@ -860,6 +860,20 @@ impl<'a> Compiler<'a> {
                 vals.insert(ChKey { sel: shape.clone(), prop: Prop::Width }, Val::n(e.bounds.width));
                 vals.insert(ChKey { sel: shape.clone(), prop: Prop::Height }, Val::n(e.bounds.height));
             }
+            // `clip: bg`: the clip follows bg as it resizes or moves, so the
+            // clipped part is never cut to bg's old size mid-tween.
+            if let Some(t) = e.styles.clip.as_deref() {
+                if let (Some(te), Some(ti)) = (solved.get(t), self.elems.get(t)) {
+                    let clip = format!(".kfc-{}{}", s, id);
+                    let (tx, ty) = delta(t);
+                    vals.insert(ChKey { sel: clip.clone(), prop: Prop::Translate }, Val::xy(tx - dx, ty - dy));
+                    if ti.is_rect {
+                        let sw = if te.styles.stroke.as_deref().is_none_or(|v| v != "none") { te.styles.stroke_width.unwrap_or(1.5) } else { 0.0 };
+                        vals.insert(ChKey { sel: clip.clone(), prop: Prop::Width }, Val::n((te.bounds.width - sw).max(0.0)));
+                        vals.insert(ChKey { sel: clip, prop: Prop::Height }, Val::n((te.bounds.height - sw).max(0.0)));
+                    }
+                }
+            }
             if let Some(lf) = &e.styles.label_fill {
                 // The label and its swapped-in texts (in their own group).
                 vals.insert(ChKey { sel: label_sel(&w), prop: Prop::Fill }, Val::S(lf.clone()));

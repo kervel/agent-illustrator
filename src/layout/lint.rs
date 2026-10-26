@@ -236,7 +236,7 @@ pub fn check(
     check_unknown_colors(doc, &mut warnings);
     check_overridden_constraints(result, &mut warnings);
     check_overridden_captions(doc, &mut warnings);
-    check_z_orders(result, doc, &mut warnings);
+    check_z_orders(result, doc, &frame_states, &mut warnings);
     {
         let idx = crate::motion::expand::ElementIndex::build(doc);
         warnings.extend(super::canvas::check(result, doc, config, &|id| idx.show(id)));
@@ -4752,7 +4752,12 @@ fn unrecognised_tags(raw: &str) -> Vec<String> {
 ///   overlaps as it was (or overlaps none);
 /// - a template part's `z_order` is local to its instance: something outside
 ///   the instance painted later still covers it, unless it is `scene(N)`.
-fn check_z_orders(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
+fn check_z_orders(
+    result: &LayoutResult,
+    doc: &Document,
+    frame_states: &[super::keyframe::FrameState],
+    warnings: &mut Vec<LintWarning>,
+) {
     let idx = crate::motion::expand::ElementIndex::build(doc);
     let show = |id: &str| idx.show(id);
     let overlap = |a: &BoundingBox, b: &BoundingBox| {
@@ -4875,6 +4880,30 @@ fn check_z_orders(result: &LayoutResult, doc: &Document, warnings: &mut Vec<Lint
     for r in &result.root_elements {
         walk(r, &mut all);
     }
+    // What is on screen in each frame (a hidden container hides its parts).
+    // Two things that never share a frame cannot cover one another.
+    let on_screen: Vec<HashSet<String>> = frame_states
+        .iter()
+        .map(|st| {
+            fn visible(e: &ElementLayout, hidden: &HashSet<String>, out: &mut HashSet<String>) {
+                if e.id.as_ref().is_some_and(|i| hidden.contains(&i.0)) {
+                    return;
+                }
+                if let Some(i) = &e.id {
+                    out.insert(i.0.clone());
+                }
+                for c in &e.children {
+                    visible(c, hidden, out);
+                }
+            }
+            let mut out = HashSet::new();
+            for r in &result.root_elements {
+                visible(r, &st.hidden_elements, &mut out);
+            }
+            out
+        })
+        .collect();
+    let together = |a: &str, b: &str| on_screen.is_empty() || on_screen.iter().any(|f| f.contains(a) && f.contains(b));
     let mut seen: HashSet<(String, String)> = HashSet::new();
     for inst in all.iter().filter(|e| e.id.as_ref().is_some_and(|i| instances.contains(&i.0))) {
         let inst_id = inst.id.as_ref().unwrap().0.clone();
@@ -4890,7 +4919,7 @@ fn check_z_orders(result: &LayoutResult, doc: &Document, warnings: &mut Vec<Lint
                 // Outside the instance (not one of its containers either),
                 // painted after it, over the part.
                 let container = o.bounds.contains_bbox(&inst.bounds);
-                if !drawn || inside_ids.contains(&oid) || container || !overlap(&part.bounds, &o.bounds) {
+                if !drawn || inside_ids.contains(&oid) || container || !overlap(&part.bounds, &o.bounds) || !together(&pid, &oid) {
                     continue;
                 }
                 if order.get(&oid).is_some_and(|&p| p > inst_at) && seen.insert((pid.clone(), oid.clone())) {
