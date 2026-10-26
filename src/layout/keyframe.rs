@@ -571,6 +571,13 @@ fn resolve_frame_layout(
             }
         }
 
+        // A frame that wraps only what is on screen starts from that size:
+        // whatever is placed against the frame (`other.left = box.right + 40`)
+        // reads it as a fixed reference, so it must not still be the full one.
+        if state.wraps_visible {
+            seed_wrap_bounds(&mut result, &modified_doc);
+        }
+
         // Re-solve constraints using modified document.
         // Transformed positions are now baked into constraints,
         // so dependents cascade correctly.
@@ -582,7 +589,6 @@ fn resolve_frame_layout(
         }
     }
 
-    // Recompute bounds after all position changes
     result.compute_bounds();
     result.snap_geometry();
 
@@ -601,6 +607,46 @@ fn resolve_frame_layout(
     result.snap_geometry();
 
     Some(result)
+}
+
+/// Set each `contains` container to the box around its (visible) members.
+fn seed_wrap_bounds(result: &mut LayoutResult, doc: &Document) {
+    use crate::parser::ast::ConstraintExpr;
+    fn find<'a>(els: &'a mut [ElementLayout], id: &str) -> Option<&'a mut ElementLayout> {
+        for e in els.iter_mut() {
+            if e.id.as_ref().is_some_and(|i| i.0 == id) {
+                return Some(e);
+            }
+            if let Some(f) = find(&mut e.children, id) {
+                return Some(f);
+            }
+        }
+        None
+    }
+    for stmt in &doc.statements {
+        let Statement::Constrain(c) = &stmt.node else { continue };
+        let ConstraintExpr::Contains { container, elements, padding } = &c.expr else { continue };
+        let pad = padding.unwrap_or(0.0);
+        let (mut x0, mut y0, mut x1, mut y1) = (f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY);
+        for e in elements {
+            if let Some(l) = result.get_element_by_name(&e.node.0) {
+                x0 = x0.min(l.bounds.x);
+                y0 = y0.min(l.bounds.y);
+                x1 = x1.max(l.bounds.x + l.bounds.width);
+                y1 = y1.max(l.bounds.y + l.bounds.height);
+            }
+        }
+        if !x0.is_finite() {
+            continue;
+        }
+        if let Some(el) = find(&mut result.root_elements, &container.node.0) {
+            el.bounds.x = x0 - pad;
+            el.bounds.y = y0 - pad;
+            el.bounds.width = x1 - x0 + 2.0 * pad;
+            el.bounds.height = y1 - y0 + 2.0 * pad;
+        }
+    }
+    result.rebuild_index();
 }
 
 /// Build the per-frame active constraint document. Starting from the base doc:

@@ -1321,6 +1321,10 @@ fn bare_pair_overlap(
     if !(is_bare_container(a) && is_bare_container(b)) {
         return false;
     }
+    // `overlaps: h` on one grid covers everything either holds, plain cells too.
+    if contains_ids.wraps(a.id_str(), b.id_str()) {
+        return true;
+    }
     fn leaves<'e>(e: &'e ElementLayout, scope: &FrameScope<'_>, out: &mut Vec<&'e ElementLayout>) {
         if scope.hides_element(e) || e.is_through_path() {
             return;
@@ -1417,6 +1421,11 @@ fn check_against_region_contents(
                 scope,
                 warnings,
             );
+            continue;
+        }
+        // An unnamed part (a grid's plain cell) goes with the region it is in:
+        // `overlaps: h` covers what `h` holds.
+        if child.id.is_none() && contains_ids.wraps(outside.id_str(), region.id_str()) {
             continue;
         }
         if let Some((w, h)) = reportable_overlap(outside, child, contains_ids) {

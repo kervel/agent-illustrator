@@ -317,33 +317,33 @@ text {
   </g>
   <path class="ai-connection conn-77d0d05f-final_to_user conn-77d0d05f-final_to_user-base aid-77d0d05f-final_to_user" d="M418 124 L178.8 124" fill="none" stroke="var(--secondary-dark)" stroke-width="3" opacity="0" marker-end="url(#ai-arrow)"/>
 <g class="aivar-77d0d05f-exec_arrow-ftool_exec">
-  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-ftool_exec" d="M818 115 L552.8 115" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-ftool_exec" d="M818 115 L552.8 115" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-prompt_arrow-ftool_exec">
-  <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-ftool_exec" d="M480 165 L480 317.9706 L672.0294 330 L814.2 330" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-ftool_exec" d="M480 165 L480 317.9706 L672.0294 330 L814.2 330" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-exec_arrow-fresult_return">
-  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-fresult_return" d="M542 115 L807.2 115" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-fresult_return" d="M542 115 L807.2 115" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-prompt_arrow-fresult_return">
-  <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-fresult_return" d="M825 330 L672.0294 330 L480 317.9706 L480 175.8" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-prompt_arrow conn-77d0d05f-prompt_arrow-fresult_return" d="M825 330 L672.0294 330 L480 317.9706 L480 175.8" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-return_to_cli-fresult_return">
-  <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-fresult_return" d="M818 115 L552.8 115" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-fresult_return" d="M818 115 L552.8 115" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-return_to_cloud-fresult_return">
-  <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-fresult_return" d="M480 165 L480 317.9706 L672.0294 330 L814.2 330" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-fresult_return" d="M480 165 L480 317.9706 L672.0294 330 L814.2 330" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-exec_arrow-ffinal_answer">
-  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-ffinal_answer" d="M542 115 L807.2 115" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-exec_arrow conn-77d0d05f-exec_arrow-ffinal_answer" d="M542 115 L807.2 115" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-final_to_cli-ffinal_answer">
-  <path class="ai-connection conn-77d0d05f-final_to_cli conn-77d0d05f-final_to_cli-ffinal_answer" d="M825 330 L672.0294 330 L480 317.9706 L480 175.8" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-final_to_cli conn-77d0d05f-final_to_cli-ffinal_answer" d="M825 330 L672.0294 330 L480 317.9706 L480 175.8" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-return_to_cli-ffinal_answer">
-  <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-ffinal_answer" d="M818 115 L552.8 115" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-return_to_cli conn-77d0d05f-return_to_cli-ffinal_answer" d="M818 115 L552.8 115" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 <g class="aivar-77d0d05f-return_to_cloud-ffinal_answer">
-  <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-ffinal_answer" d="M480 165 L480 317.9706 L672.0294 330 L814.2 330" fill="none" opacity="0" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection conn-77d0d05f-return_to_cloud conn-77d0d05f-return_to_cloud-ffinal_answer" d="M480 165 L480 317.9706 L672.0294 330 L814.2 330" fill="none" marker-end="url(#ai-arrow)"/>
 </g>
 </svg>

@@ -4416,7 +4416,7 @@ fn get_constraint_target_var(
         LayoutConstraint::Fixed { variable, .. } => {
             Some((variable.element_id.clone(), variable.property))
         }
-        LayoutConstraint::Suggested { variable, .. } => {
+        LayoutConstraint::Suggested { variable, .. } | LayoutConstraint::Shrink { variable, .. } => {
             Some((variable.element_id.clone(), variable.property))
         }
         LayoutConstraint::LessOrEqualRelational { left, .. } => {
@@ -4453,7 +4453,7 @@ fn get_constraint_referenced_elements(constraint: &super::solver::LayoutConstrai
         LayoutConstraint::Fixed { variable, .. } => {
             vec![variable.element_id.clone()]
         }
-        LayoutConstraint::Suggested { variable, .. } => {
+        LayoutConstraint::Suggested { variable, .. } | LayoutConstraint::Shrink { variable, .. } => {
             vec![variable.element_id.clone()]
         }
         LayoutConstraint::LessOrEqualRelational { left, right, .. } => {
@@ -5081,11 +5081,17 @@ fn add_element_by_name_with_per_property_strength(
 
         if width_is_targeted {
             let suggested_w = if contains_x { 1.0 } else { elem.bounds.width };
+            // A container is as small as its members allow; anything else
+            // keeps its size. The wrap must win over a plain suggestion
+            // (`head.width = box.width` with a stale head), or the two tie.
+            let source = ConstraintSource::layout(0..0, "container width");
+            let variable = LayoutVariable::width(element_name);
+            let value = suggested_w;
             solver
-                .add_constraint(LayoutConstraint::Suggested {
-                    variable: LayoutVariable::width(element_name),
-                    value: suggested_w,
-                    source: ConstraintSource::layout(0..0, "container width"),
+                .add_constraint(if contains_x {
+                    LayoutConstraint::Shrink { variable, value, source }
+                } else {
+                    LayoutConstraint::Suggested { variable, value, source }
                 })
                 .map_err(LayoutError::solver_error)?;
         } else {
@@ -5099,11 +5105,17 @@ fn add_element_by_name_with_per_property_strength(
         }
         if height_is_targeted {
             let suggested_h = if contains_y { 1.0 } else { elem.bounds.height };
+            // A container is as small as its members allow; anything else
+            // keeps its size. The wrap must win over a plain suggestion
+            // (`head.height = box.height` with a stale head), or the two tie.
+            let source = ConstraintSource::layout(0..0, "container height");
+            let variable = LayoutVariable::height(element_name);
+            let value = suggested_h;
             solver
-                .add_constraint(LayoutConstraint::Suggested {
-                    variable: LayoutVariable::height(element_name),
-                    value: suggested_h,
-                    source: ConstraintSource::layout(0..0, "container height"),
+                .add_constraint(if contains_y {
+                    LayoutConstraint::Shrink { variable, value, source }
+                } else {
+                    LayoutConstraint::Suggested { variable, value, source }
                 })
                 .map_err(LayoutError::solver_error)?;
         } else {

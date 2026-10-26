@@ -217,6 +217,14 @@ pub enum LayoutConstraint {
         source: ConstraintSource,
     },
 
+    /// Variable = constant, preferred over any plain suggestion (a container
+    /// that is as small as its members allow, whatever else is suggested)
+    Shrink {
+        variable: LayoutVariable,
+        value: f64,
+        source: ConstraintSource,
+    },
+
     /// left_var = right_var + offset (STRONG - overrides layout)
     Equal {
         left: LayoutVariable,
@@ -271,7 +279,7 @@ impl LayoutConstraint {
     pub fn source(&self) -> &ConstraintSource {
         match self {
             LayoutConstraint::Fixed { source, .. } => source,
-            LayoutConstraint::Suggested { source, .. } => source,
+            LayoutConstraint::Suggested { source, .. } | LayoutConstraint::Shrink { source, .. } => source,
             LayoutConstraint::Equal { source, .. } => source,
             LayoutConstraint::GreaterOrEqual { source, .. } => source,
             LayoutConstraint::LessOrEqual { source, .. } => source,
@@ -288,7 +296,7 @@ impl LayoutConstraint {
     pub fn element_ids(&self) -> Vec<&str> {
         match self {
             LayoutConstraint::Fixed { variable, .. } => vec![&variable.element_id],
-            LayoutConstraint::Suggested { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::Suggested { variable, .. } | LayoutConstraint::Shrink { variable, .. } => vec![&variable.element_id],
             LayoutConstraint::Equal { left, right, .. } => {
                 vec![&left.element_id, &right.element_id]
             }
@@ -497,6 +505,22 @@ impl ConstraintSolver {
                 );
                 self.solver
                     .add_constraint(expr | EQ(Strength::MEDIUM) | *value)
+                    .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                self.sources.push(source.clone());
+            }
+
+            LayoutConstraint::Shrink {
+                variable,
+                value,
+                source,
+            } => {
+                let expr = self.get_expression(variable);
+                let desc = format!(
+                    "{}.{:?} ~= {} (shrink)",
+                    variable.element_id, variable.property, value
+                );
+                self.solver
+                    .add_constraint(expr | EQ(Strength::STRONG * 0.2) | *value)
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
                 self.sources.push(source.clone());
             }

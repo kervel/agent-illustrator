@@ -83,7 +83,9 @@ Connection modifiers:
 Routing is automatic about two things: straight connections between the same
 pair (a -> b and b -> a) are drawn as side-by-side lanes, each keeping to its
 left; and right-angle connections leaving one point the same way (a fan-out)
-branch off at one place, as do ones converging on one point.
+branch off at one place, as do ones converging on one point. A cable from an
+anchor to a `point` leaves along the anchor and bends once (a point has no side
+to arrive at).
 
 STYLE MODIFIERS
 ---------------
@@ -433,7 +435,8 @@ Declarations that serve motion:
                   [title: "...", note: "..."] host metadata: a deck's header
                   from this step on, and its speaker notes (player: p.meta(k))
     collapsed: true   no room and hidden until `show x [enter: expand]`
-    overlaps: card    sits on card on purpose (a corner badge): no overlap finding
+    overlaps: card    sits on card on purpose (a corner badge): no overlap finding;
+                      it covers what card holds too (a grid's cells, a template's parts)
 
 Names: every element, named connection and keyframe name must be unique. Part b
 of instance a is `a.b` in source and `a_b` internally, so naming something a_b

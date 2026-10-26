@@ -720,7 +720,7 @@ impl SvgBuilder {
             self.connections.push(format!(r#"<g class="aivar-{}{}-f{}">"#, self.scope, id, frame));
         }
         self.connections.push(format!(
-            r#"{}<path class="{}connection conn-{}{} conn-{}{}-f{}" d="{}" fill="none" opacity="0"{}/>"#,
+            r#"{}<path class="{}connection conn-{}{} conn-{}{}-f{}" d="{}" fill="none"{}{}/>"#,
             self.indent_str(),
             prefix,
             self.scope,
@@ -729,6 +729,8 @@ impl SvgBuilder {
             id,
             frame,
             d,
+            // The wrapper carries the fade; a hidden path inside it would stay hidden.
+            if wrap { "" } else { r#" opacity="0""# },
             marker
         ));
         if wrap {

@@ -842,11 +842,28 @@ pub fn route_connection_with_anchors_and_types(
 
     // Orthogonal routing: create paths with horizontal/vertical segments only
     if let (Some(from_anchor), Some(to_anchor)) = (from_anchor, to_anchor) {
-        let from_dir = cardinal_direction_for_anchor(from_anchor.direction);
+        let mut from_dir = cardinal_direction_for_anchor(from_anchor.direction);
         let anchor_facing = cardinal_direction_for_anchor(to_anchor.direction);
         // The wire must arrive INTO the anchor from the anchor's facing direction,
         // so the last segment goes opposite to the anchor's outward-facing direction.
-        let to_dir = Point::new(-anchor_facing.x, -anchor_facing.y);
+        let mut to_dir = Point::new(-anchor_facing.x, -anchor_facing.y);
+        // A point has no side to arrive at. Between an explicit anchor and a
+        // point the line leaves along the anchor, bends once and arrives
+        // across it, instead of detouring to reach the side of nothing.
+        let is_point = |b: &BoundingBox| b.width < 1.0 && b.height < 1.0;
+        let across = |along: Point, from: Point, to: Point| {
+            if along.x.abs() > 0.5 {
+                Point::new(0.0, (to.y - from.y).signum())
+            } else {
+                Point::new((to.x - from.x).signum(), 0.0)
+            }
+        };
+        if is_point(to_bounds) && !is_point(from_bounds) {
+            to_dir = across(from_dir, start, end);
+        } else if is_point(from_bounds) && !is_point(to_bounds) {
+            from_dir = across(to_dir, end, start);
+            from_dir = Point::new(-from_dir.x, -from_dir.y);
+        }
         if let Some(path) = orthogonal_with_directions(start, end, from_dir, to_dir) {
             return path;
         }

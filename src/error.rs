@@ -164,7 +164,8 @@ impl<'a> From<chumsky::error::Rich<'a, crate::parser::lexer::Token>> for ParseEr
                     match found.as_ref().and_then(|t| keyword_spelling(t)) {
                         Some(w) => format!(
                             "Unexpected {}. '{}' is a reserved word in AIL: it cannot name an element, \
-                             parameter or connection; rename it (e.g. '{}_1' or something more specific). \
+                             parameter or connection; rename it (e.g. '{}_1' or something more specific), \
+                             also where an imported file defines it. \
                              All reserved words: `agent-illustrator --doc reserved`",
                             found_str, w, w
                         ),
