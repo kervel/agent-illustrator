@@ -192,62 +192,112 @@
     <marker id="ai-end-diamond-filled" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
       <path d="M0,5 L4,1.5 L8,5 L4,8.5 Z" fill="context-stroke" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
     </marker>
+    <clipPath id="ai-clip-344eddbc-approval_hd"><rect class="ai-shape kf-anim kfc-344eddbc-approval_hd" x="15.75" y="205.75" width="218.5" height="63" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-approval_at"><rect class="ai-shape kf-anim kfc-344eddbc-approval_at" x="15.75" y="205.75" width="218.5" height="63" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-approval_op"><rect class="ai-shape kf-anim kfc-344eddbc-approval_op" x="15.75" y="205.75" width="218.5" height="63" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-lock_hd"><rect class="ai-shape kf-anim kfc-344eddbc-lock_hd" x="375.75" y="15.75" width="218.5" height="78" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-lock_at"><rect class="ai-shape kf-anim kfc-344eddbc-lock_at" x="375.75" y="15.75" width="218.5" height="78" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-lock_op"><rect class="ai-shape kf-anim kfc-344eddbc-lock_op" x="375.75" y="15.75" width="218.5" height="78" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-entry_hd"><rect class="ai-shape kf-anim kfc-344eddbc-entry_hd" x="375.75" y="175.25" width="218.5" height="124" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-entry_at"><rect class="ai-shape kf-anim kfc-344eddbc-entry_at" x="375.75" y="175.25" width="218.5" height="124" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-entry_op"><rect class="ai-shape kf-anim kfc-344eddbc-entry_op" x="375.75" y="175.25" width="218.5" height="124" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-corr_hd"><rect class="ai-shape kf-anim kfc-344eddbc-corr_hd" x="375.75" y="380.75" width="218.5" height="63" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-corr_at"><rect class="ai-shape kf-anim kfc-344eddbc-corr_at" x="375.75" y="380.75" width="218.5" height="63" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-corr_op"><rect class="ai-shape kf-anim kfc-344eddbc-corr_op" x="375.75" y="380.75" width="218.5" height="63" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-invoice_hd"><rect class="ai-shape kf-anim kfc-344eddbc-invoice_hd" x="735.75" y="175.25" width="218.5" height="124" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-invoice_at"><rect class="ai-shape kf-anim kfc-344eddbc-invoice_at" x="735.75" y="175.25" width="218.5" height="124" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-344eddbc-invoice_op"><rect class="ai-shape kf-anim kfc-344eddbc-invoice_op" x="735.75" y="175.25" width="218.5" height="124" rx="7.25" ry="7.25"/></clipPath>
   </defs>
   <g id="cols" class="ai-container">
     <g id="c_l" class="ai-container">
       <g id="approval" class="ai-container">
         <g id="approval_box" class="ai-container">
-          <rect id="approval_hd" class="ai-shape ai-rect" x="15" y="205" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="125" y="221.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="125" dy="-0"><tspan>EntryApproval</tspan></tspan></text>
-          <rect id="approval_at" class="ai-shape ai-rect" x="15" y="238.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="23" y="254" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>kind</tspan></tspan></text>
-          <rect id="approval_op" class="ai-shape ai-rect" x="15" y="269.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="23" y="269.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"></tspan></text>
+          <g clip-path="url(#ai-clip-344eddbc-approval_hd)">
+            <rect id="approval_hd" class="ai-shape ai-rect" x="15" y="205" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="125" y="221.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="125" dy="-0"><tspan>EntryApproval</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-approval_at)">
+            <rect id="approval_at" class="ai-shape ai-rect" x="15" y="238.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="23" y="254" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>kind</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-approval_op)">
+            <rect id="approval_op" class="ai-shape ai-rect" x="15" y="269.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="23" y="269.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"></tspan></text>
+          </g>
         </g>
+        <rect id="approval_shell" class="ai-shape ai-rect" x="15" y="205" width="220" height="64.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
     </g>
     <g id="c_m" class="ai-container">
       <g id="lock" class="ai-container">
         <g id="lock_box" class="ai-container">
-          <rect id="lock_hd" class="ai-shape ai-rect" x="375" y="15" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="485" y="31.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>PeriodLock</tspan></tspan></text>
-          <rect id="lock_at" class="ai-shape ai-rect" x="375" y="48.5" width="220" height="46" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="383" y="71.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-7.5"><tspan>year</tspan></tspan><tspan x="383" dy="15"><tspan>month</tspan></tspan></text>
-          <rect id="lock_op" class="ai-shape ai-rect" x="375" y="94.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="383" y="94.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"></tspan></text>
+          <g clip-path="url(#ai-clip-344eddbc-lock_hd)">
+            <rect id="lock_hd" class="ai-shape ai-rect" x="375" y="15" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="485" y="31.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>PeriodLock</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-lock_at)">
+            <rect id="lock_at" class="ai-shape ai-rect" x="375" y="48.5" width="220" height="46" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="383" y="71.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-7.5"><tspan>year</tspan></tspan><tspan x="383" dy="15"><tspan>month</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-lock_op)">
+            <rect id="lock_op" class="ai-shape ai-rect" x="375" y="94.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="383" y="94.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"></tspan></text>
+          </g>
         </g>
+        <rect id="lock_shell" class="ai-shape ai-rect" x="375" y="15" width="220" height="79.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
       <g id="entry" class="ai-container">
         <g id="entry_box" class="ai-container">
-          <rect id="entry_hd" class="ai-shape ai-rect" x="375" y="174.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="485" y="191.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>TimeEntry</tspan></tspan></text>
-          <rect id="entry_at" class="ai-shape ai-rect" x="375" y="208" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="383" y="238.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-15"><tspan>date</tspan></tspan><tspan x="383" dy="15"><tspan>hours</tspan></tspan><tspan x="383" dy="15"><tspan>status</tspan></tspan></text>
-          <rect id="entry_op" class="ai-shape ai-rect" x="375" y="269" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="383" y="284.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>+ approve()</tspan></tspan></text>
+          <g clip-path="url(#ai-clip-344eddbc-entry_hd)">
+            <rect id="entry_hd" class="ai-shape ai-rect" x="375" y="174.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="485" y="191.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>TimeEntry</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-entry_at)">
+            <rect id="entry_at" class="ai-shape ai-rect" x="375" y="208" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="383" y="238.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-15"><tspan>date</tspan></tspan><tspan x="383" dy="15"><tspan>hours</tspan></tspan><tspan x="383" dy="15"><tspan>status</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-entry_op)">
+            <rect id="entry_op" class="ai-shape ai-rect" x="375" y="269" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="383" y="284.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>+ approve()</tspan></tspan></text>
+          </g>
         </g>
+        <rect id="entry_shell" class="ai-shape ai-rect" x="375" y="174.5" width="220" height="125.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
       <g id="corr" class="ai-container">
         <g id="corr_box" class="ai-container">
-          <rect id="corr_hd" class="ai-shape ai-rect" x="375" y="380" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="485" y="396.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>Correction</tspan></tspan></text>
-          <rect id="corr_at" class="ai-shape ai-rect" x="375" y="413.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="383" y="429" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>original</tspan></tspan></text>
-          <rect id="corr_op" class="ai-shape ai-rect" x="375" y="444.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="383" y="444.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"></tspan></text>
+          <g clip-path="url(#ai-clip-344eddbc-corr_hd)">
+            <rect id="corr_hd" class="ai-shape ai-rect" x="375" y="380" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="485" y="396.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>Correction</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-corr_at)">
+            <rect id="corr_at" class="ai-shape ai-rect" x="375" y="413.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="383" y="429" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>original</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-corr_op)">
+            <rect id="corr_op" class="ai-shape ai-rect" x="375" y="444.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="383" y="444.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"></tspan></text>
+          </g>
         </g>
+        <rect id="corr_shell" class="ai-shape ai-rect" x="375" y="380" width="220" height="64.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
     </g>
     <g id="c_r" class="ai-container">
       <g id="invoice" class="ai-container">
         <g id="invoice_box" class="ai-container">
-          <rect id="invoice_hd" class="ai-shape ai-rect" x="735" y="174.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="845" y="191.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="845" dy="-0"><tspan>Invoice</tspan></tspan></text>
-          <rect id="invoice_at" class="ai-shape ai-rect" x="735" y="208" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="743" y="238.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-15"><tspan>number</tspan></tspan><tspan x="743" dy="15"><tspan>total</tspan></tspan><tspan x="743" dy="15"><tspan>paid</tspan></tspan></text>
-          <rect id="invoice_op" class="ai-shape ai-rect" x="735" y="269" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-          <text class="ai-label" x="743" y="284.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>+ pay()</tspan></tspan></text>
+          <g clip-path="url(#ai-clip-344eddbc-invoice_hd)">
+            <rect id="invoice_hd" class="ai-shape ai-rect" x="735" y="174.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="845" y="191.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="845" dy="-0"><tspan>Invoice</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-invoice_at)">
+            <rect id="invoice_at" class="ai-shape ai-rect" x="735" y="208" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="743" y="238.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-15"><tspan>number</tspan></tspan><tspan x="743" dy="15"><tspan>total</tspan></tspan><tspan x="743" dy="15"><tspan>paid</tspan></tspan></text>
+          </g>
+          <g clip-path="url(#ai-clip-344eddbc-invoice_op)">
+            <rect id="invoice_op" class="ai-shape ai-rect" x="735" y="269" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+            <text class="ai-label" x="743" y="284.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>+ pay()</tspan></tspan></text>
+          </g>
         </g>
+        <rect id="invoice_shell" class="ai-shape ai-rect" x="735" y="174.5" width="220" height="125.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
     </g>
   </g>

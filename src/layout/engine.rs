@@ -1836,6 +1836,27 @@ fn extract_label(modifiers: &[Spanned<StyleModifier>]) -> Option<String> {
     })
 }
 
+/// A `label:` that is not a string is dropped without a trace by everything
+/// downstream; say so instead.
+fn check_label_value(modifiers: &[Spanned<StyleModifier>], owner: &str) -> Result<(), LayoutError> {
+    for m in modifiers {
+        if !matches!(m.node.key.node, StyleKey::Label) {
+            continue;
+        }
+        let reason = match &m.node.value.node {
+            StyleValue::List(_) => "a label is one string, not a list; join lines with <br>: label: \"a<br>b\"",
+            StyleValue::Number { .. } | StyleValue::Record(_) | StyleValue::Call { .. } => "a label is a string; quote numbers: label: \"42\"",
+            _ => continue,
+        };
+        return Err(LayoutError::InvalidLabel {
+            owner: owner.to_string(),
+            reason: reason.to_string(),
+            span: m.node.value.span.clone(),
+        });
+    }
+    Ok(())
+}
+
 /// Extract the first Label statement from a list of children.
 /// Returns the inner statement of the Label if found.
 /// DEPRECATED: Use `[role: label]` modifier instead.
@@ -5821,6 +5842,10 @@ fn validate_label_markup(stmts: &[Spanned<Statement>]) -> Result<(), LayoutError
             _ => continue,
         };
 
+        check_label_value(
+            modifiers,
+            &name.as_ref().map(|n| n.to_string()).unwrap_or_else(|| "an unnamed element".to_string()),
+        )?;
         if let Some(raw) = extract_label(modifiers) {
             if let Err(e) = crate::layout::text::parse_markup(&raw) {
                 return Err(LayoutError::InvalidLabel {

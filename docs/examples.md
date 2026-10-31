@@ -745,10 +745,12 @@ relationship's name.
 ```
 template "cls" (ttl: "", attrs: "", ops: "") {
     col box [gap: 0, padding: 0] {
-        rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2]
-        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
-        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
+        rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2, corner_radius: 0, clip: shell]
+        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
+        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
     }
+    rect shell [fill: none, stroke: foreground-2, corner_radius: 8]
+    constrain shell contains box
 }
 row r1 [gap: 140, align: top] {
     cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]

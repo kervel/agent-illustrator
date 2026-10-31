@@ -466,14 +466,20 @@ not what the tool is for.
 A class box is a template, not a primitive: a `col` with no gap and no padding
 holds one rect per compartment, each with a multi-line left-aligned label. The
 box grows to its content, so nothing is sized by hand.
+The rounded outer corners come from a `shell` rect (`fill: none`,
+`corner_radius: 8`, declared last so its outline is on top) that `contains` the
+column; the square compartments are `clip: shell`, so only the outer corners are
+round and the dividers stay straight.
 
 ```
 template "cls" (ttl: "", attrs: "", ops: "") {
     col box [gap: 0, padding: 0] {
-        rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2]
-        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
-        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
+        rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2, corner_radius: 0, clip: shell]
+        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
+        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
     }
+    rect shell [fill: none, stroke: foreground-2, corner_radius: 8]
+    constrain shell contains box
 }
 cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
 cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"]
