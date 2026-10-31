@@ -461,7 +461,8 @@ entry.right -- invoice.left [from_label: "*", to_label: "0..1", label: "billed o
 `from_label:` and `to_label:` put a short text (a multiplicity, a role) at each
 end of any connection, beside the line and clear of the box edge. They follow the
 line when a box moves. `label:` is still the one at the middle (a relationship
-name). All three coexist.
+name). All three coexist; with end labels present the middle one defaults to the
+other side of the line (`label_offset:` or `label_position:` overrides).
 
 ### Colors
 

@@ -1604,6 +1604,11 @@ fn extract_connection_label_with_ref(
 
     // Extract label_offset modifier (perpendicular distance from path, default
     // 10.0). Negative puts the label that far on the other side of the line.
+    // With end labels on the connection the middle label defaults to the other
+    // side of the line, so it does not run into them in a short gap.
+    let has_end_labels = modifiers.iter().any(|m| {
+        matches!(&m.node.key.node, StyleKey::Custom(k) if k == "from_label" || k == "to_label")
+    });
     let label_offset = modifiers
         .iter()
         .find_map(|m| {
@@ -1616,7 +1621,7 @@ fn extract_connection_label_with_ref(
                 None
             }
         })
-        .unwrap_or(10.0);
+        .unwrap_or(if has_end_labels && label_position.is_none() { -10.0 } else { 10.0 });
 
     // Extract label_at modifier (fraction along path, default 0.5)
     let label_at = modifiers
@@ -2148,6 +2153,22 @@ mod tests {
         // To label: left of the end, also above the line.
         assert!(to.position.x < 300.0 && to.position.x > 250.0, "x = {}", to.position.x);
         assert!(to.position.y < 50.0, "y = {}", to.position.y);
+    }
+
+    #[test]
+    fn middle_label_goes_to_the_other_side_when_end_labels_are_present() {
+        use crate::parser::ast::{StyleModifier, StyleValue};
+        let path = vec![Point::new(0.0, 50.0), Point::new(200.0, 50.0)];
+        let m = |k: &str, v: &str| Spanned::new(
+            StyleModifier {
+                key: Spanned::new(if k == "label" { StyleKey::Label } else { StyleKey::Custom(k.into()) }, Default::default()),
+                value: Spanned::new(StyleValue::String(v.into()), Default::default()),
+            },
+            Default::default(),
+        );
+        let plain = extract_connection_label(&[m("label", "x")], &path, &empty_result()).unwrap();
+        let ended = extract_connection_label(&[m("label", "x"), m("from_label", "1")], &path, &empty_result()).unwrap();
+        assert!((plain.position.y - 50.0) * (ended.position.y - 50.0) < 0.0, "{} vs {}", plain.position.y, ended.position.y);
     }
 
     #[test]

@@ -78,7 +78,8 @@ Connection modifiers:
                             negative puts it on the other side of the line
     from_label: "text"      Text at the start of the line (a multiplicity or role),
     to_label: "text"        or at its end: beside the line, clear of the box edge,
-                            on the same side of the travel direction at both ends
+                            on the same side of the travel direction at both ends (the
+                            middle `label:` then defaults to the other side)
     label_mask: <number>    Cut lines behind the label away, within this many px
                             of its box (arrows and `--` connections; the label
                             may then cross a lifeline without the line showing)

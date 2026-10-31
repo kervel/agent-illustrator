@@ -204,7 +204,7 @@
       </g>
     </g>
   </g>
-  <text class="ai-label" x="300" y="62.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="300" dy="-0"><tspan>billed on</tspan></tspan></text>
+  <text class="ai-label" x="300" y="82.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="300" dy="-0"><tspan>billed on</tspan></tspan></text>
   <text class="ai-label" x="238.334" y="59.25" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="238.334" dy="-0"><tspan>*</tspan></tspan></text>
   <text class="ai-label" x="353.992" y="59.25" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="353.992" dy="-0"><tspan>0..1</tspan></tspan></text>
   <path class="ai-connection" d="M230 72.75 L370 72.75" fill="none" stroke="#333" stroke-width="2"/>
