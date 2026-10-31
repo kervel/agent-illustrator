@@ -844,6 +844,7 @@ pub fn truncate_drawn(
         // No arrowhead until the tip arrives.
         c.direction = crate::parser::ast::ConnectionDirection::Undirected;
         c.label = None;
+        c.end_labels = [None, None];
     }
 }
 

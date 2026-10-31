@@ -1084,6 +1084,7 @@ pub fn route_connections_hiding(
                             path,
                             styles,
                             label,
+                            end_labels: extract_end_labels(&conn.modifiers),
                             label_mask: extract_label_mask(&conn.modifiers),
                             routing_mode,
                             name: conn.name.as_ref().map(|n| n.node.clone()),
@@ -1129,6 +1130,11 @@ pub fn route_connections_hiding(
 
     // Resolve overlapping connection labels
     resolve_label_overlaps(&mut result.connections);
+
+    // End labels go on last: the route is final only after lanes and branches.
+    for c in &mut result.connections {
+        place_end_labels(c);
+    }
 
     // Remove elements that are used as connection labels from the layout
     for id in &label_element_ids {
@@ -1437,6 +1443,60 @@ fn extract_label_mask(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
         (StyleKey::Custom(k), StyleValue::Number { value, .. }) if k == "label_mask" => Some(*value),
         _ => None,
     })
+}
+
+/// Gap between a line's end and the text of an end label, and between the
+/// text and the line, in px.
+const END_LABEL_GAP: f64 = 6.0;
+
+/// `from_label: "*"` / `to_label: "0..1"` on a connection. Positions are set
+/// by [`place_end_labels`] once the route is final.
+fn extract_end_labels(modifiers: &[Spanned<StyleModifier>]) -> [Option<LabelLayout>; 2] {
+    let get = |name: &str| {
+        modifiers.iter().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
+            (StyleKey::Custom(k), StyleValue::String(s)) if k == name => Some(LabelLayout::from_source(
+                s,
+                Point::new(0.0, 0.0),
+                TextAnchor::Middle,
+                12.0,
+            )),
+            _ => None,
+        })
+    };
+    [get("from_label"), get("to_label")]
+}
+
+/// Put each end label beside the line, just past its end: along the line away
+/// from the box, and to the same side of the travel direction at both ends
+/// (above a left-to-right line), so a multiplicity reads next to its box and
+/// clear of the box edge whichever way the line runs.
+fn place_end_labels(conn: &mut ConnectionLayout) {
+    let n = conn.path.len();
+    if n < 2 {
+        return;
+    }
+    // (end point, point just inside the line, i.e. direction of travel is end - inner for `to`).
+    let ends = [(conn.path[0], conn.path[1]), (conn.path[n - 1], conn.path[n - 2])];
+    for (i, (end, inner)) in ends.into_iter().enumerate() {
+        let Some(label) = conn.end_labels[i].as_mut() else { continue };
+        let (dx, dy) = (inner.x - end.x, inner.y - end.y);
+        let len = (dx * dx + dy * dy).sqrt();
+        if len < 0.001 {
+            continue;
+        }
+        // Unit vector pointing from the box along the line.
+        let (ux, uy) = (dx / len, dy / len);
+        // Travel direction at this end, to pick one side for both ends.
+        let (tx, ty) = if i == 0 { (ux, uy) } else { (-ux, -uy) };
+        let (sx, sy) = (ty, -tx);
+        let m = crate::layout::text::measure_runs(&label.rich.lines, label.font_size);
+        let half_along = ux.abs() * m.width / 2.0 + uy.abs() * m.height / 2.0;
+        let half_across = sx.abs() * m.width / 2.0 + sy.abs() * m.height / 2.0;
+        let a = END_LABEL_GAP + half_along;
+        let s = END_LABEL_GAP + half_across;
+        label.position = Point::new(end.x + ux * a + sx * s, end.y + uy * a + sy * s);
+        label.anchor = TextAnchor::Middle;
+    }
 }
 
 /// Extract connection label and return both the label and the referenced element ID (if any)
@@ -2014,6 +2074,49 @@ mod tests {
             TextAnchor::Middle,
             "Horizontal auto should use Middle anchor"
         );
+    }
+
+    fn conn_with_end_labels(path: Vec<Point>, from: &str, to: &str) -> ConnectionLayout {
+        ConnectionLayout {
+            from_id: Identifier("a".into()),
+            to_id: Identifier("b".into()),
+            direction: ConnectionDirection::Undirected,
+            path,
+            styles: ResolvedStyles::default(),
+            label: None,
+            end_labels: [
+                Some(LabelLayout::from_source(from, Point::new(0.0, 0.0), TextAnchor::Middle, 12.0)),
+                Some(LabelLayout::from_source(to, Point::new(0.0, 0.0), TextAnchor::Middle, 12.0)),
+            ],
+            label_mask: None,
+            routing_mode: RoutingMode::Direct,
+            name: None,
+        }
+    }
+
+    #[test]
+    fn end_labels_sit_just_inside_each_end_above_a_rightward_line() {
+        let mut c = conn_with_end_labels(vec![Point::new(100.0, 50.0), Point::new(300.0, 50.0)], "*", "0..1");
+        place_end_labels(&mut c);
+        let [from, to] = c.end_labels.map(|l| l.unwrap());
+        // From label: right of the start, above the line.
+        assert!(from.position.x > 100.0 && from.position.x < 130.0, "x = {}", from.position.x);
+        assert!(from.position.y < 50.0, "y = {}", from.position.y);
+        // To label: left of the end, also above the line.
+        assert!(to.position.x < 300.0 && to.position.x > 250.0, "x = {}", to.position.x);
+        assert!(to.position.y < 50.0, "y = {}", to.position.y);
+    }
+
+    #[test]
+    fn end_labels_on_a_vertical_line_clear_the_line_sideways() {
+        let mut c = conn_with_end_labels(vec![Point::new(50.0, 0.0), Point::new(50.0, 200.0)], "1", "*");
+        place_end_labels(&mut c);
+        let [from, to] = c.end_labels.map(|l| l.unwrap());
+        for l in [&from, &to] {
+            assert!(l.position.x > 50.0, "label x {} not beside the line", l.position.x);
+        }
+        assert!(from.position.y > 0.0 && from.position.y < 30.0);
+        assert!(to.position.y < 200.0 && to.position.y > 170.0);
     }
 
     // Feature 008: Curved routing tests

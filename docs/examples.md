@@ -718,3 +718,24 @@ keyframe "pass" {
 }
 ```
 Full scenes: examples/motion/request-response.ail and token-loop.ail.
+
+## Class diagram: boxes from a template, labels at the ends of the line
+
+A class box is a `col` of rects (header, attributes, operations) inside a
+template; `from_label`/`to_label` carry the multiplicities and `label` the
+relationship's name.
+
+```
+template "cls" (ttl: "", attrs: "", ops: "") {
+    col box [gap: 0, padding: 0] {
+        rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2]
+        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
+        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
+    }
+}
+row r1 [gap: 140, align: top] {
+    cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
+    cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"]
+}
+entry.right -- invoice.left [from_label: "*", to_label: "0..1", label: "billed on"]
+```

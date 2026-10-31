@@ -3770,6 +3770,8 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "via",          // connection routing
     "padding",      // contains
     "label_mask",   // connection: cut lines away behind the label
+    "from_label",   // connection: text at the start of the line
+    "to_label",     // connection: text at the end of the line
     "corner_radius", // rect rx
     "font_weight",  // label/text weight
     "font_family",  // label/text family
@@ -4463,6 +4465,7 @@ mod tests {
             path,
             styles: super::super::types::ResolvedStyles::default(),
             label: None,
+            end_labels: [None, None],
             label_mask: None,
             routing_mode,
             name: None,

@@ -35,3 +35,4 @@ examples/motion/request-response.svg      examples/motion/request-response.ail  
 examples/motion/request-response.anim.svg examples/motion/request-response.ail  --animate-css
 examples/motion/token-loop.svg            examples/motion/token-loop.ail        --animate
 examples/motion/token-loop.anim.svg       examples/motion/token-loop.ail        --animate-css
+examples/class-diagram.svg         examples/class-diagram.ail         --stylesheet-css stylesheets/kapernikov.css

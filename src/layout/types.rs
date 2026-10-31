@@ -1253,6 +1253,10 @@ pub struct ConnectionLayout {
     pub path: Vec<Point>,
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,
+    /// `from_label` / `to_label`: a short text at each end of the line (a
+    /// multiplicity, a role), indexed `[from, to]`. Placed after the final
+    /// route is known, so they follow the line wherever it ends up.
+    pub end_labels: [Option<LabelLayout>; 2],
     /// `label_mask: N`: lines drawn on the connection layer are cut away
     /// within N of the label's box, so the text reads clean over them.
     pub label_mask: Option<f64>,
@@ -1331,7 +1335,7 @@ impl LayoutResult {
             for p in &mut c.path {
                 *p = Point::new(snap(p.x), snap(p.y));
             }
-            if let Some(l) = &mut c.label {
+            for l in c.label.iter_mut().chain(c.end_labels.iter_mut().flatten()) {
                 l.position = Point::new(snap(l.position.x), snap(l.position.y));
             }
         }
@@ -1421,7 +1425,7 @@ impl LayoutResult {
                 bounds = bounds.expand_to_include(*point);
             }
             // Include connection labels
-            if let Some(label) = &conn.label {
+            for label in conn.label.iter().chain(conn.end_labels.iter().flatten()) {
                 bounds = expand_bounds_for_label(bounds, label);
             }
         }

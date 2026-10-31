@@ -2363,9 +2363,14 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         ));
     }
 
-    // Render connection label if present
-    if let Some(label) = &conn.label {
-        if let Some(pad) = conn.label_mask {
+    // Render connection label (and any end labels) if present
+    let labels = conn
+        .label
+        .iter()
+        .map(|l| (l, true))
+        .chain(conn.end_labels.iter().flatten().map(|l| (l, false)));
+    for (label, is_main) in labels {
+        if let (true, Some(pad)) = (is_main, conn.label_mask) {
             let font_size = label.styles.as_ref().and_then(|s| s.font_size).unwrap_or(label.font_size);
             let m = crate::layout::text::measure_runs(&label.rich.lines, font_size);
             let x = match label.anchor {
@@ -3108,6 +3113,7 @@ mod tests {
             path: vec![Point::new(50.0, 25.0), Point::new(100.0, 25.0)],
             styles: ResolvedStyles::default(),
             label: None,
+            end_labels: [None, None],
             label_mask: None,
             routing_mode: RoutingMode::default(),
             name: None,

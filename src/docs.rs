@@ -45,6 +45,7 @@ const TOPICS: &[(&str, &str, &str)] = &[
     ("layering", "animation", "Layering and overlaps"),
     ("overlaps", "animation", "Layering and overlaps"),
     ("captions", "animation", "Captions"),
+    ("class-diagrams", "skill", "Class and entity diagrams"),
 ];
 
 /// Other words for the same topics (what an agent would type).
@@ -89,6 +90,13 @@ const ALIASES: &[(&str, &str)] = &[
     ("messages", "sequence"),
     ("mask", "sequence"),
     ("label_mask", "sequence"),
+    ("uml", "class-diagrams"),
+    ("class", "class-diagrams"),
+    ("er", "class-diagrams"),
+    ("multiplicity", "class-diagrams"),
+    ("from_label", "class-diagrams"),
+    ("to_label", "class-diagrams"),
+    ("end-labels", "class-diagrams"),
     ("label-mask", "sequence"),
     ("state", "states"),
     ("set", "states"),
