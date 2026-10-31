@@ -510,33 +510,33 @@ nothing is sized by hand and no second template is needed. Rows are plain
 stroke-less rects (they give the text a left inset); each compartment's
 outline is a stroke-only rect that `contains` its column of rows, so dividers
 sit between compartments, not between rows. The rounded outer corners come
-from a `shell` rect (`fill: none`, `corner_radius: 8`, declared last so its
+from a `shell` rect (`fill: none`, `corner_radius: radius`, default 8; `radius: 0` for square corners, declared last so its
 outline is on top) that `contains` the whole column; every inner rect is
 `clip: shell`, so only the outer corners are round. A `col`/`row` itself cannot
 carry fill or stroke, which is why the outlines are rects.
 
 ```
-template "cls" (ttl: "", attrs: [], ops: []) {
+template "cls" (ttl: "", attrs: [], ops: [], w: 220, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
-        rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2, corner_radius: 0, clip: shell]
+        rect hd [width: w, label: ttl, font_weight: bold, fill: hfill, stroke: edge, corner_radius: 0, clip: shell]
         col at [gap: 0, padding: 0] {
             each a in attrs {
-                rect a_row [width: 220, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                rect a_row [width: w, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
                 anchor l_a [position: a_row.left, direction: left]
                 anchor r_a [position: a_row.right, direction: right]
             }
         }
         col op [gap: 0, padding: 0] {
             each o in ops {
-                rect o_row [width: 220, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                rect o_row [width: w, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
                 anchor l_o [position: o_row.left, direction: left]
                 anchor r_o [position: o_row.right, direction: right]
             }
         }
     }
-    rect at_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
-    rect op_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
-    rect shell [fill: none, stroke: foreground-2, corner_radius: 8]
+    rect at_box [fill: none, stroke: edge, corner_radius: 0, clip: shell]
+    rect op_box [fill: none, stroke: edge, corner_radius: 0, clip: shell]
+    rect shell [fill: none, stroke: edge, corner_radius: radius]
     constrain at_box contains at
     constrain op_box contains op
     constrain shell contains box

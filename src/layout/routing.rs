@@ -1492,7 +1492,7 @@ fn extract_label_mask(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
 
 /// Gap between a line's end and the text of an end label, and between the
 /// text and the line, in px.
-const END_LABEL_GAP: f64 = 6.0;
+const END_LABEL_GAP: f64 = 9.0;
 
 /// `from_label: "*"` / `to_label: "0..1"` on a connection. Positions are set
 /// by [`place_end_labels`] once the route is final.
