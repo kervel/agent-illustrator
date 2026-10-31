@@ -1250,6 +1250,8 @@ pub struct ConnectionLayout {
     pub from_id: Identifier,
     pub to_id: Identifier,
     pub direction: ConnectionDirection,
+    /// What is drawn at each end: the operator's default, `from_end`/`to_end` applied.
+    pub ends: crate::layout::line_end::LineEnds,
     pub path: Vec<Point>,
     pub styles: ResolvedStyles,
     pub label: Option<LabelLayout>,

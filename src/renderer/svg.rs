@@ -4,7 +4,8 @@ use crate::layout::{
     BoundingBox, ConnectionLayout, ElementLayout, ElementType, FillSpec, GradientKind,
     LayoutResult, PatternKind, Point, ResolvedStyles, RoutingMode, TextAnchor,
 };
-use crate::parser::ast::{ConnectionDirection, PointerDir, ShapeType};
+use crate::layout::{LineEnd, LineEnds};
+use crate::parser::ast::{PointerDir, ShapeType};
 use crate::stylesheet::Stylesheet;
 
 use super::SvgConfig;
@@ -241,19 +242,83 @@ impl SvgBuilder {
         }
     }
 
-    /// Add the arrow marker definition for directed connections
-    pub fn add_arrow_marker(&mut self) {
+    /// Define the markers for every line end in use (once each).
+    ///
+    /// All markers use `orient="auto-start-reverse"`, so one definition points
+    /// along the line at either end, and `markerUnits="strokeWidth"`, so the
+    /// shape scales with the line. Line parts take `context-stroke`; hollow
+    /// shapes are filled with the surface colour (`--role-surface`, white
+    /// without a stylesheet) so they follow a host's dark mode. Markers do not
+    /// inherit the path's dash pattern, so every end combines with `dashed`.
+    pub fn add_end_markers(&mut self, ends: impl IntoIterator<Item = LineEnds>) {
+        let mut used: Vec<LineEnd> = Vec::new();
+        for e in ends {
+            for end in [e.from, e.to] {
+                if end != LineEnd::None && !used.contains(&end) {
+                    used.push(end);
+                }
+            }
+        }
+        for (end, _) in LineEnd::ALL {
+            if used.contains(&end) {
+                let def = self.end_marker_def(end);
+                self.defs.push(def);
+            }
+        }
+    }
+
+    /// The `<marker>` for one end style.
+    fn end_marker_def(&self, end: LineEnd) -> String {
         let prefix = self.prefix();
-        // Use orient="auto" to automatically rotate the marker to match path direction
-        // at the marker position. The arrow shape points right (+X), so it will
-        // rotate to match the final segment direction (e.g., down for vertical paths).
-        // Use fill="context-stroke" so the arrow inherits the line's stroke color.
-        // Use markerUnits="strokeWidth" so arrow size scales with line thickness.
-        self.defs.push(format!(
-            r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+        if end == LineEnd::Arrow {
+            // The filled head: 4 stroke widths wide, tip 9 units past the line's end.
+            return format!(
+                r#"<marker id="{prefix}arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>"#
-        ));
+            );
+        }
+        // 10 units = 6.5 stroke widths; a 1.54-unit outline is one stroke width.
+        let hollow = format!(r##" class="{prefix}end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)""##);
+        let line = r#" fill="none" stroke="context-stroke" stroke-width="1.54""#;
+        let solid = r#" fill="context-stroke" stroke="context-stroke" stroke-width="1.54""#;
+        let outline = r#" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter""#;
+        let (ref_x, shape) = match end {
+            LineEnd::Open => (10, format!(r#"<path d="M0,1.12 L7.76,5 L0,8.88"{line} stroke-linejoin="miter"/>"#)),
+            LineEnd::Triangle => (0, format!(r#"<path d="M0,1.12 L7.76,5 L0,8.88 Z"{hollow}{outline}/>"#)),
+            LineEnd::Diamond => (0, format!(r#"<path d="M0,5 L4,1.5 L8,5 L4,8.5 Z"{hollow}{outline}/>"#)),
+            LineEnd::DiamondFilled => (0, format!(r#"<path d="M0,5 L4,1.5 L8,5 L4,8.5 Z"{solid} stroke-linejoin="miter"/>"#)),
+            LineEnd::Crow => (10, format!(r#"<path d="M0,5 L10,0.5 M0,5 L10,5 M0,5 L10,9.5"{line}/>"#)),
+            LineEnd::Circle => (0, format!(r#"<circle cx="4.5" cy="5" r="3.5"{hollow}{outline}/>"#)),
+            LineEnd::Arrow | LineEnd::None => unreachable!(),
+        };
+        format!(
+            r#"<marker id="{prefix}end-{id}" viewBox="0 0 10 10" refX="{ref_x}" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      {shape}
+    </marker>"#,
+            id = end.word()
+        )
+    }
+
+    /// `marker-start` / `marker-end` attributes for a path. `draw_end` is
+    /// false when an arrowhead is drawn as its own (animated) node instead.
+    fn marker_attrs(&self, ends: LineEnds, draw_end: bool) -> String {
+        let prefix = self.prefix();
+        let url = |e: LineEnd| {
+            if e == LineEnd::Arrow {
+                format!("url(#{prefix}arrow)")
+            } else {
+                format!("url(#{prefix}end-{})", e.word())
+            }
+        };
+        let mut out = String::new();
+        if ends.from != LineEnd::None {
+            out.push_str(&format!(r#" marker-start="{}""#, url(ends.from)));
+        }
+        if ends.to != LineEnd::None && draw_end {
+            out.push_str(&format!(r#" marker-end="{}""#, url(ends.to)));
+        }
+        out
     }
 
     /// If `styles` carries a pattern/gradient fill, ensure its `<defs>` entry is
@@ -670,7 +735,7 @@ impl SvgBuilder {
         routing_mode: RoutingMode,
         classes: &[String],
         styles: &str,
-        marker_end: bool,
+        ends: LineEnds,
         stroke_width: f64,
         draw_marker: bool,
         extra_attrs: &str,
@@ -681,13 +746,9 @@ impl SvgBuilder {
             .collect::<Vec<_>>()
             .join(" ");
 
-        let d = connection_path_d(path, routing_mode, marker_end, stroke_width);
+        let d = connection_path_d(path, routing_mode, ends, stroke_width);
 
-        let marker = if marker_end && draw_marker {
-            format!(r#" marker-end="url(#{prefix}arrow)""#)
-        } else {
-            String::new()
-        };
+        let marker = self.marker_attrs(ends, draw_marker);
 
         self.connections.push(format!(
             r#"{}<path class="{}" d="{}" fill="none"{}{}{}/>"#,
@@ -708,13 +769,9 @@ impl SvgBuilder {
 
     /// Add a hidden crossfade variant path for a connection whose route reshapes in a
     /// given frame. Shown only in that frame via `.frame-<frame> .conn-<id>-f<frame>`.
-    pub fn add_connection_variant(&mut self, d: &str, id: &str, frame: &str, marker_end: bool, style: &str) {
+    pub fn add_connection_variant(&mut self, d: &str, id: &str, frame: &str, ends: LineEnds, style: &str) {
         let prefix = self.prefix();
-        let marker = if marker_end {
-            format!(r#" marker-end="url(#{prefix}arrow)""#)
-        } else {
-            String::new()
-        };
+        let marker = self.marker_attrs(ends, true);
         let wrap = self.motion.is_some();
         if wrap {
             self.connections.push(format!(r#"<g class="aivar-{}{}-f{}">"#, self.scope, id, frame));
@@ -1082,15 +1139,7 @@ pub fn render_svg_with_keyframes(
     }
 
     // Add arrow marker if there are any directed connections
-    let has_directed = result.connections.iter().any(|c| {
-        matches!(
-            c.direction,
-            ConnectionDirection::Forward | ConnectionDirection::Backward
-        )
-    });
-    if has_directed {
-        builder.add_arrow_marker();
-    }
+    builder.add_end_markers(result.connections.iter().map(|c| c.ends));
 
     // Render elements at frame-0 positions, with hidden elements getting opacity: 0
     let empty_set = std::collections::HashSet::new();
@@ -1422,7 +1471,7 @@ fn render_motion_ghosts(result: &LayoutResult, builder: &mut SvgBuilder) {
 fn generate_keyframe_css(
     _frame_states: &[crate::layout::keyframe::FrameState],
     frame_diffs: &[crate::layout::keyframe::FrameLayout],
-    conn_meta: &std::collections::HashMap<String, (RoutingMode, bool, f64)>,
+    conn_meta: &std::collections::HashMap<String, (RoutingMode, LineEnds, f64)>,
     scope: &str,
     elements: &[ElementLayout],
 ) -> String {
@@ -1607,15 +1656,7 @@ pub fn render_svg_with_stylesheet(
     }
 
     // Add arrow marker if there are any directed connections
-    let has_directed = result.connections.iter().any(|c| {
-        matches!(
-            c.direction,
-            ConnectionDirection::Forward | ConnectionDirection::Backward
-        )
-    });
-    if has_directed {
-        builder.add_arrow_marker();
-    }
+    builder.add_end_markers(result.connections.iter().map(|c| c.ends));
 
     // Render all root elements, sorted by z_order (stable sort preserves document order)
     builder.set_clip_targets(&result.root_elements);
@@ -2309,10 +2350,7 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
     // Get stroke width for arrow pullback calculation (default: 2.0)
     let stroke_width = conn.styles.stroke_width.unwrap_or(2.0);
 
-    let marker_end = matches!(
-        conn.direction,
-        ConnectionDirection::Forward | ConnectionDirection::Bidirectional
-    );
+    let ends = conn.ends;
 
     // Motion: every path gets a `d` hook; a drawn one is masked, and its
     // arrowhead becomes its own node that appears when the tip arrives.
@@ -2323,8 +2361,13 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         let scope = builder.scope().to_string();
         classes.push(format!("aid-{}{}", scope, c));
         if m.drawables.contains_key(c) {
-            let d = connection_path_d(&conn.path, conn.routing_mode, marker_end, stroke_width);
-            builder.add_draw_mask(c, &d, stroke_width, m.initial_offset(c));
+            let d = connection_path_d(&conn.path, conn.routing_mode, ends, stroke_width);
+            // The mask only reveals as far as its stroke reaches; an end shape
+            // that is not the animated arrowhead sits beyond the line's end, so
+            // widen the mask to uncover it (it then shows slightly early).
+            let wide = !m.heads.contains(c) && (ends.to != LineEnd::None || ends.from != LineEnd::None);
+            let mask_w = if wide { stroke_width * 8.0 } else { stroke_width };
+            builder.add_draw_mask(c, &d, mask_w, m.initial_offset(c));
             extra = format!(r#" mask="url(#aim-{}{})""#, scope, c);
             if m.heads.contains(c) {
                 draw_marker = false;
@@ -2346,7 +2389,7 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         conn.routing_mode,
         &classes,
         &styles,
-        marker_end,
+        ends,
         stroke_width,
         draw_marker,
         &extra,
@@ -2700,7 +2743,7 @@ pub(crate) fn frame_transform_css(tx: Option<f64>, ty: Option<f64>, rotation: Op
 /// `idx<N>` for unnamed), so CSS emitters can rebuild a connection's `d` string.
 pub(crate) fn build_conn_meta(
     result: &LayoutResult,
-) -> std::collections::HashMap<String, (RoutingMode, bool, f64)> {
+) -> std::collections::HashMap<String, (RoutingMode, LineEnds, f64)> {
     result
         .connections
         .iter()
@@ -2711,11 +2754,7 @@ pub(crate) fn build_conn_meta(
                 .as_ref()
                 .map(|n| n.0.clone())
                 .unwrap_or_else(|| format!("idx{}", i));
-            let marker = matches!(
-                c.direction,
-                ConnectionDirection::Forward | ConnectionDirection::Bidirectional
-            );
-            (id, (c.routing_mode, marker, c.styles.stroke_width.unwrap_or(2.0)))
+            (id, (c.routing_mode, c.ends, c.styles.stroke_width.unwrap_or(2.0)))
         })
         .collect()
 }
@@ -2723,25 +2762,29 @@ pub(crate) fn build_conn_meta(
 /// Build the SVG path `d` string for a connection, including the arrow-marker pullback,
 /// matching exactly what `add_connection_path` renders. Shared so per-frame keyframe CSS
 /// (`d: path(...)`) targets the same geometry the base path uses.
-pub(crate) fn connection_path_d(path: &[Point], routing_mode: RoutingMode, marker_end: bool, stroke_width: f64) -> String {
-    // Shorten the endpoint when a marker is present so the arrow tip lands on the anchor.
-    // pullback = 9 * (markerWidth=4 / 10) * strokeWidth = 3.6 * strokeWidth.
-    let path = if marker_end && path.len() >= 2 {
-        let mut shortened = path.to_vec();
-        let last_idx = shortened.len() - 1;
-        let prev_idx = last_idx - 1;
-        let dx = shortened[last_idx].x - shortened[prev_idx].x;
-        let dy = shortened[last_idx].y - shortened[prev_idx].y;
-        let len = (dx * dx + dy * dy).sqrt();
-        if len > 0.001 {
-            let pullback = 3.6 * stroke_width;
-            shortened[last_idx].x -= dx / len * pullback;
-            shortened[last_idx].y -= dy / len * pullback;
-        }
-        shortened
-    } else {
-        path.to_vec()
-    };
+pub(crate) fn connection_path_d(path: &[Point], routing_mode: RoutingMode, ends: LineEnds, stroke_width: f64) -> String {
+    // Shorten each end whose shape sits beyond the line, so its tip lands on the anchor.
+    // (Arrow: pullback = 9 * (markerWidth=4 / 10) * strokeWidth = 3.6 * strokeWidth.)
+    let mut path = path.to_vec();
+    if path.len() >= 2 {
+        let last = path.len() - 1;
+        let pull_to = ends.to.pullback() * stroke_width;
+        let pull_from = ends.from.pullback() * stroke_width;
+        let pull = |tip: Point, toward: Point, by: f64| -> Point {
+            let (dx, dy) = (tip.x - toward.x, tip.y - toward.y);
+            let len = (dx * dx + dy * dy).sqrt();
+            if by > 0.0 && len > 0.001 {
+                Point::new(tip.x - dx / len * by, tip.y - dy / len * by)
+            } else {
+                tip
+            }
+        };
+        let (a, b) = (path[0], path[last]);
+        let (a2, b2) = (path[1], path[last - 1]);
+        path[last] = pull(b, b2, pull_to);
+        path[0] = pull(a, a2, pull_from);
+    }
+    let path = &path[..];
 
     match routing_mode {
         RoutingMode::Curved if path.len() >= 4 => {
@@ -2763,7 +2806,7 @@ pub(crate) fn connection_path_d(path: &[Point], routing_mode: RoutingMode, marke
             }
             d
         }
-        _ => path_to_d(&path),
+        _ => path_to_d(path),
     }
 }
 
@@ -2914,7 +2957,7 @@ fn strip_svg_wrapper(svg: &str) -> String {
 mod tests {
     use super::*;
     use crate::layout::{AnchorSet, ElementType, LayoutResult, ResolvedStyles};
-    use crate::parser::ast::{Identifier, LayoutType};
+    use crate::parser::ast::{ConnectionDirection, Identifier, LayoutType};
 
     #[test]
     fn register_fill_emits_pattern_def_once() {
@@ -3105,6 +3148,7 @@ mod tests {
             from_id: Identifier::new("a"),
             to_id: Identifier::new("b"),
             direction: ConnectionDirection::Forward,
+            ends: crate::layout::line_end::LineEnds::from_direction(ConnectionDirection::Forward),
             path: vec![Point::new(50.0, 25.0), Point::new(100.0, 25.0)],
             styles: ResolvedStyles::default(),
             label: None,
@@ -3121,6 +3165,35 @@ mod tests {
         assert!(svg.contains("ai-arrow"));
         assert!(svg.contains("ai-connection"));
         assert!(svg.contains("marker-end"));
+    }
+
+    #[test]
+    fn line_end_markers_defined_once_per_style_in_use() {
+        let mut b = SvgBuilder::new(SvgConfig::default());
+        let ends = |from, to| LineEnds { from, to };
+        b.add_end_markers([
+            ends(LineEnd::None, LineEnd::Triangle),
+            ends(LineEnd::Triangle, LineEnd::Crow),
+            ends(LineEnd::None, LineEnd::None),
+        ]);
+        let defs = b.defs.join("\n");
+        assert_eq!(defs.matches("<marker").count(), 2, "{defs}");
+        assert!(defs.contains(r#"id="ai-end-triangle""#) && defs.contains(r#"id="ai-end-crow""#));
+        assert!(defs.contains("auto-start-reverse"));
+        assert!(!defs.contains("ai-arrow"));
+    }
+
+    #[test]
+    fn connection_path_shortens_each_end_by_its_shape() {
+        let pts = [Point::new(0.0, 0.0), Point::new(100.0, 0.0)];
+        let d = |ends| connection_path_d(&pts, RoutingMode::Direct, ends, 2.0);
+        assert_eq!(d(LineEnds::none()), "M0 0 L100 0");
+        // arrow: 3.6 stroke widths at the to end only
+        assert_eq!(d(LineEnds { from: LineEnd::None, to: LineEnd::Arrow }), "M0 0 L92.8 0");
+        // open and crow: the line runs into the shape
+        assert_eq!(d(LineEnds { from: LineEnd::Open, to: LineEnd::Crow }), "M0 0 L100 0");
+        // from end is shortened toward the line
+        assert_eq!(d(LineEnds { from: LineEnd::Triangle, to: LineEnd::None }), "M13 0 L100 0");
     }
 
     #[test]

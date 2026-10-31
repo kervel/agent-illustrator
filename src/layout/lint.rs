@@ -3770,6 +3770,8 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "via",          // connection routing
     "padding",      // contains
     "label_mask",   // connection: cut lines away behind the label
+    "from_end",     // connection: decoration at the start (arrow, triangle, ...)
+    "to_end",       // connection: decoration at the end
     "corner_radius", // rect rx
     "font_weight",  // label/text weight
     "font_family",  // label/text family
@@ -4460,6 +4462,7 @@ mod tests {
             from_id: Identifier(from.to_string()),
             to_id: Identifier(to.to_string()),
             direction: ConnectionDirection::Forward,
+            ends: crate::layout::line_end::LineEnds::from_direction(ConnectionDirection::Forward),
             path,
             styles: super::super::types::ResolvedStyles::default(),
             label: None,

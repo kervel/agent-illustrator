@@ -6,6 +6,7 @@
 examples/architecture.svg          examples/architecture.ail          --stylesheet-css stylesheets/kapernikov.css
 examples/feedback-loops.svg        examples/feedback-loops.ail        --stylesheet-css stylesheets/kapernikov.css
 examples/gallic-wars-timeline.svg  examples/gallic-wars-timeline.ail  --stylesheet-css stylesheets/kapernikov.css
+examples/line-ends.svg           examples/line-ends.ail           --stylesheet-css stylesheets/kapernikov-schematic.css
 examples/mosfet-driver.svg         examples/mosfet-driver.ail         --stylesheet-css stylesheets/kapernikov-schematic.css
 examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
 examples/sequence-diagram.svg      examples/sequence-diagram.ail      --stylesheet-css stylesheets/kapernikov.css

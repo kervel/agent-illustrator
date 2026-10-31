@@ -1036,6 +1036,7 @@ pub fn route_connections_hiding(
                             })?;
 
                         let routing_mode = extract_routing_mode(&conn.modifiers);
+                        let line_ends = crate::layout::line_end::LineEnds::resolve(conn.direction, &conn.modifiers)?;
                         let from_bounds = from_element.bounds;
                         let to_bounds = to_element.bounds;
 
@@ -1081,6 +1082,7 @@ pub fn route_connections_hiding(
                             from_id: conn.from.element.node.clone(),
                             to_id: conn.to.element.node.clone(),
                             direction: conn.direction,
+                            ends: line_ends,
                             path,
                             styles,
                             label,
