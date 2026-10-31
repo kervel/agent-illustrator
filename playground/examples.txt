@@ -12,3 +12,6 @@ examples/motion/git-merge.ail
 ## Motion
 examples/motion/request-response.ail
 examples/motion/token-loop.ail
+
+## Diagrams
+examples/class-diagram.ail
