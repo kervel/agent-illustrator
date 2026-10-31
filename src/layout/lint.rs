@@ -4050,7 +4050,8 @@ fn check_label_overflow_recursive(elem: &ElementLayout, warnings: &mut Vec<LintW
     // An outside label is not trying to fit in the box, so it cannot overflow it.
     if let Some(label) = &elem.label.as_ref().filter(|l| label_is_inside(l)) {
         // Skip text elements — they don't have a "container" to overflow
-        if !is_text_shape(elem) {
+        // An empty label draws nothing (and takes no room), so it cannot overflow.
+        if !is_text_shape(elem) && !label.text.is_empty() {
             let label_bbox = estimate_label_bbox(label);
             let shape_bounds = &elem.bounds;
 

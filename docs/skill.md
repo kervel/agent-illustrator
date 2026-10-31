@@ -33,6 +33,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Anything on a lattice: matrix, table, calendar, aligned number columns | `grid` + `[at: [row, col]]`, cells as `g.cell(r, c)` | `constrain` lines with a hand-picked pitch |
 | Text centred in a box | `rect b [label: "x"]` | a separate `text` element plus constraints |
 | Several lines in a box | `label: "a<br>b<br>c"` | one `text` element per line |
+| An optional compartment (UML ops) | `label: ops` with `ops: ""` by default: an empty label takes no room (give `height:` to keep it) | an `if`, or a second template |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
