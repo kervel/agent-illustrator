@@ -870,6 +870,16 @@ pub fn route_connection_with_anchors_and_types(
         return forced_stub_path(start, end, from_dir, to_dir);
     }
 
+    // Facing edges that overlap (side by side boxes of different heights, or
+    // stacked boxes of different widths): one straight segment across the
+    // middle of the overlap instead of a dogleg between the edge midpoints.
+    // Only for edge attachments: an explicit anchor already says where.
+    if from_anchor.is_none() && to_anchor.is_none() {
+        if let Some(path) = straight_through_overlap(from_bounds, to_bounds, from_edge, to_edge) {
+            return path;
+        }
+    }
+
     // For vertical connections (Bottom to Top), create a proper downward path
     // even if the x coordinates are different
     if from_edge == Edge::Bottom && to_edge == Edge::Top {
@@ -921,6 +931,39 @@ pub fn route_connection_with_anchors_and_types(
     }
 
     route_orthogonal(start, end)
+}
+
+/// The overlap of the two boxes along the axis the connection runs across has
+/// to be at least this long (room for the line and an arrowhead) before the
+/// route is drawn straight through it.
+const MIN_STRAIGHT_OVERLAP: f64 = 10.0;
+
+/// A straight two-point route between facing edges (Right to Left, Left to
+/// Right, Bottom to Top, Top to Bottom) whose boxes overlap across the
+/// connection: through the middle of the overlap.
+fn straight_through_overlap(
+    from: &BoundingBox,
+    to: &BoundingBox,
+    from_edge: Edge,
+    to_edge: Edge,
+) -> Option<Vec<Point>> {
+    let mid_of_overlap = |a0: f64, a1: f64, b0: f64, b1: f64| {
+        let (lo, hi) = (a0.max(b0), a1.min(b1));
+        (hi - lo >= MIN_STRAIGHT_OVERLAP).then(|| (lo + hi) / 2.0)
+    };
+    match (from_edge, to_edge) {
+        (Edge::Right, Edge::Left) | (Edge::Left, Edge::Right) => {
+            let y = mid_of_overlap(from.y, from.bottom(), to.y, to.bottom())?;
+            let (x0, x1) = if from_edge == Edge::Right { (from.right(), to.x) } else { (from.x, to.right()) };
+            Some(vec![Point::new(x0, y), Point::new(x1, y)])
+        }
+        (Edge::Bottom, Edge::Top) | (Edge::Top, Edge::Bottom) => {
+            let x = mid_of_overlap(from.x, from.right(), to.x, to.right())?;
+            let (y0, y1) = if from_edge == Edge::Bottom { (from.bottom(), to.y) } else { (from.y, to.bottom()) };
+            Some(vec![Point::new(x, y0), Point::new(x, y1)])
+        }
+        _ => None,
+    }
 }
 
 /// Extract the routing mode from connection modifiers

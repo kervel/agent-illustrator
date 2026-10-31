@@ -1,0 +1,17 @@
+// UML class boxes from one template. An empty `ops:` leaves no empty band
+// (an empty label takes no room), and connections between boxes of different
+// heights run straight through the overlap of their facing edges.
+template "cls" (ttl: "", attrs: "", ops: "") {
+    col box [gap: 0, padding: 0] {
+        rect hd [width: 260, label: ttl, fill: "#fff3e0", stroke: "#333", stroke_width: 2, font_weight: bold]
+        rect at [width: 260, label: attrs, align: start, fill: "#fff", stroke: "#333", stroke_width: 2, font_size: 12]
+        rect op [width: 260, label: ops, align: start, fill: "#fff", stroke: "#333", stroke_width: 2, font_size: 12]
+    }
+}
+row r1 [gap: 120, align: top] {
+    cls lock [ttl: "PeriodLock", attrs: "year, month", ops: ""]
+    cls entry [ttl: "TimeEntry", attrs: "a<br>b<br>c<br>d<br>e<br>f", ops: "+ approve()<br>+ verify()"]
+    cls invoice [ttl: "Invoice", attrs: "number", ops: ""]
+}
+lock -> entry
+entry -- invoice

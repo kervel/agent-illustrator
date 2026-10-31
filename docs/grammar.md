@@ -83,6 +83,10 @@ Connection modifiers:
                             of its box (arrows and `--` connections; the label
                             may then cross a lifeline without the line showing)
 
+Side-by-side (or stacked) boxes whose facing edges overlap are joined by one
+straight segment through the middle of the overlap, not a dogleg between the
+edge midpoints. Elsewhere right-angle routes bend as needed.
+
 Routing is automatic about two things: straight connections between the same
 pair (a -> b and b -> a) are drawn as side-by-side lanes, each keeping to its
 left; and right-angle connections leaving one point the same way (a fan-out)
@@ -122,6 +126,10 @@ Common modifiers:
                             A bare `<` is literal text, so "a < b" is fine.
                             The box grows to fit; with an explicit width the
                             text wraps to it instead of overflowing.
+                            `label: ""` (e.g. a template parameter left empty)
+                            takes no room on a rect/ellipse axis that has no
+                            explicit width/height/size: a UML compartment with
+                            no operations vanishes. Give a size to keep it.
     label_position: <where> inside (default) | above | below | left | right
                             An outside label is part of the element's bounds,
                             so layouts reserve space for it.

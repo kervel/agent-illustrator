@@ -10,6 +10,8 @@ examples/mosfet-driver.svg         examples/mosfet-driver.ail         --styleshe
 examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
 examples/sequence-diagram.svg      examples/sequence-diagram.ail      --stylesheet-css stylesheets/kapernikov.css
 
+examples/uml-classes.svg           examples/uml-classes.ail           --stylesheet-css stylesheets/kapernikov.css
+
 # Animated showcases (CSS only: they play inside an <img>)
 examples/token-prediction.svg      examples/token-prediction.ail      --stylesheet-css stylesheets/kapernikov.css --animate-css
 examples/agentic-loop-story.svg    examples/agentic-loop-story.ail    --stylesheet-css stylesheets/agentic-loop-story.css --animate-css

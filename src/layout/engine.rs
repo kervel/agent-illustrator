@@ -1441,6 +1441,17 @@ fn compute_shape_size(
         }
     };
 
+    // `label: ""` on a box shape that is given no size of its own on an axis:
+    // it takes no room there. A UML compartment whose text comes from a
+    // template parameter vanishes when the parameter is empty. An explicit
+    // width/height/size still wins, and a shape whose label is swapped by a
+    // keyframe keeps its default room.
+    let empty_label = matches!(label, Some((_, _, raw, _)) if raw.is_empty())
+        && matches!(shape.shape_type.node, ShapeType::Rectangle | ShapeType::Ellipse)
+        && keyframe_wordings(&shape.modifiers).is_empty();
+    let (default_width, default_height) = if empty_label { (0.0, 0.0) } else { (default_width, default_height) };
+    let (label_min_width, label_min_height) = if empty_label { (None, None) } else { (label_min_width, label_min_height) };
+
     // Start with specified or default width
     let base_width = width.unwrap_or(default_width);
 
