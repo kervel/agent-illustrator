@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 700 245.5" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 1060 557" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -182,30 +182,83 @@
   fill: var(--text-light);
 }
   ]]></style>
-  <g id="r1" class="ai-container">
-    <g id="entry" class="ai-container">
-      <g id="entry_box" class="ai-container">
-        <rect id="entry_hd" class="ai-shape ai-rect" x="10" y="10" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-        <text class="ai-label" x="120" y="26.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="120" dy="-0"><tspan>TimeEntry</tspan></tspan></text>
-        <rect id="entry_at" class="ai-shape ai-rect" x="10" y="43.5" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-        <text class="ai-label" x="18" y="74" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="18" dy="-15"><tspan>date</tspan></tspan><tspan x="18" dy="15"><tspan>hours</tspan></tspan><tspan x="18" dy="15"><tspan>status</tspan></tspan></text>
-        <rect id="entry_op" class="ai-shape ai-rect" x="10" y="104.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-        <text class="ai-label" x="18" y="120" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="18" dy="-0"><tspan>+ approve()</tspan></tspan></text>
+  <defs>
+    <marker id="ai-end-open" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,1.12 L7.76,5 L0,8.88" fill="none" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-triangle" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,1.12 L7.76,5 L0,8.88 Z" class="ai-end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-diamond-filled" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,5 L4,1.5 L8,5 L4,8.5 Z" fill="context-stroke" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+  </defs>
+  <g id="cols" class="ai-container">
+    <g id="c_l" class="ai-container">
+      <g id="approval" class="ai-container">
+        <g id="approval_box" class="ai-container">
+          <rect id="approval_hd" class="ai-shape ai-rect" x="15" y="205" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="125" y="221.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="125" dy="-0"><tspan>EntryApproval</tspan></tspan></text>
+          <rect id="approval_at" class="ai-shape ai-rect" x="15" y="238.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="23" y="254" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>kind</tspan></tspan></text>
+          <rect id="approval_op" class="ai-shape ai-rect" x="15" y="269.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="23" y="269.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"></tspan></text>
+        </g>
       </g>
     </g>
-    <g id="invoice" class="ai-container">
-      <g id="invoice_box" class="ai-container">
-        <rect id="invoice_hd" class="ai-shape ai-rect" x="370" y="10" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-        <text class="ai-label" x="480" y="26.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="480" dy="-0"><tspan>Invoice</tspan></tspan></text>
-        <rect id="invoice_at" class="ai-shape ai-rect" x="370" y="43.5" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-        <text class="ai-label" x="378" y="74" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="378" dy="-15"><tspan>number</tspan></tspan><tspan x="378" dy="15"><tspan>total</tspan></tspan><tspan x="378" dy="15"><tspan>paid</tspan></tspan></text>
-        <rect id="invoice_op" class="ai-shape ai-rect" x="370" y="104.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
-        <text class="ai-label" x="378" y="120" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="378" dy="-0"><tspan>+ pay()</tspan></tspan></text>
+    <g id="c_m" class="ai-container">
+      <g id="lock" class="ai-container">
+        <g id="lock_box" class="ai-container">
+          <rect id="lock_hd" class="ai-shape ai-rect" x="375" y="15" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="485" y="31.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>PeriodLock</tspan></tspan></text>
+          <rect id="lock_at" class="ai-shape ai-rect" x="375" y="48.5" width="220" height="46" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="383" y="71.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-7.5"><tspan>year</tspan></tspan><tspan x="383" dy="15"><tspan>month</tspan></tspan></text>
+          <rect id="lock_op" class="ai-shape ai-rect" x="375" y="94.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="383" y="94.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"></tspan></text>
+        </g>
+      </g>
+      <g id="entry" class="ai-container">
+        <g id="entry_box" class="ai-container">
+          <rect id="entry_hd" class="ai-shape ai-rect" x="375" y="174.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="485" y="191.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>TimeEntry</tspan></tspan></text>
+          <rect id="entry_at" class="ai-shape ai-rect" x="375" y="208" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="383" y="238.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-15"><tspan>date</tspan></tspan><tspan x="383" dy="15"><tspan>hours</tspan></tspan><tspan x="383" dy="15"><tspan>status</tspan></tspan></text>
+          <rect id="entry_op" class="ai-shape ai-rect" x="375" y="269" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="383" y="284.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>+ approve()</tspan></tspan></text>
+        </g>
+      </g>
+      <g id="corr" class="ai-container">
+        <g id="corr_box" class="ai-container">
+          <rect id="corr_hd" class="ai-shape ai-rect" x="375" y="380" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="485" y="396.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>Correction</tspan></tspan></text>
+          <rect id="corr_at" class="ai-shape ai-rect" x="375" y="413.5" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="383" y="429" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>original</tspan></tspan></text>
+          <rect id="corr_op" class="ai-shape ai-rect" x="375" y="444.5" width="220" height="0" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="383" y="444.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"></tspan></text>
+        </g>
+      </g>
+    </g>
+    <g id="c_r" class="ai-container">
+      <g id="invoice" class="ai-container">
+        <g id="invoice_box" class="ai-container">
+          <rect id="invoice_hd" class="ai-shape ai-rect" x="735" y="174.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="845" y="191.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="845" dy="-0"><tspan>Invoice</tspan></tspan></text>
+          <rect id="invoice_at" class="ai-shape ai-rect" x="735" y="208" width="220" height="61" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="743" y="238.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-15"><tspan>number</tspan></tspan><tspan x="743" dy="15"><tspan>total</tspan></tspan><tspan x="743" dy="15"><tspan>paid</tspan></tspan></text>
+          <rect id="invoice_op" class="ai-shape ai-rect" x="735" y="269" width="220" height="31" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+          <text class="ai-label" x="743" y="284.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>+ pay()</tspan></tspan></text>
+        </g>
       </g>
     </g>
   </g>
-  <text class="ai-label" x="300" y="82.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="300" dy="-0"><tspan>billed on</tspan></tspan></text>
-  <text class="ai-label" x="238.334" y="59.25" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="238.334" dy="-0"><tspan>*</tspan></tspan></text>
-  <text class="ai-label" x="353.992" y="59.25" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="353.992" dy="-0"><tspan>0..1</tspan></tspan></text>
-  <path class="ai-connection" d="M230 72.75 L370 72.75" fill="none" stroke="#333" stroke-width="2"/>
+  <text class="ai-label" x="495" y="134.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="495" dy="-0"><tspan>gates</tspan></tspan></text>
+  <text class="ai-label" x="665" y="247.25" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="665" dy="-0"><tspan>billed on</tspan></tspan></text>
+  <text class="ai-label" x="603.334" y="223.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="603.334" dy="-0"><tspan>*</tspan></tspan></text>
+  <text class="ai-label" x="718.992" y="223.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="718.992" dy="-0"><tspan>0..1</tspan></tspan></text>
+  <text class="ai-label" x="365.664" y="250.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="365.664" dy="-0"><tspan>1</tspan></tspan></text>
+  <text class="ai-label" x="243.334" y="250.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="243.334" dy="-0"><tspan>*</tspan></tspan></text>
+  <path class="ai-connection" d="M485 380 L485 313" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
+  <path class="ai-connection" d="M485 94.5 L485 174.5" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M595 237.25 L735 237.25" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M362.6 237.25 L235 237.25" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-diamond-filled)"/>
 </svg>

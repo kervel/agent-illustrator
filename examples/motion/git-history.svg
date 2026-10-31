@@ -331,7 +331,7 @@ svg[data-ail-player] * { transition: none !important; }
 }
 ]]></style>
   <defs>
-    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
     <clipPath id="ai-clip-4de854cc-hub_head"><rect class="ai-shape kf-anim kfc-4de854cc-hub_head" x="651.5" y="151.5" width="297" height="147" rx="14.5" ry="14.5"/></clipPath>

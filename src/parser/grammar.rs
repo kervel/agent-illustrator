@@ -716,6 +716,14 @@ where
                 span_range(&e.span()),
             )
         }),
+        // `circle` is a reserved shape token but also a line-end style
+        // (`to_end: circle`); accept it as a keyword value here.
+        just(Token::Circle).map_with(|_, e| {
+            Spanned::new(
+                StyleValue::Keyword("circle".to_string()),
+                span_range(&e.span()),
+            )
+        }),
         // Center token (can be used in style values like [label_position: center])
         just(Token::Center).map_with(|_, e| {
             Spanned::new(
@@ -2726,6 +2734,28 @@ mod tests {
                 assert!(conns[0].to.anchor.is_none());
             }
             _ => panic!("Expected connection"),
+        }
+    }
+
+    #[test]
+    fn test_parse_line_end_modifiers() {
+        // Every spelling parses on an undirected connection, circle included
+        // (a reserved shape word) and hyphenated diamond-filled.
+        for word in ["arrow", "open", "triangle", "diamond", "diamond-filled", "crow", "circle", "none"] {
+            let doc = parse(&format!("a -- b [to_end: {word}, from_end: {word}]"))
+                .unwrap_or_else(|e| panic!("{word}: {e:?}"));
+            match &doc.statements[0].node {
+                Statement::Connection(conns) => {
+                    assert_eq!(conns[0].direction, ConnectionDirection::Undirected);
+                    let keys: Vec<_> = conns[0]
+                        .modifiers
+                        .iter()
+                        .map(|m| m.node.key.node.source_name())
+                        .collect();
+                    assert_eq!(keys, vec!["to_end", "from_end"]);
+                }
+                _ => panic!("Expected connection"),
+            }
         }
     }
 

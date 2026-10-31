@@ -9,6 +9,7 @@ pub mod config;
 pub mod engine;
 pub mod error;
 pub mod keyframe;
+pub mod line_end;
 pub mod lint;
 pub mod routing;
 pub mod solver;
@@ -29,6 +30,7 @@ mod solver_spike;
 pub use config::LayoutConfig;
 pub use engine::{compute, resolve_constrain_statements, resolve_constraints};
 pub use error::LayoutError;
+pub use line_end::{LineEnd, LineEnds};
 pub use routing::{route_connections, RoutingMode};
 pub use types::*;
 

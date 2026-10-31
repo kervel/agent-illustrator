@@ -39,6 +39,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
 | Text that must not jump when its wording changes | leave it auto-sized, add `align: start` | guessing a `width` for the longest wording |
 | A message label wider than the gap, crossing a lifeline or another line | `a -> b [label: "...", label_offset: 0, label_mask: 4]` | painting a background-coloured box behind the text |
+| A UML relation, an ER cardinality, a socket (inheritance, aggregation, crow's foot) | `a -> b [to_end: triangle]`, `a -- b [from_end: diamond-filled]` (`--doc line-ends`) | a hand-drawn shape at the end of the line |
 | One caption across a walkthrough | `transform cap [label: "..."]` per keyframe | one text element per step |
 | Children lined up on a container's cross axis | `align: center` / `end` on the container | per-child `constrain` |
 | Checking every frame | `--frames-to-dir out/` | a shell loop over frame names |
@@ -348,6 +349,27 @@ Worked sums, tables and anything with subtotals need this. `col_labels: [...]`
 / `row_labels: [...]` add aligned text gutters. For a heatmap, use one hue with
 per-cell `fill_opacity`. See `--examples`.
 
+#### Line ends (arrowheads, UML relations, crow's foot)
+
+Every connection has two ends, `from_end` and `to_end`. The operator implies
+a default (`->` an arrow on `to`, `<-` on `from`, `<->` on both, `--` none);
+the modifiers override it per end, on any operator:
+
+    a -> b  [to_end: triangle]                        // hollow triangle: inheritance
+    a -- b  [to_end: diamond]                         // hollow diamond: aggregation
+    a -- b  [from_end: diamond-filled]                // filled diamond: composition
+    a -> b  [to_end: open, stroke_dasharray: dashed]  // open V, dashed: dependency
+    a -- b  [from_end: none, to_end: crow]            // crow's foot: "many"
+
+Values: `arrow` (the filled head), `open` (V), `triangle`, `diamond`,
+`diamond-filled`, `crow`, `circle`, `none`. An unknown value is an error that
+lists these. Ends point along the line at the endpoint (straight, right-angle
+and curved routes), scale with `stroke_width`, take the connection's stroke
+colour, and combine with `stroke_dasharray`. Hollow ends (`triangle`,
+`diamond`, `circle`) are filled with the surface colour (`role-surface`), so
+they follow a theme. Animated connections (`enter: draw`) animate the filled
+`arrow` head; other ends appear with the line. See `examples/line-ends.ail`.
+
 #### Sequence diagrams (lifelines, messages, a label that crosses a line)
 
 There is no sequence-diagram construct; it is built from parts you have. A
@@ -463,6 +485,14 @@ end of any connection, beside the line and clear of the box edge. They follow th
 line when a box moves. `label:` is still the one at the middle (a relationship
 name). All three coexist; with end labels present the middle one defaults to the
 other side of the line (`label_offset:` or `label_position:` overrides).
+
+UML relations are line ends (see Line ends): inheritance `to_end: triangle`,
+composition `from_end: diamond-filled` on the owner, aggregation `diamond`,
+dependency `to_end: open, stroke_dasharray: dashed`, navigability `to_end: open`.
+Give every connection its own anchor side (`entry.left`, `entry.right`,
+`entry.top`, `entry.bottom`): two lines leaving one anchor share a segment.
+Align boxes joined by a straight line with `constrain a.center_y = b.center_y`.
+The full set is in `examples/class-diagram.ail`.
 
 ### Colors
 

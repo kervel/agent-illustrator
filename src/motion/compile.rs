@@ -573,13 +573,8 @@ fn walk_elements<'a>(
 pub fn drawable_polyline(layout: &LayoutResult, id: &str) -> Option<Polyline> {
     for c in &layout.connections {
         if c.name.as_ref().is_some_and(|n| n.0 == id) {
-            let marker = matches!(
-                c.direction,
-                crate::parser::ast::ConnectionDirection::Forward
-                    | crate::parser::ast::ConnectionDirection::Bidirectional
-            );
             let sw = c.styles.stroke_width.unwrap_or(2.0);
-            let d = crate::renderer::svg::connection_path_d(&c.path, c.routing_mode, marker, sw);
+            let d = crate::renderer::svg::connection_path_d(&c.path, c.routing_mode, c.ends, sw);
             return Some(flatten_d(&d));
         }
     }
@@ -720,12 +715,9 @@ struct Compiler<'a> {
 
 fn has_marker(layout: &LayoutResult, id: &str) -> bool {
     layout.connections.iter().any(|c| {
-        c.name.as_ref().is_some_and(|n| n.0 == id)
-            && matches!(
-                c.direction,
-                crate::parser::ast::ConnectionDirection::Forward
-                    | crate::parser::ast::ConnectionDirection::Bidirectional
-            )
+        // Only the filled arrow is animated as its own node; other end shapes
+        // are plain markers (uncovered by a widened draw mask).
+        c.name.as_ref().is_some_and(|n| n.0 == id) && c.ends.to == crate::layout::LineEnd::Arrow
     })
 }
 
@@ -913,11 +905,6 @@ impl<'a> Compiler<'a> {
                 ChKey { sel: format!(".conn-{}{}", s, cid), prop: Prop::Opacity },
                 Val::n(if hidden { 0.0 } else { 1.0 }),
             );
-            let marker = matches!(
-                c.direction,
-                crate::parser::ast::ConnectionDirection::Forward
-                    | crate::parser::ast::ConnectionDirection::Bidirectional
-            );
             let sw = c.styles.stroke_width.unwrap_or(2.0);
             let base_c = self.input.base.connections.get(i);
             let morphable = base_c.is_none_or(|b| {
@@ -928,7 +915,7 @@ impl<'a> Compiler<'a> {
                 .filter(|f| self.input.conn_variants.contains(&(cid.clone(), f.to_string())))
                 .map(str::to_string);
             let shown_path = if morphable || variant_here.is_none() { &c.path } else { &base_c.unwrap().path };
-            let d = crate::renderer::svg::connection_path_d(shown_path, c.routing_mode, marker, sw);
+            let d = crate::renderer::svg::connection_path_d(shown_path, c.routing_mode, c.ends, sw);
             vals.insert(ChKey { sel: format!(".aid-{}{}", s, cid), prop: Prop::D }, Val::S(d));
             if has_variants {
                 let use_variant = !morphable && variant_here.is_some();

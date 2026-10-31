@@ -719,6 +719,23 @@ keyframe "pass" {
 ```
 Full scenes: examples/motion/request-response.ail and token-loop.ail.
 
+EXAMPLE: Line ends (UML relations, crow's foot)
+-----------------------------------------------
+`from_end` / `to_end` choose the decoration at each end of any connection:
+arrow, open, triangle, diamond, diamond-filled, crow, circle, none. They
+override what the operator implies and combine with dashed lines.
+
+```
+a1 -> b1 [to_end: triangle]                                      // inheritance
+a2 -- b2 [to_end: diamond]                                       // aggregation
+a3 -- b3 [from_end: diamond-filled]                              // composition
+a4 -> b4 [to_end: open, stroke_dasharray: dashed]                // dependency
+a5 -- b5 [from_end: none, to_end: crow]                          // "many"
+a6 -- b6 [from_end: circle, to_end: circle]
+a8 -> b8 [to_end: triangle, stroke_dasharray: dashed]            // realisation
+```
+Full scene: examples/line-ends.ail.
+
 ## Class diagram: boxes from a template, labels at the ends of the line
 
 A class box is a `col` of rects (header, attributes, operations) inside a

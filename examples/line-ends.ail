@@ -1,0 +1,59 @@
+/* INTENT
+   Show every line-end style on a connection, UML-flavoured.
+   Audience: authors choosing how a relation should look.
+   They should see: the end styles (arrow, open, triangle, diamond,
+   diamond-filled, crow, circle, none), that `from_end`/`to_end` work on any
+   operator, and that dashed lines combine with every end.
+*/
+
+col lineends [gap: 22] {
+  text "Line ends: [from_end: ..., to_end: ...]" [font_size: 16]
+
+  row r1 [gap: 190] {
+    rect a1 [width: 110, height: 34, label: "Dog"]
+    rect b1 [width: 110, height: 34, label: "Animal"]
+  }
+  a1 -> b1 [to_end: triangle, label: "triangle: inheritance"]
+
+  row r2 [gap: 190] {
+    rect a2 [width: 110, height: 34, label: "Garage"]
+    rect b2 [width: 110, height: 34, label: "Car"]
+  }
+  a2 -- b2 [to_end: diamond, label: "diamond: aggregation"]
+
+  row r3 [gap: 190] {
+    rect a3 [width: 110, height: 34, label: "House"]
+    rect b3 [width: 110, height: 34, label: "Room"]
+  }
+  a3 -- b3 [from_end: diamond-filled, label: "diamond-filled"]
+
+  row r4 [gap: 190] {
+    rect a4 [width: 110, height: 34, label: "Client"]
+    rect b4 [width: 110, height: 34, label: "Service"]
+  }
+  a4 -> b4 [to_end: open, stroke_dasharray: dashed, label: "open, dashed: uses"]
+
+  row r5 [gap: 190] {
+    rect a5 [width: 110, height: 34, label: "Customer"]
+    rect b5 [width: 110, height: 34, label: "Order"]
+  }
+  a5 -- b5 [from_end: none, to_end: crow, label: "crow: many"]
+
+  row r6 [gap: 190] {
+    rect a6 [width: 110, height: 34, label: "Plug"]
+    rect b6 [width: 110, height: 34, label: "Socket"]
+  }
+  a6 -- b6 [from_end: circle, to_end: circle, label: "circle"]
+
+  row r7 [gap: 190] {
+    rect a7 [width: 110, height: 34, label: "Source"]
+    rect b7 [width: 110, height: 34, label: "Sink"]
+  }
+  a7 <-> b7 [label: "arrow (<->)"]
+
+  row r8 [gap: 190] {
+    rect a8 [width: 110, height: 34, label: "Impl"]
+    rect b8 [width: 110, height: 34, label: "Interface"]
+  }
+  a8 -> b8 [to_end: triangle, stroke_dasharray: dashed, stroke_width: 3, label: "dashed, thick: realises"]
+}

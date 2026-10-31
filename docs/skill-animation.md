@@ -505,7 +505,8 @@ show feed [enter: draw]       // a connection that draws itself in
 A line is drawn as declared (`drawn: 0 | 60% | <element on it>`, default fully),
 and a later `draw` never changes how it starts. Drawing is cumulative across
 frames. Dashes survive (a mask does the drawing), an arrowhead appears as the tip
-arrives. Drawing to something that is not on the line is a compile error.
+arrives (the filled `arrow` end; other `to_end`/`from_end` styles, see `--doc line-ends`,
+are plain markers uncovered with the line, slightly early). Drawing to something that is not on the line is a compile error.
 `path … [through: […]]` is routed after layout through the centres it names, so
 stations stay on the line whatever moves; `extend`, `extend_start`, `extend_end`
 run it past its ends.

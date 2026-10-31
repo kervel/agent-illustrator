@@ -134,7 +134,7 @@ svg[data-ail-player] * { transition: none !important; }
 }
 ]]></style>
   <defs>
-    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto">
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
     <mask id="aim-eb586e30-request" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-request aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>

@@ -5,8 +5,19 @@ template "cls" (ttl: "", attrs: "", ops: "") {
         rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2]
     }
 }
-row r1 [gap: 140, align: top] {
-    cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
-    cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"]
+row cols [gap: 130]  {
+    col c_l { cls approval [ttl: "EntryApproval", attrs: "kind", ops: ""] }
+    col c_m [gap: 80] {
+        cls lock [ttl: "PeriodLock", attrs: "year<br>month", ops: ""]
+        cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
+        cls corr [ttl: "Correction", attrs: "original", ops: ""]
+    }
+    col c_r { cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"] }
 }
+constrain approval.center_y = entry.center_y
+constrain invoice.center_y = entry.center_y
+
+corr.top -> entry.bottom [to_end: triangle]
+lock.bottom -> entry.top [to_end: open, stroke_dasharray: dashed, label: "gates"]
 entry.right -- invoice.left [from_label: "*", to_label: "0..1", label: "billed on"]
+entry.left -- approval.right [from_end: diamond-filled, from_label: "1", to_label: "*"]

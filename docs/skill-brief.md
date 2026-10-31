@@ -139,13 +139,13 @@ keyframe "clone" {
   `set inst done`; go back with `set inst default`.
 - Layouts that change: `layout beside { constrain ... }`, then
   `use layout beside` and later `use layout default`.
-- Hinges: `rect lid [pivot: left]` + `transform lid [rotation: -30]`. For
-  artwork: `barrier gate [arm.pivot: left]` + `transform gate.arm [rotation: -80]`.
+- Hinges: `rect lid [pivot: left]` + `transform lid [rotation: -30]`
+  (artwork parts: `--doc hinges`).
 
 ## Output
 
-- `--animate`: a click-to-step player.
-- `--animate-css`: a self-playing loop that works in an `<img>` or a README.
+- `--animate`: a click-to-step player. `--animate-css`: a self-playing loop
+  that works in an `<img>` or a README.
 - `--png -o f.png`, `--frame N`, `--at T`, `--scale 2`: pictures, no browser needed.
 - `--serve`: a live preview.
 

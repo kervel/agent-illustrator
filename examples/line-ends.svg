@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 535 659" font-size="14">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
+    --background-1: #ffffff;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #f6dedb;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    
+/* stylesheets/kapernikov-schematic.css */
+/* Kapernikov Brand Stylesheet - Schematic variant (no rounded corners)
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+  ]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <marker id="ai-end-open" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,1.12 L7.76,5 L0,8.88" fill="none" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-triangle" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,1.12 L7.76,5 L0,8.88 Z" class="ai-end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-diamond" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,5 L4,1.5 L8,5 L4,8.5 Z" class="ai-end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-diamond-filled" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,5 L4,1.5 L8,5 L4,8.5 Z" fill="context-stroke" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-crow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,5 L10,0.5 M0,5 L10,5 M0,5 L10,9.5" fill="none" stroke="context-stroke" stroke-width="1.54"/>
+    </marker>
+    <marker id="ai-end-circle" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <circle cx="4.5" cy="5" r="3.5" class="ai-end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+  </defs>
+  <g id="lineends" class="ai-container">
+    <text class="ai-shape ai-text" x="5" y="13" text-anchor="start" dominant-baseline="middle" font-size="16">Line ends: [from_end: ..., to_end: ...]</text>
+    <g id="r1" class="ai-container">
+      <rect id="a1" class="ai-shape ai-rect" x="10" y="48" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="65" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Dog</tspan></tspan></text>
+      <rect id="b1" class="ai-shape ai-rect" x="310" y="48" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="65" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Animal</tspan></tspan></text>
+    </g>
+    <g id="r2" class="ai-container">
+      <rect id="a2" class="ai-shape ai-rect" x="10" y="114" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="131" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Garage</tspan></tspan></text>
+      <rect id="b2" class="ai-shape ai-rect" x="310" y="114" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="131" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Car</tspan></tspan></text>
+    </g>
+    <g id="r3" class="ai-container">
+      <rect id="a3" class="ai-shape ai-rect" x="10" y="180" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>House</tspan></tspan></text>
+      <rect id="b3" class="ai-shape ai-rect" x="310" y="180" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Room</tspan></tspan></text>
+    </g>
+    <g id="r4" class="ai-container">
+      <rect id="a4" class="ai-shape ai-rect" x="10" y="246" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="263" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Client</tspan></tspan></text>
+      <rect id="b4" class="ai-shape ai-rect" x="310" y="246" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="263" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Service</tspan></tspan></text>
+    </g>
+    <g id="r5" class="ai-container">
+      <rect id="a5" class="ai-shape ai-rect" x="10" y="312" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="329" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Customer</tspan></tspan></text>
+      <rect id="b5" class="ai-shape ai-rect" x="310" y="312" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="329" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Order</tspan></tspan></text>
+    </g>
+    <g id="r6" class="ai-container">
+      <rect id="a6" class="ai-shape ai-rect" x="10" y="378" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="395" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Plug</tspan></tspan></text>
+      <rect id="b6" class="ai-shape ai-rect" x="310" y="378" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="395" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Socket</tspan></tspan></text>
+    </g>
+    <g id="r7" class="ai-container">
+      <rect id="a7" class="ai-shape ai-rect" x="10" y="444" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="461" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Source</tspan></tspan></text>
+      <rect id="b7" class="ai-shape ai-rect" x="310" y="444" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="461" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Sink</tspan></tspan></text>
+    </g>
+    <g id="r8" class="ai-container">
+      <rect id="a8" class="ai-shape ai-rect" x="10" y="510" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="65" y="527" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Impl</tspan></tspan></text>
+      <rect id="b8" class="ai-shape ai-rect" x="310" y="510" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+      <text class="ai-label" x="365" y="527" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Interface</tspan></tspan></text>
+    </g>
+  </g>
+  <text class="ai-label" x="215" y="55" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>triangle: inheritance</tspan></tspan></text>
+  <text class="ai-label" x="215" y="121" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>diamond: aggregation</tspan></tspan></text>
+  <text class="ai-label" x="215" y="187" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>diamond-filled</tspan></tspan></text>
+  <text class="ai-label" x="215" y="253" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>open, dashed: uses</tspan></tspan></text>
+  <text class="ai-label" x="215" y="319" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>crow: many</tspan></tspan></text>
+  <text class="ai-label" x="215" y="385" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>circle</tspan></tspan></text>
+  <text class="ai-label" x="215" y="451" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>arrow (&lt;-&gt;)</tspan></tspan></text>
+  <text class="ai-label" x="215" y="517" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>dashed, thick: realises</tspan></tspan></text>
+  <path class="ai-connection" d="M120 65 L297 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
+  <path class="ai-connection" d="M120 131 L297.6 131" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-diamond)"/>
+  <path class="ai-connection" d="M132.4 197 L310 197" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-diamond-filled)"/>
+  <path class="ai-connection" d="M120 263 L310 263" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M120 329 L310 329" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-crow)"/>
+  <path class="ai-connection" d="M131.7 395 L298.3 395" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-circle)" marker-end="url(#ai-end-circle)"/>
+  <path class="ai-connection" d="M127.2 461 L302.8 461" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-arrow)" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M120 527 L290.5 527" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-end-triangle)"/>
+</svg>

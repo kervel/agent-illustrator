@@ -279,6 +279,10 @@ fn validate_colors(doc: &Document, stylesheet: &Stylesheet) -> Result<(), Render
         stylesheet: &Stylesheet,
     ) -> Result<(), String> {
         for modifier in modifiers {
+            // `to_end: diamond-filled` is a word, not a palette token.
+            if matches!(&modifier.node.key.node, parser::ast::StyleKey::Custom(k) if k == "from_end" || k == "to_end") {
+                continue;
+            }
             check_color(&modifier.node.value.node, stylesheet)?;
         }
         Ok(())
@@ -1448,7 +1452,7 @@ fn step_opacity_keyframes_body(timeline: &[f64], pct_per_frame: f64, n: usize) -
 fn generate_animate_css(
     frame_states: &[layout::keyframe::FrameState],
     frame_diffs: &[layout::keyframe::FrameLayout],
-    conn_meta: &std::collections::HashMap<String, (layout::RoutingMode, bool, f64)>,
+    conn_meta: &std::collections::HashMap<String, (layout::RoutingMode, layout::LineEnds, f64)>,
     base_dims: &std::collections::HashMap<String, (f64, f64)>,
     base_conn_d: &std::collections::HashMap<String, String>,
     // Same per-document token the SVG's class names carry, so two animated
