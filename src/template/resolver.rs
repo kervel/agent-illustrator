@@ -104,11 +104,14 @@ pub fn resolve_templates(
     // First pass: collect template declarations
     registry.collect_from_statements(&doc.statements)?;
 
+    // `each` at the top level repeats over literal lists
+    let doc_statements = super::each::expand_each(doc.statements, &HashMap::new())?;
+
     // Second pass: resolve template instances
     let mut resolved_statements = Vec::new();
     let mut ctx = ResolutionContext::new();
 
-    for stmt in doc.statements {
+    for stmt in doc_statements {
         match &stmt.node {
             Statement::TemplateDecl(_) => {
                 // Template declarations are consumed by the registry, not rendered
@@ -414,7 +417,7 @@ fn resolve_ail_template(
 
     let mut expanded = Vec::new();
 
-    for stmt in parsed_doc.statements {
+    for stmt in super::each::expand_each(parsed_doc.statements, param_values)? {
         match &stmt.node {
             Statement::TemplateDecl(_) => {
                 // Template declarations are consumed by the registry, not expanded
@@ -478,7 +481,7 @@ fn resolve_inline_template(
         .cloned()
         .collect();
     let mut body = match &def.body {
-        Some(b) => b.clone(),
+        Some(b) => super::each::expand_each(b.clone(), param_values)?,
         None => return Ok(vec![]),
     };
     // `machine anna [hist.appears: later]`: a modifier for one part of this
@@ -496,6 +499,10 @@ fn resolve_inline_template(
     if !overrides.is_empty() {
         override_parts(&mut body, &overrides);
     }
+
+    // Anchors of the template, wherever the body declares them: at the top,
+    // in a row or column, or inside an `each` (one per item).
+    let body_anchors = take_anchors(&mut body);
 
     // Create a nested context for this instance
     let mut nested_ctx = ctx.nested(instance_name, param_values.clone());
@@ -542,8 +549,7 @@ fn resolve_inline_template(
     }
 
     // Prefix anchor declarations with instance name (Feature 009)
-    let prefixed_anchors: Vec<_> = def
-        .anchors
+    let prefixed_anchors: Vec<_> = body_anchors
         .iter()
         .map(|a| prefix_anchor_decl(a, instance_name))
         .collect();
@@ -575,6 +581,26 @@ fn resolve_inline_template(
         is_template_instance: true,
     };
     Ok(vec![Spanned::new(Statement::Group(group), span.clone())])
+}
+
+/// Pull every `anchor` declaration out of a template body (top level and
+/// inside rows/columns), in order.
+fn take_anchors(stmts: &mut Vec<Spanned<Statement>>) -> Vec<AnchorDecl> {
+    let mut found = Vec::new();
+    let mut keep = Vec::with_capacity(stmts.len());
+    for mut st in std::mem::take(stmts) {
+        match &mut st.node {
+            Statement::AnchorDecl(a) => {
+                found.push(a.clone());
+                continue;
+            }
+            Statement::Layout(l) => found.extend(take_anchors(&mut l.children)),
+            _ => {}
+        }
+        keep.push(st);
+    }
+    *stmts = keep;
+    found
 }
 
 /// Resolve a statement recursively
@@ -1106,6 +1132,75 @@ fn prefix_anchor_decl(anchor: &AnchorDecl, prefix: &str) -> AnchorDecl {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn names(doc: &Document) -> Vec<String> {
+        fn go(stmts: &[Spanned<Statement>], out: &mut Vec<String>) {
+            for s in stmts {
+                match &s.node {
+                    Statement::Shape(sh) => out.extend(sh.name.iter().map(|n| n.node.0.clone())),
+                    Statement::Layout(l) => {
+                        out.extend(l.name.iter().map(|n| n.node.0.clone()));
+                        go(&l.children, out);
+                    }
+                    Statement::Group(g) => {
+                        out.extend(g.name.iter().map(|n| n.node.0.clone()));
+                        go(&g.children, out);
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let mut out = Vec::new();
+        go(&doc.statements, &mut out);
+        out
+    }
+
+    #[test]
+    fn each_expands_a_list_parameter_with_numbered_names() {
+        let source = r#"
+            template "list" (items: []) {
+                col c { each it in items { rect rw [label: it] } }
+            }
+            list a [items: ["x", "y", "z"]]
+            list b
+        "#;
+        let doc = parse(source).expect("parse");
+        let mut registry = TemplateRegistry::new();
+        let resolved = resolve_templates(doc, &mut registry).expect("resolve");
+        let n = names(&resolved);
+        for want in ["a_c", "a_rw_1", "a_rw_2", "a_rw_3", "b"] {
+            assert!(n.contains(&want.to_string()), "{want} in {n:?}");
+        }
+        assert!(!n.iter().any(|x| x.starts_with("b_rw")), "{n:?}");
+    }
+
+    #[test]
+    fn each_nested_names_chain() {
+        let source = r#"each a in ["p", "q"] { each b in ["x", "y"] { rect cell } }"#;
+        let doc = parse(source).expect("parse");
+        let resolved = resolve_templates(doc, &mut TemplateRegistry::new()).expect("resolve");
+        assert_eq!(names(&resolved), vec!["cell_1_1", "cell_1_2", "cell_2_1", "cell_2_2"]);
+    }
+
+    #[test]
+    fn each_substitutes_the_item_and_the_index() {
+        let source = r#"each a, i in ["p", 3] { rect r [label: a, width: i] }"#;
+        let doc = parse(source).expect("parse");
+        let resolved = resolve_templates(doc, &mut TemplateRegistry::new()).expect("resolve");
+        let Statement::Shape(s) = &resolved.statements[0].node else { panic!() };
+        let label = s.modifiers.iter().find(|m| m.node.key.node == StyleKey::Label).unwrap();
+        assert_eq!(label.node.value.node, StyleValue::String("p".into()));
+        let Statement::Shape(s) = &resolved.statements[1].node else { panic!() };
+        let w = s.modifiers.iter().find(|m| m.node.key.node == StyleKey::Width).unwrap();
+        assert_eq!(w.node.value.node, StyleValue::Number { value: 1.0, unit: None });
+    }
+
+    #[test]
+    fn each_unknown_list_is_an_error() {
+        let doc = parse("each a in nothing { rect r }").expect("parse");
+        let err = resolve_templates(doc, &mut TemplateRegistry::new()).unwrap_err().to_string();
+        assert!(err.contains("nothing"), "{err}");
+    }
     use crate::parser::ast::StyleKey;
     use crate::parser::parse;
 

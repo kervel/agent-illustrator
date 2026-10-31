@@ -47,6 +47,7 @@ const TOPICS: &[(&str, &str, &str)] = &[
     ("overlaps", "animation", "Layering and overlaps"),
     ("captions", "animation", "Captions"),
     ("class-diagrams", "skill", "Class and entity diagrams"),
+    ("each", "skill", "Repeating things: `each`"),
 ];
 
 /// Other words for the same topics (what an agent would type).
@@ -103,6 +104,11 @@ const ALIASES: &[(&str, &str)] = &[
     ("messages", "sequence"),
     ("mask", "sequence"),
     ("label_mask", "sequence"),
+    ("repeat", "each"),
+    ("loop", "each"),
+    ("foreach", "each"),
+    ("lists", "each"),
+    ("for", "each"),
     ("uml", "class-diagrams"),
     ("class", "class-diagrams"),
     ("er", "class-diagrams"),

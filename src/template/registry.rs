@@ -45,6 +45,10 @@ pub enum TemplateError {
     #[error("circular template reference detected: {chain}")]
     CircularReference { chain: String },
 
+    /// A problem with an `each` block
+    #[error("{message}")]
+    Each { message: String },
+
     /// Export not found in template
     #[error("exported identifier not found in template {template}: {export}")]
     ExportNotFound { template: String, export: String },

@@ -352,6 +352,10 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                     g.children = walk(g.children, counts)?;
                     out.push(Spanned::new(Statement::Group(g), span));
                 }
+                Statement::Each(mut e) => {
+                    e.body = walk(e.body, counts)?;
+                    out.push(Spanned::new(Statement::Each(e), span));
+                }
                 Statement::TemplateDecl(mut t) => {
                     if let Some(body) = t.body.take() {
                         t.body = Some(walk(body, counts)?);
@@ -917,6 +921,11 @@ where
         just(Token::Text)
             .ignore_then(string_literal)
             .map(|s| ShapeType::Text { content: s.node }),
+        // `text a`: the text is the parameter or `each` variable `a`
+        // (the same as `text "{a}"`).
+        just(Token::Text)
+            .ignore_then(identifier)
+            .map(|id| ShapeType::Text { content: format!("{{{}}}", id.node.0) }),
         // Callout: pointer direction comes from the `pointer:` modifier (default down)
         just(Token::Callout).to(ShapeType::Callout {
             pointer: PointerDir::Down,
@@ -1706,6 +1715,49 @@ where
                 modifiers: modifiers.unwrap_or_default(),
                 anchors: vec![], // Parsed groups don't have custom anchors
                 is_template_instance: false,
+            });
+
+        // `each a in items { ... }` / `each a, i in ["x", "y"] { ... }`
+        let each_block = just(Token::Each)
+            .ignore_then(identifier)
+            .then(just(Token::Comma).ignore_then(identifier).or_not())
+            .then(
+                // `in` is only a word after `each a`; elsewhere it stays an
+                // ordinary identifier (`ease: in`).
+                select! { Token::Ident(s) if s == "in" => () }
+                    .labelled("`in` (each NAME in LIST { ... })")
+                    .ignore_then(style_value.clone())
+                    .or_not(),
+            )
+            .then(
+                stmt.clone()
+                    .repeated()
+                    .collect::<Vec<_>>()
+                    .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
+            )
+            .try_map(|(((var, index), source), body), span| {
+                let Some(source) = source else {
+                    return Err(Rich::custom(
+                        span,
+                        format!("`each {}` needs `in` and a list: each {} in [\"a\", \"b\"] {{ ... }}", var.node.0, var.node.0),
+                    ));
+                };
+                match &source.node {
+                    StyleValue::List(_) | StyleValue::Identifier(_) => {}
+                    other => {
+                        let given = match other {
+                            StyleValue::String(s) => format!("the string \"{}\"", s),
+                            StyleValue::Number { value, .. } => format!("the number {}", value),
+                            StyleValue::Color(_) => "a colour".to_string(),
+                            _ => "a value that is not a list".to_string(),
+                        };
+                        return Err(Rich::custom(
+                            source.span.clone().into(),
+                            format!("`each` repeats over a list, but was given {}; use a list such as [\"a\", \"b\"] or a list parameter", given),
+                        ));
+                    }
+                }
+                Ok(Statement::Each(EachBlock { var, index, source, body }))
             });
 
         // Label declaration: `label { ... }` or `label: <element>`
@@ -2584,6 +2636,7 @@ where
             anchor_decl, // Feature 009: anchor declarations
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
+            each_block,
             label_decl,
             connection_decl.clone().map(Statement::Connection),
             // path_decl before shape_decl since 'path' is a keyword (Feature 007)
@@ -2608,6 +2661,47 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_each_with_index_and_literal_list() {
+        let doc = parse(r#"each a, i in ["x", "y"] { rect r }"#).expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Each(e) => {
+                assert_eq!(e.var.node.0, "a");
+                assert_eq!(e.index.as_ref().unwrap().node.0, "i");
+                assert!(matches!(&e.source.node, StyleValue::List(l) if l.len() == 2));
+                assert_eq!(e.body.len(), 1);
+            }
+            other => panic!("expected each, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_each_over_a_parameter_name_and_nested() {
+        let doc = parse("template \"t\" (xs: []) { each a in xs { each b in xs { rect r } } }").expect("Should parse");
+        assert_eq!(doc.statements.len(), 1);
+    }
+
+    #[test]
+    fn parse_template_list_default() {
+        parse(r#"template "t" (attrs: [], names: ["a", "b"]) { rect r }"#).expect("list defaults parse");
+    }
+
+    #[test]
+    fn parse_text_with_a_variable() {
+        let doc = parse("text a [font_size: 12]").expect("Should parse");
+        match &doc.statements[0].node {
+            Statement::Shape(s) => assert!(matches!(&s.shape_type.node, ShapeType::Text { content } if content == "{a}")),
+            _ => panic!("shape"),
+        }
+    }
+
+    #[test]
+    fn parse_each_errors() {
+        assert!(parse(r#"each a { rect r }"#).is_err());
+        assert!(parse(r#"each a in 5 { rect r }"#).is_err());
+        assert!(parse(r#"each a in ["x"] rect r"#).is_err());
+    }
 
     #[test]
     fn parse_fill_hatch_no_args() {

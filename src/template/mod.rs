@@ -17,6 +17,7 @@
 //! server myserver [fill: red, size: 100]
 //! ```
 
+mod each;
 mod registry;
 mod resolver;
 pub mod svg_parts;

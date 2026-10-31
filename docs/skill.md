@@ -33,7 +33,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Anything on a lattice: matrix, table, calendar, aligned number columns | `grid` + `[at: [row, col]]`, cells as `g.cell(r, c)` | `constrain` lines with a hand-picked pitch |
 | Text centred in a box | `rect b [label: "x"]` | a separate `text` element plus constraints |
 | Several lines in a box | `label: "a<br>b<br>c"` | one `text` element per line |
-| An optional compartment (UML ops) | `label: ops` with `ops: ""` by default: an empty label takes no room (give `height:` to keep it) | an `if`, or a second template |
+| One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
@@ -461,30 +461,106 @@ rects, or a box made of a rect and a lid all looked worse than the artwork
 that replaced them. Building an icon from shapes isn't forbidden, it's just
 not what the tool is for.
 
+### Repeating things: `each`
+
+`each NAME in LIST { ... }` writes its body once per list item. `LIST` is a
+list parameter of the enclosing template (`attrs: []`, default empty) or a
+literal list `["a", "b"]`; it works outside templates too. Inside the body
+`NAME` is the item: `label: NAME`, `text NAME` (that is `text "{NAME}"`), or
+inside a string `"{NAME}"`. Items are strings or numbers; markup (`<b>`, `<i>`)
+works as in any label. An empty list makes nothing, so a compartment that has
+no items simply is not there.
+
+```
+template "menu" (items: []) {
+    col m [gap: 4] {
+        each it, i in items { rect entry [label: "{i}. {it}", width: 120, height: 24] }
+    }
+}
+menu file [items: ["Open", "Save", "Quit"]]
+each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2, dot_3
+```
+
+- **Names.** An element, anchor, constraint or connection name declared in the
+  body gets the item's 1-based number appended: `entry` becomes `entry_1`,
+  `entry_2`, ... In a template instance `file` that is `file.entry_1`. In a
+  nested `each` the numbers chain (`cell_2_3`: outer item 2, inner item 3), so
+  names never collide across items, instances or nested blocks. Two sibling
+  blocks must still use different names. References between statements of the
+  same body (`constrain bg contains entry`, `clip: x`) follow the renaming.
+  `constrain`, anchors, keyframes and connections can target `entry_2` like any
+  element. Unnamed elements need no names.
+- **Index.** `each NAME, i in LIST` binds `i` to the 0-based position. It is a
+  number: usable in a string (`"{i}"`) or where a number goes (`width: i`),
+  not as a label by itself (`label: i` asks for quotes, like any number).
+- **Nesting.** An `each` may contain `each` (a grid of rows of cells).
+- **Lists as arguments.** A template argument may be a list (`attrs: ["a",
+  "b"]`) and then reaches the body; passing a list straight to `label:` is an
+  error, `each` is the way.
+- **Errors say what is wrong**: an unknown list name (and which list parameters
+  exist), a non-list after `in`, a missing `in`.
+- `each` is a reserved word (`--doc reserved`); `in` is a word only right after `each NAME`.
+- Same idea at parse time, for ready-made arguments: `k* [items: [...]]`.
+
 ### Class and entity diagrams
 
-A class box is a template, not a primitive: a `col` with no gap and no padding
-holds one rect per compartment, each with a multi-line left-aligned label. The
-box grows to its content, so nothing is sized by hand.
-The rounded outer corners come from a `shell` rect (`fill: none`,
-`corner_radius: 8`, declared last so its outline is on top) that `contains` the
-column; the square compartments are `clip: shell`, so only the outer corners are
-round and the dividers stay straight.
+A class box is a template that takes lists: `attrs` and `ops` hold one string
+per row and an `each` makes the rows. An empty list leaves no compartment, so
+nothing is sized by hand and no second template is needed. Rows are plain
+stroke-less rects (they give the text a left inset); each compartment's
+outline is a stroke-only rect that `contains` its column of rows, so dividers
+sit between compartments, not between rows. The rounded outer corners come
+from a `shell` rect (`fill: none`, `corner_radius: 8`, declared last so its
+outline is on top) that `contains` the whole column; every inner rect is
+`clip: shell`, so only the outer corners are round. A `col`/`row` itself cannot
+carry fill or stroke, which is why the outlines are rects.
 
 ```
-template "cls" (ttl: "", attrs: "", ops: "") {
+template "cls" (ttl: "", attrs: [], ops: []) {
     col box [gap: 0, padding: 0] {
         rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2, corner_radius: 0, clip: shell]
-        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
-        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
+        col at [gap: 0, padding: 0] {
+            each a in attrs {
+                rect a_row [width: 220, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                anchor l_a [position: a_row.left, direction: left]
+                anchor r_a [position: a_row.right, direction: right]
+            }
+        }
+        col op [gap: 0, padding: 0] {
+            each o in ops {
+                rect o_row [width: 220, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                anchor l_o [position: o_row.left, direction: left]
+                anchor r_o [position: o_row.right, direction: right]
+            }
+        }
     }
+    rect at_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
+    rect op_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
     rect shell [fill: none, stroke: foreground-2, corner_radius: 8]
+    constrain at_box contains at
+    constrain op_box contains op
     constrain shell contains box
+    anchor t_box [position: shell.top, direction: up]
+    anchor b_box [position: shell.bottom, direction: down]
+    anchor l_hd [position: hd.left, direction: left]
+    anchor r_hd [position: hd.right, direction: right]
+    anchor l_at [position: at_box.left, direction: left]
+    anchor r_at [position: at_box.right, direction: right]
+    anchor l_op [position: op_box.left, direction: left]
+    anchor r_op [position: op_box.right, direction: right]
 }
-cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
-cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"]
-entry.right -- invoice.left [from_label: "*", to_label: "0..1", label: "billed on"]
+cls entry [ttl: "TimeEntry", attrs: ["date", "hours", "status"], ops: ["+ approve()"]]
+cls invoice [ttl: "Invoice", attrs: ["number", "total", "paid"], ops: ["+ pay()"]]
+entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
 ```
+
+Connection ends: the template declares anchors for the box (`t_box`, `b_box`),
+for each compartment (`l_hd r_hd l_at r_at l_op r_op`) and for each row
+(`l_a_N`, `r_a_N`: attribute N, 1-based; `l_o_N`, `r_o_N` for operations), so a
+relation can leave from the exact attribute it is about. Anchors declared
+inside an `each` are numbered like any name in it. (If you do not need
+compartments, a single label also works: `label: "date<br>hours"`, but a list
+and `each` keeps rows individually addressable.)
 
 `from_label:` and `to_label:` put a short text (a multiplicity, a role) at each
 end of any connection, beside the line and clear of the box edge. They follow the
@@ -563,7 +639,7 @@ A shape's `label:` takes `<br>`, `<b>`, `<i>`, `<small>` and `<span fill=…>`.
 These are keywords: they cannot name an element, a part, a connection or a
 parameter. Pick a more specific name (`app_icon`, `log_row`, `wire`).
 
-`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
+`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `each`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
 
 ---
 

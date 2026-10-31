@@ -340,7 +340,7 @@ fn collect_element_template_mapping(
         | Statement::TemplateInstance(_)
         | Statement::Export(_)
         | Statement::AnchorDecl(_)
-        | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => {}
+        | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } | Statement::Each(_) => {}
     }
 }
 
@@ -820,7 +820,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
             | Statement::Constraint(_)
             | Statement::Constrain(_) | Statement::DisableConstraint(_)
             | Statement::Label(_)
-            | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => continue,
+            | Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } | Statement::Each(_) => continue,
             _ => {
                 let element = layout_statement(&stmt.node, position, config);
                 position.y += element.bounds.height + config.element_spacing;
@@ -958,7 +958,7 @@ fn layout_statement(stmt: &Statement, position: Point, config: &LayoutConfig) ->
             // After template resolution, instances are replaced with their expanded content
             unreachable!("Template instances should be expanded before layout")
         }
-        Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } => {
+        Statement::Keyframe(_) | Statement::MotionMacro(_) | Statement::MotionDefaults(_) | Statement::Import(_) | Statement::NamedLayout { .. } | Statement::ComponentState { .. } | Statement::Each(_) => {
             // Keyframes are handled after layout, not during layout
             unreachable!("Keyframes should be filtered out before layout")
         }
@@ -1844,7 +1844,7 @@ fn check_label_value(modifiers: &[Spanned<StyleModifier>], owner: &str) -> Resul
             continue;
         }
         let reason = match &m.node.value.node {
-            StyleValue::List(_) => "a label is one string, not a list; join lines with <br>: label: \"a<br>b\"",
+            StyleValue::List(_) => "a label is one string, not a list; for one element per item use an `each` block, or join the lines with <br>: label: \"a<br>b\"",
             StyleValue::Number { .. } | StyleValue::Record(_) | StyleValue::Call { .. } => "a label is a string; quote numbers: label: \"42\"",
             _ => continue,
         };

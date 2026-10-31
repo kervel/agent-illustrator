@@ -133,6 +133,10 @@ pub enum Token {
     #[token("enable")]
     Enable,
 
+    // Repetition: `each a in items { ... }`
+    #[token("each")]
+    Each,
+
     // Constraint keywords
     #[token("constrain")]
     Constrain,

@@ -175,6 +175,19 @@ pub enum Statement {
     /// `owner` is the instance it belongs to, filled in when the template is
     /// resolved (empty as parsed).
     ComponentState { name: Spanned<String>, body: Vec<Spanned<MotionNode>>, owner: String },
+    /// `each a, i in items { ... }`: the body once per list item. Expanded
+    /// when templates are resolved; never reaches layout.
+    Each(EachBlock),
+}
+
+/// `each NAME[, INDEX] in LIST { body }`
+#[derive(Debug, Clone, PartialEq)]
+pub struct EachBlock {
+    pub var: Spanned<Identifier>,
+    pub index: Option<Spanned<Identifier>>,
+    /// A literal `StyleValue::List`, or an `Identifier` naming a list parameter.
+    pub source: Spanned<StyleValue>,
+    pub body: Vec<Spanned<Statement>>,
 }
 
 /// Shape declaration

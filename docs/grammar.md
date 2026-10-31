@@ -448,6 +448,13 @@ Declarations that serve motion:
                                                    {fname: "b.js", c1: role-primary}]]
                   constrain k*.center = d*.center   one constraint per index
                   (k0 on d0, ...); the lists must be the same length
+    repeat a block: each NAME[, i] in LIST { statements }   (--doc each)
+                  LIST: a list parameter of the enclosing template
+                  (template "cls" (attrs: [])) or a literal ["a", "b"]; NAME is the
+                  item (label: NAME, text NAME, "{NAME}"); i is the 0-based
+                  position (a number; in strings "{i}"). Names declared inside
+                  get _1, _2, ... (x -> x_1; nested: x_2_3). Empty list: nothing.
+                  anchors may be declared inside: anchor r_a [position: row.right]
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
                   the previous one; [no_resolve] keeps the previous frame's
                   layout (no constraint re-solve) for a pure style change;
@@ -509,7 +516,7 @@ RESERVED IDENTIFIERS
 --------------------
 Cannot use as element names: left, right, top, bottom, x, y, width, height,
 and the keywords: rect, circle, ellipse, polygon, line, path, text, icon,
-callout, row, col, grid, stack, group, label, template, anchor, ... (a name
+callout, row, col, grid, stack, group, label, template, anchor, each, ... (a name
 that is a keyword is a parse error that says so).
 
 EXAMPLES

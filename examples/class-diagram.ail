@@ -1,25 +1,58 @@
-template "cls" (ttl: "", attrs: "", ops: "") {
+// A UML class box is a template; its attributes and operations are lists.
+// `each` writes one row per list item, so an empty list leaves no compartment.
+// Rows are plain rects (no stroke); the compartment outlines are separate
+// stroke-only rects that `contains` the rows, so the dividers sit between the
+// compartments, not between the rows. `shell` (declared last, on top) gives the
+// box its rounded corners; every inner rect is `clip: shell` so they stay square.
+// Anchors: l_/r_ + hd|at|op = left/right of the header, attribute and operation
+// compartment; t_box/b_box = top/bottom of the box; l_a_N/r_a_N = left/right of
+// attribute N (1-based), l_o_N/r_o_N the same for operation N.
+template "cls" (ttl: "", attrs: [], ops: []) {
     col box [gap: 0, padding: 0] {
         rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2, corner_radius: 0, clip: shell]
-        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
-        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
+        col at [gap: 0, padding: 0] {
+            each a in attrs {
+                rect a_row [width: 220, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                anchor l_a [position: a_row.left, direction: left]
+                anchor r_a [position: a_row.right, direction: right]
+            }
+        }
+        col op [gap: 0, padding: 0] {
+            each o in ops {
+                rect o_row [width: 220, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                anchor l_o [position: o_row.left, direction: left]
+                anchor r_o [position: o_row.right, direction: right]
+            }
+        }
     }
+    rect at_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
+    rect op_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
     rect shell [fill: none, stroke: foreground-2, corner_radius: 8]
+    constrain at_box contains at
+    constrain op_box contains op
     constrain shell contains box
+    anchor t_box [position: shell.top, direction: up]
+    anchor b_box [position: shell.bottom, direction: down]
+    anchor l_hd [position: hd.left, direction: left]
+    anchor r_hd [position: hd.right, direction: right]
+    anchor l_at [position: at_box.left, direction: left]
+    anchor r_at [position: at_box.right, direction: right]
+    anchor l_op [position: op_box.left, direction: left]
+    anchor r_op [position: op_box.right, direction: right]
 }
 row cols [gap: 130]  {
-    col c_l { cls approval [ttl: "EntryApproval", attrs: "kind", ops: ""] }
+    col c_l { cls approval [ttl: "EntryApproval", attrs: ["kind"]] }
     col c_m [gap: 80] {
-        cls lock [ttl: "PeriodLock", attrs: "year<br>month", ops: ""]
-        cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
-        cls corr [ttl: "Correction", attrs: "original", ops: ""]
+        cls lock [ttl: "PeriodLock", attrs: ["year", "month"]]
+        cls entry [ttl: "TimeEntry", attrs: ["date", "hours", "status"], ops: ["+ approve()"]]
+        cls corr [ttl: "Correction", attrs: ["original"]]
     }
-    col c_r { cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"] }
+    col c_r { cls invoice [ttl: "Invoice", attrs: ["number", "total", "paid"], ops: ["+ pay()"]] }
 }
-constrain approval.center_y = entry.center_y
-constrain invoice.center_y = entry.center_y
+constrain approval.top = entry.top
+constrain invoice.top = entry.top
 
-corr.top -> entry.bottom [to_end: triangle]
-lock.bottom -> entry.top [to_end: open, stroke_dasharray: dashed, label: "gates"]
-entry.right -- invoice.left [from_label: "*", to_label: "0..1", label: "billed on"]
-entry.left -- approval.right [from_end: diamond-filled, from_label: "1", to_label: "*"]
+corr.t_box -> entry.b_box [to_end: triangle]
+lock.b_box -> entry.t_box [to_end: open, stroke_dasharray: dashed, label: "gates"]
+entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
+entry.l_hd -- approval.r_hd [from_end: diamond-filled, from_label: "1", to_label: "*"]

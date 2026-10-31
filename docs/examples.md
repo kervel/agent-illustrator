@@ -736,25 +736,65 @@ a8 -> b8 [to_end: triangle, stroke_dasharray: dashed]            // realisation
 ```
 Full scene: examples/line-ends.ail.
 
-## Class diagram: boxes from a template, labels at the ends of the line
+## Class diagram: lists and `each` make the compartments
 
-A class box is a `col` of rects (header, attributes, operations) inside a
-template; `from_label`/`to_label` carry the multiplicities and `label` the
-relationship's name.
+A class box is a template that takes lists (`attrs`, `ops`); `each` writes one
+row per item, so an empty list leaves no compartment. Rows are plain rects,
+each compartment's outline is a stroke-only rect that `contains` its rows, and
+the `shell` rect gives the rounded corners (inner rects are `clip: shell`).
+The template declares anchors for the box, each compartment and each row
+(`entry.r_a_2` is the right edge of attribute 2), so a relation can leave from
+the exact row. `from_label`/`to_label` carry the multiplicities and `label` the
+relationship's name. Elements made inside an `each` are numbered `a_row_1`,
+`a_row_2`, ... (`--doc each`).
 
 ```
-template "cls" (ttl: "", attrs: "", ops: "") {
+template "cls" (ttl: "", attrs: [], ops: []) {
     col box [gap: 0, padding: 0] {
         rect hd [width: 220, label: ttl, font_weight: bold, fill: secondary-light, stroke: foreground-2, corner_radius: 0, clip: shell]
-        rect at [width: 220, label: attrs, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
-        rect op [width: 220, label: ops, align: start, font_size: 12, fill: background-1, stroke: foreground-2, corner_radius: 0, clip: shell]
+        col at [gap: 0, padding: 0] {
+            each a in attrs {
+                rect a_row [width: 220, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                anchor l_a [position: a_row.left, direction: left]
+                anchor r_a [position: a_row.right, direction: right]
+            }
+        }
+        col op [gap: 0, padding: 0] {
+            each o in ops {
+                rect o_row [width: 220, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+            }
+        }
     }
+    rect at_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
+    rect op_box [fill: none, stroke: foreground-2, corner_radius: 0, clip: shell]
     rect shell [fill: none, stroke: foreground-2, corner_radius: 8]
+    constrain at_box contains at
+    constrain op_box contains op
     constrain shell contains box
+    anchor l_hd [position: hd.left, direction: left]
+    anchor r_hd [position: hd.right, direction: right]
 }
 row r1 [gap: 140, align: top] {
-    cls entry [ttl: "TimeEntry", attrs: "date<br>hours<br>status", ops: "+ approve()"]
-    cls invoice [ttl: "Invoice", attrs: "number<br>total<br>paid", ops: "+ pay()"]
+    cls entry [ttl: "TimeEntry", attrs: ["date", "hours", "status"], ops: ["+ approve()"]]
+    cls invoice [ttl: "Invoice", attrs: ["number", "total", "paid"], ops: ["+ pay()"]]
 }
-entry.right -- invoice.left [from_label: "*", to_label: "0..1", label: "billed on"]
+entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
+```
+The full scene, with all anchors and relations, is `examples/class-diagram.ail`.
+
+Without `each` (older style, still valid for a box that never changes): one
+rect per compartment with a `<br>`-joined string, `rect at [label:
+"date<br>hours", align: start, ...]`; an empty string collapses the
+compartment, but rows cannot be addressed or generated from a list.
+
+## Repeating with `each`
+
+```
+each n, i in ["Open", "Save", "Quit"] {        // top level: literal list
+    rect item [label: "{i}. {n}", width: 120, height: 24]   // item_1, item_2, item_3
+}
+template "menu" (items: []) {                   // inside a template: a list parameter
+    col m [gap: 4] { each it in items { rect entry [label: it, width: 120, height: 24] } }
+}
+menu file [items: ["New", "Open"]]              // file.entry_1, file.entry_2
 ```

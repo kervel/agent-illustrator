@@ -6,6 +6,7 @@ use agent_illustrator::render;
 fn a_list_label_is_an_error_that_points_to_each() {
     let err = render(r#"rect a [label: ["x", "y"]]"#).unwrap_err().to_string();
     assert!(err.contains("not a list"), "{err}");
+    assert!(err.contains("each"), "{err}");
     assert!(err.contains("<br>"), "{err}");
 }
 
