@@ -14,10 +14,10 @@
 
         # Map Nix system to GitHub release artifact name
         artifactName = {
-          "x86_64-linux" = "sha256-quumKqpeANuJdqF9Y7tL4nHXqshyC0Ng/KRT2R+mboM=";
-          "aarch64-linux" = "sha256-a5Td12uNxq1AMEedyDPx2yDNVsslTb1clQjBRfKRtcU=";
-          "x86_64-darwin" = "sha256-lB05xaM4ASrDbSu4Ckrh8DHjNhJzCIyiO6dkbJmic5g=";
-          "aarch64-darwin" = "sha256-WRWTP9SzLWQT7OZ1ndqQdRlE3XHEvGEjmW9g9dMvCIo=";
+          "x86_64-linux" = "agent-illustrator-linux-x86_64";
+          "aarch64-linux" = "agent-illustrator-linux-aarch64";
+          "x86_64-darwin" = "agent-illustrator-macos-x86_64";
+          "aarch64-darwin" = "agent-illustrator-macos-aarch64";
         }.${system} or (throw "Unsupported system: ${system}");
 
         # Hashes for v0.2.42 release binaries
