@@ -2651,6 +2651,15 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             None => continue,
         };
 
+        // Already drawn straight (explicit anchors on a template's parts, say):
+        // nothing to straighten, whatever the elements' centres are.
+        let straight = conn.path.len() >= 2
+            && (conn.path.iter().all(|p| (p.x - conn.path[0].x).abs() < 0.5)
+                || conn.path.iter().all(|p| (p.y - conn.path[0].y).abs() < 0.5));
+        if straight {
+            continue;
+        }
+
         let from_center = from.bounds.center();
         let to_center = to.bounds.center();
         let dx = (from_center.x - to_center.x).abs();
