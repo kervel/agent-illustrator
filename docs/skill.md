@@ -516,9 +516,14 @@ outline is on top) that `contains` the whole column; every inner rect is
 carry fill or stroke, which is why the outlines are rects.
 
 ```
-template "cls" (ttl: "", attrs: [], ops: [], w: 220, hfill: secondary-light, edge: foreground-2, radius: 8) {
+template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
-        rect hd [width: w, label: ttl, font_weight: bold, fill: hfill, stroke: edge, corner_radius: 0, clip: shell]
+        col head [gap: 0, padding: 0] {
+            each s in stereo {
+                rect st_row [width: w, height: 18, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell]
+            }
+            rect hd [width: w, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
+        }
         col at [gap: 0, padding: 0] {
             each a in attrs {
                 rect a_row [width: w, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
@@ -534,6 +539,8 @@ template "cls" (ttl: "", attrs: [], ops: [], w: 220, hfill: secondary-light, edg
             }
         }
     }
+    rect hd_box [fill: none, stroke: edge, corner_radius: 0, clip: shell]
+    constrain hd_box contains head
     rect at_box [fill: none, stroke: edge, corner_radius: 0, clip: shell]
     rect op_box [fill: none, stroke: edge, corner_radius: 0, clip: shell]
     rect shell [fill: none, stroke: edge, corner_radius: radius]
