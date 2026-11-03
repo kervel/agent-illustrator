@@ -470,6 +470,8 @@ literal list `["a", "b"]`; it works outside templates too. Inside the body
 inside a string `"{NAME}"`. Items are strings or numbers; markup (`<b>`, `<i>`)
 works as in any label. An empty list makes nothing, so a compartment that has
 no items simply is not there.
+A `{name}` that no parameter or `each` variable binds shows up literally; lint
+reports it ("shows the literal text {name}").
 
 ```
 template "menu" (items: []) {

@@ -4798,7 +4798,38 @@ fn check_label_markup(doc: &Document, warnings: &mut Vec<LintWarning>) {
                 pair: None,
             });
         }
+        for var in unbound_placeholders(&raw) {
+            warnings.push(LintWarning {
+                category: LintCategory::Label,
+                message: format!(
+                    "label on \"{owner}\" shows the literal text {{{var}}}: \
+                     no template parameter or `each` variable called \"{var}\" was in scope"
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
+        }
     }
+}
+
+/// `{name}` runs (a bare identifier between braces) left in a label after
+/// template and `each` expansion; they can only be a variable that was never bound.
+fn unbound_placeholders(raw: &str) -> Vec<String> {
+    let mut found = Vec::new();
+    let mut rest = raw;
+    while let Some(open) = rest.find('{') {
+        let after = &rest[open + 1..];
+        let Some(close) = after.find('}') else { break };
+        let name = &after[..close];
+        let mut chars = name.chars();
+        if chars.next().is_some_and(|c| c.is_alphabetic() || c == '_')
+            && chars.all(|c| c.is_alphanumeric() || c == '_')
+        {
+            found.push(name.to_string());
+        }
+        rest = &after[close + 1..];
+    }
+    found
 }
 
 /// Every `label:` in the document, with the name of the element carrying it.
@@ -4832,6 +4863,14 @@ fn collect_raw_labels(
             }
         }) {
             out.push((name.unwrap_or_else(|| "<anon>".to_string()), raw));
+        }
+        if let Statement::Shape(s) = &stmt.node {
+            if let crate::parser::ast::ShapeType::Text { content } = &s.shape_type.node {
+                out.push((
+                    s.name.as_ref().map(|n| n.node.to_string()).unwrap_or_else(|| "<anon>".to_string()),
+                    content.clone(),
+                ));
+            }
         }
         if let Some(children) = children {
             collect_raw_labels(children, out);
