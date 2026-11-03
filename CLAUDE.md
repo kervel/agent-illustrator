@@ -17,6 +17,7 @@ Create a declarative illustration language where:
 - An LLM can describe *what* to draw, not *how* to render it
 - The language handles layout, positioning, and spatial relationships
 - Output is predictable and correct on the first attempt
+- Very strong linting helps the agent avoiding mistakes
 
 ## Success Criteria
 
