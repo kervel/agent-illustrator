@@ -798,11 +798,6 @@ Lay out: boxes joined title-to-title need `constrain a.top = b.top`; top-to-bott
 equal `center_x`; no line may cross a box in between. `examples/class-diagram.ail` has the full
 template (status lists, row anchors, legend).
 
-Without `each` (older style, still valid for a box that never changes): one
-rect per compartment with a `<br>`-joined string, `rect at [label:
-"date<br>hours", align: start, ...]`; an empty string collapses the
-compartment, but rows cannot be addressed or generated from a list.
-
 ## Repeating with `each`
 
 ```

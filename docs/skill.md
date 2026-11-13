@@ -567,9 +567,7 @@ Connection ends: the template declares anchors for the box (`t_box`, `b_box`),
 for each compartment (`l_hd r_hd l_at r_at l_op r_op`) and for each row
 (`l_a_N`, `r_a_N`: attribute N, 1-based; `l_o_N`, `r_o_N` for operations), so a
 relation can leave from the exact attribute it is about. Anchors declared
-inside an `each` are numbered like any name in it. (If you do not need
-compartments, a single label also works: `label: "date<br>hours"`, but a list
-and `each` keeps rows individually addressable.)
+inside an `each` are numbered like any name in it.
 
 `from_label:` and `to_label:` put a short text (a multiplicity, a role) at each
 end of any connection, beside the line and clear of the box edge. They follow the

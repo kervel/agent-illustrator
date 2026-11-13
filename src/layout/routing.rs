@@ -1512,6 +1512,8 @@ fn extract_bundle(modifiers: &[Spanned<StyleModifier>]) -> Option<crate::layout:
 /// Gap between a line's end and the text of an end label, and between the
 /// text and the line, in px.
 const END_LABEL_GAP: f64 = 9.0;
+/// How far a label's near edge sits from the line itself (hugs the line).
+const END_LABEL_SIDE_GAP: f64 = 3.0;
 
 /// `from_label: "*"` / `to_label: "0..1"` on a connection. Positions are set
 /// by [`place_end_labels`] once the route is final.
@@ -1556,8 +1558,10 @@ fn place_end_labels(conn: &mut ConnectionLayout) {
         let m = crate::layout::text::measure_runs(&label.rich.lines, label.font_size);
         let half_along = ux.abs() * m.width / 2.0 + uy.abs() * m.height / 2.0;
         let half_across = sx.abs() * m.width / 2.0 + sy.abs() * m.height / 2.0;
-        let a = END_LABEL_GAP + half_along;
-        let s = END_LABEL_GAP + half_across;
+        // Clear the line-end decoration (diamond, triangle, ...) drawn at this end.
+        let deco = if i == 0 { conn.ends.from } else { conn.ends.to }.pullback() * 2.0;
+        let a = END_LABEL_GAP + deco + half_along;
+        let s = END_LABEL_SIDE_GAP + half_across;
         label.position = Point::new(end.x + ux * a + sx * s, end.y + uy * a + sy * s);
         label.anchor = TextAnchor::Middle;
     }

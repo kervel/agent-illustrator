@@ -494,10 +494,10 @@
   </g>
   <text class="ai-label" x="495" y="151.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="495" dy="-0"><tspan>gates</tspan></tspan></text>
   <text class="ai-label" x="800" y="260" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="800" dy="-0"><tspan>billed on</tspan></tspan></text>
-  <text class="ai-label" x="606.334" y="233.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="606.334" dy="-0"><tspan>*</tspan></tspan></text>
-  <text class="ai-label" x="985.992" y="233.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="985.992" dy="-0"><tspan>0..1</tspan></tspan></text>
-  <text class="ai-label" x="362.664" y="222.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="362.664" dy="-0"><tspan>1</tspan></tspan></text>
-  <text class="ai-label" x="246.334" y="222.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="246.334" dy="-0"><tspan>*</tspan></tspan></text>
+  <text class="ai-label" x="606.334" y="239.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="606.334" dy="-0"><tspan>*</tspan></tspan></text>
+  <text class="ai-label" x="985.992" y="239.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="985.992" dy="-0"><tspan>0..1</tspan></tspan></text>
+  <text class="ai-label" x="350.264" y="216.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="350.264" dy="-0"><tspan>1</tspan></tspan></text>
+  <text class="ai-label" x="246.334" y="216.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="246.334" dy="-0"><tspan>*</tspan></tspan></text>
   <text class="ai-label" x="135" y="270.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="135" dy="-0"><tspan>uses</tspan></tspan></text>
   <path class="ai-connection" d="M485 405 L485 333" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
   <path class="ai-connection" d="M750 405 L750 362.5 L485 362.5 L485 333" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
