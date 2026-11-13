@@ -1,31 +1,42 @@
-// A UML class box is a template; its attributes and operations are lists.
-// `each` writes one row per list item, so an empty list leaves no compartment.
-// Rows are plain rects (no stroke); the compartment outlines are separate
-// stroke-only rects that `contains` the rows, so the dividers sit between the
-// compartments, not between the rows. `shell` (declared last, on top) gives the
-// box its rounded corners; every inner rect is `clip: shell` so they stay square.
-// stereo: a list of lines above the title (e.g. ["«enum»"]); empty = no line.
-// Anchors: l_/r_ + hd|at|op = left/right of the header, attribute and operation
-// compartment; t_box/b_box = top/bottom of the box; l_a_N/r_a_N = left/right of
-// attribute N (1-based), l_o_N/r_o_N the same for operation N.
-template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, hfill: secondary-light, edge: foreground-2, radius: 8) {
+// UML class box: a template whose compartments are lists; `each` writes one row per item.
+// Tight rows: `rh` (default 20) + font_size 12 + ONE SHORT attribute per row, "name: Type".
+// Explanations belong in the text around the picture, not in a row.
+// stereo: lines above the title (["«enum»"]). attrs/ops: plain rows. An empty `ops` leaves no band.
+// Status lists, stacked under `attrs` and tinted: changed (amber), added (green), later (grey, muted).
+// `each` iterates plain strings, so rows are grouped by status. hfill tints the title bar.
+// Anchors: t_box/b_box = box top/bottom; l_hd/r_hd = title bar; l_at/r_at = attribute compartment;
+// l_a/r_a (row of `attrs`, numbered l_a_1..), l_o/r_o (rows of `ops`).
+// Layout lessons: a connection between title bars (r_hd -- l_hd) is straight only if the box tops
+// are aligned; a vertical one (b_box -- t_box) needs the center_x aligned; a line must not cross a
+// box in between (reorder the grid). Multiplicities = from_label/to_label, short role = label.
+template "cls" (ttl: "", stereo: [], attrs: [], changed: [], added: [], later: [], ops: [],
+                w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
         col head [gap: 0, padding: 0] {
             each s in stereo {
-                rect st_row [width: w, height: 18, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell]
+                rect st_row [width: w, height: 16, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell, label_fill: role-muted]
             }
-            rect hd [width: w, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
+            rect hd [width: w, height: 28, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
         }
         col at [gap: 0, padding: 0] {
             each a in attrs {
-                rect a_row [width: w, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                rect a_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
                 anchor l_a [position: a_row.left, direction: left]
                 anchor r_a [position: a_row.right, direction: right]
+            }
+            each a in changed {
+                rect c_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-warn-soft, stroke: none, clip: shell]
+            }
+            each a in added {
+                rect n_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-ok-soft, stroke: none, clip: shell]
+            }
+            each a in later {
+                rect l_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-surface-2, stroke: none, clip: shell, label_fill: role-muted]
             }
         }
         col op [gap: 0, padding: 0] {
             each o in ops {
-                rect o_row [width: w, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                rect o_row [width: w, height: rh, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
                 anchor l_o [position: o_row.left, direction: left]
                 anchor r_o [position: o_row.right, direction: right]
             }
@@ -48,19 +59,40 @@ template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, hfill: secondar
     anchor l_op [position: op_box.left, direction: left]
     anchor r_op [position: op_box.right, direction: right]
 }
+
+// legend: new / changed / unchanged
+row legend [gap: 10] {
+    rect lg_new [width: 22, height: 14, fill: role-ok-soft, stroke: foreground-2]
+    text "new" lg_new_t [font_size: 12]
+    rect lg_chg [width: 22, height: 14, fill: role-warn-soft, stroke: foreground-2]
+    text "changed" lg_chg_t [font_size: 12]
+    rect lg_old [width: 22, height: 14, fill: background-1, stroke: foreground-2]
+    text "unchanged" lg_old_t [font_size: 12]
+}
+
 row cols [gap: 130]  {
-    col c_l { cls approval [ttl: "EntryApproval", attrs: ["kind"]] }
+    col c_l { cls approval [ttl: "EntryApproval", attrs: ["kind: ApprovalKind"]] }
     col c_m [gap: 80] {
-        cls lock [ttl: "PeriodLock", attrs: ["year", "month"]]
-        cls entry [ttl: "TimeEntry", attrs: ["date", "hours", "status"], ops: ["+ approve()"]]
-        cls corr [ttl: "Correction", stereo: ["«abstract»"], attrs: ["original"]]
+        cls lock [ttl: "PeriodLock", attrs: ["year: int", "month: int"]]
+        cls entry [ttl: "TimeEntry", hfill: role-ok-soft,
+                   attrs: ["date: date", "hours: decimal"], changed: ["status: EntryStatus"],
+                   added: ["billed_at: datetime?"], ops: ["+ approve()"]]
+        cls corr [ttl: "Correction", stereo: ["«abstract»"], attrs: ["original: TimeEntry"]]
     }
-    col c_r { cls invoice [ttl: "Invoice", attrs: ["number", "total", "paid"], ops: ["+ pay()"]] }
+    col c_r {
+        cls invoice [ttl: "Invoice", attrs: ["number: str", "total: decimal", "paid: bool"], ops: ["+ pay()"]]
+        cls kind [ttl: "ApprovalKind", stereo: ["«enum»"], attrs: ["manager", "client"]]
+    }
 }
 constrain approval.top = entry.top
 constrain invoice.top = entry.top
+constrain kind.center_x = approval.center_x
+constrain kind.top = approval.bottom + 60
+constrain legend.left = cols.left
+constrain legend.bottom = cols.top - 30
 
 corr.t_box -> entry.b_box [to_end: triangle]
 lock.b_box -> entry.t_box [to_end: open, stroke_dasharray: dashed, label: "gates"]
 entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
 entry.l_hd -- approval.r_hd [from_end: diamond-filled, from_label: "1", to_label: "*"]
+approval.b_box -> kind.t_box [to_end: open, stroke_dasharray: dashed, label: "uses"]

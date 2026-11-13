@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -45 1060 554.5" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -76 1065 601" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -192,228 +192,286 @@
     <marker id="ai-end-diamond-filled" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
       <path d="M0,5 L4,1.5 L8,5 L4,8.5 Z" fill="context-stroke" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
     </marker>
-    <clipPath id="ai-clip-b218bd95-approval_hd"><rect class="ai-shape kf-anim kfc-b218bd95-approval_hd" x="15.75" y="174.25" width="218.5" height="54" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-approval_a_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-approval_a_row_1" x="15.75" y="174.25" width="218.5" height="54" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-approval_hd_box"><rect class="ai-shape kf-anim kfc-b218bd95-approval_hd_box" x="15.75" y="174.25" width="218.5" height="54" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-approval_at_box"><rect class="ai-shape kf-anim kfc-b218bd95-approval_at_box" x="15.75" y="174.25" width="218.5" height="54" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-approval_op_box"><rect class="ai-shape kf-anim kfc-b218bd95-approval_op_box" x="15.75" y="174.25" width="218.5" height="54" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-lock_hd"><rect class="ai-shape kf-anim kfc-b218bd95-lock_hd" x="375.75" y="15.75" width="218.5" height="76" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-lock_a_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-lock_a_row_1" x="375.75" y="15.75" width="218.5" height="76" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-lock_a_row_2"><rect class="ai-shape kf-anim kfc-b218bd95-lock_a_row_2" x="375.75" y="15.75" width="218.5" height="76" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-lock_hd_box"><rect class="ai-shape kf-anim kfc-b218bd95-lock_hd_box" x="375.75" y="15.75" width="218.5" height="76" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-lock_at_box"><rect class="ai-shape kf-anim kfc-b218bd95-lock_at_box" x="375.75" y="15.75" width="218.5" height="76" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-lock_op_box"><rect class="ai-shape kf-anim kfc-b218bd95-lock_op_box" x="375.75" y="15.75" width="218.5" height="76" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_hd"><rect class="ai-shape kf-anim kfc-b218bd95-entry_hd" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_a_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-entry_a_row_1" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_a_row_2"><rect class="ai-shape kf-anim kfc-b218bd95-entry_a_row_2" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_a_row_3"><rect class="ai-shape kf-anim kfc-b218bd95-entry_a_row_3" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_o_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-entry_o_row_1" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_hd_box"><rect class="ai-shape kf-anim kfc-b218bd95-entry_hd_box" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_at_box"><rect class="ai-shape kf-anim kfc-b218bd95-entry_at_box" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-entry_op_box"><rect class="ai-shape kf-anim kfc-b218bd95-entry_op_box" x="375.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-corr_st_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-corr_st_row_1" x="375.75" y="375.75" width="218.5" height="72" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-corr_hd"><rect class="ai-shape kf-anim kfc-b218bd95-corr_hd" x="375.75" y="375.75" width="218.5" height="72" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-corr_a_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-corr_a_row_1" x="375.75" y="375.75" width="218.5" height="72" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-corr_hd_box"><rect class="ai-shape kf-anim kfc-b218bd95-corr_hd_box" x="375.75" y="375.75" width="218.5" height="72" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-corr_at_box"><rect class="ai-shape kf-anim kfc-b218bd95-corr_at_box" x="375.75" y="375.75" width="218.5" height="72" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-corr_op_box"><rect class="ai-shape kf-anim kfc-b218bd95-corr_op_box" x="375.75" y="375.75" width="218.5" height="72" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_hd"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_hd" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_a_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_a_row_1" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_a_row_2"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_a_row_2" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_a_row_3"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_a_row_3" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_o_row_1"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_o_row_1" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_hd_box"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_hd_box" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_at_box"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_at_box" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
-    <clipPath id="ai-clip-b218bd95-invoice_op_box"><rect class="ai-shape kf-anim kfc-b218bd95-invoice_op_box" x="735.75" y="174.25" width="218.5" height="120" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-approval_hd"><rect class="ai-shape kf-anim kfc-5b99f771-approval_hd" x="15.75" y="192.75" width="218.5" height="46.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-approval_a_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-approval_a_row_1" x="15.75" y="192.75" width="218.5" height="46.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-approval_hd_box"><rect class="ai-shape kf-anim kfc-5b99f771-approval_hd_box" x="15.75" y="192.75" width="218.5" height="46.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-approval_at_box"><rect class="ai-shape kf-anim kfc-5b99f771-approval_at_box" x="15.75" y="192.75" width="218.5" height="46.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-approval_op_box"><rect class="ai-shape kf-anim kfc-5b99f771-approval_op_box" x="15.75" y="192.75" width="218.5" height="46.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-lock_hd"><rect class="ai-shape kf-anim kfc-5b99f771-lock_hd" x="375.75" y="43.75" width="218.5" height="66.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-lock_a_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-lock_a_row_1" x="375.75" y="43.75" width="218.5" height="66.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-lock_a_row_2"><rect class="ai-shape kf-anim kfc-5b99f771-lock_a_row_2" x="375.75" y="43.75" width="218.5" height="66.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-lock_hd_box"><rect class="ai-shape kf-anim kfc-5b99f771-lock_hd_box" x="375.75" y="43.75" width="218.5" height="66.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-lock_at_box"><rect class="ai-shape kf-anim kfc-5b99f771-lock_at_box" x="375.75" y="43.75" width="218.5" height="66.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-lock_op_box"><rect class="ai-shape kf-anim kfc-5b99f771-lock_op_box" x="375.75" y="43.75" width="218.5" height="66.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_hd"><rect class="ai-shape kf-anim kfc-5b99f771-entry_hd" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_a_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-entry_a_row_1" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_a_row_2"><rect class="ai-shape kf-anim kfc-5b99f771-entry_a_row_2" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_c_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-entry_c_row_1" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_n_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-entry_n_row_1" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_o_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-entry_o_row_1" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_hd_box"><rect class="ai-shape kf-anim kfc-5b99f771-entry_hd_box" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_at_box"><rect class="ai-shape kf-anim kfc-5b99f771-entry_at_box" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-entry_op_box"><rect class="ai-shape kf-anim kfc-5b99f771-entry_op_box" x="375.75" y="192.75" width="218.5" height="126.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-corr_st_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-corr_st_row_1" x="375.75" y="400.75" width="218.5" height="62.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-corr_hd"><rect class="ai-shape kf-anim kfc-5b99f771-corr_hd" x="375.75" y="400.75" width="218.5" height="62.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-corr_a_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-corr_a_row_1" x="375.75" y="400.75" width="218.5" height="62.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-corr_hd_box"><rect class="ai-shape kf-anim kfc-5b99f771-corr_hd_box" x="375.75" y="400.75" width="218.5" height="62.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-corr_at_box"><rect class="ai-shape kf-anim kfc-5b99f771-corr_at_box" x="375.75" y="400.75" width="218.5" height="62.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-corr_op_box"><rect class="ai-shape kf-anim kfc-5b99f771-corr_op_box" x="375.75" y="400.75" width="218.5" height="62.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_hd"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_hd" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_a_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_a_row_1" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_a_row_2"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_a_row_2" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_a_row_3"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_a_row_3" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_o_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_o_row_1" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_hd_box"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_hd_box" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_at_box"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_at_box" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-invoice_op_box"><rect class="ai-shape kf-anim kfc-5b99f771-invoice_op_box" x="735.75" y="192.75" width="218.5" height="106.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_st_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-kind_st_row_1" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_hd"><rect class="ai-shape kf-anim kfc-5b99f771-kind_hd" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_a_row_1"><rect class="ai-shape kf-anim kfc-5b99f771-kind_a_row_1" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_a_row_2"><rect class="ai-shape kf-anim kfc-5b99f771-kind_a_row_2" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_hd_box"><rect class="ai-shape kf-anim kfc-5b99f771-kind_hd_box" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_at_box"><rect class="ai-shape kf-anim kfc-5b99f771-kind_at_box" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
+    <clipPath id="ai-clip-5b99f771-kind_op_box"><rect class="ai-shape kf-anim kfc-5b99f771-kind_op_box" x="15.75" y="301.75" width="218.5" height="82.5" rx="7.25" ry="7.25"/></clipPath>
   </defs>
+  <g id="legend" class="ai-container">
+    <rect id="lg_new" class="ai-shape ai-rect" x="10" y="-16" width="22" height="14" fill="var(--role-ok-soft)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+    <text id="lg_new_t" class="ai-shape ai-text" x="42" y="-10" text-anchor="start" dominant-baseline="middle" font-size="12">new</text>
+    <rect id="lg_chg" class="ai-shape ai-rect" x="74.008" y="-16" width="22" height="14" fill="var(--role-warn-soft)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+    <text id="lg_chg_t" class="ai-shape ai-text" x="106.008" y="-10" text-anchor="start" dominant-baseline="middle" font-size="12">changed</text>
+    <rect id="lg_old" class="ai-shape ai-rect" x="162.04" y="-16" width="22" height="14" fill="var(--background-1)" stroke="var(--foreground-2)" stroke-width="1.5"/>
+    <text id="lg_old_t" class="ai-shape ai-text" x="194.04" y="-10" text-anchor="start" dominant-baseline="middle" font-size="12">unchanged</text>
+  </g>
   <g id="cols" class="ai-container">
     <g id="c_l" class="ai-container">
       <g id="approval" class="ai-container">
         <g id="approval_box" class="ai-container">
           <g id="approval_head" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-approval_hd)">
-              <rect id="approval_hd" class="ai-shape ai-rect" x="15" y="173.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="125" y="190.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="125" dy="-0"><tspan>EntryApproval</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-approval_hd)">
+              <rect id="approval_hd" class="ai-shape ai-rect" x="15" y="192" width="220" height="28" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="125" y="206" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="125" dy="-0"><tspan>EntryApproval</tspan></tspan></text>
             </g>
           </g>
           <g id="approval_at" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-approval_a_row_1)">
-              <rect id="approval_a_row_1" class="ai-shape ai-rect" x="15" y="207" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="23" y="218" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>kind</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-approval_a_row_1)">
+              <rect id="approval_a_row_1" class="ai-shape ai-rect" x="15" y="220" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="23" y="230" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>kind: ApprovalKind</tspan></tspan></text>
             </g>
           </g>
           <g id="approval_op" class="ai-container">
           </g>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-approval_hd_box)">
-          <rect id="approval_hd_box" class="ai-shape ai-rect" x="15" y="173.5" width="220" height="33.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-approval_hd_box)">
+          <rect id="approval_hd_box" class="ai-shape ai-rect" x="15" y="192" width="220" height="28" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-approval_at_box)">
-          <rect id="approval_at_box" class="ai-shape ai-rect" x="15" y="207" width="220" height="22" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-approval_at_box)">
+          <rect id="approval_at_box" class="ai-shape ai-rect" x="15" y="220" width="220" height="20" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-approval_op_box)">
-          <rect id="approval_op_box" class="ai-shape ai-rect" x="15" y="229" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-approval_op_box)">
+          <rect id="approval_op_box" class="ai-shape ai-rect" x="15" y="240" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <rect id="approval_shell" class="ai-shape ai-rect" x="15" y="173.5" width="220" height="55.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+        <rect id="approval_shell" class="ai-shape ai-rect" x="15" y="192" width="220" height="48" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
     </g>
     <g id="c_m" class="ai-container">
       <g id="lock" class="ai-container">
         <g id="lock_box" class="ai-container">
           <g id="lock_head" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-lock_hd)">
-              <rect id="lock_hd" class="ai-shape ai-rect" x="375" y="15" width="220" height="33.5" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="485" y="31.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>PeriodLock</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-lock_hd)">
+              <rect id="lock_hd" class="ai-shape ai-rect" x="375" y="43" width="220" height="28" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="485" y="57" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>PeriodLock</tspan></tspan></text>
             </g>
           </g>
           <g id="lock_at" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-lock_a_row_1)">
-              <rect id="lock_a_row_1" class="ai-shape ai-rect" x="375" y="48.5" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="59.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>year</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-lock_a_row_1)">
+              <rect id="lock_a_row_1" class="ai-shape ai-rect" x="375" y="71" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="81" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>year: int</tspan></tspan></text>
             </g>
-            <g clip-path="url(#ai-clip-b218bd95-lock_a_row_2)">
-              <rect id="lock_a_row_2" class="ai-shape ai-rect" x="375" y="70.5" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="81.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>month</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-lock_a_row_2)">
+              <rect id="lock_a_row_2" class="ai-shape ai-rect" x="375" y="91" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="101" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>month: int</tspan></tspan></text>
             </g>
           </g>
           <g id="lock_op" class="ai-container">
           </g>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-lock_hd_box)">
-          <rect id="lock_hd_box" class="ai-shape ai-rect" x="375" y="15" width="220" height="33.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-lock_hd_box)">
+          <rect id="lock_hd_box" class="ai-shape ai-rect" x="375" y="43" width="220" height="28" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-lock_at_box)">
-          <rect id="lock_at_box" class="ai-shape ai-rect" x="375" y="48.5" width="220" height="44" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-lock_at_box)">
+          <rect id="lock_at_box" class="ai-shape ai-rect" x="375" y="71" width="220" height="40" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-lock_op_box)">
-          <rect id="lock_op_box" class="ai-shape ai-rect" x="375" y="92.5" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-lock_op_box)">
+          <rect id="lock_op_box" class="ai-shape ai-rect" x="375" y="111" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <rect id="lock_shell" class="ai-shape ai-rect" x="375" y="15" width="220" height="77.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+        <rect id="lock_shell" class="ai-shape ai-rect" x="375" y="43" width="220" height="68" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
       <g id="entry" class="ai-container">
         <g id="entry_box" class="ai-container">
           <g id="entry_head" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-entry_hd)">
-              <rect id="entry_hd" class="ai-shape ai-rect" x="375" y="173.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="485" y="190.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>TimeEntry</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-entry_hd)">
+              <rect id="entry_hd" class="ai-shape ai-rect" x="375" y="192" width="220" height="28" fill="var(--role-ok-soft)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="485" y="206" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>TimeEntry</tspan></tspan></text>
             </g>
           </g>
           <g id="entry_at" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-entry_a_row_1)">
-              <rect id="entry_a_row_1" class="ai-shape ai-rect" x="375" y="207" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="218" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>date</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-entry_a_row_1)">
+              <rect id="entry_a_row_1" class="ai-shape ai-rect" x="375" y="220" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="230" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>date: date</tspan></tspan></text>
             </g>
-            <g clip-path="url(#ai-clip-b218bd95-entry_a_row_2)">
-              <rect id="entry_a_row_2" class="ai-shape ai-rect" x="375" y="229" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="240" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>hours</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-entry_a_row_2)">
+              <rect id="entry_a_row_2" class="ai-shape ai-rect" x="375" y="240" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="250" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>hours: decimal</tspan></tspan></text>
             </g>
-            <g clip-path="url(#ai-clip-b218bd95-entry_a_row_3)">
-              <rect id="entry_a_row_3" class="ai-shape ai-rect" x="375" y="251" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="262" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>status</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-entry_c_row_1)">
+              <rect id="entry_c_row_1" class="ai-shape ai-rect" x="375" y="260" width="220" height="20" fill="var(--role-warn-soft)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="270" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>status: EntryStatus</tspan></tspan></text>
+            </g>
+            <g clip-path="url(#ai-clip-5b99f771-entry_n_row_1)">
+              <rect id="entry_n_row_1" class="ai-shape ai-rect" x="375" y="280" width="220" height="20" fill="var(--role-ok-soft)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="290" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>billed_at: datetime?</tspan></tspan></text>
             </g>
           </g>
           <g id="entry_op" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-entry_o_row_1)">
-              <rect id="entry_o_row_1" class="ai-shape ai-rect" x="375" y="273" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="284" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>+ approve()</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-entry_o_row_1)">
+              <rect id="entry_o_row_1" class="ai-shape ai-rect" x="375" y="300" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="310" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>+ approve()</tspan></tspan></text>
             </g>
           </g>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-entry_hd_box)">
-          <rect id="entry_hd_box" class="ai-shape ai-rect" x="375" y="173.5" width="220" height="33.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-entry_hd_box)">
+          <rect id="entry_hd_box" class="ai-shape ai-rect" x="375" y="192" width="220" height="28" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-entry_at_box)">
-          <rect id="entry_at_box" class="ai-shape ai-rect" x="375" y="207" width="220" height="66" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-entry_at_box)">
+          <rect id="entry_at_box" class="ai-shape ai-rect" x="375" y="220" width="220" height="80" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-entry_op_box)">
-          <rect id="entry_op_box" class="ai-shape ai-rect" x="375" y="273" width="220" height="22" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-entry_op_box)">
+          <rect id="entry_op_box" class="ai-shape ai-rect" x="375" y="300" width="220" height="20" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <rect id="entry_shell" class="ai-shape ai-rect" x="375" y="173.5" width="220" height="121.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+        <rect id="entry_shell" class="ai-shape ai-rect" x="375" y="192" width="220" height="128" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
       <g id="corr" class="ai-container">
         <g id="corr_box" class="ai-container">
           <g id="corr_head" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-corr_st_row_1)">
-              <rect id="corr_st_row_1" class="ai-shape ai-rect" x="375" y="375" width="220" height="18" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="485" y="384" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="485" dy="-0"><tspan>«abstract»</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-corr_st_row_1)">
+              <rect id="corr_st_row_1" class="ai-shape ai-rect" x="375" y="400" width="220" height="16" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="485" y="408" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--role-muted)"><tspan x="485" dy="-0"><tspan>«abstract»</tspan></tspan></text>
             </g>
-            <g clip-path="url(#ai-clip-b218bd95-corr_hd)">
-              <rect id="corr_hd" class="ai-shape ai-rect" x="375" y="393" width="220" height="33.5" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="485" y="409.75" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>Correction</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-corr_hd)">
+              <rect id="corr_hd" class="ai-shape ai-rect" x="375" y="416" width="220" height="28" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="485" y="430" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="485" dy="-0"><tspan>Correction</tspan></tspan></text>
             </g>
           </g>
           <g id="corr_at" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-corr_a_row_1)">
-              <rect id="corr_a_row_1" class="ai-shape ai-rect" x="375" y="426.5" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="383" y="437.5" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>original</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-corr_a_row_1)">
+              <rect id="corr_a_row_1" class="ai-shape ai-rect" x="375" y="444" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="383" y="454" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="383" dy="-0"><tspan>original: TimeEntry</tspan></tspan></text>
             </g>
           </g>
           <g id="corr_op" class="ai-container">
           </g>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-corr_hd_box)">
-          <rect id="corr_hd_box" class="ai-shape ai-rect" x="375" y="375" width="220" height="51.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-corr_hd_box)">
+          <rect id="corr_hd_box" class="ai-shape ai-rect" x="375" y="400" width="220" height="44" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-corr_at_box)">
-          <rect id="corr_at_box" class="ai-shape ai-rect" x="375" y="426.5" width="220" height="22" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-corr_at_box)">
+          <rect id="corr_at_box" class="ai-shape ai-rect" x="375" y="444" width="220" height="20" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-corr_op_box)">
-          <rect id="corr_op_box" class="ai-shape ai-rect" x="375" y="448.5" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-corr_op_box)">
+          <rect id="corr_op_box" class="ai-shape ai-rect" x="375" y="464" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <rect id="corr_shell" class="ai-shape ai-rect" x="375" y="375" width="220" height="73.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+        <rect id="corr_shell" class="ai-shape ai-rect" x="375" y="400" width="220" height="64" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
     </g>
     <g id="c_r" class="ai-container">
       <g id="invoice" class="ai-container">
         <g id="invoice_box" class="ai-container">
           <g id="invoice_head" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-invoice_hd)">
-              <rect id="invoice_hd" class="ai-shape ai-rect" x="735" y="173.5" width="220" height="33.5" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="845" y="190.25" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="845" dy="-0"><tspan>Invoice</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-invoice_hd)">
+              <rect id="invoice_hd" class="ai-shape ai-rect" x="735" y="192" width="220" height="28" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="845" y="206" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="845" dy="-0"><tspan>Invoice</tspan></tspan></text>
             </g>
           </g>
           <g id="invoice_at" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-invoice_a_row_1)">
-              <rect id="invoice_a_row_1" class="ai-shape ai-rect" x="735" y="207" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="743" y="218" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>number</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-invoice_a_row_1)">
+              <rect id="invoice_a_row_1" class="ai-shape ai-rect" x="735" y="220" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="743" y="230" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>number: str</tspan></tspan></text>
             </g>
-            <g clip-path="url(#ai-clip-b218bd95-invoice_a_row_2)">
-              <rect id="invoice_a_row_2" class="ai-shape ai-rect" x="735" y="229" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="743" y="240" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>total</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-invoice_a_row_2)">
+              <rect id="invoice_a_row_2" class="ai-shape ai-rect" x="735" y="240" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="743" y="250" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>total: decimal</tspan></tspan></text>
             </g>
-            <g clip-path="url(#ai-clip-b218bd95-invoice_a_row_3)">
-              <rect id="invoice_a_row_3" class="ai-shape ai-rect" x="735" y="251" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="743" y="262" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>paid</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-invoice_a_row_3)">
+              <rect id="invoice_a_row_3" class="ai-shape ai-rect" x="735" y="260" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="743" y="270" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>paid: bool</tspan></tspan></text>
             </g>
           </g>
           <g id="invoice_op" class="ai-container">
-            <g clip-path="url(#ai-clip-b218bd95-invoice_o_row_1)">
-              <rect id="invoice_o_row_1" class="ai-shape ai-rect" x="735" y="273" width="220" height="22" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
-              <text class="ai-label" x="743" y="284" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>+ pay()</tspan></tspan></text>
+            <g clip-path="url(#ai-clip-5b99f771-invoice_o_row_1)">
+              <rect id="invoice_o_row_1" class="ai-shape ai-rect" x="735" y="280" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="743" y="290" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="743" dy="-0"><tspan>+ pay()</tspan></tspan></text>
             </g>
           </g>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-invoice_hd_box)">
-          <rect id="invoice_hd_box" class="ai-shape ai-rect" x="735" y="173.5" width="220" height="33.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-invoice_hd_box)">
+          <rect id="invoice_hd_box" class="ai-shape ai-rect" x="735" y="192" width="220" height="28" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-invoice_at_box)">
-          <rect id="invoice_at_box" class="ai-shape ai-rect" x="735" y="207" width="220" height="66" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-invoice_at_box)">
+          <rect id="invoice_at_box" class="ai-shape ai-rect" x="735" y="220" width="220" height="60" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <g clip-path="url(#ai-clip-b218bd95-invoice_op_box)">
-          <rect id="invoice_op_box" class="ai-shape ai-rect" x="735" y="273" width="220" height="22" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        <g clip-path="url(#ai-clip-5b99f771-invoice_op_box)">
+          <rect id="invoice_op_box" class="ai-shape ai-rect" x="735" y="280" width="220" height="20" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
         </g>
-        <rect id="invoice_shell" class="ai-shape ai-rect" x="735" y="173.5" width="220" height="121.5" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+        <rect id="invoice_shell" class="ai-shape ai-rect" x="735" y="192" width="220" height="108" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+      </g>
+      <g id="kind" class="ai-container">
+        <g id="kind_box" class="ai-container">
+          <g id="kind_head" class="ai-container">
+            <g clip-path="url(#ai-clip-5b99f771-kind_st_row_1)">
+              <rect id="kind_st_row_1" class="ai-shape ai-rect" x="15" y="301" width="220" height="16" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="125" y="309" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--role-muted)"><tspan x="125" dy="-0"><tspan>«enum»</tspan></tspan></text>
+            </g>
+            <g clip-path="url(#ai-clip-5b99f771-kind_hd)">
+              <rect id="kind_hd" class="ai-shape ai-rect" x="15" y="317" width="220" height="28" fill="var(--secondary-light)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="125" y="331" text-anchor="middle" dominant-baseline="middle" style="font-weight:bold"><tspan x="125" dy="-0"><tspan>ApprovalKind</tspan></tspan></text>
+            </g>
+          </g>
+          <g id="kind_at" class="ai-container">
+            <g clip-path="url(#ai-clip-5b99f771-kind_a_row_1)">
+              <rect id="kind_a_row_1" class="ai-shape ai-rect" x="15" y="345" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="23" y="355" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>manager</tspan></tspan></text>
+            </g>
+            <g clip-path="url(#ai-clip-5b99f771-kind_a_row_2)">
+              <rect id="kind_a_row_2" class="ai-shape ai-rect" x="15" y="365" width="220" height="20" fill="var(--background-1)" stroke="none" stroke-width="1.5"/>
+              <text class="ai-label" x="23" y="375" text-anchor="start" dominant-baseline="middle" font-size="12"><tspan x="23" dy="-0"><tspan>client</tspan></tspan></text>
+            </g>
+          </g>
+          <g id="kind_op" class="ai-container">
+          </g>
+        </g>
+        <g clip-path="url(#ai-clip-5b99f771-kind_hd_box)">
+          <rect id="kind_hd_box" class="ai-shape ai-rect" x="15" y="301" width="220" height="44" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        </g>
+        <g clip-path="url(#ai-clip-5b99f771-kind_at_box)">
+          <rect id="kind_at_box" class="ai-shape ai-rect" x="15" y="345" width="220" height="40" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        </g>
+        <g clip-path="url(#ai-clip-5b99f771-kind_op_box)">
+          <rect id="kind_op_box" class="ai-shape ai-rect" x="15" y="385" width="1" height="1" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+        </g>
+        <rect id="kind_shell" class="ai-shape ai-rect" x="15" y="301" width="220" height="84" fill="none" stroke="var(--foreground-2)" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
       </g>
     </g>
   </g>
-  <text class="ai-label" x="495" y="133" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="495" dy="-0"><tspan>gates</tspan></tspan></text>
-  <text class="ai-label" x="665" y="250" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="665" dy="-0"><tspan>billed on</tspan></tspan></text>
-  <text class="ai-label" x="606.334" y="223.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="606.334" dy="-0"><tspan>*</tspan></tspan></text>
-  <text class="ai-label" x="715.992" y="223.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="715.992" dy="-0"><tspan>0..1</tspan></tspan></text>
-  <text class="ai-label" x="362.664" y="206.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="362.664" dy="-0"><tspan>1</tspan></tspan></text>
-  <text class="ai-label" x="246.334" y="206.75" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="246.334" dy="-0"><tspan>*</tspan></tspan></text>
-  <path class="ai-connection" d="M485 375 L485 308" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
-  <path class="ai-connection" d="M485 92.5 L485 173.5" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
-  <path class="ai-connection" d="M595 240 L735 240" fill="none" stroke="#333" stroke-width="2"/>
-  <path class="ai-connection" d="M362.6 190.25 L235 190.25" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-diamond-filled)"/>
+  <text class="ai-label" x="495" y="151.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="495" dy="-0"><tspan>gates</tspan></tspan></text>
+  <text class="ai-label" x="665" y="260" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="665" dy="-0"><tspan>billed on</tspan></tspan></text>
+  <text class="ai-label" x="606.334" y="233.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="606.334" dy="-0"><tspan>*</tspan></tspan></text>
+  <text class="ai-label" x="715.992" y="233.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="715.992" dy="-0"><tspan>0..1</tspan></tspan></text>
+  <text class="ai-label" x="362.664" y="222.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="362.664" dy="-0"><tspan>1</tspan></tspan></text>
+  <text class="ai-label" x="246.334" y="222.5" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="246.334" dy="-0"><tspan>*</tspan></tspan></text>
+  <text class="ai-label" x="135" y="270.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="135" dy="-0"><tspan>uses</tspan></tspan></text>
+  <path class="ai-connection" d="M485 400 L485 333" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
+  <path class="ai-connection" d="M485 111 L485 192" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M595 250 L735 250" fill="none" stroke="#333" stroke-width="2"/>
+  <path class="ai-connection" d="M362.6 206 L235 206" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-diamond-filled)"/>
+  <path class="ai-connection" d="M125 240 L125 301" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
 </svg>

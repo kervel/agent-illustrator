@@ -749,24 +749,24 @@ relationship's name. Elements made inside an `each` are numbered `a_row_1`,
 `a_row_2`, ... (`--doc each`).
 
 ```
-template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, hfill: secondary-light, edge: foreground-2, radius: 8) {
+template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
         col head [gap: 0, padding: 0] {
             each s in stereo {
-                rect st_row [width: w, height: 18, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell]
+                rect st_row [width: w, height: 16, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell]
             }
-            rect hd [width: w, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
+            rect hd [width: w, height: 28, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
         }
         col at [gap: 0, padding: 0] {
             each a in attrs {
-                rect a_row [width: w, height: 22, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                rect a_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
                 anchor l_a [position: a_row.left, direction: left]
                 anchor r_a [position: a_row.right, direction: right]
             }
         }
         col op [gap: 0, padding: 0] {
             each o in ops {
-                rect o_row [width: w, height: 22, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                rect o_row [width: w, height: rh, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
             }
         }
     }
@@ -788,6 +788,15 @@ row r1 [gap: 140, align: top] {
 entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
 ```
 The full scene, with all anchors and relations, is `examples/class-diagram.ail`.
+
+Tight rows: give rows a fixed `rh` (20) and write ONE short attribute per row (`name: Type`);
+without a height each row gets airy label padding, and a long text with `height: 22` trips
+label-overflow. To mark rows (new / changed / later) add lists `changed`, `added`, `later`
+after `attrs`, each `each` writing rows with a tint (`role-warn-soft`, `role-ok-soft`, grey);
+`hfill` tints the title bar. `each` iterates plain strings, so group rows by status.
+Lay out: boxes joined title-to-title need `constrain a.top = b.top`; top-to-bottom joins need
+equal `center_x`; no line may cross a box in between. `examples/class-diagram.ail` has the full
+template (status lists, row anchors, legend).
 
 Without `each` (older style, still valid for a box that never changes): one
 rect per compartment with a `<br>`-joined string, `rect at [label:
