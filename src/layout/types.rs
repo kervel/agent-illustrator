@@ -1262,9 +1262,21 @@ pub struct ConnectionLayout {
     /// `label_mask: N`: lines drawn on the connection layer are cut away
     /// within N of the label's box, so the text reads clean over them.
     pub label_mask: Option<f64>,
+    /// `bundle: apart | together`: whether this line must keep its own path or
+    /// should share a leg with the other `together` lines. Unset = don't care.
+    pub bundle: Option<BundleIntent>,
     pub routing_mode: RoutingMode, // Feature 008: track routing mode for rendering
     /// Optional name for referencing in keyframes (Feature 011)
     pub name: Option<Identifier>,
+}
+
+/// What an author wants for a connection's path relative to other connections.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BundleIntent {
+    /// `bundle: apart`: no segment may run along another connection.
+    Apart,
+    /// `bundle: together`: share a leg with the other `together` lines at a common end.
+    Together,
 }
 
 /// The complete result of layout computation

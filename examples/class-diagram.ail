@@ -8,7 +8,9 @@
 // l_a/r_a (row of `attrs`, numbered l_a_1..), l_o/r_o (rows of `ops`).
 // Layout lessons: a connection between title bars (r_hd -- l_hd) is straight only if the box tops
 // are aligned; a vertical one (b_box -- t_box) needs the center_x aligned; a line must not cross a
-// box in between (reorder the grid). Multiplicities = from_label/to_label, short role = label.
+// box in between (reorder the grid). `bundle: together` on inheritance lines into one parent (same
+// anchor) makes them share a trunk;
+// `bundle: apart` on the other lines makes lint flag any shared leg. Multiplicities = from_label/to_label, short role = label.
 template "cls" (ttl: "", stereo: [], attrs: [], changed: [], added: [], later: [], ops: [],
                 w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
@@ -77,7 +79,10 @@ row cols [gap: 130]  {
         cls entry [ttl: "TimeEntry", hfill: role-ok-soft,
                    attrs: ["date: date", "hours: decimal"], changed: ["status: EntryStatus"],
                    added: ["billed_at: datetime?"], ops: ["+ approve()"]]
-        cls corr [ttl: "Correction", stereo: ["«abstract»"], attrs: ["original: TimeEntry"]]
+        row subs [gap: 40] {
+            cls corr [ttl: "Correction", attrs: ["original: TimeEntry"]]
+            cls over [ttl: "Overtime", attrs: ["rate: decimal"]]
+        }
     }
     col c_r {
         cls invoice [ttl: "Invoice", attrs: ["number: str", "total: decimal", "paid: bool"], ops: ["+ pay()"]]
@@ -86,13 +91,15 @@ row cols [gap: 130]  {
 }
 constrain approval.top = entry.top
 constrain invoice.top = entry.top
+constrain corr.center_x = entry.center_x
 constrain kind.center_x = approval.center_x
 constrain kind.top = approval.bottom + 60
 constrain legend.left = cols.left
 constrain legend.bottom = cols.top - 30
 
-corr.t_box -> entry.b_box [to_end: triangle]
-lock.b_box -> entry.t_box [to_end: open, stroke_dasharray: dashed, label: "gates"]
-entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
-entry.l_hd -- approval.r_hd [from_end: diamond-filled, from_label: "1", to_label: "*"]
-approval.b_box -> kind.t_box [to_end: open, stroke_dasharray: dashed, label: "uses"]
+corr.t_box -> entry.b_box [to_end: triangle, bundle: together]
+over.t_box -> entry.b_box [to_end: triangle, bundle: together]
+lock.b_box -> entry.t_box [to_end: open, stroke_dasharray: dashed, label: "gates", bundle: apart]
+entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on", bundle: apart]
+entry.l_hd -- approval.r_hd [from_end: diamond-filled, from_label: "1", to_label: "*", bundle: apart]
+approval.b_box -> kind.t_box [to_end: open, stroke_dasharray: dashed, label: "uses", bundle: apart]

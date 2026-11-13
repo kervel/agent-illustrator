@@ -87,6 +87,10 @@ Connection modifiers:
                             diamond-filled | crow | circle | none
                             Works on any operator: `a -- b [to_end: triangle]`.
                             Combines with `stroke_dasharray: dashed`.
+    bundle: apart|together  Path intent, checked by lint (category `bundle`): `apart` = no
+                            segment may run along another line (ambiguous ends); `together`
+                            = share one trunk with the other `together` lines at a common
+                            element (same anchor). Unset = don't care.
     label_mask: <number>    Cut lines behind the label away, within this many px
                             of its box (arrows and `--` connections; the label
                             may then cross a lifeline without the line showing)
@@ -557,7 +561,7 @@ any finding, so a build can gate on it. `--lint-categories` lists the
 categories: overlap, containment, label, connection, alignment,
 redundant-constant, reducible-bend, missing-anchor, contrast, steep-direct,
 crowded-layout, over-constrained, label-overflow, unknown-modifier,
-overridden-constraint, canvas-overflow, motion, motion-coordinate.
+overridden-constraint, canvas-overflow, motion, motion-coordinate, bundle.
 
 What the newer checks say and what to do:
     "... is cut off"            text runs past the image edge: wrap (max_width),

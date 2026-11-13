@@ -3159,6 +3159,7 @@ mod tests {
             label: None,
             end_labels: [None, None],
             label_mask: None,
+            bundle: None,
             routing_mode: RoutingMode::default(),
             name: None,
         });

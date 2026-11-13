@@ -583,6 +583,10 @@ dependency `to_end: open, stroke_dasharray: dashed`, navigability `to_end: open`
 Give every connection its own anchor side (`entry.left`, `entry.right`,
 `entry.top`, `entry.bottom`): two lines leaving one anchor share a segment.
 Align boxes joined by a straight line with `constrain a.center_y = b.center_y`.
+State how lines may overlap with `bundle:`: `bundle: apart` on associations and
+aggregations (a shared leg makes the multiplicity ambiguous), `bundle: together` on
+inheritance lines into one parent (attach all at the same anchor, e.g. `shape.b_box`,
+so they share one trunk). Lint (`bundle`) checks it; unset = don't care.
 The full set is in `examples/class-diagram.ail`.
 
 Tight rows: give rows a fixed `rh` (20) and write ONE short attribute per row (`name: Type`);

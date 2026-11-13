@@ -1131,6 +1131,7 @@ pub fn route_connections_hiding(
                             label,
                             end_labels: extract_end_labels(&conn.modifiers),
                             label_mask: extract_label_mask(&conn.modifiers),
+                            bundle: extract_bundle(&conn.modifiers),
                             routing_mode,
                             name: conn.name.as_ref().map(|n| n.node.clone()),
                         });
@@ -1487,6 +1488,24 @@ fn extract_label_mask(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
     modifiers.iter().find_map(|m| match (&m.node.key.node, &m.node.value.node) {
         (StyleKey::Custom(k), StyleValue::Number { value, .. }) if k == "label_mask" => Some(*value),
         _ => None,
+    })
+}
+
+/// `bundle: apart | together` on a connection (see `BundleIntent`).
+fn extract_bundle(modifiers: &[Spanned<StyleModifier>]) -> Option<crate::layout::types::BundleIntent> {
+    use crate::layout::types::BundleIntent;
+    modifiers.iter().find_map(|m| {
+        let StyleKey::Custom(k) = &m.node.key.node else { return None };
+        if k != "bundle" {
+            return None;
+        }
+        match &m.node.value.node {
+            StyleValue::Keyword(w) | StyleValue::String(w) if w == "apart" => Some(BundleIntent::Apart),
+            StyleValue::Keyword(w) | StyleValue::String(w) if w == "together" => Some(BundleIntent::Together),
+            StyleValue::Identifier(i) if i.0 == "apart" => Some(BundleIntent::Apart),
+            StyleValue::Identifier(i) if i.0 == "together" => Some(BundleIntent::Together),
+            _ => None,
+        }
     })
 }
 
@@ -2140,6 +2159,7 @@ mod tests {
             ],
             ends: crate::layout::line_end::LineEnds::none(),
             label_mask: None,
+            bundle: None,
             routing_mode: RoutingMode::Direct,
             name: None,
         }

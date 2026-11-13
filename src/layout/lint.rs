@@ -71,11 +71,13 @@ pub enum LintCategory {
     Motion,
     /// A number where a motion statement should name a place.
     MotionCoordinate,
+    /// `bundle: apart | together` intent not met by the routed lines.
+    Bundle,
 }
 
 impl LintCategory {
     /// Every category, in the order they are documented.
-    pub const ALL: [LintCategory; 18] = [
+    pub const ALL: [LintCategory; 19] = [
         LintCategory::Overlap,
         LintCategory::Containment,
         LintCategory::Label,
@@ -94,6 +96,7 @@ impl LintCategory {
         LintCategory::CanvasOverflow,
         LintCategory::Motion,
         LintCategory::MotionCoordinate,
+        LintCategory::Bundle,
     ];
 
     /// Errors: the picture is certainly wrong (something leaves the canvas,
@@ -147,6 +150,7 @@ impl fmt::Display for LintCategory {
             LintCategory::CanvasOverflow => write!(f, "canvas-overflow"),
             LintCategory::Motion => write!(f, "motion"),
             LintCategory::MotionCoordinate => write!(f, "motion-coordinate"),
+            LintCategory::Bundle => write!(f, "bundle"),
         }
     }
 }
@@ -298,6 +302,7 @@ fn check_collisions(
     check_near_misses(result, scope, warnings);
     check_caption_clearance(result, contains_ids, scope, warnings);
     check_routed_line_crossings(result, scope, warnings);
+    check_bundles(result, scope, warnings);
     check_text_in_view(result, scope, warnings);
 }
 
@@ -480,6 +485,78 @@ fn check_text_in_view(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &
 /// opaque element it does not pass through: the line disappears behind it,
 /// or it covers what is on it. Checked against the line's segments, not its
 /// bounding box (which for a diagonal covers half the slide).
+/// Length of path two connections run along the same line, ignoring corners and
+/// touching ends. Only axis-aligned segments (orthogonal and straight H/V lines).
+fn shared_leg(a: &[Point], b: &[Point]) -> f64 {
+    const TOL: f64 = 1.0;
+    let mut best = 0.0f64;
+    for sa in a.windows(2) {
+        for sb in b.windows(2) {
+            let (a1, a2, b1, b2) = (sa[0], sa[1], sb[0], sb[1]);
+            let (ah, bh) = ((a1.y - a2.y).abs() < TOL, (b1.y - b2.y).abs() < TOL);
+            let (av, bv) = ((a1.x - a2.x).abs() < TOL, (b1.x - b2.x).abs() < TOL);
+            let overlap = if ah && bh && (a1.y - b1.y).abs() < TOL {
+                a1.x.max(a2.x).min(b1.x.max(b2.x)) - a1.x.min(a2.x).max(b1.x.min(b2.x))
+            } else if av && bv && (a1.x - b1.x).abs() < TOL {
+                a1.y.max(a2.y).min(b1.y.max(b2.y)) - a1.y.min(a2.y).max(b1.y.min(b2.y))
+            } else {
+                0.0
+            };
+            best = best.max(overlap);
+        }
+    }
+    best
+}
+
+/// `bundle: apart` lines must not run along any other connection (a shared leg
+/// makes ends and multiplicities ambiguous); `bundle: together` lines that meet
+/// at a common element should share a leg. Unset connections are not checked.
+fn check_bundles(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
+    use crate::layout::types::BundleIntent;
+    const MIN_SHARED: f64 = 4.0;
+    let conns: Vec<&super::types::ConnectionLayout> = result
+        .connections
+        .iter()
+        .filter(|c| c.routing_mode != RoutingMode::Curved)
+        .filter(|c| !scope.hides_connection(c.name.as_ref().map(|n| n.0.as_str())))
+        .collect();
+    let label = |c: &super::types::ConnectionLayout| format!("{}→{}", c.from_id.0, c.to_id.0);
+    for (i, a) in conns.iter().enumerate() {
+        for b in conns.iter().skip(i + 1) {
+            let shares = shared_leg(&a.path, &b.path) > MIN_SHARED;
+            let apart = a.bundle == Some(BundleIntent::Apart) || b.bundle == Some(BundleIntent::Apart);
+            if shares && apart {
+                warnings.push(LintWarning {
+                    category: LintCategory::Bundle,
+                    message: format!(
+                        "connections {} and {} run along the same line but one is `bundle: apart`; \
+                         attach them at different anchors (another side of the element)",
+                        label(a),
+                        label(b)
+                    ),
+                    frames: Vec::new(),
+                    pair: None,
+                });
+            }
+            let meet = a.from_id == b.from_id || a.from_id == b.to_id || a.to_id == b.from_id || a.to_id == b.to_id;
+            let together = a.bundle == Some(BundleIntent::Together) && b.bundle == Some(BundleIntent::Together);
+            if together && meet && !shares {
+                warnings.push(LintWarning {
+                    category: LintCategory::Bundle,
+                    message: format!(
+                        "connections {} and {} are `bundle: together` but share no leg; \
+                         attach both at the same anchor so they merge into one trunk",
+                        label(a),
+                        label(b)
+                    ),
+                    frames: Vec::new(),
+                    pair: None,
+                });
+            }
+        }
+    }
+}
+
 fn check_routed_line_crossings(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
     fn visit<'a>(e: &'a ElementLayout, scope: &FrameScope<'_>, out: &mut Vec<&'a ElementLayout>) {
         if scope.hides_element(e) {
@@ -3779,6 +3856,7 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "via",          // connection routing
     "padding",      // contains
     "label_mask",   // connection: cut lines away behind the label
+    "bundle",       // connection: apart | together (lint intent)
     "from_label",   // connection: text at the start of the line
     "to_label",     // connection: text at the end of the line
     "from_end",     // connection: decoration at the start (arrow, triangle, ...)
@@ -4480,6 +4558,7 @@ mod tests {
             label: None,
             end_labels: [None, None],
             label_mask: None,
+            bundle: None,
             routing_mode,
             name: None,
         }
@@ -4493,6 +4572,39 @@ mod tests {
             bounds: BoundingBox::zero(),
             overridden_constraints: vec![],
         }
+    }
+
+    #[test]
+    fn test_bundle_apart_flags_shared_leg_and_together_wants_one() {
+        use crate::layout::types::BundleIntent;
+        let p = |x: f64, y: f64| Point::new(x, y);
+        // a→c and b→c share the vertical leg x=100, y 100..150
+        let mut a = make_connection("a", "c", vec![p(60.0, 50.0), p(60.0, 100.0), p(100.0, 100.0), p(100.0, 150.0)], RoutingMode::Orthogonal);
+        let mut b = make_connection("b", "c", vec![p(140.0, 50.0), p(140.0, 100.0), p(100.0, 100.0), p(100.0, 150.0)], RoutingMode::Orthogonal);
+        let scope = FrameScope::all_visible();
+        // unset: don't care
+        let mut w = Vec::new();
+        check_bundles(&make_layout_with_connections(vec![a.clone(), b.clone()]), &scope, &mut w);
+        assert!(w.is_empty());
+        // apart: flagged
+        a.bundle = Some(BundleIntent::Apart);
+        let mut w = Vec::new();
+        check_bundles(&make_layout_with_connections(vec![a.clone(), b.clone()]), &scope, &mut w);
+        assert_eq!(w.len(), 1);
+        assert_eq!(w[0].category.to_string(), "bundle");
+        // together + sharing: fine
+        a.bundle = Some(BundleIntent::Together);
+        b.bundle = Some(BundleIntent::Together);
+        let mut w = Vec::new();
+        check_bundles(&make_layout_with_connections(vec![a.clone(), b.clone()]), &scope, &mut w);
+        assert!(w.is_empty());
+        // together but separate legs: hint
+        let b2 = make_connection("b", "c", vec![p(140.0, 50.0), p(140.0, 150.0)], RoutingMode::Orthogonal);
+        let mut b2 = b2;
+        b2.bundle = Some(BundleIntent::Together);
+        let mut w = Vec::new();
+        check_bundles(&make_layout_with_connections(vec![a, b2]), &scope, &mut w);
+        assert_eq!(w.len(), 1);
     }
 
     #[test]
