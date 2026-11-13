@@ -50,6 +50,6 @@ To re-render examples manually: `bash examples/render-all.sh`
 
 - Every new feature is discoverable: docs (`docs/skill*.md`, `grammar.md`, `examples.md`, `--doc` aliases) and an example.
 - No single-purpose hacks. Guard readability and ergonomics strictly; prefer general, composable constructs.
-- No single purpose features for a single diagram type. I don't want a 'swimminglane' feature, i don't want a 'class' feature for class diagrams, a template or an example should cover these together with the primitives that make it easy to draw a class diagram.
-- Diagram types (x-functional charts, class diagrams, sequence diagrams) all become examples with templates. The layout engine stays application agnostic
+- **The engine is domain-agnostic.** Layout, constraints, connections and lint know geometry and relations, never diagram types. No `class`, `swimlane`, `sequence`, `gantt` element or modifier, and no lint or default keyed on a domain notion (e.g. "a triangle end means inheritance"). Every diagram type (class, sequence, cross-functional, ...) is an example with a template, built from general primitives (`each`, `contains`, anchors, `constrain`, lists).
+- **A need from one diagram type becomes a general primitive.** If a template is awkward, fix the primitive so every diagram type benefits (`each` over records, a neutral modifier like `bundle: apart|together`). Never add a feature only one diagram type can use.
 - Two animation renderers: the JS player and the pure-CSS SVG renderer (no JS). Both must stay fully functional; where CSS genuinely can't express something, degrade gracefully.
