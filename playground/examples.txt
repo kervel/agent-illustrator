@@ -15,3 +15,4 @@ examples/motion/token-loop.ail
 
 ## Diagrams
 examples/class-diagram.ail
+examples/sequence-diagram.ail

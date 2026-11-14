@@ -303,6 +303,7 @@ fn check_collisions(
     check_caption_clearance(result, contains_ids, scope, warnings);
     check_routed_line_crossings(result, scope, warnings);
     check_bundles(result, scope, warnings);
+    check_masked_arrows(result, scope, warnings);
     check_text_in_view(result, scope, warnings);
 }
 
@@ -506,6 +507,52 @@ fn shared_leg(a: &[Point], b: &[Point]) -> f64 {
         }
     }
     best
+}
+
+/// A `label_mask` cuts every line behind the label. A label wider than its own arrow
+/// cuts the arrow away entirely (or just its head), and nothing is left to read.
+fn check_masked_arrows(result: &LayoutResult, scope: &FrameScope<'_>, warnings: &mut Vec<LintWarning>) {
+    use super::line_end::LineEnd;
+    for conn in &result.connections {
+        let (Some(pad), Some(label)) = (conn.label_mask, conn.label.as_ref()) else { continue };
+        if conn.path.len() < 2 || scope.hides_connection(conn.name.as_ref().map(|n| n.0.as_str())) {
+            continue;
+        }
+        let bb = estimate_label_bbox(label);
+        let masked = BoundingBox::new(bb.x - pad, bb.y - pad, bb.width + 2.0 * pad, bb.height + 2.0 * pad);
+        let inside = |p: Point| p.x > masked.x && p.x < masked.right() && p.y > masked.y && p.y < masked.bottom();
+        let (mut visible, mut total) = (0.0f64, 0.0f64);
+        for seg in conn.path.windows(2) {
+            let len = ((seg[1].x - seg[0].x).powi(2) + (seg[1].y - seg[0].y).powi(2)).sqrt();
+            let n = (len / 2.0).ceil().max(1.0) as usize;
+            for k in 0..n {
+                let t = (k as f64 + 0.5) / n as f64;
+                let pt = Point::new(seg[0].x + (seg[1].x - seg[0].x) * t, seg[0].y + (seg[1].y - seg[0].y) * t);
+                if !inside(pt) {
+                    visible += len / n as f64;
+                }
+            }
+            total += len;
+        }
+        let first = conn.path[0];
+        let last = conn.path[conn.path.len() - 1];
+        let head_hidden = (conn.ends.from != LineEnd::None && inside(first))
+            || (conn.ends.to != LineEnd::None && inside(last));
+        if total > 0.0 && (visible < 14.0 || head_hidden) {
+            warnings.push(LintWarning {
+                category: LintCategory::Label,
+                message: format!(
+                    "connection {}→{}: `label_mask` cuts the {} (the label is as wide as the arrow); \
+                     shorten the label or widen the gap between the two ends",
+                    conn.from_id.0,
+                    conn.to_id.0,
+                    if visible < 14.0 { "whole arrow away" } else { "arrowhead away" }
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
+        }
+    }
 }
 
 /// `bundle: apart` lines must not run along any other connection (a shared leg

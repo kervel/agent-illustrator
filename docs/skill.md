@@ -372,19 +372,22 @@ they follow a theme. Animated connections (`enter: draw`) animate the filled
 
 #### Sequence diagrams (lifelines, messages, a label that crosses a line)
 
-There is no sequence-diagram construct; it is built from parts you have. A
-lifeline is a dashed connection down from the actor's box, chained through one
-tiny invisible `rect` per message (`client -- c1`, `c1 -- c2`, ...). A message is
-an arrow between two of those points at the same height. Chained connections
-style only their last segment, so write each lifeline segment on its own line.
+There is no sequence-diagram construct; `examples/sequence-diagram.ail` builds one
+from a `life` template (actor head + dashed lifeline) whose `ticks: [...]` list
+makes one invisible row per message, equally high on every lifeline. A message is an
+arrow between `x.p_k` and `y.p_k` (solid = call, dashed + `to_end: open` = reply,
+solid + open = async); a self-message chains `x.p_4 -- w1 -- w2 -> x.p_5` through
+two waypoints. Activation bars, loop/alt fragments, notes and a destroy mark are
+plain shapes placed against the rows with `constrain` (mark them `overlaps:` the
+lifeline `x.lifeline`).
 
 `label_offset:` moves a label off the arrow (negative = the other side).
 `label_at:` slides it along the arrow, so it can clear a lifeline. When a label
 is wider than the gap and has to cross a line anyway, give its connection
 `label_mask: 4`: every line behind the label's box (plus 4 px) is cut away
 there, the arrow's own line included. It cuts the connection layer only
-(`a -- b`, arrows); a lifeline drawn as a thin rect is not cut. Each message is
-one row of the same shape, so a generator can emit them from data. Example in
+(`a -- b`, arrows); keep a label shorter than its arrow or the arrow vanishes.
+Each message is one row of the same shape, so a generator can emit them from data. Example in
 `--examples` (EXAMPLE 12) and `examples/sequence-diagram.ail`.
 
 ### Layout Strategy
