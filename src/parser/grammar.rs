@@ -1306,22 +1306,26 @@ where
         .then(modifier_block.clone().or_not())
         .map(|((container, elements), modifiers)| {
             // Extract padding from modifiers if present
-            let padding = modifiers.as_ref().and_then(|mods| {
-                mods.iter().find_map(|m| {
-                    if let StyleKey::Custom(k) = &m.node.key.node {
-                        if k == "padding" {
-                            if let StyleValue::Number { value, .. } = &m.node.value.node {
-                                return Some(*value);
+            let pad_of = |key: &str| {
+                modifiers.as_ref().and_then(|mods| {
+                    mods.iter().find_map(|m| {
+                        if let StyleKey::Custom(k) = &m.node.key.node {
+                            if k == key {
+                                if let StyleValue::Number { value, .. } = &m.node.value.node {
+                                    return Some(*value);
+                                }
                             }
                         }
-                    }
-                    None
+                        None
+                    })
                 })
-            });
+            };
             ConstraintExpr::Contains {
                 container,
                 elements,
-                padding,
+                padding: pad_of("padding"),
+                padding_x: pad_of("padding_x"),
+                padding_y: pad_of("padding_y"),
             }
         });
 
@@ -3470,6 +3474,7 @@ mod tests {
                     container,
                     elements,
                     padding,
+                    ..
                 } => {
                     assert_eq!(container.node.as_str(), "container");
                     assert_eq!(elements.len(), 3);
@@ -3494,6 +3499,7 @@ mod tests {
                     container,
                     elements,
                     padding,
+                    ..
                 } => {
                     assert_eq!(container.node.as_str(), "container");
                     assert_eq!(elements.len(), 2);

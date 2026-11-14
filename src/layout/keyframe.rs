@@ -625,8 +625,9 @@ fn seed_wrap_bounds(result: &mut LayoutResult, doc: &Document) {
     }
     for stmt in &doc.statements {
         let Statement::Constrain(c) = &stmt.node else { continue };
-        let ConstraintExpr::Contains { container, elements, padding } = &c.expr else { continue };
-        let pad = padding.unwrap_or(0.0);
+        let ConstraintExpr::Contains { container, elements, padding, padding_x, padding_y } = &c.expr else { continue };
+        let pad_x = padding_x.or(*padding).unwrap_or(0.0);
+        let pad_y = padding_y.or(*padding).unwrap_or(0.0);
         let (mut x0, mut y0, mut x1, mut y1) = (f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY);
         for e in elements {
             if let Some(l) = result.get_element_by_name(&e.node.0) {
@@ -640,10 +641,10 @@ fn seed_wrap_bounds(result: &mut LayoutResult, doc: &Document) {
             continue;
         }
         if let Some(el) = find(&mut result.root_elements, &container.node.0) {
-            el.bounds.x = x0 - pad;
-            el.bounds.y = y0 - pad;
-            el.bounds.width = x1 - x0 + 2.0 * pad;
-            el.bounds.height = y1 - y0 + 2.0 * pad;
+            el.bounds.x = x0 - pad_x;
+            el.bounds.y = y0 - pad_y;
+            el.bounds.width = x1 - x0 + 2.0 * pad_x;
+            el.bounds.height = y1 - y0 + 2.0 * pad_y;
         }
     }
     result.rebuild_index();

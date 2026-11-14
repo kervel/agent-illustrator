@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 860 670" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-76 -50 942 742" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -197,15 +197,15 @@
         <text class="ai-label" x="65" y="30" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Client</tspan></tspan></text>
         <g id="cl_rows" class="ai-container">
           <rect id="cl_p_1" class="ai-shape ai-rect" x="64" y="80" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_2" class="ai-shape ai-rect" x="64" y="128" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_3" class="ai-shape ai-rect" x="64" y="176" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_4" class="ai-shape ai-rect" x="64" y="224" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_5" class="ai-shape ai-rect" x="64" y="272" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_6" class="ai-shape ai-rect" x="64" y="320" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_7" class="ai-shape ai-rect" x="64" y="368" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_8" class="ai-shape ai-rect" x="64" y="416" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_9" class="ai-shape ai-rect" x="64" y="464" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="cl_p_10" class="ai-shape ai-rect" x="64" y="512" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_2" class="ai-shape ai-rect" x="64" y="136" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_3" class="ai-shape ai-rect" x="64" y="192" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_4" class="ai-shape ai-rect" x="64" y="248" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_5" class="ai-shape ai-rect" x="64" y="304" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_6" class="ai-shape ai-rect" x="64" y="360" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_7" class="ai-shape ai-rect" x="64" y="416" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_8" class="ai-shape ai-rect" x="64" y="472" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_9" class="ai-shape ai-rect" x="64" y="528" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="cl_p_10" class="ai-shape ai-rect" x="64" y="584" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
         </g>
       </g>
     </g>
@@ -215,15 +215,15 @@
         <text class="ai-label" x="275" y="30" text-anchor="middle" dominant-baseline="middle"><tspan x="275" dy="-0"><tspan>API</tspan></tspan></text>
         <g id="api_rows" class="ai-container">
           <rect id="api_p_1" class="ai-shape ai-rect" x="274" y="80" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_2" class="ai-shape ai-rect" x="274" y="128" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_3" class="ai-shape ai-rect" x="274" y="176" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_4" class="ai-shape ai-rect" x="274" y="224" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_5" class="ai-shape ai-rect" x="274" y="272" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_6" class="ai-shape ai-rect" x="274" y="320" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_7" class="ai-shape ai-rect" x="274" y="368" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_8" class="ai-shape ai-rect" x="274" y="416" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_9" class="ai-shape ai-rect" x="274" y="464" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="api_p_10" class="ai-shape ai-rect" x="274" y="512" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_2" class="ai-shape ai-rect" x="274" y="136" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_3" class="ai-shape ai-rect" x="274" y="192" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_4" class="ai-shape ai-rect" x="274" y="248" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_5" class="ai-shape ai-rect" x="274" y="304" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_6" class="ai-shape ai-rect" x="274" y="360" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_7" class="ai-shape ai-rect" x="274" y="416" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_8" class="ai-shape ai-rect" x="274" y="472" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_9" class="ai-shape ai-rect" x="274" y="528" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="api_p_10" class="ai-shape ai-rect" x="274" y="584" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
         </g>
       </g>
     </g>
@@ -233,9 +233,9 @@
         <text class="ai-label" x="485" y="30" text-anchor="middle" dominant-baseline="middle"><tspan x="485" dy="-0"><tspan>Auth</tspan></tspan></text>
         <g id="auth_rows" class="ai-container">
           <rect id="auth_p_1" class="ai-shape ai-rect" x="484" y="80" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="auth_p_2" class="ai-shape ai-rect" x="484" y="128" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="auth_p_3" class="ai-shape ai-rect" x="484" y="176" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="auth_p_4" class="ai-shape ai-rect" x="484" y="224" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="auth_p_2" class="ai-shape ai-rect" x="484" y="136" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="auth_p_3" class="ai-shape ai-rect" x="484" y="192" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="auth_p_4" class="ai-shape ai-rect" x="484" y="248" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
         </g>
       </g>
     </g>
@@ -245,58 +245,61 @@
         <text class="ai-label" x="695" y="30" text-anchor="middle" dominant-baseline="middle"><tspan x="695" dy="-0"><tspan>Database</tspan></tspan></text>
         <g id="db_rows" class="ai-container">
           <rect id="db_p_1" class="ai-shape ai-rect" x="694" y="80" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_2" class="ai-shape ai-rect" x="694" y="128" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_3" class="ai-shape ai-rect" x="694" y="176" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_4" class="ai-shape ai-rect" x="694" y="224" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_5" class="ai-shape ai-rect" x="694" y="272" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_6" class="ai-shape ai-rect" x="694" y="320" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_7" class="ai-shape ai-rect" x="694" y="368" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_8" class="ai-shape ai-rect" x="694" y="416" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_9" class="ai-shape ai-rect" x="694" y="464" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-          <rect id="db_p_10" class="ai-shape ai-rect" x="694" y="512" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_2" class="ai-shape ai-rect" x="694" y="136" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_3" class="ai-shape ai-rect" x="694" y="192" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_4" class="ai-shape ai-rect" x="694" y="248" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_5" class="ai-shape ai-rect" x="694" y="304" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_6" class="ai-shape ai-rect" x="694" y="360" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_7" class="ai-shape ai-rect" x="694" y="416" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_8" class="ai-shape ai-rect" x="694" y="472" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_9" class="ai-shape ai-rect" x="694" y="528" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+          <rect id="db_p_10" class="ai-shape ai-rect" x="694" y="584" width="2" height="48" fill="none" stroke="none" stroke-width="1.5"/>
         </g>
       </g>
     </g>
   </g>
-  <rect id="loop_f" class="ai-shape ai-rect" x="175" y="316" width="570" height="96" fill="none" stroke="var(--role-muted)" stroke-width="1.5"/>
-  <text id="loop_t" class="ai-shape ai-text" x="181" y="325.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">loop [each item]</text>
-  <rect id="alt_f" class="ai-shape ai-rect" x="15" y="412" width="310" height="98" fill="none" stroke="var(--role-muted)" stroke-width="1.5"/>
-  <rect id="alt_div" class="ai-shape ai-rect" x="15" y="463.5" width="310" height="1" fill="var(--role-muted)" stroke="none" stroke-width="1.5"/>
-  <text id="alt_t" class="ai-shape ai-text" x="21" y="421.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">alt [in stock]</text>
-  <text id="alt_e" class="ai-shape ai-text" x="21" y="473" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">[out of stock]</text>
-  <rect id="act_api" class="ai-shape ai-rect" x="270" y="100" width="10" height="392" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5"/>
-  <rect id="act_auth" class="ai-shape ai-rect" x="480" y="148" width="10" height="56" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5"/>
-  <rect id="act_db" class="ai-shape ai-rect" x="690" y="340" width="10" height="56" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5"/>
-  <rect id="note1" class="ai-shape ai-rect" x="647" y="230" width="96" height="36" fill="var(--role-warn-soft)" stroke="var(--role-muted)" stroke-width="1.5"/>
-  <text class="ai-label" x="695" y="248" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="695" dy="-6.875"><tspan>read-only</tspan></tspan><tspan x="695" dy="13.75"><tspan>replica</tspan></tspan></text>
-  <text id="auth_end" class="ai-shape ai-text" x="475" y="272" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--role-muted)">✕</text>
-  <rect id="sm1" class="ai-shape ai-rect" x="314" y="247" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
-  <rect id="sm2" class="ai-shape ai-rect" x="314" y="295" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
-  <text id="sm_t" class="ai-shape ai-text" x="322" y="272" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">4: validate cart</text>
+  <rect id="loop_f" class="ai-shape ai-rect" x="164" y="360" width="642" height="104" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+  <text id="loop_t" class="ai-shape ai-text" x="170" y="369.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">loop [each item]</text>
+  <rect id="alt_f" class="ai-shape ai-rect" x="-16" y="472" width="372" height="104" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+  <rect id="alt_div" class="ai-shape ai-rect" x="-16" y="523.5" width="372" height="1" fill="var(--role-muted)" stroke="none" stroke-width="1.5"/>
+  <text id="alt_t" class="ai-shape ai-text" x="-10" y="481.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">alt [in stock]</text>
+  <text id="alt_e" class="ai-shape ai-text" x="-10" y="533" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">[out of stock]</text>
+  <rect id="act_api" class="ai-shape ai-rect" x="270" y="100" width="10" height="456" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+  <rect id="act_auth" class="ai-shape ai-rect" x="480" y="156" width="10" height="64" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+  <rect id="act_db" class="ai-shape ai-rect" x="690" y="380" width="10" height="64" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+  <rect id="note1" class="ai-shape ai-rect" x="647" y="254" width="96" height="36" fill="var(--role-warn-soft)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+  <text class="ai-label" x="695" y="272" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="695" dy="-6.875"><tspan>read-only</tspan></tspan><tspan x="695" dy="13.75"><tspan>replica</tspan></tspan></text>
+  <g transform="rotate(45 485 296)">
+    <rect id="x1" class="ai-shape ai-rect" x="477" y="295" width="16" height="2" fill="var(--role-muted)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g transform="rotate(-45 485 296)">
+    <rect id="x2" class="ai-shape ai-rect" x="477" y="295" width="16" height="2" fill="var(--role-muted)" stroke="none" stroke-width="1.5"/>
+  </g>
+  <rect id="sm1" class="ai-shape ai-rect" x="314" y="271" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <rect id="sm2" class="ai-shape ai-rect" x="314" y="327" width="2" height="2" fill="none" stroke="none" stroke-width="1.5"/>
+  <text id="sm_t" class="ai-shape ai-text" x="322" y="296" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--role-muted)">4: validate cart</text>
   <text class="ai-label" x="170" y="104" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170" dy="-0"><tspan>1: login(user)</tspan></tspan></text>
-  <text class="ai-label" x="380" y="152" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="380" dy="-0"><tspan>2: verify</tspan></tspan></text>
-  <text class="ai-label" x="380" y="200" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="380" dy="-0"><tspan>3: ok</tspan></tspan></text>
-  <text class="ai-label" x="485" y="344" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="485" dy="-0"><tspan>5: query</tspan></tspan></text>
-  <text class="ai-label" x="485" y="392" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="485" dy="-0"><tspan>6: rows</tspan></tspan></text>
-  <text class="ai-label" x="170" y="440" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170" dy="-0"><tspan>7: 200 OK</tspan></tspan></text>
-  <text class="ai-label" x="170" y="488" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170" dy="-0"><tspan>8: 409</tspan></tspan></text>
-  <text class="ai-label" x="485" y="536" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="485" dy="-0"><tspan>9: audit(event)</tspan></tspan></text>
-  <mask id="aimlabel-de32eebb-" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><rect x="-100000" y="-100000" width="200000" height="200000" fill="#fff"/><rect x="125.155" y="91.25" width="89.69000000000001" height="25.5" fill="#000"/><rect x="351.493" y="139.25" width="57.014" height="25.5" fill="#000"/><rect x="360.824" y="187.25" width="38.352000000000004" height="25.5" fill="#000"/><rect x="455.709" y="331.25" width="58.58200000000001" height="25.5" fill="#000"/><rect x="458.439" y="379.25" width="53.12200000000001" height="25.5" fill="#000"/><rect x="134.47899999999998" y="427.25" width="71.042" height="25.5" fill="#000"/><rect x="146.54" y="475.25" width="46.92" height="25.5" fill="#000"/><rect x="436.256" y="523.25" width="97.48800000000001" height="25.5" fill="#000"/></mask>
-  <g mask="url(#aimlabel-de32eebb-)">
-  <path class="ai-connection conn-de32eebb-cl_lifeline" d="M65 50 L65 560" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
-  <path class="ai-connection conn-de32eebb-api_lifeline" d="M275 50 L275 560" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
-  <path class="ai-connection conn-de32eebb-auth_lifeline" d="M485 50 L485 272" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
-  <path class="ai-connection conn-de32eebb-db_lifeline" d="M695 50 L695 560" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <text class="ai-label" x="380" y="160" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="380" dy="-0"><tspan>2: verify</tspan></tspan></text>
+  <text class="ai-label" x="380" y="216" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="380" dy="-0"><tspan>3: ok</tspan></tspan></text>
+  <text class="ai-label" x="485" y="384" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="485" dy="-0"><tspan>5: query</tspan></tspan></text>
+  <text class="ai-label" x="485" y="440" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="485" dy="-0"><tspan>6: rows</tspan></tspan></text>
+  <text class="ai-label" x="170" y="496" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170" dy="-0"><tspan>7: 200 OK</tspan></tspan></text>
+  <text class="ai-label" x="170" y="552" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="170" dy="-0"><tspan>8: 409</tspan></tspan></text>
+  <text class="ai-label" x="485" y="608" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="485" dy="-0"><tspan>9: audit(event)</tspan></tspan></text>
+  <mask id="aimlabel-d3c5b177-" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><rect x="-100000" y="-100000" width="200000" height="200000" fill="#fff"/><rect x="125.155" y="91.25" width="89.69000000000001" height="25.5" fill="#000"/><rect x="351.493" y="147.25" width="57.014" height="25.5" fill="#000"/><rect x="360.824" y="203.25" width="38.352000000000004" height="25.5" fill="#000"/><rect x="455.709" y="371.25" width="58.58200000000001" height="25.5" fill="#000"/><rect x="458.439" y="427.25" width="53.12200000000001" height="25.5" fill="#000"/><rect x="134.47899999999998" y="483.25" width="71.042" height="25.5" fill="#000"/><rect x="146.54" y="539.25" width="46.92" height="25.5" fill="#000"/><rect x="436.256" y="595.25" width="97.48800000000001" height="25.5" fill="#000"/></mask>
+  <g mask="url(#aimlabel-d3c5b177-)">
+  <path class="ai-connection conn-d3c5b177-cl_lifeline" d="M65 50 L65 632" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection conn-d3c5b177-api_lifeline" d="M275 50 L275 632" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection conn-d3c5b177-auth_lifeline" d="M485 50 L485 296" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path class="ai-connection conn-d3c5b177-db_lifeline" d="M695 50 L695 632" fill="none" stroke="var(--role-muted)" stroke-width="1" stroke-dasharray="4,3"/>
   <path class="ai-connection" d="M66 104 L266.8 104" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M276 152 L476.8 152" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M484 200 L276 200" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
-  <path class="ai-connection" d="M276 248 L314 248" fill="none" stroke="#333" stroke-width="2"/>
-  <path class="ai-connection" d="M315 249 L315 295" fill="none" stroke="#333" stroke-width="2"/>
-  <path class="ai-connection" d="M314 296 L283.2 296" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M276 344 L686.8 344" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M694 392 L276 392" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
-  <path class="ai-connection" d="M274 440 L66 440" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
-  <path class="ai-connection" d="M274 488 L66 488" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
-  <path class="ai-connection" d="M276 536 L694 536" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M276 160 L476.8 160" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M484 216 L276 216" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M276 272 L315 272 L315 328 L283.2 328" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M276 384 L686.8 384" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M694 440 L276 440" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M274 496 L66 496" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M274 552 L66 552" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M276 608 L694 608" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-open)"/>
   </g>
 </svg>

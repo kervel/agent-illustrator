@@ -1903,17 +1903,21 @@ fn check_contains_in_stmts(
                     container,
                     elements,
                     padding,
+                    padding_x,
+                    padding_y,
                 } = &c.expr
                 {
                     let pad = padding.unwrap_or(0.0);
+                    let pad_x = padding_x.unwrap_or(pad);
+                    let pad_y = padding_y.unwrap_or(pad);
                     if let Some(container_elem) = result.get_element_by_name(&container.node.0) {
                         let cb = container_elem.bounds;
                         for elem_id in elements {
                             if let Some(elem) = result.get_element_by_name(&elem_id.node.0) {
                                 let eb = elem.bounds;
                                 // Check left edge
-                                if cb.x > eb.x - pad + CONTAINMENT_EPSILON {
-                                    let overflow = cb.x - (eb.x - pad);
+                                if cb.x > eb.x - pad_x + CONTAINMENT_EPSILON {
+                                    let overflow = cb.x - (eb.x - pad_x);
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
                                         message: format!(
@@ -1925,8 +1929,8 @@ fn check_contains_in_stmts(
                                     });
                                 }
                                 // Check right edge
-                                if cb.right() + CONTAINMENT_EPSILON < eb.right() + pad {
-                                    let overflow = (eb.right() + pad) - cb.right();
+                                if cb.right() + CONTAINMENT_EPSILON < eb.right() + pad_x {
+                                    let overflow = (eb.right() + pad_x) - cb.right();
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
                                         message: format!(
@@ -1938,8 +1942,8 @@ fn check_contains_in_stmts(
                                     });
                                 }
                                 // Check top edge
-                                if cb.y > eb.y - pad + CONTAINMENT_EPSILON {
-                                    let overflow = cb.y - (eb.y - pad);
+                                if cb.y > eb.y - pad_y + CONTAINMENT_EPSILON {
+                                    let overflow = cb.y - (eb.y - pad_y);
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
                                         message: format!(
@@ -1951,8 +1955,8 @@ fn check_contains_in_stmts(
                                     });
                                 }
                                 // Check bottom edge
-                                if cb.bottom() + CONTAINMENT_EPSILON < eb.bottom() + pad {
-                                    let overflow = (eb.bottom() + pad) - cb.bottom();
+                                if cb.bottom() + CONTAINMENT_EPSILON < eb.bottom() + pad_y {
+                                    let overflow = (eb.bottom() + pad_y) - cb.bottom();
                                     warnings.push(LintWarning {
                                         category: LintCategory::Containment,
                                         message: format!(

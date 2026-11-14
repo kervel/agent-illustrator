@@ -627,8 +627,12 @@ impl ConstraintCollector {
                 container,
                 elements,
                 padding,
+                padding_x,
+                padding_y,
             } => {
                 let pad = padding.unwrap_or(0.0);
+                let pad_x = padding_x.unwrap_or(pad);
+                let pad_y = padding_y.unwrap_or(pad);
 
                 // For containment, generate relational inequality constraints:
                 // container.x <= element.x - padding
@@ -641,7 +645,7 @@ impl ConstraintCollector {
                         .push(LayoutConstraint::LessOrEqualRelational {
                             left: LayoutVariable::x(&container.node.0),
                             right: LayoutVariable::x(&elem.node.0),
-                            offset: -pad,
+                            offset: -pad_x,
                             source: ConstraintSource::user(
                                 span.clone(),
                                 format!("{} contains {} (left)", container.node.0, elem.node.0),
@@ -653,7 +657,7 @@ impl ConstraintCollector {
                         .push(LayoutConstraint::GreaterOrEqualRelational {
                             left: LayoutVariable::new(&container.node.0, LayoutProperty::Right),
                             right: LayoutVariable::new(&elem.node.0, LayoutProperty::Right),
-                            offset: pad,
+                            offset: pad_x,
                             source: ConstraintSource::user(
                                 span.clone(),
                                 format!("{} contains {} (right)", container.node.0, elem.node.0),
@@ -665,7 +669,7 @@ impl ConstraintCollector {
                         .push(LayoutConstraint::LessOrEqualRelational {
                             left: LayoutVariable::y(&container.node.0),
                             right: LayoutVariable::y(&elem.node.0),
-                            offset: -pad,
+                            offset: -pad_y,
                             source: ConstraintSource::user(
                                 span.clone(),
                                 format!("{} contains {} (top)", container.node.0, elem.node.0),
@@ -677,7 +681,7 @@ impl ConstraintCollector {
                         .push(LayoutConstraint::GreaterOrEqualRelational {
                             left: LayoutVariable::new(&container.node.0, LayoutProperty::Bottom),
                             right: LayoutVariable::new(&elem.node.0, LayoutProperty::Bottom),
-                            offset: pad,
+                            offset: pad_y,
                             source: ConstraintSource::user(
                                 span.clone(),
                                 format!("{} contains {} (bottom)", container.node.0, elem.node.0),

@@ -71,7 +71,8 @@ Connection modifiers:
     routing: orthogonal     Right-angle path (default)
     routing: direct         Straight diagonal line
     routing: curved         Smooth cubic Bezier curve
-    via: element            Route curve through element's center
+    via: [e1, e2]        Route through the elements' centers: a smooth curve (curved) or one
+                            polyline with sharp corners (direct) - e.g. a self-message
     label: "text"           Add label (at midpoint or curve apex)
     label_at: <number>      Label position along path (0.0=start, 1.0=end, default 0.5)
     label_offset: <number>  Perpendicular distance from path to label (default 10);
@@ -224,6 +225,7 @@ constrain a.center_y = midpoint(b.bottom, c.top)   Center in the gap between edg
 constrain a.center_x = midpoint(g.cell(0,0), g.cell(0,2))   Grid cells work too
                                        (there is no other arithmetic: no ( ) or /)
 constrain bg contains a, b [padding: 10]   Auto-size container (either side may be a path: `card.row.x`).
+                                          `padding_x:` / `padding_y:` set one axis (override `padding`).
                                             In an animation it wraps what is on screen in each frame: a row with
                                             `appears: later` members makes the box grow as they appear
 constrain a.center_x = 50 as a_home    Name a constraint
@@ -456,7 +458,7 @@ Declarations that serve motion:
                   LIST: a list parameter of the enclosing template
                   (template "cls" (attrs: [])) or a literal ["a", "b"]; NAME is the
                   item (label: NAME, text NAME, "{NAME}"); i is the 0-based
-                  position (a number; in strings "{i}"). Names declared inside
+                  position (a number; in strings "{i}", "{i+1}" counts from 1). Names declared inside
                   get _1, _2, ... (x -> x_1; nested: x_2_3). Empty list: nothing.
                   anchors may be declared inside: anchor r_a [position: row.right]
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after

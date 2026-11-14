@@ -1073,6 +1073,9 @@ pub enum ConstraintExpr {
         container: Spanned<Identifier>,
         elements: Vec<Spanned<Identifier>>,
         padding: Option<f64>,
+        /// `[padding_x: N]` / `[padding_y: N]` override `padding` on one axis.
+        padding_x: Option<f64>,
+        padding_y: Option<f64>,
     },
 }
 

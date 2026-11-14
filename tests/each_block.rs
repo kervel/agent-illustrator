@@ -211,3 +211,12 @@ fn each_and_in_are_reserved() {
     // `in` stays an ordinary word outside `each` (`ease: in`).
     assert!(render("rect in").is_ok());
 }
+
+#[test]
+fn index_plus_one_numbers_items_from_one() {
+    let out = svg(r#"
+each n, i in ["a", "b", "c"] { rect r [width: 40, height: 20, label: "{i+1}. {n}"] }"#);
+    for t in ["1. a", "2. b", "3. c"] {
+        assert!(out.contains(&format!(">{t}<")), "missing {t}");
+    }
+}

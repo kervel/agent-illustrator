@@ -366,6 +366,21 @@ fn interpolate(text: &str, vars: &Vars) -> String {
             };
             out = out.replace(&needle, &value);
         }
+        // `{i+1}` / `{i-1}`: a number variable plus or minus a whole number
+        // (1-based numbering from the 0-based index).
+        if let StyleValue::Number { value, .. } = v {
+            for sign in ['+', '-'] {
+                let prefix = format!("{{{}{}", k, sign);
+                while let Some(start) = out.find(&prefix) {
+                    let rest = &out[start + prefix.len()..];
+                    let Some(end) = rest.find('}') else { break };
+                    let Ok(n) = rest[..end].trim().parse::<f64>() else { break };
+                    let r = if sign == '+' { value + n } else { value - n };
+                    let end_abs = start + prefix.len() + end + 1;
+                    out.replace_range(start..end_abs, &format!("{}", r));
+                }
+            }
+        }
     }
     out
 }

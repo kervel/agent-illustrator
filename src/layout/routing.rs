@@ -789,6 +789,24 @@ pub fn route_connection_with_anchors_and_types(
         return vec![start, control1, control2, end];
     }
 
+    // Direct routing through `via:` points: one polyline start -> via... -> end.
+    // The ends leave toward the first / last via point unless anchored.
+    if mode == RoutingMode::Direct && !via_points.is_empty() {
+        let first = via_points[0];
+        let last = via_points[via_points.len() - 1];
+        let start = from_anchor
+            .map(|a| a.position)
+            .unwrap_or_else(|| boundary_point_toward_shape(from_bounds, first, from_is_ellipse));
+        let end = to_anchor
+            .map(|a| a.position)
+            .unwrap_or_else(|| boundary_point_toward_shape(to_bounds, last, to_is_ellipse));
+        let mut path = Vec::with_capacity(via_points.len() + 2);
+        path.push(start);
+        path.extend_from_slice(via_points);
+        path.push(end);
+        return path;
+    }
+
     // For direct routing, use the pre-calculated start/end positions
     if mode == RoutingMode::Direct {
         let dx = to_center.x - from_center.x;
@@ -1003,6 +1021,16 @@ fn extract_via_references(modifiers: &[Spanned<StyleModifier>]) -> Vec<String> {
                         via_refs.push(id.0.clone());
                     }
                 }
+                StyleValue::List(items) => {
+                    // Bracketed list: `via: [w1, w2]`
+                    for item in items {
+                        match &item.node {
+                            StyleValue::Identifier(id) => via_refs.push(id.0.clone()),
+                            StyleValue::Keyword(k) => via_refs.push(k.clone()),
+                            _ => {}
+                        }
+                    }
+                }
                 _ => {}
             }
         }
@@ -1095,7 +1123,9 @@ pub fn route_connections_hiding(
                         // the edge pair (bottom -> top for a fan-out below, ...)
                         // decides, not a ray from centre to centre, which exits
                         // a corner and arrives sideways.
-                        let auto_ortho = routing_mode == RoutingMode::Orthogonal
+                        let has_via = !extract_via_references(&conn.modifiers).is_empty();
+                        let auto_ortho = (routing_mode == RoutingMode::Orthogonal
+                            || (routing_mode == RoutingMode::Direct && has_via))
                             && conn.from.anchor.is_none()
                             && conn.to.anchor.is_none();
                         let from_anchor_opt = if auto_ortho { None } else { Some(&from_anchor) };

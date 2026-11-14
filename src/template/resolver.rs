@@ -961,6 +961,8 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr
             container,
             elements,
             padding,
+            padding_x,
+            padding_y,
         } => ConstraintExpr::Contains {
             container: prefix_identifier(container, prefix),
             elements: elements
@@ -968,6 +970,8 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr
                 .map(|e| prefix_identifier(e, prefix))
                 .collect(),
             padding: *padding,
+            padding_x: *padding_x,
+            padding_y: *padding_y,
         },
     }
 }

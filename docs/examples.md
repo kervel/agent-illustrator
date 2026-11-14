@@ -581,7 +581,7 @@ No dedicated construct: a template draws an actor and its lifeline, and a list
 (`ticks`) makes one invisible row per message, the same height on every
 lifeline (a shorter list ends that lifeline early). A message is an arrow
 between `x.p_k` and `y.p_k`. Activation bars, loop/alt fragments, a note, a
-self-message (chain through two waypoints) and a destroy mark are plain shapes
+self-message (`via: [w1, w2]` on a direct connector) and a destroy mark are plain shapes
 placed with `constrain`. `label_mask: 4` cuts the line behind a label that sits
 on a message; keep the label shorter than its arrow. Full file:
 examples/sequence-diagram.ail.
@@ -598,7 +598,7 @@ examples/sequence-diagram.ail.
 template "life" (ttl: "", ticks: [], step: 48, w: 110) {
   col l [gap: 30, padding: 0, align: center] {
     rect hd [label: ttl, width: w, height: 40]
-    col rows [gap: 0, padding: 0] {
+    col rows [gap: 8, padding: 0] {
       each t in ticks {
         rect p [width: 2, height: step, stroke: none, fill: none]
       }
@@ -613,53 +613,51 @@ row actors [gap: 100, align: top] {
   life db [ttl: "Database", ticks: [1,2,3,4,5,6,7,8,9,10]]
 }
 
-// fragments: `loop` around rows 6-7, `alt` around rows 8-9 (a dashed divider between its branches)
-rect loop_f [fill: none, stroke: role-muted, overlaps: [api, auth, db, api.lifeline, auth.lifeline, db.lifeline]]
-constrain loop_f.left = api.p_6.center_x - 100
-constrain loop_f.right = db.p_6.center_x + 50
-constrain loop_f.top = api.p_6.center_y - 28
-constrain loop_f.bottom = api.p_7.center_y + 20
+// fragments: a square frame that `contains` the rows it spans (padding_x: wider than the
+// lifelines it covers, padding_y: 0); rows are 8px apart (rows gap), so frames never touch. `alt` has a divider between its branches.
+rect loop_f [corner_radius: 0, fill: none, stroke: role-muted, overlaps: [actors, api, auth, db, api.lifeline, auth.lifeline, db.lifeline]]
+constrain loop_f contains api.p_6, db.p_7 [padding_x: 110, padding_y: 0]
 text "loop [each item]" loop_t [font_size: 11, fill: role-muted, overlaps: [loop_f, api, api.lifeline]]
 constrain loop_t.left = loop_f.left + 6
 constrain loop_t.top = loop_f.top + 4
 
-rect alt_f [fill: none, stroke: role-muted, overlaps: [cl, api, cl.lifeline, api.lifeline, act_api]]
-constrain alt_f.left = cl.p_8.center_x - 50
-constrain alt_f.right = api.p_8.center_x + 50
-constrain alt_f.top = cl.p_8.center_y - 28
-constrain alt_f.bottom = cl.p_9.center_y + 22
-rect alt_div [height: 1, fill: role-muted, stroke: none, overlaps: [cl, api, cl.lifeline, api.lifeline]]
+rect alt_f [corner_radius: 0, fill: none, stroke: role-muted, overlaps: [actors, cl, api, cl.lifeline, api.lifeline, act_api]]
+constrain alt_f contains cl.p_8, api.p_9 [padding_x: 80, padding_y: 0]
+rect alt_div [height: 1, fill: role-muted, stroke: none, overlaps: [actors, cl, api, cl.lifeline, api.lifeline]]
 constrain alt_div.left = alt_f.left
 constrain alt_div.right = alt_f.right
-constrain alt_div.center_y = cl.p_9.center_y - 24
-text "alt [in stock]" alt_t [font_size: 11, fill: role-muted, overlaps: [alt_f, cl, cl.lifeline]]
+constrain alt_div.center_y = cl.p_8.bottom + 4
+text "alt [in stock]" alt_t [font_size: 11, fill: role-muted, overlaps: [actors, alt_f, cl, cl.lifeline]]
 constrain alt_t.left = alt_f.left + 6
 constrain alt_t.top = alt_f.top + 4
-text "[out of stock]" alt_e [font_size: 11, fill: role-muted, overlaps: [alt_f, cl, cl.lifeline]]
+text "[out of stock]" alt_e [font_size: 11, fill: role-muted, overlaps: [actors, alt_f, cl, cl.lifeline]]
 constrain alt_e.left = alt_f.left + 6
 constrain alt_e.top = alt_div.bottom + 3
 
 // activation bars
-rect act_api [width: 10, fill: role-surface-2, stroke: role-muted, overlaps: [api, api.lifeline]]
+rect act_api [corner_radius: 0, width: 10, fill: role-surface-2, stroke: role-muted, overlaps: [api, api.lifeline]]
 constrain act_api.center_x = api.p_1.center_x
 constrain act_api.top = api.p_1.center_y - 4
 constrain act_api.bottom = api.p_9.center_y + 4
-rect act_auth [width: 10, fill: role-surface-2, stroke: role-muted, overlaps: [auth, auth.lifeline]]
+rect act_auth [corner_radius: 0, width: 10, fill: role-surface-2, stroke: role-muted, overlaps: [auth, auth.lifeline]]
 constrain act_auth.center_x = auth.p_2.center_x
 constrain act_auth.top = auth.p_2.center_y - 4
 constrain act_auth.bottom = auth.p_3.center_y + 4
-rect act_db [width: 10, fill: role-surface-2, stroke: role-muted, overlaps: [db, db.lifeline]]
+rect act_db [corner_radius: 0, width: 10, fill: role-surface-2, stroke: role-muted, overlaps: [db, db.lifeline]]
 constrain act_db.center_x = db.p_6.center_x
 constrain act_db.top = db.p_6.center_y - 4
 constrain act_db.bottom = db.p_7.center_y + 4
 
 // a note over Database, and a destroy mark at the end of Auth's lifeline
-rect note1 [label: "read-only<br>replica", width: 96, height: 36, fill: role-warn-soft, stroke: role-muted, font_size: 11, overlaps: [db, db.lifeline]]
+rect note1 [corner_radius: 0, label: "read-only<br>replica", width: 96, height: 36, fill: role-warn-soft, stroke: role-muted, font_size: 11, overlaps: [db, db.lifeline]]
 constrain note1.center_x = db.p_4.center_x
 constrain note1.center_y = db.p_4.center_y
-text "✕" auth_end [font_size: 18, fill: role-muted, overlaps: [auth, auth.lifeline]]
-constrain auth_end.center_x = auth.rows.center_x
-constrain auth_end.center_y = auth.rows.bottom
+rect x1 [width: 16, height: 2, rotation: 45, fill: role-muted, stroke: none, overlaps: [auth, auth.lifeline, x2]]
+rect x2 [width: 16, height: 2, rotation: -45, fill: role-muted, stroke: none, overlaps: [auth, auth.lifeline, x1]]
+constrain x1.center_x = auth.rows.center_x
+constrain x1.center_y = auth.rows.bottom
+constrain x2.center_x = x1.center_x
+constrain x2.center_y = x1.center_y
 
 // a self-message: out to a waypoint pair and back (rows 4-5)
 rect sm1 [size: 2, stroke: none, fill: none]
@@ -676,7 +674,7 @@ constrain sm_t.center_y = api.p_4.center_y + 24
 cl.p_1 -> api.p_1 [routing: direct, label: "1: login(user)", label_offset: 0, label_mask: 4]
 api.p_2 -> auth.p_2 [routing: direct, label: "2: verify", label_offset: 0, label_mask: 4]
 auth.p_3 -> api.p_3 [routing: direct, to_end: open, stroke_dasharray: dashed, label: "3: ok", label_offset: 0, label_mask: 4]
-api.p_4 -- sm1 -- sm2 -> api.p_5 [routing: direct]
+api.p_4 -> api.p_5 [routing: direct, via: [sm1, sm2]]
 api.p_6 -> db.p_6 [routing: direct, label: "5: query", label_offset: 0, label_mask: 4]
 db.p_7 -> api.p_7 [routing: direct, to_end: open, stroke_dasharray: dashed, label: "6: rows", label_offset: 0, label_mask: 4]
 api.p_8 -> cl.p_8 [routing: direct, to_end: open, stroke_dasharray: dashed, label: "7: 200 OK", label_offset: 0, label_mask: 4]

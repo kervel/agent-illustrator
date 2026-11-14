@@ -29,7 +29,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 
 | What you want | Use | Never |
 |---------------|-----|-------|
-| A box around existing elements | `constrain bg contains a, b [padding: 30]` | Hand-computed `width`/`height` |
+| A box around existing elements | `constrain bg contains a, b [padding: 30]` (`padding_x:`/`padding_y:` per axis) | Hand-computed `width`/`height` |
 | Anything on a lattice: matrix, table, calendar, aligned number columns | `grid` + `[at: [row, col]]`, cells as `g.cell(r, c)` | `constrain` lines with a hand-picked pitch |
 | Text centred in a box | `rect b [label: "x"]` | a separate `text` element plus constraints |
 | Several lines in a box | `label: "a<br>b<br>c"` | one `text` element per line |
@@ -376,10 +376,13 @@ There is no sequence-diagram construct; `examples/sequence-diagram.ail` builds o
 from a `life` template (actor head + dashed lifeline) whose `ticks: [...]` list
 makes one invisible row per message, equally high on every lifeline. A message is an
 arrow between `x.p_k` and `y.p_k` (solid = call, dashed + `to_end: open` = reply,
-solid + open = async); a self-message chains `x.p_4 -- w1 -- w2 -> x.p_5` through
-two waypoints. Activation bars, loop/alt fragments, notes and a destroy mark are
-plain shapes placed against the rows with `constrain` (mark them `overlaps:` the
-lifeline `x.lifeline`).
+solid + open = async); a self-message is `x.p_4 -> x.p_5 [routing: direct, via: [w1, w2]]` (one polyline
+through two invisible waypoint rects). Fragments (loop/alt) are square frames that
+`contains` the rows they span: `constrain f contains a.p_6, b.p_7 [padding_x: 110,
+padding_y: 0]`, with `gap: 8` between rows so neighbouring frames never touch.
+Activation bars, notes and the destroy mark (two crossed rotated rects) are plain
+shapes placed against the rows with `constrain` (`corner_radius: 0` for the
+square look; mark them `overlaps:` the lifeline `x.lifeline`).
 
 `label_offset:` moves a label off the arrow (negative = the other side).
 `label_at:` slides it along the arrow, so it can clear a lifeline. When a label
@@ -496,7 +499,7 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   `constrain`, anchors, keyframes and connections can target `entry_2` like any
   element. Unnamed elements need no names.
 - **Index.** `each NAME, i in LIST` binds `i` to the 0-based position. It is a
-  number: usable in a string (`"{i}"`) or where a number goes (`width: i`),
+  number: usable in a string (`"{i}"`, or `"{i+1}"` to count from 1) or where a number goes (`width: i`),
   not as a label by itself (`label: i` asks for quotes, like any number).
 - **Nesting.** An `each` may contain `each` (a grid of rows of cells).
 - **Lists as arguments.** A template argument may be a list (`attrs: ["a",
