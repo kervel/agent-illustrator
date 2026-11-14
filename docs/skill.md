@@ -521,11 +521,12 @@ outline is on top) that `contains` the whole column; every inner rect is
 carry fill or stroke, which is why the outlines are rects.
 
 ```
-template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
+template "cls" (ttl: "", stereo: [], attrs: [], changed: [], added: [], later: [], ops: [],
+                w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
         col head [gap: 0, padding: 0] {
             each s in stereo {
-                rect st_row [width: w, height: 16, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell]
+                rect st_row [width: w, height: 16, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell, label_fill: role-muted]
             }
             rect hd [width: w, height: 28, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
         }
@@ -534,6 +535,15 @@ template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: 
                 rect a_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
                 anchor l_a [position: a_row.left, direction: left]
                 anchor r_a [position: a_row.right, direction: right]
+            }
+            each a in changed {
+                rect c_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-warn-soft, stroke: none, clip: shell]
+            }
+            each a in added {
+                rect n_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-ok-soft, stroke: none, clip: shell]
+            }
+            each a in later {
+                rect l_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-surface-2, stroke: none, clip: shell, label_fill: role-muted]
             }
         }
         col op [gap: 0, padding: 0] {
@@ -561,9 +571,9 @@ template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: 
     anchor l_op [position: op_box.left, direction: left]
     anchor r_op [position: op_box.right, direction: right]
 }
-cls entry [ttl: "TimeEntry", attrs: ["date", "hours", "status"], ops: ["+ approve()"]]
-cls invoice [ttl: "Invoice", attrs: ["number", "total", "paid"], ops: ["+ pay()"]]
-entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
+cls entry [ttl: "TimeEntry", attrs: ["date: date", "hours: decimal"], changed: ["status: EntryStatus"], ops: ["+ approve()"]]
+cls invoice [ttl: "Invoice", attrs: ["number: str", "total: decimal", "paid: bool"], ops: ["+ pay()"]]
+entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on", bundle: apart]
 ```
 
 Connection ends: the template declares anchors for the box (`t_box`, `b_box`),

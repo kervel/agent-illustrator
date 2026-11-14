@@ -786,11 +786,12 @@ relationship's name. Elements made inside an `each` are numbered `a_row_1`,
 `a_row_2`, ... (`--doc each`).
 
 ```
-template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
+template "cls" (ttl: "", stereo: [], attrs: [], changed: [], added: [], later: [], ops: [],
+                w: 220, rh: 20, hfill: secondary-light, edge: foreground-2, radius: 8) {
     col box [gap: 0, padding: 0] {
         col head [gap: 0, padding: 0] {
             each s in stereo {
-                rect st_row [width: w, height: 16, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell]
+                rect st_row [width: w, height: 16, label: s, font_size: 11, fill: hfill, stroke: none, clip: shell, label_fill: role-muted]
             }
             rect hd [width: w, height: 28, label: ttl, font_weight: bold, fill: hfill, stroke: none, clip: shell]
         }
@@ -800,10 +801,21 @@ template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: 
                 anchor l_a [position: a_row.left, direction: left]
                 anchor r_a [position: a_row.right, direction: right]
             }
+            each a in changed {
+                rect c_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-warn-soft, stroke: none, clip: shell]
+            }
+            each a in added {
+                rect n_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-ok-soft, stroke: none, clip: shell]
+            }
+            each a in later {
+                rect l_row [width: w, height: rh, label: a, align: start, font_size: 12, fill: role-surface-2, stroke: none, clip: shell, label_fill: role-muted]
+            }
         }
         col op [gap: 0, padding: 0] {
             each o in ops {
                 rect o_row [width: w, height: rh, label: o, align: start, font_size: 12, fill: background-1, stroke: none, clip: shell]
+                anchor l_o [position: o_row.left, direction: left]
+                anchor r_o [position: o_row.right, direction: right]
             }
         }
     }
@@ -815,14 +827,20 @@ template "cls" (ttl: "", stereo: [], attrs: [], ops: [], w: 220, rh: 20, hfill: 
     constrain at_box contains at
     constrain op_box contains op
     constrain shell contains box
+    anchor t_box [position: shell.top, direction: up]
+    anchor b_box [position: shell.bottom, direction: down]
     anchor l_hd [position: hd.left, direction: left]
     anchor r_hd [position: hd.right, direction: right]
+    anchor l_at [position: at_box.left, direction: left]
+    anchor r_at [position: at_box.right, direction: right]
+    anchor l_op [position: op_box.left, direction: left]
+    anchor r_op [position: op_box.right, direction: right]
 }
 row r1 [gap: 140, align: top] {
-    cls entry [ttl: "TimeEntry", attrs: ["date", "hours", "status"], ops: ["+ approve()"]]
-    cls invoice [ttl: "Invoice", attrs: ["number", "total", "paid"], ops: ["+ pay()"]]
+    cls entry [ttl: "TimeEntry", attrs: ["date: date", "hours: decimal"], changed: ["status: EntryStatus"], ops: ["+ approve()"]]
+    cls invoice [ttl: "Invoice", attrs: ["number: str", "total: decimal", "paid: bool"], ops: ["+ pay()"]]
 }
-entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on"]
+entry.r_a_2 -- invoice.l_a_2 [from_label: "*", to_label: "0..1", label: "billed on", bundle: apart]
 ```
 The full scene, with all anchors and relations, is `examples/class-diagram.ail`.
 
