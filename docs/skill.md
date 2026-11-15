@@ -522,7 +522,10 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   template argument), a name (`t.from -> t.to`, `constrain t.to.width = 90`),
   a string (`"{i+1}: {t.on}"`), `text t.on`. A field holding a name may be
   dotted (`from: failed.left`). Field names are free, reserved words
-  included (`from`, `label`, `text`).
+  included (`from`, `label`, `text`). A bare word value, hyphenated ones
+  included, shows as written inside a string: with `{fe: diamond-filled}`,
+  `"from_end: {r.fe}"` reads `from_end: diamond-filled` and `from_end: r.fe`
+  still sets the end, so one unquoted value serves both.
   ```
   each t in [{from: idle, to: run, on: "start"}, {from: run, to: idle, on: "stop"}] {
       t.from -> t.to [label: t.on]

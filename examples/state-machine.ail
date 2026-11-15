@@ -58,9 +58,10 @@ constrain token.center = start.center
 
 motion [title: heading, title_swap: roll]
 
-// Taking a transition: the event in the heading is highlighted while the token rides its arrow.
+// Taking a transition: the event in the heading is highlighted, and so is the arrow the token rides.
 motion take(arrow: path) {
     accent heading
+    highlight arrow [duration: slow]
     move token along arrow [duration: slow]
 }
 

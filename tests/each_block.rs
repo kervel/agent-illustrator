@@ -444,3 +444,40 @@ fn a_typo_in_a_field_is_reported_at_the_field() {
     let caret = err.lines().skip_while(|l| !l.contains("each t in")).nth(1).expect(&err);
     assert_eq!(caret.find('^'), line.find("rnu"), "{err}");
 }
+
+#[test]
+fn a_hyphenated_bare_value_shows_as_written_in_a_string() {
+    // `diamond-filled` unquoted parses as a (palette) token, not a plain word:
+    // `{r.look}` stayed literally `{r.look}`, with no diagnostic.
+    let out = svg(r#"
+col list {
+    each r in [{look: diamond-filled}, {look: crow}, {look: accent-1}] {
+        text "end: {r.look}"
+    }
+}
+"#);
+    assert!(out.contains("end: diamond-filled"), "{out}");
+    assert!(out.contains("end: crow"), "{out}");
+    assert!(out.contains("end: accent-1"), "{out}");
+    assert!(!out.contains("{r.look}"), "{out}");
+}
+
+#[test]
+fn one_unquoted_end_value_sets_the_end_and_shows_as_text() {
+    let quoted = svg(r#"
+row pair [gap: 120] { rect a  rect b }
+each r in [{fe: "diamond-filled"}] {
+    a -- b [from_end: r.fe]
+    text "from_end: {r.fe}" code
+}
+"#);
+    let bare = svg(r#"
+row pair [gap: 120] { rect a  rect b }
+each r in [{fe: diamond-filled}] {
+    a -- b [from_end: r.fe]
+    text "from_end: {r.fe}" code
+}
+"#);
+    assert!(bare.contains("from_end: diamond-filled"), "{bare}");
+    assert_eq!(quoted, bare);
+}

@@ -2376,6 +2376,21 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         }
     }
 
+    // Effects aimed at the line itself (pulse, flash, highlight, ping, shake,
+    // nudge): extra strokes along it, and a wrapper when the line moves.
+    let effect_kinds: Vec<String> = match (&builder.motion, conn_class.as_ref()) {
+        (Some(m), Some(c)) => m.overlays.get(c).map(|k| k.iter().cloned().collect()).unwrap_or_default(),
+        _ => Vec::new(),
+    };
+    let moves = effect_kinds.iter().any(|k| k == "wrap");
+    if moves {
+        let c = conn_class.as_ref().unwrap();
+        builder.add_connection_raw(format!(r#"<g class="kf-{}{}">"#, builder.scope(), c));
+    }
+    if !effect_kinds.is_empty() {
+        render_connection_effects(conn, builder, conn_class.as_ref().unwrap(), &effect_kinds, true);
+    }
+
     let base_wrap = match (&builder.motion, conn_class.as_ref()) {
         (Some(m), Some(c)) => m.conn_variants.iter().any(|(id, _)| id == c),
         _ => false,
@@ -2404,6 +2419,18 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
         builder.add_connection_raw(format!(
             r#"<g class="conn-{scope}{c}"><path class="aihead-{scope}{c}" d="{hd}" fill="{fill}" style="opacity:{on}"/></g>"#
         ));
+    }
+    if !effect_kinds.is_empty() {
+        render_connection_effects(conn, builder, conn_class.as_ref().unwrap(), &effect_kinds, false);
+    }
+    // The labels (in the element layer) move with the line.
+    let labels_move = moves && (conn.label.is_some() || conn.end_labels.iter().any(|l| l.is_some()));
+    if moves {
+        builder.add_connection_raw("</g>".to_string());
+    }
+    if labels_move {
+        let c = conn_class.as_ref().unwrap();
+        builder.start_group_attrs(&[format!("kf-{}{}", builder.scope(), c)], "");
     }
 
     // Render connection label (and any end labels) if present
@@ -2458,6 +2485,65 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
             &extra_classes,
         );
     }
+    if labels_move {
+        builder.end_group();
+    }
+}
+
+/// Motion effect nodes of a connection: a highlight stroke behind the line
+/// (`behind`), a flash stroke, a pulse stroke and a ping ring over it. All
+/// hidden until the effect plays; inside a `conn-<id>` group so hiding the
+/// line hides them too.
+fn render_connection_effects(conn: &ConnectionLayout, builder: &mut SvgBuilder, c: &str, kinds: &[String], behind: bool) {
+    let s = builder.scope().to_string();
+    let sw = conn.styles.stroke_width.unwrap_or(2.0);
+    let d = connection_path_d(&conn.path, conn.routing_mode, conn.ends, sw);
+    let line_colour = conn.styles.stroke.clone().unwrap_or_else(|| "#333".to_string());
+    let mut out = String::new();
+    for kind in kinds {
+        let (what, arg) = kind.split_once(':').unwrap_or((kind.as_str(), ""));
+        let stroke = |w: f64, colour: &str, class: &str| {
+            format!(
+                r#"<path class="{class}-{s}{c}" d="{d}" fill="none" stroke="{colour}" stroke-width="{}" stroke-linecap="round" stroke-linejoin="round" style="opacity:0;pointer-events:none"/>"#,
+                r2(w)
+            )
+        };
+        match (what, behind) {
+            ("highlight", true) => out.push_str(&stroke(sw + 12.0, arg, "aihl")),
+            ("flash", false) => out.push_str(&stroke(sw + 3.0, arg, "aiflash")),
+            ("pulse", false) => {
+                let widen: f64 = arg.parse().unwrap_or(2.5);
+                out.push_str(&stroke(sw * widen, &line_colour, "aipulse"));
+            }
+            ("ping", false) => {
+                let m = path_midpoint(&conn.path);
+                let colour = if arg == "currentColor" { line_colour.as_str() } else { arg };
+                out.push_str(&format!(
+                    r#"<circle class="aiping-{s}{c}" cx="{}" cy="{}" r="12" fill="none" stroke="{colour}" stroke-width="3" style="opacity:0;transform-origin:{}px {}px;pointer-events:none"/>"#,
+                    r2(m.x), r2(m.y), r2(m.x), r2(m.y)
+                ));
+            }
+            _ => {}
+        }
+    }
+    if !out.is_empty() {
+        builder.add_connection_raw(format!(r#"<g class="conn-{s}{c}">{out}</g>"#));
+    }
+}
+
+/// The point halfway along a polyline (by length).
+fn path_midpoint(path: &[Point]) -> Point {
+    let total: f64 = path.windows(2).map(|w| (w[1].x - w[0].x).hypot(w[1].y - w[0].y)).sum();
+    let mut left = total / 2.0;
+    for w in path.windows(2) {
+        let l = (w[1].x - w[0].x).hypot(w[1].y - w[0].y);
+        if l >= left && l > 0.0 {
+            let f = left / l;
+            return Point::new(w[0].x + (w[1].x - w[0].x) * f, w[0].y + (w[1].y - w[0].y) * f);
+        }
+        left -= l;
+    }
+    path.first().copied().unwrap_or(Point::new(0.0, 0.0))
 }
 
 /// Format connection styles (stroke-focused, no fill)

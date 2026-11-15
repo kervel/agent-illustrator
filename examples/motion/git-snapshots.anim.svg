@@ -248,6 +248,8 @@ text { white-space: pre; }
 .kf-f8126697-stick { animation: ailfilm45 21.32s linear infinite, ailfilm46 21.32s linear infinite; }
 .kfp-f8126697-st3_dot { animation: ailfilm50 21.32s linear infinite; }
 .kfp-f8126697-status { animation: ailfilm55 21.32s linear infinite; }
+.aitxt-f8126697-status-base.kfp-f8126697-status { animation: ailfilm52 21.32s linear infinite, ailfilm55 21.32s linear infinite, ailfilm54 21.32s linear infinite; }
+.aitxt-f8126697-status-v0.kfp-f8126697-status { animation: ailfilm53 21.32s linear infinite, ailfilm55 21.32s linear infinite, ailfilm54 21.32s linear infinite; }
 @media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
 ]]></style>
   <defs>

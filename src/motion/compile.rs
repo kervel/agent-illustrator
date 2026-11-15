@@ -1830,7 +1830,7 @@ pub fn compile(input: &CompileInput) -> Result<Motion, CompileError> {
 
     // Fill the settled table; defaults for channels that only animate.
     let neutral = |k: &ChKey| -> Val {
-        let aux_hook = ["aighost-", "aiflash-", "aihl-", "aiping-", "aitick-", "aiacu-", "aiacr-", "aiaco-", "aiacb-", "aiacm-"]
+        let aux_hook = ["aighost-", "aiflash-", "aihl-", "aiping-", "aipulse-", "aitick-", "aiacu-", "aiacr-", "aiaco-", "aiacb-", "aiacm-"]
             .iter()
             .any(|p| k.sel.starts_with(&format!(".{}", p)));
         match k.prop {
@@ -2714,6 +2714,80 @@ impl<'a> Compiler<'a> {
             Some(MotionValue::Str(n)) => Some(n.clone()),
             _ => None,
         };
+        // A connection (an arrow) has no box to scale or fill: its effects
+        // are drawn along the line itself (see `render_connection`).
+        let on_connection = self
+            .input
+            .base
+            .connections
+            .iter()
+            .any(|c| c.name.as_ref().is_some_and(|n| n.0 == target));
+        if on_connection {
+            let mut kinds: Vec<String> = Vec::new();
+            match name {
+                // A pulse on a line: a wider stroke of the line swells in and out.
+                "pulse" => {
+                    let k = opt_number(opts, "scale").unwrap_or(1.15);
+                    // 1.15 (the default) -> 2.5x the stroke; 1.3 -> 4x.
+                    let widen = (1.0 + (k - 1.0) * 10.0).max(1.5);
+                    kinds.push(format!("pulse:{}", (widen * 100.0).round() / 100.0));
+                    self.overlay(fm, format!(".aipulse-{}{}", s, target), Prop::Opacity, ov(vec![Val::n(0.0), Val::n(0.7), Val::n(0.0)], Mode::Abs, t.ease));
+                }
+                // A white flash over a thin line on a white page reads as the
+                // line blinking out; flash it in the accent colour instead.
+                "flash" => {
+                    kinds.push(format!("flash:{}", colour.unwrap_or_else(|| "var(--accent-1, #2346D8)".into())));
+                    self.overlay(fm, format!(".aiflash-{}{}", s, target), Prop::Opacity, ov(vec![Val::n(0.0), Val::n(0.9), Val::n(0.0)], Mode::Abs, Ease::Linear));
+                }
+                "highlight" => {
+                    kinds.push(format!("highlight:{}", colour.unwrap_or_else(|| "var(--accent-1, #2346D8)".into())));
+                    self.overlay(fm, format!(".aihl-{}{}", s, target), Prop::Opacity, ov(vec![Val::n(0.0), Val::n(0.3), Val::n(0.3), Val::n(0.0)], Mode::Abs, t.ease));
+                }
+                // A ring from the middle of the line.
+                "ping" => {
+                    kinds.push(format!("ping:{}", colour.unwrap_or_else(|| "currentColor".into())));
+                    let hook = format!(".aiping-{}{}", s, target);
+                    self.overlay(fm, hook.clone(), Prop::Opacity, ov(vec![Val::n(0.9), Val::n(0.0)], Mode::Abs, t.ease));
+                    let k = opt_number(opts, "scale").unwrap_or(1.8);
+                    self.overlay(fm, hook, Prop::Scale, ov(vec![Val::xy(1.0, 1.0), Val::xy(k, k)], Mode::Abs, t.ease));
+                }
+                // The whole line (and its labels) moves: it gets a wrapper.
+                "shake" | "nudge" => {
+                    kinds.push("wrap".to_string());
+                    let keys = if name == "shake" {
+                        [0.0, -1.0, 0.8, -0.5, 0.25, 0.0].iter().map(|f| Val::xy(f * d, 0.0)).collect()
+                    } else {
+                        let (ux, uy) = match opt_name(opts, "direction").unwrap_or("right") {
+                            "left" => (-1.0, 0.0),
+                            "up" => (0.0, -1.0),
+                            "down" => (0.0, 1.0),
+                            _ => (1.0, 0.0),
+                        };
+                        vec![Val::xy(0.0, 0.0), Val::xy(ux * d, uy * d), Val::xy(0.0, 0.0)]
+                    };
+                    let ease = if name == "shake" { Ease::Linear } else { t.ease };
+                    self.overlay(fm, wrap, Prop::Translate, ov(keys, Mode::Add, ease));
+                }
+                "accent" => {
+                    return Err(CompileError {
+                        message: format!(
+                            "accent {}: '{}' is a connection; accent marks a box, a row or a label. \
+                             For a line use highlight, flash or pulse",
+                            target, target
+                        ),
+                        span: fm.atoms[atom].span.clone(),
+                    })
+                }
+                other => {
+                    return Err(CompileError {
+                        message: format!("unknown effect '{}': use accent, pulse, shake, flash, ping, highlight or nudge", other),
+                        span: fm.atoms[atom].span.clone(),
+                    })
+                }
+            }
+            self.aux.overlays.entry(target.to_string()).or_default().extend(kinds);
+            return Ok(());
+        }
         match name {
             "pulse" => {
                 let k = opt_number(opts, "scale").unwrap_or(1.15);

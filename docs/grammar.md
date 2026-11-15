@@ -395,6 +395,9 @@ Motion statements (full guide: --skill-animation):
     accent a [tone: attention|error|ok, style: auto|underline|ring|outline|wiggle, hold: step]
                         "look here": the style follows the element, the tone says why
     pulse | shake | nudge | flash | ping | highlight  a [...]   loop a [pulse]
+                        on a named connection (a -> b as link) they act on the line:
+                        pulse thickens it, flash/highlight stroke it in a colour,
+                        ping rings its middle, shake/nudge move it and its labels
     count total [to: 14900, format: "€ {:,}"]
     transform cap [label: "...", swap: roll|fade|cut]
     swap a -> b [via: flip|fade|morph, flip: member]

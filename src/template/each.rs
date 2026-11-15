@@ -576,6 +576,9 @@ fn as_text(v: &StyleValue) -> Option<String> {
         StyleValue::String(s) | StyleValue::Keyword(s) => Some(s.clone()),
         StyleValue::Number { value, .. } => Some(format!("{}", value)),
         StyleValue::Identifier(id) => Some(id.0.clone()),
+        // A bare hyphenated word (`diamond-filled`, `accent-1`) parses as a
+        // colour token; inside a string it is the word as written.
+        StyleValue::Color(c) => c.token_string().or_else(|| c.concrete_string().map(str::to_string)),
         _ => None,
     }
 }
@@ -618,7 +621,20 @@ fn fill(expr: &str, vars: &Vars, problems: &mut Vec<Problem>) -> Option<String> 
         problems.push(Problem::Msg(format!("`{{{}}}`: {} has no part `{}` to show as text", expr, what, r)));
         return None;
     }
-    as_text(&value)
+    let text = as_text(&value);
+    if text.is_none() {
+        problems.push(Problem::Msg(format!(
+            "`{{{}}}`: {} is {}, which has no text to show inside a string; give it a string value",
+            expr,
+            what,
+            match &value {
+                StyleValue::List(_) | StyleValue::IdentifierList(_) => "a list".to_string(),
+                StyleValue::Call { name, .. } => format!("`{}(...)`", name),
+                other => describe(other),
+            }
+        )));
+    }
+    text
 }
 
 /// A dotted name (`n`, `n.top`, `m.from`) with a loop variable at its head replaced.

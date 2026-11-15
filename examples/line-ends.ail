@@ -8,8 +8,8 @@
 
    The chart is one table of records and one `each`: every record is a row
    (two boxes, the line between them, the code that draws it). A record field
-   holds an end value (`te: "triangle"`) or a dash style (`dash: none`); the
-   end values are quoted because the code column also shows them as text.
+   holds an end value (`te: triangle`, `fe: diamond-filled`) or a dash style
+   (`dash: none`); the code column shows the same values as text (`{r.fe}`).
    To add a row, add a record.
 */
 
@@ -17,14 +17,14 @@ text "Line ends: [from_end: ..., to_end: ...]" title [font_size: 16]
 
 col chart [gap: 22, align: start] {
     each r in [
-        {a: "Dog",      b: "Animal",     fe: "none",           te: "triangle",  dash: none,   means: "inheritance"},
-        {a: "Impl",     b: "Interface",  fe: "none",           te: "triangle",  dash: dashed, means: "realisation (dashed)"},
-        {a: "Garage",   b: "Car",        fe: "diamond",        te: "none",      dash: none,   means: "aggregation"},
-        {a: "House",    b: "Room",       fe: "diamond-filled", te: "none",      dash: none,   means: "composition"},
-        {a: "Client",   b: "Service",    fe: "none",           te: "open",      dash: dashed, means: "dependency (dashed)"},
-        {a: "Customer", b: "Order",      fe: "none",           te: "crow",      dash: none,   means: "one to many"},
-        {a: "Plug",     b: "Socket",     fe: "circle",         te: "circle",    dash: none,   means: "socket"},
-        {a: "Source",   b: "Sink",       fe: "arrow",          te: "arrow",     dash: none,   means: "both ways"},
+        {a: "Dog",      b: "Animal",     fe: none,           te: triangle,  dash: none,   means: "inheritance"},
+        {a: "Impl",     b: "Interface",  fe: none,           te: triangle,  dash: dashed, means: "realisation (dashed)"},
+        {a: "Garage",   b: "Car",        fe: diamond,        te: none,      dash: none,   means: "aggregation"},
+        {a: "House",    b: "Room",       fe: diamond-filled, te: none,      dash: none,   means: "composition"},
+        {a: "Client",   b: "Service",    fe: none,           te: open,      dash: dashed, means: "dependency (dashed)"},
+        {a: "Customer", b: "Order",      fe: none,           te: crow,      dash: none,   means: "one to many"},
+        {a: "Plug",     b: "Socket",     fe: circle,         te: circle,    dash: none,   means: "socket"},
+        {a: "Source",   b: "Sink",       fe: arrow,          te: arrow,     dash: none,   means: "both ways"},
     ] {
         row entry [gap: 36, align: center] {
             row pair [gap: 170] {

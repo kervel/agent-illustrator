@@ -608,6 +608,13 @@ Use `accent` for "look here" while you talk, `mark` for "this is now so".
 target a small seeded tilt of up to 4 degrees (`jitter: move(6)` shifts by up
 to 6px instead; a bare `jitter: 4` means rotate) — a pile, not a table.
 
+On a named connection (`a -> b as req`) the effects act on the line itself:
+`pulse req` swells a wider stroke of it in and out (`scale: 1.3` widens more),
+`flash req` and `highlight req` stroke it in a colour (the accent unless
+`color:` says otherwise), `ping req` rings its middle, `shake`/`nudge` move it
+with its labels, and `loop req [pulse]` keeps it breathing. `accent` is for
+boxes, rows and labels: on a line it is an error that points to these.
+
 ### Text and numbers
 
 ```

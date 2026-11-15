@@ -209,6 +209,23 @@ pub fn film_css(m: &Motion, tokens: &MotionTokens, hold: f64, lead: f64, end_hol
         }
         css.push_str(&format!("{} {{ animation: {}; }}\n", sel, anims.join(", ")));
     }
+    // A text element's wordings (`.aitxt-<id>-base`, `-v0`) are the shape
+    // itself, so they also carry its `.kfp-<id>` hook (fill, stroke): a
+    // label swap plus a colour change are again two rules for one node.
+    // The compound selector matches only nodes with both classes (a box's
+    // label variants have no `kfp-`), and, later and as specific, wins.
+    for (sel, anims) in &by_sel {
+        let Some(rest) = sel.strip_prefix(".aitxt-") else { continue };
+        let Some((id, _variant)) = rest.rsplit_once('-') else { continue };
+        let shape = format!(".kfp-{}", id);
+        let Some(shape_anims) = by_sel.get(shape.as_str()) else { continue };
+        let mut all = anims.clone();
+        all.extend(shape_anims.iter().cloned());
+        if let Some(extra) = text_anims.get(id) {
+            all.extend(extra.iter().cloned());
+        }
+        css.push_str(&format!("{}{} {{ animation: {}; }}\n", sel, shape, all.join(", ")));
+    }
     css.push_str("@media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }\n");
     css
 }
@@ -667,6 +684,7 @@ fn pretty_sel_raw(sel: &str, scope: &str) -> String {
         ("aiflash-", "flash"),
         ("aiping-", "ping"),
         ("aihl-", "highlight"),
+        ("aipulse-", "pulse"),
         ("aitick-", "counter"),
         ("aitxt-", "text"),
         ("aivar-", "route variant"),
