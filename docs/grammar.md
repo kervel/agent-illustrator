@@ -259,6 +259,8 @@ Inline templates:
                                          of this instance (nested: hist.d4.fill)
     Instance modifiers opacity:, appears: and overlaps: apply to the whole instance.
     "{param}" is filled in in any string modifier of a template body (label: "v{n}").
+    A parameter given an element (`src: api.p_2`) works as that element in the body's
+    `constrain`, `contains` and connection endpoints: how a template reaches outside itself.
     Named connections in a template body are parts of each instance (acme.wire).
 
 File-based templates:
@@ -468,6 +470,7 @@ Declarations that serve motion:
                   from this step on, and its speaker notes (player: p.meta(k))
     collapsed: true   no room and hidden until `show x [enter: expand]`
     overlaps: card    sits on card on purpose (a corner badge): no overlap finding;
+    overlaps: all     an overlay (frame, highlight over other things): no overlap finding for it
                       it covers what card holds too (a grid's cells, a template's parts)
 
 Names: every element, named connection and keyframe name must be unique. Part b

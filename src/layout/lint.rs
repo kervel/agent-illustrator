@@ -1192,6 +1192,11 @@ fn collect_contains_ids_in(
                         .collect(),
                     _ => vec![],
                 };
+                // `overlaps: all`: an overlay (a frame over lifelines, a
+                // highlight): covering anything is what it is for.
+                if names.iter().any(|n| n == "all") {
+                    relations.layered.insert(name.node.0.clone());
+                }
                 relations.overlaps.entry(name.node.0.clone()).or_default().extend(names);
             }
         }
@@ -2517,7 +2522,8 @@ fn check_connections(
         let to_id = &conn.to_id.0;
         // `overlaps: line` on the element (or it rides the line).
         let on_purpose = |id: &str| {
-            conn.name.as_ref().is_some_and(|n| relations.overlaps.get(id).is_some_and(|o| o.contains(&n.0)))
+            relations.layered.contains(id)
+                || conn.name.as_ref().is_some_and(|n| relations.overlaps.get(id).is_some_and(|o| o.contains(&n.0)))
         };
 
         let path_start = match conn.path.first() {

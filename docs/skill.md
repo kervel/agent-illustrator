@@ -373,16 +373,17 @@ they follow a theme. Animated connections (`enter: draw`) animate the filled
 #### Sequence diagrams (lifelines, messages, a label that crosses a line)
 
 There is no sequence-diagram construct; `examples/sequence-diagram.ail` builds one
-from a `life` template (actor head + dashed lifeline) whose `ticks: [...]` list
-makes one invisible row per message, equally high on every lifeline. A message is an
-arrow between `x.p_k` and `y.p_k` (solid = call, dashed + `to_end: open` = reply,
-solid + open = async); a self-message is `x.p_4 -> x.p_5 [routing: direct, via: [w1, w2]]` (one polyline
-through two invisible waypoint rects). Fragments (loop/alt) are square frames that
-`contains` the rows they span: `constrain f contains a.p_6, b.p_7 [padding_x: 110,
-padding_y: 0]`, with `gap: 8` between rows so neighbouring frames never touch.
-Activation bars, notes and the destroy mark (two crossed rotated rects) are plain
-shapes placed against the rows with `constrain` (`corner_radius: 0` for the
-square look; mark them `overlaps:` the lifeline `x.lifeline`).
+from small templates. `life` = actor head + dashed lifeline, whose `ticks: [...]` list
+makes one invisible row per message, equally high on every lifeline. The others take
+element references as parameters, so they can reach outside themselves:
+`call` / `reply` / `async` (`call m1 [src: cl.p_1, dst: api.p_1, what: "login"]`: solid +
+filled head / dashed + open head / solid + open), `frame` (a square frame that
+`contains` the rows from `first:` to `last:`: loop, alt) and `act` (an activation bar).
+A template parameter bound to an element (`src: api.p_2`) works in `constrain`,
+`contains` and connection endpoints inside the template. A self-message is
+`x.p_4 -> x.p_5 [routing: direct, via: [w1, w2]]`; the destroy mark is two crossed
+rotated rects. Give overlays `overlaps: all` (it sits over lifelines on purpose);
+`corner_radius: 0` gives the square look.
 
 `label_offset:` moves a label off the arrow (negative = the other side).
 `label_at:` slides it along the arrow, so it can clear a lifeline. When a label

@@ -870,10 +870,9 @@ fn substitute_parameters(
             // Prefix all connection endpoints
             // Feature 009: AnchorReference.element contains the identifier
             for conn in &mut conns {
-                conn.from.element.node =
-                    Identifier::new(format!("{}_{}", prefix, conn.from.element.node.0));
-                conn.to.element.node =
-                    Identifier::new(format!("{}_{}", prefix, conn.to.element.node.0));
+                let refs = element_refs(params);
+                conn.from.element = prefix_identifier(&conn.from.element, prefix, &refs);
+                conn.to.element = prefix_identifier(&conn.to.element, prefix, &refs);
                 // `a.right -> b.left as w` names a part of this instance
                 // (`acme.w`), like any other part.
                 if let Some(n) = &mut conn.name {
@@ -885,7 +884,7 @@ fn substitute_parameters(
         }
         Statement::Constrain(decl) => {
             // Prefix all element references in the constraint expression
-            let new_expr = prefix_constraint_expr(&decl.expr, prefix);
+            let new_expr = prefix_constraint_expr(&decl.expr, prefix, &element_refs(params));
             Spanned::new(
                 Statement::Constrain(ConstrainDecl { expr: new_expr, name: decl.name.clone() }),
                 stmt.span,
@@ -914,32 +913,45 @@ fn substitute_parameters(
     }
 }
 
+/// Element-reference parameters of an instance: parameter name -> element it names.
+type Refs = HashMap<String, String>;
+
+fn element_refs(params: &HashMap<String, StyleValue>) -> Refs {
+    params
+        .iter()
+        .filter_map(|(k, v)| match v {
+            StyleValue::Identifier(id) => Some((k.clone(), id.0.clone())),
+            _ => None,
+        })
+        .collect()
+}
+
 /// Prefix all element references in a constraint expression
-fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr {
+fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str, refs: &Refs) -> ConstraintExpr {
     match expr {
         ConstraintExpr::Equal { left, right } => ConstraintExpr::Equal {
-            left: prefix_property_ref(left, prefix),
-            right: prefix_property_ref(right, prefix),
+            left: prefix_property_ref(left, prefix, refs),
+            right: prefix_property_ref(right, prefix, refs),
         },
         ConstraintExpr::EqualWithOffset {
             left,
             right,
             offset,
         } => ConstraintExpr::EqualWithOffset {
-            left: prefix_property_ref(left, prefix),
-            right: prefix_property_ref(right, prefix),
+            left: prefix_property_ref(left, prefix, refs),
+            right: prefix_property_ref(right, prefix, refs),
             offset: *offset,
         },
         ConstraintExpr::Constant { left, value } => ConstraintExpr::Constant {
-            left: prefix_property_ref(left, prefix),
+            left: prefix_property_ref(left, prefix, refs),
             value: *value,
         },
         ConstraintExpr::GreaterOrEqual { left, value } => ConstraintExpr::GreaterOrEqual {
-            left: prefix_property_ref(left, prefix),
+            left: prefix_property_ref(left, prefix, refs),
             value: *value,
         },
         ConstraintExpr::LessOrEqual { left, value } => ConstraintExpr::LessOrEqual {
-            left: prefix_property_ref(left, prefix),
+            left: prefix_property_ref(left, prefix, refs),
             value: *value,
         },
         ConstraintExpr::Midpoint {
@@ -950,9 +962,9 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr
             a_edge,
             b_edge,
         } => ConstraintExpr::Midpoint {
-            target: prefix_property_ref(target, prefix),
-            a: prefix_identifier(a, prefix),
-            b: prefix_identifier(b, prefix),
+            target: prefix_property_ref(target, prefix, refs),
+            a: prefix_identifier(a, prefix, refs),
+            b: prefix_identifier(b, prefix, refs),
             offset: *offset,
             a_edge: a_edge.clone(),
             b_edge: b_edge.clone(),
@@ -964,10 +976,10 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr
             padding_x,
             padding_y,
         } => ConstraintExpr::Contains {
-            container: prefix_identifier(container, prefix),
+            container: prefix_identifier(container, prefix, refs),
             elements: elements
                 .iter()
-                .map(|e| prefix_identifier(e, prefix))
+                .map(|e| prefix_identifier(e, prefix, refs))
                 .collect(),
             padding: *padding,
             padding_x: *padding_x,
@@ -977,16 +989,24 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str) -> ConstraintExpr
 }
 
 /// Prefix a property reference
-fn prefix_property_ref(prop_ref: &PropertyRef, prefix: &str) -> PropertyRef {
+fn prefix_property_ref(prop_ref: &PropertyRef, prefix: &str, refs: &Refs) -> PropertyRef {
     PropertyRef {
-        element: prefix_element_path(&prop_ref.element, prefix),
+        element: prefix_element_path(&prop_ref.element, prefix, refs),
         property: prop_ref.property.clone(),
     }
 }
 
 /// Prefix an element path (add prefix to the first segment)
-fn prefix_element_path(path: &Spanned<ElementPath>, prefix: &str) -> Spanned<ElementPath> {
+fn prefix_element_path(path: &Spanned<ElementPath>, prefix: &str, refs: &Refs) -> Spanned<ElementPath> {
     let mut new_segments = path.node.segments.clone();
+    if let Some(target) = new_segments.first().and_then(|f| refs.get(&f.node.0)) {
+        // An element-reference parameter: the element the instance was given
+        let span = new_segments[0].span.clone();
+        let mut segs: Vec<Spanned<Identifier>> =
+            target.split('.').map(|t| Spanned::new(Identifier::new(t.to_string()), span.clone())).collect();
+        segs.extend(new_segments.drain(1..));
+        return Spanned::new(ElementPath { segments: segs }, path.span.clone());
+    }
     if !new_segments.is_empty() {
         let first = &new_segments[0];
         new_segments[0] = Spanned::new(
@@ -1003,7 +1023,19 @@ fn prefix_element_path(path: &Spanned<ElementPath>, prefix: &str) -> Spanned<Ele
 }
 
 /// Prefix a single identifier
-fn prefix_identifier(id: &Spanned<Identifier>, prefix: &str) -> Spanned<Identifier> {
+fn prefix_identifier(id: &Spanned<Identifier>, prefix: &str, refs: &Refs) -> Spanned<Identifier> {
+    let (head, rest) = match id.node.0.split_once('.') {
+        Some((h, r)) => (h, Some(r)),
+        None => (id.node.0.as_str(), None),
+    };
+    if let Some(target) = refs.get(head) {
+        // `contains` and midpoint operands name parts with `_` (`x_p_1`)
+        let text = match rest {
+            Some(r) => format!("{}_{}", target.replace('.', "_"), r),
+            None => target.replace('.', "_"),
+        };
+        return Spanned::new(Identifier::new(text), id.span.clone());
+    }
     Spanned::new(
         Identifier::new(format!("{}_{}", prefix, id.node.0)),
         id.span.clone(),
@@ -1116,11 +1148,11 @@ fn arguments_to_modifiers(
 fn prefix_anchor_decl(anchor: &AnchorDecl, prefix: &str) -> AnchorDecl {
     let prefixed_position = match &anchor.position {
         AnchorPosition::PropertyRef(prop_ref) => {
-            AnchorPosition::PropertyRef(prefix_property_ref(prop_ref, prefix))
+            AnchorPosition::PropertyRef(prefix_property_ref(prop_ref, prefix, &Refs::new()))
         }
         AnchorPosition::PropertyRefWithOffset { prop_ref, offset } => {
             AnchorPosition::PropertyRefWithOffset {
-                prop_ref: prefix_property_ref(prop_ref, prefix),
+                prop_ref: prefix_property_ref(prop_ref, prefix, &Refs::new()),
                 offset: *offset,
             }
         }
