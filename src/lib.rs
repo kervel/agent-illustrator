@@ -446,7 +446,22 @@ pub(crate) fn locate_error(e: RenderError, source: &str) -> RenderError {
         }
         _ => return e,
     };
+    // `p_{i+1}` that no `each` filled in (the parser rejects unbound ones,
+    // so this is a backstop).
+    if name.contains("_{") {
+        let written = name.replace("_{", "[").replace('}', "]");
+        let message = format!(
+            "`{}`: an index computed from a loop variable only works inside the `each` that binds it",
+            written
+        );
+        return locate_error(RenderError::Layout(LayoutError::Located { message, span }), source);
+    }
+    // `p_7` past the last copy, or `p_0`: say which copies there are.
+    let copy = layout::copy_hint(&name, &suggestions);
     if span.end > source.len() || span.start >= span.end {
+        if let Some(h) = copy {
+            return RenderError::Layout(LayoutError::validation_error(&format!("undefined identifier '{}': {}", name, h)));
+        }
         let hint = if suggestions.is_empty() {
             String::new()
         } else {
@@ -462,7 +477,9 @@ pub(crate) fn locate_error(e: RenderError, source: &str) -> RenderError {
     let line_end = source[start..].find('\n').map(|i| start + i).unwrap_or(source.len());
     let col = source[line_start..start].chars().count() + 1;
     let width = source[start..span.end.min(line_end)].chars().count().max(1);
-    let hint = if suggestions.is_empty() {
+    let hint = if let Some(h) = copy {
+        format!("\n  {}", h)
+    } else if suggestions.is_empty() {
         String::new()
     } else {
         format!("\n  did you mean: {}?", suggestions.join(", "))

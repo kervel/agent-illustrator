@@ -130,10 +130,13 @@ pub fn from_error(e: &RenderError, source: &str) -> Vec<Diagnostic> {
             let text = text.strip_prefix("layout error: ").unwrap_or(&text).to_string();
             let (code, span, hint): (&str, Option<&std::ops::Range<usize>>, Option<String>) = match le {
                 LayoutError::Located { span, .. } => ("layout", Some(span), None),
-                LayoutError::UndefinedIdentifier { span, suggestions, .. } => (
+                LayoutError::UndefinedIdentifier { name, span, suggestions } => (
                     "undefined-identifier",
                     Some(span),
-                    (!suggestions.is_empty()).then(|| format!("did you mean: {}?", suggestions.join(", "))),
+                    // `p_7` / `p_0`: which copies exist, not "did you mean".
+                    crate::layout::copy_hint(name, suggestions).or_else(|| {
+                        (!suggestions.is_empty()).then(|| format!("did you mean: {}?", suggestions.join(", ")))
+                    }),
                 ),
                 LayoutError::PathNotFound { span, suggestions, .. } => (
                     "path-not-found",

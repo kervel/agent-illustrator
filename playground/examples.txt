@@ -16,3 +16,4 @@ examples/motion/request-response.ail
 examples/class-diagram.ail
 examples/sequence-diagram.ail
 examples/state-machine.ail
+examples/pipeline.ail

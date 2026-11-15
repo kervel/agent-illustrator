@@ -1,6 +1,6 @@
 # Design: connections (and other statements) from data
 
-Status: approved. **S1 (P1) released in v0.2.49; S2 (P2) implemented**; S3–S6 not started.
+Status: approved. **S1 (P1) released in v0.2.49; S2 (P2) and S3 (P3) implemented**; S4–S6 not started.
 Maintainer decisions: keywords may name fields (open question 1: yes); a missing field is an
 error, there are no defaults (open question 4). Motivating example: `examples/sequence-diagram.ail`.
 
@@ -35,6 +35,35 @@ S2 as built (differences from §2 P2 noted):
   `style: a.st`, so it waits for named modifier sets (a).
 - Example: `examples/state-machine.ail`. Docs: skill.md (`each` + Reach For row), grammar.md,
   examples.md, `--doc records`.
+
+S3 as built (differences from §2 P3 noted):
+- A second token pass, `indexed_names` (`parser/grammar.rs`), runs after `indexed_parts`, so
+  `line[4]`, `row[2]`, `cell[r][c]` keep their sugar; `line`/`lines`/`row`/`rows`/`cell`/`cells`
+  never take the generic `_k`. A literal whole number becomes `p_6` at once.
+- **Bound or not is decided at parse time, not after expansion.** The pass tracks the loop
+  variables of the enclosing `each` bodies (by braces). A word or computed index whose head
+  is bound becomes `p_{i+1}` / `p_{m.row}` / `p_{m}`; an unbound word is a literal key
+  (`p[query]` = `p_query`); an unbound `i+1` or `m.row` is a parse error with a caret
+  ("`i` is not bound here; an index like i+1 only works inside `each m, i in ...`"). A
+  fraction (`p[2.5]`) and a negative literal are parse errors too. So the resolver pass that
+  rewrites leftovers is not needed; `locate_error` keeps a backstop for a `_{` that reaches
+  layout.
+- `p_{m.row}` has a dot inside one name, so `each.rs` fills indices (`fill_index`) in every
+  name position **before** the name is split at its dots (path segments, connection element
+  and anchor, contains/midpoint operands, place subject/anchor, modifier and template
+  argument values, declared shape names). An index whose variable is not bound by this block
+  is left for the inner block. The value must be a whole number ≥ 0 or a word; a fraction,
+  negative result (`p[i-1]` on item 1), quoted string or dotted name is reported per item
+  with the rest of the block's problems.
+- The `p_0` hint and an out-of-range hint share one helper (`layout::copy_hint`): `find_similar`
+  returns the first and last copy of a numbered family, and the message says "`api.p` has
+  copies 1 to 3 (api.p_1 … api.p_3); there is no copy 7" (for `_0`: "... write api.p[i+1],
+  not api.p[i]"). A connection end `api.p[7]` used to fail as an *invalid anchor*; when
+  `api` has numbered `p_k` parts it now gives the same undefined-name message with a caret.
+- Template parameters are not indices: `p[n]` with a parameter `n` is the literal `p_n`.
+- Example: `examples/pipeline.ail` (stages from one `each`, hand-offs `stage[k] ->
+  stage[k+1]` from another, single stages by number). The sequence example is unchanged.
+  Docs: skill.md (`each` + Reach For row), grammar.md, examples.md, `--doc index`/`pipeline`.
 
 ## 1. The problem, measured against today's code
 

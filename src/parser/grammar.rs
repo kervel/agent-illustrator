@@ -128,6 +128,161 @@ fn indexed_parts(toks: Vec<(Token, std::ops::Range<usize>)>) -> Vec<(Token, std:
     out
 }
 
+/// `NAME[k]`: the k-th copy an `each` made of `NAME` (`api.p[6]` is
+/// `api.p_6`), wherever a name goes. The `[` must touch the name (`rect a
+/// [x]` and `a -> b [auto]` stay modifier blocks). The index is a whole
+/// number (`p[6]` -> `p_6`), a word (`p[query]` -> `p_query`), or, inside an
+/// `each` that binds its head, `i`, `i+1`, `i-1`, `m.row` or `m`: those
+/// become `p_{i+1}` and are filled in per item when the `each` expands
+/// (`template/each.rs`). Runs after `indexed_parts`, so `line[4]`, `row[2]`
+/// and `cell[r][c]` keep their own meaning.
+fn indexed_names(
+    toks: Vec<(Token, std::ops::Range<usize>)>,
+    input: &str,
+) -> Result<Vec<(Token, std::ops::Range<usize>)>, crate::ParseError> {
+    let word_of = |t: &Token| -> Option<String> {
+        match t {
+            Token::Ident(w) => Some(w.clone()),
+            other => crate::error::keyword_spelling(other).map(str::to_string),
+        }
+    };
+    let builtin = |w: &str| matches!(w, "line" | "lines" | "row" | "rows" | "cell" | "cells");
+    let fail = |span: std::ops::Range<usize>, message: String| crate::ParseError::Syntax {
+        span,
+        message,
+        expected: vec![],
+    };
+
+    // Loop variables in scope: one frame per `each` body, closed by its `}`.
+    let mut frames: Vec<(usize, Vec<String>)> = Vec::new();
+    // An `each` header whose body `{` has not come yet.
+    let mut pending: Option<Vec<String>> = None;
+    let mut bracket_depth = 0usize;
+    let mut braces = 0usize;
+
+    let mut out: Vec<(Token, std::ops::Range<usize>)> = Vec::with_capacity(toks.len());
+    let mut i = 0;
+    while i < toks.len() {
+        let (tok, span) = &toks[i];
+        match tok {
+            Token::Each => {
+                // each VAR (, IDX)? in ...
+                let mut names = Vec::new();
+                if let Some((Token::Ident(v), _)) = toks.get(i + 1) {
+                    names.push(v.clone());
+                    if let (Some((Token::Comma, _)), Some((Token::Ident(ix), _))) = (toks.get(i + 2), toks.get(i + 3)) {
+                        names.push(ix.clone());
+                    }
+                }
+                pending = Some(names);
+            }
+            Token::BracketOpen | Token::ParenOpen => bracket_depth += 1,
+            Token::BracketClose | Token::ParenClose => bracket_depth = bracket_depth.saturating_sub(1),
+            Token::BraceOpen => {
+                braces += 1;
+                if bracket_depth == 0 {
+                    if let Some(names) = pending.take() {
+                        frames.push((braces, names));
+                    }
+                }
+            }
+            Token::BraceClose => {
+                if frames.last().is_some_and(|(d, _)| *d == braces) {
+                    frames.pop();
+                }
+                braces = braces.saturating_sub(1);
+            }
+            _ => {}
+        }
+        let bound = |w: &str| frames.iter().any(|(_, names)| names.iter().any(|n| n == w));
+
+        let name = match tok {
+            Token::Ident(w) if !builtin(w) => Some(w.clone()),
+            _ => None,
+        };
+        let touches = toks.get(i + 1).is_some_and(|(t, s)| *t == Token::BracketOpen && s.start == span.end);
+        if let (Some(name), true) = (name, touches) {
+            // The tokens between `[` and the matching `]` on this line.
+            let close = (i + 2..toks.len().min(i + 7)).find(|&j| toks[j].0 == Token::BracketClose);
+            if let Some(close) = close {
+                let inner = &toks[i + 2..close];
+                let whole = span.start..toks[close].1.end;
+                // Messages show the whole dotted name (`api.p[i+1]`).
+                let mut from = span.start;
+                let mut j = out.len();
+                while j >= 2 && out[j - 1].0 == Token::Dot && word_of(&out[j - 2].0).is_some() {
+                    from = out[j - 2].1.start;
+                    j -= 2;
+                }
+                let written = &input[from..whole.end];
+                let index: Option<String> = match inner {
+                    [(Token::Number(n), s)] => {
+                        if n.fract() != 0.0 {
+                            return Err(fail(
+                                s.clone(),
+                                format!(
+                                    "`{}`: an index is a whole number, counted from 1 ({}[1], {}[2], ...)",
+                                    written, name, name
+                                ),
+                            ));
+                        }
+                        Some(format!("{}", *n as u64))
+                    }
+                    [(Token::Minus, s), (Token::Number(_), e)] => {
+                        return Err(fail(
+                            s.start..e.end,
+                            format!("`{}`: copies are numbered from 1, so an index is never negative", written),
+                        ));
+                    }
+                    [(w, _)] => word_of(w).map(|w| if bound(&w) { format!("{{{}}}", w) } else { w }),
+                    [(w, s), (Token::Dot, _), (f, _)] => match (word_of(w), word_of(f)) {
+                        (Some(w), Some(f)) => {
+                            if !bound(&w) {
+                                return Err(fail(
+                                    s.clone(),
+                                    format!(
+                                        "`{}`: `{}` is not bound here; an index like {}.{} only works inside `each {} in ...`",
+                                        written, w, w, f, w
+                                    ),
+                                ));
+                            }
+                            Some(format!("{{{}.{}}}", w, f))
+                        }
+                        _ => None,
+                    },
+                    [(w, s), (op @ (Token::Plus | Token::Minus), _), (Token::Number(n), _)] if n.fract() == 0.0 => {
+                        match word_of(w) {
+                            Some(w) => {
+                                let op = if *op == Token::Plus { '+' } else { '-' };
+                                if !bound(&w) {
+                                    return Err(fail(
+                                        s.clone(),
+                                        format!(
+                                            "`{}`: `{}` is not bound here; an index like {}{}{} only works inside `each m, {} in ...`",
+                                            written, w, w, op, *n as u64, w
+                                        ),
+                                    ));
+                                }
+                                Some(format!("{{{}{}{}}}", w, op, *n as u64))
+                            }
+                            None => None,
+                        }
+                    }
+                    _ => None,
+                };
+                if let Some(index) = index {
+                    out.push((Token::Ident(format!("{}_{}", name, index)), whole));
+                    i = close + 1;
+                    continue;
+                }
+            }
+        }
+        out.push(toks[i].clone());
+        i += 1;
+    }
+    Ok(out)
+}
+
 /// A record's fields have their own names, so a reserved word may name one:
 /// `{from: cl, label: "login"}` and `m.from`, `m.label` in an `each` body.
 /// A keyword becomes a plain word (1) as a record key: right after the `{`
@@ -189,7 +344,9 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     }
 
     // Create a logos lexer and convert to token stream
-    let tokens = field_words(indexed_parts(crate::parser::lexer::lex(input).collect()));
+    let tokens = indexed_names(indexed_parts(crate::parser::lexer::lex(input).collect()), input)
+        .map_err(|e| vec![e.locate(input)])?;
+    let tokens = field_words(tokens);
     let token_iter = tokens.into_iter().map(|(tok, span)| (tok, span.into()));
 
     // Turn the token iterator into a stream that chumsky can use
@@ -2796,6 +2953,29 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn index_tokens(src: &str) -> Vec<Token> {
+        let toks = indexed_names(indexed_parts(crate::parser::lexer::lex(src).collect()), src).expect("indexes");
+        toks.into_iter().map(|(t, _)| t).collect()
+    }
+
+    #[test]
+    fn a_touching_bracket_indexes_a_spaced_one_does_not() {
+        let id = |s: &str| Token::Ident(s.to_string());
+        assert_eq!(index_tokens("a[x]"), vec![id("a_x")]);
+        assert_eq!(index_tokens("a.p[6]"), vec![id("a"), Token::Dot, id("p_6")]);
+        assert_eq!(
+            index_tokens("a [x]"),
+            vec![id("a"), Token::BracketOpen, id("x"), Token::BracketClose]
+        );
+        // Only an enclosing `each` binds a computed index; an unbound word is a key.
+        let toks = index_tokens("each m, i in [1] { p[i+1] p[m.row] p[m] p[query] }");
+        for want in ["p_{i+1}", "p_{m.row}", "p_{m}", "p_query"] {
+            assert!(toks.contains(&id(want)), "{want}: {toks:?}");
+        }
+        // The built-in parts keep their own sugar.
+        assert_eq!(index_tokens("t.row[2]"), vec![id("t"), Token::Dot, id("row2")]);
+    }
 
     #[test]
     fn parse_each_with_index_and_literal_list() {

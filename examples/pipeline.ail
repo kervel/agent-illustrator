@@ -1,0 +1,39 @@
+// A delivery pipeline: the stages are one list, the arrows between them a second `each`.
+//
+// The first `each` makes the stage boxes stage_1 .. stage_5. `stage[k]` names copy k
+// (it is the same as stage_k), and inside an `each` the index may be computed:
+// `stage[k+1]` is the stage after stage k. Copies count from 1.
+// To add a stage, add a record and one more number to the hand-off list.
+
+row stages [gap: 70, align: center] {
+    each s in [
+        {name: "Commit",  tool: "git push"},
+        {name: "Build",   tool: "cargo build"},
+        {name: "Test",    tool: "cargo test"},
+        {name: "Package", tool: "docker build"},
+        {name: "Deploy",  tool: "helm upgrade"},
+    ] {
+        rect stage [label: "<b>{s.name}</b><br>{s.tool}", width: 120, height: 56, fill: role-surface-2]
+    }
+}
+
+// The hand-offs: stage k to stage k+1.
+each k in [1, 2, 3, 4] {
+    stage[k].right -> stage[k+1].left [routing: direct]
+}
+
+// Single stages by number: the CI frame spans Build to Package, a failed test goes back
+// to Build, and Package pushes to the registry that Deploy pulls from.
+rect ci [fill: none, stroke: role-muted, stroke_dasharray: dashed, corner_radius: 8, overlaps: all]
+constrain ci contains stage[2], stage[4] [padding_x: 16, padding_y: 34]
+text "CI" ci_title [font_size: 12, fill: role-muted, overlaps: all]
+constrain ci_title.left = ci.left + 8
+constrain ci_title.top = ci.top + 4
+
+stage[3].top -> stage[2].top [routing: curved, label: "fails", stroke: role-error, stroke_dasharray: dashed]
+
+rect registry [label: "Image registry", width: 160, height: 44, fill: role-warn-soft]
+constrain registry.center_x = stage[4].center_x
+constrain registry.top = ci.bottom + 60
+stage[4].bottom -> registry.top [routing: direct, label: "push"]
+registry.right -> stage[5].bottom [label: "pull"]

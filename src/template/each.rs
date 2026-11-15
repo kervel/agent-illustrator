@@ -637,8 +637,116 @@ fn fill(expr: &str, vars: &Vars, problems: &mut Vec<Problem>) -> Option<String> 
     text
 }
 
+/// A name as the author wrote it: `p_{i+1}` -> `p[i+1]`.
+fn as_written(name: &str) -> String {
+    name.replace("_{", "[").replace('}', "]")
+}
+
+/// `p_{i+1}`, `api.p_{m.row}`, `p_{m}`: the indices that this block's
+/// variables bind, filled in (`p_3`, `api.p_2`, `p_query`). An index whose
+/// variable is not bound here stays as written, for an inner `each`. Runs
+/// before a name is split at its dots (`{m.row}` has one).
+fn fill_index(name: &str, vars: &Vars, problems: &mut Vec<Problem>) -> String {
+    fill_index_in(name, name, vars, problems)
+}
+
+/// `fill_index` for one part of a longer name (`p_{m.r}` of `api.p_{m.r}`),
+/// which messages show whole.
+fn fill_index_in(name: &str, whole: &str, vars: &Vars, problems: &mut Vec<Problem>) -> String {
+    if !name.contains("_{") {
+        return name.to_string();
+    }
+    let mut out = String::new();
+    let mut rest = name;
+    while let Some(start) = rest.find("_{") {
+        out.push_str(&rest[..start]);
+        let after = &rest[start + 2..];
+        let Some(end) = after.find('}') else {
+            out.push_str(&rest[start..]);
+            return out;
+        };
+        let expr = &after[..end];
+        match index_value(expr, whole, vars, problems) {
+            Some(k) => {
+                out.push('_');
+                out.push_str(&k);
+            }
+            None => out.push_str(&rest[start..start + end + 3]),
+        }
+        rest = &after[end + 1..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// The text one index stands for (`i+1` -> `3`, `m.row` -> `2`, `m.id` ->
+/// `query`), or `None` when its variable is not bound here or on a problem.
+fn index_value(expr: &str, name: &str, vars: &Vars, problems: &mut Vec<Problem>) -> Option<String> {
+    let written = as_written(name);
+    let (value, what, header) = if let Some(at) = expr.find(['+', '-']) {
+        let var = &expr[..at];
+        let b = vars.get(var)?;
+        let n: f64 = expr[at + 1..].parse().ok()?;
+        let StyleValue::Number { value, .. } = b.value else {
+            problems.push(Problem::Msg(format!(
+                "{}: `{}`: `{}` is {} (item {}), so `{}` is not a number; arithmetic in an index needs a number such as the position: each m, i in ... {{ p[i+1] }}",
+                b.header, written, var, describe(&b.value), b.item, expr
+            )));
+            return None;
+        };
+        let v = if expr.as_bytes()[at] == b'+' { value + n } else { value - n };
+        let what = if b.is_index { format!("`{}` (item {})", expr, b.item) } else { format!("`{}` for item {}", expr, b.item) };
+        (StyleValue::Number { value: v, unit: None }, what, b.header.clone())
+    } else {
+        let b = vars.get(head_of(expr).0)?;
+        let header = b.header.clone();
+        let (value, rest, _, what) = lookup(expr, vars, problems)?;
+        if rest.is_some() {
+            problems.push(Problem::Msg(format!(
+                "{}: `{}`: {} is {}, which cannot be an index; an index is a whole number or a name",
+                header, written, what, describe(&value)
+            )));
+            return None;
+        }
+        (value, what, header)
+    };
+    let bad = |problems: &mut Vec<Problem>, why: String| {
+        problems.push(Problem::Msg(format!("{}: `{}`: {}", header, written, why)));
+        None
+    };
+    match &value {
+        StyleValue::Number { value: v, .. } => {
+            if v.fract() != 0.0 {
+                bad(problems, format!("{} is {}; an index is a whole number, counted from 1", what, v))
+            } else if *v < 0.0 {
+                bad(
+                    problems,
+                    format!("{} is {}; copies are numbered from 1, so an index is never negative", what, v),
+                )
+            } else {
+                Some(format!("{}", *v as u64))
+            }
+        }
+        StyleValue::Identifier(id) if !id.0.is_empty() && id.0.chars().all(|c| c.is_alphanumeric() || c == '_') => {
+            Some(id.0.clone())
+        }
+        StyleValue::Keyword(k) if k.chars().all(|c| c.is_alphanumeric() || c == '_') => Some(k.clone()),
+        StyleValue::String(s) => bad(
+            problems,
+            format!("{} is the string \"{}\"; an index is a whole number or a name (letters, digits, _), written without quotes", what, s),
+        ),
+        other => bad(
+            problems,
+            format!("{} is {}; an index is a whole number or a name (letters, digits, _)", what, describe(other)),
+        ),
+    }
+}
+
 /// A dotted name (`n`, `n.top`, `m.from`) with a loop variable at its head replaced.
 fn subst_dotted(id: &mut Spanned<Identifier>, vars: &Vars, problems: &mut Vec<Problem>) {
+    if id.node.0.contains("_{") {
+        id.node = Identifier::new(fill_index(&id.node.0, vars, problems));
+    }
     if let Some((full, span)) = name_at(&id.node.0.clone(), vars, problems) {
         id.node = Identifier::new(full);
         id.span = span;
@@ -648,6 +756,13 @@ fn subst_dotted(id: &mut Spanned<Identifier>, vars: &Vars, problems: &mut Vec<Pr
 fn subst_path(p: &mut Spanned<ElementPath>, vars: &Vars, problems: &mut Vec<Problem>) {
     if p.node.segments.is_empty() {
         return;
+    }
+    let whole: Vec<&str> = p.node.segments.iter().map(|s| s.node.0.as_str()).collect();
+    let whole = whole.join(".");
+    for seg in &mut p.node.segments {
+        if seg.node.0.contains("_{") {
+            seg.node = Identifier::new(fill_index_in(&seg.node.0, &whole, vars, problems));
+        }
     }
     let written: Vec<&str> = p.node.segments.iter().map(|s| s.node.0.as_str()).collect();
     let written = written.join(".");
@@ -666,6 +781,18 @@ fn subst_prop(p: &mut PropertyRef, vars: &Vars, problems: &mut Vec<Problem>) {
 
 /// `n.top -> hub`, `m.from -> m.to`: the head is the element, the rest its anchor.
 fn subst_endpoint(r: &mut AnchorReference, vars: &Vars, problems: &mut Vec<Problem>) {
+    let whole = match &r.anchor {
+        Some(a) => format!("{}.{}", r.element.node.0, a.node),
+        None => r.element.node.0.clone(),
+    };
+    if r.element.node.0.contains("_{") {
+        r.element.node = Identifier::new(fill_index_in(&r.element.node.0, &whole, vars, problems));
+    }
+    if let Some(a) = &mut r.anchor {
+        if a.node.contains("_{") {
+            a.node = fill_index_in(&a.node, &whole, vars, problems);
+        }
+    }
     let written = match &r.anchor {
         Some(a) => format!("{}.{}", r.element.node.0, a.node),
         None => r.element.node.0.clone(),
@@ -704,6 +831,9 @@ fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, problems: &mut Vec<Problem>) 
 fn subst_value(v: &mut Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) {
     match &mut v.node {
         StyleValue::Identifier(id) => {
+            if id.0.contains("_{") {
+                id.0 = fill_index(&id.0, vars, problems);
+            }
             let written = id.0.clone();
             if !vars.contains_key(head_of(&written).0) {
                 return;
@@ -726,6 +856,9 @@ fn subst_value(v: &mut Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Prob
         }
         StyleValue::IdentifierList(ids) => {
             for id in ids {
+                if id.0.contains("_{") {
+                    id.0 = fill_index(&id.0, vars, problems);
+                }
                 if let Some((full, _)) = name_at(&id.0.clone(), vars, problems) {
                     id.0 = full;
                 }
@@ -751,6 +884,11 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
     let span = st.span.clone();
     let node = match st.node {
         Statement::Shape(mut s) => {
+            if let Some(n) = &mut s.name {
+                if n.node.0.contains("_{") {
+                    n.node = Identifier::new(fill_index(&n.node.0, vars, problems));
+                }
+            }
             if let ShapeType::Text { content } = &mut s.shape_type.node {
                 *content = interpolate(content, vars, problems);
             }

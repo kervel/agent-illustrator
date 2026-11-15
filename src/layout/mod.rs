@@ -382,8 +382,69 @@ pub(crate) fn levenshtein_distance(a: &str, b: &str) -> usize {
     dp[m][n]
 }
 
+/// `api.p_7` (or `api_p_7`) -> (`api.p`, 7): a name that numbers a copy.
+pub(crate) fn numbered_copy(name: &str) -> Option<(&str, u64)> {
+    let (stem, k) = name.rsplit_once('_')?;
+    if stem.is_empty() || k.is_empty() || !k.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    Some((stem, k.parse().ok()?))
+}
+
+/// The numbered copies of `stem` among `names` (`p_1`, `p_2`, ... for
+/// `p`), lowest number first; dots and `_` count as the same separator.
+pub(crate) fn copy_family<'a>(stem: &str, names: impl IntoIterator<Item = &'a String>) -> Vec<(u64, String)> {
+    let want = stem.replace('.', "_");
+    let mut out: Vec<(u64, String)> = names
+        .into_iter()
+        .filter_map(|n| {
+            let (s, k) = numbered_copy(n)?;
+            (s.replace('.', "_") == want).then(|| (k, n.clone()))
+        })
+        .collect();
+    out.sort();
+    out.dedup_by(|a, b| a.0 == b.0);
+    out
+}
+
+/// What to say when `missing` names a copy (`p_7`, `api.p_0`) that does not
+/// exist, given the names that do (`suggestions` or every defined name):
+/// copies count from 1, and `stem` has copies 1 to N.
+pub(crate) fn copy_hint<'a>(missing: &str, names: impl IntoIterator<Item = &'a String>) -> Option<String> {
+    let (stem, k) = numbered_copy(missing)?;
+    let family = copy_family(stem, names);
+    let range = match (family.first(), family.last()) {
+        (Some(first), _) if family.len() == 1 => Some(format!("`{}` has one copy, {}", stem, first.1)),
+        (Some(first), Some(last)) => {
+            Some(format!("`{}` has copies {} to {} ({} … {})", stem, first.0, last.0, first.1, last.1))
+        }
+        _ => None,
+    };
+    let range = range?;
+    if k == 0 {
+        return Some(format!(
+            "{}: copies that `each` makes are numbered from 1, and an each index `i` counts from 0, so write {s}[i+1], not {s}[i]",
+            range,
+            s = stem
+        ));
+    }
+    Some(format!("{}; there is no copy {}", range, k))
+}
+
 /// Find similar identifiers within a maximum edit distance
 pub(crate) fn find_similar(defined: &HashSet<String>, target: &str, max_distance: usize) -> Vec<String> {
+    // `p_7` when p_1..p_3 exist: the copies themselves, so the message can
+    // say which numbers there are.
+    if let Some((stem, _)) = numbered_copy(target) {
+        let family = copy_family(stem, defined);
+        if !family.is_empty() {
+            let mut out: Vec<String> = family.iter().map(|(_, n)| n.clone()).collect();
+            if out.len() > 2 {
+                out = vec![out[0].clone(), out[out.len() - 1].clone()];
+            }
+            return out;
+        }
+    }
     let mut candidates: Vec<(String, usize)> = defined
         .iter()
         .filter_map(|name| {

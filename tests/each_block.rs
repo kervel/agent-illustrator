@@ -481,3 +481,197 @@ each r in [{fe: diamond-filled}] {
     assert!(bare.contains("from_end: diamond-filled"), "{bare}");
     assert_eq!(quoted, bare);
 }
+
+// ---- S3: indexed names `x.p[k]` ----------------------------------------
+
+const LIVES: &str = r#"
+template "life" (ticks: []) {
+    col rows [gap: 8, padding: 0] {
+        each t in ticks { rect p [width: 20, height: 16] }
+    }
+}
+row actors [gap: 120] {
+    life api [ticks: [1, 2, 3]]
+    life db [ticks: [1, 2, 3]]
+}
+"#;
+
+#[test]
+fn an_indexed_name_is_the_numbered_copy_everywhere_a_name_goes() {
+    let plain = svg(&format!(r#"{LIVES}
+point w
+constrain w.center_x = api.p_2.center_x + 40
+constrain w.center_y = api.p_2.center_y
+api.p_1 -> db.p_1 [routing: direct]
+api.p_2.right -> db.p_3.left [via: [w]]
+rect frame [fill: none, overlaps: all]
+constrain frame contains api.p_2, db.p_3 [padding: 4]
+"#));
+    let indexed = svg(&format!(r#"{LIVES}
+point w
+constrain w.center_x = api.p[2].center_x + 40
+constrain w.center_y = api.p[2].center_y
+api.p[1] -> db.p[1] [routing: direct]
+api.p[2].right -> db.p[3].left [via: [w]]
+rect frame [fill: none, overlaps: all]
+constrain frame contains api.p[2], db.p[3] [padding: 4]
+"#));
+    assert_eq!(plain, indexed);
+}
+
+#[test]
+fn an_index_may_be_computed_from_the_loop_index() {
+    let plain = svg(&format!(r#"{LIVES}
+api.p_1 -> db.p_1
+api.p_2 -> db.p_2
+db.p_2 -> api.p_1
+db.p_3 -> api.p_2
+"#));
+    let computed = svg(&format!(r#"{LIVES}
+each m, i in ["a", "b"] {{
+    api.p[i+1] -> db.p[i+1]
+}}
+each m, i in ["a", "b"] {{
+    db.p[i+2] -> api.p[i+1]
+}}
+"#));
+    assert_eq!(plain, computed);
+}
+
+#[test]
+fn a_pipeline_wires_the_copies_of_one_each_with_another() {
+    let out = svg(r#"
+row flow [gap: 40] {
+    each s in ["fetch", "build", "test"] { rect box [label: s] }
+}
+each k in [1, 2] { box[k].right -> box[k+1].left }
+"#);
+    let hand = svg(r#"
+row flow [gap: 40] {
+    each s in ["fetch", "build", "test"] { rect box [label: s] }
+}
+box_1.right -> box_2.left
+box_2.right -> box_3.left
+"#);
+    assert_eq!(out, hand);
+}
+
+#[test]
+fn an_index_may_be_a_record_field_even_a_reserved_word() {
+    let plain = svg(&format!(r#"{LIVES}
+api.p_3 -> db.p_3 [label: "x"]
+db.p_1 -> api.p_1 [label: "y"]
+"#));
+    let fields = svg(&format!(r#"{LIVES}
+each m in [{{from: api, to: db, row: 3, label: "x"}}, {{from: db, to: api, row: 1, label: "y"}}] {{
+    m.from.p[m.row] -> m.to.p[m.row] [label: m.label]
+}}
+"#));
+    assert_eq!(plain, fields);
+}
+
+#[test]
+fn a_word_index_names_the_copy_with_that_suffix() {
+    let base = r#"
+col c { rect p_query  rect p_rows }
+rect hub
+"#;
+    let plain = svg(&format!("{base}p_query -> hub\np_rows -> hub\n"));
+    let literal = svg(&format!("{base}p[query] -> hub\np[rows] -> hub\n"));
+    let field = svg(&format!("{base}each m in [{{id: query}}, {{id: rows}}] {{ p[m.id] -> hub }}\n"));
+    assert_eq!(plain, literal);
+    assert_eq!(plain, field);
+}
+
+#[test]
+fn a_touching_bracket_is_an_index_a_spaced_one_a_modifier_block() {
+    // `rect a [x]` and `a -> b [auto]` keep their modifier blocks; a block
+    // with `key: value` is never an index, spaced or not.
+    let spaced = svg("rect a [fill: red]\nrect b\na -> b [routing: direct]\n");
+    let touching = svg("rect a[fill: red]\nrect b\na -> b[routing: direct]\n");
+    assert_eq!(spaced, touching);
+}
+
+#[test]
+fn an_index_from_an_outer_each_reaches_into_a_nested_one() {
+    let plain = svg(&format!(r#"{LIVES}
+api.p_1 -> db.p_1
+api.p_1 -> db.p_2
+api.p_2 -> db.p_1
+api.p_2 -> db.p_2
+"#));
+    let nested = svg(&format!(r#"{LIVES}
+each a, i in ["x", "y"] {{
+    each b, j in ["u", "v"] {{ api.p[i+1] -> db.p[j+1] }}
+}}
+"#));
+    assert_eq!(plain, nested);
+}
+
+fn err_of(src: &str) -> String {
+    match render(src) {
+        Ok(_) => panic!("expected an error\n---\n{src}"),
+        Err(e) => e.to_string(),
+    }
+}
+
+#[test]
+fn p_of_i_hints_that_copies_count_from_one() {
+    let err = err_of(&format!("{LIVES}\neach m, i in [\"a\", \"b\"] {{ api.p[i] -> db.p[i+1] }}\n"));
+    assert!(err.contains("api.p_0"), "{err}");
+    assert!(err.contains("`api.p` has copies 1 to 3"), "{err}");
+    assert!(err.contains("write api.p[i+1], not api.p[i]"), "{err}");
+}
+
+#[test]
+fn an_index_past_the_last_copy_names_the_copies_there_are() {
+    for line in ["api.p[7] -> db.p[1]", "constrain api.p[7].left = db.p[1].right + 10"] {
+        let err = err_of(&format!("{LIVES}\n{line}\n"));
+        assert!(err.contains("undefined identifier 'api.p_7'"), "{line}: {err}");
+        assert!(err.contains("`api.p` has copies 1 to 3 (api.p_1 … api.p_3); there is no copy 7"), "{line}: {err}");
+    }
+}
+
+#[test]
+fn a_computed_index_outside_its_each_is_an_error() {
+    let err = err_of("rect a\nrect b\na.p[i+1] -> b\n");
+    assert!(err.contains("`i` is not bound here") && err.contains("only works inside `each m, i in ...`"), "{err}");
+    let err = err_of("rect a\nrect b\na.p[m.row] -> b\n");
+    assert!(err.contains("`m` is not bound here"), "{err}");
+    // A sibling block's variable is not bound either.
+    let err = err_of("each m in [a] { rect x }\nrect b\nx.p[m.row] -> b\n");
+    assert!(err.contains("`m` is not bound here"), "{err}");
+}
+
+#[test]
+fn an_index_must_be_a_whole_number_or_a_name() {
+    let err = err_of("rect a\nrect b\na[2.5] -> b\n");
+    assert!(err.contains("`a[2.5]`: an index is a whole number"), "{err}");
+    let err = err_of("rect a\nrect b\na[-1] -> b\n");
+    assert!(err.contains("never negative"), "{err}");
+    let err = err_of(&format!("{LIVES}\neach m in [{{r: 1.5}}] {{ api.p[m.r] -> db.p[1] }}\n"));
+    assert!(err.contains("`api.p[m.r]`: `m.r` (item 1) is 1.5; an index is a whole number"), "{err}");
+    let err = err_of(&format!("{LIVES}\neach m, i in [\"a\"] {{ api.p[i-1] -> db.p[1] }}\n"));
+    assert!(err.contains("`i-1` (item 1) is -1") && err.contains("never negative"), "{err}");
+    let err = err_of(&format!("{LIVES}\neach m in [{{r: \"two words\"}}] {{ api.p[m.r] -> db.p[1] }}\n"));
+    assert!(err.contains("is the string \"two words\"; an index is a whole number or a name"), "{err}");
+}
+
+#[test]
+fn an_indexed_name_works_as_a_template_argument_and_in_a_via_list() {
+    let base = format!(r#"{LIVES}
+template "mark" (at: "") {{
+    circle dot [size: 6]
+    constrain dot.center_x = at.center_x
+    constrain dot.center_y = at.center_y
+}}
+col ws {{ each n in [1, 2] {{ rect w [size: 4] }} }}
+"#);
+    let plain = svg(&format!("{base}mark mk_1 [at: api.p_2]\napi.p_1 -> db.p_1 [via: [w_2]]\n"));
+    let literal = svg(&format!("{base}mark mk_1 [at: api.p[2]]\napi.p[1] -> db.p[1] [via: [w[2]]]\n"));
+    let computed = svg(&format!(
+        "{base}each m, i in [{{r: 2}}] {{\n  mark mk [at: api.p[m.r]]\n  api.p[i+1] -> db.p[i+1] [via: [w[m.r]]]\n}}\n"
+    ));
+    assert_eq!(plain, literal);
+    assert_eq!(plain, computed);
+}

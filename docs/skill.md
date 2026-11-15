@@ -36,6 +36,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
 | The same connection or constraint for several elements (a server to each client) | `each c in [c1, c2, c3] { srv -> c }` (`--doc each`) | one hand-copied line per element |
 | Connections from a table (transitions, dependencies, associations) | `each t in [{from: a, to: b, on: "go"}, ...] { t.from -> t.to [label: t.on] }` (`--doc each`) | parallel lists, or one hand-written line per row |
+| One copy an `each` made, by number (a chain of stages, row k of a lifeline) | `stage[2]`, `api.p[k]`; in an `each`: `stage[k+1]`, `api.p[m.row]` (`--doc each`) | spelling out `stage_2`, or computing names by hand |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
@@ -540,6 +541,24 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
 - **Index.** `each NAME, i in LIST` binds `i` to the 0-based position. It is a
   number: usable in a string (`"{i}"`, or `"{i+1}"` to count from 1) or where a number goes (`width: i`),
   not as a label by itself (`label: i` asks for quotes, like any number).
+- **One copy by number: `NAME[k]`.** `stage[2]` is `stage_2`, the copy that
+  item 2 made; `api.p[6]` is `api.p_6`. It works wherever a name goes
+  (connection ends, `constrain`, `contains`, `via:`, template arguments). The
+  `[` touches the name: `rect a [fill: red]` (with a space) stays a modifier
+  block. Inside an `each`, the index may come from the loop: `stage[k+1]`,
+  `p[i-1]`, `p[m.row]` (a number field), `p[m]`. Copies count from 1 and `i`
+  from 0, so the copy for item `i` is `p[i+1]`; looping over the numbers
+  themselves avoids the arithmetic:
+  ```
+  row stages { each s in ["Build", "Test", "Deploy"] { rect stage [label: s] } }
+  each k in [1, 2] { stage[k].right -> stage[k+1].left }   // stage_1 -> stage_2, stage_2 -> stage_3
+  ```
+  An index is a whole number or a word (`p[query]` is `p_query`). A computed
+  index outside the `each` that binds it, a fraction or a negative number is
+  an error; `p[0]` or a copy past the last one says which copies exist
+  (`api.p has copies 1 to 10`). `line[4]`, `row[2]` and `cell[r][c]` keep
+  their own meaning (`line4`, `row2`). `examples/pipeline.ail` wires a
+  pipeline this way.
 - **Nesting.** An `each` may contain `each` (a grid of rows of cells).
 - **Lists as arguments.** A template argument may be a list (`attrs: ["a",
   "b"]`) and then reaches the body; passing a list straight to `label:` is an

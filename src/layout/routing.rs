@@ -147,6 +147,22 @@ pub fn resolve_anchor(
         Some(anchor_name) => {
             // Explicit anchor - look up in element's anchor set
             let anchor = element.anchors.get(&anchor_name.node).ok_or_else(|| {
+                // `api.p_7` / `api.p[7]` when api has p_1..p_3: a missing copy, not an anchor.
+                if let Some((stem, _)) = super::numbered_copy(&anchor_name.node) {
+                    let prefix = format!("{}_", element_name);
+                    let parts: Vec<String> = elements
+                        .keys()
+                        .filter_map(|k| k.strip_prefix(&prefix).map(|p| format!("{}.{}", element_name, p)))
+                        .collect();
+                    let family = super::copy_family(&format!("{}.{}", element_name, stem), &parts);
+                    if !family.is_empty() {
+                        return LayoutError::undefined(
+                            format!("{}.{}", element_name, anchor_name.node),
+                            anchor_name.span.clone(),
+                            vec![family[0].1.clone(), family[family.len() - 1].1.clone()],
+                        );
+                    }
+                }
                 let valid_anchors: Vec<String> =
                     element.anchors.names().map(String::from).collect();
                 LayoutError::invalid_anchor(

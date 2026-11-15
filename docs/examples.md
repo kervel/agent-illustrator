@@ -910,3 +910,18 @@ each t in [
     t.from -> t.to as tr [label: t.on]       // `as tr` names the arrows tr_1, tr_2, ... for motion
 }
 ```
+
+`stage[k]` names copy k of what an `each` made (`stage[2]` is `stage_2`); inside an `each`
+the index may be computed (`stage[k+1]`, `p[i+1]`, `p[m.row]`). A pipeline whose boxes come
+from one `each` and whose hand-off arrows come from another (`examples/pipeline.ail`):
+
+```
+row stages [gap: 70, align: center] {
+    each s in [{name: "Build", tool: "cargo build"}, {name: "Test", tool: "cargo test"},
+               {name: "Package", tool: "docker build"}] {
+        rect stage [label: "<b>{s.name}</b><br>{s.tool}", width: 120, height: 56]
+    }
+}
+each k in [1, 2] { stage[k].right -> stage[k+1].left [routing: direct] }   // copies count from 1
+stage[2].top -> stage[1].top [routing: curved, label: "fails"]               // one copy by number
+```

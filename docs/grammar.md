@@ -472,6 +472,12 @@ Declarations that serve motion:
                   "{...}" goes: each t in [{from: a, to: b, on: "go"}] {
                   t.from -> t.to [label: t.on] }. Field names may be reserved
                   words (from, label, text). Every item needs every field used.
+                  NAME[k] is copy k (1-based) of an element an each made, wherever a
+                  name goes: stage[2] = stage_2, api.p[6] = api.p_6 ([ touches the
+                  name; "rect a [x]" stays a block). Inside each the index may be
+                  i+1, i-1, k, m.row (number field) or m (a word: p[m] = p_query):
+                  each k in [1, 2] { stage[k].right -> stage[k+1].left }
+                  line[n], row[n], cell[r][c] keep their meaning (line4, row2).
                   anchors may be declared inside: anchor r_a [position: row.right]
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
                   the previous one; [no_resolve] keeps the previous frame's
