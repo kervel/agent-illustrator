@@ -462,6 +462,9 @@ Declarations that serve motion:
                   item (label: NAME, text NAME, "{NAME}"); i is the 0-based
                   position (a number; in strings "{i}", "{i+1}" counts from 1). Names declared inside
                   get _1, _2, ... (x -> x_1; nested: x_2_3). Empty list: nothing.
+                  Items that are names stand for elements wherever a name goes:
+                  each c in [c1, c2, b.led] { srv -> c   constrain c.width = 80
+                  constrain bg contains c   x -> y [via: [c]] }   (c.top = b.led.top)
                   anchors may be declared inside: anchor r_a [position: row.right]
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
                   the previous one; [no_resolve] keeps the previous frame's

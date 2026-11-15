@@ -871,3 +871,23 @@ template "menu" (items: []) {                   // inside a template: a list par
 }
 menu file [items: ["New", "Open"]]              // file.entry_1, file.entry_2
 ```
+
+Items written as names stand for elements wherever a name goes (connection ends,
+`constrain`, `contains`, `via:`). A server sending data to three clients, the middle one
+failing (`examples/fan-out.ail`):
+
+```
+rect srv [label: "Server", width: 130, height: 70, fill: role-primary, label_fill: role-surface]
+col clients [gap: 34, align: start] {
+    rect c1 [label: "Client 1", width: 130, height: 44, fill: role-ok-soft]
+    rect c2 [label: "Client 2<br><i>timeout</i>", width: 130, height: 54, fill: role-error-soft, stroke: role-error, stroke_width: 2]
+    rect c3 [label: "Client 3", width: 130, height: 44, fill: role-ok-soft]
+}
+constrain clients.left = srv.right + 200
+constrain srv.center_y = clients.center_y
+
+each c in [c1, c3] {                            // the healthy clients: one arrow each
+    srv.right -> c.left [routing: direct, label: "data", stroke: role-ok]
+}
+srv.right -> c2.left [routing: direct, label: "no reply", stroke: role-error, stroke_dasharray: dashed, to_end: open]
+```

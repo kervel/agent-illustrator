@@ -156,6 +156,59 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
                 vec![crate::ParseError::Syntax { span, message, expected: vec![] }.locate(input)]
             })
         })
+        .map(|mut doc| {
+            join_constraint_parts(&mut doc.statements);
+            doc
+        })
+}
+
+/// `contains` and `midpoint` operands name a component's part as one name:
+/// `c.dot` -> `c_dot`. The parser keeps the dots; this joins them everywhere
+/// except inside `each` bodies, which are joined once their loop variables
+/// are filled in (`each n in [a, b] { constrain bg contains n.dot }`).
+pub fn join_constraint_parts(stmts: &mut [Spanned<Statement>]) {
+    fn join(id: &mut Spanned<Identifier>) {
+        if id.node.0.contains('.') {
+            id.node = Identifier::new(id.node.0.replace('.', "_"));
+        }
+    }
+    fn expr(e: &mut ConstraintExpr) {
+        match e {
+            ConstraintExpr::Midpoint { a, b, .. } => {
+                join(a);
+                join(b);
+            }
+            ConstraintExpr::Contains { container, elements, .. } => {
+                join(container);
+                elements.iter_mut().for_each(join);
+            }
+            _ => {}
+        }
+    }
+    fn stmt(s: &mut Statement) {
+        match s {
+            Statement::Constrain(d) => expr(&mut d.expr),
+            Statement::NamedLayout { constraints, .. } => {
+                for c in constraints {
+                    expr(&mut c.node.expr);
+                }
+            }
+            Statement::Layout(l) => join_constraint_parts(&mut l.children),
+            Statement::Group(g) => join_constraint_parts(&mut g.children),
+            Statement::Label(inner) => stmt(inner),
+            Statement::TemplateDecl(t) => {
+                if let Some(body) = &mut t.body {
+                    join_constraint_parts(body);
+                }
+            }
+            // Joined after expansion (template/each.rs).
+            Statement::Each(_) => {}
+            _ => {}
+        }
+    }
+    for s in stmts {
+        stmt(&mut s.node);
+    }
 }
 
 /// `doc d* [fname: ["a", "b", "c"]]` -> d0, d1, d2, each taking the i-th item
@@ -1126,13 +1179,16 @@ where
         .map_with(|segments, e| Spanned::new(ElementPath { segments }, span_range(&e.span())));
 
     // `c.dot` as one name (a component's part): `c_dot`.
+    // The dots stay until `join_constraint_parts` (end of `parse`, or after
+    // `each` expansion for a body), so an `each` loop variable at the head
+    // can still be told apart from the rest.
     let joined_path = identifier
         .then(just(Token::Dot).ignore_then(identifier).repeated().collect::<Vec<_>>())
         .map(|(head, rest)| {
             let mut n = head.node.0.clone();
             let span = head.span.clone();
             for r in rest {
-                n.push('_');
+                n.push('.');
                 n.push_str(&r.node.0);
             }
             Spanned::new(Identifier::new(n), span)

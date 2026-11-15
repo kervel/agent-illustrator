@@ -18,6 +18,7 @@
 //! ```
 
 mod each;
+mod names;
 mod registry;
 mod resolver;
 pub mod svg_parts;

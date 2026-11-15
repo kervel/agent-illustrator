@@ -34,6 +34,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Text centred in a box | `rect b [label: "x"]` | a separate `text` element plus constraints |
 | Several lines in a box | `label: "a<br>b<br>c"` | one `text` element per line |
 | One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
+| The same connection or constraint for several elements (a server to each client) | `each c in [c1, c2, c3] { srv -> c }` (`--doc each`) | one hand-copied line per element |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
@@ -474,7 +475,7 @@ not what the tool is for.
 list parameter of the enclosing template (`attrs: []`, default empty) or a
 literal list `["a", "b"]`; it works outside templates too. Inside the body
 `NAME` is the item: `label: NAME`, `text NAME` (that is `text "{NAME}"`), or
-inside a string `"{NAME}"`. Items are strings or numbers; markup (`<b>`, `<i>`)
+inside a string `"{NAME}"`. Items are strings, numbers or names (below); markup (`<b>`, `<i>`)
 works as in any label. An empty list makes nothing, so a compartment that has
 no items simply is not there.
 A `{name}` that no parameter or `each` variable binds shows up literally; lint
@@ -499,6 +500,21 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   same body (`constrain bg contains entry`, `clip: x`) follow the renaming.
   `constrain`, anchors, keyframes and connections can target `entry_2` like any
   element. Unnamed elements need no names.
+- **Items that name elements.** An item written as a name (no quotes) stands
+  for that element wherever a name goes: connection ends, `constrain`,
+  `contains`, `midpoint`, anchor positions and `via:`/`through:` lists.
+  A dotted item names a part: with `c` = `b1.led`, `c.top` is `b1.led.top`.
+  ```
+  each c in [c1, c2, c3] { srv.right -> c.left [label: "data"] }
+  each c in [c1, c3] { constrain c.width = 120 }
+  ```
+  Different looks for some items: loop over those items only and write the
+  others out (`examples/fan-out.ail`). Inside a template, the names are the
+  instance's parts. A quoted item (`["c1"]`) or the index where a name goes is
+  an error that says what to write; a misspelt name is reported at the item in
+  the list. A loop variable may not have the name of an element that the body
+  also uses as a name (`each a in [...] { a -> hub }` beside a `rect a`):
+  rename the variable.
 - **Index.** `each NAME, i in LIST` binds `i` to the 0-based position. It is a
   number: usable in a string (`"{i}"`, or `"{i+1}"` to count from 1) or where a number goes (`width: i`),
   not as a label by itself (`label: i` asks for quotes, like any number).

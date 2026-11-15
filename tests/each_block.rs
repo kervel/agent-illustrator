@@ -220,3 +220,131 @@ each n, i in ["a", "b", "c"] { rect r [width: 40, height: 20, label: "{i+1}. {n}
         assert!(out.contains(&format!(">{t}<")), "missing {t}");
     }
 }
+
+// ---- loop variables where a name goes --------------------------------
+
+fn connections(svg: &str) -> usize {
+    svg.matches("class=\"ai-connection\"").count()
+}
+
+/// x, y, width, height of `<rect id="ID" ...>`.
+fn rect_of(svg: &str, id: &str) -> (f64, f64, f64, f64) {
+    let start = svg.find(&format!("<rect id=\"{id}\"")).unwrap_or_else(|| panic!("no rect {id}"));
+    let tag = &svg[start..start + svg[start..].find('>').unwrap()];
+    let attr = |k: &str| -> f64 {
+        let at = tag.find(&format!(" {k}=\"")).unwrap_or_else(|| panic!("{k} in {tag}")) + k.len() + 3;
+        tag[at..at + tag[at..].find('"').unwrap()].parse().unwrap()
+    };
+    (attr("x"), attr("y"), attr("width"), attr("height"))
+}
+
+#[test]
+fn a_loop_variable_is_a_connection_endpoint() {
+    let out = svg(r#"
+row r [gap: 60] { rect srv [label: "server"]  col cs [gap: 20] { rect c1  rect c2  rect c3 } }
+each c in [c1, c2, c3] { srv.right -> c.left [label: "data"] }"#);
+    assert_eq!(connections(&out), 3);
+}
+
+#[test]
+fn a_loop_variable_works_in_constrain_and_contains() {
+    let out = svg(r#"
+row r [gap: 60] { rect a [label: "a"]  rect b [label: "b"] }
+each n in [a, b] { constrain n.width = 50 }
+rect frame [fill: none, stroke: foreground-2]
+each n in [a] { constrain frame contains n, b [padding: 10] }"#);
+    let (ax, _, aw, _) = rect_of(&out, "a");
+    let (bx, _, bw, _) = rect_of(&out, "b");
+    assert_eq!((aw, bw), (50.0, 50.0));
+    let (fx, _, fw, _) = rect_of(&out, "frame");
+    assert!(fx <= ax - 10.0 + 0.01 && fx + fw >= bx + bw + 10.0 - 0.01, "frame {fx}+{fw} around {ax}..{}", bx + bw);
+}
+
+#[test]
+fn a_loop_variable_works_in_via_lists_and_anchor_positions() {
+    let out = svg(r#"
+row r [gap: 80] { rect a [label: "a"]  rect hub [label: "hub"] }
+point w1
+point w2
+constrain w1.center_x = a.center_x
+constrain w1.center_y = a.top - 40
+constrain w2.center_x = hub.center_x
+constrain w2.center_y = w1.center_y
+each n in [w1] { a.top -> hub.top [routing: direct, via: [n, w2]] }
+template "pair" (outs: []) {
+    row two [gap: 20] { rect l [width: 30, height: 20]  rect rr [width: 30, height: 20] }
+    each n in outs { anchor out [position: n.bottom, direction: down] }
+}
+pair p [outs: [rr]]
+constrain p.top = hub.bottom + 40
+rect z [width: 20, height: 20]
+constrain z.top = p.bottom + 40
+p.out_1 -> z.top"#);
+    assert_eq!(connections(&out), 2);
+}
+
+#[test]
+fn a_dotted_item_names_a_part_of_an_instance() {
+    let out = svg(r#"
+template "board" () { rect body [width: 80, height: 40]  circle led [size: 10] }
+row r [gap: 80] { board b1  board b2  rect hub [label: "hub"] }
+each n in [b1.led, b2.led] { n.top -> hub [routing: direct]  constrain n.center_y = b1.body.center_y }"#);
+    assert_eq!(connections(&out), 2);
+}
+
+#[test]
+fn inside_a_template_loop_names_are_the_instance_parts() {
+    let out = svg(r#"
+template "panel" (lit: []) {
+    row leds [gap: 20] { circle l1 [size: 14]  circle l2 [size: 14]  circle l3 [size: 14] }
+    rect bar [width: 120, height: 10]
+    constrain bar.top = leds.bottom + 30
+    each n in lit { bar -> n }
+}
+panel p [lit: [l1, l3]]
+panel q [lit: [l2]]"#);
+    assert_eq!(connections(&out), 3);
+}
+
+#[test]
+fn a_loop_variable_that_hides_an_element_used_as_a_name_is_an_error() {
+    let err = render(r#"
+row r { rect a [label: "a"]  rect hub [label: "h"] }
+each a in [hub] { a -> hub }"#)
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("`a` is also the name of an element") && err.contains("rename the loop variable"), "{err}");
+    // Used only as a value (a label), the same name is fine.
+    assert!(render(r#"
+rect a [label: "a"]
+each a in ["x"] { rect r [label: a] }"#)
+        .is_ok());
+}
+
+#[test]
+fn a_string_or_the_index_where_a_name_goes_says_what_to_write() {
+    let err = render(r#"
+row r { rect a [label: "a"]  rect hub [label: "h"] }
+each n in ["a"] { n -> hub }"#)
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("the string \"a\"") && err.contains("without quotes"), "{err}");
+    let err = render(r#"
+row r { rect a [label: "a"]  rect hub [label: "h"] }
+each n, i in [a] { i -> hub }"#)
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("position") && err.contains("each it, i in"), "{err}");
+}
+
+#[test]
+fn a_typo_in_the_list_is_reported_at_the_list_item() {
+    let src = r#"row r { rect a [label: "a"]  rect hub [label: "h"] }
+each n in [a, bx] { n -> hub }"#;
+    let err = render(src).unwrap_err().to_string();
+    assert!(err.contains("'bx'"), "{err}");
+    // The caret sits under `bx` in the list, not under `n` in the body.
+    let line = err.lines().find(|l| l.contains("each n in")).expect(&err);
+    let caret = err.lines().skip_while(|l| !l.contains("each n in")).nth(1).expect(&err);
+    assert_eq!(caret.find('^'), line.find("bx"), "{err}");
+}

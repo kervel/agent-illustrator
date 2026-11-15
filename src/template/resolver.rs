@@ -1001,11 +1001,8 @@ fn prefix_element_path(path: &Spanned<ElementPath>, prefix: &str, refs: &Refs) -
     let mut new_segments = path.node.segments.clone();
     if let Some(target) = new_segments.first().and_then(|f| refs.get(&f.node.0)) {
         // An element-reference parameter: the element the instance was given
-        let span = new_segments[0].span.clone();
-        let mut segs: Vec<Spanned<Identifier>> =
-            target.split('.').map(|t| Spanned::new(Identifier::new(t.to_string()), span.clone())).collect();
-        segs.extend(new_segments.drain(1..));
-        return Spanned::new(ElementPath { segments: segs }, path.span.clone());
+        let spliced = super::names::splice_path(&path.node, target, &new_segments[0].span);
+        return Spanned::new(spliced, path.span.clone());
     }
     if !new_segments.is_empty() {
         let first = &new_segments[0];
@@ -1024,16 +1021,9 @@ fn prefix_element_path(path: &Spanned<ElementPath>, prefix: &str, refs: &Refs) -
 
 /// Prefix a single identifier
 fn prefix_identifier(id: &Spanned<Identifier>, prefix: &str, refs: &Refs) -> Spanned<Identifier> {
-    let (head, rest) = match id.node.0.split_once('.') {
-        Some((h, r)) => (h, Some(r)),
-        None => (id.node.0.as_str(), None),
-    };
-    if let Some(target) = refs.get(head) {
+    if let Some(target) = refs.get(super::names::head_of(&id.node.0).0) {
         // `contains` and midpoint operands name parts with `_` (`x_p_1`)
-        let text = match rest {
-            Some(r) => format!("{}_{}", target.replace('.', "_"), r),
-            None => target.replace('.', "_"),
-        };
+        let text = super::names::splice_dotted(&id.node.0, target).replace('.', "_");
         return Spanned::new(Identifier::new(text), id.span.clone());
     }
     Spanned::new(
