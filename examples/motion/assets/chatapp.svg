@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" width="120" height="100">
+  <title>Chat app</title>
+  <!-- A chat app: a window with two speech bubbles. Parts: chat.frame, chat.bar, chat.left, chat.right. "tint" colours your bubble. -->
+  <rect id="frame" x="1.5" y="1.5" width="117" height="97" rx="12"
+        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+  <path id="bar" d="M1.5 13.5 a12 12 0 0 1 12 -12 H106.5 a12 12 0 0 1 12 12 V22 H1.5 Z"
+        fill="var(--role-surface-2, #eceef2)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+  <g id="left">
+    <rect x="12" y="32" width="60" height="22" rx="9" fill="var(--role-surface-2, #eceef2)"/>
+    <path d="M16 54 L14 62 L24 54 Z" fill="var(--role-surface-2, #eceef2)"/>
+  </g>
+  <g id="right">
+    <rect x="46" y="64" width="62" height="22" rx="9" fill="var(--tint, var(--role-primary, #1d6e88))"/>
+    <path d="M104 86 L106 94 L96 86 Z" fill="var(--tint, var(--role-primary, #1d6e88))"/>
+  </g>
+</svg>

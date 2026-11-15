@@ -11,10 +11,8 @@ examples/motion/git-merge.ail
 
 ## Motion
 examples/motion/request-response.ail
-examples/motion/token-loop.ail
 
 ## Diagrams
 examples/class-diagram.ail
 examples/sequence-diagram.ail
-examples/fan-out.ail
 examples/state-machine.ail

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -65 815 390" font-size="14" data-frames="ask,call,answer">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="ask,send,call,answer,tell,again,resend,answer2">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --accent-light: #e3f2fd;
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
     --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
     --background-light: #ffffff;
     --code-add: var(--role-ok);
     --code-add-bg: var(--role-ok-soft);
@@ -32,45 +32,47 @@
     --code-string: var(--role-ok);
     --code-title: var(--role-ink);
     --code-title-bg: var(--role-surface-2);
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --foreground-light: #e0e0e0;
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --role-backdrop: var(--background-2);
     --role-error: var(--status-error);
-    --role-error-soft: #ffebee;
+    --role-error-soft: #f6dedb;
     --role-ink: var(--text-1);
     --role-muted: var(--text-2);
     --role-ok: var(--status-success);
-    --role-ok-soft: #e8f5e9;
-    --role-primary: var(--accent-1);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
     --role-rule: var(--foreground-3);
-    --role-secondary: var(--secondary-1);
-    --role-series-1: #0e8a8a;
-    --role-series-1-soft: #d6eeee;
-    --role-series-2: #e07a12;
-    --role-series-2-soft: #fbe6d2;
-    --role-series-3: #7b4bb7;
-    --role-series-3-soft: #e8def3;
-    --role-series-4: #c2185b;
-    --role-series-4-soft: #f6d7e3;
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
     --role-surface: var(--background-1);
     --role-surface-2: var(--background-2);
     --role-warn: var(--status-warning);
-    --role-warn-soft: #fff8e1;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --secondary-light: #fff3e0;
-    --status-error: #f44336;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --text-1: #333333;
-    --text-2: #666666;
-    --text-3: #999999;
-    --text-dark: #1a1a1a;
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
     --text-light: #ffffff;
   }
   .ai-on-dark { fill: var(--text-light); }
@@ -80,114 +82,861 @@
 .ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
 .ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
 .frame-ask {
-  .conn-eb586e30-reply { d: path("M585 55 L170.8 55"); }
-  .conn-eb586e30-request { d: path("M160 55 L574.2 55"); }
+}
+.frame-send {
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
 }
 .frame-call {
-  .conn-eb586e30-reply { d: path("M585 55 L170.8 55"); }
-  .conn-eb586e30-request { opacity: 1; }
-  .conn-eb586e30-request { d: path("M160 55 L574.2 55"); }
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
+  .conn-6714b6eb-l_call { opacity: 1; }
 }
 .frame-answer {
-  .kf-eb586e30-m3 { opacity: 1; }
-  .conn-eb586e30-reply { opacity: 1; }
-  .conn-eb586e30-request { opacity: 1; }
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
+  .kf-6714b6eb-e3 { opacity: 1; }
+  .conn-6714b6eb-l_call { opacity: 1; }
+  .conn-6714b6eb-l_reply { opacity: 1; }
+}
+.frame-tell {
+  .kf-6714b6eb-a1 { opacity: 1; }
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
+  .kf-6714b6eb-e3 { opacity: 1; }
+  .conn-6714b6eb-l_answer { opacity: 1; }
+  .conn-6714b6eb-l_call { opacity: 1; }
+  .conn-6714b6eb-l_reply { opacity: 1; }
+}
+.frame-again {
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
+  .kf-6714b6eb-e3 { opacity: 1; }
+  .kf-6714b6eb-e4 { opacity: 1; }
+  .kf-6714b6eb-q1 { opacity: 0; }
+  .kf-6714b6eb-q2 { opacity: 1; }
+  .conn-6714b6eb-l_answer { opacity: 1; }
+  .conn-6714b6eb-l_call { opacity: 1; }
+  .conn-6714b6eb-l_reply { opacity: 1; }
+}
+.frame-resend {
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
+  .kf-6714b6eb-e3 { opacity: 1; }
+  .kf-6714b6eb-e4 { opacity: 1; }
+  .kf-6714b6eb-forget { opacity: 1; }
+  .kf-6714b6eb-q1 { opacity: 0; }
+  .kf-6714b6eb-q2 { opacity: 1; }
+  .conn-6714b6eb-l_answer { opacity: 1; }
+  .conn-6714b6eb-l_call { opacity: 1; }
+  .conn-6714b6eb-l_reply { opacity: 1; }
+}
+.frame-answer2 {
+  .kf-6714b6eb-a2 { opacity: 1; }
+  .kf-6714b6eb-conv_bg { opacity: 1; }
+  .kfc-6714b6eb-conv_head { transform: translate(0px, 0px); }
+  .kf-6714b6eb-conv_head { opacity: 1; }
+  .kf-6714b6eb-e1 { opacity: 1; }
+  .kf-6714b6eb-e2 { opacity: 1; }
+  .kf-6714b6eb-e3 { opacity: 1; }
+  .kf-6714b6eb-e4 { opacity: 1; }
+  .kf-6714b6eb-e5 { opacity: 1; }
+  .kf-6714b6eb-forget { opacity: 1; }
+  .kf-6714b6eb-q1 { opacity: 0; }
+  .kf-6714b6eb-q2 { opacity: 1; }
+  .conn-6714b6eb-l_answer { opacity: 1; }
+  .conn-6714b6eb-l_call { opacity: 1; }
+  .conn-6714b6eb-l_reply { opacity: 1; }
+}
+    
+/* stylesheets/kapernikov.css */
+/* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
 }
   /* motion: settled states (auto-generated) */
 svg[data-ail-player] * { transition: none !important; }
-.aiacm-eb586e30-m2-attention { opacity: 0; }
-.aiacm-eb586e30-m2-attention { scale: 1 1; }
-.conn-eb586e30-request { opacity: 0; }
-.aimask-eb586e30-request { stroke-dashoffset: 0; }
-.aihead-eb586e30-request { opacity: 1; }
-.aighost-eb586e30-0 { translate: 0px 0px; }
-.aighost-eb586e30-0 { scale: 1 1; }
-.aighost-eb586e30-0 { opacity: 0; }
-.conn-eb586e30-reply { opacity: 0; }
-.aimask-eb586e30-reply { stroke-dashoffset: 0; }
-.aihead-eb586e30-reply { opacity: 1; }
-.kf-eb586e30-m3 { opacity: 0; }
-.kf-eb586e30-m3 { translate: 0px 0px; }
+.kf-6714b6eb-s_badge { opacity: 1; }
+.kf-6714b6eb-q1 { opacity: 1; }
+.kf-6714b6eb-q1 { scale: 1 1; }
+.conn-6714b6eb-l_ask { opacity: 1; }
+.aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+.aihead-6714b6eb-l_ask { opacity: 1; }
+.kf-6714b6eb-conv_bg { opacity: 0; }
+.kf-6714b6eb-conv_head { opacity: 0; }
+.kf-6714b6eb-e1 { opacity: 0; }
+.kf-6714b6eb-e1 { translate: 0px 0px; }
+.aiacm-6714b6eb-e1-attention { opacity: 0; }
+.aiacm-6714b6eb-e1-attention { scale: 1 1; }
+.kf-6714b6eb-e2 { opacity: 0; }
+.kf-6714b6eb-e2 { translate: 0px 0px; }
+.kf-6714b6eb-e2 { scale: 1 1; }
+.conn-6714b6eb-l_call { opacity: 0; }
+.aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+.aihead-6714b6eb-l_call { opacity: 1; }
+.aighost-6714b6eb-0 { translate: 0px 0px; }
+.aighost-6714b6eb-0 { scale: 1 1; }
+.aighost-6714b6eb-0 { opacity: 0; }
+.conn-6714b6eb-l_reply { opacity: 0; }
+.aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+.aihead-6714b6eb-l_reply { opacity: 1; }
+.kf-6714b6eb-r1 { opacity: 0; }
+.kf-6714b6eb-r1 { translate: 0px 0px; }
+.kf-6714b6eb-r1 { scale: 1 1; }
+.kf-6714b6eb-e3 { opacity: 0; }
+.kf-6714b6eb-e3 { translate: 0px 0px; }
+.kf-6714b6eb-e3 { scale: 1 1; }
+.conn-6714b6eb-l_answer { opacity: 0; }
+.aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+.aihead-6714b6eb-l_answer { opacity: 1; }
+.kf-6714b6eb-a1 { opacity: 0; }
+.kf-6714b6eb-a1 { translate: 0px 0px; }
+.kf-6714b6eb-a1 { scale: 1 1; }
+.kf-6714b6eb-q2 { opacity: 0; }
+.kf-6714b6eb-q2 { scale: 1 1; }
+.kf-6714b6eb-l_ask { scale: 1 1; }
+.kf-6714b6eb-e4 { opacity: 0; }
+.kf-6714b6eb-e4 { translate: 0px 0px; }
+.kf-6714b6eb-e4 { scale: 1 1; }
+.aiacm-6714b6eb-e4_txt-attention { opacity: 0; }
+.aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+.kf-6714b6eb-forget { opacity: 0; }
+.kf-6714b6eb-forget { translate: 0px 0px; }
+.kf-6714b6eb-l_call { scale: 1 1; }
+.aighost-6714b6eb-1 { translate: 0px 0px; }
+.aighost-6714b6eb-1 { scale: 1 1; }
+.aighost-6714b6eb-1 { opacity: 0; }
+.kf-6714b6eb-l_reply { scale: 1 1; }
+.kf-6714b6eb-r2 { opacity: 0; }
+.kf-6714b6eb-r2 { translate: 0px 0px; }
+.kf-6714b6eb-r2 { scale: 1 1; }
+.kf-6714b6eb-e5 { opacity: 0; }
+.kf-6714b6eb-e5 { translate: 0px 0px; }
+.kf-6714b6eb-e5 { scale: 1 1; }
+.kf-6714b6eb-l_answer { scale: 1 1; }
+.kf-6714b6eb-a2 { opacity: 0; }
+.kf-6714b6eb-a2 { translate: 0px 0px; }
+.kf-6714b6eb-a2 { scale: 1 1; }
 .frame-ask {
-  .aiacm-eb586e30-m2-attention { scale: 1 1; }
-  .aimask-eb586e30-request { stroke-dashoffset: 0; }
-  .aihead-eb586e30-request { opacity: 1; }
-  .aighost-eb586e30-0 { scale: 1 1; }
-  .aimask-eb586e30-reply { stroke-dashoffset: 0; }
-  .aihead-eb586e30-reply { opacity: 1; }
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
+}
+.frame-send {
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
 }
 .frame-call {
-  .aiacm-eb586e30-m2-attention { scale: 1 1; }
-  .aimask-eb586e30-request { stroke-dashoffset: 0; }
-  .aihead-eb586e30-request { opacity: 1; }
-  .aighost-eb586e30-0 { scale: 1 1; }
-  .aimask-eb586e30-reply { stroke-dashoffset: 0; }
-  .aihead-eb586e30-reply { opacity: 1; }
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
 }
 .frame-answer {
-  .aiacm-eb586e30-m2-attention { scale: 1 1; }
-  .aimask-eb586e30-request { stroke-dashoffset: 0; }
-  .aihead-eb586e30-request { opacity: 1; }
-  .aighost-eb586e30-0 { scale: 1 1; }
-  .aimask-eb586e30-reply { stroke-dashoffset: 0; }
-  .aihead-eb586e30-reply { opacity: 1; }
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
+}
+.frame-tell {
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
+}
+.frame-again {
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
+}
+.frame-resend {
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
+}
+.frame-answer2 {
+  .kf-6714b6eb-q1 { scale: 1 1; }
+  .aimask-6714b6eb-l_ask { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_ask { opacity: 1; }
+  .aiacm-6714b6eb-e1-attention { scale: 1 1; }
+  .kf-6714b6eb-e2 { scale: 1 1; }
+  .aimask-6714b6eb-l_call { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_call { opacity: 1; }
+  .aighost-6714b6eb-0 { scale: 1 1; }
+  .aimask-6714b6eb-l_reply { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_reply { opacity: 1; }
+  .kf-6714b6eb-r1 { scale: 1 1; }
+  .kf-6714b6eb-e3 { scale: 1 1; }
+  .aimask-6714b6eb-l_answer { stroke-dashoffset: 0; }
+  .aihead-6714b6eb-l_answer { opacity: 1; }
+  .kf-6714b6eb-a1 { scale: 1 1; }
+  .kf-6714b6eb-q2 { scale: 1 1; }
+  .kf-6714b6eb-l_ask { scale: 1 1; }
+  .kf-6714b6eb-e4 { scale: 1 1; }
+  .aiacm-6714b6eb-e4_txt-attention { scale: 1 1; }
+  .kf-6714b6eb-l_call { scale: 1 1; }
+  .aighost-6714b6eb-1 { scale: 1 1; }
+  .kf-6714b6eb-l_reply { scale: 1 1; }
+  .kf-6714b6eb-r2 { scale: 1 1; }
+  .kf-6714b6eb-e5 { scale: 1 1; }
+  .kf-6714b6eb-l_answer { scale: 1 1; }
+  .kf-6714b6eb-a2 { scale: 1 1; }
 }
 ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
-    <mask id="aim-eb586e30-request" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-request aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
-    <mask id="aim-eb586e30-reply" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-reply aid-eb586e30-reply" d="M585 64 L170.8 64" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <clipPath id="ai-clip-6714b6eb-conv_head"><rect class="ai-shape kf-anim kfc-6714b6eb-conv_head" x="741" y="381" width="638" height="348" rx="13" ry="13"/></clipPath>
+    <mask id="aim-6714b6eb-l_ask" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_ask aid-6714b6eb-l_ask" d="M223 232 L526.0615 232" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-6714b6eb-l_answer" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_answer aid-6714b6eb-l_answer" d="M540.4615 268 L237.4 268" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-6714b6eb-l_call" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_call aid-6714b6eb-l_call" d="M699.5385 232 L1157.5285999999999 232" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-6714b6eb-l_reply" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_reply aid-6714b6eb-l_reply" d="M1171.9286 268 L713.9385 268" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <clipPath id="ai-clip-6714b6eb-conv_head"><rect class="ai-shape kf-anim kfc-6714b6eb-conv_head" x="741" y="381" width="638" height="348" rx="13" ry="13"/></clipPath>
+    <clipPath id="ai-clip-6714b6eb-conv_head"><rect class="ai-shape kf-anim kfc-6714b6eb-conv_head" x="741" y="381" width="638" height="348" rx="13" ry="13"/></clipPath>
   </defs>
-  <g class="kf-eb586e30-stage kf-anim" style="transform-origin:355px 135px">
-    <g id="stage" class="ai-container kfp-eb586e30-stage">
-      <g class="kf-eb586e30-client kf-anim" style="transform-origin:165px 140px">
-        <g id="client" class="ai-container kfp-eb586e30-client">
-          <g class="kf-eb586e30-app kf-anim" style="transform-origin:85px 55px">
-            <rect id="app" class="ai-shape ai-rect kfp-eb586e30-app" x="10" y="10" width="150" height="90" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="12" style="rx:12px;ry:12px"/>
-            <text class="ai-label" x="85" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="85" dy="-0"><tspan>Chat app</tspan></tspan></text>
+  <g class="kf-6714b6eb-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-6714b6eb-s">
+      <g class="kf-6714b6eb-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-6714b6eb-s_stage" x="0" y="0" width="1600" height="900" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-6714b6eb-s_badge kf-anim" style="transform-origin:96.5px 64.5px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-6714b6eb-s_badge" x="96" y="64" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-6714b6eb-s_heading kf-anim" style="transform-origin:129px 64.5px">
+        <text id="s_heading" class="ai-shape ai-text kfp-6714b6eb-s_heading" x="119" y="64.5" text-anchor="start" dominant-baseline="middle" font-size="1" fill="none">How a chatbot talks to an LLM</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-you kf-anim" style="transform-origin:170px 250px">
+    <g id="you" class="ai-container kfp-6714b6eb-you">
+      <g class="kf-6714b6eb-you__art kf-anim" style="transform-origin:170px 250px">
+        <g id="you__art" class="ai-svg-embed kfp-6714b6eb-you__art" transform="translate(135, 205.8333) scale(1.6666666666666667, 1.6666660377358489) translate(-3, -2)">
+          <title>Person</title>
+          <!-- Parts (ids) are addressable from AIL: p.head, p.body.
+          Colour is a theme role; the CSS variable "tint" is an instance argument. -->
+        </g>
+      </g>
+      <g class="kf-6714b6eb-you_head kf-anim" style="transform-origin:170px 224.17px">
+        <g id="you_head" class="ai-svg-embed kfp-6714b6eb-you_head" transform="translate(151.6667, 205.8333) scale(1.6666681818181817, 1.6666681818181817) translate(-13, -2)" fill="var(--role-ink)">
+          <circle id="you__head" cx="24" cy="13" r="11" fill="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-you_body kf-anim" style="transform-origin:170px 272.5px">
+        <g id="you_body" class="ai-svg-embed kfp-6714b6eb-you_body" transform="translate(135, 250.8333) scale(1.6666666666666667, 1.6666653846153847) translate(-3, -29)" fill="var(--role-ink)">
+          <path id="you__body" d="M3 55 C3 38 11 29 24 29 C37 29 45 38 45 55 Z" fill="inherit"/>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-app kf-anim" style="transform-origin:620px 250px">
+    <g id="app" class="ai-container kfp-6714b6eb-app">
+      <g class="kf-6714b6eb-app__art kf-anim" style="transform-origin:620px 250px">
+        <g id="app__art" class="ai-svg-embed kfp-6714b6eb-app__art" transform="translate(560, 200.2564) scale(1.0256410256410255, 1.025641237113402) translate(-1.5, -1.5)">
+          <title>Chat app</title>
+          <!-- A chat app: a window with two speech bubbles. Parts: chat.frame, chat.bar, chat.left, chat.right. "tint" colours your bubble. -->
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_frame kf-anim" style="transform-origin:620px 250px">
+        <g id="app_frame" class="ai-svg-embed kfp-6714b6eb-app_frame" transform="translate(558.4615, 198.7179) scale(1.0256408333333333, 1.025641) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+          <rect id="app__frame" x="1.5" y="1.5" width="117" height="97" rx="12" stroke-width="3" fill="inherit" stroke="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_bar kf-anim" style="transform-origin:620px 210.77px">
+        <g id="app_bar" class="ai-svg-embed kfp-6714b6eb-app_bar" transform="translate(558.4615, 198.7179) scale(1.0256408333333333, 1.0256425531914892) translate(-0, 0.00000095367431640625)" fill="var(--role-surface-2, #eceef2)" stroke="var(--role-ink, #14171f)">
+          <path id="app__bar" d="M1.5 13.5 a12 12 0 0 1 12 -12 H106.5 a12 12 0 0 1 12 12 V22 H1.5 Z" stroke-width="3" fill="inherit" stroke="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_left kf-anim" style="transform-origin:601.54px 246.92px">
+        <g id="app_left" class="ai-svg-embed kfp-6714b6eb-app_left" transform="translate(570.7692, 231.5385) scale(1.0256416666666666, 1.02564) translate(-12, -32)">
+          <g id="app__left">
+          <rect x="12" y="32" width="60" height="22" rx="9" fill="var(--role-surface-2, #eceef2)"/>
+          <path d="M16 54 L14 62 L24 54 Z" fill="var(--role-surface-2, #eceef2)"/>
           </g>
-          <g class="kf-eb586e30-log kf-anim" style="transform-origin:165px 197px">
-            <g id="log" class="ai-container kfp-eb586e30-log">
-              <g class="kf-eb586e30-m1 kf-anim" style="transform-origin:165px 149px">
-                <rect id="m1" class="ai-shape ai-rect kfp-eb586e30-m1" x="15" y="129" width="300" height="40" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-                <text class="ai-label" x="165" y="149" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>system: be helpful</tspan></tspan></text>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_right kf-anim" style="transform-origin:637.44px 279.74px">
+        <g id="app_right" class="ai-svg-embed kfp-6714b6eb-app_right" transform="translate(605.641, 264.359) scale(1.0256403225806452, 1.02564) translate(-46, -64)">
+          <g id="app__right">
+          <rect x="46" y="64" width="62" height="22" rx="9" fill="var(--role-series-4)"/>
+          <path d="M104 86 L106 94 L96 86 Z" fill="var(--role-series-4)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-llm kf-anim" style="transform-origin:1250px 250px">
+    <g id="llm" class="ai-container kfp-6714b6eb-llm">
+      <g class="kf-6714b6eb-llm__art kf-anim" style="transform-origin:1250px 250px">
+        <g id="llm__art" class="ai-svg-embed kfp-6714b6eb-llm__art" transform="translate(1192, 192) scale(1.0357142857142858, 1.0357142857142858) translate(-4, -4)">
+          <title>LLM</title>
+          <!-- A language model: a chip with a small network inside. Parts: llm.pins, llm.body, llm.net. "tint" colours the network. -->
+        </g>
+      </g>
+      <g class="kf-6714b6eb-llm_pins kf-anim" style="transform-origin:1250px 250px">
+        <g id="llm_pins" class="ai-svg-embed kfp-6714b6eb-llm_pins" transform="translate(1189.9286, 189.9286) scale(1.0357146551724137, 1.0357146551724137) translate(-2, -2)" stroke="var(--role-ink, #14171f)">
+          <g id="llm__pins" stroke-width="4" stroke-linecap="round" stroke="inherit">
+          <line x1="36" y1="4" x2="36" y2="16"/><line x1="60" y1="4" x2="60" y2="16"/><line x1="84" y1="4" x2="84" y2="16"/>
+          <line x1="36" y1="104" x2="36" y2="116"/><line x1="60" y1="104" x2="60" y2="116"/><line x1="84" y1="104" x2="84" y2="116"/>
+          <line x1="4" y1="36" x2="16" y2="36"/><line x1="4" y1="60" x2="16" y2="60"/><line x1="4" y1="84" x2="16" y2="84"/>
+          <line x1="104" y1="36" x2="116" y2="36"/><line x1="104" y1="60" x2="116" y2="60"/><line x1="104" y1="84" x2="116" y2="84"/>
+          </g>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-llm_body kf-anim" style="transform-origin:1250px 250px">
+        <g id="llm_body" class="ai-svg-embed kfp-6714b6eb-llm_body" transform="translate(1203.3929, 203.3929) scale(1.0357144444444444, 1.0357144444444444) translate(-15, -15)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+          <rect id="llm__body" x="16.5" y="16.5" width="87" height="87" rx="14" stroke-width="3" fill="inherit" stroke="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-llm_net kf-anim" style="transform-origin:1250.52px 250px">
+        <g id="llm_net" class="ai-svg-embed kfp-6714b6eb-llm_net" transform="translate(1219.9643, 217.8929) scale(1.035713559322034, 1.0357145161290322) translate(-31, -29)">
+          <g id="llm__net">
+          <g stroke="var(--role-rule, #cbd1da)" stroke-width="2.5">
+          <line x1="38" y1="42" x2="60" y2="36"/><line x1="38" y1="42" x2="60" y2="60"/><line x1="38" y1="42" x2="60" y2="84"/>
+          <line x1="38" y1="78" x2="60" y2="36"/><line x1="38" y1="78" x2="60" y2="60"/><line x1="38" y1="78" x2="60" y2="84"/>
+          <line x1="60" y1="36" x2="82" y2="60"/><line x1="60" y1="60" x2="82" y2="60"/><line x1="60" y1="84" x2="82" y2="60"/>
+          </g>
+          <g fill="var(--tint, var(--role-primary, #1d6e88))" stroke="var(--role-ink, #14171f)" stroke-width="2">
+          <circle cx="38" cy="42" r="6"/><circle cx="38" cy="78" r="6"/>
+          <circle cx="60" cy="36" r="6"/><circle cx="60" cy="60" r="6"/><circle cx="60" cy="84" r="6"/>
+          <circle cx="82" cy="60" r="7"/>
+          </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-you_nm kf-anim" style="transform-origin:170px 327.29px">
+    <rect id="you_nm" class="ai-shape ai-rect kfp-6714b6eb-you_nm" x="130" y="306.1666" width="80" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="170" y="327.2916" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="170" dy="-0"><tspan>You</tspan></tspan></text>
+  </g>
+  <g class="kf-6714b6eb-app_nm kf-anim" style="transform-origin:620px 156.8px">
+    <rect id="app_nm" class="ai-shape ai-rect kfp-6714b6eb-app_nm" x="567.2605" y="135.6786" width="105.4789" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="620" y="156.8036" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="620" dy="-0"><tspan>Chat app</tspan></tspan></text>
+  </g>
+  <g class="kf-6714b6eb-llm_nm kf-anim" style="transform-origin:1250px 156.8px">
+    <rect id="llm_nm" class="ai-shape ai-rect kfp-6714b6eb-llm_nm" x="1210" y="135.6786" width="80" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1250" y="156.8036" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="1250" dy="-0"><tspan>LLM</tspan></tspan></text>
+  </g>
+  <g class="kf-6714b6eb-you_r1 kf-anim" style="transform-origin:223px 232px">
+    <rect id="you_r1" class="ai-shape ai-rect ai-point kfp-6714b6eb-you_r1" x="223" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-you_r2 kf-anim" style="transform-origin:223px 268px">
+    <rect id="you_r2" class="ai-shape ai-rect ai-point kfp-6714b6eb-you_r2" x="223" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_l1 kf-anim" style="transform-origin:540.46px 232px">
+    <rect id="app_l1" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_l1" x="540.4615" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_l2 kf-anim" style="transform-origin:540.46px 268px">
+    <rect id="app_l2" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_l2" x="540.4615" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_r1 kf-anim" style="transform-origin:699.54px 232px">
+    <rect id="app_r1" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_r1" x="699.5385" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_r2 kf-anim" style="transform-origin:699.54px 268px">
+    <rect id="app_r2" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_r2" x="699.5385" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-llm_l1 kf-anim" style="transform-origin:1171.93px 232px">
+    <rect id="llm_l1" class="ai-shape ai-rect ai-point kfp-6714b6eb-llm_l1" x="1171.9286" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-llm_l2 kf-anim" style="transform-origin:1171.93px 268px">
+    <rect id="llm_l2" class="ai-shape ai-rect ai-point kfp-6714b6eb-llm_l2" x="1171.9286" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-q1 kf-anim" style="transform-origin:395px 187.5px">
+    <g id="q1" class="ai-container kfp-6714b6eb-q1">
+      <g class="kf-6714b6eb-q1_bg kf-anim" style="transform-origin:395px 187.5px">
+        <rect id="q1_bg" class="ai-shape ai-rect kfp-6714b6eb-q1_bg" x="246.1005" y="167" width="297.799" height="41" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="187.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-q2 kf-anim" style="transform-origin:395px 187.5px">
+    <g id="q2" class="ai-container kfp-6714b6eb-q2">
+      <g class="kf-6714b6eb-q2_bg kf-anim" style="transform-origin:395px 187.5px">
+        <rect id="q2_bg" class="ai-shape ai-rect kfp-6714b6eb-q2_bg" x="257.451" y="167" width="275.098" height="41" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="187.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>Best museum to visit there?</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-a1 kf-anim" style="transform-origin:395px 312.5px">
+    <g id="a1" class="ai-container kfp-6714b6eb-a1">
+      <g class="kf-6714b6eb-a1_bg kf-anim" style="transform-origin:395px 312.5px">
+        <rect id="a1_bg" class="ai-shape ai-rect kfp-6714b6eb-a1_bg" x="343.824" y="292" width="102.352" height="41" fill="var(--role-ok-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-a2 kf-anim" style="transform-origin:395px 312.5px">
+    <g id="a2" class="ai-container kfp-6714b6eb-a2">
+      <g class="kf-6714b6eb-a2_bg kf-anim" style="transform-origin:395px 312.5px">
+        <rect id="a2_bg" class="ai-shape ai-rect kfp-6714b6eb-a2_bg" x="281.9685" y="292" width="226.063" height="41" fill="var(--role-ok-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>The Magritte Museum.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-r1 kf-anim" style="transform-origin:935px 312.5px">
+    <g id="r1" class="ai-container kfp-6714b6eb-r1">
+      <g class="kf-6714b6eb-r1_bg kf-anim" style="transform-origin:935px 312.5px">
+        <rect id="r1_bg" class="ai-shape ai-rect kfp-6714b6eb-r1_bg" x="883.824" y="292" width="102.352" height="41" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="935" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="935" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-r2 kf-anim" style="transform-origin:935px 312.5px">
+    <g id="r2" class="ai-container kfp-6714b6eb-r2">
+      <g class="kf-6714b6eb-r2_bg kf-anim" style="transform-origin:935px 312.5px">
+        <rect id="r2_bg" class="ai-shape ai-rect kfp-6714b6eb-r2_bg" x="821.9685" y="292" width="226.063" height="41" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="935" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="935" dy="-0"><tspan>The Magritte Museum.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-convo kf-anim" style="transform-origin:1060px 555px">
+    <g id="convo" class="ai-container kfp-6714b6eb-convo">
+      <g class="kf-hidden kf-6714b6eb-conv_bg kf-anim" style="transform-origin:1060px 555px">
+        <rect id="conv_bg" class="ai-shape ai-rect kfp-6714b6eb-conv_bg" x="740" y="380" width="640" height="350" fill="var(--role-surface)" stroke="var(--role-rule)" stroke-width="2" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-hidden kf-6714b6eb-conv_head kf-anim" style="transform-origin:1060px 404px">
+        <g clip-path="url(#ai-clip-6714b6eb-conv_head)">
+          <rect id="conv_head" class="ai-shape ai-rect kfp-6714b6eb-conv_head" x="740" y="380" width="640" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+          <text class="ai-label" x="748" y="404" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-muted)" style="font-weight:700"><tspan x="748" dy="-0"><tspan>the conversation, kept by the app</tspan></tspan></text>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-conv kf-anim" style="transform-origin:1065px 578px">
+        <g id="conv" class="ai-container kfp-6714b6eb-conv">
+          <g class="kf-hidden kf-6714b6eb-e1 kf-anim" style="transform-origin:1065px 470px">
+            <g id="e1" class="ai-container kfp-6714b6eb-e1">
+              <g class="kf-6714b6eb-e1_bg kf-anim" style="transform-origin:1065px 470px">
+                <rect id="e1_bg" class="ai-shape ai-rect kfp-6714b6eb-e1_bg" x="765" y="447" width="600" height="46" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
               </g>
-              <g class="kf-eb586e30-m2 kf-anim" style="transform-origin:165px 197px">
-                <rect id="m2" class="ai-shape ai-rect kfp-eb586e30-m2" x="15" y="177" width="300" height="40" fill="var(--role-series-4-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-                <text class="ai-label" x="165" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>you: capital of Belgium?</tspan></tspan></text>
-                <rect class="aiacm-eb586e30-m2-attention" x="19" y="177" width="292" height="40" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:19px 197px;pointer-events:none"/>
+              <g class="kf-6714b6eb-e1_tag kf-anim" style="transform-origin:819px 470px">
+                <rect id="e1_tag" class="ai-shape ai-rect kfp-6714b6eb-e1_tag" x="779" y="452" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="470" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>system</tspan></tspan></text>
               </g>
-              <g class="kf-hidden kf-eb586e30-m3 kf-anim" style="transform-origin:165px 245px">
-                <rect id="m3" class="ai-shape ai-rect kfp-eb586e30-m3" x="15" y="225" width="300" height="40" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-                <text class="ai-label" x="165" y="245" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>LLM: Brussels.</tspan></tspan></text>
+              <g class="kf-6714b6eb-e1_txt kf-anim" style="transform-origin:987.59px 470px">
+                <rect id="e1_txt" class="ai-shape ai-rect kfp-6714b6eb-e1_txt" x="865" y="450.125" width="245.178" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="470" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>You are a helpful assistant.</tspan></tspan></text>
+              </g>
+            </g>
+            <rect class="aiacm-6714b6eb-e1-attention" x="769" y="447" width="592" height="46" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:769px 470px;pointer-events:none"/>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e2 kf-anim" style="transform-origin:1065px 524px">
+            <g id="e2" class="ai-container kfp-6714b6eb-e2">
+              <g class="kf-6714b6eb-e2_bg kf-anim" style="transform-origin:1065px 524px">
+                <rect id="e2_bg" class="ai-shape ai-rect kfp-6714b6eb-e2_bg" x="765" y="501" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e2_tag kf-anim" style="transform-origin:819px 524px">
+                <rect id="e2_tag" class="ai-shape ai-rect kfp-6714b6eb-e2_tag" x="779" y="506" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="524" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e2_txt kf-anim" style="transform-origin:1000.48px 524px">
+                <rect id="e2_txt" class="ai-shape ai-rect kfp-6714b6eb-e2_txt" x="865" y="504.125" width="270.961" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="524" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e3 kf-anim" style="transform-origin:1065px 578px">
+            <g id="e3" class="ai-container kfp-6714b6eb-e3">
+              <g class="kf-6714b6eb-e3_bg kf-anim" style="transform-origin:1065px 578px">
+                <rect id="e3_bg" class="ai-shape ai-rect kfp-6714b6eb-e3_bg" x="765" y="555" width="600" height="46" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e3_tag kf-anim" style="transform-origin:819px 578px">
+                <rect id="e3_tag" class="ai-shape ai-rect kfp-6714b6eb-e3_tag" x="779" y="560" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="578" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>LLM</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e3_txt kf-anim" style="transform-origin:912.06px 578px">
+                <rect id="e3_txt" class="ai-shape ai-rect kfp-6714b6eb-e3_txt" x="865" y="558.125" width="94.128" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="578" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e4 kf-anim" style="transform-origin:1065px 632px">
+            <g id="e4" class="ai-container kfp-6714b6eb-e4">
+              <g class="kf-6714b6eb-e4_bg kf-anim" style="transform-origin:1065px 632px">
+                <rect id="e4_bg" class="ai-shape ai-rect kfp-6714b6eb-e4_bg" x="765" y="609" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e4_tag kf-anim" style="transform-origin:819px 632px">
+                <rect id="e4_tag" class="ai-shape ai-rect kfp-6714b6eb-e4_tag" x="779" y="614" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="632" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e4_txt kf-anim" style="transform-origin:990.21px 632px">
+                <rect id="e4_txt" class="ai-shape ai-rect kfp-6714b6eb-e4_txt" x="865" y="612.125" width="250.422" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="632" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Best museum to visit there?</tspan></tspan></text>
+                <rect class="aiacm-6714b6eb-e4_txt-attention" x="869" y="612.13" width="242.42" height="39.75" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:869px 632px;pointer-events:none"/>
+              </g>
+            </g>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e5 kf-anim" style="transform-origin:1065px 686px">
+            <g id="e5" class="ai-container kfp-6714b6eb-e5">
+              <g class="kf-6714b6eb-e5_bg kf-anim" style="transform-origin:1065px 686px">
+                <rect id="e5_bg" class="ai-shape ai-rect kfp-6714b6eb-e5_bg" x="765" y="663" width="600" height="46" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e5_tag kf-anim" style="transform-origin:819px 686px">
+                <rect id="e5_tag" class="ai-shape ai-rect kfp-6714b6eb-e5_tag" x="779" y="668" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="686" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>LLM</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e5_txt kf-anim" style="transform-origin:968.03px 686px">
+                <rect id="e5_txt" class="ai-shape ai-rect kfp-6714b6eb-e5_txt" x="865" y="666.125" width="206.057" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="686" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>The Magritte Museum.</tspan></tspan></text>
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="kf-eb586e30-llm kf-anim" style="transform-origin:645px 55px">
-        <rect id="llm" class="ai-shape ai-rect kfp-eb586e30-llm" x="585" y="-5" width="120" height="120" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
-        <text class="ai-label" x="645" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="645" dy="-0"><tspan>LLM</tspan></tspan></text>
-      </g>
     </g>
   </g>
-  <path class="ai-connection conn-eb586e30-request conn-eb586e30-request-base aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-eb586e30-request)"/>
-  <g class="conn-eb586e30-request"><path class="aihead-eb586e30-request" d="M573 52 L583.8 46 L573 40 Z" fill="var(--role-primary)" style="opacity:1"/></g>
-  <path class="ai-connection conn-eb586e30-reply conn-eb586e30-reply-base aid-eb586e30-reply" d="M585 64 L170.8 64" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-eb586e30-reply)"/>
-  <g class="conn-eb586e30-reply"><path class="aihead-eb586e30-reply" d="M172 58 L161.2 64 L172 70 Z" fill="var(--role-primary)" style="opacity:1"/></g>
-  <g class="aighost-eb586e30-0" style="opacity:0;transform-origin:165px 197px;pointer-events:none">
-<g data-ghost-of="log" class="ai-container">
-<rect data-ghost-of="m1" class="ai-shape ai-rect" x="15" y="129" width="300" height="40" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-<text class="ai-label" x="165" y="149" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>system: be helpful</tspan></tspan></text>
-<rect data-ghost-of="m2" class="ai-shape ai-rect" x="15" y="177" width="300" height="40" fill="var(--role-series-4-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-<text class="ai-label" x="165" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>you: capital of Belgium?</tspan></tspan></text>
+  <g class="kf-hidden kf-6714b6eb-forget kf-anim" style="transform-origin:935px 189.5px">
+    <rect id="forget" class="ai-shape ai-rect kfp-6714b6eb-forget" x="687.138" y="169" width="495.724" height="41" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="935" y="189.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-primary)" style="font-weight:700"><tspan x="935" dy="-0"><tspan>the LLM remembers nothing: everything goes again</tspan></tspan></text>
+  </g>
+  <path class="ai-connection conn-6714b6eb-l_ask conn-6714b6eb-l_ask-base aid-6714b6eb-l_ask" d="M223 232 L526.0615 232" fill="none" stroke="var(--role-ink)" stroke-width="4" mask="url(#aim-6714b6eb-l_ask)"/>
+  <g class="conn-6714b6eb-l_ask"><path class="aihead-6714b6eb-l_ask" d="M524.46 240 L538.86 232 L524.46 224 Z" fill="var(--role-ink)" style="opacity:1"/></g>
+  <path class="ai-connection conn-6714b6eb-l_answer conn-6714b6eb-l_answer-base aid-6714b6eb-l_answer" d="M540.4615 268 L237.4 268" fill="none" stroke="var(--role-ink)" stroke-width="4" opacity="0" mask="url(#aim-6714b6eb-l_answer)"/>
+  <g class="conn-6714b6eb-l_answer"><path class="aihead-6714b6eb-l_answer" d="M239 260 L224.6 268 L239 276 Z" fill="var(--role-ink)" style="opacity:1"/></g>
+  <path class="ai-connection conn-6714b6eb-l_call conn-6714b6eb-l_call-base aid-6714b6eb-l_call" d="M699.5385 232 L1157.5285999999999 232" fill="none" stroke="var(--role-primary)" stroke-width="4" opacity="0" mask="url(#aim-6714b6eb-l_call)"/>
+  <g class="conn-6714b6eb-l_call"><path class="aihead-6714b6eb-l_call" d="M1155.93 240 L1170.33 232 L1155.93 224 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <path class="ai-connection conn-6714b6eb-l_reply conn-6714b6eb-l_reply-base aid-6714b6eb-l_reply" d="M1171.9286 268 L713.9385 268" fill="none" stroke="var(--role-primary)" stroke-width="4" opacity="0" mask="url(#aim-6714b6eb-l_reply)"/>
+  <g class="conn-6714b6eb-l_reply"><path class="aihead-6714b6eb-l_reply" d="M715.54 260 L701.14 268 L715.54 276 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <g class="aighost-6714b6eb-0" style="opacity:0;transform-origin:1060px 555px;pointer-events:none">
+<g data-ghost-of="convo" class="ai-container">
+<rect data-ghost-of="conv_bg" class="ai-shape ai-rect" x="740" y="380" width="640" height="350" fill="var(--role-surface)" stroke="var(--role-rule)" stroke-width="2" rx="14" style="rx:14px;ry:14px"/>
+<g clip-path="url(#ai-clip-6714b6eb-conv_head)">
+<rect data-ghost-of="conv_head" class="ai-shape ai-rect" x="740" y="380" width="640" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="748" y="404" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-muted)" style="font-weight:700"><tspan x="748" dy="-0"><tspan>the conversation, kept by the app</tspan></tspan></text>
+</g>
+<g data-ghost-of="conv" class="ai-container">
+<g data-ghost-of="e1" class="ai-container">
+<rect data-ghost-of="e1_bg" class="ai-shape ai-rect" x="765" y="447" width="600" height="46" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e1_tag" class="ai-shape ai-rect" x="779" y="452" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="470" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>system</tspan></tspan></text>
+<rect data-ghost-of="e1_txt" class="ai-shape ai-rect" x="865" y="450.125" width="245.178" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="470" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>You are a helpful assistant.</tspan></tspan></text>
+</g>
+<g data-ghost-of="e2" class="ai-container">
+<rect data-ghost-of="e2_bg" class="ai-shape ai-rect" x="765" y="501" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e2_tag" class="ai-shape ai-rect" x="779" y="506" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="524" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+<rect data-ghost-of="e2_txt" class="ai-shape ai-rect" x="865" y="504.125" width="270.961" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="524" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
 </g>
 </g>
-  <text class="ai-label conn-eb586e30-request" x="372.5" y="36" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="372.5" dy="-0"><tspan>whole log</tspan></tspan></text>
-  <text class="ai-label conn-eb586e30-reply" x="372.5" y="74" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="372.5" dy="-0"><tspan>one message</tspan></tspan></text>
-<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"eb586e30-","frames":[{"name":"ask","duration":1.2,"auto":null,"title":"The app keeps the conversation","note":null},{"name":"call","duration":1.4,"auto":null,"title":"Every call sends the whole log","note":null},{"name":"answer","duration":1.4,"auto":null,"title":"The LLM answers with one message","note":null}],"elements":["stage","client","app","log","m1","m2","m3","llm","request","reply"],"channels":[[".aiacm-eb586e30-m2-attention","opacity"],[".aiacm-eb586e30-m2-attention","scale"],[".conn-eb586e30-request","opacity"],[".aimask-eb586e30-request","stroke-dashoffset"],[".aihead-eb586e30-request","opacity"],[".aighost-eb586e30-0","translate"],[".aighost-eb586e30-0","scale"],[".aighost-eb586e30-0","opacity"],[".conn-eb586e30-reply","opacity"],[".aimask-eb586e30-reply","stroke-dashoffset"],[".aihead-eb586e30-reply","opacity"],[".kf-eb586e30-m3","opacity"],[".kf-eb586e30-m3","translate"]],"settled":[["0","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px"],["0","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px"],["0","1 1","1","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px"],["0","1 1","1","0","1","0px 0px","1 1","0","1","0","1","1","0px 0px"]],"anims":[[{"c":0,"t":0,"d":1.2,"e":"linear","k":[[0,"0"],[0.25,"1"],[0.5,"1"],[0.75,"1"],[1,"0"]]},{"c":0,"t":1.2,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":1,"t":0,"d":0.35,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":1,"t":0.35,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]}],[{"c":2,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":3,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":3,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":4,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":4,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":5,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[0.0313,"0px -19.438px"],[0.0625,"0px -38.875px"],[0.0938,"0px -58.313px"],[0.125,"0px -77.75px"],[0.1563,"0px -97.188px"],[0.1875,"0px -116.625px"],[0.2188,"0px -136.063px"],[0.25,"13.5px -142px"],[0.2813,"32.938px -142px"],[0.3125,"52.375px -142px"],[0.3438,"71.813px -142px"],[0.375,"91.25px -142px"],[0.4063,"110.688px -142px"],[0.4375,"130.125px -142px"],[0.4688,"149.563px -142px"],[0.5,"169px -142px"],[0.5313,"188.438px -142px"],[0.5625,"207.875px -142px"],[0.5938,"227.313px -142px"],[0.625,"246.75px -142px"],[0.6563,"266.188px -142px"],[0.6875,"285.625px -142px"],[0.7188,"305.063px -142px"],[0.75,"324.5px -142px"],[0.7813,"343.938px -142px"],[0.8125,"363.375px -142px"],[0.8438,"382.813px -142px"],[0.875,"402.25px -142px"],[0.9063,"421.688px -142px"],[0.9375,"441.125px -142px"],[0.9688,"460.563px -142px"],[1,"480px -142px"]]},{"c":5,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":6,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.387 0.387"]]},{"c":6,"t":1.4,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":7,"t":0.5,"d":0.9,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":7,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]}],[{"c":8,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":9,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":10,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":10,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":11,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":12,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"480px -190px"],[0.0313,"459.241px -190px"],[0.0625,"438.482px -190px"],[0.0938,"417.723px -190px"],[0.125,"396.964px -190px"],[0.1563,"376.205px -190px"],[0.1875,"355.446px -190px"],[0.2188,"334.687px -190px"],[0.25,"313.928px -190px"],[0.2813,"293.169px -190px"],[0.3125,"272.41px -190px"],[0.3438,"251.651px -190px"],[0.375,"230.892px -190px"],[0.4063,"210.133px -190px"],[0.4375,"189.374px -190px"],[0.4688,"168.615px -190px"],[0.5,"147.856px -190px"],[0.5313,"127.097px -190px"],[0.5625,"106.338px -190px"],[0.5938,"85.579px -190px"],[0.625,"64.82px -190px"],[0.6563,"44.061px -190px"],[0.6875,"23.302px -190px"],[0.7188,"5.701px -186.744px"],[0.75,"5.067px -165.995px"],[0.7813,"4.434px -145.245px"],[0.8125,"3.8px -124.496px"],[0.8438,"3.167px -103.747px"],[0.875,"2.534px -82.997px"],[0.9063,"1.9px -62.248px"],[0.9375,"1.267px -41.499px"],[0.9688,"0.633px -20.749px"],[1,"0px 0px"]]},{"c":12,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":12,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]}]]}]]></script>
+</g>
+</g>
+  <g class="aighost-6714b6eb-1" style="opacity:0;transform-origin:1060px 555px;pointer-events:none">
+<g data-ghost-of="convo" class="ai-container">
+<rect data-ghost-of="conv_bg" class="ai-shape ai-rect" x="740" y="380" width="640" height="350" fill="var(--role-surface)" stroke="var(--role-rule)" stroke-width="2" rx="14" style="rx:14px;ry:14px"/>
+<g clip-path="url(#ai-clip-6714b6eb-conv_head)">
+<rect data-ghost-of="conv_head" class="ai-shape ai-rect" x="740" y="380" width="640" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="748" y="404" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-muted)" style="font-weight:700"><tspan x="748" dy="-0"><tspan>the conversation, kept by the app</tspan></tspan></text>
+</g>
+<g data-ghost-of="conv" class="ai-container">
+<g data-ghost-of="e1" class="ai-container">
+<rect data-ghost-of="e1_bg" class="ai-shape ai-rect" x="765" y="447" width="600" height="46" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e1_tag" class="ai-shape ai-rect" x="779" y="452" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="470" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>system</tspan></tspan></text>
+<rect data-ghost-of="e1_txt" class="ai-shape ai-rect" x="865" y="450.125" width="245.178" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="470" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>You are a helpful assistant.</tspan></tspan></text>
+</g>
+<g data-ghost-of="e2" class="ai-container">
+<rect data-ghost-of="e2_bg" class="ai-shape ai-rect" x="765" y="501" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e2_tag" class="ai-shape ai-rect" x="779" y="506" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="524" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+<rect data-ghost-of="e2_txt" class="ai-shape ai-rect" x="865" y="504.125" width="270.961" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="524" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
+</g>
+<g data-ghost-of="e3" class="ai-container">
+<rect data-ghost-of="e3_bg" class="ai-shape ai-rect" x="765" y="555" width="600" height="46" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e3_tag" class="ai-shape ai-rect" x="779" y="560" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="578" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>LLM</tspan></tspan></text>
+<rect data-ghost-of="e3_txt" class="ai-shape ai-rect" x="865" y="558.125" width="94.128" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="578" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+</g>
+<g data-ghost-of="e4" class="ai-container">
+<rect data-ghost-of="e4_bg" class="ai-shape ai-rect" x="765" y="609" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e4_tag" class="ai-shape ai-rect" x="779" y="614" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="632" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+<rect data-ghost-of="e4_txt" class="ai-shape ai-rect" x="865" y="612.125" width="250.422" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="632" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Best museum to visit there?</tspan></tspan></text>
+</g>
+</g>
+</g>
+</g>
+<script type="application/json" class="ail-motion"><![CDATA[{"v":1,"scope":"6714b6eb-","frames":[{"name":"ask","duration":1.2,"auto":null,"title":"How a chatbot talks to an LLM","note":null},{"name":"send","duration":1.8,"auto":null,"title":null,"note":null},{"name":"call","duration":1.4,"auto":0,"title":null,"note":null},{"name":"answer","duration":1.8,"auto":0,"title":null,"note":null},{"name":"tell","duration":1,"auto":0,"title":null,"note":null},{"name":"again","duration":2.5,"auto":null,"title":null,"note":null},{"name":"resend","duration":0.9,"auto":null,"title":null,"note":null},{"name":"answer2","duration":2,"auto":null,"title":null,"note":null}],"elements":["s","s_stage","s_badge","s_heading","you","you__art","you_head","you_body","app","app__art","app_frame","app_bar","app_left","app_right","llm","llm__art","llm_pins","llm_body","llm_net","you_nm","app_nm","llm_nm","you_r1","you_r2","app_l1","app_l2","app_r1","app_r2","llm_l1","llm_l2","q1","q1_bg","q2","q2_bg","a1","a1_bg","a2","a2_bg","r1","r1_bg","r2","r2_bg","convo","conv_bg","conv_head","conv","e1","e1_bg","e1_tag","e1_txt","e2","e2_bg","e2_tag","e2_txt","e3","e3_bg","e3_tag","e3_txt","e4","e4_bg","e4_tag","e4_txt","e5","e5_bg","e5_tag","e5_txt","forget","l_ask","l_answer","l_call","l_reply"],"channels":[[".kf-6714b6eb-s_badge","opacity"],[".kf-6714b6eb-q1","opacity"],[".kf-6714b6eb-q1","scale"],[".conn-6714b6eb-l_ask","opacity"],[".aimask-6714b6eb-l_ask","stroke-dashoffset"],[".aihead-6714b6eb-l_ask","opacity"],[".kf-6714b6eb-conv_bg","opacity"],[".kf-6714b6eb-conv_head","opacity"],[".kf-6714b6eb-e1","opacity"],[".kf-6714b6eb-e1","translate"],[".aiacm-6714b6eb-e1-attention","opacity"],[".aiacm-6714b6eb-e1-attention","scale"],[".kf-6714b6eb-e2","opacity"],[".kf-6714b6eb-e2","translate"],[".kf-6714b6eb-e2","scale"],[".conn-6714b6eb-l_call","opacity"],[".aimask-6714b6eb-l_call","stroke-dashoffset"],[".aihead-6714b6eb-l_call","opacity"],[".aighost-6714b6eb-0","translate"],[".aighost-6714b6eb-0","scale"],[".aighost-6714b6eb-0","opacity"],[".conn-6714b6eb-l_reply","opacity"],[".aimask-6714b6eb-l_reply","stroke-dashoffset"],[".aihead-6714b6eb-l_reply","opacity"],[".kf-6714b6eb-r1","opacity"],[".kf-6714b6eb-r1","translate"],[".kf-6714b6eb-r1","scale"],[".kf-6714b6eb-e3","opacity"],[".kf-6714b6eb-e3","translate"],[".kf-6714b6eb-e3","scale"],[".conn-6714b6eb-l_answer","opacity"],[".aimask-6714b6eb-l_answer","stroke-dashoffset"],[".aihead-6714b6eb-l_answer","opacity"],[".kf-6714b6eb-a1","opacity"],[".kf-6714b6eb-a1","translate"],[".kf-6714b6eb-a1","scale"],[".kf-6714b6eb-q2","opacity"],[".kf-6714b6eb-q2","scale"],[".kf-6714b6eb-l_ask","scale"],[".kf-6714b6eb-e4","opacity"],[".kf-6714b6eb-e4","translate"],[".kf-6714b6eb-e4","scale"],[".aiacm-6714b6eb-e4_txt-attention","opacity"],[".aiacm-6714b6eb-e4_txt-attention","scale"],[".kf-6714b6eb-forget","opacity"],[".kf-6714b6eb-forget","translate"],[".kf-6714b6eb-l_call","scale"],[".aighost-6714b6eb-1","translate"],[".aighost-6714b6eb-1","scale"],[".aighost-6714b6eb-1","opacity"],[".kf-6714b6eb-l_reply","scale"],[".kf-6714b6eb-r2","opacity"],[".kf-6714b6eb-r2","translate"],[".kf-6714b6eb-r2","scale"],[".kf-6714b6eb-e5","opacity"],[".kf-6714b6eb-e5","translate"],[".kf-6714b6eb-e5","scale"],[".kf-6714b6eb-l_answer","scale"],[".kf-6714b6eb-a2","opacity"],[".kf-6714b6eb-a2","translate"],[".kf-6714b6eb-a2","scale"]],"settled":[["0","0","1 1","0","0","1","0","0","0","0px 0px","0","1 1","0","0px 0px","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px","1 1","0","0px 0px","1 1","0","0","1","0","0px 0px","1 1","0","1 1","1 1","0","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","1","1 1","1","0","1","0","0","0","0px 0px","0","1 1","0","0px 0px","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px","1 1","0","0px 0px","1 1","0","0","1","0","0px 0px","1 1","0","1 1","1 1","0","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","1","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","0","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px","1 1","0","0px 0px","1 1","0","0","1","0","0px 0px","1 1","0","1 1","1 1","0","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","1","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","1","0","1","0px 0px","1 1","0","0","0","1","0","0px 0px","1 1","0","0px 0px","1 1","0","0","1","0","0px 0px","1 1","0","1 1","1 1","0","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","1","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","1","0","1","0px 0px","1 1","0","1","0","1","0","0px 0px","1 1","1","0px 0px","1 1","0","0","1","0","0px 0px","1 1","0","1 1","1 1","0","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","1","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","1","0","1","0px 0px","1 1","0","1","0","1","0","0px 0px","1 1","1","0px 0px","1 1","1","0","1","1","0px 0px","1 1","0","1 1","1 1","0","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","0","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","1","0","1","0px 0px","1 1","0","1","0","1","0","0px 0px","1 1","1","0px 0px","1 1","1","0","1","0","0px 0px","1 1","1","1 1","1 1","1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","0","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","1","0","1","0px 0px","1 1","0","1","0","1","0","0px 0px","1 1","1","0px 0px","1 1","1","0","1","0","0px 0px","1 1","1","1 1","1 1","1","0px 0px","1 1","0","1 1","1","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","0","0px 0px","1 1","1 1","0","0px 0px","1 1"],["1","0","1 1","1","0","1","1","1","1","0px 0px","0","1 1","1","0px 0px","1 1","1","0","1","0px 0px","1 1","0","1","0","1","0","0px 0px","1 1","1","0px 0px","1 1","1","0","1","0","0px 0px","1 1","1","1 1","1 1","1","0px 0px","1 1","0","1 1","1","0px 0px","1 1","0px 0px","1 1","0","1 1","0","0px 0px","1 1","1","0px 0px","1 1","1 1","1","0px 0px","1 1"]],"anims":[[{"c":0,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":1,"t":0.2,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":2,"t":0.2,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":3,"t":0.7,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":4,"t":0.7,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":4,"t":1.2,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":5,"t":0.7,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":5,"t":1.2,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]}],[{"c":6,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":7,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":8,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":9,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":10,"t":0.5,"d":1.2,"e":"linear","k":[[0,"0"],[0.25,"1"],[0.5,"1"],[0.75,"1"],[1,"0"]]},{"c":10,"t":1.7,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":11,"t":0.5,"d":0.35,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":11,"t":0.85,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":12,"t":1.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":13,"t":1.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-670px -336.5px"],[1,"0px 0px"]]},{"c":14,"t":1.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.496 0.496"],[1,"1 1"]]}],[{"c":15,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":16,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":16,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":17,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":17,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":18,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"190px -305px"]]},{"c":18,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":19,"t":0.5,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.188 0.188"]]},{"c":19,"t":1.4,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":20,"t":0.5,"d":0.9,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":20,"t":1.4,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]}],[{"c":21,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":22,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":22,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":23,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":23,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":24,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":24,"t":1.3,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":25,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"315px -62.5px"],[1,"0px 0px"]]},{"c":26,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.174 1.174"],[1,"1 1"]]},{"c":27,"t":1.3,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":28,"t":1.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-130px -265.5px"],[1,"0px 0px"]]},{"c":29,"t":1.3,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.171 0.171"],[1,"1 1"]]}],[{"c":30,"t":0,"d":0.001,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":31,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.001"],[1,"0"]]},{"c":31,"t":0.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":32,"t":0,"d":0.5,"e":"linear","k":[[0,"0"],[0.125,"0"],[0.25,"0"],[0.375,"0"],[0.5,"0"],[0.625,"0"],[0.75,"0"],[0.875,"0"],[1,"1"]]},{"c":32,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1"],[1,"1"]]},{"c":33,"t":0.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":34,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"670px 265.5px"],[1,"0px 0px"]]},{"c":35,"t":0.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.122 1.122"],[1,"1 1"]]}],[{"c":1,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":33,"t":0,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":36,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":37,"t":0,"d":0.5,"e":"cubic-bezier(0.34,1.56,0.64,1)","k":[[0,"0 0"],[1,"1 1"]]},{"c":38,"t":0.5,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.15 1.15"],[1,"1 1"]]},{"c":38,"t":1,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":39,"t":0.8,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":40,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-670px -444.5px"],[1,"0px 0px"]]},{"c":41,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.458 0.458"],[1,"1 1"]]},{"c":42,"t":1.3,"d":1.2,"e":"linear","k":[[0,"0"],[0.25,"1"],[0.5,"1"],[0.75,"1"],[1,"0"]]},{"c":42,"t":2.5,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]},{"c":43,"t":1.3,"d":0.35,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0 1"],[1,"1 1"]]},{"c":43,"t":1.65,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]}],[{"c":44,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0"],[1,"1"]]},{"c":45,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0px 12px"],[1,"0px 0px"]]},{"c":46,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.15 1.15"],[1,"1 1"]]},{"c":46,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":47,"t":0,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"0px 0px"],[1,"190px -305px"]]},{"c":47,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0px 0px"],[1,"0px 0px"]]},{"c":48,"t":0,"d":0.9,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[1,"0.188 0.188"]]},{"c":48,"t":0.9,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":49,"t":0,"d":0.9,"e":"linear","k":[[0,"1"],[0.1111,"1"],[0.2222,"1"],[0.3333,"1"],[0.4444,"1"],[0.5556,"1"],[0.6667,"1"],[0.7778,"1"],[0.8889,"1"],[1,"0"]]},{"c":49,"t":0.9,"d":0.001,"e":"linear","k":[[0,"0"],[1,"0"]]}],[{"c":50,"t":0,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.15 1.15"],[1,"1 1"]]},{"c":50,"t":0.5,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":51,"t":0,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":51,"t":0.8,"d":0.25,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1"],[1,"0"]]},{"c":52,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"315px -62.5px"],[1,"0px 0px"]]},{"c":53,"t":0,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.531 0.531"],[1,"1 1"]]},{"c":54,"t":0.8,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":55,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"-130px -373.5px"],[1,"0px 0px"]]},{"c":56,"t":0.8,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"0.377 0.377"],[1,"1 1"]]},{"c":57,"t":1.3,"d":0.5,"e":"cubic-bezier(0.65,0,0.35,1)","k":[[0,"1 1"],[0.5,"1.15 1.15"],[1,"1 1"]]},{"c":57,"t":1.8,"d":0.001,"e":"linear","k":[[0,"1 1"],[1,"1 1"]]},{"c":58,"t":1.5,"d":0.25,"e":"linear","k":[[0,"0"],[1,"1"]]},{"c":59,"t":1.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"670px 373.5px"],[1,"0px 0px"]]},{"c":60,"t":1.5,"d":0.5,"e":"cubic-bezier(0.215,0.61,0.355,1)","k":[[0,"1.122 1.122"],[1,"1 1"]]}]]}]]></script>
 <script><![CDATA[
 /* agent-illustrator motion player: plays the tracks compiled into an SVG.
  * No dependencies; Web Animations API. The player has no semantics of its

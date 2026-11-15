@@ -1,41 +1,192 @@
-/* Request and response over a connection: what travels rides the wire.
-   Render: agent-illustrator --animate request-response.ail
+/* How a chatbot talks to an LLM.
+   Render: agent-illustrator --stylesheet-css ../../stylesheets/kapernikov.css --animate request-response.ail
 
    STORYBOARD
-     ask      the app's conversation log holds a question
-     call     the whole log rides the request arrow into the LLM
-     answer   ONE new message rides the reply arrow back, at its own size,
-              and lands as the next row of the log
+     ask      you ask the chat app a question
+     send     the app starts the conversation (its system prompt, then your question) and sends it to the LLM
+     call     the whole conversation goes to the LLM
+     answer   the LLM sends back one new message, only its answer; the app adds it to
+              the conversation and shows it to you
+     again    you ask a follow-up: "there" only means something with the earlier messages;
+              the app adds it to the conversation
+     resend   the LLM remembers nothing, so the app sends the whole conversation again
+     answer2  again one new message comes back and joins the conversation; it keeps growing
 */
 
-row stage [gap: 260] {
-    col client [gap: 24] {
-        rect app [width: 150, height: 90, label: "Chat app", fill: role-surface-2, corner_radius: 12]
-        col log [gap: 8] {
-            rect m1 [width: 300, height: 40, label: "system: be helpful", fill: role-surface-2, corner_radius: 8]
-            rect m2 [width: 300, height: 40, label: "you: capital of Belgium?", fill: role-series-4-soft, corner_radius: 8]
-            rect m3 [width: 300, height: 40, label: "LLM: Brussels.", fill: role-series-1-soft, corner_radius: 8,
+import "agents-deck.ail"
+
+template "person" from "assets/person.svg"
+template "chat_art" from "assets/chatapp.svg"
+template "llm_art" from "assets/llm.svg"
+
+// One message in the conversation: who says it, and what.
+template "msg" (who: "user", says: "", tint: role-surface-2) {
+    rect bg [width: 600, height: 46, fill: tint, stroke: none, corner_radius: 10]
+    rect tag [label: who, font_family: mono, font_size: 16, font_weight: 700, label_fill: role-muted, fill: none,
+              stroke: none, align: start]
+    rect txt [label: says, font_size: 19, label_fill: role-ink, fill: none, stroke: none, align: start]
+    constrain tag.left = bg.left + 14
+    constrain tag.center_y = bg.center_y
+    constrain txt.left = bg.left + 100
+    constrain txt.center_y = bg.center_y
+}
+
+// A speech bubble.
+template "bubble" (says: "", tint: role-series-4-soft) {
+    rect bg [label: says, font_size: 20, font_weight: 600, label_fill: role-ink, fill: tint, stroke: none,
+             corner_radius: 14, max_width: 360]
+}
+
+// ---------------------------------------------------------------- stage
+
+slide s [num: "1", title: "How a chatbot talks to an LLM"]
+
+// The actors.
+person you [width: 70, height: 82, tint: role-ink]
+chat_art app [width: 120, height: 100, tint: role-series-4]
+llm_art llm [width: 116, height: 116]
+constrain you.center_x = s.stage.left + 170
+constrain you.center_y = s.stage.top + 250
+constrain app.center_x = s.stage.left + 620
+constrain app.center_y = you.center_y
+constrain llm.center_x = s.stage.left + 1250
+constrain llm.center_y = you.center_y
+
+rect you_nm [caption_of: you, label_position: below, label_offset: 12, label: "You", font_size: 21, font_weight: 700,
+             label_fill: role-ink, fill: none, stroke: none]
+rect app_nm [caption_of: app, label_position: above, label_offset: 12, label: "Chat app", font_size: 21,
+             font_weight: 700, label_fill: role-ink, fill: none, stroke: none]
+rect llm_nm [caption_of: llm, label_position: above, label_offset: 12, label: "LLM", font_size: 21, font_weight: 700,
+             label_fill: role-ink, fill: none, stroke: none]
+
+// Where the arrows start and end: two lanes between each pair, one each way.
+point you_r1
+point you_r2
+point app_l1
+point app_l2
+point app_r1
+point app_r2
+point llm_l1
+point llm_l2
+constrain you_r1.center_x = you.right + 18
+constrain you_r1.center_y = you.center_y - 18
+constrain you_r2.center_x = you_r1.center_x
+constrain you_r2.center_y = you.center_y + 18
+constrain app_l1.center_x = app.left - 18
+constrain app_l1.center_y = you_r1.center_y
+constrain app_l2.center_x = app_l1.center_x
+constrain app_l2.center_y = you_r2.center_y
+constrain app_r1.center_x = app.right + 18
+constrain app_r1.center_y = you_r1.center_y
+constrain app_r2.center_x = app_r1.center_x
+constrain app_r2.center_y = you_r2.center_y
+constrain llm_l1.center_x = llm.left - 18
+constrain llm_l1.center_y = you_r1.center_y
+constrain llm_l2.center_x = llm_l1.center_x
+constrain llm_l2.center_y = you_r2.center_y
+
+you_r1 -> app_l1 as l_ask [stroke: role-ink, stroke_width: 4, appears: later]
+app_l2 -> you_r2 as l_answer [stroke: role-ink, stroke_width: 4, appears: later]
+app_r1 -> llm_l1 as l_call [stroke: role-primary, stroke_width: 4, appears: later]
+llm_l2 -> app_r2 as l_reply [stroke: role-primary, stroke_width: 4, appears: later]
+
+// What you say, and what you get back.
+bubble q1 [says: "What's the capital of Belgium?", appears: later]
+bubble q2 [says: "Best museum to visit there?", appears: later]
+bubble a1 [says: "Brussels.", tint: role-ok-soft, appears: later]
+bubble a2 [says: "The Magritte Museum.", tint: role-ok-soft, appears: later]
+constrain q1.bg.center_x = midpoint(you, app)
+constrain q1.bg.bottom = you_r1.center_y - 24
+constrain q2.bg.center_x = q1.bg.center_x
+constrain q2.bg.bottom = q1.bg.bottom
+constrain a1.bg.center_x = q1.bg.center_x
+constrain a1.bg.top = you_r2.center_y + 24
+constrain a2.bg.center_x = q1.bg.center_x
+constrain a2.bg.top = a1.bg.top
+
+// What the LLM sends back: one new message, on the wire. Not the conversation.
+bubble r1 [says: "Brussels.", tint: role-series-1-soft, appears: later]
+bubble r2 [says: "The Magritte Museum.", tint: role-series-1-soft, appears: later]
+constrain r1.bg.center_x = midpoint(app, llm)
+constrain r1.bg.top = app_r2.center_y + 24
+constrain r2.bg.center_x = r1.bg.center_x
+constrain r2.bg.top = r1.bg.top
+
+// The conversation: the app keeps it, and sends all of it on every call.
+group convo {
+    rect conv_bg [width: 640, height: 350, fill: role-surface, stroke: role-rule, stroke_width: 2, corner_radius: 14,
                      appears: later]
-        }
+    rect conv_head [width: 640, height: 48, fill: role-surface-2, stroke: none, clip: conv_bg,
+                    label: "the conversation, kept by the app", align: start, font_size: 19, font_weight: 700,
+                    label_fill: role-muted, appears: later]
+    col conv [gap: 8, overlaps: conv_bg] {
+        msg e1 [who: "system", says: "You are a helpful assistant.", appears: later]
+        msg e2 [who: "you", says: "What's the capital of Belgium?", tint: role-series-4-soft, appears: later]
+        msg e3 [who: "LLM", says: "Brussels.", tint: role-series-1-soft, appears: later]
+        msg e4 [who: "you", says: "Best museum to visit there?", tint: role-series-4-soft, appears: later]
+        msg e5 [who: "LLM", says: "The Magritte Museum.", tint: role-series-1-soft, appears: later]
     }
-    rect llm [width: 120, height: 120, label: "LLM", fill: role-surface-2, corner_radius: 16]
+    constrain conv_head.top = conv_bg.top
+    constrain conv_head.left = conv_bg.left
+    constrain conv.left = conv_bg.left + 20
+    constrain conv.top = conv_head.bottom + 14
 }
-constrain llm.center_y = app.center_y
+constrain conv_bg.left = app.center_x + 120
+constrain conv_bg.top = s.stage.top + 380
 
-app -> llm as request [stroke: role-primary, stroke_width: 3, label: "whole log", appears: later]
-llm -> app as reply [stroke: role-primary, stroke_width: 3, label: "one message",
-                     appears: later]
+rect forget [label: "the LLM remembers nothing: everything goes again", font_size: 20, font_weight: 700,
+             label_fill: role-primary, fill: none, stroke: none, appears: later]
+constrain forget.center_x = midpoint(app, llm)
+constrain forget.bottom = app_r1.center_y - 22
 
-keyframe "ask" [title: "The app keeps the conversation"] {
-    accent m2
+// ---------------------------------------------------------------- motion
+
+keyframe "ask" [title: "How a chatbot talks to an LLM"] {
+    slide_in(s)
+    at 0.2 { show q1 [enter: pop] }
+    when q1 shown { show l_ask [enter: draw] }
 }
 
-keyframe "call" [title: "Every call sends the whole log"] {
-    show request [enter: draw]
-    when request shown { fly ghost(log) to llm [along: request] }
+keyframe "send" {
+    show conv_bg, conv_head [enter: fade]
+    when conv_bg shown { show e1 [enter: rise]; accent e1 }
+    when e1 shown + 0.3 { show e2 [from: q1] }
 }
 
-keyframe "answer" [title: "The LLM answers with one message"] {
-    show reply [enter: draw]
-    when reply shown { show m3 [from: llm, along: reply, scale: 1, duration: slow, ease: glide] }
+keyframe "call" [auto] {
+    show l_call [enter: draw]
+    when l_call shown { fly ghost(convo) to llm }   // the whole conversation, as it is now
+}
+
+keyframe "answer" [auto] {
+    show l_reply [enter: draw]
+    when l_reply shown { show r1 [from: llm] }          // only the answer comes back
+    when r1 shown + 0.3 { show e3 [from: r1]; hide r1 [exit: fade] }
+}
+
+keyframe "tell" [auto] {
+    show l_answer [enter: draw]
+    when l_answer shown { show a1 [from: e3] }
+}
+
+keyframe "again" {
+    hide q1, a1 [exit: fade]
+    show q2 [enter: pop]
+    when q2 shown { pulse l_ask }
+    when q2 shown + 0.3 { show e4 [from: q2] }
+    when e4 shown { accent e4.txt }
+}
+
+keyframe "resend" {
+    show forget [enter: rise]
+    pulse l_call
+    fly ghost(convo) to llm
+}
+
+keyframe "answer2" {
+    pulse l_reply
+    show r2 [from: llm]
+    when r2 shown + 0.3 { show e5 [from: r2]; hide r2 [exit: fade] }
+    when e5 shown { pulse l_answer }
+    when e5 shown + 0.2 { show a2 [from: e5] }
 }

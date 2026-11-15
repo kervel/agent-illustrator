@@ -761,7 +761,7 @@ keyframe "pass" {
     when check pulsed { move token along run, out }       // through the check and out
 }
 ```
-Full scenes: examples/motion/request-response.ail and token-loop.ail.
+Full scenes: examples/motion/request-response.ail and examples/state-machine.ail.
 
 EXAMPLE: Line ends (UML relations, crow's foot)
 -----------------------------------------------
@@ -770,13 +770,16 @@ arrow, open, triangle, diamond, diamond-filled, crow, circle, none. They
 override what the operator implies and combine with dashed lines.
 
 ```
-a1 -> b1 [to_end: triangle]                                      // inheritance
-a2 -- b2 [to_end: diamond]                                       // aggregation
-a3 -- b3 [from_end: diamond-filled]                              // composition
-a4 -> b4 [to_end: open, stroke_dasharray: dashed]                // dependency
-a5 -- b5 [from_end: none, to_end: crow]                          // "many"
-a6 -- b6 [from_end: circle, to_end: circle]
-a8 -> b8 [to_end: triangle, stroke_dasharray: dashed]            // realisation
+// one record per row; a record field can carry an end value or a dash style
+each r in [
+    {a: "Dog",    b: "Animal",    fe: "none",    te: "triangle", dash: none,   means: "inheritance"},
+    {a: "Garage", b: "Car",       fe: "diamond", te: "none",     dash: none,   means: "aggregation"},
+    {a: "Client", b: "Service",   fe: "none",    te: "open",     dash: dashed, means: "dependency"},
+    {a: "Plug",   b: "Socket",    fe: "circle",  te: "circle",   dash: none,   means: "socket"},
+] {
+    rect a [label: r.a]   rect b [label: r.b]
+    a -- b [from_end: r.fe, to_end: r.te, stroke_dasharray: r.dash, label: r.means]
+}
 ```
 Full scene: examples/line-ends.ail.
 
@@ -874,7 +877,7 @@ menu file [items: ["New", "Open"]]              // file.entry_1, file.entry_2
 
 Items written as names stand for elements wherever a name goes (connection ends,
 `constrain`, `contains`, `via:`). A server sending data to three clients, the middle one
-failing (`examples/fan-out.ail`):
+failing:
 
 ```
 rect srv [label: "Server", width: 130, height: 70, fill: role-primary, label_fill: role-surface]
@@ -893,7 +896,7 @@ srv.right -> c2.left [routing: direct, label: "no reply", stroke: role-error, st
 ```
 
 Items may be records: `t.from`, `t.on` are fields, usable as names, values and in strings.
-A state machine from its transition table (`examples/state-machine.ail`):
+A state machine from its transition table, with one running instance animated (`examples/state-machine.ail`):
 
 ```
 each t in [
@@ -904,6 +907,6 @@ each t in [
     {from: playing, to: failed,  on: "error"},
     {from: failed.left, to: idle.bottom, on: "reset"},   // a field may name a side
 ] {
-    t.from -> t.to [label: t.on]
+    t.from -> t.to as tr [label: t.on]       // `as tr` names the arrows tr_1, tr_2, ... for motion
 }
 ```

@@ -33,16 +33,7 @@ const GATED: &[&str] = &[
 /// An entry here is a claim that the example is right and the rule is being
 /// asked a question it cannot answer. Adding one is a deliberate act — which
 /// is the point, because a bare count would let the corpus rot quietly.
-const REVIEWED: &[(&str, &str, &str)] = &[
-    (
-        "token-prediction.ail",
-        "set .center_y to the same constant 300",
-        "d, e and f each keep their own literal home row. Keyframes disable \
-         those pins individually to move one box without the others, so \
-         relating them would couple elements the animation exists to \
-         separate.",
-    ),
-];
+const REVIEWED: &[(&str, &str, &str)] = &[];
 
 /// Run `--lint` the way an agent does.
 ///

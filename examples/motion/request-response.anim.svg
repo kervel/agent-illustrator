@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -65 815 390" font-size="14" data-frames="ask,call,answer">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-size="14" data-frames="ask,send,call,answer,tell,again,resend,answer2">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
-    --accent-1: #2196f3;
-    --accent-2: #e3f2fd;
-    --accent-3: #bbdefb;
-    --accent-dark: #1565c0;
-    --accent-light: #e3f2fd;
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
     --background-1: #ffffff;
-    --background-2: #f5f5f5;
-    --background-3: #eeeeee;
-    --background-dark: #333333;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
     --background-light: #ffffff;
     --code-add: var(--role-ok);
     --code-add-bg: var(--role-ok-soft);
@@ -32,45 +32,47 @@
     --code-string: var(--role-ok);
     --code-title: var(--role-ink);
     --code-title-bg: var(--role-surface-2);
-    --foreground-1: #333333;
-    --foreground-2: #666666;
-    --foreground-3: #999999;
-    --foreground-dark: #1a1a1a;
-    --foreground-light: #e0e0e0;
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
     --role-backdrop: var(--background-2);
     --role-error: var(--status-error);
-    --role-error-soft: #ffebee;
+    --role-error-soft: #f6dedb;
     --role-ink: var(--text-1);
     --role-muted: var(--text-2);
     --role-ok: var(--status-success);
-    --role-ok-soft: #e8f5e9;
-    --role-primary: var(--accent-1);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
     --role-rule: var(--foreground-3);
-    --role-secondary: var(--secondary-1);
-    --role-series-1: #0e8a8a;
-    --role-series-1-soft: #d6eeee;
-    --role-series-2: #e07a12;
-    --role-series-2-soft: #fbe6d2;
-    --role-series-3: #7b4bb7;
-    --role-series-3-soft: #e8def3;
-    --role-series-4: #c2185b;
-    --role-series-4-soft: #f6d7e3;
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
     --role-surface: var(--background-1);
     --role-surface-2: var(--background-2);
     --role-warn: var(--status-warning);
-    --role-warn-soft: #fff8e1;
-    --secondary-1: #ff9800;
-    --secondary-2: #fff3e0;
-    --secondary-3: #ffe0b2;
-    --secondary-dark: #e65100;
-    --secondary-light: #fff3e0;
-    --status-error: #f44336;
-    --status-success: #4caf50;
-    --status-warning: #ff9800;
-    --text-1: #333333;
-    --text-2: #666666;
-    --text-3: #999999;
-    --text-dark: #1a1a1a;
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
     --text-light: #ffffff;
   }
   .ai-on-dark { fill: var(--text-light); }
@@ -79,83 +81,585 @@
 .kf-anim { transition: transform 0.5s ease, opacity 0.5s ease; }
 .ai-shape { transition: width 0.5s ease, height 0.5s ease, fill 0.5s ease, stroke 0.5s ease; }
 .ai-connection { transition: d 0.5s ease, opacity 0.5s ease; }
+    
+/* stylesheets/kapernikov.css */
+/* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
   /* motion: the whole story as CSS (auto-generated) */
-@keyframes ailfilm0 { 0% { opacity: 0; } 3.9216% { opacity: 0; } 6.8627% { opacity: 1; } 12.7451% { opacity: 1; } 15.6863% { opacity: 0; } 99.9902% { opacity: 0; } }
-@keyframes ailfilm1 { 0% { scale: 0 1; } 3.9216% { scale: 0 1; } 4.2484% { scale: 0.008 1; } 4.5752% { scale: 0.037 1; } 4.902% { scale: 0.099 1; } 5.2288% { scale: 0.218 1; } 5.5556% { scale: 0.433 1; } 5.8824% { scale: 0.688 1; } 6.2092% { scale: 0.851 1; } 6.5359% { scale: 0.937 1; } 6.8627% { scale: 0.981 1; } 7.1895% { scale: 0.998 1; } 99.9902% { scale: 1 1; } }
-@keyframes ailfilm2 { 0% { opacity: 0; } 29.402% { opacity: 0; } 29.4118% { opacity: 1; } 99.9902% { opacity: 1; } }
-@keyframes ailfilm3 { 0% { stroke-dashoffset: 0; } 29.402% { stroke-dashoffset: 0; } 29.4118% { stroke-dashoffset: 1.001; } 29.7386% { stroke-dashoffset: 0.814; } 30.0654% { stroke-dashoffset: 0.641; } 30.3922% { stroke-dashoffset: 0.493; } 30.719% { stroke-dashoffset: 0.373; } 31.0458% { stroke-dashoffset: 0.278; } 31.3725% { stroke-dashoffset: 0.205; } 31.6993% { stroke-dashoffset: 0.148; } 32.0261% { stroke-dashoffset: 0.105; } 32.3529% { stroke-dashoffset: 0.071; } 33.0065% { stroke-dashoffset: 0.028; } 33.6601% { stroke-dashoffset: 0.006; } 35.2941% { stroke-dashoffset: 0; } 99.9902% { stroke-dashoffset: 0; } }
-@keyframes ailfilm4 { 0% { opacity: 1; } 29.402% { opacity: 1; } 29.4118% { opacity: 0; } 33.6601% { opacity: 0; } 33.9869% { opacity: 0.467; } 34.3137% { opacity: 1; } 99.9902% { opacity: 1; } }
-@keyframes ailfilm5 { 0% { translate: 0px 0px; } 34.3137% { translate: 0px 0px; } 34.6405% { translate: 0px -0.703px; } 34.9673% { translate: 0px -2.949px; } 35.2941% { translate: 0px -6.973px; } 35.6209% { translate: 0px -13.072px; } 35.9477% { translate: 0px -21.623px; } 36.2745% { translate: 0px -33.113px; } 36.6013% { translate: 0px -48.18px; } 36.9281% { translate: 0px -67.671px; } 37.2549% { translate: 0px -92.724px; } 37.5817% { translate: 0px -124.836px; } 37.9085% { translate: 23.807px -142px; } 38.2353% { translate: 75.171px -142px; } 38.5621% { translate: 136.29px -142px; } 38.8889% { translate: 201.71px -142px; } 39.2157% { translate: 262.829px -142px; } 39.5425% { translate: 314.193px -142px; } 39.8693% { translate: 355.164px -142px; } 40.1961% { translate: 387.276px -142px; } 40.5229% { translate: 412.329px -142px; } 40.8497% { translate: 431.82px -142px; } 41.1765% { translate: 446.887px -142px; } 41.5033% { translate: 458.377px -142px; } 41.8301% { translate: 466.928px -142px; } 42.1569% { translate: 473.027px -142px; } 42.4837% { translate: 477.051px -142px; } 42.8105% { translate: 479.297px -142px; } 43.1373% { translate: 0px 0px; } 99.9902% { translate: 0px 0px; } }
-@keyframes ailfilm6 { 0% { scale: 1 1; } 34.9673% { scale: 0.997 0.997; } 35.9477% { scale: 0.979 0.979; } 36.6013% { scale: 0.953 0.953; } 37.2549% { scale: 0.909 0.909; } 37.5817% { scale: 0.877 0.877; } 37.9085% { scale: 0.837 0.837; } 38.2353% { scale: 0.786 0.786; } 39.2157% { scale: 0.601 0.601; } 39.5425% { scale: 0.55 0.55; } 39.8693% { scale: 0.51 0.51; } 40.5229% { scale: 0.454 0.454; } 41.1765% { scale: 0.42 0.42; } 42.1569% { scale: 0.394 0.394; } 42.8105% { scale: 0.388 0.388; } 43.1373% { scale: 1 1; } 99.9902% { scale: 1 1; } }
-@keyframes ailfilm7 { 0% { opacity: 0; } 33.9869% { opacity: 0; } 34.3137% { opacity: 1; } 42.1569% { opacity: 1; } 43.1373% { opacity: 0; } 99.9902% { opacity: 0; } }
-@keyframes ailfilm8 { 0% { opacity: 0; } 56.8529% { opacity: 0; } 56.8627% { opacity: 1; } 99.9902% { opacity: 1; } }
-@keyframes ailfilm9 { 0% { stroke-dashoffset: 0; } 56.8529% { stroke-dashoffset: 0; } 56.8627% { stroke-dashoffset: 1.001; } 57.1895% { stroke-dashoffset: 0.814; } 57.5163% { stroke-dashoffset: 0.641; } 57.8431% { stroke-dashoffset: 0.493; } 58.1699% { stroke-dashoffset: 0.373; } 58.4967% { stroke-dashoffset: 0.278; } 58.8235% { stroke-dashoffset: 0.205; } 59.1503% { stroke-dashoffset: 0.148; } 59.4771% { stroke-dashoffset: 0.105; } 59.8039% { stroke-dashoffset: 0.071; } 60.4575% { stroke-dashoffset: 0.028; } 61.1111% { stroke-dashoffset: 0.006; } 62.7451% { stroke-dashoffset: 0; } 99.9902% { stroke-dashoffset: 0; } }
-@keyframes ailfilm10 { 0% { opacity: 1; } 56.8529% { opacity: 1; } 56.8627% { opacity: 0; } 61.1111% { opacity: 0; } 61.4379% { opacity: 0.467; } 61.7647% { opacity: 1; } 99.9902% { opacity: 1; } }
-@keyframes ailfilm11 { 0% { opacity: 0; } 61.7647% { opacity: 0; } 64.0523% { opacity: 0.933; } 64.3791% { opacity: 1; } 99.9902% { opacity: 1; } }
-@keyframes ailfilm12 { 0% { translate: 0px 0px; } 61.4379% { translate: 0px 0px; } 61.7647% { translate: 480px -190px; } 62.0915% { translate: 479.249px -190px; } 62.4183% { translate: 476.851px -190px; } 62.7451% { translate: 472.553px -190px; } 63.0719% { translate: 466.039px -190px; } 63.3987% { translate: 456.906px -190px; } 63.7255% { translate: 444.635px -190px; } 64.0523% { translate: 428.545px -190px; } 64.3791% { translate: 407.728px -190px; } 64.7059% { translate: 380.971px -190px; } 65.0327% { translate: 346.677px -190px; } 65.3595% { translate: 302.92px -190px; } 65.6863% { translate: 248.064px -190px; } 66.0131% { translate: 182.79px -190px; } 66.3399% { translate: 112.922px -190px; } 66.6667% { translate: 47.647px -190px; } 66.9935% { translate: 5.403px -176.997px; } 67.3203% { translate: 4.068px -133.261px; } 67.6471% { translate: 3.022px -98.983px; } 67.9739% { translate: 2.205px -72.238px; } 68.3007% { translate: 1.57px -51.431px; } 68.6275% { translate: 1.079px -35.348px; } 68.9542% { translate: 0.705px -23.083px; } 69.281% { translate: 0.426px -13.954px; } 69.6078% { translate: 0.227px -7.443px; } 69.9346% { translate: 0.096px -3.148px; } 70.2614% { translate: 0.023px -0.751px; } 70.5882% { translate: 0px 0px; } 99.9902% { translate: 0px 0px; } }
-.aiacm-eb586e30-m2-attention { animation: ailfilm0 10.2s linear infinite, ailfilm1 10.2s linear infinite; }
-.aighost-eb586e30-0 { animation: ailfilm5 10.2s linear infinite, ailfilm6 10.2s linear infinite, ailfilm7 10.2s linear infinite; }
-.aihead-eb586e30-reply { animation: ailfilm10 10.2s linear infinite; }
-.aihead-eb586e30-request { animation: ailfilm4 10.2s linear infinite; }
-.aimask-eb586e30-reply { animation: ailfilm9 10.2s linear infinite; }
-.aimask-eb586e30-request { animation: ailfilm3 10.2s linear infinite; }
-.conn-eb586e30-reply { animation: ailfilm8 10.2s linear infinite; }
-.conn-eb586e30-request { animation: ailfilm2 10.2s linear infinite; }
-.kf-eb586e30-m3 { animation: ailfilm11 10.2s linear infinite, ailfilm12 10.2s linear infinite; }
+@keyframes ailfilm0 { 0% { opacity: 0; } 1.8519% { opacity: 0; } 2.0062% { opacity: 0.187; } 2.1605% { opacity: 0.36; } 2.3148% { opacity: 0.508; } 2.4691% { opacity: 0.628; } 2.6235% { opacity: 0.722; } 2.7778% { opacity: 0.795; } 2.9321% { opacity: 0.852; } 3.0864% { opacity: 0.895; } 3.2407% { opacity: 0.929; } 3.5494% { opacity: 0.972; } 3.858% { opacity: 0.994; } 4.6296% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm1 { 0% { opacity: 0; } 2.7778% { opacity: 0; } 3.858% { opacity: 0.933; } 4.0123% { opacity: 1; } 48.1481% { opacity: 1; } 48.3025% { opacity: 0.64; } 48.4568% { opacity: 0.372; } 48.6111% { opacity: 0.205; } 48.7654% { opacity: 0.105; } 48.9198% { opacity: 0.046; } 49.0741% { opacity: 0.015; } 49.2284% { opacity: 0.001; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm2 { 0% { scale: 1 1; } 2.6235% { scale: 1 1; } 2.7778% { scale: 0 0; } 2.9321% { scale: 0.281 0.281; } 3.0864% { scale: 0.515 0.515; } 3.2407% { scale: 0.703 0.703; } 3.3951% { scale: 0.849 0.849; } 3.5494% { scale: 0.957 0.957; } 3.7037% { scale: 1.03 1.03; } 3.858% { scale: 1.075 1.075; } 4.0123% { scale: 1.095 1.095; } 4.1667% { scale: 1.097 1.097; } 4.321% { scale: 1.085 1.085; } 4.784% { scale: 1.021 1.021; } 4.9383% { scale: 1.006 1.006; } 5.4012% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm3 { 0% { opacity: 0; } 4.9383% { opacity: 0; } 5.0926% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm4 { 0% { stroke-dashoffset: 0; } 4.9383% { stroke-dashoffset: 0; } 5.0926% { stroke-dashoffset: 1.001; } 5.2469% { stroke-dashoffset: 0.814; } 5.4012% { stroke-dashoffset: 0.641; } 5.5556% { stroke-dashoffset: 0.493; } 5.7099% { stroke-dashoffset: 0.373; } 5.8642% { stroke-dashoffset: 0.278; } 6.0185% { stroke-dashoffset: 0.205; } 6.1728% { stroke-dashoffset: 0.148; } 6.3272% { stroke-dashoffset: 0.105; } 6.4815% { stroke-dashoffset: 0.071; } 6.7901% { stroke-dashoffset: 0.028; } 7.0988% { stroke-dashoffset: 0.006; } 7.4074% { stroke-dashoffset: 0; } 99.9954% { stroke-dashoffset: 0; } }
+@keyframes ailfilm5 { 0% { opacity: 1; } 4.9383% { opacity: 1; } 5.0926% { opacity: 0; } 7.0988% { opacity: 0; } 7.2531% { opacity: 0.467; } 7.4074% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm6 { 0% { opacity: 0; } 13.8889% { opacity: 0; } 14.0432% { opacity: 0.187; } 14.1975% { opacity: 0.36; } 14.3519% { opacity: 0.508; } 14.5062% { opacity: 0.628; } 14.6605% { opacity: 0.722; } 14.8148% { opacity: 0.795; } 14.9691% { opacity: 0.852; } 15.1235% { opacity: 0.895; } 15.2778% { opacity: 0.929; } 15.5864% { opacity: 0.972; } 15.8951% { opacity: 0.994; } 16.6667% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm7 { 0% { opacity: 0; } 13.8889% { opacity: 0; } 14.0432% { opacity: 0.187; } 14.1975% { opacity: 0.36; } 14.3519% { opacity: 0.508; } 14.5062% { opacity: 0.628; } 14.6605% { opacity: 0.722; } 14.8148% { opacity: 0.795; } 14.9691% { opacity: 0.852; } 15.1235% { opacity: 0.895; } 15.2778% { opacity: 0.929; } 15.5864% { opacity: 0.972; } 15.8951% { opacity: 0.994; } 16.6667% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm8 { 0% { opacity: 0; } 16.2037% { opacity: 0; } 16.358% { opacity: 0.187; } 16.5123% { opacity: 0.36; } 16.6667% { opacity: 0.508; } 16.821% { opacity: 0.628; } 16.9753% { opacity: 0.722; } 17.1296% { opacity: 0.795; } 17.284% { opacity: 0.852; } 17.4383% { opacity: 0.895; } 17.5926% { opacity: 0.929; } 17.9012% { opacity: 0.972; } 18.2099% { opacity: 0.994; } 18.9815% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm9 { 0% { translate: 0px 0px; } 16.0494% { translate: 0px 0px; } 16.2037% { translate: 0px 12px; } 16.5123% { translate: 0px 7.685px; } 16.821% { translate: 0px 4.467px; } 17.284% { translate: 0px 1.777px; } 17.9012% { translate: 0px 0.332px; } 20.216% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm10 { 0% { opacity: 0; } 16.2037% { opacity: 0; } 17.5926% { opacity: 1; } 20.3704% { opacity: 1; } 21.7593% { opacity: 0; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm11 { 0% { scale: 1 1; } 16.0494% { scale: 1 1; } 16.2037% { scale: 0 1; } 16.358% { scale: 0.008 1; } 16.5123% { scale: 0.037 1; } 16.6667% { scale: 0.099 1; } 16.821% { scale: 0.218 1; } 16.9753% { scale: 0.433 1; } 17.1296% { scale: 0.688 1; } 17.284% { scale: 0.851 1; } 17.4383% { scale: 0.937 1; } 17.5926% { scale: 0.981 1; } 17.7469% { scale: 0.998 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm12 { 0% { opacity: 0; } 19.9074% { opacity: 0; } 20.9877% { opacity: 0.933; } 21.142% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm13 { 0% { translate: 0px 0px; } 19.7531% { translate: 0px 0px; } 19.9074% { translate: -670px -336.5px; } 20.0617% { translate: -544.893px -273.666px; } 20.216% { translate: -429.107px -215.514px; } 20.3704% { translate: -329.836px -165.657px; } 20.5247% { translate: -249.413px -125.265px; } 20.679% { translate: -186.209px -93.521px; } 20.8333% { translate: -137.147px -68.881px; } 20.9877% { translate: -99.24px -49.842px; } 21.142% { translate: -70.06px -35.187px; } 21.2963% { translate: -47.756px -23.985px; } 21.4506% { translate: -30.939px -15.539px; } 21.6049% { translate: -18.562px -9.323px; } 21.7593% { translate: -9.83px -4.937px; } 21.9136% { translate: -4.128px -2.073px; } 22.0679% { translate: -0.979px -0.491px; } 22.2222% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm14 { 0% { scale: 1 1; } 19.7531% { scale: 1 1; } 19.9074% { scale: 0.496 0.496; } 20.216% { scale: 0.677 0.677; } 20.3704% { scale: 0.752 0.752; } 20.5247% { scale: 0.813 0.813; } 20.679% { scale: 0.86 0.86; } 20.8333% { scale: 0.897 0.897; } 21.142% { scale: 0.947 0.947; } 21.6049% { scale: 0.986 0.986; } 22.2222% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm15 { 0% { opacity: 0; } 22.2176% { opacity: 0; } 22.2222% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm16 { 0% { stroke-dashoffset: 0; } 22.2176% { stroke-dashoffset: 0; } 22.2222% { stroke-dashoffset: 1.001; } 22.3765% { stroke-dashoffset: 0.814; } 22.5309% { stroke-dashoffset: 0.641; } 22.6852% { stroke-dashoffset: 0.493; } 22.8395% { stroke-dashoffset: 0.373; } 22.9938% { stroke-dashoffset: 0.278; } 23.1481% { stroke-dashoffset: 0.205; } 23.3025% { stroke-dashoffset: 0.148; } 23.4568% { stroke-dashoffset: 0.105; } 23.6111% { stroke-dashoffset: 0.071; } 23.9198% { stroke-dashoffset: 0.028; } 24.2284% { stroke-dashoffset: 0.006; } 25% { stroke-dashoffset: 0; } 99.9954% { stroke-dashoffset: 0; } }
+@keyframes ailfilm17 { 0% { opacity: 1; } 22.2176% { opacity: 1; } 22.2222% { opacity: 0; } 24.2284% { opacity: 0; } 24.3827% { opacity: 0.467; } 24.537% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm18 { 0% { translate: 0px 0px; } 24.537% { translate: 0px 0px; } 24.6914% { translate: 0.215px -0.345px; } 24.8457% { translate: 0.901px -1.446px; } 25% { translate: 2.13px -3.419px; } 25.1543% { translate: 3.993px -6.41px; } 25.3086% { translate: 6.605px -10.603px; } 25.463% { translate: 10.115px -16.237px; } 25.6173% { translate: 14.717px -23.625px; } 25.7716% { translate: 20.671px -33.183px; } 25.9259% { translate: 28.324px -45.468px; } 26.0802% { translate: 38.133px -61.214px; } 26.2346% { translate: 50.648px -81.304px; } 26.3889% { translate: 66.338px -106.49px; } 26.5432% { translate: 85.008px -136.461px; } 26.6975% { translate: 104.992px -168.539px; } 26.8519% { translate: 123.662px -198.51px; } 27.0062% { translate: 139.352px -223.696px; } 27.1605% { translate: 151.867px -243.786px; } 27.3148% { translate: 161.676px -259.532px; } 27.4691% { translate: 169.329px -271.817px; } 27.6235% { translate: 175.283px -281.375px; } 27.7778% { translate: 179.885px -288.763px; } 27.9321% { translate: 183.395px -294.397px; } 28.0864% { translate: 186.007px -298.59px; } 28.2407% { translate: 187.87px -301.581px; } 28.3951% { translate: 189.099px -303.554px; } 28.5494% { translate: 189.785px -304.655px; } 28.7037% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm19 { 0% { scale: 1 1; } 24.8457% { scale: 0.996 0.996; } 25.3086% { scale: 0.972 0.972; } 25.6173% { scale: 0.937 0.937; } 25.9259% { scale: 0.879 0.879; } 26.0802% { scale: 0.837 0.837; } 26.2346% { scale: 0.783 0.783; } 26.3889% { scale: 0.716 0.716; } 26.8519% { scale: 0.471 0.471; } 27.0062% { scale: 0.404 0.404; } 27.1605% { scale: 0.351 0.351; } 27.3148% { scale: 0.309 0.309; } 27.6235% { scale: 0.251 0.251; } 27.9321% { scale: 0.216 0.216; } 28.3951% { scale: 0.192 0.192; } 28.5494% { scale: 0.189 0.189; } 28.7037% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm20 { 0% { opacity: 0; } 24.3827% { opacity: 0; } 24.537% { opacity: 1; } 28.2407% { opacity: 1; } 28.7037% { opacity: 0; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm21 { 0% { opacity: 0; } 28.6991% { opacity: 0; } 28.7037% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm22 { 0% { stroke-dashoffset: 0; } 28.6991% { stroke-dashoffset: 0; } 28.7037% { stroke-dashoffset: 1.001; } 28.858% { stroke-dashoffset: 0.814; } 29.0123% { stroke-dashoffset: 0.641; } 29.1667% { stroke-dashoffset: 0.493; } 29.321% { stroke-dashoffset: 0.373; } 29.4753% { stroke-dashoffset: 0.278; } 29.6296% { stroke-dashoffset: 0.205; } 29.784% { stroke-dashoffset: 0.148; } 29.9383% { stroke-dashoffset: 0.105; } 30.0926% { stroke-dashoffset: 0.071; } 30.4012% { stroke-dashoffset: 0.028; } 30.7099% { stroke-dashoffset: 0.006; } 31.4815% { stroke-dashoffset: 0; } 99.9954% { stroke-dashoffset: 0; } }
+@keyframes ailfilm23 { 0% { opacity: 1; } 28.6991% { opacity: 1; } 28.7037% { opacity: 0; } 30.7099% { opacity: 0; } 30.8642% { opacity: 0.467; } 31.0185% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm24 { 0% { opacity: 0; } 31.0185% { opacity: 0; } 32.0988% { opacity: 0.933; } 32.2531% { opacity: 1; } 34.7222% { opacity: 1; } 34.8765% { opacity: 0.64; } 35.0309% { opacity: 0.372; } 35.1852% { opacity: 0.205; } 35.3395% { opacity: 0.105; } 35.4938% { opacity: 0.046; } 35.6481% { opacity: 0.015; } 35.8025% { opacity: 0.001; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm25 { 0% { translate: 0px 0px; } 30.8642% { translate: 0px 0px; } 31.0185% { translate: 315px -62.5px; } 31.1728% { translate: 256.181px -50.829px; } 31.3272% { translate: 201.744px -40.029px; } 31.4815% { translate: 155.072px -30.768px; } 31.6358% { translate: 117.262px -23.266px; } 31.7901% { translate: 87.546px -17.37px; } 31.9444% { translate: 64.48px -12.794px; } 32.0988% { translate: 46.657px -9.257px; } 32.2531% { translate: 32.939px -6.535px; } 32.4074% { translate: 22.453px -4.455px; } 32.5617% { translate: 14.546px -2.886px; } 32.716% { translate: 8.727px -1.732px; } 32.8704% { translate: 4.621px -0.917px; } 33.0247% { translate: 1.941px -0.385px; } 33.179% { translate: 0.46px -0.091px; } 33.4877% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm26 { 0% { scale: 1 1; } 30.8642% { scale: 1 1; } 31.0185% { scale: 1.174 1.174; } 31.4815% { scale: 1.086 1.086; } 31.7901% { scale: 1.048 1.048; } 32.2531% { scale: 1.018 1.018; } 33.0247% { scale: 1.001 1.001; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm27 { 0% { opacity: 0; } 34.7222% { opacity: 0; } 35.8025% { opacity: 0.933; } 35.9568% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm28 { 0% { translate: 0px 0px; } 34.5679% { translate: 0px 0px; } 34.7222% { translate: -130px -265.5px; } 34.8765% { translate: -105.725px -215.924px; } 35.0309% { translate: -83.259px -170.041px; } 35.1852% { translate: -63.998px -130.704px; } 35.3395% { translate: -48.394px -98.835px; } 35.4938% { translate: -36.13px -73.789px; } 35.6481% { translate: -26.611px -54.347px; } 35.8025% { translate: -19.255px -39.326px; } 35.9568% { translate: -13.594px -27.763px; } 36.1111% { translate: -9.266px -18.924px; } 36.2654% { translate: -6.003px -12.26px; } 36.4198% { translate: -3.602px -7.356px; } 36.5741% { translate: -1.907px -3.895px; } 36.7284% { translate: -0.801px -1.636px; } 36.8827% { translate: -0.19px -0.388px; } 37.1914% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm29 { 0% { scale: 1 1; } 34.5679% { scale: 1 1; } 34.7222% { scale: 0.171 0.171; } 34.8765% { scale: 0.325 0.325; } 35.0309% { scale: 0.469 0.469; } 35.1852% { scale: 0.592 0.592; } 35.3395% { scale: 0.691 0.691; } 35.4938% { scale: 0.769 0.769; } 35.6481% { scale: 0.83 0.83; } 35.8025% { scale: 0.877 0.877; } 35.9568% { scale: 0.913 0.913; } 36.2654% { scale: 0.962 0.962; } 36.5741% { scale: 0.988 0.988; } 37.037% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm30 { 0% { opacity: 0; } 37.0324% { opacity: 0; } 37.037% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm31 { 0% { stroke-dashoffset: 0; } 37.0324% { stroke-dashoffset: 0; } 37.037% { stroke-dashoffset: 1.001; } 37.1914% { stroke-dashoffset: 0.814; } 37.3457% { stroke-dashoffset: 0.641; } 37.5% { stroke-dashoffset: 0.493; } 37.6543% { stroke-dashoffset: 0.373; } 37.8086% { stroke-dashoffset: 0.278; } 37.963% { stroke-dashoffset: 0.205; } 38.1173% { stroke-dashoffset: 0.148; } 38.2716% { stroke-dashoffset: 0.105; } 38.4259% { stroke-dashoffset: 0.071; } 38.7346% { stroke-dashoffset: 0.028; } 39.0432% { stroke-dashoffset: 0.006; } 39.8148% { stroke-dashoffset: 0; } 99.9954% { stroke-dashoffset: 0; } }
+@keyframes ailfilm32 { 0% { opacity: 1; } 37.0324% { opacity: 1; } 37.037% { opacity: 0; } 39.0432% { opacity: 0; } 39.1975% { opacity: 0.467; } 39.3519% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm33 { 0% { opacity: 0; } 39.3519% { opacity: 0; } 40.4321% { opacity: 0.933; } 40.5864% { opacity: 1; } 48.1481% { opacity: 1; } 48.3025% { opacity: 0.64; } 48.4568% { opacity: 0.372; } 48.6111% { opacity: 0.205; } 48.7654% { opacity: 0.105; } 48.9198% { opacity: 0.046; } 49.0741% { opacity: 0.015; } 49.2284% { opacity: 0.001; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm34 { 0% { translate: 0px 0px; } 39.1975% { translate: 0px 0px; } 39.3519% { translate: 670px 265.5px; } 39.5062% { translate: 544.893px 215.924px; } 39.6605% { translate: 429.107px 170.041px; } 39.8148% { translate: 329.836px 130.704px; } 39.9691% { translate: 249.413px 98.835px; } 40.1235% { translate: 186.209px 73.789px; } 40.2778% { translate: 137.147px 54.347px; } 40.4321% { translate: 99.24px 39.326px; } 40.5864% { translate: 70.06px 27.763px; } 40.7407% { translate: 47.756px 18.924px; } 40.8951% { translate: 30.939px 12.26px; } 41.0494% { translate: 18.562px 7.356px; } 41.2037% { translate: 9.83px 3.895px; } 41.358% { translate: 4.128px 1.636px; } 41.5123% { translate: 0.979px 0.388px; } 41.6667% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm35 { 0% { scale: 1 1; } 39.1975% { scale: 1 1; } 39.3519% { scale: 1.122 1.122; } 39.8148% { scale: 1.06 1.06; } 40.2778% { scale: 1.025 1.025; } 41.0494% { scale: 1.003 1.003; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm36 { 0% { opacity: 0; } 48.1481% { opacity: 0; } 49.2284% { opacity: 0.933; } 49.3827% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm37 { 0% { scale: 1 1; } 48.1435% { scale: 1 1; } 48.1481% { scale: 0 0; } 48.3025% { scale: 0.281 0.281; } 48.4568% { scale: 0.515 0.515; } 48.6111% { scale: 0.703 0.703; } 48.7654% { scale: 0.849 0.849; } 48.9198% { scale: 0.957 0.957; } 49.0741% { scale: 1.03 1.03; } 49.2284% { scale: 1.075 1.075; } 49.3827% { scale: 1.095 1.095; } 49.537% { scale: 1.097 1.097; } 49.6914% { scale: 1.085 1.085; } 50.1543% { scale: 1.021 1.021; } 50.3086% { scale: 1.006 1.006; } 50.7716% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm38 { 0% { scale: 1 1; } 50.6173% { scale: 1.001 1.001; } 50.9259% { scale: 1.012 1.012; } 51.2346% { scale: 1.045 1.045; } 51.3889% { scale: 1.076 1.076; } 51.5432% { scale: 1.122 1.122; } 51.6975% { scale: 1.122 1.122; } 51.8519% { scale: 1.076 1.076; } 52.0062% { scale: 1.045 1.045; } 52.3148% { scale: 1.012 1.012; } 52.7778% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm39 { 0% { opacity: 0; } 51.8519% { opacity: 0; } 52.9321% { opacity: 0.933; } 53.0864% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm40 { 0% { translate: 0px 0px; } 51.6975% { translate: 0px 0px; } 51.8519% { translate: -670px -444.5px; } 52.0062% { translate: -544.893px -361.5px; } 52.1605% { translate: -429.107px -284.683px; } 52.3148% { translate: -329.836px -218.824px; } 52.4691% { translate: -249.413px -165.469px; } 52.6235% { translate: -186.209px -123.537px; } 52.7778% { translate: -137.147px -90.988px; } 52.9321% { translate: -99.24px -65.839px; } 53.0864% { translate: -70.06px -46.48px; } 53.2407% { translate: -47.756px -31.683px; } 53.3951% { translate: -30.939px -20.526px; } 53.5494% { translate: -18.562px -12.315px; } 53.7037% { translate: -9.83px -6.521px; } 53.858% { translate: -4.128px -2.739px; } 54.0123% { translate: -0.979px -0.649px; } 54.1667% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm41 { 0% { scale: 1 1; } 51.6975% { scale: 1 1; } 51.8519% { scale: 0.458 0.458; } 52.1605% { scale: 0.653 0.653; } 52.3148% { scale: 0.733 0.733; } 52.4691% { scale: 0.798 0.798; } 52.6235% { scale: 0.85 0.85; } 52.7778% { scale: 0.889 0.889; } 53.0864% { scale: 0.943 0.943; } 53.3951% { scale: 0.975 0.975; } 53.858% { scale: 0.997 0.997; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm42 { 0% { opacity: 0; } 54.1667% { opacity: 0; } 55.5556% { opacity: 1; } 58.3333% { opacity: 1; } 59.7222% { opacity: 0; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm43 { 0% { scale: 1 1; } 54.0123% { scale: 1 1; } 54.1667% { scale: 0 1; } 54.321% { scale: 0.008 1; } 54.4753% { scale: 0.037 1; } 54.6296% { scale: 0.099 1; } 54.784% { scale: 0.218 1; } 54.9383% { scale: 0.433 1; } 55.0926% { scale: 0.688 1; } 55.2469% { scale: 0.851 1; } 55.4012% { scale: 0.937 1; } 55.5556% { scale: 0.981 1; } 55.7099% { scale: 0.998 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm44 { 0% { opacity: 0; } 66.2037% { opacity: 0; } 66.358% { opacity: 0.187; } 66.5123% { opacity: 0.36; } 66.6667% { opacity: 0.508; } 66.821% { opacity: 0.628; } 66.9753% { opacity: 0.722; } 67.1296% { opacity: 0.795; } 67.284% { opacity: 0.852; } 67.4383% { opacity: 0.895; } 67.5926% { opacity: 0.929; } 67.9012% { opacity: 0.972; } 68.2099% { opacity: 0.994; } 68.9815% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm45 { 0% { translate: 0px 0px; } 66.1991% { translate: 0px 0px; } 66.2037% { translate: 0px 12px; } 66.5123% { translate: 0px 7.685px; } 66.821% { translate: 0px 4.467px; } 67.284% { translate: 0px 1.777px; } 67.9012% { translate: 0px 0.332px; } 70.216% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm46 { 0% { scale: 1 1; } 66.358% { scale: 1.001 1.001; } 66.6667% { scale: 1.012 1.012; } 66.9753% { scale: 1.045 1.045; } 67.1296% { scale: 1.076 1.076; } 67.284% { scale: 1.122 1.122; } 67.4383% { scale: 1.122 1.122; } 67.5926% { scale: 1.076 1.076; } 67.7469% { scale: 1.045 1.045; } 68.0556% { scale: 1.012 1.012; } 68.5185% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm47 { 0% { translate: 0px 0px; } 66.2037% { translate: 0px 0px; } 66.358% { translate: 0.215px -0.345px; } 66.5123% { translate: 0.901px -1.446px; } 66.6667% { translate: 2.13px -3.419px; } 66.821% { translate: 3.993px -6.41px; } 66.9753% { translate: 6.605px -10.603px; } 67.1296% { translate: 10.115px -16.237px; } 67.284% { translate: 14.717px -23.625px; } 67.4383% { translate: 20.671px -33.183px; } 67.5926% { translate: 28.324px -45.468px; } 67.7469% { translate: 38.133px -61.214px; } 67.9012% { translate: 50.648px -81.304px; } 68.0556% { translate: 66.338px -106.49px; } 68.2099% { translate: 85.008px -136.461px; } 68.3642% { translate: 104.992px -168.539px; } 68.5185% { translate: 123.662px -198.51px; } 68.6728% { translate: 139.352px -223.696px; } 68.8272% { translate: 151.867px -243.786px; } 68.9815% { translate: 161.676px -259.532px; } 69.1358% { translate: 169.329px -271.817px; } 69.2901% { translate: 175.283px -281.375px; } 69.4444% { translate: 179.885px -288.763px; } 69.5988% { translate: 183.395px -294.397px; } 69.7531% { translate: 186.007px -298.59px; } 69.9074% { translate: 187.87px -301.581px; } 70.0617% { translate: 189.099px -303.554px; } 70.216% { translate: 189.785px -304.655px; } 70.3704% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm48 { 0% { scale: 1 1; } 66.5123% { scale: 0.996 0.996; } 66.9753% { scale: 0.972 0.972; } 67.284% { scale: 0.937 0.937; } 67.5926% { scale: 0.879 0.879; } 67.7469% { scale: 0.837 0.837; } 67.9012% { scale: 0.783 0.783; } 68.0556% { scale: 0.716 0.716; } 68.5185% { scale: 0.471 0.471; } 68.6728% { scale: 0.404 0.404; } 68.8272% { scale: 0.351 0.351; } 68.9815% { scale: 0.309 0.309; } 69.2901% { scale: 0.251 0.251; } 69.5988% { scale: 0.216 0.216; } 70.0617% { scale: 0.192 0.192; } 70.216% { scale: 0.189 0.189; } 70.3704% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm49 { 0% { opacity: 0; } 66.1991% { opacity: 0; } 66.2037% { opacity: 1; } 69.9074% { opacity: 1; } 70.3704% { opacity: 0; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm50 { 0% { scale: 1 1; } 77.0062% { scale: 1.001 1.001; } 77.3148% { scale: 1.012 1.012; } 77.6235% { scale: 1.045 1.045; } 77.7778% { scale: 1.076 1.076; } 77.9321% { scale: 1.122 1.122; } 78.0864% { scale: 1.122 1.122; } 78.2407% { scale: 1.076 1.076; } 78.3951% { scale: 1.045 1.045; } 78.7037% { scale: 1.012 1.012; } 79.1667% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm51 { 0% { opacity: 0; } 76.8519% { opacity: 0; } 77.9321% { opacity: 0.933; } 78.0864% { opacity: 1; } 80.5556% { opacity: 1; } 80.7099% { opacity: 0.64; } 80.8642% { opacity: 0.372; } 81.0185% { opacity: 0.205; } 81.1728% { opacity: 0.105; } 81.3272% { opacity: 0.046; } 81.4815% { opacity: 0.015; } 81.6358% { opacity: 0.001; } 99.9954% { opacity: 0; } }
+@keyframes ailfilm52 { 0% { translate: 0px 0px; } 76.8472% { translate: 0px 0px; } 76.8519% { translate: 315px -62.5px; } 77.0062% { translate: 256.181px -50.829px; } 77.1605% { translate: 201.744px -40.029px; } 77.3148% { translate: 155.072px -30.768px; } 77.4691% { translate: 117.262px -23.266px; } 77.6235% { translate: 87.546px -17.37px; } 77.7778% { translate: 64.48px -12.794px; } 77.9321% { translate: 46.657px -9.257px; } 78.0864% { translate: 32.939px -6.535px; } 78.2407% { translate: 22.453px -4.455px; } 78.3951% { translate: 14.546px -2.886px; } 78.5494% { translate: 8.727px -1.732px; } 78.7037% { translate: 4.621px -0.917px; } 78.858% { translate: 1.941px -0.385px; } 79.0123% { translate: 0.46px -0.091px; } 79.321% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm53 { 0% { scale: 1 1; } 76.8472% { scale: 1 1; } 76.8519% { scale: 0.531 0.531; } 77.1605% { scale: 0.7 0.7; } 77.3148% { scale: 0.769 0.769; } 77.4691% { scale: 0.826 0.826; } 77.6235% { scale: 0.87 0.87; } 77.9321% { scale: 0.931 0.931; } 78.2407% { scale: 0.967 0.967; } 78.7037% { scale: 0.993 0.993; } 79.6296% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm54 { 0% { opacity: 0; } 80.5556% { opacity: 0; } 81.6358% { opacity: 0.933; } 81.7901% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm55 { 0% { translate: 0px 0px; } 80.4012% { translate: 0px 0px; } 80.5556% { translate: -130px -373.5px; } 80.7099% { translate: -105.725px -303.757px; } 80.8642% { translate: -83.259px -239.211px; } 81.0185% { translate: -63.998px -183.871px; } 81.1728% { translate: -48.394px -139.039px; } 81.3272% { translate: -36.13px -103.804px; } 81.4815% { translate: -26.611px -76.454px; } 81.6358% { translate: -19.255px -55.322px; } 81.7901% { translate: -13.594px -39.056px; } 81.9444% { translate: -9.266px -26.622px; } 82.0988% { translate: -6.003px -17.247px; } 82.2531% { translate: -3.602px -10.348px; } 82.4074% { translate: -1.907px -5.48px; } 82.5617% { translate: -0.801px -2.301px; } 82.716% { translate: -0.19px -0.545px; } 82.8704% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm56 { 0% { scale: 1 1; } 80.4012% { scale: 1 1; } 80.5556% { scale: 0.377 0.377; } 80.7099% { scale: 0.493 0.493; } 80.8642% { scale: 0.601 0.601; } 81.0185% { scale: 0.693 0.693; } 81.1728% { scale: 0.768 0.768; } 81.3272% { scale: 0.827 0.827; } 81.4815% { scale: 0.872 0.872; } 81.6358% { scale: 0.908 0.908; } 81.9444% { scale: 0.956 0.956; } 82.4074% { scale: 0.991 0.991; } 83.0247% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm57 { 0% { scale: 1 1; } 83.0247% { scale: 1.001 1.001; } 83.3333% { scale: 1.012 1.012; } 83.642% { scale: 1.045 1.045; } 83.7963% { scale: 1.076 1.076; } 83.9506% { scale: 1.122 1.122; } 84.1049% { scale: 1.122 1.122; } 84.2593% { scale: 1.076 1.076; } 84.4136% { scale: 1.045 1.045; } 84.7222% { scale: 1.012 1.012; } 85.1852% { scale: 1 1; } 99.9954% { scale: 1 1; } }
+@keyframes ailfilm58 { 0% { opacity: 0; } 83.7963% { opacity: 0; } 84.8765% { opacity: 0.933; } 85.0309% { opacity: 1; } 99.9954% { opacity: 1; } }
+@keyframes ailfilm59 { 0% { translate: 0px 0px; } 83.642% { translate: 0px 0px; } 83.7963% { translate: 670px 373.5px; } 83.9506% { translate: 544.893px 303.757px; } 84.1049% { translate: 429.107px 239.211px; } 84.2593% { translate: 329.836px 183.871px; } 84.4136% { translate: 249.413px 139.039px; } 84.5679% { translate: 186.209px 103.804px; } 84.7222% { translate: 137.147px 76.454px; } 84.8765% { translate: 99.24px 55.322px; } 85.0309% { translate: 70.06px 39.056px; } 85.1852% { translate: 47.756px 26.622px; } 85.3395% { translate: 30.939px 17.247px; } 85.4938% { translate: 18.562px 10.348px; } 85.6481% { translate: 9.83px 5.48px; } 85.8025% { translate: 4.128px 2.301px; } 85.9568% { translate: 0.979px 0.545px; } 86.1111% { translate: 0px 0px; } 99.9954% { translate: 0px 0px; } }
+@keyframes ailfilm60 { 0% { scale: 1 1; } 83.642% { scale: 1 1; } 83.7963% { scale: 1.122 1.122; } 84.2593% { scale: 1.06 1.06; } 84.7222% { scale: 1.025 1.025; } 85.4938% { scale: 1.003 1.003; } 99.9954% { scale: 1 1; } }
+.aiacm-6714b6eb-e1-attention { animation: ailfilm10 21.6s linear infinite, ailfilm11 21.6s linear infinite; }
+.aiacm-6714b6eb-e4_txt-attention { animation: ailfilm42 21.6s linear infinite, ailfilm43 21.6s linear infinite; }
+.aighost-6714b6eb-0 { animation: ailfilm18 21.6s linear infinite, ailfilm19 21.6s linear infinite, ailfilm20 21.6s linear infinite; }
+.aighost-6714b6eb-1 { animation: ailfilm47 21.6s linear infinite, ailfilm48 21.6s linear infinite, ailfilm49 21.6s linear infinite; }
+.aihead-6714b6eb-l_answer { animation: ailfilm32 21.6s linear infinite; }
+.aihead-6714b6eb-l_ask { animation: ailfilm5 21.6s linear infinite; }
+.aihead-6714b6eb-l_call { animation: ailfilm17 21.6s linear infinite; }
+.aihead-6714b6eb-l_reply { animation: ailfilm23 21.6s linear infinite; }
+.aimask-6714b6eb-l_answer { animation: ailfilm31 21.6s linear infinite; }
+.aimask-6714b6eb-l_ask { animation: ailfilm4 21.6s linear infinite; }
+.aimask-6714b6eb-l_call { animation: ailfilm16 21.6s linear infinite; }
+.aimask-6714b6eb-l_reply { animation: ailfilm22 21.6s linear infinite; }
+.conn-6714b6eb-l_answer { animation: ailfilm30 21.6s linear infinite; }
+.conn-6714b6eb-l_ask { animation: ailfilm3 21.6s linear infinite; }
+.conn-6714b6eb-l_call { animation: ailfilm15 21.6s linear infinite; }
+.conn-6714b6eb-l_reply { animation: ailfilm21 21.6s linear infinite; }
+.kf-6714b6eb-a1 { animation: ailfilm33 21.6s linear infinite, ailfilm34 21.6s linear infinite, ailfilm35 21.6s linear infinite; }
+.kf-6714b6eb-a2 { animation: ailfilm58 21.6s linear infinite, ailfilm59 21.6s linear infinite, ailfilm60 21.6s linear infinite; }
+.kf-6714b6eb-conv_bg { animation: ailfilm6 21.6s linear infinite; }
+.kf-6714b6eb-conv_head { animation: ailfilm7 21.6s linear infinite; }
+.kf-6714b6eb-e1 { animation: ailfilm8 21.6s linear infinite, ailfilm9 21.6s linear infinite; }
+.kf-6714b6eb-e2 { animation: ailfilm12 21.6s linear infinite, ailfilm13 21.6s linear infinite, ailfilm14 21.6s linear infinite; }
+.kf-6714b6eb-e3 { animation: ailfilm27 21.6s linear infinite, ailfilm28 21.6s linear infinite, ailfilm29 21.6s linear infinite; }
+.kf-6714b6eb-e4 { animation: ailfilm39 21.6s linear infinite, ailfilm40 21.6s linear infinite, ailfilm41 21.6s linear infinite; }
+.kf-6714b6eb-e5 { animation: ailfilm54 21.6s linear infinite, ailfilm55 21.6s linear infinite, ailfilm56 21.6s linear infinite; }
+.kf-6714b6eb-forget { animation: ailfilm44 21.6s linear infinite, ailfilm45 21.6s linear infinite; }
+.kf-6714b6eb-l_answer { animation: ailfilm57 21.6s linear infinite; }
+.kf-6714b6eb-l_ask { animation: ailfilm38 21.6s linear infinite; }
+.kf-6714b6eb-l_call { animation: ailfilm46 21.6s linear infinite; }
+.kf-6714b6eb-l_reply { animation: ailfilm50 21.6s linear infinite; }
+.kf-6714b6eb-q1 { animation: ailfilm1 21.6s linear infinite, ailfilm2 21.6s linear infinite; }
+.kf-6714b6eb-q2 { animation: ailfilm36 21.6s linear infinite, ailfilm37 21.6s linear infinite; }
+.kf-6714b6eb-r1 { animation: ailfilm24 21.6s linear infinite, ailfilm25 21.6s linear infinite, ailfilm26 21.6s linear infinite; }
+.kf-6714b6eb-r2 { animation: ailfilm51 21.6s linear infinite, ailfilm52 21.6s linear infinite, ailfilm53 21.6s linear infinite; }
+.kf-6714b6eb-s_badge { animation: ailfilm0 21.6s linear infinite; }
 @media (prefers-reduced-motion: reduce) { * { animation-play-state: paused !important; } }
 ]]></style>
   <defs>
     <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
-    <mask id="aim-eb586e30-request" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-request aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
-    <mask id="aim-eb586e30-reply" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-eb586e30-reply aid-eb586e30-reply" d="M585 64 L170.8 64" fill="none" stroke="#fff" stroke-width="6.8" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <clipPath id="ai-clip-6714b6eb-conv_head"><rect class="ai-shape kf-anim kfc-6714b6eb-conv_head" x="741" y="381" width="638" height="348" rx="13" ry="13"/></clipPath>
+    <mask id="aim-6714b6eb-l_ask" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_ask aid-6714b6eb-l_ask" d="M223 232 L526.0615 232" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-6714b6eb-l_answer" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_answer aid-6714b6eb-l_answer" d="M540.4615 268 L237.4 268" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-6714b6eb-l_call" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_call aid-6714b6eb-l_call" d="M699.5385 232 L1157.5285999999999 232" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <mask id="aim-6714b6eb-l_reply" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-6714b6eb-l_reply aid-6714b6eb-l_reply" d="M1171.9286 268 L713.9385 268" fill="none" stroke="#fff" stroke-width="8.4" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:0"/></mask>
+    <clipPath id="ai-clip-6714b6eb-conv_head"><rect class="ai-shape kf-anim kfc-6714b6eb-conv_head" x="741" y="381" width="638" height="348" rx="13" ry="13"/></clipPath>
+    <clipPath id="ai-clip-6714b6eb-conv_head"><rect class="ai-shape kf-anim kfc-6714b6eb-conv_head" x="741" y="381" width="638" height="348" rx="13" ry="13"/></clipPath>
   </defs>
-  <g class="kf-eb586e30-stage kf-anim" style="transform-origin:355px 135px">
-    <g id="stage" class="ai-container kfp-eb586e30-stage">
-      <g class="kf-eb586e30-client kf-anim" style="transform-origin:165px 140px">
-        <g id="client" class="ai-container kfp-eb586e30-client">
-          <g class="kf-eb586e30-app kf-anim" style="transform-origin:85px 55px">
-            <rect id="app" class="ai-shape ai-rect kfp-eb586e30-app" x="10" y="10" width="150" height="90" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="12" style="rx:12px;ry:12px"/>
-            <text class="ai-label" x="85" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="85" dy="-0"><tspan>Chat app</tspan></tspan></text>
+  <g class="kf-6714b6eb-s kf-anim" style="transform-origin:800px 450px">
+    <g id="s" class="ai-container kfp-6714b6eb-s">
+      <g class="kf-6714b6eb-s_stage kf-anim" style="transform-origin:800px 450px">
+        <rect id="s_stage" class="ai-shape ai-rect ai-canvas kfp-6714b6eb-s_stage" x="0" y="0" width="1600" height="900" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-6714b6eb-s_badge kf-anim" style="transform-origin:96.5px 64.5px">
+        <rect id="s_badge" class="ai-shape ai-rect kfp-6714b6eb-s_badge" x="96" y="64" width="1" height="1" fill="none" stroke="none" stroke-width="1.5"/>
+      </g>
+      <g class="kf-6714b6eb-s_heading kf-anim" style="transform-origin:129px 64.5px">
+        <text id="s_heading" class="ai-shape ai-text kfp-6714b6eb-s_heading" x="119" y="64.5" text-anchor="start" dominant-baseline="middle" font-size="1" fill="none">How a chatbot talks to an LLM</text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-you kf-anim" style="transform-origin:170px 250px">
+    <g id="you" class="ai-container kfp-6714b6eb-you">
+      <g class="kf-6714b6eb-you__art kf-anim" style="transform-origin:170px 250px">
+        <g id="you__art" class="ai-svg-embed kfp-6714b6eb-you__art" transform="translate(135, 205.8333) scale(1.6666666666666667, 1.6666660377358489) translate(-3, -2)">
+          <title>Person</title>
+          <!-- Parts (ids) are addressable from AIL: p.head, p.body.
+          Colour is a theme role; the CSS variable "tint" is an instance argument. -->
+        </g>
+      </g>
+      <g class="kf-6714b6eb-you_head kf-anim" style="transform-origin:170px 224.17px">
+        <g id="you_head" class="ai-svg-embed kfp-6714b6eb-you_head" transform="translate(151.6667, 205.8333) scale(1.6666681818181817, 1.6666681818181817) translate(-13, -2)" fill="var(--role-ink)">
+          <circle id="you__head" cx="24" cy="13" r="11" fill="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-you_body kf-anim" style="transform-origin:170px 272.5px">
+        <g id="you_body" class="ai-svg-embed kfp-6714b6eb-you_body" transform="translate(135, 250.8333) scale(1.6666666666666667, 1.6666653846153847) translate(-3, -29)" fill="var(--role-ink)">
+          <path id="you__body" d="M3 55 C3 38 11 29 24 29 C37 29 45 38 45 55 Z" fill="inherit"/>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-app kf-anim" style="transform-origin:620px 250px">
+    <g id="app" class="ai-container kfp-6714b6eb-app">
+      <g class="kf-6714b6eb-app__art kf-anim" style="transform-origin:620px 250px">
+        <g id="app__art" class="ai-svg-embed kfp-6714b6eb-app__art" transform="translate(560, 200.2564) scale(1.0256410256410255, 1.025641237113402) translate(-1.5, -1.5)">
+          <title>Chat app</title>
+          <!-- A chat app: a window with two speech bubbles. Parts: chat.frame, chat.bar, chat.left, chat.right. "tint" colours your bubble. -->
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_frame kf-anim" style="transform-origin:620px 250px">
+        <g id="app_frame" class="ai-svg-embed kfp-6714b6eb-app_frame" transform="translate(558.4615, 198.7179) scale(1.0256408333333333, 1.025641) translate(0.00000095367431640625, 0.00000095367431640625)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+          <rect id="app__frame" x="1.5" y="1.5" width="117" height="97" rx="12" stroke-width="3" fill="inherit" stroke="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_bar kf-anim" style="transform-origin:620px 210.77px">
+        <g id="app_bar" class="ai-svg-embed kfp-6714b6eb-app_bar" transform="translate(558.4615, 198.7179) scale(1.0256408333333333, 1.0256425531914892) translate(-0, 0.00000095367431640625)" fill="var(--role-surface-2, #eceef2)" stroke="var(--role-ink, #14171f)">
+          <path id="app__bar" d="M1.5 13.5 a12 12 0 0 1 12 -12 H106.5 a12 12 0 0 1 12 12 V22 H1.5 Z" stroke-width="3" fill="inherit" stroke="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_left kf-anim" style="transform-origin:601.54px 246.92px">
+        <g id="app_left" class="ai-svg-embed kfp-6714b6eb-app_left" transform="translate(570.7692, 231.5385) scale(1.0256416666666666, 1.02564) translate(-12, -32)">
+          <g id="app__left">
+          <rect x="12" y="32" width="60" height="22" rx="9" fill="var(--role-surface-2, #eceef2)"/>
+          <path d="M16 54 L14 62 L24 54 Z" fill="var(--role-surface-2, #eceef2)"/>
           </g>
-          <g class="kf-eb586e30-log kf-anim" style="transform-origin:165px 197px">
-            <g id="log" class="ai-container kfp-eb586e30-log">
-              <g class="kf-eb586e30-m1 kf-anim" style="transform-origin:165px 149px">
-                <rect id="m1" class="ai-shape ai-rect kfp-eb586e30-m1" x="15" y="129" width="300" height="40" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-                <text class="ai-label" x="165" y="149" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>system: be helpful</tspan></tspan></text>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-app_right kf-anim" style="transform-origin:637.44px 279.74px">
+        <g id="app_right" class="ai-svg-embed kfp-6714b6eb-app_right" transform="translate(605.641, 264.359) scale(1.0256403225806452, 1.02564) translate(-46, -64)">
+          <g id="app__right">
+          <rect x="46" y="64" width="62" height="22" rx="9" fill="var(--role-series-4)"/>
+          <path d="M104 86 L106 94 L96 86 Z" fill="var(--role-series-4)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-llm kf-anim" style="transform-origin:1250px 250px">
+    <g id="llm" class="ai-container kfp-6714b6eb-llm">
+      <g class="kf-6714b6eb-llm__art kf-anim" style="transform-origin:1250px 250px">
+        <g id="llm__art" class="ai-svg-embed kfp-6714b6eb-llm__art" transform="translate(1192, 192) scale(1.0357142857142858, 1.0357142857142858) translate(-4, -4)">
+          <title>LLM</title>
+          <!-- A language model: a chip with a small network inside. Parts: llm.pins, llm.body, llm.net. "tint" colours the network. -->
+        </g>
+      </g>
+      <g class="kf-6714b6eb-llm_pins kf-anim" style="transform-origin:1250px 250px">
+        <g id="llm_pins" class="ai-svg-embed kfp-6714b6eb-llm_pins" transform="translate(1189.9286, 189.9286) scale(1.0357146551724137, 1.0357146551724137) translate(-2, -2)" stroke="var(--role-ink, #14171f)">
+          <g id="llm__pins" stroke-width="4" stroke-linecap="round" stroke="inherit">
+          <line x1="36" y1="4" x2="36" y2="16"/><line x1="60" y1="4" x2="60" y2="16"/><line x1="84" y1="4" x2="84" y2="16"/>
+          <line x1="36" y1="104" x2="36" y2="116"/><line x1="60" y1="104" x2="60" y2="116"/><line x1="84" y1="104" x2="84" y2="116"/>
+          <line x1="4" y1="36" x2="16" y2="36"/><line x1="4" y1="60" x2="16" y2="60"/><line x1="4" y1="84" x2="16" y2="84"/>
+          <line x1="104" y1="36" x2="116" y2="36"/><line x1="104" y1="60" x2="116" y2="60"/><line x1="104" y1="84" x2="116" y2="84"/>
+          </g>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-llm_body kf-anim" style="transform-origin:1250px 250px">
+        <g id="llm_body" class="ai-svg-embed kfp-6714b6eb-llm_body" transform="translate(1203.3929, 203.3929) scale(1.0357144444444444, 1.0357144444444444) translate(-15, -15)" fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)">
+          <rect id="llm__body" x="16.5" y="16.5" width="87" height="87" rx="14" stroke-width="3" fill="inherit" stroke="inherit"/>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-llm_net kf-anim" style="transform-origin:1250.52px 250px">
+        <g id="llm_net" class="ai-svg-embed kfp-6714b6eb-llm_net" transform="translate(1219.9643, 217.8929) scale(1.035713559322034, 1.0357145161290322) translate(-31, -29)">
+          <g id="llm__net">
+          <g stroke="var(--role-rule, #cbd1da)" stroke-width="2.5">
+          <line x1="38" y1="42" x2="60" y2="36"/><line x1="38" y1="42" x2="60" y2="60"/><line x1="38" y1="42" x2="60" y2="84"/>
+          <line x1="38" y1="78" x2="60" y2="36"/><line x1="38" y1="78" x2="60" y2="60"/><line x1="38" y1="78" x2="60" y2="84"/>
+          <line x1="60" y1="36" x2="82" y2="60"/><line x1="60" y1="60" x2="82" y2="60"/><line x1="60" y1="84" x2="82" y2="60"/>
+          </g>
+          <g fill="var(--tint, var(--role-primary, #1d6e88))" stroke="var(--role-ink, #14171f)" stroke-width="2">
+          <circle cx="38" cy="42" r="6"/><circle cx="38" cy="78" r="6"/>
+          <circle cx="60" cy="36" r="6"/><circle cx="60" cy="60" r="6"/><circle cx="60" cy="84" r="6"/>
+          <circle cx="82" cy="60" r="7"/>
+          </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-you_nm kf-anim" style="transform-origin:170px 327.29px">
+    <rect id="you_nm" class="ai-shape ai-rect kfp-6714b6eb-you_nm" x="130" y="306.1666" width="80" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="170" y="327.2916" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="170" dy="-0"><tspan>You</tspan></tspan></text>
+  </g>
+  <g class="kf-6714b6eb-app_nm kf-anim" style="transform-origin:620px 156.8px">
+    <rect id="app_nm" class="ai-shape ai-rect kfp-6714b6eb-app_nm" x="567.2605" y="135.6786" width="105.4789" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="620" y="156.8036" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="620" dy="-0"><tspan>Chat app</tspan></tspan></text>
+  </g>
+  <g class="kf-6714b6eb-llm_nm kf-anim" style="transform-origin:1250px 156.8px">
+    <rect id="llm_nm" class="ai-shape ai-rect kfp-6714b6eb-llm_nm" x="1210" y="135.6786" width="80" height="42.25" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1250" y="156.8036" text-anchor="middle" dominant-baseline="middle" font-size="21" fill="var(--role-ink)" style="font-weight:700"><tspan x="1250" dy="-0"><tspan>LLM</tspan></tspan></text>
+  </g>
+  <g class="kf-6714b6eb-you_r1 kf-anim" style="transform-origin:223px 232px">
+    <rect id="you_r1" class="ai-shape ai-rect ai-point kfp-6714b6eb-you_r1" x="223" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-you_r2 kf-anim" style="transform-origin:223px 268px">
+    <rect id="you_r2" class="ai-shape ai-rect ai-point kfp-6714b6eb-you_r2" x="223" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_l1 kf-anim" style="transform-origin:540.46px 232px">
+    <rect id="app_l1" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_l1" x="540.4615" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_l2 kf-anim" style="transform-origin:540.46px 268px">
+    <rect id="app_l2" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_l2" x="540.4615" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_r1 kf-anim" style="transform-origin:699.54px 232px">
+    <rect id="app_r1" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_r1" x="699.5385" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-app_r2 kf-anim" style="transform-origin:699.54px 268px">
+    <rect id="app_r2" class="ai-shape ai-rect ai-point kfp-6714b6eb-app_r2" x="699.5385" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-llm_l1 kf-anim" style="transform-origin:1171.93px 232px">
+    <rect id="llm_l1" class="ai-shape ai-rect ai-point kfp-6714b6eb-llm_l1" x="1171.9286" y="232" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-llm_l2 kf-anim" style="transform-origin:1171.93px 268px">
+    <rect id="llm_l2" class="ai-shape ai-rect ai-point kfp-6714b6eb-llm_l2" x="1171.9286" y="268" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g class="kf-6714b6eb-q1 kf-anim" style="transform-origin:395px 187.5px">
+    <g id="q1" class="ai-container kfp-6714b6eb-q1">
+      <g class="kf-6714b6eb-q1_bg kf-anim" style="transform-origin:395px 187.5px">
+        <rect id="q1_bg" class="ai-shape ai-rect kfp-6714b6eb-q1_bg" x="246.1005" y="167" width="297.799" height="41" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="187.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-q2 kf-anim" style="transform-origin:395px 187.5px">
+    <g id="q2" class="ai-container kfp-6714b6eb-q2">
+      <g class="kf-6714b6eb-q2_bg kf-anim" style="transform-origin:395px 187.5px">
+        <rect id="q2_bg" class="ai-shape ai-rect kfp-6714b6eb-q2_bg" x="257.451" y="167" width="275.098" height="41" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="187.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>Best museum to visit there?</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-a1 kf-anim" style="transform-origin:395px 312.5px">
+    <g id="a1" class="ai-container kfp-6714b6eb-a1">
+      <g class="kf-6714b6eb-a1_bg kf-anim" style="transform-origin:395px 312.5px">
+        <rect id="a1_bg" class="ai-shape ai-rect kfp-6714b6eb-a1_bg" x="343.824" y="292" width="102.352" height="41" fill="var(--role-ok-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-a2 kf-anim" style="transform-origin:395px 312.5px">
+    <g id="a2" class="ai-container kfp-6714b6eb-a2">
+      <g class="kf-6714b6eb-a2_bg kf-anim" style="transform-origin:395px 312.5px">
+        <rect id="a2_bg" class="ai-shape ai-rect kfp-6714b6eb-a2_bg" x="281.9685" y="292" width="226.063" height="41" fill="var(--role-ok-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="395" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="395" dy="-0"><tspan>The Magritte Museum.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-r1 kf-anim" style="transform-origin:935px 312.5px">
+    <g id="r1" class="ai-container kfp-6714b6eb-r1">
+      <g class="kf-6714b6eb-r1_bg kf-anim" style="transform-origin:935px 312.5px">
+        <rect id="r1_bg" class="ai-shape ai-rect kfp-6714b6eb-r1_bg" x="883.824" y="292" width="102.352" height="41" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="935" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="935" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-hidden kf-6714b6eb-r2 kf-anim" style="transform-origin:935px 312.5px">
+    <g id="r2" class="ai-container kfp-6714b6eb-r2">
+      <g class="kf-6714b6eb-r2_bg kf-anim" style="transform-origin:935px 312.5px">
+        <rect id="r2_bg" class="ai-shape ai-rect kfp-6714b6eb-r2_bg" x="821.9685" y="292" width="226.063" height="41" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="14" style="rx:14px;ry:14px"/>
+        <text class="ai-label" x="935" y="312.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-ink)" style="font-weight:600"><tspan x="935" dy="-0"><tspan>The Magritte Museum.</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g class="kf-6714b6eb-convo kf-anim" style="transform-origin:1060px 555px">
+    <g id="convo" class="ai-container kfp-6714b6eb-convo">
+      <g class="kf-hidden kf-6714b6eb-conv_bg kf-anim" style="transform-origin:1060px 555px">
+        <rect id="conv_bg" class="ai-shape ai-rect kfp-6714b6eb-conv_bg" x="740" y="380" width="640" height="350" fill="var(--role-surface)" stroke="var(--role-rule)" stroke-width="2" rx="14" style="rx:14px;ry:14px"/>
+      </g>
+      <g class="kf-hidden kf-6714b6eb-conv_head kf-anim" style="transform-origin:1060px 404px">
+        <g clip-path="url(#ai-clip-6714b6eb-conv_head)">
+          <rect id="conv_head" class="ai-shape ai-rect kfp-6714b6eb-conv_head" x="740" y="380" width="640" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+          <text class="ai-label" x="748" y="404" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-muted)" style="font-weight:700"><tspan x="748" dy="-0"><tspan>the conversation, kept by the app</tspan></tspan></text>
+        </g>
+      </g>
+      <g class="kf-6714b6eb-conv kf-anim" style="transform-origin:1065px 578px">
+        <g id="conv" class="ai-container kfp-6714b6eb-conv">
+          <g class="kf-hidden kf-6714b6eb-e1 kf-anim" style="transform-origin:1065px 470px">
+            <g id="e1" class="ai-container kfp-6714b6eb-e1">
+              <g class="kf-6714b6eb-e1_bg kf-anim" style="transform-origin:1065px 470px">
+                <rect id="e1_bg" class="ai-shape ai-rect kfp-6714b6eb-e1_bg" x="765" y="447" width="600" height="46" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
               </g>
-              <g class="kf-eb586e30-m2 kf-anim" style="transform-origin:165px 197px">
-                <rect id="m2" class="ai-shape ai-rect kfp-eb586e30-m2" x="15" y="177" width="300" height="40" fill="var(--role-series-4-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-                <text class="ai-label" x="165" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>you: capital of Belgium?</tspan></tspan></text>
-                <rect class="aiacm-eb586e30-m2-attention" x="19" y="177" width="292" height="40" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:19px 197px;pointer-events:none"/>
+              <g class="kf-6714b6eb-e1_tag kf-anim" style="transform-origin:819px 470px">
+                <rect id="e1_tag" class="ai-shape ai-rect kfp-6714b6eb-e1_tag" x="779" y="452" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="470" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>system</tspan></tspan></text>
               </g>
-              <g class="kf-hidden kf-eb586e30-m3 kf-anim" style="transform-origin:165px 245px">
-                <rect id="m3" class="ai-shape ai-rect kfp-eb586e30-m3" x="15" y="225" width="300" height="40" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-                <text class="ai-label" x="165" y="245" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>LLM: Brussels.</tspan></tspan></text>
+              <g class="kf-6714b6eb-e1_txt kf-anim" style="transform-origin:987.59px 470px">
+                <rect id="e1_txt" class="ai-shape ai-rect kfp-6714b6eb-e1_txt" x="865" y="450.125" width="245.178" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="470" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>You are a helpful assistant.</tspan></tspan></text>
+              </g>
+            </g>
+            <rect class="aiacm-6714b6eb-e1-attention" x="769" y="447" width="592" height="46" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:769px 470px;pointer-events:none"/>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e2 kf-anim" style="transform-origin:1065px 524px">
+            <g id="e2" class="ai-container kfp-6714b6eb-e2">
+              <g class="kf-6714b6eb-e2_bg kf-anim" style="transform-origin:1065px 524px">
+                <rect id="e2_bg" class="ai-shape ai-rect kfp-6714b6eb-e2_bg" x="765" y="501" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e2_tag kf-anim" style="transform-origin:819px 524px">
+                <rect id="e2_tag" class="ai-shape ai-rect kfp-6714b6eb-e2_tag" x="779" y="506" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="524" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e2_txt kf-anim" style="transform-origin:1000.48px 524px">
+                <rect id="e2_txt" class="ai-shape ai-rect kfp-6714b6eb-e2_txt" x="865" y="504.125" width="270.961" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="524" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e3 kf-anim" style="transform-origin:1065px 578px">
+            <g id="e3" class="ai-container kfp-6714b6eb-e3">
+              <g class="kf-6714b6eb-e3_bg kf-anim" style="transform-origin:1065px 578px">
+                <rect id="e3_bg" class="ai-shape ai-rect kfp-6714b6eb-e3_bg" x="765" y="555" width="600" height="46" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e3_tag kf-anim" style="transform-origin:819px 578px">
+                <rect id="e3_tag" class="ai-shape ai-rect kfp-6714b6eb-e3_tag" x="779" y="560" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="578" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>LLM</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e3_txt kf-anim" style="transform-origin:912.06px 578px">
+                <rect id="e3_txt" class="ai-shape ai-rect kfp-6714b6eb-e3_txt" x="865" y="558.125" width="94.128" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="578" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+              </g>
+            </g>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e4 kf-anim" style="transform-origin:1065px 632px">
+            <g id="e4" class="ai-container kfp-6714b6eb-e4">
+              <g class="kf-6714b6eb-e4_bg kf-anim" style="transform-origin:1065px 632px">
+                <rect id="e4_bg" class="ai-shape ai-rect kfp-6714b6eb-e4_bg" x="765" y="609" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e4_tag kf-anim" style="transform-origin:819px 632px">
+                <rect id="e4_tag" class="ai-shape ai-rect kfp-6714b6eb-e4_tag" x="779" y="614" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="632" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e4_txt kf-anim" style="transform-origin:990.21px 632px">
+                <rect id="e4_txt" class="ai-shape ai-rect kfp-6714b6eb-e4_txt" x="865" y="612.125" width="250.422" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="632" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Best museum to visit there?</tspan></tspan></text>
+                <rect class="aiacm-6714b6eb-e4_txt-attention" x="869" y="612.13" width="242.42" height="39.75" fill="var(--role-warn, #E8A33D)" fill-opacity="0.32" style="opacity:0;transform-origin:869px 632px;pointer-events:none"/>
+              </g>
+            </g>
+          </g>
+          <g class="kf-hidden kf-6714b6eb-e5 kf-anim" style="transform-origin:1065px 686px">
+            <g id="e5" class="ai-container kfp-6714b6eb-e5">
+              <g class="kf-6714b6eb-e5_bg kf-anim" style="transform-origin:1065px 686px">
+                <rect id="e5_bg" class="ai-shape ai-rect kfp-6714b6eb-e5_bg" x="765" y="663" width="600" height="46" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+              </g>
+              <g class="kf-6714b6eb-e5_tag kf-anim" style="transform-origin:819px 686px">
+                <rect id="e5_tag" class="ai-shape ai-rect kfp-6714b6eb-e5_tag" x="779" y="668" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="787" y="686" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>LLM</tspan></tspan></text>
+              </g>
+              <g class="kf-6714b6eb-e5_txt kf-anim" style="transform-origin:968.03px 686px">
+                <rect id="e5_txt" class="ai-shape ai-rect kfp-6714b6eb-e5_txt" x="865" y="666.125" width="206.057" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+                <text class="ai-label" x="873" y="686" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>The Magritte Museum.</tspan></tspan></text>
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="kf-eb586e30-llm kf-anim" style="transform-origin:645px 55px">
-        <rect id="llm" class="ai-shape ai-rect kfp-eb586e30-llm" x="585" y="-5" width="120" height="120" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="16" style="rx:16px;ry:16px"/>
-        <text class="ai-label" x="645" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="645" dy="-0"><tspan>LLM</tspan></tspan></text>
-      </g>
     </g>
   </g>
-  <path class="ai-connection conn-eb586e30-request conn-eb586e30-request-base aid-eb586e30-request" d="M160 46 L574.2 46" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-eb586e30-request)"/>
-  <g class="conn-eb586e30-request"><path class="aihead-eb586e30-request" d="M573 52 L583.8 46 L573 40 Z" fill="var(--role-primary)" style="opacity:1"/></g>
-  <path class="ai-connection conn-eb586e30-reply conn-eb586e30-reply-base aid-eb586e30-reply" d="M585 64 L170.8 64" fill="none" stroke="var(--role-primary)" stroke-width="3" opacity="0" mask="url(#aim-eb586e30-reply)"/>
-  <g class="conn-eb586e30-reply"><path class="aihead-eb586e30-reply" d="M172 58 L161.2 64 L172 70 Z" fill="var(--role-primary)" style="opacity:1"/></g>
-  <g class="aighost-eb586e30-0" style="opacity:0;transform-origin:165px 197px;pointer-events:none">
-<g data-ghost-of="log" class="ai-container">
-<rect data-ghost-of="m1" class="ai-shape ai-rect" x="15" y="129" width="300" height="40" fill="var(--role-surface-2)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-<text class="ai-label" x="165" y="149" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>system: be helpful</tspan></tspan></text>
-<rect data-ghost-of="m2" class="ai-shape ai-rect" x="15" y="177" width="300" height="40" fill="var(--role-series-4-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-<text class="ai-label" x="165" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="165" dy="-0"><tspan>you: capital of Belgium?</tspan></tspan></text>
+  <g class="kf-hidden kf-6714b6eb-forget kf-anim" style="transform-origin:935px 189.5px">
+    <rect id="forget" class="ai-shape ai-rect kfp-6714b6eb-forget" x="687.138" y="169" width="495.724" height="41" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="935" y="189.5" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--role-primary)" style="font-weight:700"><tspan x="935" dy="-0"><tspan>the LLM remembers nothing: everything goes again</tspan></tspan></text>
+  </g>
+  <path class="ai-connection conn-6714b6eb-l_ask conn-6714b6eb-l_ask-base aid-6714b6eb-l_ask" d="M223 232 L526.0615 232" fill="none" stroke="var(--role-ink)" stroke-width="4" mask="url(#aim-6714b6eb-l_ask)"/>
+  <g class="conn-6714b6eb-l_ask"><path class="aihead-6714b6eb-l_ask" d="M524.46 240 L538.86 232 L524.46 224 Z" fill="var(--role-ink)" style="opacity:1"/></g>
+  <path class="ai-connection conn-6714b6eb-l_answer conn-6714b6eb-l_answer-base aid-6714b6eb-l_answer" d="M540.4615 268 L237.4 268" fill="none" stroke="var(--role-ink)" stroke-width="4" opacity="0" mask="url(#aim-6714b6eb-l_answer)"/>
+  <g class="conn-6714b6eb-l_answer"><path class="aihead-6714b6eb-l_answer" d="M239 260 L224.6 268 L239 276 Z" fill="var(--role-ink)" style="opacity:1"/></g>
+  <path class="ai-connection conn-6714b6eb-l_call conn-6714b6eb-l_call-base aid-6714b6eb-l_call" d="M699.5385 232 L1157.5285999999999 232" fill="none" stroke="var(--role-primary)" stroke-width="4" opacity="0" mask="url(#aim-6714b6eb-l_call)"/>
+  <g class="conn-6714b6eb-l_call"><path class="aihead-6714b6eb-l_call" d="M1155.93 240 L1170.33 232 L1155.93 224 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <path class="ai-connection conn-6714b6eb-l_reply conn-6714b6eb-l_reply-base aid-6714b6eb-l_reply" d="M1171.9286 268 L713.9385 268" fill="none" stroke="var(--role-primary)" stroke-width="4" opacity="0" mask="url(#aim-6714b6eb-l_reply)"/>
+  <g class="conn-6714b6eb-l_reply"><path class="aihead-6714b6eb-l_reply" d="M715.54 260 L701.14 268 L715.54 276 Z" fill="var(--role-primary)" style="opacity:1"/></g>
+  <g class="aighost-6714b6eb-0" style="opacity:0;transform-origin:1060px 555px;pointer-events:none">
+<g data-ghost-of="convo" class="ai-container">
+<rect data-ghost-of="conv_bg" class="ai-shape ai-rect" x="740" y="380" width="640" height="350" fill="var(--role-surface)" stroke="var(--role-rule)" stroke-width="2" rx="14" style="rx:14px;ry:14px"/>
+<g clip-path="url(#ai-clip-6714b6eb-conv_head)">
+<rect data-ghost-of="conv_head" class="ai-shape ai-rect" x="740" y="380" width="640" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="748" y="404" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-muted)" style="font-weight:700"><tspan x="748" dy="-0"><tspan>the conversation, kept by the app</tspan></tspan></text>
+</g>
+<g data-ghost-of="conv" class="ai-container">
+<g data-ghost-of="e1" class="ai-container">
+<rect data-ghost-of="e1_bg" class="ai-shape ai-rect" x="765" y="447" width="600" height="46" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e1_tag" class="ai-shape ai-rect" x="779" y="452" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="470" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>system</tspan></tspan></text>
+<rect data-ghost-of="e1_txt" class="ai-shape ai-rect" x="865" y="450.125" width="245.178" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="470" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>You are a helpful assistant.</tspan></tspan></text>
+</g>
+<g data-ghost-of="e2" class="ai-container">
+<rect data-ghost-of="e2_bg" class="ai-shape ai-rect" x="765" y="501" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e2_tag" class="ai-shape ai-rect" x="779" y="506" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="524" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+<rect data-ghost-of="e2_txt" class="ai-shape ai-rect" x="865" y="504.125" width="270.961" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="524" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
 </g>
 </g>
-  <text class="ai-label conn-eb586e30-request" x="372.5" y="36" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="372.5" dy="-0"><tspan>whole log</tspan></tspan></text>
-  <text class="ai-label conn-eb586e30-reply" x="372.5" y="74" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12" opacity="0"><tspan x="372.5" dy="-0"><tspan>one message</tspan></tspan></text>
+</g>
+</g>
+  <g class="aighost-6714b6eb-1" style="opacity:0;transform-origin:1060px 555px;pointer-events:none">
+<g data-ghost-of="convo" class="ai-container">
+<rect data-ghost-of="conv_bg" class="ai-shape ai-rect" x="740" y="380" width="640" height="350" fill="var(--role-surface)" stroke="var(--role-rule)" stroke-width="2" rx="14" style="rx:14px;ry:14px"/>
+<g clip-path="url(#ai-clip-6714b6eb-conv_head)">
+<rect data-ghost-of="conv_head" class="ai-shape ai-rect" x="740" y="380" width="640" height="48" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="748" y="404" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-muted)" style="font-weight:700"><tspan x="748" dy="-0"><tspan>the conversation, kept by the app</tspan></tspan></text>
+</g>
+<g data-ghost-of="conv" class="ai-container">
+<g data-ghost-of="e1" class="ai-container">
+<rect data-ghost-of="e1_bg" class="ai-shape ai-rect" x="765" y="447" width="600" height="46" fill="var(--role-surface-2)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e1_tag" class="ai-shape ai-rect" x="779" y="452" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="470" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>system</tspan></tspan></text>
+<rect data-ghost-of="e1_txt" class="ai-shape ai-rect" x="865" y="450.125" width="245.178" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="470" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>You are a helpful assistant.</tspan></tspan></text>
+</g>
+<g data-ghost-of="e2" class="ai-container">
+<rect data-ghost-of="e2_bg" class="ai-shape ai-rect" x="765" y="501" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e2_tag" class="ai-shape ai-rect" x="779" y="506" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="524" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+<rect data-ghost-of="e2_txt" class="ai-shape ai-rect" x="865" y="504.125" width="270.961" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="524" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>What&apos;s the capital of Belgium?</tspan></tspan></text>
+</g>
+<g data-ghost-of="e3" class="ai-container">
+<rect data-ghost-of="e3_bg" class="ai-shape ai-rect" x="765" y="555" width="600" height="46" fill="var(--role-series-1-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e3_tag" class="ai-shape ai-rect" x="779" y="560" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="578" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>LLM</tspan></tspan></text>
+<rect data-ghost-of="e3_txt" class="ai-shape ai-rect" x="865" y="558.125" width="94.128" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="578" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Brussels.</tspan></tspan></text>
+</g>
+<g data-ghost-of="e4" class="ai-container">
+<rect data-ghost-of="e4_bg" class="ai-shape ai-rect" x="765" y="609" width="600" height="46" fill="var(--role-series-4-soft)" stroke="none" stroke-width="1.5" rx="10" style="rx:10px;ry:10px"/>
+<rect data-ghost-of="e4_tag" class="ai-shape ai-rect" x="779" y="614" width="80" height="36" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="787" y="632" text-anchor="start" dominant-baseline="middle" font-size="16" fill="var(--role-muted)" style="font-weight:700;font-family:var(--font-mono, ui-monospace, monospace)"><tspan x="787" dy="-0"><tspan>you</tspan></tspan></text>
+<rect data-ghost-of="e4_txt" class="ai-shape ai-rect" x="865" y="612.125" width="250.422" height="39.75" fill="none" stroke="none" stroke-width="1.5"/>
+<text class="ai-label" x="873" y="632" text-anchor="start" dominant-baseline="middle" font-size="19" fill="var(--role-ink)"><tspan x="873" dy="-0"><tspan>Best museum to visit there?</tspan></tspan></text>
+</g>
+</g>
+</g>
+</g>
 </svg>

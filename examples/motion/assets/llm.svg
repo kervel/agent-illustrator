@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <title>LLM</title>
+  <!-- A language model: a chip with a small network inside. Parts: llm.pins, llm.body, llm.net. "tint" colours the network. -->
+  <g id="pins" stroke="var(--role-ink, #14171f)" stroke-width="4" stroke-linecap="round">
+    <line x1="36" y1="4" x2="36" y2="16"/><line x1="60" y1="4" x2="60" y2="16"/><line x1="84" y1="4" x2="84" y2="16"/>
+    <line x1="36" y1="104" x2="36" y2="116"/><line x1="60" y1="104" x2="60" y2="116"/><line x1="84" y1="104" x2="84" y2="116"/>
+    <line x1="4" y1="36" x2="16" y2="36"/><line x1="4" y1="60" x2="16" y2="60"/><line x1="4" y1="84" x2="16" y2="84"/>
+    <line x1="104" y1="36" x2="116" y2="36"/><line x1="104" y1="60" x2="116" y2="60"/><line x1="104" y1="84" x2="116" y2="84"/>
+  </g>
+  <rect id="body" x="16.5" y="16.5" width="87" height="87" rx="14"
+        fill="var(--role-surface, #ffffff)" stroke="var(--role-ink, #14171f)" stroke-width="3"/>
+  <g id="net">
+    <g stroke="var(--role-rule, #cbd1da)" stroke-width="2.5">
+      <line x1="38" y1="42" x2="60" y2="36"/><line x1="38" y1="42" x2="60" y2="60"/><line x1="38" y1="42" x2="60" y2="84"/>
+      <line x1="38" y1="78" x2="60" y2="36"/><line x1="38" y1="78" x2="60" y2="60"/><line x1="38" y1="78" x2="60" y2="84"/>
+      <line x1="60" y1="36" x2="82" y2="60"/><line x1="60" y1="60" x2="82" y2="60"/><line x1="60" y1="84" x2="82" y2="60"/>
+    </g>
+    <g fill="var(--tint, var(--role-primary, #1d6e88))" stroke="var(--role-ink, #14171f)" stroke-width="2">
+      <circle cx="38" cy="42" r="6"/><circle cx="38" cy="78" r="6"/>
+      <circle cx="60" cy="36" r="6"/><circle cx="60" cy="60" r="6"/><circle cx="60" cy="84" r="6"/>
+      <circle cx="82" cy="60" r="7"/>
+    </g>
+  </g>
+</svg>

@@ -10,9 +10,11 @@
    again — three times, so the loop is unmistakable. Each predicted token (red)
    becomes plain input as it's appended.
 
-   The input box grows via `transform inbox [width: N]` and the feed arrow follows
-   the growing right edge automatically (AIL re-anchors connections to their
-   endpoints every keyframe — no extra constraints needed).
+   The token lists are data: one `each` makes the prompt chips (tok_1..tok_3),
+   another the predicted chips (next_1..next_3), each with its own arrow
+   (predict_1..3) and its own home pins (home_x_1, home_y_1, ...). Appending a
+   token = disable its home pins and pin it after the previous chip; the box
+   grows by one chip pitch (56) and the feed arrow follows its right edge.
 */
 
 rect canvas [width: 800, height: 420, fill: white, stroke: none, opacity: 0.01]
@@ -23,81 +25,68 @@ rect inbox [width: 190, height: 70, fill: #eef3f6, stroke: secondary-1, stroke_w
 constrain inbox.left = 80
 constrain inbox.center_y = 150
 
-/* input chips at fixed slots (pitch 56); the box grows past them to the right */
-rect a [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "The"]
-rect b [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "cat"]
-rect c [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: "sat"]
-constrain a.center_y = inbox.center_y
-constrain b.center_y = inbox.center_y
-constrain c.center_y = inbox.center_y
-constrain a.center_x = 119
-constrain b.center_x = 175
-constrain c.center_x = 231
+row prompt [gap: 6, overlaps: inbox] {
+    each w in ["The", "cat", "sat"] {
+        rect tok [width: 50, height: 38, fill: #ffffff, stroke: #cdd8e3, label: w]
+    }
+}
+constrain tok_1.left = inbox.left + 14
+constrain prompt.center_y = inbox.center_y
 
 rect llm [width: 150, height: 64, fill: secondary-1, label: "LLM"]
 constrain llm.center_x = 560
 constrain llm.center_y = inbox.center_y
-
-/* predicted tokens — each starts below the LLM (red = just predicted) */
-rect d [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "on"]
-rect e [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "the"]
-rect f [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: "mat"]
-constrain d.center_x = llm.center_x as d_hx
-// d, e and f each keep their own literal home row. They look like a
-// redundant-constant, but keyframes disable these pins individually to
-// move one box without the others — relating them would couple elements
-// the animation exists to separate.
-constrain d.center_y = 300 as d_hy
-constrain e.center_x = llm.center_x as e_hx
-constrain e.center_y = 300 as e_hy
-constrain f.center_x = llm.center_x as f_hx
-constrain f.center_y = 300 as f_hy
-
 inbox.right -> llm.left as feed [stroke: foreground-2, stroke_width: 2]
-llm.bottom -> d.top as parrow_d [stroke: accent-1, stroke_width: 2, label: "predicts one token"]
-llm.bottom -> e.top as parrow_e [stroke: accent-1, stroke_width: 2]
-llm.bottom -> f.top as parrow_f [stroke: accent-1, stroke_width: 2]
+
+// Predicted tokens wait below the LLM (red = just predicted). Each keeps its
+// own named home pins, so a keyframe can release one chip without the others.
+each w in ["on", "the", "mat"] {
+    rect next [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: w]
+    constrain next.center_x = llm.center_x as home_x
+    constrain next.top = llm.bottom + 99 as home_y
+    llm.bottom -> next.top as predict [stroke: accent-1, stroke_width: 2, label: "predicts one token"]
+}
 
 text "Predict one token, append it — then repeat." cap [fill: #1b2733]
 constrain cap.center_x = 360
 constrain cap.top = 360
 
 keyframe "prompt" {
-    hide d, e, f, parrow_d, parrow_e, parrow_f
+    hide next_1, next_2, next_3, predict_1, predict_2, predict_3
 }
 keyframe "predict_on" {
-    show d, parrow_d
+    show next_1, predict_1
 }
 keyframe "append_on" {
-    hide parrow_d
+    hide predict_1
     transform inbox [width: 246]
-    disable d_hx
-    disable d_hy
-    constrain d.center_x = 287
-    constrain d.center_y = 150
-    transform d [stroke: #cdd8e3, stroke_width: 1]
+    disable home_x_1
+    disable home_y_1
+    constrain next_1.left = tok_3.right + 6
+    constrain next_1.center_y = inbox.center_y
+    transform next_1 [stroke: #cdd8e3, stroke_width: 1]
 }
 keyframe "predict_the" {
-    show e, parrow_e
+    show next_2, predict_2
 }
 keyframe "append_the" {
-    hide parrow_e
+    hide predict_2
     transform inbox [width: 302]
-    disable e_hx
-    disable e_hy
-    constrain e.center_x = 343
-    constrain e.center_y = 150
-    transform e [stroke: #cdd8e3, stroke_width: 1]
+    disable home_x_2
+    disable home_y_2
+    constrain next_2.left = next_1.right + 6
+    constrain next_2.center_y = inbox.center_y
+    transform next_2 [stroke: #cdd8e3, stroke_width: 1]
 }
 keyframe "predict_mat" {
-    show f, parrow_f
+    show next_3, predict_3
 }
 keyframe "append_mat" {
-    hide parrow_f
+    hide predict_3
     transform inbox [width: 358]
-    disable f_hx
-    disable f_hy
-    constrain f.center_x = 399
-    constrain f.center_y = 150
-    transform f [stroke: #cdd8e3, stroke_width: 1]
+    disable home_x_3
+    disable home_y_3
+    constrain next_3.left = next_2.right + 6
+    constrain next_3.center_y = inbox.center_y
+    transform next_3 [stroke: #cdd8e3, stroke_width: 1]
 }

@@ -1,83 +1,67 @@
-// Railway Topology - Three Level Abstraction
-// Uses symbolic colors for brand-agnostic theming
-// Uses [role: label] for element labels
+// Railway topology at three levels of abstraction.
+//   Micro: the real track: two main tracks (A on top, B below) joined by two crossovers.
+//   Meso:  the same track, greyed, with the two operational points (OPs) drawn over it.
+//   Macro: each OP becomes a node; the track between them becomes one section of line.
+// Micro and Meso each declare their 8 track dots; the `rails` template wires
+// the dots of one level into the track shape, so that shape is written once.
+
+// The track shape between 8 dots (l = left end, x = crossover junction, r = right end):
+//   A: al -- ax1 ------------ ax2 -- ar
+//              \                  /
+//   B: bl ------ bx1 -- bx2 ------ br
+// The B junctions are 140px apart, centred between the ends; each A junction sits
+// 40px further out, so the crossovers run diagonally.
+template "rails" (al: "", ax1: "", ax2: "", ar: "", bl: "", bx1: "", bx2: "", br: "", ink: text-1) {
+    constrain al.center_x = bl.center_x
+    constrain ar.center_x = br.center_x
+    constrain bx2.center_x = bx1.center_x + 140
+    constrain bx1.center_x = midpoint(bl, br) - 70
+    constrain ax1.center_x = bx1.center_x - 40
+    constrain ax2.center_x = bx2.center_x + 40
+
+    each s in [
+        {p: al,  q: ax1}, {p: ax1, q: ax2}, {p: ax2, q: ar},   // track A
+        {p: bl,  q: bx1}, {p: bx1, q: bx2}, {p: bx2, q: br},   // track B
+        {p: ax1, q: bx1}, {p: bx2, q: ax2},                    // crossovers
+    ] {
+        s.p -- s.q [stroke: ink, stroke_width: 2, routing: direct]
+    }
+}
 
 col diagram {
-    // === MICRO LEVEL ===
-    // 2 main tracks (A and B) with crossover connections
-    // Track A: a1 -- jA1 -- jA2 -- a2
-    // Track B: b1 -- jB1 -- jB2 -- b2
-    // Crossovers: jA1 -> jB1 (left), jB2 -> jA2 (right)
+    // === MICRO ===
     group micro {
         col micro_label [role: label] {
             text "Micro" micro_lbl [font_size: 20, fill: text-1]
             text "Detailed tracks" [font_size: 12, fill: text-2]
         }
-
         col tracks [gap: 30] {
-            // Track A (top)
             row trackA [gap: 80] {
                 circle a1 [fill: accent-1, size: 6]
                 circle jA1 [fill: accent-1, size: 6]
                 circle jA2 [fill: accent-1, size: 6]
                 circle a2 [fill: accent-1, size: 6]
             }
-            // Track B (bottom)
             row trackB [gap: 80] {
                 circle b1 [fill: accent-1, size: 6]
                 circle jB1 [fill: accent-1, size: 6]
                 circle jB2 [fill: accent-1, size: 6]
                 circle b2 [fill: accent-1, size: 6]
             }
-
-            // Align track A endpoints to track B endpoints (both tracks same length)
-            constrain a1.center_x = b1.center_x
-            constrain a2.center_x = b2.center_x
-
-            // Preserve B track spacing (jB2 is 140px right of jB1)
-            constrain jB2.center_x = jB1.center_x + 140
-            // Center the junction pair within the track
-            // midpoint of jB1,jB2 should equal midpoint of b1,b2
-            // jB1 + 70 = midpoint(b1,b2), so jB1 = midpoint(b1,b2) - 70
-            constrain jB1.center_x = midpoint(b1, b2) - 70
-
-            // Offset A junctions for diagonal crossovers:
-            // jA1 offset left → diagonal goes down-right to jB1
-            // jA2 offset right → diagonal goes down-left from jB2
-            constrain jA1.center_x = jB1.center_x - 40
-            constrain jA2.center_x = jB2.center_x + 40
-
-            // Track A main line
-            a1 -- jA1 [stroke: text-1, stroke_width: 2, routing: direct]
-            jA1 -- jA2 [stroke: text-1, stroke_width: 2, routing: direct]
-            jA2 -- a2 [stroke: text-1, stroke_width: 2, routing: direct]
-
-            // Track B main line
-            b1 -- jB1 [stroke: text-1, stroke_width: 2, routing: direct]
-            jB1 -- jB2 [stroke: text-1, stroke_width: 2, routing: direct]
-            jB2 -- b2 [stroke: text-1, stroke_width: 2, routing: direct]
-
-            // Crossover connections (switches)
-            jA1 -- jB1 [stroke: text-1, stroke_width: 2, routing: direct]
-            jB2 -- jA2 [stroke: text-1, stroke_width: 2, routing: direct]
         }
+        rails micro_rails [al: a1, ax1: jA1, ax2: jA2, ar: a2, bl: b1, bx1: jB1, bx2: jB2, br: b2]
     }
 
-    // === MESO LEVEL ===
-    // Same track structure as Micro, with dashed ellipses for operational points
+    // === MESO === the same track, greyed, under the operational points
     group meso {
         col meso_label [role: label] {
             text "Meso" meso_lbl [font_size: 20, fill: text-1]
             text "OPs + Tracks" [font_size: 12, fill: text-2]
         }
-
-        // Stack: ellipses behind tracks
         stack meso_content {
-            // Ellipses positioned over junction areas using constraints
+            // An OP is a dashed ellipse over the crossover it contains
             ellipse op1 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 1 (Station)"]
             ellipse op2 [fill: accent-light, opacity: 0.3, stroke: accent-1, stroke_dasharray: "6,3", width: 140, height: 80, label: "OP 2 (Station)"]
-
-            // Track structure (same as Micro but grayed)
             col meso_tracks [gap: 30] {
                 row mtrackA [gap: 80] {
                     circle ma1 [fill: foreground-3, size: 6]
@@ -91,72 +75,41 @@ col diagram {
                     circle mjB2 [fill: foreground-3, size: 6]
                     circle mb2 [fill: foreground-3, size: 6]
                 }
-
-                // Align meso junctions to micro junctions (cross-level alignment)
-                constrain mjB1.center_x = jB1.center_x
-                constrain mjB2.center_x = jB2.center_x
-
-                // Offset A junctions for diagonal crossovers (same as micro)
-                constrain mjA1.center_x = mjB1.center_x - 40
-                constrain mjA2.center_x = mjB2.center_x + 40
-
-                // Align meso track endpoints to micro track endpoints
-                constrain ma1.center_x = a1.center_x
-                constrain ma2.center_x = a2.center_x
-                constrain mb1.center_x = b1.center_x
-                constrain mb2.center_x = b2.center_x
-
-                // Track lines (grayed)
-                ma1 -- mjA1 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mjA1 -- mjA2 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mjA2 -- ma2 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mb1 -- mjB1 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mjB1 -- mjB2 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mjB2 -- mb2 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mjA1 -- mjB1 [stroke: foreground-3, stroke_width: 2, routing: direct]
-                mjB2 -- mjA2 [stroke: foreground-3, stroke_width: 2, routing: direct]
             }
-
-            // Position ellipses over junction areas using constraints
-            // op1 centered over the left junction area (midpoint of mjA1 and mjB1)
-            constrain op1.center_x = midpoint(mjA1, mjB1)
-            constrain op1.center_y = midpoint(mjA1, mjB1)
-            // op2 centered over the right junction area (midpoint of mjA2 and mjB2)
-            constrain op2.center_x = midpoint(mjA2, mjB2)
-            constrain op2.center_y = midpoint(mjA2, mjB2)
         }
+        rails meso_rails [al: ma1, ax1: mjA1, ax2: mjA2, ar: ma2, bl: mb1, bx1: mjB1, bx2: mjB2, br: mb2, ink: foreground-3]
+        constrain op1.center = midpoint(mjA1, mjB1)
+        constrain op2.center = midpoint(mjA2, mjB2)
     }
 
-    // === MACRO LEVEL ===
+    // === MACRO === one node per OP, one line between them
     group macro {
-        // Label using new [role: label] modifier
         col macro_label [role: label] {
             text "Macro" macro_lbl [font_size: 20, fill: text-1]
             text "Nodes & Lines" [font_size: 12, fill: text-2]
         }
-
         row graph [gap: 100] {
             circle n1 [fill: accent-1, size: 50, label: "OP 1"]
             circle n2 [fill: accent-1, size: 50, label: "OP 2"]
             n1 -- n2 [stroke: accent-1, stroke_width: 3, label: "Section of Line (SoL)", routing: direct]
         }
-
-        // Align macro nodes with track endpoints (left-to-left, right-to-right)
-        constrain n1.left = b1.left
-        constrain n2.right = b2.right
     }
 
-    // Aggregation arrows with connection label references
+    // The three views share their ends (the track shape does the rest)
+    constrain mb1.center_x = b1.center_x
+    constrain mb2.center_x = b2.center_x
+    constrain n1.left = b1.left
+    constrain n2.right = b2.right
+
+    // Arrows down the label column: micro -> meso -> macro
     text "Aggregation" agg_label [font_size: 11, fill: foreground-3]
     text "Simplification" simp_label [font_size: 11, fill: foreground-3]
     micro_label.bottom -> meso_label.top [label: agg_label, label_position: right, stroke: foreground-3, routing: direct]
     meso_label.bottom -> macro_label.top [label: simp_label, label_position: right, stroke: foreground-3, routing: direct]
 
-    // Constrain the level labels to same vertical axis
-    // Containers for correct arrow routing
+    // One vertical axis for the level labels (containers, for the arrows) and their titles
     constrain micro_label.center_x = meso_label.center_x
     constrain meso_label.center_x = macro_label.center_x
-    // Text elements for visual alignment
     constrain micro_lbl.center_x = meso_lbl.center_x
     constrain meso_lbl.center_x = macro_lbl.center_x
 }

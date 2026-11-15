@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 535 659" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -74 839.6 735" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -193,71 +193,95 @@
       <circle cx="4.5" cy="5" r="3.5" class="ai-end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
     </marker>
   </defs>
-  <g id="lineends" class="ai-container">
-    <text class="ai-shape ai-text" x="5" y="13" text-anchor="start" dominant-baseline="middle" font-size="16">Line ends: [from_end: ..., to_end: ...]</text>
-    <g id="r1" class="ai-container">
-      <rect id="a1" class="ai-shape ai-rect" x="10" y="48" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="65" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Dog</tspan></tspan></text>
-      <rect id="b1" class="ai-shape ai-rect" x="310" y="48" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="65" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Animal</tspan></tspan></text>
+  <text id="title" class="ai-shape ai-text" x="0" y="-6" text-anchor="start" dominant-baseline="middle" font-size="16">Line ends: [from_end: ..., to_end: ...]</text>
+  <g id="chart" class="ai-container">
+    <g id="entry_1" class="ai-container">
+      <g id="pair_1" class="ai-container">
+        <rect id="a_1" class="ai-shape ai-rect" x="15" y="35" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="52" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Dog</tspan></tspan></text>
+        <rect id="b_1" class="ai-shape ai-rect" x="295" y="35" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="52" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Animal</tspan></tspan></text>
+      </g>
+      <text id="code_1" class="ai-shape ai-text" x="446" y="52" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: none, to_end: triangle</text>
     </g>
-    <g id="r2" class="ai-container">
-      <rect id="a2" class="ai-shape ai-rect" x="10" y="114" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="131" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Garage</tspan></tspan></text>
-      <rect id="b2" class="ai-shape ai-rect" x="310" y="114" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="131" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Car</tspan></tspan></text>
+    <g id="entry_2" class="ai-container">
+      <g id="pair_2" class="ai-container">
+        <rect id="a_2" class="ai-shape ai-rect" x="15" y="111" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="128" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Impl</tspan></tspan></text>
+        <rect id="b_2" class="ai-shape ai-rect" x="295" y="111" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="128" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Interface</tspan></tspan></text>
+      </g>
+      <text id="code_2" class="ai-shape ai-text" x="446" y="128" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: none, to_end: triangle</text>
     </g>
-    <g id="r3" class="ai-container">
-      <rect id="a3" class="ai-shape ai-rect" x="10" y="180" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>House</tspan></tspan></text>
-      <rect id="b3" class="ai-shape ai-rect" x="310" y="180" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="197" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Room</tspan></tspan></text>
+    <g id="entry_3" class="ai-container">
+      <g id="pair_3" class="ai-container">
+        <rect id="a_3" class="ai-shape ai-rect" x="15" y="187" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="204" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Garage</tspan></tspan></text>
+        <rect id="b_3" class="ai-shape ai-rect" x="295" y="187" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="204" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Car</tspan></tspan></text>
+      </g>
+      <text id="code_3" class="ai-shape ai-text" x="446" y="204" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: diamond, to_end: none</text>
     </g>
-    <g id="r4" class="ai-container">
-      <rect id="a4" class="ai-shape ai-rect" x="10" y="246" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="263" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Client</tspan></tspan></text>
-      <rect id="b4" class="ai-shape ai-rect" x="310" y="246" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="263" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Service</tspan></tspan></text>
+    <g id="entry_4" class="ai-container">
+      <g id="pair_4" class="ai-container">
+        <rect id="a_4" class="ai-shape ai-rect" x="15" y="263" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="280" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>House</tspan></tspan></text>
+        <rect id="b_4" class="ai-shape ai-rect" x="295" y="263" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="280" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Room</tspan></tspan></text>
+      </g>
+      <text id="code_4" class="ai-shape ai-text" x="446" y="280" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: diamond-filled, to_end: none</text>
     </g>
-    <g id="r5" class="ai-container">
-      <rect id="a5" class="ai-shape ai-rect" x="10" y="312" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="329" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Customer</tspan></tspan></text>
-      <rect id="b5" class="ai-shape ai-rect" x="310" y="312" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="329" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Order</tspan></tspan></text>
+    <g id="entry_5" class="ai-container">
+      <g id="pair_5" class="ai-container">
+        <rect id="a_5" class="ai-shape ai-rect" x="15" y="339" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="356" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Client</tspan></tspan></text>
+        <rect id="b_5" class="ai-shape ai-rect" x="295" y="339" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="356" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Service</tspan></tspan></text>
+      </g>
+      <text id="code_5" class="ai-shape ai-text" x="446" y="356" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: none, to_end: open</text>
     </g>
-    <g id="r6" class="ai-container">
-      <rect id="a6" class="ai-shape ai-rect" x="10" y="378" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="395" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Plug</tspan></tspan></text>
-      <rect id="b6" class="ai-shape ai-rect" x="310" y="378" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="395" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Socket</tspan></tspan></text>
+    <g id="entry_6" class="ai-container">
+      <g id="pair_6" class="ai-container">
+        <rect id="a_6" class="ai-shape ai-rect" x="15" y="415" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="432" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Customer</tspan></tspan></text>
+        <rect id="b_6" class="ai-shape ai-rect" x="295" y="415" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="432" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Order</tspan></tspan></text>
+      </g>
+      <text id="code_6" class="ai-shape ai-text" x="446" y="432" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: none, to_end: crow</text>
     </g>
-    <g id="r7" class="ai-container">
-      <rect id="a7" class="ai-shape ai-rect" x="10" y="444" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="461" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Source</tspan></tspan></text>
-      <rect id="b7" class="ai-shape ai-rect" x="310" y="444" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="461" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Sink</tspan></tspan></text>
+    <g id="entry_7" class="ai-container">
+      <g id="pair_7" class="ai-container">
+        <rect id="a_7" class="ai-shape ai-rect" x="15" y="491" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="508" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Plug</tspan></tspan></text>
+        <rect id="b_7" class="ai-shape ai-rect" x="295" y="491" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="508" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Socket</tspan></tspan></text>
+      </g>
+      <text id="code_7" class="ai-shape ai-text" x="446" y="508" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: circle, to_end: circle</text>
     </g>
-    <g id="r8" class="ai-container">
-      <rect id="a8" class="ai-shape ai-rect" x="10" y="510" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="65" y="527" text-anchor="middle" dominant-baseline="middle"><tspan x="65" dy="-0"><tspan>Impl</tspan></tspan></text>
-      <rect id="b8" class="ai-shape ai-rect" x="310" y="510" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
-      <text class="ai-label" x="365" y="527" text-anchor="middle" dominant-baseline="middle"><tspan x="365" dy="-0"><tspan>Interface</tspan></tspan></text>
+    <g id="entry_8" class="ai-container">
+      <g id="pair_8" class="ai-container">
+        <rect id="a_8" class="ai-shape ai-rect" x="15" y="567" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="70" y="584" text-anchor="middle" dominant-baseline="middle"><tspan x="70" dy="-0"><tspan>Source</tspan></tspan></text>
+        <rect id="b_8" class="ai-shape ai-rect" x="295" y="567" width="110" height="34" fill="#f0f0f0" stroke="#333333" stroke-width="1.5"/>
+        <text class="ai-label" x="350" y="584" text-anchor="middle" dominant-baseline="middle"><tspan x="350" dy="-0"><tspan>Sink</tspan></tspan></text>
+      </g>
+      <text id="code_8" class="ai-shape ai-text" x="446" y="584" text-anchor="start" dominant-baseline="middle" font-size="12" style="font-family:var(--font-mono, ui-monospace, monospace)">from_end: arrow, to_end: arrow</text>
     </g>
   </g>
-  <text class="ai-label" x="215" y="55" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>triangle: inheritance</tspan></tspan></text>
-  <text class="ai-label" x="215" y="121" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>diamond: aggregation</tspan></tspan></text>
-  <text class="ai-label" x="215" y="187" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>diamond-filled</tspan></tspan></text>
-  <text class="ai-label" x="215" y="253" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>open, dashed: uses</tspan></tspan></text>
-  <text class="ai-label" x="215" y="319" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>crow: many</tspan></tspan></text>
-  <text class="ai-label" x="215" y="385" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>circle</tspan></tspan></text>
-  <text class="ai-label" x="215" y="451" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>arrow (&lt;-&gt;)</tspan></tspan></text>
-  <text class="ai-label" x="215" y="517" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="215" dy="-0"><tspan>dashed, thick: realises</tspan></tspan></text>
-  <path class="ai-connection" d="M120 65 L297 65" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-triangle)"/>
-  <path class="ai-connection" d="M120 131 L297.6 131" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-diamond)"/>
-  <path class="ai-connection" d="M132.4 197 L310 197" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-diamond-filled)"/>
-  <path class="ai-connection" d="M120 263 L310 263" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
-  <path class="ai-connection" d="M120 329 L310 329" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-end-crow)"/>
-  <path class="ai-connection" d="M131.7 395 L298.3 395" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-end-circle)" marker-end="url(#ai-end-circle)"/>
-  <path class="ai-connection" d="M127.2 461 L302.8 461" fill="none" stroke="#333" stroke-width="2" marker-start="url(#ai-arrow)" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M120 527 L290.5 527" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-end-triangle)"/>
+  <text class="ai-label" x="210" y="42" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>inheritance</tspan></tspan></text>
+  <text class="ai-label" x="210" y="118" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>realisation (dashed)</tspan></tspan></text>
+  <text class="ai-label" x="210" y="194" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>aggregation</tspan></tspan></text>
+  <text class="ai-label" x="210" y="270" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>composition</tspan></tspan></text>
+  <text class="ai-label" x="210" y="346" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>dependency (dashed)</tspan></tspan></text>
+  <text class="ai-label" x="210" y="422" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>one to many</tspan></tspan></text>
+  <text class="ai-label" x="210" y="498" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>socket</tspan></tspan></text>
+  <text class="ai-label" x="210" y="574" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="210" dy="-0"><tspan>both ways</tspan></tspan></text>
+  <path class="ai-connection" d="M125 52 L282 52" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="none" marker-end="url(#ai-end-triangle)"/>
+  <path class="ai-connection" d="M125 128 L282 128" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-triangle)"/>
+  <path class="ai-connection" d="M137.4 204 L295 204" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="none" marker-start="url(#ai-end-diamond)"/>
+  <path class="ai-connection" d="M137.4 280 L295 280" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="none" marker-start="url(#ai-end-diamond-filled)"/>
+  <path class="ai-connection" d="M125 356 L295 356" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ai-end-open)"/>
+  <path class="ai-connection" d="M125 432 L295 432" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="none" marker-end="url(#ai-end-crow)"/>
+  <path class="ai-connection" d="M136.7 508 L283.3 508" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="none" marker-start="url(#ai-end-circle)" marker-end="url(#ai-end-circle)"/>
+  <path class="ai-connection" d="M132.2 584 L287.8 584" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="none" marker-start="url(#ai-arrow)" marker-end="url(#ai-arrow)"/>
 </svg>

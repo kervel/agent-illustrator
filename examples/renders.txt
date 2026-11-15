@@ -5,16 +5,16 @@
 # Static showcases
 examples/architecture.svg          examples/architecture.ail          --stylesheet-css stylesheets/kapernikov.css
 examples/feedback-loops.svg        examples/feedback-loops.ail        --stylesheet-css stylesheets/kapernikov.css
-examples/fan-out.svg               examples/fan-out.ail               --stylesheet-css stylesheets/kapernikov.css
 examples/gallic-wars-timeline.svg  examples/gallic-wars-timeline.ail  --stylesheet-css stylesheets/kapernikov.css
 examples/line-ends.svg           examples/line-ends.ail           --stylesheet-css stylesheets/kapernikov-schematic.css
 examples/mosfet-driver.svg         examples/mosfet-driver.ail         --stylesheet-css stylesheets/kapernikov-schematic.css
 examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
 examples/sequence-diagram.svg      examples/sequence-diagram.ail      --stylesheet-css stylesheets/kapernikov.css
-examples/state-machine.svg         examples/state-machine.ail         --stylesheet-css stylesheets/kapernikov.css
 
 
 # Animated showcases (CSS only: they play inside an <img>)
+examples/state-machine.svg         examples/state-machine.ail         --stylesheet-css stylesheets/kapernikov.css --animate
+examples/state-machine.anim.svg    examples/state-machine.ail         --stylesheet-css stylesheets/kapernikov.css --animate-css
 examples/token-prediction.svg      examples/token-prediction.ail      --stylesheet-css stylesheets/kapernikov.css --animate-css
 examples/agentic-loop-story.svg    examples/agentic-loop-story.ail    --stylesheet-css stylesheets/agentic-loop-story.css --animate-css
 
@@ -35,8 +35,6 @@ examples/motion/git-branches.last.svg   examples/motion/git-branches.ail   --sty
 examples/motion/git-merge.svg           examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --animate
 examples/motion/git-merge.anim.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --animate-css
 examples/motion/git-merge.last.svg      examples/motion/git-merge.ail      --stylesheet-css examples/motion/git-deck.css --frame choose
-examples/motion/request-response.svg      examples/motion/request-response.ail  --animate
-examples/motion/request-response.anim.svg examples/motion/request-response.ail  --animate-css
-examples/motion/token-loop.svg            examples/motion/token-loop.ail        --animate
-examples/motion/token-loop.anim.svg       examples/motion/token-loop.ail        --animate-css
+examples/motion/request-response.svg      examples/motion/request-response.ail  --stylesheet-css stylesheets/kapernikov.css --animate
+examples/motion/request-response.anim.svg examples/motion/request-response.ail  --stylesheet-css stylesheets/kapernikov.css --animate-css
 examples/class-diagram.svg         examples/class-diagram.ail         --stylesheet-css stylesheets/kapernikov.css

@@ -510,7 +510,7 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   each c in [c1, c3] { constrain c.width = 120 }
   ```
   Different looks for some items: loop over those items only and write the
-  others out (`examples/fan-out.ail`). Inside a template, the names are the
+  others out. Inside a template, the names are the
   instance's parts. A quoted item (`["c1"]`) or the index where a name goes is
   an error that says what to write; a misspelt name is reported at the item in
   the list. A loop variable may not have the name of an element that the body

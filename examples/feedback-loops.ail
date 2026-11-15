@@ -1,71 +1,58 @@
-// Human-Agent Feedback Loop Diagram v9
-// Styleable version using palette colors
-// Usage: ai-illustrator feedback-loops-v9.ail --stylesheet mytheme.toml
+// Human-agent feedback loops.
+// Two loops of four steps: the human loop (slow, persistent) on top, the agent
+// loop (fast, ephemeral) below. Each loop runs left to right and returns along a
+// dashed line: over the top for the human, under the bottom for the agent.
+// Thin lines between the rows are where the loops hand work to each other.
 
-// Control points for curves (invisible)
-circle human_via [size: 1, fill: none, stroke: none]
-circle agent_via [size: 1, fill: none, stroke: none]
-
-col diagram [gap: 40] {
-  // === HUMAN LOOP (top) ===
-  col human_section [gap: 8] {
-    row human_header [gap: 8] {
-      text "HUMAN" human_title [font_size: 14, fill: accent-dark]
-      text "— slow · persistent" human_sub [font_size: 11, fill: text-3]
-    }
-
-    row human_loop [gap: 20] {
-      rect assign [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Assign Task"]
-      rect tune [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Tune Feedback"]
-      rect spot [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Spot Patterns"]
-      rect evaluate [width: 120, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: "Evaluate"]
-    }
-  }
-
-  // === AGENT LOOP (bottom) ===
-  col agent_section [gap: 8] {
-    // The assign->task connector drops through this row at x = assign's
-    // centre; the gap keeps the subtitle clear of it.
-    row agent_header [gap: 30] {
-      text "AGENT" agent_title [font_size: 14, fill: secondary-dark]
-      text "— fast · ephemeral" agent_sub [font_size: 11, fill: text-3]
-    }
-    row agent_loop [gap: 20] {
-      rect task [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Task"]
-      rect execute [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Execute"]
-      rect check [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Feedback"]
-      rect result [width: 120, height: 50, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: "Result"]
-    }
-  }
+template "step" (name: "", tint: accent-light, ink: accent-dark) {
+    rect body [width: 120, height: 50, fill: tint, stroke: ink, stroke_width: 2, label: name]
 }
 
-// Position via points for curve control
-constrain human_via.center_x = midpoint(assign, evaluate)
-constrain human_via.center_y = assign.top - 50
+// The forward arrows of one loop: a -> b -> c -> d.
+template "chain" (a: "", b: "", c: "", d: "", ink: accent-dark) {
+    a -> b [stroke: ink, stroke_width: 3]
+    b -> c [stroke: ink, stroke_width: 3]
+    c -> d [stroke: ink, stroke_width: 3]
+}
 
-constrain agent_via.center_x = midpoint(task, result)
-constrain agent_via.center_y = result.bottom + 50
-
-// Align loops horizontally
+col diagram [gap: 90] {
+    row human [gap: 40, align: center] {
+        col human_head [gap: 4, align: end] {
+            text "HUMAN" human_title [font_size: 14, fill: accent-dark]
+            text "slow · persistent" human_sub [font_size: 11, fill: text-3]
+        }
+        row human_steps [gap: 30] {
+            step assign   [name: "Assign Task"]
+            step tune     [name: "Tune Feedback"]
+            step spot     [name: "Spot Patterns"]
+            step evaluate [name: "Evaluate"]
+        }
+    }
+    row agent [gap: 40, align: center] {
+        col agent_head [gap: 4, align: end] {
+            text "AGENT" agent_title [font_size: 14, fill: secondary-dark]
+            text "fast · ephemeral" agent_sub [font_size: 11, fill: text-3]
+        }
+        row agent_steps [gap: 30] {
+            step task    [name: "Task",     tint: secondary-light, ink: secondary-dark]
+            step execute [name: "Execute",  tint: secondary-light, ink: secondary-dark]
+            step check   [name: "Feedback", tint: secondary-light, ink: secondary-dark]
+            step result  [name: "Result",   tint: secondary-light, ink: secondary-dark]
+        }
+    }
+}
+// The two loops share columns, so the hand-over lines drop straight down.
+constrain human_head.right = agent_head.right
 constrain assign.left = task.left
 
-// Human internal flow (left to right: assign -> tune -> spot -> evaluate)
-assign -> tune [stroke: accent-dark, stroke_width: 3]
-tune -> spot [stroke: accent-dark, stroke_width: 3]
-spot -> evaluate [stroke: accent-dark, stroke_width: 3]
+// Each loop runs forward along its row and returns dashed around the outside:
+// over the top for the human, under the bottom for the agent.
+chain human_flow [a: assign, b: tune, c: spot, d: evaluate]
+evaluate.top -> assign.top [stroke: accent-dark, stroke_width: 3, stroke_dasharray: dashed]
+chain agent_flow [a: task, b: execute, c: check, d: result, ink: secondary-dark]
+result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, stroke_dasharray: dashed]
 
-// Human loop-back (feedback): evaluate.top -> assign.top (curves ABOVE, dashed)
-evaluate.top -> assign.top [stroke: accent-dark, stroke_width: 3, routing: curved, via: human_via, stroke_dasharray: dashed]
-
-// Agent internal flow (left to right: task -> execute -> check -> result)
-task -> execute [stroke: secondary-dark, stroke_width: 3]
-execute -> check [stroke: secondary-dark, stroke_width: 3]
-check -> result [stroke: secondary-dark, stroke_width: 3]
-
-// Agent loop-back (feedback): result.bottom -> task.bottom (curves BELOW, dashed)
-result.bottom -> task.bottom [stroke: secondary-dark, stroke_width: 3, routing: curved, via: agent_via, stroke_dasharray: dashed]
-
-// Cross connections (vertical)
-assign.bottom -> task.top [stroke: foreground-3, stroke_width: 1]
-result.top -> evaluate.bottom [stroke: foreground-3, stroke_width: 1]
-tune.bottom -> check.top [stroke: accent-1, stroke_width: 2, routing: curved, label: "tunes"]
+// Hand-over between the loops
+assign -> task [stroke: foreground-3, stroke_width: 1]
+result -> evaluate [stroke: foreground-3, stroke_width: 1]
+tune.bottom -> check.top [stroke: accent-1, stroke_width: 2, label: "tunes"]

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-384.8659 -59 1229.8659 879" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-456.968 45 1080 737" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -187,82 +187,59 @@
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
   </defs>
-  <g id="diagram" class="ai-container">
-    <rect id="app_bg" class="ai-shape ai-rect" x="-45" y="215" width="580" height="130" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="1" opacity="0.15"/>
-    <text class="ai-label" x="-45" y="201.5" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)"><tspan x="-45" dy="-0"><tspan>Application Layer</tspan></tspan></text>
-    <rect id="async_bg" class="ai-shape ai-rect" x="80" y="455" width="460" height="110" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="1" opacity="0.1"/>
-    <text class="ai-label" x="80" y="441.5" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)"><tspan x="80" dy="-0"><tspan>Async / Real-time</tspan></tspan></text>
-    <rect id="data_bg" class="ai-shape ai-rect" x="0" y="640" width="620" height="120" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="1" opacity="0.15"/>
-    <text class="ai-label" x="0" y="626.5" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--secondary-dark)"><tspan x="0" dy="-0"><tspan>Data Layer</tspan></tspan></text>
-    <rect id="browser" class="ai-shape ai-rect" x="230" y="32" width="160" height="46" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="2"/>
-    <text class="ai-label" x="310" y="55" text-anchor="middle" dominant-baseline="middle"><tspan x="310" dy="-0"><tspan>Browser</tspan></tspan></text>
-    <g id="nginx" class="ai-container">
-      <rect id="nginx_body" class="ai-shape ai-rect" x="240" y="125" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-      <text class="ai-label" x="310" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="310" dy="-0"><tspan>Nginx Gateway</tspan></tspan></text>
-    </g>
-    <g id="angular" class="ai-container">
-      <rect id="angular_body" class="ai-shape ai-rect" x="-40" y="270" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-      <text class="ai-label" x="30" y="295" text-anchor="middle" dominant-baseline="middle"><tspan x="30" dy="-0"><tspan>Angular 21</tspan></tspan></text>
-    </g>
-    <g id="django" class="ai-container">
-      <rect id="django_body" class="ai-shape ai-rect" x="390" y="270" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-      <text class="ai-label" x="460" y="295" text-anchor="middle" dominant-baseline="middle"><tspan x="460" dy="-0"><tspan>Django 6 API</tspan></tspan></text>
-    </g>
-    <g id="celery" class="ai-container">
-      <rect id="celery_body" class="ai-shape ai-rect" x="130" y="495" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-      <text class="ai-label" x="200" y="520" text-anchor="middle" dominant-baseline="middle"><tspan x="200" dy="-0"><tspan>Celery Workers</tspan></tspan></text>
-    </g>
-    <g id="channels" class="ai-container">
-      <rect id="channels_body" class="ai-shape ai-rect" x="350" y="495" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-      <text class="ai-label" x="420" y="520" text-anchor="middle" dominant-baseline="middle"><tspan x="420" dy="-0"><tspan>Django Channels</tspan></tspan></text>
-    </g>
-    <g id="postgres" class="ai-container">
-      <ellipse id="postgres_body" class="ai-shape ai-ellipse" cx="30" cy="715" rx="65" ry="27.5" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-      <text class="ai-label" x="30" y="715" text-anchor="middle" dominant-baseline="middle"><tspan x="30" dy="-8.75"><tspan>PostgreSQL</tspan></tspan><tspan x="30" dy="17.5"><tspan font-size="11.200000000000001">+ PostGIS</tspan></tspan></text>
-    </g>
-    <g id="redis" class="ai-container">
-      <ellipse id="redis_body" class="ai-shape ai-ellipse" cx="310" cy="715" rx="65" ry="27.5" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-      <text class="ai-label" x="310" y="715" text-anchor="middle" dominant-baseline="middle"><tspan x="310" dy="-0"><tspan>Redis</tspan></tspan></text>
-    </g>
-    <g id="minio" class="ai-container">
-      <ellipse id="minio_body" class="ai-shape ai-ellipse" cx="540" cy="715" rx="65" ry="27.5" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-      <text class="ai-label" x="540" y="715" text-anchor="middle" dominant-baseline="middle"><tspan x="540" dy="-0"><tspan>MinIO / S3</tspan></tspan></text>
-    </g>
-    <g id="keycloak" class="ai-container">
-      <rect id="keycloak_body" class="ai-shape ai-rect" x="655" y="128" width="130" height="44" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="1"/>
-      <text class="ai-label" x="720" y="150" text-anchor="middle" dominant-baseline="middle"><tspan x="720" dy="-0"><tspan>OAuth2 / OIDC</tspan></tspan></text>
-    </g>
-    <g id="sentry" class="ai-container">
-      <rect id="sentry_body" class="ai-shape ai-rect" x="655" y="273" width="130" height="44" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="1"/>
-      <text class="ai-label" x="720" y="295" text-anchor="middle" dominant-baseline="middle"><tspan x="720" dy="-0"><tspan>Sentry</tspan></tspan></text>
-    </g>
-    <circle id="via_pg" class="ai-shape ai-circle" cx="-200" cy="550" r="0.5" fill="#f0f0f0" stroke="#333333" stroke-width="1.5" opacity="0"/>
-    <circle id="via_minio" class="ai-shape ai-circle" cx="670" cy="580" r="0.5" fill="#f0f0f0" stroke="#333333" stroke-width="1.5" opacity="0"/>
-  </g>
-  <text id="diagram_title" class="ai-shape ai-text" x="206.968" y="10" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--foreground-1)">fullstack-sota Architecture</text>
-  <text class="ai-label" x="320" y="99.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="320" dy="-0"><tspan>HTTP / WS</tspan></tspan></text>
-  <text class="ai-label" x="171.5352" y="232.3815" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="171.5352" dy="-0"><tspan>/web/</tspan></tspan></text>
-  <text class="ai-label" x="387.7852" y="212.8957" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="387.7852" dy="-0"><tspan>/fs/</tspan></tspan></text>
-  <text class="ai-label" x="245" y="285" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="245" dy="-0"><tspan>REST API</tspan></tspan></text>
-  <text class="ai-label" x="333.0577" y="417.021" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="333.0577" dy="-0"><tspan>tasks</tspan></tspan></text>
-  <text class="ai-label" x="559" y="450" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="559" dy="-0"><tspan>WS</tspan></tspan></text>
-  <text class="ai-label" x="260.2161" y="607.7181" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="260.2161" dy="-0"><tspan>broker</tspan></tspan></text>
-  <text class="ai-label" x="370.2161" y="624.7819" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="370.2161" dy="-0"><tspan>channel layer</tspan></tspan></text>
-  <text class="ai-label" x="-250.5951" y="375.2484" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="-250.5951" dy="-0"><tspan>ORM</tspan></tspan></text>
-  <text class="ai-label" x="724.3693" y="494.7388" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="724.3693" dy="-0"><tspan>files</tspan></tspan></text>
-  <text class="ai-label" x="517.5" y="140" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="517.5" dy="-0"><tspan>OIDC</tspan></tspan></text>
-  <text class="ai-label" x="592.5" y="285" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="592.5" dy="-0"><tspan>errors</tspan></tspan></text>
-  <path class="ai-connection" d="M310 78 L310 113.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M310 179 L310 222.5 L30 222.5 L30 258.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M310 179 L310 222.5 L460 222.5 L460 258.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M104 295 L378.8 295" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M460 324 L460 407.5 L200 407.5 L200 483.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M534 295 L549 295 L549 476 L420 476 L420 483.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M200 549 L200 616.25 L30 616.25 L30 676.3" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M200 549 L200 616.25 L310 616.25 L310 676.3" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M420 549 L420 616.25 L310 616.25 L310 676.3" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M386 295 C172.9739 295 -324.8659 377.4062 -200 550 C-148.0401 621.8206 30 594.8545 30 676.3" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M534 295 C639.2621 295 717.5414 486.0856 670 580 C644.9833 629.4186 540 628.1102 540 676.3" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M384 150 L643.8 150" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M534 295 L643.8 295" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <rect id="app_bg" class="ai-shape ai-rect" x="-396.968" y="347" width="760" height="90" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="1" opacity="0.15"/>
+  <text class="ai-label" x="-396.968" y="333.5" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)"><tspan x="-396.968" dy="-0"><tspan>Application Layer</tspan></tspan></text>
+  <rect id="async_bg" class="ai-shape ai-rect" x="-216.968" y="487" width="380" height="90" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="1" opacity="0.15"/>
+  <text class="ai-label" x="-216.968" y="473.5" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--accent-dark)"><tspan x="-216.968" dy="-0"><tspan>Async / Real-time</tspan></tspan></text>
+  <rect id="data_bg" class="ai-shape ai-rect" x="-156.968" y="627" width="630" height="95" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="1" opacity="0.15"/>
+  <text class="ai-label" x="-156.968" y="613.5" text-anchor="start" dominant-baseline="middle" font-size="12" fill="var(--secondary-dark)"><tspan x="-156.968" dy="-0"><tspan>Data Layer</tspan></tspan></text>
+  <text id="diagram_title" class="ai-shape ai-text" x="0" y="114" text-anchor="start" dominant-baseline="middle" font-size="18" fill="var(--foreground-1)">fullstack-sota Architecture</text>
+  <rect id="browser" class="ai-shape ai-rect" x="33.032" y="143" width="140" height="44" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="1"/>
+  <text class="ai-label" x="103.032" y="165" text-anchor="middle" dominant-baseline="middle"><tspan x="103.032" dy="-0"><tspan>Browser</tspan></tspan></text>
+  <rect id="nginx" class="ai-shape ai-rect" x="33.032" y="237" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+  <text class="ai-label" x="103.032" y="262" text-anchor="middle" dominant-baseline="middle"><tspan x="103.032" dy="-0"><tspan>Nginx Gateway</tspan></tspan></text>
+  <rect id="angular" class="ai-shape ai-rect" x="-376.968" y="367" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+  <text class="ai-label" x="-306.968" y="392" text-anchor="middle" dominant-baseline="middle"><tspan x="-306.968" dy="-0"><tspan>Angular 21</tspan></tspan></text>
+  <rect id="django" class="ai-shape ai-rect" x="-136.968" y="367" width="480" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+  <text class="ai-label" x="103.032" y="392" text-anchor="middle" dominant-baseline="middle"><tspan x="103.032" dy="-0"><tspan>Django 6 API</tspan></tspan></text>
+  <rect id="channels" class="ai-shape ai-rect" x="-196.968" y="507" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+  <text class="ai-label" x="-126.968" y="532" text-anchor="middle" dominant-baseline="middle"><tspan x="-126.968" dy="-0"><tspan>Django Channels</tspan></tspan></text>
+  <rect id="celery" class="ai-shape ai-rect" x="3.032" y="507" width="140" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+  <text class="ai-label" x="73.032" y="532" text-anchor="middle" dominant-baseline="middle"><tspan x="73.032" dy="-0"><tspan>Celery Workers</tspan></tspan></text>
+  <ellipse id="redis" class="ai-shape ai-ellipse" cx="-26.968000000000004" cy="674.5" rx="70" ry="27.5" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <text class="ai-label" x="-26.968" y="674.5" text-anchor="middle" dominant-baseline="middle"><tspan x="-26.968" dy="-0"><tspan>Redis</tspan></tspan></text>
+  <ellipse id="postgres" class="ai-shape ai-ellipse" cx="183.03199999999998" cy="674.5" rx="70" ry="27.5" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <text class="ai-label" x="183.032" y="674.5" text-anchor="middle" dominant-baseline="middle"><tspan x="183.032" dy="-8.75"><tspan>PostgreSQL</tspan></tspan><tspan x="183.032" dy="17.5"><tspan font-size="11.200000000000001">+ PostGIS</tspan></tspan></text>
+  <ellipse id="minio" class="ai-shape ai-ellipse" cx="343.032" cy="674.5" rx="70" ry="27.5" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+  <text class="ai-label" x="343.032" y="674.5" text-anchor="middle" dominant-baseline="middle"><tspan x="343.032" dy="-0"><tspan>MinIO / S3</tspan></tspan></text>
+  <rect id="keycloak" class="ai-shape ai-rect" x="423.032" y="240" width="140" height="44" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="1"/>
+  <text class="ai-label" x="493.032" y="262" text-anchor="middle" dominant-baseline="middle"><tspan x="493.032" dy="-0"><tspan>OAuth2 / OIDC</tspan></tspan></text>
+  <rect id="sentry" class="ai-shape ai-rect" x="423.032" y="370" width="140" height="44" fill="var(--foreground-3)" stroke="var(--foreground-1)" stroke-width="1"/>
+  <text class="ai-label" x="493.032" y="392" text-anchor="middle" dominant-baseline="middle"><tspan x="493.032" dy="-0"><tspan>Sentry</tspan></tspan></text>
+  <text class="ai-label" x="113.032" y="212" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="113.032" dy="-0"><tspan>HTTP / WS</tspan></tspan></text>
+  <text class="ai-label" x="298.032" y="252" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="298.032" dy="-0"><tspan>OIDC</tspan></tspan></text>
+  <text class="ai-label" x="-189.468" y="272" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="-189.468" dy="-0"><tspan>/web/</tspan></tspan></text>
+  <text class="ai-label" x="113.032" y="327" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="113.032" dy="-0"><tspan>/fs/</tspan></tspan></text>
+  <text class="ai-label" x="-186.968" y="382" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="-186.968" dy="-0"><tspan>REST API</tspan></tspan></text>
+  <text class="ai-label" x="383.032" y="382" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="383.032" dy="-0"><tspan>errors</tspan></tspan></text>
+  <text class="ai-label" x="-86.968" y="462" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="-86.968" dy="-0"><tspan>WS</tspan></tspan></text>
+  <text class="ai-label" x="83.032" y="462" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="83.032" dy="-0"><tspan>tasks</tspan></tspan></text>
+  <text class="ai-label" x="193.032" y="532" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="193.032" dy="-0"><tspan>ORM</tspan></tspan></text>
+  <text class="ai-label" x="318.032" y="532" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="318.032" dy="-0"><tspan>files</tspan></tspan></text>
+  <text class="ai-label" x="-66.968" y="602" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="-66.968" dy="-0"><tspan>channel layer</tspan></tspan></text>
+  <text class="ai-label" x="33.032" y="602" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="33.032" dy="-0"><tspan>broker</tspan></tspan></text>
+  <text class="ai-label" x="138.032" y="602" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="138.032" dy="-0"></tspan></text>
+  <path class="ai-connection" d="M103.032 187 L103.032 229.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M173.032 262 L415.832 262" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M33.032 262 L-306.968 262 L-306.968 359.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M103.032 287 L103.032 359.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-236.968 392 L-144.16799999999998 392" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M343.032 392 L415.832 392" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-96.968 417 L-96.968 499.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M73.032 417 L73.032 499.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M183.032 417 L183.032 639.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M308.032 417 L308.032 639.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M-76.968 557 L-76.968 639.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M23.032 557 L23.032 639.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M128.032 557 L128.032 639.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

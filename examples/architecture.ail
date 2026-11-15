@@ -3,167 +3,108 @@
    Audience: developers joining the project.
    They should understand: what services exist, how they connect,
    and the major technology choices (Angular, Django, PostgreSQL, Redis, etc.)
+
+   STRUCTURE
+   Four bands from top to bottom: client + gateway, application, async, data.
+   External services (auth, error tracking) sit in a column on the right.
+   Django is drawn wide: it is the hub, and each box below it sits under its
+   own part of Django, so every Django line drops straight down.
 */
 
-// === TEMPLATES ===
-
-template "svc" (name: "Service") {
-    rect body [width: 140, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: name]
-    anchor top_conn [position: body.top - 4, direction: up]
-    anchor bottom_conn [position: body.bottom + 4, direction: down]
-    anchor left_conn [position: body.left - 4, direction: left]
-    anchor right_conn [position: body.right + 4, direction: right]
+// === KINDS OF BOX ===
+template "svc" (name: "Service", w: 140) {
+    rect body [width: w, height: 50, fill: accent-light, stroke: accent-dark, stroke_width: 2, label: name]
 }
-
 template "store" (name: "DB") {
-    ellipse body [width: 130, height: 55, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: name]
-    anchor top_conn [position: body.top - 4, direction: up]
-    anchor bottom_conn [position: body.bottom + 4, direction: down]
-    anchor left_conn [position: body.left - 4, direction: left]
-    anchor right_conn [position: body.right + 4, direction: right]
+    ellipse body [width: 140, height: 55, fill: secondary-light, stroke: secondary-dark, stroke_width: 2, label: name]
 }
-
 template "ext" (name: "External") {
-    rect body [width: 130, height: 44, fill: foreground-3, stroke: foreground-1, stroke_width: 1, label: name]
-    anchor top_conn [position: body.top - 4, direction: up]
-    anchor bottom_conn [position: body.bottom + 4, direction: down]
-    anchor left_conn [position: body.left - 4, direction: left]
-    anchor right_conn [position: body.right + 4, direction: right]
+    rect body [width: 140, height: 44, fill: foreground-3, stroke: foreground-1, stroke_width: 1, label: name]
+}
+template "zone" (name: "", tint: accent-light, edge: accent-dark) {
+    rect body [fill: tint, stroke: edge, stroke_width: 1, opacity: 0.15,
+               label: name, label_position: above, align: start, label_fill: edge, font_size: 12]
 }
 
-// === ELEMENTS ===
+// === ZONES (declared first, so they are drawn behind) ===
+zone app_bg   [name: "Application Layer"]
+zone async_bg [name: "Async / Real-time"]
+zone data_bg  [name: "Data Layer", tint: secondary-light, edge: secondary-dark]
 
-group diagram {
-    // Background zones (drawn first = behind)
-    // Zone titles ride on their zone: `label_position: above` keeps them
-    // clear of the contents with no offset to guess.
-    rect app_bg [width: 580, height: 130, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.15,
-                 label: "Application Layer", label_position: above, align: start, label_fill: accent-dark, font_size: 12]
-
-    rect async_bg [width: 460, height: 110, fill: accent-light, stroke: accent-dark, stroke_width: 1, opacity: 0.10,
-                   label: "Async / Real-time", label_position: above, align: start, label_fill: accent-dark, font_size: 12]
-
-    rect data_bg [width: 620, height: 120, fill: secondary-light, stroke: secondary-dark, stroke_width: 1, opacity: 0.15,
-                  label: "Data Layer", label_position: above, align: start, label_fill: secondary-dark, font_size: 12]
-
-    // Client
-    rect browser [width: 160, height: 46, fill: foreground-3, stroke: foreground-1, stroke_width: 2, label: "Browser"]
-
-    // Gateway
-    svc nginx [name: "Nginx Gateway"]
-
-    // Application layer
-    svc angular [name: "Angular 21"]
-    svc django [name: "Django 6 API"]
-
-    // Async layer
-    svc celery [name: "Celery Workers"]
-    svc channels [name: "Django Channels"]
-
-    // Data layer
-    store postgres [name: "PostgreSQL<br><small>+ PostGIS</small>"]
-    store redis [name: "Redis"]
-    store minio [name: "MinIO / S3"]
-
-    // External / Auth
-    ext keycloak [name: "OAuth2 / OIDC"]
-    ext sentry [name: "Sentry"]
-
-    // Via points for routing Django data connections around async layer
-    circle via_pg [size: 1, opacity: 0]
-    circle via_minio [size: 1, opacity: 0]
-}
-
-// === LAYOUT VIA CONSTRAINTS ===
-
-// Anchor: diagram_title sets the horizontal center for the whole diagram
+// === BOXES ===
 text "fullstack-sota Architecture" diagram_title [font_size: 18, fill: foreground-1]
-constrain diagram_title.center_x = 310
-constrain diagram_title.center_y = 10
+ext browser [name: "Browser"]
+svc nginx [name: "Nginx Gateway"]
 
-// Browser at top, centered on title
+svc angular [name: "Angular 21"]
+svc django [name: "Django 6 API", w: 480]
+
+svc channels [name: "Django Channels"]
+svc celery [name: "Celery Workers"]
+
+store redis [name: "Redis"]
+store postgres [name: "PostgreSQL<br><small>+ PostGIS</small>"]
+store minio [name: "MinIO / S3"]
+
+ext keycloak [name: "OAuth2 / OIDC"]
+ext sentry [name: "Sentry"]
+
+// === LAYOUT ===
+// Spine: title, browser, gateway and Django share one centre line.
 constrain browser.center_x = diagram_title.center_x
-constrain browser.center_y = 55
-
-// Nginx below browser — 60px gap for routing room
 constrain nginx.center_x = diagram_title.center_x
-constrain nginx.center_y = 150
+constrain django.center_x = diagram_title.center_x
+constrain browser.top = diagram_title.bottom + 20
+constrain nginx.top = browser.bottom + 50
+constrain django.top = nginx.bottom + 80
 
-// App layer background centered on title
-constrain app_bg.center_x = 245
-constrain app_bg.center_y = 280
+// Application band: Angular to the left of Django.
+constrain angular.center_y = django.center_y
+constrain angular.right = django.left - 100
 
-// Angular and Django side by side in app layer
-constrain angular.center_x = 30
-constrain angular.center_y = 295
-constrain django.center_x = 460
-constrain django.center_y = angular.center_y
+// Async band: Channels and Celery each under their own part of Django.
+constrain channels.left = django.left - 60
+constrain celery.left = channels.right + 60
+constrain channels.top = django.bottom + 90
+constrain celery.top = channels.top
 
-// Async layer background — 100px gap from app layer for routing
-constrain async_bg.center_x = diagram_title.center_x
-constrain async_bg.center_y = 510
+// Data band: Redis under the gap between the two workers;
+// PostgreSQL under both Celery and Django, MinIO under Django's right end.
+constrain redis.center_x = midpoint(channels, celery)
+constrain postgres.left = celery.right - 30
+constrain minio.left = postgres.right + 20
+constrain redis.top = channels.bottom + 90
+constrain postgres.top = redis.top
+constrain minio.top = redis.top
 
-// Celery and Channels — aligned with data stores to get clean vertical connections
-constrain celery.center_x = 200
-constrain celery.center_y = 520
-constrain channels.center_x = 420
-constrain channels.center_y = celery.center_y
-
-// Data layer background — 80px gap from async for routing
-constrain data_bg.center_x = diagram_title.center_x
-constrain data_bg.center_y = 700
-
-// Data stores spread wider to avoid routing conflicts
-constrain postgres.center_x = angular.center_x
-constrain postgres.center_y = 715
-constrain redis.center_x = diagram_title.center_x
-constrain redis.center_y = postgres.center_y
-constrain minio.center_x = 540
-constrain minio.center_y = postgres.center_y
-
-// External services on the right — enough spacing
-constrain keycloak.center_x = 720
+// External column on the right, level with what talks to it.
+constrain keycloak.left = django.right + 80
+constrain sentry.left = keycloak.left
 constrain keycloak.center_y = nginx.center_y
-constrain sentry.center_x = keycloak.center_x
-constrain sentry.center_y = angular.center_y
+constrain sentry.center_y = django.center_y
 
-// Via points for routing Django → data connections wide around async layer
-constrain via_pg.center_x = -200
-constrain via_pg.center_y = 550
-constrain via_minio.center_x = 670
-constrain via_minio.center_y = 580
+// Zones wrap their boxes.
+constrain app_bg contains angular, django [padding: 20]
+constrain async_bg contains channels, celery [padding: 20]
+constrain data_bg contains redis, postgres, minio [padding_x: 60, padding_y: 20]   // title clears the Redis lines
 
 // === CONNECTIONS ===
-
-// Browser to Nginx
-browser.bottom -> nginx.top_conn [label: "HTTP / WS", routing: direct]
-
-// Nginx fans out to apps
-nginx.bottom_conn -> angular.top_conn [label: "/web/"]
-nginx.bottom_conn -> django.top_conn [label: "/fs/"]
-
-// Angular talks to Django via API
-angular.right_conn -> django.left_conn [label: "REST API"]
-
-// Django dispatches to async workers
-django.bottom_conn -> celery.top_conn [label: "tasks"]
-django.right_conn -> channels.top_conn [label: "WS"]
-
-// Celery to data stores
-celery.bottom_conn -> postgres.top_conn
-celery.bottom_conn -> redis.top_conn [label: "broker"]
-
-// Channels to Redis
-channels.bottom_conn -> redis.top_conn [label: "channel layer"]
-
-// Django → PostgreSQL routed around left side of async layer
-django.left_conn -> postgres.top_conn [routing: curved, via: via_pg, label: "ORM"]
-
-// Django → MinIO routed around right side of async layer
-django.right_conn -> minio.top_conn [routing: curved, via: via_minio, label: "files"]
-
-// Auth
-nginx.right_conn -> keycloak.left_conn [label: "OIDC"]
-
-// External
-django.right_conn -> sentry.left_conn [label: "errors"]
+// One row per connection. Ends without a side let the router draw a straight
+// line wherever two boxes overlap; a side (`nginx.left`) forces a corner.
+each c in [
+    {from: browser,        to: nginx,         on: "HTTP / WS"},
+    {from: nginx,          to: keycloak,      on: "OIDC"},
+    {from: nginx.left,     to: angular.top,   on: "/web/"},
+    {from: nginx,          to: django,        on: "/fs/"},
+    {from: angular,        to: django,        on: "REST API"},
+    {from: django,         to: sentry,        on: "errors"},
+    {from: django,         to: channels,      on: "WS"},
+    {from: django,         to: celery,        on: "tasks"},
+    {from: django,         to: postgres,      on: "ORM"},
+    {from: django,         to: minio,         on: "files"},
+    {from: channels,       to: redis,         on: "channel layer"},
+    {from: celery,         to: redis,         on: "broker"},
+    {from: celery,         to: postgres,      on: ""},
+] {
+    c.from -> c.to [label: c.on]
+}

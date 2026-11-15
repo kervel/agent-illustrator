@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -74.9568 660 455.9136" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 833.87 388" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -187,52 +187,54 @@
       <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
     </marker>
   </defs>
-  <circle id="human_via" class="ai-shape ai-circle" cx="285" cy="7" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
-  <circle id="agent_via" class="ai-shape ai-circle" cx="285" cy="299" r="0.5" fill="none" stroke="none" stroke-width="1.5"/>
   <g id="diagram" class="ai-container">
-    <g id="human_section" class="ai-container">
-      <g id="human_header" class="ai-container">
-        <text id="human_title" class="ai-shape ai-text" x="15" y="32" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--accent-dark)">HUMAN</text>
-        <text id="human_sub" class="ai-shape ai-text" x="74.324" y="30.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">— slow · persistent</text>
+    <g id="human" class="ai-container">
+      <g id="human_head" class="ai-container">
+        <text id="human_title" class="ai-shape ai-text" x="42.546" y="32.5" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--accent-dark)">HUMAN</text>
+        <text id="human_sub" class="ai-shape ai-text" x="15.011" y="49" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">slow · persistent</text>
       </g>
-      <g id="human_loop" class="ai-container">
-        <rect id="assign" class="ai-shape ai-rect" x="15" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="75" y="82" text-anchor="middle" dominant-baseline="middle"><tspan x="75" dy="-0"><tspan>Assign Task</tspan></tspan></text>
-        <rect id="tune" class="ai-shape ai-rect" x="155" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="215" y="82" text-anchor="middle" dominant-baseline="middle"><tspan x="215" dy="-0"><tspan>Tune Feedback</tspan></tspan></text>
-        <rect id="spot" class="ai-shape ai-rect" x="295" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="355" y="82" text-anchor="middle" dominant-baseline="middle"><tspan x="355" dy="-0"><tspan>Spot Patterns</tspan></tspan></text>
-        <rect id="evaluate" class="ai-shape ai-rect" x="435" y="57" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
-        <text class="ai-label" x="495" y="82" text-anchor="middle" dominant-baseline="middle"><tspan x="495" dy="-0"><tspan>Evaluate</tspan></tspan></text>
+      <g id="human_steps" class="ai-container">
+        <rect id="assign" class="ai-shape ai-rect" x="143.87" y="15" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="203.87" y="40" text-anchor="middle" dominant-baseline="middle"><tspan x="203.87" dy="-0"><tspan>Assign Task</tspan></tspan></text>
+        <rect id="tune" class="ai-shape ai-rect" x="293.859" y="15" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="353.859" y="40" text-anchor="middle" dominant-baseline="middle"><tspan x="353.859" dy="-0"><tspan>Tune Feedback</tspan></tspan></text>
+        <rect id="spot" class="ai-shape ai-rect" x="443.859" y="15" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="503.859" y="40" text-anchor="middle" dominant-baseline="middle"><tspan x="503.859" dy="-0"><tspan>Spot Patterns</tspan></tspan></text>
+        <rect id="evaluate" class="ai-shape ai-rect" x="593.859" y="15" width="120" height="50" fill="var(--accent-light)" stroke="var(--accent-dark)" stroke-width="2"/>
+        <text class="ai-label" x="653.859" y="40" text-anchor="middle" dominant-baseline="middle"><tspan x="653.859" dy="-0"><tspan>Evaluate</tspan></tspan></text>
       </g>
     </g>
-    <g id="agent_section" class="ai-container">
-      <g id="agent_header" class="ai-container">
-        <text id="agent_title" class="ai-shape ai-text" x="15" y="174" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--secondary-dark)">AGENT</text>
-        <text id="agent_sub" class="ai-shape ai-text" x="93.23" y="172.5" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">— fast · ephemeral</text>
+    <g id="agent" class="ai-container">
+      <g id="agent_head" class="ai-container">
+        <text id="agent_title" class="ai-shape ai-text" x="45.64" y="192.5" text-anchor="start" dominant-baseline="middle" font-size="14" fill="var(--secondary-dark)">AGENT</text>
+        <text id="agent_sub" class="ai-shape ai-text" x="15" y="209" text-anchor="start" dominant-baseline="middle" font-size="11" fill="var(--text-3)">fast · ephemeral</text>
       </g>
-      <g id="agent_loop" class="ai-container">
-        <rect id="task" class="ai-shape ai-rect" x="15" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="75" y="224" text-anchor="middle" dominant-baseline="middle"><tspan x="75" dy="-0"><tspan>Task</tspan></tspan></text>
-        <rect id="execute" class="ai-shape ai-rect" x="155" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="215" y="224" text-anchor="middle" dominant-baseline="middle"><tspan x="215" dy="-0"><tspan>Execute</tspan></tspan></text>
-        <rect id="check" class="ai-shape ai-rect" x="295" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="355" y="224" text-anchor="middle" dominant-baseline="middle"><tspan x="355" dy="-0"><tspan>Feedback</tspan></tspan></text>
-        <rect id="result" class="ai-shape ai-rect" x="435" y="199" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
-        <text class="ai-label" x="495" y="224" text-anchor="middle" dominant-baseline="middle"><tspan x="495" dy="-0"><tspan>Result</tspan></tspan></text>
+      <g id="agent_steps" class="ai-container">
+        <rect id="task" class="ai-shape ai-rect" x="143.87" y="175" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="203.87" y="200" text-anchor="middle" dominant-baseline="middle"><tspan x="203.87" dy="-0"><tspan>Task</tspan></tspan></text>
+        <rect id="execute" class="ai-shape ai-rect" x="293.87" y="175" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="353.87" y="200" text-anchor="middle" dominant-baseline="middle"><tspan x="353.87" dy="-0"><tspan>Execute</tspan></tspan></text>
+        <rect id="check" class="ai-shape ai-rect" x="443.87" y="175" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="503.87" y="200" text-anchor="middle" dominant-baseline="middle"><tspan x="503.87" dy="-0"><tspan>Feedback</tspan></tspan></text>
+        <rect id="result" class="ai-shape ai-rect" x="593.87" y="175" width="120" height="50" fill="var(--secondary-light)" stroke="var(--secondary-dark)" stroke-width="2"/>
+        <text class="ai-label" x="653.87" y="200" text-anchor="middle" dominant-baseline="middle"><tspan x="653.87" dy="-0"><tspan>Result</tspan></tspan></text>
       </g>
     </g>
   </g>
-  <text class="ai-label" x="286.7573" y="143.1556" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="286.7573" dy="-0"><tspan>tunes</tspan></tspan></text>
-  <path class="ai-connection" d="M135 82 L144.2 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M275 82 L284.2 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M415 82 L424.2 82" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M495 57 C495 -14.9568 356.9568 7 285 7 C213.0432 7 75 -14.9568 75 46.2" fill="none" stroke="var(--accent-dark)" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M135 224 L144.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M275 224 L284.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M415 224 L424.2 224" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M495 249 C495 320.9568 356.9568 299 285 299 C213.0432 299 75 320.9568 75 259.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M75 107 L75 195.4" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M495 199 L495 110.6" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M215 107 C215 174.0093 355 131.9907 355 191.8" fill="none" stroke="var(--accent-1)" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <g id="human_flow" class="ai-container">
+  </g>
+  <g id="agent_flow" class="ai-container">
+  </g>
+  <text class="ai-label" x="432.3068" y="110.6112" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="432.3068" dy="-0"><tspan>tunes</tspan></tspan></text>
+  <path class="ai-connection" d="M263.87 40 L283.05899999999997 40" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M413.859 40 L433.05899999999997 40" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M563.859 40 L583.0590000000001 40" fill="none" stroke="var(--accent-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M653.859 15 L653.859 0 L203.87 0 L203.87 4.199999999999999" fill="none" stroke="var(--accent-dark)" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M263.87 200 L283.07 200" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M413.87 200 L433.07 200" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M563.87 200 L583.07 200" fill="none" stroke="var(--secondary-dark)" stroke-width="3" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M653.87 225 L653.87 240 L203.87 240 L203.87 235.8" fill="none" stroke="var(--secondary-dark)" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M203.87 65 L203.87 171.4" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M653.8645 175 L653.8645 68.6" fill="none" stroke="var(--foreground-3)" stroke-width="1" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M353.859 65 L353.859 120 L503.87 120 L503.87 167.8" fill="none" stroke="var(--accent-1)" stroke-width="2" marker-end="url(#ai-arrow)"/>
 </svg>

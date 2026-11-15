@@ -1,9 +1,23 @@
-// A state machine drawn from its transition table.
-// The states are plain boxes; the transitions are one list of records, and one `each`
-// draws an arrow per record: `t.from -> t.to`, labelled with `t.on`. A record's field names
-// are free (`from`, `label`, `text` work too); every record needs every field the body uses.
-// A dotted value names a side or a part: `failed.left`.
-// To add a transition, add a record: no line of drawing code changes.
+/* A state machine drawn from its transition table, and one instance of it running.
+
+   The states are plain boxes; the transitions are one list of records, and one `each`
+   draws an arrow per record: `t.from -> t.to`, labelled with `t.on`. A record's field names
+   are free (`from`, `label`, `text` work too); every record needs every field the body uses.
+   A dotted value names a side or a part: `failed.left`.
+   To add a transition, add a record: no line of drawing code changes.
+
+   STORYBOARD (one click per event; the CSS version loops by itself)
+     start    a token appears on the start dot and rides into Idle
+     play     the token rides the "play" arrow; Playing lights up
+     pause    on to Paused, where the token waits (it breathes)
+     resume   back to Playing
+     error    down to Failed: it shakes and turns red
+     reset    back to Idle; the next instance starts from the dot
+   The heading names the event being handled (each keyframe's title);
+   the line under the machine says the state the instance is in.
+*/
+text "on start: Idle" heading [font_size: 20, font_weight: 700, align: start]
+
 circle start [size: 16, fill: role-ink, stroke: none]
 row states [gap: 150, align: center] {
     rect idle    [label: "Idle",    width: 110, height: 46, corner_radius: 20]
@@ -16,8 +30,10 @@ constrain start.center_y = idle.center_y
 constrain failed.center_x = playing.center_x
 constrain failed.top = states.bottom + 90
 
-start -> idle
+start -> idle as enter
 
+// Inside `each`, `as tr` names the arrows by their row: tr_1 = play, tr_2 = pause,
+// tr_3 = resume, tr_4 = stop, tr_5 = error, tr_6 = reset.
 each t in [
     {from: idle,    to: playing, on: "play"},
     {from: playing, to: paused,  on: "pause"},
@@ -26,5 +42,82 @@ each t in [
     {from: playing, to: failed,  on: "error"},
     {from: failed.left, to: idle.bottom, on: "reset"},   // a field may name a side
 ] {
-    t.from -> t.to [label: t.on]
+    t.from -> t.to as tr [label: t.on]
+}
+
+text "state: Idle" status [font_size: 18, align: start]
+constrain heading.left = start.left
+constrain heading.bottom = states.top - 50
+constrain status.left = heading.left
+constrain status.top = failed.bottom + 30
+
+// The instance: a token that waits on the start dot, then rides the arrows.
+circle token [size: 18, fill: role-primary, stroke: role-surface, stroke_width: 3, appears: later,
+              overlaps: [start, states, idle, playing, paused, failed]]
+constrain token.center = start.center
+
+motion [title: heading, title_swap: roll]
+
+// Taking a transition: the event in the heading is highlighted while the token rides its arrow.
+motion take(arrow: path) {
+    accent heading
+    move token along arrow [duration: slow]
+}
+
+keyframe "start" [title: "on start: Idle"] {
+    show token [enter: pop]
+    when token shown { move token along enter }
+    when token arrives { mark idle; pulse idle }
+}
+
+keyframe "play" [title: "on play: Idle → Playing"] {
+    take(tr_1)
+    when token arrives {
+        unmark idle
+        mark playing [tone: ok]
+        pulse playing
+        transform status [label: "state: Playing", swap: roll]
+    }
+}
+
+keyframe "pause" [title: "on pause: Playing → Paused"] {
+    take(tr_2)
+    when token arrives {
+        unmark playing
+        mark paused
+        transform status [label: "state: Paused (waiting)", swap: roll]
+        loop token [pulse, period: 1.2]       // waiting for the next event
+    }
+}
+
+keyframe "resume" [title: "on resume: Paused → Playing"] {
+    take(tr_3)
+    when token arrives {
+        unmark paused
+        mark playing [tone: ok]
+        pulse playing
+        transform status [label: "state: Playing", swap: roll]
+    }
+}
+
+keyframe "error" [title: "on error: Playing → Failed"] {
+    take(tr_5)
+    when token arrives {
+        unmark playing
+        shake failed
+        mark failed [tone: error]
+        transform token [fill: role-error]
+        transform status [label: "state: Failed", swap: roll]
+    }
+}
+
+keyframe "reset" [title: "on reset: Failed → Idle"] {
+    take(tr_6)
+    when token arrives {
+        unmark failed
+        mark idle
+        pulse idle
+        transform token [fill: initial]
+        transform status [label: "state: Idle", swap: roll]
+    }
 }

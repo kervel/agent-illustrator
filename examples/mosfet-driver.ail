@@ -287,9 +287,15 @@ template "motor" {
     anchor negative [position: bottom_lead.bottom, direction: down]
 }
 
-// Power rail template
-template "power_rail" {
+// Power rail template: the bar, its voltage above it, its domain beside it
+template "power_rail" (volts: "+V", domain: "", tint: secondary-dark) {
     rect rail [width: 60, height: 4, fill: secondary-dark, stroke: none]
+    text volts volts_label [font_size: 12, fill: secondary-dark]
+    text domain domain_label [font_size: 10, fill: tint]
+    constrain volts_label.center_x = rail.center_x
+    constrain volts_label.bottom = rail.top - 4
+    constrain domain_label.left = rail.right + 10
+    constrain domain_label.center_y = rail.center_y
     anchor conn [position: rail.bottom + 4, direction: down]
     anchor conn_left [position: rail.left, direction: down]
     anchor conn_right [position: rail.right, direction: down]
@@ -324,8 +330,8 @@ template "junction" {
 // === CIRCUIT INSTANTIATION ===
 
 // Power rails
-power_rail vcc_12v
-power_rail vcc_5v
+power_rail vcc_12v [volts: "+12V", domain: "Load"]
+power_rail vcc_5v [volts: "+5V", domain: "Gate Drive", tint: accent-1]
 
 // Load section (12V domain)
 motor load_motor
@@ -353,11 +359,11 @@ ground_sym gnd_led
 // === LAYOUT ===
 
 // 12V power rail and load - right side, top
-constrain vcc_12v.center_x = 450
-constrain vcc_12v.top = 20
+constrain vcc_12v.rail.center_x = 450
+constrain vcc_12v.rail.top = 20
 
 constrain load_motor.positive_x = vcc_12v.conn_x
-constrain load_motor.top = vcc_12v.bottom + 30
+constrain load_motor.top = vcc_12v.rail.bottom + 30
 
 constrain d_flyback.center_x = load_motor.center_x + 60
 constrain d_flyback.center_y = load_motor.center_y
@@ -371,11 +377,11 @@ constrain gnd_main.top = q_main.bottom + 40
 
 
 // 5V gate drive section - middle
-constrain vcc_5v.center_x = 200
-constrain vcc_5v.top = vcc_12v.top
+constrain vcc_5v.rail.center_x = 200
+constrain vcc_5v.rail.top = vcc_12v.rail.top
 
-constrain r_pullup.center_x = vcc_5v.center_x
-constrain r_pullup.top = vcc_5v.bottom + 30
+constrain r_pullup.center_x = vcc_5v.rail.center_x
+constrain r_pullup.top = vcc_5v.rail.bottom + 30
 
 constrain r_gate.center_y = r_pullup.bottom + 40
 constrain r_gate.left = r_pullup.right + 30
@@ -445,25 +451,6 @@ status_led.cathode -- gnd_led.conn [stroke: foreground-2, stroke_width: 1.5]
 
 
 // === ANNOTATIONS ===
-
-// Voltage labels above power rails
-text "+12V" label_12v [font_size: 12, fill: secondary-dark]
-text "+5V" label_5v [font_size: 12, fill: secondary-dark]
-constrain label_12v.center_x = vcc_12v.center_x
-constrain label_12v.bottom = vcc_12v.top - 4
-
-constrain label_5v.center_x = vcc_5v.center_x
-constrain label_5v.bottom = vcc_5v.top - 4
-
-// Domain labels beside power rails
-text "Load" domain_12v [font_size: 10, fill: secondary-dark]
-text "Gate Drive" domain_5v [font_size: 10, fill: accent-1]
-
-constrain domain_12v.left = vcc_12v.right + 10
-constrain domain_12v.center_y = vcc_12v.center_y
-
-constrain domain_5v.left = vcc_5v.right + 10
-constrain domain_5v.center_y = vcc_5v.center_y
 
 text "Status" status_label [font_size: 10, fill: green]
 constrain status_label.right = status_led.left - 8
