@@ -344,7 +344,7 @@ fn validate_constraint_expr_refs(
 }
 
 /// Compute Levenshtein edit distance between two strings
-fn levenshtein_distance(a: &str, b: &str) -> usize {
+pub(crate) fn levenshtein_distance(a: &str, b: &str) -> usize {
     let a_chars: Vec<char> = a.chars().collect();
     let b_chars: Vec<char> = b.chars().collect();
     let m = a_chars.len();

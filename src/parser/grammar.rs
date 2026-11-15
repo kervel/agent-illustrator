@@ -128,6 +128,60 @@ fn indexed_parts(toks: Vec<(Token, std::ops::Range<usize>)>) -> Vec<(Token, std:
     out
 }
 
+/// A record's fields have their own names, so a reserved word may name one:
+/// `{from: cl, label: "login"}` and `m.from`, `m.label` in an `each` body.
+/// A keyword becomes a plain word (1) as a record key: right after the `{`
+/// or a `,` of a record (a `{` that opens a list item, after `[` or `,`) and
+/// before `:`; (2) right after a `.`, except the words that name an edge or a
+/// part there (`a.top`, `a.center_x`, `c.line[4]`, `t.row[2]`).
+fn field_words(toks: Vec<(Token, std::ops::Range<usize>)>) -> Vec<(Token, std::ops::Range<usize>)> {
+    let keeps_meaning_after_dot = |t: &Token| {
+        matches!(
+            t,
+            Token::Left
+                | Token::Right
+                | Token::Top
+                | Token::Bottom
+                | Token::HorizontalCenter
+                | Token::VerticalCenter
+                | Token::Center
+                | Token::CenterXProp
+                | Token::CenterYProp
+                | Token::Line
+                | Token::Row
+        )
+    };
+    // One entry per open `{`: is it a record?
+    let mut braces: Vec<bool> = Vec::new();
+    let mut out: Vec<(Token, std::ops::Range<usize>)> = Vec::with_capacity(toks.len());
+    for i in 0..toks.len() {
+        let (tok, span) = &toks[i];
+        let prev = i.checked_sub(1).map(|j| &toks[j].0);
+        match tok {
+            Token::BraceOpen => {
+                braces.push(matches!(prev, Some(Token::BracketOpen) | Some(Token::Comma)));
+            }
+            Token::BraceClose => {
+                braces.pop();
+            }
+            _ => {}
+        }
+        if let Some(word) = crate::error::keyword_spelling(tok) {
+            let in_record = braces.last() == Some(&true);
+            let as_key = in_record
+                && matches!(prev, Some(Token::BraceOpen) | Some(Token::Comma))
+                && matches!(toks.get(i + 1), Some((Token::Colon, _)));
+            let as_field = prev == Some(&Token::Dot) && !keeps_meaning_after_dot(tok);
+            if as_key || as_field {
+                out.push((Token::Ident(word.to_string()), span.clone()));
+                continue;
+            }
+        }
+        out.push((tok.clone(), span.clone()));
+    }
+    out
+}
+
 pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     let len = input.len();
     if let Some(e) = reserved_word_as_name(input) {
@@ -135,7 +189,7 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
     }
 
     // Create a logos lexer and convert to token stream
-    let tokens = indexed_parts(crate::parser::lexer::lex(input).collect());
+    let tokens = field_words(indexed_parts(crate::parser::lexer::lex(input).collect()));
     let token_iter = tokens.into_iter().map(|(tok, span)| (tok, span.into()));
 
     // Turn the token iterator into a stream that chumsky can use
@@ -826,13 +880,26 @@ where
     // Bracketed list value: `[a, b, c]` (numbers or strings), e.g. at: [1,0],
     // col_labels: ["a","b"]. Lists contain atoms only (no nested lists).
     // `[st1.dot, st2.dot]`: a dotted name is one identifier in a list.
+    // The last part may be a side or the centre: `[failed.left, idle.center]`.
+    let dotted_segment = choice((
+        identifier.map(|i| i.node.0),
+        just(Token::Left).to("left".to_string()),
+        just(Token::Right).to("right".to_string()),
+        just(Token::Top).to("top".to_string()),
+        just(Token::Bottom).to("bottom".to_string()),
+        just(Token::Center).to("center".to_string()),
+        just(Token::CenterXProp).to("center_x".to_string()),
+        just(Token::CenterYProp).to("center_y".to_string()),
+        just(Token::HorizontalCenter).to("horizontal_center".to_string()),
+        just(Token::VerticalCenter).to("vertical_center".to_string()),
+    ));
     let dotted_atom = identifier
-        .then(just(Token::Dot).ignore_then(identifier).repeated().at_least(1).collect::<Vec<_>>())
+        .then(just(Token::Dot).ignore_then(dotted_segment).repeated().at_least(1).collect::<Vec<_>>())
         .map_with(|(head, rest), e| {
             let mut n = head.node.0;
             for r in rest {
                 n.push('.');
-                n.push_str(&r.node.0);
+                n.push_str(&r);
             }
             Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
         });
@@ -975,10 +1042,18 @@ where
             .ignore_then(string_literal)
             .map(|s| ShapeType::Text { content: s.node }),
         // `text a`: the text is the parameter or `each` variable `a`
-        // (the same as `text "{a}"`).
+        // (the same as `text "{a}"`); `text m.label`: a field of a record item.
         just(Token::Text)
             .ignore_then(identifier)
-            .map(|id| ShapeType::Text { content: format!("{{{}}}", id.node.0) }),
+            .then(just(Token::Dot).ignore_then(identifier).repeated().collect::<Vec<_>>())
+            .map(|(id, rest)| {
+                let mut name = id.node.0;
+                for r in rest {
+                    name.push('.');
+                    name.push_str(&r.node.0);
+                }
+                ShapeType::Text { content: format!("{{{}}}", name) }
+            }),
         // Callout: pointer direction comes from the `pointer:` modifier (default down)
         just(Token::Callout).to(ShapeType::Callout {
             pointer: PointerDir::Down,

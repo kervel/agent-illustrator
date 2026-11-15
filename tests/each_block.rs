@@ -348,3 +348,99 @@ each n in [a, bx] { n -> hub }"#;
     let caret = err.lines().skip_while(|l| !l.contains("each n in")).nth(1).expect(&err);
     assert_eq!(caret.find('^'), line.find("bx"), "{err}");
 }
+
+// ---- records: one item, several fields --------------------------------
+
+const STATES: &str = r#"row r [gap: 80] { rect idle [label: "Idle"]  rect run [label: "Running"]  rect done [label: "Done"] }
+"#;
+
+#[test]
+fn a_record_field_works_in_labels_strings_endpoints_and_constraints() {
+    let out = svg(&format!(r#"{STATES}
+each t, i in [{{from: idle, to: run, label: "start"}}, {{from: run, to: done, label: "finish"}}] {{
+    t.from -> t.to [label: "{{i+1}}: {{t.label}}"]
+    constrain t.to.width = 120
+}}
+each n in [{{at: done, text: "last", tint: role-ok-soft}}] {{
+    rect tag [label: n.text, fill: n.tint, width: 60, height: 20]
+    constrain tag.top = n.at.bottom + 10
+    text n.text cap [font_size: 10]
+    constrain cap.top = tag.bottom + 4
+}}"#));
+    assert_eq!(connections(&out), 2);
+    for t in [">1: start<", ">2: finish<"] {
+        assert!(out.contains(t), "missing {t}");
+    }
+    assert_eq!(out.matches(">last<").count(), 2);
+    assert_eq!(rect_of(&out, "run").2, 120.0);
+    assert_eq!(rect_of(&out, "done").2, 120.0);
+    assert!(out.contains("role-ok-soft"), "the tint field reached fill:");
+}
+
+#[test]
+fn reserved_words_name_fields() {
+    // `from`, `label`, `text` are keywords elsewhere; in a record and after `m.` they are fields.
+    let out = svg(&format!(r#"{STATES}
+each m in [{{from: idle, to: run, label: "go", text: "t"}}] {{ m.from -> m.to [label: m.label] }}"#));
+    assert!(out.contains(">go<"));
+    // ... and outside records they keep their meaning.
+    svg(r#"row r { rect a [label: "a"]  rect b [label: "b"] }
+a.right -> b.left [label: "x"]
+constrain b.top = a.top"#);
+}
+
+#[test]
+fn a_record_field_reaches_a_template_argument() {
+    let out = svg(r#"
+template "pill" (txt: "") { rect body [label: txt, width: 90, height: 30]  circle dot [size: 6] }
+row r [gap: 20] { each s in [{label: "Alpha"}, {label: "Beta"}] { pill p [txt: s.label] } }"#);
+    assert!(out.contains(">Alpha<") && out.contains(">Beta<"));
+}
+
+#[test]
+fn an_unknown_field_lists_the_fields_and_suggests_one() {
+    let err = render(&format!(r#"{STATES}
+each t in [{{from: idle, to: run, label: "a"}}, {{from: run, to: done, label: "b"}}] {{ t.from -> t.to [label: t.lable] }}"#))
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("`t.lable`") && err.contains("item 1 has: from, to, label"), "{err}");
+    assert!(err.contains("did you mean `label`"), "{err}");
+}
+
+#[test]
+fn a_field_missing_from_some_items_names_them() {
+    let err = render(&format!(r#"{STATES}
+each t in [{{from: idle, to: run, label: "a"}}, {{from: run, to: done}}, {{from: done, to: idle}}] {{ t.from -> t.to [label: t.label] }}"#))
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("items 2 and 3 have no field `label`") && err.contains("add `label: ...`"), "{err}");
+}
+
+#[test]
+fn a_whole_record_is_an_error_that_lists_its_fields() {
+    for body in ["t -> idle", "rect x [label: t]", "text t q", r#"text "{t}" q"#, "constrain t.width = 4"] {
+        let err = render(&format!(r#"{STATES}
+each t in [{{from: idle, to: run}}] {{ {body} }}"#))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("`t` is a whole record; pick a field: t.from, t.to"), "{body}: {err}");
+    }
+}
+
+#[test]
+fn a_quoted_name_in_a_field_says_to_drop_the_quotes() {
+    let err = render(&format!(r#"{STATES}
+each t in [{{from: "idle", to: run}}] {{ t.from -> t.to }}"#))
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("`t.from` (item 1) is the string \"idle\"") && err.contains("without quotes"), "{err}");
+}
+
+#[test]
+fn a_typo_in_a_field_is_reported_at_the_field() {
+    let src = format!(r#"{STATES}each t in [{{from: idle, to: rnu}}] {{ t.from -> t.to }}"#);
+    let err = render(&src).unwrap_err().to_string();
+    let line = err.lines().find(|l| l.contains("each t in")).expect(&err);
+    let caret = err.lines().skip_while(|l| !l.contains("each t in")).nth(1).expect(&err);
+    assert_eq!(caret.find('^'), line.find("rnu"), "{err}");
+}

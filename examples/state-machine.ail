@@ -1,0 +1,30 @@
+// A state machine drawn from its transition table.
+// The states are plain boxes; the transitions are one list of records, and one `each`
+// draws an arrow per record: `t.from -> t.to`, labelled with `t.on`. A record's field names
+// are free (`from`, `label`, `text` work too); every record needs every field the body uses.
+// A dotted value names a side or a part: `failed.left`.
+// To add a transition, add a record: no line of drawing code changes.
+circle start [size: 16, fill: role-ink, stroke: none]
+row states [gap: 150, align: center] {
+    rect idle    [label: "Idle",    width: 110, height: 46, corner_radius: 20]
+    rect playing [label: "Playing", width: 110, height: 46, corner_radius: 20, fill: role-ok-soft]
+    rect paused  [label: "Paused",  width: 110, height: 46, corner_radius: 20, fill: role-warn-soft]
+}
+rect failed [label: "Failed", width: 110, height: 46, corner_radius: 20, fill: role-error-soft, stroke: role-error]
+constrain start.right = idle.left - 50
+constrain start.center_y = idle.center_y
+constrain failed.center_x = playing.center_x
+constrain failed.top = states.bottom + 90
+
+start -> idle
+
+each t in [
+    {from: idle,    to: playing, on: "play"},
+    {from: playing, to: paused,  on: "pause"},
+    {from: paused,  to: playing, on: "resume"},
+    {from: playing, to: idle,    on: "stop"},
+    {from: playing, to: failed,  on: "error"},
+    {from: failed.left, to: idle.bottom, on: "reset"},   // a field may name a side
+] {
+    t.from -> t.to [label: t.on]
+}

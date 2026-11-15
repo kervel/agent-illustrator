@@ -1,7 +1,8 @@
 # Design: connections (and other statements) from data
 
-Status: approved. **S1 (P1) implemented**; S2–S6 not started. Motivating example:
-`examples/sequence-diagram.ail`.
+Status: approved. **S1 (P1) released in v0.2.49; S2 (P2) implemented**; S3–S6 not started.
+Maintainer decisions: keywords may name fields (open question 1: yes); a missing field is an
+error, there are no defaults (open question 4). Motivating example: `examples/sequence-diagram.ail`.
 
 S1 as built (differences from §2 P1 noted):
 - `joined_path` keeps dots; `parser::join_constraint_parts` joins them at the end of `parse`
@@ -15,6 +16,25 @@ S1 as built (differences from §2 P1 noted):
   same scope (the document, or the template body). It does not see names from outside a template.
 - Example: `examples/fan-out.ail`. Docs: skill.md (`each` + Reach For row), grammar.md,
   examples.md, `--doc fan-out`.
+
+S2 as built (differences from §2 P2 noted):
+- Keyword field names come from a token pass (`field_words` in `parser/grammar.rs`), not from a
+  `word` parser. A keyword becomes a plain word as a record key (after the `{` or `,` of a `{`
+  that opens a list item, before `:`), and after a `.`. The exceptions after a dot are the words
+  that already mean something there: edges, centres, `line`, `row`.
+- A dotted list or record value may end in an edge (`from: failed.left`, `via: [a.top]`).
+- `text m.label` works (the `text NAME` shorthand takes a dotted name).
+- Problems are collected over all items and reported together. A field that no item has gives
+  "no item has a field `lable` (item 1 has: ...); did you mean `label`?". A field missing from
+  only some items gives "items 2 and 3 have no field `label`, which the other items have".
+- A whole record is an error in every position, including `constrain t.width`, where `width` is
+  a property, not a field.
+- `m.f.part` in a value position whose field is not a name ("`m.f` is the string "x", which
+  has no part `part`") is an error. In S1 such a value was left alone.
+- The class template still uses its four status lists. Moving it to one record list needs
+  `style: a.st`, so it waits for named modifier sets (a).
+- Example: `examples/state-machine.ail`. Docs: skill.md (`each` + Reach For row), grammar.md,
+  examples.md, `--doc records`.
 
 ## 1. The problem, measured against today's code
 

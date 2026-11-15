@@ -35,6 +35,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Several lines in a box | `label: "a<br>b<br>c"` | one `text` element per line |
 | One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
 | The same connection or constraint for several elements (a server to each client) | `each c in [c1, c2, c3] { srv -> c }` (`--doc each`) | one hand-copied line per element |
+| Connections from a table (transitions, dependencies, associations) | `each t in [{from: a, to: b, on: "go"}, ...] { t.from -> t.to [label: t.on] }` (`--doc each`) | parallel lists, or one hand-written line per row |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
@@ -475,7 +476,7 @@ not what the tool is for.
 list parameter of the enclosing template (`attrs: []`, default empty) or a
 literal list `["a", "b"]`; it works outside templates too. Inside the body
 `NAME` is the item: `label: NAME`, `text NAME` (that is `text "{NAME}"`), or
-inside a string `"{NAME}"`. Items are strings, numbers or names (below); markup (`<b>`, `<i>`)
+inside a string `"{NAME}"`. Items are strings, numbers, names or records (below); markup (`<b>`, `<i>`)
 works as in any label. An empty list makes nothing, so a compartment that has
 no items simply is not there.
 A `{name}` that no parameter or `each` variable binds shows up literally; lint
@@ -515,6 +516,24 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   the list. A loop variable may not have the name of an element that the body
   also uses as a name (`each a in [...] { a -> hub }` beside a `rect a`):
   rename the variable.
+- **Records: several values per item.** An item may be a record,
+  `{from: idle, to: run, on: "start"}`; `NAME.FIELD` is that field wherever
+  the item itself could go: a value (`label: t.on`, `fill: t.tint`, a
+  template argument), a name (`t.from -> t.to`, `constrain t.to.width = 90`),
+  a string (`"{i+1}: {t.on}"`), `text t.on`. A field holding a name may be
+  dotted (`from: failed.left`). Field names are free, reserved words
+  included (`from`, `label`, `text`).
+  ```
+  each t in [{from: idle, to: run, on: "start"}, {from: run, to: idle, on: "stop"}] {
+      t.from -> t.to [label: t.on]
+  }
+  ```
+  Every record needs every field the body uses; there are no defaults (a
+  field missing from some items names those items; a field no item has lists
+  the fields and suggests the closest). A whole record where one value goes
+  (`label: t`, `t -> x`) is an error that lists `t.from, t.to, ...`.
+  `examples/state-machine.ail` draws a state machine from its transition
+  table this way.
 - **Index.** `each NAME, i in LIST` binds `i` to the 0-based position. It is a
   number: usable in a string (`"{i}"`, or `"{i+1}"` to count from 1) or where a number goes (`width: i`),
   not as a label by itself (`label: i` asks for quotes, like any number).

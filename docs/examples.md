@@ -891,3 +891,19 @@ each c in [c1, c3] {                            // the healthy clients: one arro
 }
 srv.right -> c2.left [routing: direct, label: "no reply", stroke: role-error, stroke_dasharray: dashed, to_end: open]
 ```
+
+Items may be records: `t.from`, `t.on` are fields, usable as names, values and in strings.
+A state machine from its transition table (`examples/state-machine.ail`):
+
+```
+each t in [
+    {from: idle,    to: playing, on: "play"},
+    {from: playing, to: paused,  on: "pause"},
+    {from: paused,  to: playing, on: "resume"},
+    {from: playing, to: idle,    on: "stop"},
+    {from: playing, to: failed,  on: "error"},
+    {from: failed.left, to: idle.bottom, on: "reset"},   // a field may name a side
+] {
+    t.from -> t.to [label: t.on]
+}
+```

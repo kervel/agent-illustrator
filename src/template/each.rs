@@ -17,7 +17,7 @@ use crate::parser::ast::{
     PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue,
 };
 
-use super::names::{head_of, splice_dotted, splice_path};
+use super::names::head_of;
 use super::registry::TemplateError;
 
 type Stmts = Vec<Spanned<Statement>>;
@@ -139,15 +139,17 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
 
     let declared = declared_names(&e.body);
     let mut out = Vec::new();
+    let mut problems: Vec<Problem> = Vec::new();
     for (k, item) in items.iter().enumerate() {
         let value = match &item.node {
             v @ (StyleValue::String(_)
             | StyleValue::Number { .. }
             | StyleValue::Keyword(_)
-            | StyleValue::Identifier(_)) => v.clone(),
+            | StyleValue::Identifier(_)
+            | StyleValue::Record(_)) => v.clone(),
             other => {
                 return Err(err(format!(
-                    "each {} in ...: item {} is {}; items must be strings or numbers",
+                    "each {} in ...: item {} is {}; items are strings, numbers, names or records ({{from: a, label: \"x\"}})",
                     var,
                     k + 1,
                     describe(other)
@@ -173,22 +175,101 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
         }
         let renames: HashMap<String, String> =
             declared.iter().map(|n| (n.clone(), format!("{}_{}", n, k + 1))).collect();
-        let mut errors = Vec::new();
         let body: Stmts = e
             .body
             .iter()
             .cloned()
             .map(|s| rename_stmt(s, &renames))
-            .map(|s| subst_stmt(s, &vars, &mut errors))
+            .map(|s| subst_stmt(s, &vars, &mut problems))
             .collect();
-        if let Some(first) = errors.into_iter().next() {
-            return Err(err(first));
+        if !problems.is_empty() {
+            // Keep going: a field missing from some items is reported for all of them.
+            continue;
         }
         let mut body = expand_in(body, lists, scope)?;
         crate::parser::join_constraint_parts(&mut body);
         out.extend(body);
     }
+    if !problems.is_empty() {
+        return Err(err(report(problems, &items)));
+    }
     Ok(out)
+}
+
+/// Something wrong with how the body uses the loop variables.
+enum Problem {
+    Msg(String),
+    /// `m.f` where item `item` (1-based) has no field `f`.
+    Missing { header: String, written: String, field: String, item: usize },
+}
+
+/// The fields of a record item.
+fn field_names(item: &StyleValue) -> Vec<String> {
+    match item {
+        StyleValue::Record(fields) => fields.iter().map(|(k, _)| k.node.0.clone()).collect(),
+        _ => Vec::new(),
+    }
+}
+
+/// One message for everything that went wrong, every item considered.
+fn report(problems: Vec<Problem>, items: &[Spanned<StyleValue>]) -> String {
+    let mut lines: Vec<String> = Vec::new();
+    // field -> (header, written, items missing it), in first-seen order
+    let mut missing: Vec<(String, String, String, Vec<usize>)> = Vec::new();
+    for p in problems {
+        match p {
+            Problem::Msg(m) => {
+                if !lines.contains(&m) {
+                    lines.push(m);
+                }
+            }
+            Problem::Missing { header, written, field, item } => {
+                match missing.iter_mut().find(|(_, w, f, _)| *w == written && *f == field) {
+                    Some((_, _, _, its)) => {
+                        if !its.contains(&item) {
+                            its.push(item)
+                        }
+                    }
+                    None => missing.push((header, written, field, vec![item])),
+                }
+            }
+        }
+    }
+    let records = items.iter().filter(|i| matches!(i.node, StyleValue::Record(_))).count();
+    for (header, written, field, its) in missing {
+        if its.len() == records {
+            // No item has it: a misspelt field.
+            let first = its[0];
+            let fields = field_names(&items[first - 1].node);
+            let close = fields
+                .iter()
+                .filter(|f| crate::layout::levenshtein_distance(f, &field) <= 2)
+                .min_by_key(|f| crate::layout::levenshtein_distance(f, &field));
+            let hint = close.map(|c| format!("; did you mean `{}`?", c)).unwrap_or_default();
+            lines.push(format!(
+                "{}: `{}`: no item has a field `{}` (item {} has: {}){}",
+                header,
+                written,
+                field,
+                first,
+                fields.join(", "),
+                hint
+            ));
+        } else {
+            let names: Vec<String> = its.iter().map(|i| i.to_string()).collect();
+            let which = if its.len() == 1 {
+                format!("item {} has", names[0])
+            } else {
+                let (last, rest) = names.split_last().unwrap();
+                format!("items {} and {} have", rest.join(", "), last)
+            };
+            lines.push(format!(
+                "{}: `{}`: {} no field `{}`, which the other items have; a field cannot be left out, so add `{}: ...` there",
+                header, written, which, field, field
+            ));
+        }
+    }
+    lines.join("\n")
 }
 
 // ---- names declared inside a body ------------------------------------
@@ -410,224 +491,299 @@ fn rename_expr(e: &mut ConstraintExpr, m: &HashMap<String, String>) {
 
 // ---- substituting the loop variables ---------------------------------
 
-fn interpolate(text: &str, vars: &Vars) -> String {
-    let mut out = text.to_string();
-    for (k, b) in vars {
-        let v = &b.value;
-        let needle = format!("{{{}}}", k);
-        if out.contains(&needle) {
-            let value = match v {
-                StyleValue::String(s) | StyleValue::Keyword(s) => s.clone(),
-                StyleValue::Number { value, .. } => format!("{}", value),
-                StyleValue::Identifier(id) => id.0.clone(),
-                _ => continue,
+/// What `written` (`m`, `m.from`, `m.from.top`, `n.top`) means when its head
+/// is a loop variable: the value, the rest of the name after it, where the
+/// value was written, and how to call it in a message. `None` when the head
+/// is not a loop variable, or on a problem (pushed).
+fn lookup(written: &str, vars: &Vars, problems: &mut Vec<Problem>) -> Option<(StyleValue, Option<String>, Span, String)> {
+    let (head, rest) = head_of(written);
+    let b = vars.get(head)?;
+    match &b.value {
+        StyleValue::Record(fields) => {
+            let names: Vec<String> = fields.iter().map(|(k, _)| k.node.0.clone()).collect();
+            let Some(rest) = rest else {
+                problems.push(Problem::Msg(format!(
+                    "{}: `{}` is a whole record; pick a field: {}",
+                    b.header,
+                    head,
+                    names.iter().map(|n| format!("{}.{}", head, n)).collect::<Vec<_>>().join(", ")
+                )));
+                return None;
             };
-            out = out.replace(&needle, &value);
-        }
-        // `{i+1}` / `{i-1}`: a number variable plus or minus a whole number
-        // (1-based numbering from the 0-based index).
-        if let StyleValue::Number { value, .. } = v {
-            for sign in ['+', '-'] {
-                let prefix = format!("{{{}{}", k, sign);
-                while let Some(start) = out.find(&prefix) {
-                    let rest = &out[start + prefix.len()..];
-                    let Some(end) = rest.find('}') else { break };
-                    let Ok(n) = rest[..end].trim().parse::<f64>() else { break };
-                    let r = if sign == '+' { value + n } else { value - n };
-                    let end_abs = start + prefix.len() + end + 1;
-                    out.replace_range(start..end_abs, &format!("{}", r));
+            let (field, after) = head_of(rest);
+            match fields.iter().find(|(k, _)| k.node.0 == field) {
+                Some((_, v)) => Some((
+                    v.node.clone(),
+                    after.map(str::to_string),
+                    v.span.clone(),
+                    format!("`{}.{}` (item {})", head, field, b.item),
+                )),
+                None => {
+                    problems.push(Problem::Missing {
+                        header: b.header.clone(),
+                        written: format!("{}.{}", head, field),
+                        field: field.to_string(),
+                        item: b.item,
+                    });
+                    None
                 }
             }
         }
+        v => {
+            let what = if b.is_index { format!("`{}`", head) } else { format!("item {}", b.item) };
+            Some((v.clone(), rest.map(str::to_string), b.span.clone(), what))
+        }
     }
+}
+
+/// The name `written` stands for where an element name goes, with its span
+/// (the list item, or the record field, so a typo is shown where it is).
+fn name_at(written: &str, vars: &Vars, problems: &mut Vec<Problem>) -> Option<(String, Span)> {
+    let head = head_of(written).0;
+    let b = vars.get(head)?;
+    let (value, rest, span, what) = lookup(written, vars, problems)?;
+    let name = match &value {
+        StyleValue::Identifier(id) => id.0.clone(),
+        StyleValue::Keyword(k) => k.clone(),
+        _ => {
+            let given = if b.is_index {
+                format!(
+                    "`{}` is the item's position (a number), not an element; name the item instead: each it, {} in [a, b] {{ it -> ... }}",
+                    head, head
+                )
+            } else if let StyleValue::String(s) = &value {
+                format!("{} is the string \"{}\"; a name goes without quotes: {}", what, s, s)
+            } else {
+                format!("{} is {}, not the name of an element", what, describe(&value))
+            };
+            problems.push(Problem::Msg(format!(
+                "{}: `{}` stands where a name goes, but {}",
+                b.header, written, given
+            )));
+            return None;
+        }
+    };
+    let full = match rest {
+        Some(r) => format!("{}.{}", name, r),
+        None => name,
+    };
+    Some((full, span))
+}
+
+/// The text a value shows inside a string, if it has one.
+fn as_text(v: &StyleValue) -> Option<String> {
+    match v {
+        StyleValue::String(s) | StyleValue::Keyword(s) => Some(s.clone()),
+        StyleValue::Number { value, .. } => Some(format!("{}", value)),
+        StyleValue::Identifier(id) => Some(id.0.clone()),
+        _ => None,
+    }
+}
+
+/// `{m}`, `{m.label}`, `{i}`, `{i+1}`, `{i-1}` filled in; any other `{...}`
+/// stays as written (a template parameter, or text lint reports).
+fn interpolate(text: &str, vars: &Vars, problems: &mut Vec<Problem>) -> String {
+    let mut out = String::new();
+    let mut rest = text;
+    while let Some(start) = rest.find('{') {
+        out.push_str(&rest[..start]);
+        let after = &rest[start + 1..];
+        let Some(end) = after.find('}') else {
+            out.push_str(&rest[start..]);
+            return out;
+        };
+        let expr = after[..end].trim();
+        match fill(expr, vars, problems) {
+            Some(t) => out.push_str(&t),
+            None => out.push_str(&rest[start..start + end + 2]),
+        }
+        rest = &after[end + 1..];
+    }
+    out.push_str(rest);
     out
 }
 
-/// The name a loop variable stands for where a name goes (an endpoint, a
-/// constraint, `contains`, an anchor position). `None` when `head` is not a
-/// loop variable; an error when it is one whose value is not a name.
-fn name_of(head: &str, written: &str, vars: &Vars, errors: &mut Vec<String>) -> Option<(String, Span)> {
-    let b = vars.get(head)?;
-    let given = match &b.value {
-        StyleValue::Identifier(id) => return Some((id.0.clone(), b.span.clone())),
-        StyleValue::Keyword(k) => return Some((k.clone(), b.span.clone())),
-        _ if b.is_index => format!(
-            "`{}` is the item's position (a number), not an element; name the item instead: each it, {} in [a, b] {{ it -> ... }}",
-            head, head
-        ),
-        StyleValue::String(s) => format!(
-            "item {} is the string \"{}\"; a name goes without quotes: [{}, ...]",
-            b.item, s, s
-        ),
-        other => format!("item {} is {}, not the name of an element", b.item, describe(other)),
-    };
-    errors.push(format!("{}: `{}` stands where a name goes, but {}", b.header, written, given));
-    None
+fn fill(expr: &str, vars: &Vars, problems: &mut Vec<Problem>) -> Option<String> {
+    // `{i+1}` / `{i-1}`: a number variable plus or minus a whole number.
+    if let Some(at) = expr.find(['+', '-']) {
+        let (name, n) = (expr[..at].trim(), expr[at + 1..].trim());
+        let StyleValue::Number { value, .. } = vars.get(name)?.value else { return None };
+        let n: f64 = n.parse().ok()?;
+        return Some(format!("{}", if expr.as_bytes()[at] == b'+' { value + n } else { value - n }));
+    }
+    vars.get(head_of(expr).0)?;
+    let (value, rest, _, what) = lookup(expr, vars, problems)?;
+    if let Some(r) = rest {
+        // `{m.from.top}`: no text for a part of an element
+        problems.push(Problem::Msg(format!("`{{{}}}`: {} has no part `{}` to show as text", expr, what, r)));
+        return None;
+    }
+    as_text(&value)
 }
 
-/// A dotted name (`n`, `n.top`) with a loop variable at its head replaced.
-fn subst_dotted(id: &mut Spanned<Identifier>, vars: &Vars, errors: &mut Vec<String>) {
-    let written = id.node.0.clone();
-    if let Some((target, span)) = name_of(head_of(&written).0, &written, vars, errors) {
-        id.node = Identifier::new(splice_dotted(&written, &target));
+/// A dotted name (`n`, `n.top`, `m.from`) with a loop variable at its head replaced.
+fn subst_dotted(id: &mut Spanned<Identifier>, vars: &Vars, problems: &mut Vec<Problem>) {
+    if let Some((full, span)) = name_at(&id.node.0.clone(), vars, problems) {
+        id.node = Identifier::new(full);
         id.span = span;
     }
 }
 
-fn subst_path(p: &mut Spanned<ElementPath>, vars: &Vars, errors: &mut Vec<String>) {
-    let Some(first) = p.node.segments.first() else { return };
+fn subst_path(p: &mut Spanned<ElementPath>, vars: &Vars, problems: &mut Vec<Problem>) {
+    if p.node.segments.is_empty() {
+        return;
+    }
     let written: Vec<&str> = p.node.segments.iter().map(|s| s.node.0.as_str()).collect();
     let written = written.join(".");
-    if let Some((target, span)) = name_of(&first.node.0.clone(), &written, vars, errors) {
-        p.node = splice_path(&p.node, &target, &span);
+    if let Some((full, span)) = name_at(&written, vars, problems) {
+        p.node = ElementPath {
+            segments: full.split('.').map(|t| Spanned::new(Identifier::new(t), span.clone())).collect(),
+        };
         // The caret of a "no such element" error lands on the list item.
         p.span = span;
     }
 }
 
-fn subst_prop(p: &mut PropertyRef, vars: &Vars, errors: &mut Vec<String>) {
-    subst_path(&mut p.element, vars, errors);
+fn subst_prop(p: &mut PropertyRef, vars: &Vars, problems: &mut Vec<Problem>) {
+    subst_path(&mut p.element, vars, problems);
 }
 
-/// `n.top -> hub`: the endpoint's element is the head, the rest its anchor.
-fn subst_endpoint(r: &mut AnchorReference, vars: &Vars, errors: &mut Vec<String>) {
+/// `n.top -> hub`, `m.from -> m.to`: the head is the element, the rest its anchor.
+fn subst_endpoint(r: &mut AnchorReference, vars: &Vars, problems: &mut Vec<Problem>) {
     let written = match &r.anchor {
         Some(a) => format!("{}.{}", r.element.node.0, a.node),
         None => r.element.node.0.clone(),
     };
-    let Some((target, span)) = name_of(&r.element.node.0.clone(), &written, vars, errors) else { return };
-    let (head, rest) = head_of(&target);
-    if let Some(rest) = rest {
-        // `c: board.led` -> element `board`, anchor `led[.top]`
-        let anchor = match &r.anchor {
-            Some(a) => format!("{}.{}", rest, a.node),
-            None => rest.to_string(),
-        };
+    let Some((full, span)) = name_at(&written, vars, problems) else { return };
+    let (head, rest) = head_of(&full);
+    r.anchor = rest.map(|rest| {
         let aspan = r.anchor.as_ref().map(|a| a.span.clone()).unwrap_or_else(|| span.clone());
-        r.anchor = Some(Spanned::new(anchor, aspan));
-    }
+        Spanned::new(rest.to_string(), aspan)
+    });
     r.element = Spanned::new(Identifier::new(head), span);
 }
 
-fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, errors: &mut Vec<String>) {
+fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, problems: &mut Vec<Problem>) {
     match e {
         ConstraintExpr::Equal { left, right } | ConstraintExpr::EqualWithOffset { left, right, .. } => {
-            subst_prop(left, vars, errors);
-            subst_prop(right, vars, errors);
+            subst_prop(left, vars, problems);
+            subst_prop(right, vars, problems);
         }
         ConstraintExpr::Constant { left, .. }
         | ConstraintExpr::GreaterOrEqual { left, .. }
-        | ConstraintExpr::LessOrEqual { left, .. } => subst_prop(left, vars, errors),
+        | ConstraintExpr::LessOrEqual { left, .. } => subst_prop(left, vars, problems),
         ConstraintExpr::Midpoint { target, a, b, .. } => {
-            subst_prop(target, vars, errors);
-            subst_dotted(a, vars, errors);
-            subst_dotted(b, vars, errors);
+            subst_prop(target, vars, problems);
+            subst_dotted(a, vars, problems);
+            subst_dotted(b, vars, problems);
         }
         ConstraintExpr::Contains { container, elements, .. } => {
             for id in std::iter::once(container).chain(elements.iter_mut()) {
-                subst_dotted(id, vars, errors);
+                subst_dotted(id, vars, problems);
             }
         }
     }
 }
 
-/// The name a loop variable holds, if it holds one.
-fn bound_name(vars: &Vars, head: &str) -> Option<String> {
-    vars.get(head).and_then(|b| match &b.value {
-        StyleValue::Identifier(t) => Some(t.0.clone()),
-        StyleValue::Keyword(k) => Some(k.clone()),
-        _ => None,
-    })
-}
-
-fn subst_value(v: &mut Spanned<StyleValue>, vars: &Vars) {
+fn subst_value(v: &mut Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) {
     match &mut v.node {
         StyleValue::Identifier(id) => {
-            if let Some(b) = vars.get(&id.0) {
-                v.node = b.value.clone();
-            } else if let (head, Some(_)) = head_of(&id.0) {
-                // `via: [n.dot]`, `position: n.top`: a name with a part.
-                if let Some(target) = bound_name(vars, head) {
-                    id.0 = splice_dotted(&id.0, &target);
-                }
+            let written = id.0.clone();
+            if !vars.contains_key(head_of(&written).0) {
+                return;
+            }
+            match lookup(&written, vars, problems) {
+                // `label: m`, `label: m.label`, `fill: m.tint`: the value itself
+                Some((value, None, _, _)) => v.node = value,
+                // `position: n.top`, `via: [m.from.dot]`: a part of the element it names
+                Some((StyleValue::Identifier(t), Some(r), _, _)) => id.0 = format!("{}.{}", t.0, r),
+                Some((StyleValue::Keyword(t), Some(r), _, _)) => id.0 = format!("{}.{}", t, r),
+                Some((other, Some(r), _, what)) => problems.push(Problem::Msg(format!(
+                    "`{}`: {} is {}, which has no part `{}`",
+                    written,
+                    what,
+                    describe(&other),
+                    r
+                ))),
+                None => {}
             }
         }
         StyleValue::IdentifierList(ids) => {
             for id in ids {
-                if let Some(target) = bound_name(vars, head_of(&id.0).0) {
-                    id.0 = splice_dotted(&id.0, &target);
+                if let Some((full, _)) = name_at(&id.0.clone(), vars, problems) {
+                    id.0 = full;
                 }
             }
         }
-        StyleValue::String(s) if s.contains('{') => *s = interpolate(s, vars),
+        StyleValue::String(s) if s.contains('{') => *s = interpolate(s, vars, problems),
         StyleValue::List(items) => {
             for it in items {
-                subst_value(it, vars);
+                subst_value(it, vars, problems);
             }
         }
         _ => {}
     }
 }
 
-fn subst_mods(mods: &mut [Spanned<StyleModifier>], vars: &Vars) {
+fn subst_mods(mods: &mut [Spanned<StyleModifier>], vars: &Vars, problems: &mut Vec<Problem>) {
     for m in mods {
-        subst_value(&mut m.node.value, vars);
+        subst_value(&mut m.node.value, vars, problems);
     }
 }
 
-fn subst_stmt(st: Spanned<Statement>, vars: &Vars, errors: &mut Vec<String>) -> Spanned<Statement> {
+fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) -> Spanned<Statement> {
     let span = st.span.clone();
     let node = match st.node {
         Statement::Shape(mut s) => {
             if let ShapeType::Text { content } = &mut s.shape_type.node {
-                *content = interpolate(content, vars);
+                *content = interpolate(content, vars, problems);
             }
             if let ShapeType::Path(p) = &mut s.shape_type.node {
-                subst_mods(&mut p.modifiers, vars);
+                subst_mods(&mut p.modifiers, vars, problems);
             }
-            subst_mods(&mut s.modifiers, vars);
+            subst_mods(&mut s.modifiers, vars, problems);
             Statement::Shape(s)
         }
         Statement::Layout(mut l) => {
-            subst_mods(&mut l.modifiers, vars);
-            l.children = l.children.into_iter().map(|c| subst_stmt(c, vars, errors)).collect();
+            subst_mods(&mut l.modifiers, vars, problems);
+            l.children = l.children.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
             Statement::Layout(l)
         }
         Statement::Group(mut g) => {
-            subst_mods(&mut g.modifiers, vars);
-            g.children = g.children.into_iter().map(|c| subst_stmt(c, vars, errors)).collect();
+            subst_mods(&mut g.modifiers, vars, problems);
+            g.children = g.children.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
             Statement::Group(g)
         }
         Statement::Connection(mut cs) => {
             for c in &mut cs {
-                subst_endpoint(&mut c.from, vars, errors);
-                subst_endpoint(&mut c.to, vars, errors);
-                subst_mods(&mut c.modifiers, vars);
+                subst_endpoint(&mut c.from, vars, problems);
+                subst_endpoint(&mut c.to, vars, problems);
+                subst_mods(&mut c.modifiers, vars, problems);
             }
             Statement::Connection(cs)
         }
         Statement::Constrain(mut d) => {
-            subst_expr(&mut d.expr, vars, errors);
+            subst_expr(&mut d.expr, vars, problems);
             Statement::Constrain(d)
         }
         Statement::Constraint(mut c) => {
-            subst_dotted(&mut c.subject, vars, errors);
+            subst_dotted(&mut c.subject, vars, problems);
             if let Some(a) = &mut c.anchor {
-                subst_dotted(a, vars, errors);
+                subst_dotted(a, vars, problems);
             }
-            subst_mods(&mut c.modifiers, vars);
+            subst_mods(&mut c.modifiers, vars, problems);
             Statement::Constraint(c)
         }
         Statement::AnchorDecl(mut a) => {
             match &mut a.position {
-                AnchorPosition::PropertyRef(p) => subst_prop(p, vars, errors),
-                AnchorPosition::PropertyRefWithOffset { prop_ref, .. } => subst_prop(prop_ref, vars, errors),
+                AnchorPosition::PropertyRef(p) => subst_prop(p, vars, problems),
+                AnchorPosition::PropertyRefWithOffset { prop_ref, .. } => subst_prop(prop_ref, vars, problems),
             }
             Statement::AnchorDecl(a)
         }
         Statement::TemplateInstance(mut i) => {
             for (_, v) in &mut i.arguments {
-                subst_value(v, vars);
+                subst_value(v, vars, problems);
             }
             Statement::TemplateInstance(i)
         }
@@ -638,7 +794,7 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, errors: &mut Vec<String>) -> 
             if let Some(ix) = &e.index {
                 inner.remove(&ix.node.0);
             }
-            e.body = e.body.into_iter().map(|c| subst_stmt(c, &inner, errors)).collect();
+            e.body = e.body.into_iter().map(|c| subst_stmt(c, &inner, problems)).collect();
             Statement::Each(e)
         }
         other => other,

@@ -11,6 +11,7 @@ examples/line-ends.svg           examples/line-ends.ail           --stylesheet-c
 examples/mosfet-driver.svg         examples/mosfet-driver.ail         --stylesheet-css stylesheets/kapernikov-schematic.css
 examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
 examples/sequence-diagram.svg      examples/sequence-diagram.ail      --stylesheet-css stylesheets/kapernikov.css
+examples/state-machine.svg         examples/state-machine.ail         --stylesheet-css stylesheets/kapernikov.css
 
 
 # Animated showcases (CSS only: they play inside an <img>)

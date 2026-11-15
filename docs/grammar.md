@@ -465,6 +465,10 @@ Declarations that serve motion:
                   Items that are names stand for elements wherever a name goes:
                   each c in [c1, c2, b.led] { srv -> c   constrain c.width = 80
                   constrain bg contains c   x -> y [via: [c]] }   (c.top = b.led.top)
+                  Items may be records: NAME.FIELD wherever a value, a name or
+                  "{...}" goes: each t in [{from: a, to: b, on: "go"}] {
+                  t.from -> t.to [label: t.on] }. Field names may be reserved
+                  words (from, label, text). Every item needs every field used.
                   anchors may be declared inside: anchor r_a [position: row.right]
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
                   the previous one; [no_resolve] keeps the previous frame's

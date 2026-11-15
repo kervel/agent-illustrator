@@ -17,3 +17,4 @@ examples/motion/token-loop.ail
 examples/class-diagram.ail
 examples/sequence-diagram.ail
 examples/fan-out.ail
+examples/state-machine.ail
