@@ -1,34 +1,48 @@
-// A sequence diagram from a few small templates and general primitives.
+// A sequence diagram drawn from one list of messages.
 //
-// `life` = an actor head + dashed lifeline. `ticks` lists the message rows (one invisible
-// spacer per row), so row k is at the same height on every lifeline; a shorter list ends that
-// lifeline early. Everything else points at rows as `actor.p_k`:
-//   call / reply / async   a message between two rows (solid+filled head / dashed+open / solid+open)
-//   frame                  a square frame around the rows from one point to another (loop, alt)
-//   act                    an activation bar from one row to another
-// Template parameters that name elements (`src: api.p_2`) are how a template reaches outside
-// itself. `overlaps: all` marks an overlay (a frame or bar over lifelines) so lint accepts it.
-// Keep a message label shorter than its arrow, or `label_mask` removes the arrow itself.
-template "life" (ttl: "", ticks: [], step: 48, w: 110) {
+// `msgs` is the conversation, in order: one record per message, one row per record on every
+// lifeline. A message's `id` names its row (`api.p[query]`), so the bars, frames and the note
+// below say which message they mean, not which row number. To add a message, add a record:
+// the arrows, rows and numbers follow, and nothing else changes.
+//   from, to   the two lifelines (from == to is a self-message)
+//   kind       how the arrow looks: one of the kinds in `looks`
+//   label      the text on the arrow; its number is its place in the list
+let msgs = [
+  {id: login,    from: cl,   to: api,  kind: call,  label: "login(user)"},
+  {id: verify,   from: api,  to: auth, kind: call,  label: "verify"},
+  {id: ok,       from: auth, to: api,  kind: reply, label: "ok"},
+  {id: validate, from: api,  to: api,  kind: call,  label: "validate cart"},
+  {id: query,    from: api,  to: db,   kind: call,  label: "query"},
+  {id: rows,     from: db,   to: api,  kind: reply, label: "rows"},
+  {id: ok200,    from: api,  to: cl,   kind: reply, label: "200 OK"},
+  {id: conflict, from: api,  to: cl,   kind: reply, label: "409"},
+  {id: audit,    from: api,  to: db,   kind: async, label: "audit(event)"},
+]
+let looks = [
+  {kind: call,  head: arrow, dash: none},     // solid, filled head
+  {kind: reply, head: open,  dash: dashed},   // dashed, open head
+  {kind: async, head: open,  dash: none},     // solid, open head
+]
+// activation bars: on which lifeline, from which message to which
+let bars = [
+  {on: api,  first: login,  last: conflict},
+  {on: auth, first: verify, last: ok},
+  {on: db,   first: query,  last: rows},
+]
+
+// An actor: a head and a dashed lifeline over one invisible row per tick, named by the
+// tick's id (`p[login]`). The lifeline runs to the bottom of `until`, by default its own rows.
+template "life" (ttl: "", ticks: [], until: rows, step: 48, w: 110) {
   col l [gap: 30, padding: 0, align: center] {
     rect hd [label: ttl, width: w, height: 40]
     col rows [gap: 8, padding: 0] {
-      each t in ticks {
-        rect p [width: 2, height: step, stroke: none, fill: none]
-      }
+      each t by id in ticks { rect p [width: 2, height: step, stroke: none, fill: none] }
     }
   }
-  hd.bottom -- rows.bottom as lifeline [routing: direct, stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
+  hd.bottom -- until.bottom as lifeline [routing: direct, stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
 }
-template "call" (src: "", dst: "", what: "") {
-  src -> dst [routing: direct, label: what, label_offset: 0, label_mask: 4]
-}
-template "reply" (src: "", dst: "", what: "") {
-  src -> dst [routing: direct, to_end: open, stroke_dasharray: dashed, label: what, label_offset: 0, label_mask: 4]
-}
-template "async" (src: "", dst: "", what: "") {
-  src -> dst [routing: direct, to_end: open, label: what, label_offset: 0, label_mask: 4]
-}
+// A square frame around the rows from `first` to `last` (loop, alt), and a line that splits a
+// frame below the row `after` (the `else` of an alt).
 template "frame" (first: "", last: "", ttl: "") {
   rect box [corner_radius: 0, fill: none, stroke: role-muted, overlaps: all]
   constrain box contains first, last [padding_x: 110, padding_y: 0]
@@ -36,65 +50,59 @@ template "frame" (first: "", last: "", ttl: "") {
   constrain title.left = box.left + 6
   constrain title.top = box.top + 4
 }
-template "act" (first: "", last: "", w: 10) {
-  rect bar [width: w, corner_radius: 0, fill: role-surface-2, stroke: role-muted, overlaps: all]
-  constrain bar.center_x = first.center_x
-  constrain bar.top = first.center_y - 4
-  constrain bar.bottom = last.center_y + 4
+template "split" (of: "", after: "", ttl: "") {
+  rect rule [width: 10.., height: 1, fill: role-muted, stroke: none, overlaps: all]
+  constrain rule.left = of.box.left
+  constrain rule.right = of.box.right
+  constrain rule.center_y = after.bottom + 4
+  text ttl title [font_size: 11, fill: role-muted, overlaps: all]
+  constrain title.left = rule.left + 6
+  constrain title.top = rule.bottom + 3
 }
 
 row actors [gap: 100, align: top] {
-  life cl [ttl: "Client", ticks: [1,2,3,4,5,6,7,8,9,10]]
-  life api [ttl: "API", ticks: [1,2,3,4,5,6,7,8,9,10]]
-  life auth [ttl: "Auth", ticks: [1,2,3,4]]
-  life db [ttl: "Database", ticks: [1,2,3,4,5,6,7,8,9,10]]
+  life cl   [ttl: "Client",   ticks: msgs]
+  life api  [ttl: "API",      ticks: msgs]
+  life auth [ttl: "Auth",     ticks: msgs, until: auth.p[ok]]   // destroyed after "ok"
+  life db   [ttl: "Database", ticks: msgs]
 }
 
-// activation bars
-act a_api [first: api.p_1, last: api.p_9]
-act a_auth [first: auth.p_2, last: auth.p_3]
-act a_db [first: db.p_6, last: db.p_7]
+// Messages: an arrow across its own row; a self-message goes out and back within the row.
+// `label_mask` cuts the line behind the label, so keep a label shorter than its arrow.
+each k in looks {
+  each m, i in msgs where m.kind == k.kind and m.from != m.to {
+    m.from.p[m.id] -> m.to.p[m.id] [routing: direct, to_end: k.head, stroke_dasharray: k.dash,
+                                    label: "{i+1}: {m.label}", label_offset: 0, label_mask: 4]
+  }
+  each m, i in msgs where m.kind == k.kind and m.from == m.to {
+    point out
+    point back
+    constrain out.center_x = m.from.p[m.id].center_x + 40
+    constrain out.center_y = m.from.p[m.id].top
+    constrain back.center_x = out.center_x
+    constrain back.center_y = m.from.p[m.id].bottom
+    m.from.p[m.id].top -> m.to.p[m.id].bottom [routing: direct, via: [out, back], to_end: k.head, stroke_dasharray: k.dash]
+    text "{i+1}: {m.label}" self_t [font_size: 11, fill: role-muted]
+    constrain self_t.left = out.right + 6
+    constrain self_t.center_y = m.from.p[m.id].center_y
+  }
+}
 
-// fragments: frames that contain the rows they span (rows are 8px apart, so frames never touch)
-frame loop_f [first: api.p_6, last: db.p_7, ttl: "loop [each item]"]
-frame alt_f [first: cl.p_8, last: api.p_9, ttl: "alt [in stock]"]
-rect alt_div [height: 1, fill: role-muted, stroke: none, overlaps: all]
-constrain alt_div.left = alt_f.box.left
-constrain alt_div.right = alt_f.box.right
-constrain alt_div.center_y = cl.p_8.bottom + 4
-text "[out of stock]" alt_else [font_size: 11, fill: role-muted, overlaps: all]
-constrain alt_else.left = alt_f.box.left + 6
-constrain alt_else.top = alt_div.bottom + 3
+each b in bars {
+  rect bar [width: 10, corner_radius: 0, fill: role-surface-2, stroke: role-muted, overlaps: all]
+  constrain bar.center_x = b.on.p[b.first].center_x
+  constrain bar.top = b.on.p[b.first].center_y - 4
+  constrain bar.bottom = b.on.p[b.last].center_y + 4
+}
 
-// a note over Database, and a destroy cross at the end of Auth's lifeline
+// fragments, a note and a destroy cross, each pointing at the message it is about
+frame loop_f [first: api.p[query], last: db.p[rows], ttl: "loop [each item]"]
+frame alt_f [first: cl.p[ok200], last: api.p[conflict], ttl: "alt [in stock]"]
+split alt_else [of: alt_f, after: cl.p[ok200], ttl: "[out of stock]"]
 rect note1 [label: "read-only<br>replica", width: 96, height: 36, corner_radius: 0, fill: role-warn-soft, stroke: role-muted, font_size: 11, overlaps: all]
-constrain note1.center_x = db.p_4.center_x
-constrain note1.center_y = db.p_4.center_y
+constrain note1.center = db.p[validate].center
 rect x1 [width: 16, height: 2, rotation: 45, fill: role-muted, stroke: none, overlaps: all]
 rect x2 [width: 16, height: 2, rotation: -45, fill: role-muted, stroke: none, overlaps: all]
-constrain x1.center_x = auth.rows.center_x
-constrain x1.center_y = auth.rows.bottom
-constrain x2.center_x = x1.center_x
-constrain x2.center_y = x1.center_y
-
-// a self-message: a polyline out to two waypoints and back (rows 4-5)
-rect sm1 [size: 2, stroke: none, fill: none]
-rect sm2 [size: 2, stroke: none, fill: none]
-constrain sm1.center_x = api.p_4.center_x + 40
-constrain sm1.center_y = api.p_4.center_y
-constrain sm2.center_x = sm1.center_x
-constrain sm2.center_y = api.p_5.center_y
-api.p_4 -> api.p_5 [routing: direct, via: [sm1, sm2]]
-text "4: validate cart" sm_t [font_size: 11, fill: role-muted]
-constrain sm_t.left = sm1.right + 6
-constrain sm_t.center_y = api.p_4.center_y + 24
-
-// messages
-call m1 [src: cl.p_1, dst: api.p_1, what: "1: login(user)"]
-call m2 [src: api.p_2, dst: auth.p_2, what: "2: verify"]
-reply m3 [src: auth.p_3, dst: api.p_3, what: "3: ok"]
-call m5 [src: api.p_6, dst: db.p_6, what: "5: query"]
-reply m6 [src: db.p_7, dst: api.p_7, what: "6: rows"]
-reply m7 [src: api.p_8, dst: cl.p_8, what: "7: 200 OK"]
-reply m8 [src: api.p_9, dst: cl.p_9, what: "8: 409"]
-async m9 [src: api.p_10, dst: db.p_10, what: "9: audit(event)"]
+constrain x1.center_x = auth.p[ok].center_x
+constrain x1.center_y = auth.p[ok].bottom
+constrain x2.center = x1.center

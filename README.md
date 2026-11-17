@@ -114,13 +114,17 @@ tool covers.
 | [![State machine](examples/state-machine.anim.svg)](examples/state-machine.ail) | [![Chatbot and LLM](examples/motion/request-response.anim.svg)](examples/motion/request-response.ail) |
 | **State machine** (animated): one list of transitions draws the arrows, a token walks them | **Chatbot and LLM** (animated): the whole conversation goes on the wire every time |
 | [![Sequence diagram](examples/sequence-diagram.svg)](examples/sequence-diagram.ail) | [![Class diagram](examples/class-diagram.svg)](examples/class-diagram.ail) |
-| **Sequence diagram**: small templates, frames that contain their rows | **Class diagram**: one template, attribute and operation lists per class |
+| **Sequence diagram**: one list of messages draws every arrow; rows, bars and frames named by message | **Class diagram**: one template, attribute and operation lists per class |
 | [![Architecture](examples/architecture.svg)](examples/architecture.ail) | [![MOSFET driver](examples/mosfet-driver.svg)](examples/mosfet-driver.ail) |
 | **Software architecture**: four small templates, zones that contain their boxes, one list of connections | **Schematic**: component templates, anchor-based wiring |
 | [![Feedback loops](examples/feedback-loops.svg)](examples/feedback-loops.ail) | [![Railway topology](examples/railway-topology.svg)](examples/railway-topology.ail) |
 | **Feedback loops**: step and chain templates, right-angle loop-backs | **Railway topology**: three views from one track template |
 | [![Gallic Wars](examples/gallic-wars-timeline.svg)](examples/gallic-wars-timeline.ail) | [![Next-token prediction](examples/token-prediction.svg)](examples/token-prediction.ail) |
 | **Timeline**: alternating cards, emphasis | **Next-token prediction** (animated): a growing input, connectors that follow |
+
+[![Cross-functional flowchart](examples/cross-functional.svg)](examples/cross-functional.ail)
+
+**Cross-functional flowchart**: lanes from a list of roles, one template per node kind, lanes that stretch to fit the process (size ranges, keyed copies)
 
 All images are rendered from the sources by `bash examples/render-all.sh`
 (listed in [examples/renders.txt](examples/renders.txt)); a test fails when a

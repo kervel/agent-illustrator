@@ -42,6 +42,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | A template part that stretches to something outside it (a lane body to the last column, a bar to a date) | `rect body [width: 200..]` in the template, then `constrain body.right = across.right` (`--doc sizes`) | a `width:` parameter computed by hand |
 | A box that may grow or shrink, within limits | `width: 120..400` (`200..` at least, `..300` at most); the label wraps at the upper bound (`--doc sizes`) | a fixed width that is too wide for one label and too narrow for the next |
 | One copy an `each` made, by number (a chain of stages, row k of a lifeline) | `stage[2]`, `api.p[k]`; in an `each`: `stage[k+1]`, `api.p[m.row]` (`--doc each`) | spelling out `stage_2`, or computing names by hand |
+| A template parameter that usually means one of the template's own parts (a lifeline that ends at its last row, unless told where) | a default that names the part: `template "life" (until: rows) { ... hd -- until }`, then `life auth [until: auth.p[ok]]` for the exception (`--doc templates`) | a parameter every caller must pass, or a second template |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
 | Text that must fit a fixed box | give the box a `width:`; the label wraps | guessing where to break it |
@@ -380,18 +381,22 @@ they follow a theme. Animated connections (`enter: draw`) animate the filled
 
 #### Sequence diagrams (lifelines, messages, a label that crosses a line)
 
-There is no sequence-diagram construct; `examples/sequence-diagram.ail` builds one
-from small templates. `life` = actor head + dashed lifeline, whose `ticks: [...]` list
-makes one invisible row per message, equally high on every lifeline. The others take
-element references as parameters, so they can reach outside themselves:
-`call` / `reply` / `async` (`call m1 [src: cl.p_1, dst: api.p_1, what: "login"]`: solid +
-filled head / dashed + open head / solid + open), `frame` (a square frame that
-`contains` the rows from `first:` to `last:`: loop, alt) and `act` (an activation bar).
-A template parameter bound to an element (`src: api.p_2`) works in `constrain`,
-`contains` and connection endpoints inside the template. A self-message is
-`x.p_4 -> x.p_5 [routing: direct, via: [w1, w2]]`; the destroy mark is two crossed
-rotated rects. Give overlays `overlaps: all` (it sits over lifelines on purpose);
-`corner_radius: 0` gives the square look.
+There is no sequence-diagram construct; `examples/sequence-diagram.ail` draws one
+from data. `let msgs = [{id: login, from: cl, to: api, kind: call, label: "login(user)"}, ...]`
+is the conversation in order. `life` = actor head + dashed lifeline over `each t by id in
+ticks` (one invisible row per message, equally high on every lifeline, named by the
+message: `api.p[login]`); every lifeline gets `ticks: msgs`. One `each m, i in msgs where
+m.from != m.to` draws the arrows (`m.from.p[m.id] -> m.to.p[m.id]`, label `"{i+1}: {m.label}"`);
+the look per kind is a second list (`let looks = [{kind: reply, head: open, dash: dashed}, ...]`,
+read by an outer `each k in looks` with `where m.kind == k.kind`). A self-message (`where m.from
+== m.to`) is `x.p[id].top -> x.p[id].bottom [routing: direct, via: [out, back]]` through two
+points beside the row. Activation bars come from `let bars = [{on: api, first: login, last:
+conflict}]`; frames (loop, alt) are a `frame` template that `contains` the rows from `first:`
+to `last:`. A shorter lifeline: `life auth [ticks: msgs, until: auth.p[ok]]`, where the
+template says `(until: rows)`, a default that names its own part (see Template Best
+Practices). Everything names rows by message id, so adding a message is adding one record.
+The destroy mark is two crossed rotated rects. Give overlays `overlaps: all` (it sits over
+lifelines on purpose); `corner_radius: 0` gives the square look.
 
 `label_offset:` moves a label off the arrow (negative = the other side).
 `label_at:` slides it along the arrow, so it can clear a lifeline. When a label
@@ -399,8 +404,7 @@ is wider than the gap and has to cross a line anyway, give its connection
 `label_mask: 4`: every line behind the label's box (plus 4 px) is cut away
 there, the arrow's own line included. It cuts the connection layer only
 (`a -- b`, arrows); keep a label shorter than its arrow or the arrow vanishes.
-Each message is one row of the same shape, so a generator can emit them from data. Example in
-`--examples` (EXAMPLE 12) and `examples/sequence-diagram.ail`.
+Example in `--examples` (EXAMPLE 12) and `examples/sequence-diagram.ail`.
 
 ### Layout Strategy
 
@@ -463,6 +467,7 @@ constrain rule.top = g.cell(1, 3).bottom + 4
 - **Label placement**: Offset labels above/below elements with constraints to avoid connection overlap. Keep connection labels short (1-2 words).
 - **Template composition**: Templates can instantiate other templates. Internal elements stay with the instance when constrained.
 - **Test in isolation**: Before integrating a template, test it standalone in a minimal file. One component per test image.
+- **A default that names a part of the template**: `template "life" (until: rows) { ... col rows { ... } ... hd.bottom -- until.bottom }` runs each lifeline to its *own* `rows` (`cl.rows`, `api.rows`) unless the caller passes another element (`life auth [until: auth.p[ok]]`). Only a parameter left at its default, and only a name the body declares, is read this way; a value the caller passes is a name from outside, as always.
 - **Parts of an instance**: named connections, points and states inside a template belong to each instance (`acme.w_front`); `machine anna [hist.appears: later, overlaps: m.bg]` sets something on the instance or one part; `label: "release: {rname}"` fills in parameters.
 
 **Objects are artwork, not rects.** Agent Illustrator is not an icon-drawing

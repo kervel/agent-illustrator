@@ -268,6 +268,10 @@ Inline templates:
     "{param}" is filled in in any string modifier of a template body (label: "v{n}").
     A parameter given an element (`src: api.p_2`) works as that element in the body's
     `constrain`, `contains` and connection endpoints: how a template reaches outside itself.
+    A default that names one of the body's own parts means that part of each instance:
+    `template "life" (until: rows) { ... col rows {...} ... hd.bottom -- until.bottom }`
+    ends `cl`'s line at `cl.rows`; `life auth [until: auth.p[ok]]` ends it elsewhere. Only a
+    parameter left at its default is read this way; a passed value names an outside element.
     Named connections in a template body are parts of each instance (acme.wire).
 
 File-based templates:

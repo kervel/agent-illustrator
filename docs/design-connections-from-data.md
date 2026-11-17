@@ -1,8 +1,8 @@
 # Design: connections (and other statements) from data
 
 Status: approved. **S1 (P1) released in v0.2.49; S2 (P2), S3 (P3), S4 (P4), S5 (P5) and S6 (P6)
-implemented**. What remains is the sequence-example rewrite of §4 (see "Before the sequence
-rewrite" below).
+implemented, and the sequence example is rewritten as in §4** (see "Sequence rewrite as built"
+below).
 Maintainer decisions: keywords may name fields (open question 1: yes); a missing field is an
 error, there are no defaults (open question 4). Motivating example: `examples/sequence-diagram.ail`.
 
@@ -123,14 +123,32 @@ S6 as built (differences from §2 P6 noted):
   t.to` as a curved loop through two points; a `seek` keyframe rides it as `arc_7`). Docs:
   skill.md, grammar.md, examples.md, `--doc where`.
 
-Before the sequence rewrite (§4), still open:
-- Named modifier sets (a) have not landed, so `[style: m.kind]` does not exist; per-kind looks
-  need either separate `where m.kind == reply` blocks or per-field modifiers (`to_end: m.end`).
-- Keyed copies are explicit (S5): the `life` template must say `each t by id in ticks`, and then
-  it rejects plain numeric `ticks` (no `id` field).
-- auth's short lifeline still needs slices (open question 5).
-- Self-loops: `a.top -> a.top [via: [p, q], routing: curved]` draws a loop; without
-  `routing: curved` (or `direct`) the via points of a same-element connection are ignored.
+Sequence rewrite as built (§4; differences noted):
+- One `let msgs` of records `{id, from, to, kind, label}`; every `life` gets `ticks: msgs`
+  and makes its rows with `each t by id in ticks` (`api.p[query]`). Labels are numbered
+  `"{i+1}: ..."`, so the self-message is one row and row k is message k.
+- Named modifier sets (a) have not landed, so the look of a kind is data too: `let looks =
+  [{kind: reply, head: open, dash: dashed}, ...]`, read by an outer `each k in looks` around
+  `each m, i in msgs where m.kind == k.kind and m.from != m.to` (`to_end: k.head,
+  stroke_dasharray: k.dash`). A second inner block, `where ... m.from == m.to`, draws the
+  self-message `x.p[id].top -> x.p[id].bottom [routing: direct, via: [out, back]]` with a
+  separate text beside it: a `label:` on a `routing: direct` + `via` polyline is anchored
+  about 10px off the drawn path (vertical segment at x=315, label base at x=305 for any
+  `label_offset`), a routing bug to look at separately.
+- Activation bars come from `let bars = [{on: api, first: login, last: conflict}, ...]`.
+  Frames stay a `frame` template (two instances read better than a list of two); alt's
+  `else` line is a `split` template (`split alt_else [of: alt_f, after: cl.p[ok200], ...]`).
+- **Auth's short lifeline: no slices (open question 5).** A smaller general primitive
+  covers it: a template parameter left at its default, whose default names one of the
+  body's own parts, means that part of the instance (`resolver.rs` `own_part_defaults`).
+  `life` declares `(until: rows)` and draws `hd.bottom -- until.bottom`; `life auth [...,
+  until: auth.p[ok]]` ends early. Tests: `tests/own_part_defaults.rs`. Docs: skill.md
+  (Template Best Practices, Reach For row, sequence section), grammar.md TEMPLATES,
+  `--doc defaults`/`parameter`. File templates (`from "x.ail"`) have no parameters, so the
+  rule only concerns inline templates.
+- The old file was 100 lines with 9 hand-numbered message lines, 3 bars, frames and notes
+  with row numbers (about 25 places to renumber per inserted message); the new file is
+  about the same length, and an insertion is one record.
 
 ## 1. The problem, measured against today's code
 
@@ -464,7 +482,8 @@ row k is message k and the label number is the row number. In today's file these
 self-message spans rows 4–5 and query is "5:" on row 6.
 
 **Not solved:** auth's shorter lifeline. Today it is a 4-item `ticks`. With a shared list, every
-lifeline gets all rows (open question 5).
+lifeline gets all rows (open question 5). *Solved without slices*: see "Sequence rewrite as
+built" (a parameter default that names the template's own part, `until: rows`).
 
 ## 5. Alternatives considered and rejected
 
@@ -504,7 +523,8 @@ lifeline gets all rows (open question 5).
    {kind: call}]`)? Defaults would shorten `msgs` when most items are one kind.
 5. **Slices** for a shorter list from a shared one: `ticks: msgs[..validate]`. This reuses the
    `rows[2..4]` range syntax, with key or number bounds, and would restore auth's short
-   lifeline. Is it worth a seventh primitive?
+   lifeline. Is it worth a seventh primitive? *(Not needed for the sequence example: an
+   own-part default, `until: rows`, ends auth's lifeline. Slices stay open.)*
 6. **Self-loop routing** (`a -> a`) as a separate general connection feature?
 7. **`let` scope:** top level only (proposed), or also inside template bodies? May a let hold a
    record or scalar for reuse as a modifier value (that drifts toward variables; proposed: no)?
@@ -526,7 +546,7 @@ example under `examples/`. Run `bash examples/render-all.sh`, and check that all
 | **S3** P3: `x.p[k]` generalised in `indexed_parts`, `{...}` in identifiers, unbound-index error, `p_0` hint | data-driven messages with numeric rows | `api.p[6]` == `api.p_6` in endpoint, constraint, contains, via list; `p[i+1]` in each; `p[i]` gives the `p_0` hint; `p[i+1]` outside each is an error; `rect a [x]`/`a -> b [auto]` unaffected (adjacency) | a pipeline whose boxes come from one `each` and whose arrows `box[i+1].right -> box[i+2].left` come from another. Optionally the sequence messages via an explicit `row:` field (`p[m.row]`), which still carries hand-written row numbers because the self-message (2 rows) stays outside the list |
 | **S4** P4: `let` (done) | shared lists across instances and blocks | let as each source, as instance arg, as nested default; redefinition error; used as style value error; `let` in `--doc reserved` | state machine: `let tr = [...]` shared by the transitions `each` and a legend |
 | **S5** P5: keyed copies | insertion-stable references | keyed names `p_login`; `p[login]`; duplicate/mixed/non-word id errors; numeric index on keyed family hint; `i` still positional | class rows by id (`entry.r_a[billed_at]`) |
-| **S6** P6: `where` (done; sequence rewrite pending) | per-kind bodies | `==`/`!=`/field-vs-field/`and`; `i` and names keep source positions; unknown field in `where` | state-machine self-transitions; the sequence example rewritten as in §4 (it needs S3–S6 together) |
+| **S6** P6: `where` (done; sequence rewrite done) | per-kind bodies | `==`/`!=`/field-vs-field/`and`; `i` and names keep source positions; unknown field in `where` | state-machine self-transitions; the sequence example rewritten as in §4 (it needs S3–S6 together) |
 
 S1 alone already fixes a real gap that affects every diagram type. S2 opens up tables of
 records. The sequence example can only be fully data-driven once S3–S6 are all in: one list,

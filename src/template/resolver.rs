@@ -217,9 +217,11 @@ fn resolve_instance(
     }
 
     // Override with provided arguments
+    let mut defaulted: HashSet<String> = param_values.keys().cloned().collect();
     for (name, value) in &inst.arguments {
         let param_name = name.node.0.clone();
         if def.has_parameter(&param_name) {
+            defaulted.remove(&param_name);
             param_values.insert(param_name, with_lets(&value.node));
         }
         // Note: Extra arguments are silently ignored (could warn in future)
@@ -266,7 +268,7 @@ fn resolve_instance(
         }
         crate::parser::ast::TemplateSourceType::Inline => {
             // For inline templates, expand the body
-            resolve_inline_template(&def, instance_name, span, registry, ctx, &param_values, &instance_modifiers)
+            resolve_inline_template(&def, instance_name, span, registry, ctx, &param_values, &defaulted, &instance_modifiers)
         }
     };
 
@@ -515,6 +517,7 @@ fn resolve_inline_template(
     registry: &mut TemplateRegistry,
     ctx: &mut ResolutionContext,
     param_values: &HashMap<String, StyleValue>,
+    defaulted: &HashSet<String>,
     instance_modifiers: &[Spanned<StyleModifier>],
 ) -> Result<Vec<Spanned<Statement>>, TemplateError> {
     // `check tests [opacity: 0.3]`: the whole instance is faint;
@@ -534,6 +537,8 @@ fn resolve_inline_template(
         Some(b) => super::each::expand_each(b.clone(), &lists)?,
         None => return Ok(vec![]),
     };
+    let own = own_part_defaults(param_values, defaulted, &body, instance_name);
+    let param_values = &own;
     // `machine anna [hist.appears: later]`: a modifier for one part of this
     // instance (`hist.d4.appears` reaches into a nested component).
     let overrides: Vec<(String, String, Spanned<StyleValue>)> = instance_modifiers
@@ -1135,6 +1140,33 @@ fn scope_overlaps(v: &Spanned<StyleValue>, params: &HashMap<String, StyleValue>,
         other => other.clone(),
     };
     Spanned::new(node, v.span.clone())
+}
+
+/// `template "life" (until: rows) { col rows {...}; hd -- until }`: a parameter
+/// left at its default, whose default names one of the template's own parts
+/// (`rows`, `rows.bottom`, `l.rows`), means that part of *this* instance
+/// (`cl_rows`). A value the caller passes is a name from outside, as always.
+fn own_part_defaults(
+    param_values: &HashMap<String, StyleValue>,
+    defaulted: &HashSet<String>,
+    body: &[Spanned<Statement>],
+    instance_name: &str,
+) -> HashMap<String, StyleValue> {
+    let own = super::each::declared_names(body);
+    param_values
+        .iter()
+        .map(|(k, v)| {
+            let v = match v {
+                StyleValue::Identifier(id)
+                    if defaulted.contains(k) && own.contains(id.0.split('.').next().unwrap_or("")) =>
+                {
+                    StyleValue::Identifier(Identifier::new(format!("{}_{}", instance_name, id.0)))
+                }
+                _ => v.clone(),
+            };
+            (k.clone(), v)
+        })
+        .collect()
 }
 
 fn element_refs(params: &HashMap<String, StyleValue>) -> Refs {
