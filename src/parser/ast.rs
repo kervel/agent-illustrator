@@ -798,6 +798,13 @@ pub enum StyleValue {
         name: String,
         args: Vec<Spanned<StyleValue>>,
     },
+    /// A size that may change between bounds: `width: 200..` (at least 200),
+    /// `width: ..300` (at most 300), `width: 120..400`. At least one bound is
+    /// given. Only `width` and `height` take one.
+    Range {
+        min: Option<f64>,
+        max: Option<f64>,
+    },
 }
 
 // ============================================

@@ -675,3 +675,93 @@ col ws {{ each n in [1, 2] {{ rect w [size: 4] }} }}
     assert_eq!(plain, literal);
     assert_eq!(plain, computed);
 }
+
+// ---- naming copies by the items (keyed copies) ---------------------------
+
+fn render_err(src: &str) -> String {
+    match render(src) {
+        Ok(_) => panic!("expected an error\n---\n{src}"),
+        Err(e) => e.to_string(),
+    }
+}
+
+#[test]
+fn records_with_an_id_name_their_copies_by_it() {
+    let out = svg(r#"
+col lanes {
+    each l in [{id: cust, name: "Customer"}, {id: ops, name: "Operations"}] {
+        rect lane [label: l.name]
+    }
+}
+rect hub
+lane_ops -> hub
+"#);
+    assert!(has_id(&out, "lane_cust"), "{:?}", ids(&out));
+    assert!(has_id(&out, "lane_ops"));
+    assert!(!has_id(&out, "lane_1"));
+}
+
+#[test]
+fn a_keyed_copy_is_reached_with_an_index() {
+    let base = r#"
+col lanes {
+    each l in [{id: cust}, {id: ops}] {
+        rect lane
+    }
+}
+rect hub
+"#;
+    assert_eq!(svg(&format!("{base}lane_ops -> hub\n")), svg(&format!("{base}lane[ops] -> hub\n")));
+}
+
+#[test]
+fn the_position_still_counts_from_zero_with_keyed_copies() {
+    let out = svg(r#"
+col c {
+    each l, i in [{id: a}, {id: b}] {
+        rect r [label: "row {i+1}"]
+    }
+}
+"#);
+    assert!(has_id(&out, "r_a") && has_id(&out, "r_b"), "{:?}", ids(&out));
+    assert!(out.contains(">row 2<"));
+}
+
+#[test]
+fn an_id_on_only_some_items_is_an_error() {
+    let e = render_err("col c {\n each l in [{id: a, n: 1}, {n: 2}] {\n rect r\n }\n}\n");
+    assert!(e.contains("item 2 has no `id`"), "{e}");
+}
+
+#[test]
+fn a_duplicate_id_is_an_error() {
+    let e = render_err("col c {\n each l in [{id: a}, {id: a}] {\n rect r\n }\n}\n");
+    assert!(e.contains("items 1 and 2 both have id `a`"), "{e}");
+}
+
+#[test]
+fn a_quoted_id_is_an_error() {
+    let e = render_err("col c {\n each l in [{id: \"a b\"}] {\n rect r\n }\n}\n");
+    assert!(e.contains("`id` must be a name"), "{e}");
+}
+
+#[test]
+fn a_name_indexed_by_the_item_keeps_that_name() {
+    // `rect lane[l]` is already one per item: no `_1` is added.
+    let out = svg(r#"
+col lanes {
+    each l in [cust, ops] {
+        rect lane[l]
+    }
+}
+rect hub
+lane_cust -> hub
+"#);
+    assert!(has_id(&out, "lane_cust") && has_id(&out, "lane_ops"), "{:?}", ids(&out));
+}
+
+#[test]
+fn two_items_making_one_indexed_name_is_an_error() {
+    let e = render_err("col c {\n each l in [a, a] {\n rect r[l]\n }\n}\n");
+    assert!(e.contains("items 1 and 2 both make an element called `r_a`"), "{e}");
+}

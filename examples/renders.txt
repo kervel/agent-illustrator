@@ -11,6 +11,7 @@ examples/mosfet-driver.svg         examples/mosfet-driver.ail         --styleshe
 examples/pipeline.svg              examples/pipeline.ail              --stylesheet-css stylesheets/kapernikov.css
 examples/railway-topology.svg      examples/railway-topology.ail      --stylesheet-css stylesheets/kapernikov.css
 examples/sequence-diagram.svg      examples/sequence-diagram.ail      --stylesheet-css stylesheets/kapernikov.css
+examples/cross-functional.svg      examples/cross-functional.ail      --stylesheet-css stylesheets/kapernikov.css
 
 
 # Animated showcases (CSS only: they play inside an <img>)

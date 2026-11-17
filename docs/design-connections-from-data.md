@@ -1,6 +1,6 @@
 # Design: connections (and other statements) from data
 
-Status: approved. **S1 (P1) released in v0.2.49; S2 (P2) and S3 (P3) implemented**; S4–S6 not started.
+Status: approved. **S1 (P1) released in v0.2.49; S2 (P2), S3 (P3) and S5 (P5) implemented**; S4 and S6 not started.
 Maintainer decisions: keywords may name fields (open question 1: yes); a missing field is an
 error, there are no defaults (open question 4). Motivating example: `examples/sequence-diagram.ail`.
 
@@ -64,6 +64,18 @@ S3 as built (differences from §2 P3 noted):
 - Example: `examples/pipeline.ail` (stages from one `each`, hand-offs `stage[k] ->
   stage[k+1]` from another, single stages by number). The sequence example is unchanged.
   Docs: skill.md (`each` + Reach For row), grammar.md, examples.md, `--doc index`/`pipeline`.
+
+S5 as built (differences from §2 P5 noted):
+- The trigger is implicit, as recommended: records that all have an `id` field (open question
+  3). `item_keys` in `each.rs` gives the suffixes; the rename map uses them instead of `k+1`.
+- Also new: a declared name whose index this block binds (`rect lane[l]`, `rect p[m.id]`) keeps
+  that name and gets no suffix (it used to become `lane_cust_1`). Two items that make the
+  same declared name are an error ("items 1 and 2 both make an element called `r_a`").
+- An id may be a whole number as well as a word.
+- The numeric-index hint on a keyed family (`api.p[3]`) is not specialised yet; the existing
+  undefined-name message lists the similar names.
+- Example: `examples/cross-functional.ail` (lanes `lanes_cust`, `lanes_am`, reached as `lanes[am]`).
+  Docs: skill.md (`each`), grammar.md, examples.md, `--doc keyed`.
 
 ## 1. The problem, measured against today's code
 

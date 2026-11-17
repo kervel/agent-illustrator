@@ -609,6 +609,11 @@ pub struct ResolvedStyles {
     /// `pivot: left`: what rotation and scaling turn about (a lid's hinge);
     /// default the centre.
     pub pivot: Option<String>,
+    /// `width: 200..`: the width constraints may give it, within these
+    /// bounds (`None` = open on that side). `None` = a fixed width.
+    pub width_range: Option<(Option<f64>, Option<f64>)>,
+    /// `height: 40..120`, as `width_range`.
+    pub height_range: Option<(Option<f64>, Option<f64>)>,
 }
 
 /// Parse an `align:` value.  Accepts both the SVG spelling
@@ -658,6 +663,8 @@ impl ResolvedStyles {
             clip: None,
             padding: None,
             pivot: None,
+            width_range: None,
+            height_range: None,
         }
     }
 
@@ -675,6 +682,13 @@ impl ResolvedStyles {
         });
 
         for modifier in modifiers {
+            if let StyleValue::Range { min, max } = &modifier.node.value.node {
+                match &modifier.node.key.node {
+                    StyleKey::Width => styles.width_range = Some((*min, *max)),
+                    StyleKey::Height => styles.height_range = Some((*min, *max)),
+                    _ => {}
+                }
+            }
             match &modifier.node.key.node {
                 // Read by the engine from the modifiers directly, not a style.
                 StyleKey::CaptionOf => {}
@@ -943,6 +957,8 @@ impl ResolvedStyles {
             clip: other.clip.clone().or_else(|| self.clip.clone()),
             padding: other.padding.or(self.padding),
             pivot: other.pivot.clone().or_else(|| self.pivot.clone()),
+            width_range: other.width_range.or(self.width_range),
+            height_range: other.height_range.or(self.height_range),
             font_weight: other.font_weight.clone().or_else(|| self.font_weight.clone()),
             font_family: other.font_family.clone().or_else(|| self.font_family.clone()),
         }
@@ -1209,6 +1225,27 @@ impl ElementLayout {
     /// The point rotation and scaling turn about: `pivot: left | right | top
     /// | bottom | top_left | top_right | bottom_left | bottom_right`, else
     /// the centre.
+    /// The angle this element is drawn turned by, when it is a leaf shape
+    /// with a `rotation:` that turns it at all. A rotated template instance
+    /// has its parts turned in place by the solver, so it answers `None`.
+    pub fn turned_by(&self) -> Option<f64> {
+        self.styles.rotation.filter(|a| {
+            let a = a.rem_euclid(360.0);
+            self.children.is_empty() && a > 1e-6 && a < 360.0 - 1e-6
+        })
+    }
+
+    /// The box this element covers on the page: its laid-out box, turned
+    /// about its pivot when it is drawn rotated. Layout keeps the unturned
+    /// box (it is what is drawn, then turned); whatever asks what the
+    /// element covers (an enclosing group's box, lint) uses this.
+    pub fn footprint(&self) -> BoundingBox {
+        match self.turned_by() {
+            Some(angle) => super::transform::RotationTransform::new(angle, self.pivot_point()).transform_bounds(&self.bounds),
+            None => self.bounds,
+        }
+    }
+
     pub fn pivot_point(&self) -> Point {
         let b = &self.bounds;
         let (fx, fy) = match self.styles.pivot.as_deref() {

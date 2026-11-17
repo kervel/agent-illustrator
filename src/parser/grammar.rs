@@ -1168,7 +1168,22 @@ where
             }
             Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
         });
-    let style_value = choice((value_list, call_value, percent_value, dotted_value, value_atom.clone())).boxed();
+    // `200..`, `..300`, `120..400`: a size that may change between bounds.
+    let range_value = number
+        .clone()
+        .or_not()
+        .then_ignore(just(Token::Dot).then(just(Token::Dot)))
+        .then(number.clone().or_not())
+        .try_map(|(min, max), span| {
+            if min.is_none() && max.is_none() {
+                return Err(Rich::custom(span, "a range needs at least one bound: `200..`, `..300` or `120..400`"));
+            }
+            Ok(Spanned::new(
+                StyleValue::Range { min: min.map(|n| n.node), max: max.map(|n| n.node) },
+                span_range(&span),
+            ))
+        });
+    let style_value = choice((range_value, value_list, call_value, percent_value, dotted_value, value_atom.clone())).boxed();
 
     let modifier = style_key
         .then_ignore(just(Token::Colon))

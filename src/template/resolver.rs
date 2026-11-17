@@ -790,9 +790,37 @@ fn substitute_parameters(
             }
             // Substitute parameters in modifiers
             shape.modifiers = substitute_modifiers(&shape.modifiers, params);
+            // Names that came in through parameters are outside the template.
+            let outside: std::collections::HashSet<String> = element_refs(params).into_values().collect();
+            let local = |id: &Identifier| -> Option<Identifier> {
+                (id.0 != "all" && !outside.contains(&id.0))
+                    .then(|| Identifier::new(format!("{}_{}", prefix, id.0.replace('.', "_"))))
+            };
             // A line routed through siblings names them: scope those names too.
             let scope_list = |mods: &mut Vec<Spanned<StyleModifier>>| {
                 for m in mods.iter_mut() {
+                    // `overlaps: hd` names a sibling it sits on; `overlaps: all`
+                    // and a name passed in as a parameter stay as they are.
+                    if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "overlaps") {
+                        match &mut m.node.value.node {
+                            StyleValue::Identifier(id) => {
+                                if let Some(l) = local(id) {
+                                    *id = l;
+                                }
+                            }
+                            StyleValue::List(items) => {
+                                for it in items.iter_mut() {
+                                    if let StyleValue::Identifier(id) = &mut it.node {
+                                        if let Some(l) = local(id) {
+                                            *id = l;
+                                        }
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                        continue;
+                    }
                     // `caption_of: dot` names a sibling inside the template.
                     if matches!(&m.node.key.node, StyleKey::CaptionOf) {
                         if let StyleValue::Identifier(id) = &m.node.value.node {

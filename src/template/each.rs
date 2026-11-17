@@ -137,7 +137,16 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
         }
     };
 
-    let declared = declared_names(&e.body);
+    // A name whose index this block binds (`rect lane[l]`, `rect p[m.id]`)
+    // is already one per item: it keeps that name. Every other declared name
+    // gets the item's key: its `id` when the items are keyed records, else
+    // its position (x -> x_1, x_2, ...).
+    let index_vars: Vec<&str> = std::iter::once(var.as_str()).chain(e.index.as_ref().map(|ix| ix.node.0.as_str())).collect();
+    let declared: HashSet<String> =
+        declared_names(&e.body).into_iter().filter(|n| !indexed_by(n, &index_vars)).collect();
+    let keys = item_keys(&items, &header)?;
+    // declared name -> the item that made it, to catch two items making one name
+    let mut made: HashMap<String, usize> = HashMap::new();
     let mut out = Vec::new();
     let mut problems: Vec<Problem> = Vec::new();
     for (k, item) in items.iter().enumerate() {
@@ -174,7 +183,7 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
             );
         }
         let renames: HashMap<String, String> =
-            declared.iter().map(|n| (n.clone(), format!("{}_{}", n, k + 1))).collect();
+            declared.iter().map(|n| (n.clone(), format!("{}_{}", n, keys[k]))).collect();
         let body: Stmts = e
             .body
             .iter()
@@ -186,6 +195,21 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
             // Keep going: a field missing from some items is reported for all of them.
             continue;
         }
+        let mut names: Vec<String> = declared_names(&body).into_iter().collect();
+        names.sort();
+        for n in names {
+            if let Some(first) = made.insert(n.clone(), k + 1) {
+                if first != k + 1 {
+                    problems.push(Problem::Msg(format!(
+                        "{}: items {} and {} both make an element called `{}`; a name like p[m.id] must differ per item",
+                        header, first, k + 1, n
+                    )));
+                }
+            }
+        }
+        if !problems.is_empty() {
+            continue;
+        }
         let mut body = expand_in(body, lists, scope)?;
         crate::parser::join_constraint_parts(&mut body);
         out.extend(body);
@@ -194,6 +218,78 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
         return Err(err(report(problems, &items)));
     }
     Ok(out)
+}
+
+/// `lane_{l}`, `p_{m.id}`, `p_{i+1}`: a name with an index that one of `vars`
+/// binds (the indexed-name pass writes `x[e]` as `x_{e}`).
+fn indexed_by(name: &str, vars: &[&str]) -> bool {
+    let mut rest = name;
+    while let Some(start) = rest.find("_{") {
+        let after = &rest[start + 2..];
+        let Some(end) = after.find('}') else { return false };
+        let expr = &after[..end];
+        let head = expr.split(['.', '+', '-']).next().unwrap_or("");
+        if vars.contains(&head) {
+            return true;
+        }
+        rest = &after[end + 1..];
+    }
+    false
+}
+
+/// What each item's copies are called: the items' `id` fields when they are
+/// records that all have one (`{id: login, ...}` -> `p_login`), otherwise
+/// their positions counted from 1.
+fn item_keys(items: &[Spanned<StyleValue>], header: &str) -> Result<Vec<String>, TemplateError> {
+    let id_of = |v: &StyleValue| -> Option<StyleValue> {
+        match v {
+            StyleValue::Record(fields) => fields.iter().find(|(k, _)| k.node.0 == "id").map(|(_, v)| v.node.clone()),
+            _ => None,
+        }
+    };
+    let with_id: Vec<usize> = items.iter().enumerate().filter(|(_, it)| id_of(&it.node).is_some()).map(|(k, _)| k + 1).collect();
+    if with_id.is_empty() {
+        return Ok((1..=items.len()).map(|k| k.to_string()).collect());
+    }
+    if with_id.len() != items.len() {
+        let without: Vec<String> =
+            (1..=items.len()).filter(|k| !with_id.contains(k)).map(|k| k.to_string()).collect();
+        return Err(err(format!(
+            "{}: item{} {} {} no `id`, which the other items have; give every item an `id` (its copies are named by it), or none (they are numbered)",
+            header,
+            if without.len() == 1 { "" } else { "s" },
+            without.join(", "),
+            if without.len() == 1 { "has" } else { "have" }
+        )));
+    }
+    let mut keys: Vec<String> = Vec::with_capacity(items.len());
+    for (k, it) in items.iter().enumerate() {
+        let key = match id_of(&it.node) {
+            Some(StyleValue::Identifier(id)) => Some(id.0),
+            Some(StyleValue::Keyword(w)) => Some(w),
+            Some(StyleValue::Number { value, .. }) if value >= 0.0 && value.fract() == 0.0 => Some(format!("{}", value as u64)),
+            _ => None,
+        }
+        .filter(|w| !w.is_empty() && w.chars().all(|c| c.is_alphanumeric() || c == '_'));
+        let Some(key) = key else {
+            return Err(err(format!(
+                "{}: item {}: `id` must be a name (letters, digits, _), written without quotes; it names the item's copies (p_login)",
+                header,
+                k + 1
+            )));
+        };
+        if let Some(first) = keys.iter().position(|x| *x == key) {
+            return Err(err(format!(
+                "{}: items {} and {} both have id `{}`; ids name the copies, so each must be different",
+                header,
+                first + 1,
+                k + 1,
+                key
+            )));
+        }
+        keys.push(key);
+    }
+    Ok(keys)
 }
 
 /// Something wrong with how the body uses the loop variables.
