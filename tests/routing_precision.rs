@@ -179,6 +179,65 @@ a.top -> a.top as c
     assert!(msgs.iter().any(|m| m.contains("a→a") && m.contains("via")), "{msgs:?}");
 }
 
+// ── a connection to a bare point ends on the point ───────────────────
+
+#[test]
+fn parallel_connections_to_a_point_fan_into_the_point() {
+    // Two arrows between one box and one point (a request and its reply) are
+    // spread into lanes; the box ends move apart, the point ends stay on it.
+    let src = r#"
+rect a [width: 60, height: 40]
+point p
+constrain a.left = 0
+constrain a.top = 0
+constrain p.center_x = 200
+constrain p.center_y = 30
+a -> p as go
+p -> a as back
+a -- p as tie
+"#;
+    let svg = render(src).unwrap();
+    for name in ["go", "back", "tie"] {
+        let pts = points(&path_d(&svg, Some(name)));
+        let at_p = if name == "back" { pts[0] } else { pts[pts.len() - 1] };
+        let (dx, dy) = (at_p.0 - 200.0, at_p.1 - 30.0);
+        // `go` ends 7.2px short (the arrowhead covers that): measure the line.
+        let dist = dx.hypot(dy);
+        assert!(dist < 8.0, "{name} ends {dist:.1}px from the point: {pts:?}");
+        if name == "go" {
+            // ... and that shortfall is along the line, not across it.
+            let (sx, sy) = (pts[pts.len() - 1].0 - pts[0].0, pts[pts.len() - 1].1 - pts[0].1);
+            let cross = (dx * sy - dy * sx).abs() / sx.hypot(sy);
+            assert!(cross < 0.01, "go points at the point: {pts:?}");
+        }
+    }
+    // The three lanes are still apart at the box.
+    let starts: Vec<(f64, f64)> = ["go", "tie"].iter().map(|n| points(&path_d(&svg, Some(n)))[0]).collect();
+    assert!((starts[0].1 - starts[1].1).abs() > 5.0, "{starts:?}");
+}
+
+#[test]
+fn leftward_connection_leaves_and_enters_its_sides_horizontally() {
+    // b is left of and below a: the route leaves a's left side going left and
+    // enters b's right side going left, like the mirrored b -> a does, instead
+    // of running down along a's left edge and b's right edge.
+    let src = r#"
+rect a [width: 60, height: 40]
+rect b [width: 60, height: 40]
+constrain a.left = 300
+constrain a.top = 100
+constrain b.left = 0
+constrain b.top = 200
+a -> b as c
+"#;
+    let pts = points(&path_d(&render(src).unwrap(), Some("c")));
+    assert_eq!(pts[0], (300.0, 120.0), "{pts:?}");
+    assert_eq!(pts[1].1, 120.0, "first run horizontal: {pts:?}");
+    let n = pts.len();
+    assert_eq!(pts[n - 1].1, 220.0, "{pts:?}");
+    assert_eq!(pts[n - 2].1, 220.0, "last run horizontal into b's right side: {pts:?}");
+}
+
 // ── labels sit on the drawn polyline ──────────────────────────────────
 
 /// (x, text-anchor) of the label text whose content is `text`.

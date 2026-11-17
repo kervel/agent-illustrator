@@ -970,6 +970,21 @@ pub fn route_connection_with_anchors_and_types(
         }
     }
 
+    // The same going left (Left to Right): bend half way between the sides,
+    // rather than running along both edges.
+    if from_edge == Edge::Left && to_edge == Edge::Right {
+        let dy = (end.y - start.y).abs();
+        if dy > 15.0 {
+            let mid_x = ((start.x + end.x) / 2.0).max(end.x + MIN_FINAL_SEGMENT_LENGTH);
+            return vec![
+                start,
+                Point::new(mid_x, start.y),
+                Point::new(mid_x, end.y),
+                end,
+            ];
+        }
+    }
+
     route_orthogonal(start, end)
 }
 
@@ -1427,14 +1442,42 @@ fn spread_coinciding_connections(result: &mut LayoutResult) {
             result.get_element_by_name(&from_box).map(|e| e.bounds),
             result.get_element_by_name(&to_box).map(|e| e.bounds),
         );
+        // A bare point has no edge to spread along: its end stays on the
+        // point and the lanes fan out from the box end only. Between two
+        // points there is nowhere to spread to.
+        let is_point = |b: Option<BoundingBox>| b.is_some_and(|b| b.width < 1.0 && b.height < 1.0);
+        let (from_pt, to_pt) = (is_point(boxes.0), is_point(boxes.1));
+        if from_pt && to_pt {
+            for (j, _) in &order {
+                done[*j] = true;
+            }
+            continue;
+        }
         let k = order.len() as f64;
         for (slot, (j, reversed)) in order.iter().enumerate() {
             done[*j] = true;
             let off = ((k - 1.0) / 2.0 - slot as f64) * gap;
             let (ox, oy) = (nx * off, ny * off);
             let (mut a, mut b) = (Point::new(p.x + ox, p.y + oy), Point::new(q.x + ox, q.y + oy));
-            // Slide the ends along the shifted line back onto the boxes' edges.
-            if let (Some(fb), Some(tb)) = boxes {
+            if from_pt || to_pt {
+                let (fb, tb) = (boxes.0.unwrap(), boxes.1.unwrap());
+                if from_pt {
+                    a = p;
+                    // The box end: where the line from the point enters the box.
+                    let d = (b.x - a.x, b.y - a.y);
+                    if let Some((t_enter, _)) = clip_line(a, d, &tb) {
+                        b = Point::new(a.x + d.0 * t_enter, a.y + d.1 * t_enter);
+                    }
+                } else {
+                    b = q;
+                    // The box end: where the line toward the point leaves the box.
+                    let d = (b.x - a.x, b.y - a.y);
+                    if let Some((_, t_exit)) = clip_line(a, d, &fb) {
+                        a = Point::new(a.x + d.0 * t_exit, a.y + d.1 * t_exit);
+                    }
+                }
+            } else if let (Some(fb), Some(tb)) = boxes {
+                // Slide the ends along the shifted line back onto the boxes' edges.
                 let d = (b.x - a.x, b.y - a.y);
                 let origin = a;
                 if let (Some((_, t_exit)), Some((t_enter, _))) = (clip_line(origin, d, &fb), clip_line(origin, d, &tb)) {
@@ -1447,7 +1490,9 @@ fn spread_coinciding_connections(result: &mut LayoutResult) {
             let c = &mut result.connections[*j];
             c.path = if *reversed { vec![b, a] } else { vec![a, b] };
             if let Some(l) = c.label.as_mut() {
-                l.position = Point::new(l.position.x + ox, l.position.y + oy);
+                // A fan (one end fixed on a point) moves its middle half as far.
+                let f = if from_pt || to_pt { 0.5 } else { 1.0 };
+                l.position = Point::new(l.position.x + ox * f, l.position.y + oy * f);
             }
         }
     }
