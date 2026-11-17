@@ -432,6 +432,11 @@ constrain via_pt.center_y = source.center_y - 40
 source.bottom -> target.top [routing: curved, via: via_pt]
 ```
 Keep via-points 30-60px from the connection line. Too far = huge loops.
+`via:` works under every routing: `curved` bends through the points, `direct` draws
+one polyline with sharp corners, and the default (orthogonal) runs at right angles
+through each point in order. That is how a connection loops back into its own
+element: `a.top -> a.right [via: [p, q]]` with two `point`s beside `a` (without
+`via:`, `a.top -> a.top` has no length and lint says so).
 
 #### Fitting a box around elements (`contains`)
 

@@ -71,8 +71,10 @@ Connection modifiers:
     routing: orthogonal     Right-angle path (default)
     routing: direct         Straight diagonal line
     routing: curved         Smooth cubic Bezier curve
-    via: [e1, e2]        Route through the elements' centers: a smooth curve (curved) or one
-                            polyline with sharp corners (direct) - e.g. a self-message
+    via: [e1, e2]        Route through the elements' centers: a smooth curve (curved), one
+                            polyline with sharp corners (direct), or right angles through
+                            each point (orthogonal, the default) - e.g. a self-message or a
+                            loop back into the same element (`a.top -> a.right [via: [p, q]]`)
     label: "text"           Add label (at midpoint or curve apex)
     label_at: <number>      Label position along path (0.0=start, 1.0=end, default 0.5)
     label_offset: <number>  Perpendicular distance from path to label (default 10);

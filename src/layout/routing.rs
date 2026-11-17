@@ -854,6 +854,12 @@ pub fn route_connection_with_anchors_and_types(
         return vec![start, end];
     }
 
+    // Orthogonal routing through `via:` points: right angles from the start
+    // through each via point to the end.
+    if mode == RoutingMode::Orthogonal && !via_points.is_empty() {
+        return orthogonal_through(from_bounds, to_bounds, via_points, from_anchor, to_anchor);
+    }
+
     // Orthogonal routing: use anchor positions if provided, otherwise edge-based attachment
     // Feature 009: When anchors are specified, use their positions
     let (default_from_edge, default_to_edge) = best_edges(from_bounds, to_bounds);
@@ -965,6 +971,100 @@ pub fn route_connection_with_anchors_and_types(
     }
 
     route_orthogonal(start, end)
+}
+
+fn edge_direction(edge: Edge) -> Point {
+    match edge {
+        Edge::Top => Point::new(0.0, -1.0),
+        Edge::Bottom => Point::new(0.0, 1.0),
+        Edge::Left => Point::new(-1.0, 0.0),
+        Edge::Right => Point::new(1.0, 0.0),
+    }
+}
+
+/// An orthogonal route that passes through every `via:` point in order. It
+/// leaves the start along its anchor's direction (or by the edge facing the
+/// first via point), runs on in the direction it is going before turning
+/// toward each next via point, and arrives at the end against the end
+/// anchor's direction (or at the edge facing the last via point). Works the
+/// same when both ends are on one element, so a self connection loops out
+/// through its via points and back.
+fn orthogonal_through(
+    from_bounds: &BoundingBox,
+    to_bounds: &BoundingBox,
+    via_points: &[Point],
+    from_anchor: Option<&ResolvedAnchor>,
+    to_anchor: Option<&ResolvedAnchor>,
+) -> Vec<Point> {
+    let first = via_points[0];
+    let last = via_points[via_points.len() - 1];
+    let dot = |p: Point| BoundingBox::new(p.x, p.y, 0.0, 0.0);
+    let (start, mut heading) = match from_anchor {
+        Some(a) => (a.position, cardinal_direction_for_anchor(a.direction)),
+        None => {
+            let edge = best_edges(from_bounds, &dot(first)).0;
+            (attachment_point(from_bounds, edge), edge_direction(edge))
+        }
+    };
+    let (end, arrive) = match to_anchor {
+        Some(a) => {
+            let facing = cardinal_direction_for_anchor(a.direction);
+            (a.position, Point::new(-facing.x, -facing.y))
+        }
+        None => {
+            let edge = best_edges(&dot(last), to_bounds).1;
+            let facing = edge_direction(edge);
+            (attachment_point(to_bounds, edge), Point::new(-facing.x, -facing.y))
+        }
+    };
+    let vertical = |d: Point| d.y.abs() > d.x.abs();
+    let mut path = vec![start];
+    let mut cur = start;
+    for &v in via_points {
+        // Keep going the way the line runs, then turn toward v.
+        let corner = if vertical(heading) { Point::new(cur.x, v.y) } else { Point::new(v.x, cur.y) };
+        path.push(corner);
+        path.push(v);
+        let d = segment_direction(corner, v);
+        heading = if d.x != 0.0 || d.y != 0.0 {
+            d
+        } else {
+            let d = segment_direction(cur, corner);
+            if d.x != 0.0 || d.y != 0.0 { d } else { heading }
+        };
+        cur = v;
+    }
+    // The last leg ends running along `arrive`.
+    let corner = if vertical(arrive) { Point::new(end.x, cur.y) } else { Point::new(cur.x, end.y) };
+    path.push(corner);
+    path.push(end);
+    drop_repeated_and_straight_points(path)
+}
+
+/// Remove repeated points and points in the middle of a straight run (the
+/// line goes on the same way through them). Unlike `simplify_path` it keeps a
+/// point where the line turns back, so a via point at the far end of an
+/// out-and-back run stays on the route.
+fn drop_repeated_and_straight_points(points: Vec<Point>) -> Vec<Point> {
+    let mut out: Vec<Point> = Vec::with_capacity(points.len());
+    for p in points {
+        if out.last().is_some_and(|l| (l.x - p.x).abs() < 0.001 && (l.y - p.y).abs() < 0.001) {
+            continue;
+        }
+        if out.len() >= 2 {
+            let (a, b) = (out[out.len() - 2], out[out.len() - 1]);
+            let d1 = segment_direction(a, b);
+            let d2 = segment_direction(b, p);
+            let straight_on = (d1.x == d2.x && d1.y == d2.y)
+                && ((a.x - b.x).abs() < 0.001 && (b.x - p.x).abs() < 0.001
+                    || (a.y - b.y).abs() < 0.001 && (b.y - p.y).abs() < 0.001);
+            if straight_on {
+                out.pop();
+            }
+        }
+        out.push(p);
+    }
+    out
 }
 
 /// How far apart (across the line) two ends may be and still count as aligned:

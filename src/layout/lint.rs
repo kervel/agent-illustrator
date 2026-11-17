@@ -221,6 +221,7 @@ pub fn check(
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
+    check_zero_length_connections(result, &mut warnings);
     check_missing_anchors(doc, result, &mut warnings);
     check_contrast(result, &mut warnings);
     check_steep_direct(result, &mut warnings);
@@ -2833,6 +2834,26 @@ fn check_label_connection_overlaps(
                     break;
                 }
             }
+        }
+    }
+}
+
+/// A connection whose route has no length (both ends on one spot: `a.top ->
+/// a.top`, or `a -> a`) draws nothing, at most a stray arrowhead.
+fn check_zero_length_connections(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    for conn in &result.connections {
+        let len: f64 = conn.path.windows(2).map(|w| (w[1].x - w[0].x).hypot(w[1].y - w[0].y)).sum();
+        if conn.path.len() >= 2 && len < 1.0 {
+            warnings.push(LintWarning {
+                category: LintCategory::Connection,
+                message: format!(
+                    "connection {}→{} has no length: both ends are on the same spot, so nothing is drawn; \
+                     loop it out with `via: [p, q]` (points beside the element) or connect two different anchors",
+                    conn.from_id.0, conn.to_id.0
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
         }
     }
 }

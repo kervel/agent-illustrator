@@ -101,3 +101,80 @@ a -> b [routing: direct]
     let m = msgs.iter().find(|m| m.contains("nearly vertical")).expect("alignment reported");
     assert!(m.contains("off by 3.25px"), "{m}");
 }
+
+// ── via: under the default (orthogonal) routing ────────────────────────
+
+fn on_path(pts: &[(f64, f64)], p: (f64, f64)) -> bool {
+    pts.windows(2).any(|w| {
+        let ((x0, y0), (x1, y1)) = (w[0], w[1]);
+        let within = |v: f64, a: f64, b: f64| v >= a.min(b) - 0.01 && v <= a.max(b) + 0.01;
+        ((x0 - x1).abs() < 0.01 && (p.0 - x0).abs() < 0.01 && within(p.1, y0, y1))
+            || ((y0 - y1).abs() < 0.01 && (p.1 - y0).abs() < 0.01 && within(p.0, x0, x1))
+    })
+}
+
+fn orthogonal(pts: &[(f64, f64)]) -> bool {
+    pts.windows(2).all(|w| (w[0].0 - w[1].0).abs() < 0.01 || (w[0].1 - w[1].1).abs() < 0.01)
+}
+
+const SELF_VIA: &str = r#"
+rect a [width: 60, height: 40]
+point p
+point q
+constrain a.left = 0
+constrain a.top = 0
+constrain p.center_x = 30
+constrain p.center_y = -40
+constrain q.center_x = 120
+constrain q.center_y = p.center_y
+a.top -> a.right as loop [via: [p, q]]
+"#;
+
+#[test]
+fn self_connection_follows_via_under_default_routing() {
+    let pts = points(&path_d(&render(SELF_VIA).unwrap(), Some("loop")));
+    assert!(orthogonal(&pts), "right angles only: {pts:?}");
+    assert_eq!(pts[0], (30.0, 0.0), "leaves a.top: {pts:?}");
+    assert!(on_path(&pts, (30.0, -40.0)) && on_path(&pts, (120.0, -40.0)), "through p and q: {pts:?}");
+    // Arrives at a.right from the right (the arrowhead pulls the end back).
+    let (last, prev) = (pts[pts.len() - 1], pts[pts.len() - 2]);
+    assert!((last.1 - 20.0).abs() < 0.01 && (prev.1 - 20.0).abs() < 0.01 && last.0 > 60.0 && prev.0 > last.0, "{pts:?}");
+}
+
+#[test]
+fn self_connection_on_one_anchor_follows_via() {
+    let src = SELF_VIA.replace("a.top -> a.right", "a.top -> a.top");
+    let pts = points(&path_d(&render(&src).unwrap(), Some("loop")));
+    assert!(pts.len() >= 4, "a loop out and back, not a zero-length line: {pts:?}");
+    assert!(on_path(&pts, (30.0, -40.0)) && on_path(&pts, (120.0, -40.0)), "{pts:?}");
+}
+
+#[test]
+fn via_steers_an_orthogonal_connection_between_two_elements() {
+    let src = r#"
+rect a [width: 40, height: 40]
+rect b [width: 40, height: 40]
+point w
+constrain a.left = 0
+constrain a.top = 0
+constrain b.left = 200
+constrain b.top = 0
+constrain w.center_x = 100
+constrain w.center_y = 120
+a -> b as c [via: [w]]
+"#;
+    let pts = points(&path_d(&render(src).unwrap(), Some("c")));
+    assert!(orthogonal(&pts), "{pts:?}");
+    assert!(on_path(&pts, (100.0, 120.0)), "detours through w below: {pts:?}");
+    assert_eq!(pts[0], (20.0, 40.0), "leaves a toward w (its bottom): {pts:?}");
+}
+
+#[test]
+fn zero_length_connection_is_reported() {
+    let src = r#"
+rect a [width: 60, height: 40]
+a.top -> a.top as c
+"#;
+    let msgs = lint(src);
+    assert!(msgs.iter().any(|m| m.contains("a→a") && m.contains("via")), "{msgs:?}");
+}
