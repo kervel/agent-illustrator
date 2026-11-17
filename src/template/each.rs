@@ -1192,6 +1192,24 @@ fn subst_path(p: &mut Spanned<ElementPath>, vars: &Vars, problems: &mut Vec<Prob
 
 fn subst_prop(p: &mut PropertyRef, vars: &Vars, problems: &mut Vec<Problem>) {
     subst_path(&mut p.element, vars, problems);
+    // `m.at.center_x` with `at: box.top`: the x of box's top.
+    if let Err(why) = super::names::fold_side(&mut p.element.node, &mut p.property) {
+        problems.push(Problem::Msg(why));
+    }
+}
+
+/// A `midpoint` operand that became a side (`m.from` = `a.right`): the
+/// element, with the side as its edge.
+fn side_as_edge(id: &mut Spanned<Identifier>, edge: &mut Option<crate::parser::ast::ConstraintProperty>) {
+    if edge.is_some() {
+        return;
+    }
+    if let Some((element, side)) = id.node.0.rsplit_once('.') {
+        if super::names::SIDES.contains(&side) {
+            *edge = crate::parser::ast::ConstraintProperty::from_str(side);
+            id.node = Identifier::new(element);
+        }
+    }
 }
 
 /// `n.top -> hub`, `m.from -> m.to`: the head is the element, the rest its anchor.
@@ -1230,10 +1248,12 @@ fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, problems: &mut Vec<Problem>) 
         ConstraintExpr::Constant { left, .. }
         | ConstraintExpr::GreaterOrEqual { left, .. }
         | ConstraintExpr::LessOrEqual { left, .. } => subst_prop(left, vars, problems),
-        ConstraintExpr::Midpoint { target, a, b, .. } => {
+        ConstraintExpr::Midpoint { target, a, b, a_edge, b_edge, .. } => {
             subst_prop(target, vars, problems);
             subst_dotted(a, vars, problems);
             subst_dotted(b, vars, problems);
+            side_as_edge(a, a_edge);
+            side_as_edge(b, b_edge);
         }
         ConstraintExpr::Contains { container, elements, .. } => {
             for id in std::iter::once(container).chain(elements.iter_mut()) {

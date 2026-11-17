@@ -1385,7 +1385,7 @@ where
         .collect::<Vec<_>>()
         .delimited_by(just(Token::BracketOpen), just(Token::BracketClose))
         .map_with(|items, e| Spanned::new(StyleValue::List(items), span_range(&e.span())));
-    let value_list = choice((record, inner_list, dotted_atom, value_atom.clone()))
+    let value_list = choice((record, inner_list, dotted_atom.clone(), value_atom.clone()))
         .separated_by(just(Token::Comma))
         .allow_trailing()
         .collect::<Vec<_>>()
@@ -1462,16 +1462,9 @@ where
             let v = if neg.is_some() { -n.node } else { n.node };
             Spanned::new(StyleValue::Number { value: v, unit: Some("%".to_string()) }, span_range(&e.span()))
         });
-    let dotted_value = identifier
-        .then(just(Token::Dot).ignore_then(identifier).repeated().at_least(1).collect::<Vec<_>>())
-        .map_with(|(head, rest), e| {
-            let mut n = head.node.0;
-            for r in rest {
-                n.push('.');
-                n.push_str(&r.node.0);
-            }
-            Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
-        });
+    // `drawn: st.dot`, `src: evaluate.top`: a dotted name as one identifier;
+    // its last part may be a side or the centre (`dotted_atom`).
+    let dotted_value = dotted_atom.clone();
     // `200..`, `..300`, `120..400`: a size that may change between bounds.
     // A bound may be written negative (`-10..20`) so the error says why it
     // is wrong, instead of failing to parse.
@@ -1833,10 +1826,12 @@ where
                 Some(prop) => {
                     let path_segments: Vec<_> = segments[..segments.len() - 1].to_vec();
                     let prop_span = last.span.clone();
-                    Ok(PropertyRef {
-                        element: Spanned::new(ElementPath { segments: path_segments }, span_range(&span)),
-                        property: Spanned::new(prop, prop_span),
-                    })
+                    let mut element = ElementPath { segments: path_segments };
+                    let mut property = Spanned::new(prop, prop_span);
+                    // `box.top.center_x`: the x of box's top side.
+                    crate::template::names::fold_side(&mut element, &mut property)
+                        .map_err(|why| Rich::custom(span, why))?;
+                    Ok(PropertyRef { element: Spanned::new(element, span_range(&span)), property })
                 }
                 None => Err(Rich::custom(span, format!("'{}' is not a valid constraint property. Expected one of: x, y, width, height, left, right, top, bottom, center, center_x, center_y", last.node.as_str()))),
             }

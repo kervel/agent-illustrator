@@ -233,6 +233,8 @@ constrain a.width = 100                Fixed dimension
 constrain a.center_x = midpoint(b, c)  Center between two elements
 constrain a.center_y = midpoint(b.bottom, c.top)   Center in the gap between edges
 constrain a.center_x = midpoint(g.cell(0,0), g.cell(0,2))   Grid cells work too
+constrain d.center_x = box.top.center_x   A side is a point: its x and y (the top's x is
+                                       box's centre x; `box.right.center_y` is box's centre y)
                                        (there is no other arithmetic: no ( ) or /)
 constrain bg contains a, b [padding: 10]   Auto-size container (either side may be a path: `card.row.x`).
                                           `padding_x:` / `padding_y:` set one axis (override `padding`).
@@ -271,6 +273,10 @@ Inline templates:
     "{param}" is filled in in any string modifier of a template body (label: "v{n}").
     A parameter given an element (`src: api.p_2`) works as that element in the body's
     `constrain`, `contains` and connection endpoints: how a template reaches outside itself.
+    Given a side (`src: box.top`, `box.right`, `box.center`) it is that point: `src -> x`
+    starts at box's top, `src.center_x` is the top's x (box's centre x) and `src.center_y`
+    its y (box's top), `midpoint(src, ...)` uses that edge. A side has no width or height,
+    and `contains` needs the element.
     A default that names one of the body's own parts means that part of each instance:
     `template "life" (until: rows) { ... col rows {...} ... hd.bottom -- until.bottom }`
     ends `cl`'s line at `cl.rows`; `life auth [until: auth.p[ok]]` ends it elsewhere. Only a

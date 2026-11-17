@@ -18,7 +18,7 @@
 //! ```
 
 mod each;
-mod names;
+pub(crate) mod names;
 mod registry;
 mod resolver;
 pub mod svg_parts;
