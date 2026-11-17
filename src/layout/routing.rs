@@ -1276,10 +1276,19 @@ pub fn route_connections_hiding(
                         let to_bounds = to_element.bounds;
 
                         // Feature 009: Resolve anchors for connection endpoints
+                        // With `via:` an end without an explicit anchor faces its
+                        // nearest via point (the first for the start, the last for
+                        // the end), not the other element: for a self connection
+                        // the other element is itself.
+                        let via_refs = extract_via_references(&conn.modifiers);
+                        let via_points = resolve_via_points(&via_refs, result)?;
+                        let dot = |p: &Point| BoundingBox::new(p.x, p.y, 0.0, 0.0);
+                        let toward_from = via_points.first().map(dot).unwrap_or(to_bounds);
+                        let toward_to = via_points.last().map(dot).unwrap_or(from_bounds);
                         let from_anchor =
-                            resolve_anchor(&conn.from, &result.elements, Some(&to_bounds))?;
+                            resolve_anchor(&conn.from, &result.elements, Some(&toward_from))?;
                         let to_anchor =
-                            resolve_anchor(&conn.to, &result.elements, Some(&from_bounds))?;
+                            resolve_anchor(&conn.to, &result.elements, Some(&toward_to))?;
 
                         // Always pass resolved anchors (auto-picked or explicit) so
                         // the router can use their direction for routing.
@@ -1294,9 +1303,12 @@ pub fn route_connections_hiding(
                             && conn.to.anchor.is_none();
                         let from_anchor_opt = if auto_ortho { None } else { Some(&from_anchor) };
                         let to_anchor_opt = if auto_ortho { None } else { Some(&to_anchor) };
-
-                        let via_refs = extract_via_references(&conn.modifiers);
-                        let via_points = resolve_via_points(&via_refs, result)?;
+                        // Orthogonal through via points: an end without an
+                        // explicit anchor takes the middle of the side facing its
+                        // via point (decided per end by the router).
+                        let ortho_via = routing_mode == RoutingMode::Orthogonal && !via_points.is_empty();
+                        let from_anchor_opt = if ortho_via && conn.from.anchor.is_none() { None } else { from_anchor_opt };
+                        let to_anchor_opt = if ortho_via && conn.to.anchor.is_none() { None } else { to_anchor_opt };
                         let path = route_connection_with_anchors_and_types(
                             &from_bounds,
                             &to_bounds,
@@ -1447,7 +1459,10 @@ fn spread_coinciding_connections(result: &mut LayoutResult) {
         // points there is nowhere to spread to.
         let is_point = |b: Option<BoundingBox>| b.is_some_and(|b| b.width < 1.0 && b.height < 1.0);
         let (from_pt, to_pt) = (is_point(boxes.0), is_point(boxes.1));
-        if from_pt && to_pt {
+        // A fan is diagonal: under right-angle routing the lines stay on
+        // one straight run into the point, like a single connection.
+        let orthogonal = order.iter().any(|(j, _)| result.connections[*j].routing_mode == RoutingMode::Orthogonal);
+        if (from_pt && to_pt) || ((from_pt || to_pt) && orthogonal) {
             for (j, _) in &order {
                 done[*j] = true;
             }

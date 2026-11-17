@@ -167,10 +167,10 @@ Sequence rewrite as built (§4; differences noted):
   [{kind: reply, head: open, dash: dashed}, ...]`, read by an outer `each k in looks` around
   `each m, i in msgs where m.kind == k.kind and m.from != m.to` (`to_end: k.head,
   stroke_dasharray: k.dash`). A second inner block, `where ... m.from == m.to`, draws the
-  self-message `x.p[id].top -> x.p[id].bottom [routing: direct, via: [out, back]]` with a
-  separate text beside it: a `label:` on a `routing: direct` + `via` polyline is anchored
-  about 10px off the drawn path (vertical segment at x=315, label base at x=305 for any
-  `label_offset`), a routing bug to look at separately.
+  self-message `x.p[id].top -> x.p[id].bottom [routing: direct, via: [out, back], label: ...,
+  label_offset: 6]`. (Its label used to be a separate text: a `label:` on a 4-point route was
+  placed as if the route were a Bezier, ~10px off the drawn line. Fixed: only curved routes
+  are Beziers.)
 - Activation bars come from `let bars = [{on: api, first: login, last: conflict}, ...]`.
   Frames stay a `frame` template (two instances read better than a list of two); alt's
   `else` line is a `split` template (`split alt_else [of: alt_f, after: cl.p[ok200], ...]`).

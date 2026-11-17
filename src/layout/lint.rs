@@ -2854,6 +2854,26 @@ fn check_zero_length_connections(result: &LayoutResult, warnings: &mut Vec<LintW
                 frames: Vec::new(),
                 pair: None,
             });
+            continue;
+        }
+        // A connection from an element to itself drawn straight across its own
+        // box (`a -> a`): the line is hidden under, or scribbled over, the box.
+        if conn.from_id == conn.to_id && conn.path.len() >= 2 {
+            let Some(el) = result.get_element_by_name(&conn.from_id.0) else { continue };
+            let b = el.bounds;
+            let inside = |p: Point| p.x > b.x + 0.5 && p.x < b.right() - 0.5 && p.y > b.y + 0.5 && p.y < b.bottom() - 0.5;
+            if conn.path.windows(2).any(|w| inside(Point::new((w[0].x + w[1].x) / 2.0, (w[0].y + w[1].y) / 2.0))) {
+                warnings.push(LintWarning {
+                    category: LintCategory::Connection,
+                    message: format!(
+                        "connection {}→{} runs through its own element; \
+                         loop it out with `via: [p, q]` (points beside the element), e.g. `{}.top -> {}.right [via: [p, q]]`",
+                        conn.from_id.0, conn.to_id.0, conn.from_id.0, conn.to_id.0
+                    ),
+                    frames: Vec::new(),
+                    pair: None,
+                });
+            }
         }
     }
 }

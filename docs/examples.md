@@ -1005,6 +1005,26 @@ each k in [1, 2] { stage[k].right -> stage[k+1].left [routing: direct] }   // co
 stage[2].top -> stage[1].top [routing: curved, label: "fails"]               // one copy by number
 ```
 
+## A connection back into its own element (`via:` under right-angle routing)
+
+`via: [p, q]` works under every routing; with the default (orthogonal) one the line runs at
+right angles through each point in order. A job that retries itself
+(`examples/retry-loop.ail`):
+
+```
+point over
+point beside
+constrain over.center_x = upload.center_x
+constrain over.center_y = upload.top - 40      // above the box
+constrain beside.center_x = upload.right + 40  // and beside it
+constrain beside.center_y = over.center_y
+upload.top -> upload.right [via: [over, beside], stroke_dasharray: "5,3", label: "retry (503)"]
+```
+
+Without `via:`, `a -> a` runs through its own box and `a.top -> a.top` has no length; lint
+reports both. An end without an anchor (`upload.top -> upload [via: ...]`) takes the side
+facing its nearest via point.
+
 ## Optional parts with `if`
 
 `if COND { ... } else { ... }` keeps one body and drops the other before layout; a dropped

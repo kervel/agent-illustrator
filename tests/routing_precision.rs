@@ -192,9 +192,9 @@ constrain a.left = 0
 constrain a.top = 0
 constrain p.center_x = 200
 constrain p.center_y = 30
-a -> p as go
-p -> a as back
-a -- p as tie
+a -> p as go [routing: direct]
+p -> a as back [routing: direct]
+a -- p as tie [routing: direct]
 "#;
     let svg = render(src).unwrap();
     for name in ["go", "back", "tie"] {
@@ -214,6 +214,51 @@ a -- p as tie
     // The three lanes are still apart at the box.
     let starts: Vec<(f64, f64)> = ["go", "tie"].iter().map(|n| points(&path_d(&svg, Some(n)))[0]).collect();
     assert!((starts[0].1 - starts[1].1).abs() > 5.0, "{starts:?}");
+}
+
+#[test]
+fn orthogonal_request_and_reply_to_a_point_stay_straight_and_on_it() {
+    // Under right-angle routing a fan would be diagonal: the pair stays on
+    // one horizontal run that ends on the point.
+    let src = r#"
+rect a [width: 60, height: 40]
+point p
+constrain a.left = 0
+constrain a.top = 0
+constrain p.center_x = 200
+constrain p.center_y = a.center_y
+a -> p as go
+p -> a as back
+"#;
+    let svg = render(src).unwrap();
+    for name in ["go", "back"] {
+        let pts = points(&path_d(&svg, Some(name)));
+        assert!(pts.iter().all(|p| p.1 == 20.0), "{name} horizontal at the point's y: {pts:?}");
+    }
+    assert_eq!(points(&path_d(&svg, Some("back")))[0], (200.0, 20.0));
+}
+
+#[test]
+fn self_connection_through_its_own_box_is_reported() {
+    let msgs = lint("rect a [width: 60, height: 40]\na -> a as c\n");
+    assert!(msgs.iter().any(|m| m.contains("a→a") && m.contains("via")), "{msgs:?}");
+    // A loop outside the box is fine.
+    assert!(lint(SELF_VIA).iter().all(|m| !m.contains("a→a")), "{:?}", lint(SELF_VIA));
+}
+
+#[test]
+fn self_connection_with_one_anchor_faces_its_via_points() {
+    // `a.top -> a [via: [p, q]]`: the end without an anchor is the side
+    // facing q (a.right), not a's centre.
+    let src = SELF_VIA.replace("a.top -> a.right", "a.top -> a");
+    let pts = points(&path_d(&render(&src).unwrap(), Some("loop")));
+    let last = pts[pts.len() - 1];
+    assert!(last.0 >= 60.0 && (last.1 - 20.0).abs() < 0.01, "ends on a's right side: {pts:?}");
+    let pts = points(&path_d(&render(&SELF_VIA.replace("a.top -> a.right", "a -> a")).unwrap(), Some("loop")));
+    assert!(on_path(&pts, (30.0, -40.0)) && on_path(&pts, (120.0, -40.0)), "{pts:?}");
+    let (first, last) = (pts[0], pts[pts.len() - 1]);
+    let outside_or_edge = |p: (f64, f64)| p.0 <= 0.0 || p.0 >= 60.0 || p.1 <= 0.0 || p.1 >= 40.0;
+    assert!(outside_or_edge(first) && outside_or_edge(last), "ends on a's edges: {pts:?}");
 }
 
 #[test]
