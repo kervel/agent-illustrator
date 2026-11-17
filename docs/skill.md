@@ -436,7 +436,7 @@ Keep via-points 30-60px from the connection line. Too far = huge loops.
 one polyline with sharp corners, and the default (orthogonal) runs at right angles
 through each point in order. That is how a connection loops back into its own
 element: `a.top -> a.right [via: [p, q]]` with two `point`s beside `a` (without
-`via:`, `a.top -> a.top` has no length and lint says so).
+`via:`, `a.top -> a.top` has no length and lint says so). See `examples/retry-loop.ail`.
 
 #### Fitting a box around elements (`contains`)
 

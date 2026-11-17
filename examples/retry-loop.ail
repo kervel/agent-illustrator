@@ -1,0 +1,25 @@
+// A job that retries itself: a connection from an element back into the same element.
+//
+// `via: [p, q]` routes through the points in order, under every routing. With the default
+// (orthogonal) routing the line runs at right angles: out of `upload.top`, over the two
+// points above and beside the box, and back into `upload.right`. Without `via:` a
+// connection from an anchor to itself has no length (lint says so).
+
+row jobs [gap: 90, align: center] {
+    rect queue  [label: "Queue",  width: 120, height: 50]
+    rect upload [label: "Upload", width: 120, height: 50, fill: role-warn-soft]
+}
+rect done [label: "Done", width: 120, height: 50, fill: role-ok-soft]
+constrain done.center_x = upload.center_x
+constrain done.top = upload.bottom + 70
+
+queue -> upload
+upload -> done [label: "200"]
+
+point over
+point beside
+constrain over.center_x = upload.center_x
+constrain over.center_y = upload.top - 40
+constrain beside.center_x = upload.right + 40
+constrain beside.center_y = over.center_y
+upload.top -> upload.right [via: [over, beside], stroke_dasharray: "5,3", label: "retry (503)"]
