@@ -1845,7 +1845,32 @@ fn render_element_inner(
         (Some(target), Some(id)) => builder.start_clip(&id.0, target),
         _ => false,
     };
-    render_element_body(element, builder, hidden, kf_referenced);
+    // `opacity:` fades the whole element. On a bare shape the attribute on the
+    // shape is enough, but its label is a sibling `<text>` and a text element
+    // swaps in variant nodes carrying their own `opacity`, so those fade as
+    // one group instead. (Containers wrap their children themselves.)
+    let faded = element
+        .styles
+        .opacity
+        .filter(|o| (o - 1.0).abs() > f64::EPSILON)
+        .filter(|_| {
+            element.label.is_some()
+                || matches!(
+                    element.element_type,
+                    ElementType::Shape(
+                        ShapeType::Text { .. } | ShapeType::SvgEmbed { .. } | ShapeType::RasterImage { .. }
+                    )
+                )
+        });
+    if let Some(o) = faded {
+        let mut e = element.clone();
+        e.styles.opacity = None;
+        builder.start_opacity_group(o);
+        render_element_body(&e, builder, hidden, kf_referenced);
+        builder.end_group();
+    } else {
+        render_element_body(element, builder, hidden, kf_referenced);
+    }
     if clipped {
         builder.end_group();
     }
