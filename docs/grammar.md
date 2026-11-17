@@ -562,6 +562,9 @@ CLI flags:
     --player-js        Print the player for hosts that inline the SVG
     --lint-strict      Like --lint, but warnings fail too (errors always do)
     --stylesheet-css F Repeat to layer stylesheets in order (theme, then deck): later wins
+    --flat-colors      Literal colours instead of var(--token), one arrowhead per line
+                       colour instead of context-stroke: for viewers that paint
+                       CSS variables black (any SVG output; light palette)
     --crop-to-content [PAD]  The picture is what the frames show (union of all
                        frames, + PAD, default 24), not the stage: for embedding
     --serve [PORT]     Live preview (default 8420): the real player, arrow keys

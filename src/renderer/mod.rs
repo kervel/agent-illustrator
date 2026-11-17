@@ -4,6 +4,7 @@
 //! with appropriate CSS classes for styling.
 
 pub mod config;
+pub mod flat;
 pub mod path;
 pub mod svg;
 

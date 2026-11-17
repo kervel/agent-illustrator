@@ -360,8 +360,37 @@ fn parse_css(css: &str, rules: &mut Vec<Rule>, faces: &mut Vec<Vec<(String, Stri
     }
 }
 
+/// The custom properties a document's `<style>` defines on its root element
+/// (`:root`, `svg`), later rules winning. `@media` blocks are skipped, so a
+/// stylesheet's dark-mode overrides do not apply: these are the base values.
+pub(crate) fn root_vars(svg: &str) -> Result<HashMap<String, String>, String> {
+    let doc = roxmltree::Document::parse(svg).map_err(|e| format!("the SVG does not parse: {}", e))?;
+    let mut rules = Vec::new();
+    let mut faces_raw = Vec::new();
+    let mut remote = false;
+    for n in doc.descendants().filter(|n| n.tag_name().name() == "style") {
+        let text: String = n.children().filter_map(|c| c.text()).collect();
+        parse_css(&text, &mut rules, &mut faces_raw, &mut remote);
+    }
+    Ok(vars_of(doc.root_element(), &rules))
+}
+
+fn vars_of(root: roxmltree::Node, rules: &[Rule]) -> HashMap<String, String> {
+    let mut vars: HashMap<String, String> = HashMap::new();
+    let mut root_rules: Vec<&Rule> = rules.iter().filter(|r| r.selectors.iter().any(|s| matches(root, s))).collect();
+    root_rules.sort_by_key(|r| r.order);
+    for r in root_rules {
+        for (k, v, _) in &r.decls {
+            if k.starts_with("--") {
+                vars.insert(k.clone(), v.clone());
+            }
+        }
+    }
+    vars
+}
+
 /// `var(--x, fallback)` -> its value, recursively.
-fn resolve_vars(v: &str, vars: &HashMap<String, String>, depth: usize) -> String {
+pub(crate) fn resolve_vars(v: &str, vars: &HashMap<String, String>, depth: usize) -> String {
     if depth > 8 || !v.contains("var(") {
         return v.to_string();
     }
@@ -462,16 +491,7 @@ fn flatten(svg: &str) -> Result<Flat, String> {
     }
     // Custom properties from rules that apply to the root.
     let root = doc.root_element();
-    let mut vars: HashMap<String, String> = HashMap::new();
-    let mut root_rules: Vec<&Rule> = rules.iter().filter(|r| r.selectors.iter().any(|s| matches(root, s))).collect();
-    root_rules.sort_by_key(|r| r.order);
-    for r in root_rules {
-        for (k, v, _) in &r.decls {
-            if k.starts_with("--") {
-                vars.insert(k.clone(), v.clone());
-            }
-        }
-    }
+    let vars = vars_of(root, &rules);
     let font_faces: Vec<(String, Vec<u8>)> = faces_raw
         .iter()
         .filter_map(|decls| {

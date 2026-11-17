@@ -206,6 +206,7 @@ agent-illustrator scene.ail --states                   # the storyboard, as text
 agent-illustrator scene.ail --timeline                 # when everything happens
 agent-illustrator scene.ail --frame 2 --at 50%         # a still, mid-motion
 agent-illustrator scene.ail --frame 2 --png -o f.png   # a PNG to look at (no browser needed)
+agent-illustrator diagram.ail --flat-colors > flat.svg # literal colours, for viewers without CSS variables
 agent-illustrator scene.ail --lint                     # what an agent should fix
 ```
 

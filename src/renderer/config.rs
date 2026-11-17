@@ -28,6 +28,14 @@ pub struct SvgConfig {
     /// Empty leaves class names unscoped, which is what a single standalone
     /// diagram wants.
     pub scope: String,
+
+    /// `--flat-colors`: write every colour as a literal (`#2196f3`), not as
+    /// a `var(--token)` the host must resolve, and give each line colour its
+    /// own arrowhead instead of `context-stroke`. For viewers and converters
+    /// that do not evaluate CSS custom properties (they paint such shapes
+    /// black). Dark-mode overrides in `@media` blocks are dropped: the
+    /// colours are the base (light) ones.
+    pub flat_colors: bool,
 }
 
 impl Default for SvgConfig {
@@ -38,6 +46,7 @@ impl Default for SvgConfig {
             pretty_print: true,
             class_prefix: Some("ai-".to_string()),
             scope: String::new(),
+            flat_colors: false,
         }
     }
 }
@@ -69,6 +78,12 @@ impl SvgConfig {
     /// Set the CSS class prefix
     pub fn with_class_prefix(mut self, prefix: impl Into<String>) -> Self {
         self.class_prefix = Some(prefix.into());
+        self
+    }
+
+    /// Emit literal colours instead of CSS custom properties (`--flat-colors`)
+    pub fn with_flat_colors(mut self, flat: bool) -> Self {
+        self.flat_colors = flat;
         self
     }
 

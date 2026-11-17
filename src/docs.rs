@@ -51,10 +51,16 @@ const TOPICS: &[(&str, &str, &str)] = &[
     ("if", "skill", "Optional parts: `if`"),
     ("sizes", "skill", "Sizes that stretch: ranges"),
     ("swimlanes", "skill", "Cross-functional flowcharts"),
+    ("flat-colors", "styling", "Part 7: Flat colours"),
 ];
 
 /// Other words for the same topics (what an agent would type).
 const ALIASES: &[(&str, &str)] = &[
+    ("flat-colours", "flat-colors"),
+    ("flat", "flat-colors"),
+    ("var", "flat-colors"),
+    ("viewer", "flat-colors"),
+    ("black", "flat-colors"),
     ("move", "travel"),
     ("fly", "travel"),
     ("pivot", "hinges"),

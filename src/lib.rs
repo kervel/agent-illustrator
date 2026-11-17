@@ -418,7 +418,12 @@ fn extract_template_rotations(doc: &Document) -> std::collections::HashMap<Strin
 /// assert!(svg.contains("<svg"));
 /// ```
 pub fn render_with_config(source: &str, config: RenderConfig) -> Result<String, RenderError> {
+    let flat = config.svg.flat_colors;
     let (svg, _) = render_pipeline(source, config).map_err(|e| locate_error(e, source))?;
+    // Text outputs (timeline, states, JSON) are not markup.
+    if flat && svg.trim_start().starts_with('<') {
+        return Ok(renderer::flat::flatten_colors(&svg));
+    }
     Ok(svg)
 }
 

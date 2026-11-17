@@ -172,9 +172,10 @@ rect box [stroke_dasharray: dotted]                    # = "2,2"
    color tokens (accent-light, foreground-1, etc.) are always available. Your CSS
    file adds rules on top.
 
-3. **rsvg-convert ignores CSS variables.** If you render to PNG with rsvg-convert,
-   all `var(--token)` colors render as black. Use headless Chrome for accurate
-   previews: `google-chrome --headless --screenshot=out.png --window-size=2400,1800 file.svg`
+3. **Some viewers ignore CSS variables.** Image viewers and converters that do
+   not evaluate `var(--token)` paint those colours (and `context-stroke`
+   arrowheads) black. Render with `--flat-colors` for them (Part 7), or use
+   `--png`, which needs no browser.
 
 4. **Drop shadows on hidden elements.** `filter: drop-shadow(...)` can cause
    faint artifacts on elements that should be invisible. Apply shadows only to
@@ -185,3 +186,29 @@ rect box [stroke_dasharray: dotted]                    # = "2,2"
 
 6. **Inline `fill:` uses token names, CSS uses `var()`.** In AIL: `fill: accent-light`.
    In CSS: `fill: var(--accent-light)`. Don't mix them up.
+
+## Part 7: Flat colours (no CSS variables)
+
+By default every colour in the SVG is a CSS variable (`fill="var(--role-primary)"`)
+so a stylesheet can retheme it, and arrowheads take the line's colour through
+`context-stroke`. Browsers handle both; many image viewers, converters and
+editors do not, and paint those shapes black.
+
+```bash
+agent-illustrator --flat-colors scene.ail -o scene.svg
+agent-illustrator --flat-colors --stylesheet-css theme.css scene.ail -o scene.svg
+agent-illustrator --flat-colors --animate-css scene.ail -o scene.svg   # works with every SVG output
+```
+
+`--flat-colors` writes every colour as the literal value the palette and your
+`--stylesheet-css` files give it (`fill="#2196f3"`): on shapes, label spans,
+pattern and gradient fills, CSS rules, and the motion's colour changes. Each
+line colour gets its own arrowhead marker with the colour written in. The
+picture is the same; only the indirection is gone.
+
+- The colours are fixed at render time: a stylesheet attached afterwards can no
+  longer retheme them through `--token` variables.
+- Dark-mode overrides (`@media (prefers-color-scheme: dark)`) are dropped; the
+  base (light) colours are used.
+- An arrowhead keeps the colour its line is drawn with; a keyframe that
+  recolours the line does not recolour its arrowhead.

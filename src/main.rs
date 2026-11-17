@@ -340,6 +340,15 @@ struct Cli {
     /// toggling a `frame-<name>` class on the SVG root.
     #[arg(long)]
     no_frame_css: bool,
+
+    /// Write every colour as a literal (#2196f3) instead of a CSS variable
+    /// (var(--role-primary)), and give each line colour its own arrowhead
+    /// instead of `context-stroke`. For hosts that do not evaluate CSS
+    /// variables (image viewers, converters), which paint such shapes black.
+    /// Uses the stylesheet's base colours; dark-mode (@media) overrides are
+    /// dropped. Works with every SVG output (--animate, --animate-css, --frame).
+    #[arg(long)]
+    flat_colors: bool,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -509,6 +518,7 @@ fn main() {
     config.timeline = cli.timeline;
     config.states = cli.states;
     config.timeline_json = cli.timeline_json;
+    config.svg.flat_colors = cli.flat_colors;
     if let Some(css) = custom_css {
         config = config.with_custom_css(css);
     }
