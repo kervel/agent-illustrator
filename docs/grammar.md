@@ -367,6 +367,12 @@ digits, '-' or '_' and must not start with a digit. A name with a space is
 rejected rather than renamed, because a renamed frame is one you could not then
 pass to --frame.
 
+One keyframe per list item: put it in an `each`; the name, title and targets
+fill in from the item.
+    each s, i in steps { keyframe "step{i+1}" [title: "{s.t}"] { show box[s.id] } }
+    each m in moves { keyframe "{m.id}" { constrain dot.left = base.right + m.dx } }
+Two items making one name is an error.
+
 Keyframes are cumulative: each frame builds on the previous frame's state.
 Transforms (visual AND geometry) persist forward, merged per-property; to reset
 a property, restate it (e.g. dx: 0).

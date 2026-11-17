@@ -20,6 +20,8 @@ use crate::parser::ast::{
 use super::names::head_of;
 use super::registry::TemplateError;
 
+mod keyframes;
+
 type Stmts = Vec<Spanned<Statement>>;
 
 /// What a loop variable stands for in one copy of the body.
@@ -182,6 +184,8 @@ fn expand_block(
     let keys = item_keys(&items, e.key.as_ref().map(|k| k.node.0.as_str()), &header)?;
     // declared name -> the item that made it, to catch two items making one name
     let mut made: HashMap<String, usize> = HashMap::new();
+    // keyframe name -> the item that made it
+    let mut made_frames: HashMap<String, usize> = HashMap::new();
     let mut out = Vec::new();
     let mut problems: Vec<Problem> = Vec::new();
     // Items that `where` leaves out still count: `i` and the copy names are
@@ -252,6 +256,18 @@ fn expand_block(
         }
         let mut body = expand_in(body, lists, scope, dropped)?;
         crate::parser::join_constraint_parts(&mut body);
+        let mut frames = Vec::new();
+        keyframes::declared(&body, &mut frames);
+        for f in frames {
+            if let Some(&first) = made_frames.get(&f) {
+                problems.push(Problem::Msg(format!(
+                    "{}: items {} and {} both make a keyframe called \"{}\"; name it from the item: keyframe \"step{{i+1}}\" or \"{{{}.id}}\"",
+                    header, first, k + 1, f, var
+                )));
+            } else {
+                made_frames.insert(f, k + 1);
+            }
+        }
         out.extend(body);
     }
     if !problems.is_empty() {
@@ -876,6 +892,10 @@ fn rename_stmt(st: Spanned<Statement>, m: &HashMap<String, String>) -> Spanned<S
             b.else_body = b.else_body.into_iter().map(|c| rename_stmt(c, m)).collect();
             Statement::If(b)
         }
+        Statement::Keyframe(mut k) => {
+            keyframes::rename(&mut k, m);
+            Statement::Keyframe(k)
+        }
         other => other,
     };
     Spanned::new(node, span)
@@ -1480,6 +1500,10 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
             b.then_body = b.then_body.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
             b.else_body = b.else_body.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
             Statement::If(b)
+        }
+        Statement::Keyframe(mut k) => {
+            keyframes::subst(&mut k, vars, problems);
+            Statement::Keyframe(k)
         }
         other => other,
     };

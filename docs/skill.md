@@ -520,6 +520,9 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   same body (`constrain bg contains entry`, `clip: x`) follow the renaming.
   `constrain`, anchors, keyframes and connections can target `entry_2` like any
   element. Unnamed elements need no names.
+- **A keyframe per item.** A `keyframe` in the body is one frame per item,
+  named from it: `each s, i in steps { keyframe "step{i+1}" { show box[s.id] } }`
+  (`--doc keyframes-from-data`).
 - **Keyed copies: `by` a field.** `each r by id in [...]` names the copies
   by each record's `id` field instead of by number:
   `each r by id in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}]

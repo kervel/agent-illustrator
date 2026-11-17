@@ -1100,3 +1100,23 @@ The x of a top side is the element's centre x and its y is the top, so `pin` lan
 middle of `tight.r`'s top edge. A side has no width or height and cannot be contained; pass the
 element (`at: tight.r`) when the template needs a box. A name nothing fills (`+ gpa`) is an
 error that names the template's parameters.
+
+## Keyframes from a list
+
+A walkthrough that steps through data writes its keyframe once, inside an `each`: one frame
+per item, named from it. `examples/token-prediction.ail` makes its six frames this way.
+
+```
+let steps = [{id: plan, t: "Plan"}, {id: build, t: "Build"}, {id: ship, t: "Ship"}]
+row r [gap: 20] {
+    each s by id in steps { rect box [label: "{s.t}", width: 80, height: 40] }
+}
+keyframe "start" { hide box[plan], box[build], box[ship] }
+each s, i in steps {                                      // step1, step2, step3
+    keyframe "step{i+1}" [title: "{s.t}"] { show box[s.id] [enter: fade]; then { pulse box[s.id] } }
+}
+```
+
+The name, `title:` and `note:` fill in like a label; the targets, the numbers in a keyframe's
+`constrain` (`+ m.dx`) and a part the same body declares (`hide tag`: this item's tag) follow
+the item. Two items that make one name (`keyframe "same"`) are an error naming both.

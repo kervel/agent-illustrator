@@ -1402,12 +1402,21 @@ fn all_element_names(result: &layout::LayoutResult) -> Vec<String> {
     out
 }
 
+/// `source` with its templates and `each` blocks expanded, so keyframes an
+/// `each` makes (`keyframe "step{i+1}"`) are listed. A file whose templates
+/// cannot be resolved here (a template file relative to elsewhere) is read
+/// as written.
+fn keyframe_document(source: &str) -> Result<Document, RenderError> {
+    let doc = parse(source)?;
+    Ok(resolve_templates(doc.clone(), &mut TemplateRegistry::new()).unwrap_or(doc))
+}
+
 /// Names of the keyframes declared in `source`, in declaration order.
 ///
 /// Empty for a document without keyframes.  Useful for rendering every
 /// frame without having to transcribe the names out of the source.
 pub fn frame_names(source: &str) -> Result<Vec<String>, RenderError> {
-    let doc = parse(source)?;
+    let doc = keyframe_document(source)?;
     Ok(layout::keyframe::extract_keyframes(&doc)
         .iter()
         .map(|kf| kf.name.node.clone())
@@ -1418,7 +1427,7 @@ pub fn frame_names(source: &str) -> Result<Vec<String>, RenderError> {
 /// after it by themselves, in order. The same grouping as the player's
 /// `steps`; a host that turns clicks into fragments needs one per step.
 pub fn step_frames(source: &str) -> Result<Vec<Vec<String>>, RenderError> {
-    let doc = parse(source)?;
+    let doc = keyframe_document(source)?;
     let mut steps: Vec<Vec<String>> = Vec::new();
     for (i, kf) in layout::keyframe::extract_keyframes(&doc).iter().enumerate() {
         match steps.last_mut() {

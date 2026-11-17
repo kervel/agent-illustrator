@@ -774,6 +774,28 @@ A swarm is one statement: `move needs.* to box [stagger: 0.07]`,
 ghost(b) to box`), `transform m1, m2, m3 [fill: role-error]`. The busy-beat
 lint counts one statement as one gesture, however many targets it staggers.
 
+### Keyframes from a list
+
+A walkthrough that steps through data (one frame per stage, per message, per
+row) writes its keyframe once, inside an `each`, like the elements it shows:
+```
+let steps = [{id: plan, t: "Plan"}, {id: build, t: "Build"}, {id: ship, t: "Ship"}]
+row r [gap: 20] {
+    each s by id in steps { rect box [label: "{s.t}", width: 80, height: 40] }
+}
+keyframe "start" { hide box[plan], box[build], box[ship] }
+each s, i in steps {
+    keyframe "step{i+1}" [title: "{s.t}"] { show box[s.id] [enter: fade]; then { pulse box[s.id] } }
+}
+```
+That is three keyframes, `step1` .. `step3`, in list order, after `start`.
+The name and `title:`/`note:` fill in like a label (`"{s.id}"`, `"step{i+1}"`).
+Everything inside follows the item: `box[s.id]`, a field that names an element
+(`move dot to m.at`), numbers in a `constrain` (`+ m.dx`), and parts the same
+body declares (`rect tag ...; keyframe "k{i+1}" { hide tag }` hides this
+item's `tag`). Two items that make the same keyframe name are an error naming
+both items: put the item in the name. `--list-frames` shows the names made.
+
 ### Selecting many things
 
 `group.*` (its named children, in order), `.class`, `a.b.c` (a part of a nested

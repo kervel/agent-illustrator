@@ -12,9 +12,10 @@
 
    The token lists are data: one `each` makes the prompt chips (tok_1..tok_3),
    another the predicted chips (next_1..next_3), each with its own arrow
-   (predict_1..3) and its own home pins (home_x_1, home_y_1, ...). Appending a
-   token = disable its home pins and pin it after the previous chip; the box
-   grows by one chip pitch (56) and the feed arrow follows its right edge.
+   (predict_1..3) and its own home pins (home_x_1, home_y_1, ...). A third
+   `each` over the same list makes the keyframes. Appending a token = disable
+   its home pins and pin it after the previous chip; the box grows by one chip
+   pitch (56) and the feed arrow follows its right edge.
 */
 
 rect canvas [width: 800, height: 420, fill: white, stroke: none, opacity: 0.01]
@@ -38,10 +39,14 @@ constrain llm.center_x = 560
 constrain llm.center_y = inbox.center_y
 inbox.right -> llm.left as feed [stroke: foreground-2, stroke_width: 2]
 
+// The predicted tokens: the word, the chip it lands after, and how wide the
+// input box is once it is in.
+let preds = [{w: "on", after: tok_3, box_w: 246}, {w: "the", after: next_1, box_w: 302}, {w: "mat", after: next_2, box_w: 358}]
+
 // Predicted tokens wait below the LLM (red = just predicted). Each keeps its
 // own named home pins, so a keyframe can release one chip without the others.
-each w in ["on", "the", "mat"] {
-    rect next [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: w]
+each p in preds {
+    rect next [width: 50, height: 38, fill: #ffffff, stroke: accent-1, stroke_width: 3, label: p.w]
     constrain next.center_x = llm.center_x as home_x
     constrain next.top = llm.bottom + 99 as home_y
     llm.bottom -> next.top as predict [stroke: accent-1, stroke_width: 2, label: "predicts one token"]
@@ -54,39 +59,20 @@ constrain cap.top = 360
 keyframe "prompt" {
     hide next_1, next_2, next_3, predict_1, predict_2, predict_3
 }
-keyframe "predict_on" {
-    show next_1, predict_1
-}
-keyframe "append_on" {
-    hide predict_1
-    transform inbox [width: 246]
-    disable home_x_1
-    disable home_y_1
-    constrain next_1.left = tok_3.right + 6
-    constrain next_1.center_y = inbox.center_y
-    transform next_1 [stroke: #cdd8e3, stroke_width: 1]
-}
-keyframe "predict_the" {
-    show next_2, predict_2
-}
-keyframe "append_the" {
-    hide predict_2
-    transform inbox [width: 302]
-    disable home_x_2
-    disable home_y_2
-    constrain next_2.left = next_1.right + 6
-    constrain next_2.center_y = inbox.center_y
-    transform next_2 [stroke: #cdd8e3, stroke_width: 1]
-}
-keyframe "predict_mat" {
-    show next_3, predict_3
-}
-keyframe "append_mat" {
-    hide predict_3
-    transform inbox [width: 358]
-    disable home_x_3
-    disable home_y_3
-    constrain next_3.left = next_2.right + 6
-    constrain next_3.center_y = inbox.center_y
-    transform next_3 [stroke: #cdd8e3, stroke_width: 1]
+// Two keyframes per token, made from the same list: predict_on, append_on,
+// predict_the, ... Token k's chip, arrow and pins are next[k], predict[k],
+// home_x[k] and home_y[k].
+each p, i in preds {
+    keyframe "predict_{p.w}" {
+        show next[i+1], predict[i+1]
+    }
+    keyframe "append_{p.w}" {
+        hide predict[i+1]
+        transform inbox [width: p.box_w]
+        disable home_x[i+1]
+        disable home_y[i+1]
+        constrain next[i+1].left = p.after.right + 6
+        constrain next[i+1].center_y = inbox.center_y
+        transform next[i+1] [stroke: #cdd8e3, stroke_width: 1]
+    }
 }
