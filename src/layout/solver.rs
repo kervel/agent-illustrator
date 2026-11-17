@@ -233,6 +233,15 @@ pub enum LayoutConstraint {
         source: ConstraintSource,
     },
 
+    /// min <= variable <= max (REQUIRED): the bounds of a ranged size
+    /// (`width: 120..400`). Nothing a user constraint asks can break them.
+    Within {
+        variable: LayoutVariable,
+        min: Option<f64>,
+        max: Option<f64>,
+        source: ConstraintSource,
+    },
+
     /// variable >= value (STRONG - overrides layout)
     GreaterOrEqual {
         variable: LayoutVariable,
@@ -282,6 +291,7 @@ impl LayoutConstraint {
             LayoutConstraint::Suggested { source, .. } | LayoutConstraint::Shrink { source, .. } => source,
             LayoutConstraint::Equal { source, .. } => source,
             LayoutConstraint::GreaterOrEqual { source, .. } => source,
+            LayoutConstraint::Within { source, .. } => source,
             LayoutConstraint::LessOrEqual { source, .. } => source,
             LayoutConstraint::LessOrEqualRelational { source, .. } => source,
             LayoutConstraint::GreaterOrEqualRelational { source, .. } => source,
@@ -301,6 +311,7 @@ impl LayoutConstraint {
                 vec![&left.element_id, &right.element_id]
             }
             LayoutConstraint::GreaterOrEqual { variable, .. } => vec![&variable.element_id],
+            LayoutConstraint::Within { variable, .. } => vec![&variable.element_id],
             LayoutConstraint::LessOrEqual { variable, .. } => vec![&variable.element_id],
             LayoutConstraint::LessOrEqualRelational { left, right, .. } => {
                 vec![&left.element_id, &right.element_id]
@@ -556,6 +567,23 @@ impl ConstraintSolver {
                 self.solver
                     .add_constraint(left_expr | EQ(strength) | (right_expr + *offset))
                     .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                self.sources.push(source.clone());
+            }
+
+            LayoutConstraint::Within { variable, min, max, source } => {
+                let expr = self.get_expression(variable);
+                if let Some(min) = min {
+                    let desc = format!("{}.{:?} >= {}", variable.element_id, variable.property, min);
+                    self.solver
+                        .add_constraint(expr.clone() | GE(Strength::REQUIRED) | *min)
+                        .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                }
+                if let Some(max) = max {
+                    let desc = format!("{}.{:?} <= {}", variable.element_id, variable.property, max);
+                    self.solver
+                        .add_constraint(expr | LE(Strength::REQUIRED) | *max)
+                        .map_err(|e| self.convert_kasuari_error(e, source, &desc))?;
+                }
                 self.sources.push(source.clone());
             }
 

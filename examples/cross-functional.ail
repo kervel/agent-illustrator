@@ -1,0 +1,195 @@
+// A cross-functional flowchart: who does what, in which order, when a consultant is staffed.
+//
+// The file has three parts:
+//   1. building blocks: a `lane` template and one template per node kind
+//   2. the grid: one lane per role (rows) and numbered steps (columns)
+//   3. the process: one line per node, then the flows between them
+//
+// Every node takes `name`, `lane` and `at`, and puts itself on that lane, at that step:
+//     task move [name: "Offboard and onboard", lane: lanes[am], at: step[5]]
+// Every node kind has the same anchors (l, r, t, b), so all flows read alike.
+
+
+// ─── 1. Building blocks ──────────────────────────────────────────────────────
+
+// A lane: a header strip with the role name upright, and a body that stretches to the
+// last step. `width: 200..` is a size range: the body grows, the header stays put.
+template "lane" (name: "", across: "", h: 130) {
+    rect hd [width: 36, height: h, corner_radius: 0, fill: role-surface-2, stroke: role-muted]
+    text "{name}" title [rotation: -90, font_size: 13, font_weight: bold, overlaps: hd]
+    rect body [width: 200.., height: h, corner_radius: 0, fill: none, stroke: role-muted, overlaps: all]
+    constrain title.center = hd.center
+    constrain body.left = hd.right
+    constrain body.top = hd.top
+    constrain body.right = across.right + 50
+}
+
+// Activities: a task, and a subprocess (a task with a [+] marker)
+template "task" (name: "", lane: "", at: "") {
+    rect box [label: name, width: 130, height: 56, corner_radius: 8, fill: role-series-1-soft, font_size: 12]
+    constrain box.center_y = lane.center_y
+    constrain box.center_x = at.center_x
+    anchor l [position: box.left, direction: left]
+    anchor r [position: box.right, direction: right]
+    anchor t [position: box.top, direction: up]
+    anchor b [position: box.bottom, direction: down]
+}
+
+template "subprocess" (name: "", lane: "", at: "") {
+    rect box [label: name, width: 130, height: 72, corner_radius: 8, fill: role-series-1-soft, font_size: 12]
+    rect plus [label: "+", width: 14, height: 14, corner_radius: 0, fill: role-surface, font_size: 11, overlaps: box]
+    constrain box.center_y = lane.center_y
+    constrain box.center_x = at.center_x
+    constrain plus.center_x = box.center_x
+    constrain plus.bottom = box.bottom - 3
+    anchor l [position: box.left, direction: left]
+    anchor r [position: box.right, direction: right]
+    anchor t [position: box.top, direction: up]
+    anchor b [position: box.bottom, direction: down]
+}
+
+// A gateway: a diamond with a mark, "×" one way (exclusive), "+" all ways (parallel).
+// The anchors sit on an upright square around the diamond, so flows meet its corners.
+template "gateway" (mark: "×", name: "", lane: "", at: "") {
+    rect diamond [size: 34, rotation: 45, corner_radius: 0, fill: role-warn-soft, stroke: role-warn]
+    rect hit [size: 48, fill: none, stroke: none, label: mark, font_size: 22, font_weight: bold, label_fill: role-warn, overlaps: diamond]
+    text name question [font_size: 11, max_width: 100]
+    constrain hit.center_y = lane.center_y
+    constrain hit.center_x = at.center_x
+    constrain diamond.center = hit.center
+    constrain question.center_x = hit.center_x
+    constrain question.bottom = hit.top - 4
+    anchor l [position: hit.left, direction: left]
+    anchor r [position: hit.right, direction: right]
+    anchor t [position: hit.top, direction: up]
+    anchor b [position: hit.bottom, direction: down]
+}
+
+// Events: a ring with a caption under it. Start (thin green), end (thick red),
+// timer (a clock face) and message (an envelope).
+template "start" (name: "", lane: "", at: "") {
+    circle ring [size: 34, fill: role-ok-soft, stroke: role-ok, stroke_width: 2]
+    text name caption [font_size: 11, max_width: 110]
+    constrain ring.center_y = lane.center_y
+    constrain ring.center_x = at.center_x
+    constrain caption.center_x = ring.center_x
+    constrain caption.top = ring.bottom + 4
+    anchor l [position: ring.left, direction: left]
+    anchor r [position: ring.right, direction: right]
+    anchor t [position: ring.top, direction: up]
+    anchor b [position: ring.bottom, direction: down]
+}
+
+template "end" (name: "", lane: "", at: "") {
+    circle ring [size: 34, fill: role-error-soft, stroke: role-error, stroke_width: 4]
+    text name caption [font_size: 11, max_width: 110]
+    constrain ring.center_y = lane.center_y
+    constrain ring.center_x = at.center_x
+    constrain caption.center_x = ring.center_x
+    constrain caption.top = ring.bottom + 4
+    anchor l [position: ring.left, direction: left]
+    anchor r [position: ring.right, direction: right]
+    anchor t [position: ring.top, direction: up]
+    anchor b [position: ring.bottom, direction: down]
+}
+
+template "timer" (name: "", lane: "", at: "") {
+    circle ring [size: 34, fill: role-warn-soft, stroke: role-warn, stroke_width: 2]
+    circle face [size: 26, fill: role-surface, stroke: role-warn, overlaps: ring]
+    rect minute [width: 2, height: 9, fill: role-ink, stroke: none, corner_radius: 0, overlaps: [ring, face]]
+    rect hour [width: 7, height: 2, fill: role-ink, stroke: none, corner_radius: 0, overlaps: [ring, face, minute]]
+    text name caption [font_size: 11, max_width: 110]
+    constrain ring.center_y = lane.center_y
+    constrain ring.center_x = at.center_x
+    constrain face.center = ring.center
+    constrain minute.center_x = ring.center_x
+    constrain minute.bottom = ring.center_y + 1
+    constrain hour.left = ring.center_x - 1
+    constrain hour.center_y = ring.center_y
+    constrain caption.center_x = ring.center_x
+    constrain caption.top = ring.bottom + 4
+    anchor l [position: ring.left, direction: left]
+    anchor r [position: ring.right, direction: right]
+    anchor t [position: ring.top, direction: up]
+    anchor b [position: ring.bottom, direction: down]
+}
+
+template "message" (name: "", lane: "", at: "") {
+    circle ring [size: 34, fill: role-ok-soft, stroke: role-ok, stroke_width: 2]
+    rect envelope [width: 18, height: 12, corner_radius: 0, fill: role-surface, stroke: role-ink, overlaps: ring]
+    text name caption [font_size: 11, max_width: 110]
+    constrain ring.center_y = lane.center_y
+    constrain ring.center_x = at.center_x
+    constrain envelope.center = ring.center
+    constrain caption.center_x = ring.center_x
+    constrain caption.top = ring.bottom + 4
+    anchor l [position: ring.left, direction: left]
+    anchor r [position: ring.right, direction: right]
+    anchor t [position: ring.top, direction: up]
+    anchor b [position: ring.bottom, direction: down]
+}
+
+
+// ─── 2. The grid ─────────────────────────────────────────────────────────────
+
+// One lane per role, top to bottom. `by id` names each copy: lanes[am] is lanes_am.
+// `align: hd` lines the lanes up on their header strips.
+col pool [gap: 0, padding: 0, align: hd] {
+    each r by id in [
+        {id: cust, name: "Customer"},
+        {id: am,   name: "Account manager"},
+        {id: con,  name: "Consultant"},
+        {id: lead, name: "Team lead"},
+    ] {
+        lane lanes [name: r.name, across: steps]
+    }
+}
+
+// Steps 1 to 12, left to right: invisible points that nodes line up under.
+row steps [gap: 150] {
+    each k in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] {
+        point step
+    }
+}
+constrain steps.left = lanes[cust].body.left + 60
+constrain steps.center_y = pool.top
+
+
+// ─── 3. The process ──────────────────────────────────────────────────────────
+
+message    request [name: "Project request",                     lane: lanes[cust], at: step[1]]
+task       qualify [name: "Qualify request",                     lane: lanes[am],   at: step[2]]
+gateway    known   [name: "Consultant already at customer?",     lane: lanes[am],   at: step[3]]
+subprocess intro   [name: "Run project introduction",            lane: lanes[con],  at: step[4]]
+task       join    [name: "Join project introduction",           lane: lanes[cust], at: step[4]]
+task       move    [name: "Offboard and onboard on new project", lane: lanes[am],   at: step[5]]
+task       onboard [name: "Follow up onboarding",                lane: lanes[con],  at: step[6]]
+gateway    merge   [mark: "×",                                   lane: lanes[am],   at: step[7]]
+gateway    split   [mark: "+",                                   lane: lanes[am],   at: step[8]]
+timer      due     [name: "Review cycle due",                    lane: lanes[lead], at: step[9]]
+task       context [name: "Follow up customer context",          lane: lanes[cust], at: step[10]]
+task       project [name: "Follow up project",                   lane: lanes[am],   at: step[10]]
+subprocess review  [name: "Performance review",                  lane: lanes[lead], at: step[10]]
+gateway    joined  [mark: "+",                                   lane: lanes[am],   at: step[11]]
+end        done    [name: "Consultant staffed",                  lane: lanes[am],   at: step[12]]
+
+// Sequence flows: what happens next
+request.r -> qualify.t
+qualify.r -> known.l
+known.r   -> move.l    [label: "Yes"]
+known.b   -> intro.l   [label: "No"]
+intro.r   -> onboard.l
+onboard.r -> merge.b
+move.r    -> merge.l
+merge.r   -> split.l
+split.t   -> context.l
+split.r   -> project.l
+split.b   -> due.l
+due.r     -> review.l
+context.r -> joined.t
+project.r -> joined.l
+review.r  -> joined.b
+joined.r  -> done.l
+
+// Message flow between roles: dashed, with an open circle where it starts
+intro.t -> join.b [stroke_dasharray: dashed, from_end: circle, to_end: open]

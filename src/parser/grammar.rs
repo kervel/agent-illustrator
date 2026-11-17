@@ -1168,7 +1168,28 @@ where
             }
             Spanned::new(StyleValue::Identifier(Identifier::new(n)), span_range(&e.span()))
         });
-    let style_value = choice((value_list, call_value, percent_value, dotted_value, value_atom.clone())).boxed();
+    // `200..`, `..300`, `120..400`: a size that may change between bounds.
+    // A bound may be written negative (`-10..20`) so the error says why it
+    // is wrong, instead of failing to parse.
+    let bound = just(Token::Minus)
+        .or_not()
+        .then(number.clone())
+        .map(|(neg, n)| Spanned::new(if neg.is_some() { -n.node } else { n.node }, n.span));
+    let range_value = bound
+        .clone()
+        .or_not()
+        .then_ignore(just(Token::Dot).then(just(Token::Dot)))
+        .then(bound.or_not())
+        .try_map(|(min, max), span| {
+            if min.is_none() && max.is_none() {
+                return Err(Rich::custom(span, "a range needs at least one bound: `200..`, `..300` or `120..400`"));
+            }
+            Ok(Spanned::new(
+                StyleValue::Range { min: min.map(|n| n.node), max: max.map(|n| n.node) },
+                span_range(&span),
+            ))
+        });
+    let style_value = choice((range_value, value_list, call_value, percent_value, dotted_value, value_atom.clone())).boxed();
 
     let modifier = style_key
         .then_ignore(just(Token::Colon))
@@ -2013,6 +2034,9 @@ where
         let each_block = just(Token::Each)
             .ignore_then(identifier)
             .then(just(Token::Comma).ignore_then(identifier).or_not())
+            // `by id`: name the copies by that field of each record. Like
+            // `in`, `by` is only a word here.
+            .then(select! { Token::Ident(s) if s == "by" => () }.ignore_then(identifier).or_not())
             .then(
                 // `in` is only a word after `each a`; elsewhere it stays an
                 // ordinary identifier (`ease: in`).
@@ -2027,7 +2051,7 @@ where
                     .collect::<Vec<_>>()
                     .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
             )
-            .try_map(|(((var, index), source), body), span| {
+            .try_map(|((((var, index), key), source), body), span| {
                 let Some(source) = source else {
                     return Err(Rich::custom(
                         span,
@@ -2049,7 +2073,7 @@ where
                         ));
                     }
                 }
-                Ok(Statement::Each(EachBlock { var, index, source, body }))
+                Ok(Statement::Each(EachBlock { var, index, key, source, body }))
             });
 
         // Label declaration: `label { ... }` or `label: <element>`

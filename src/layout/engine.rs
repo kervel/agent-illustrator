@@ -807,6 +807,7 @@ pub fn compute(doc: &Document, config: &LayoutConfig) -> Result<LayoutResult, La
     // First validate references
     super::validate_references(doc)?;
     validate_label_markup(&doc.statements)?;
+    validate_size_ranges(&doc.statements)?;
     validate_keyframe_names(doc)?;
     validate_disabled_constraints(doc)?;
 
@@ -1269,7 +1270,15 @@ fn resolve_shape_label(
             (true, Some(w)) => Some((w - 2.0 * LABEL_INSET) / factor),
             _ => None,
         },
-        max: extract_f64_param(&shape.modifiers, "max_width").map(|m| (m - 2.0 * LABEL_INSET) / factor),
+        // A ranged width never grows past its upper bound: its words wrap there.
+        max: match (
+            extract_f64_param(&shape.modifiers, "max_width"),
+            if inside { extract_size_range(&shape.modifiers, StyleKey::Width).and_then(|(_, max)| max) } else { None },
+        ) {
+            (Some(a), Some(b)) => Some(a.min(b)),
+            (a, b) => a.or(b),
+        }
+        .map(|m| (m - 2.0 * LABEL_INSET) / factor),
     };
     let rich = wrap.apply(&rich, font_size);
     Some((rich, font_size, raw, wrap))
@@ -1485,7 +1494,11 @@ fn compute_shape_size(
         }
     }
 
-    (final_width, final_height)
+    // A ranged size is the size it would have had, kept within its bounds.
+    (
+        clamp_to(final_width, extract_size_range(&shape.modifiers, StyleKey::Width)),
+        clamp_to(final_height, extract_size_range(&shape.modifiers, StyleKey::Height)),
+    )
 }
 
 /// Compute bounding box dimensions from path geometry
@@ -1728,6 +1741,25 @@ fn extract_width_modifier(modifiers: &[Spanned<StyleModifier>]) -> Option<f64> {
             None
         }
     })
+}
+
+/// `width: 120..400` / `height: 40..`: the bounds a ranged size keeps to.
+pub(crate) fn extract_size_range(modifiers: &[Spanned<StyleModifier>], key: StyleKey) -> Option<(Option<f64>, Option<f64>)> {
+    modifiers.iter().rev().find_map(|m| match &m.node.value.node {
+        StyleValue::Range { min, max } if m.node.key.node == key => Some((*min, *max)),
+        _ => None,
+    })
+}
+
+/// Keep `v` within a range's bounds.
+fn clamp_to(v: f64, range: Option<(Option<f64>, Option<f64>)>) -> f64 {
+    match range {
+        Some((min, max)) => {
+            let v = min.map_or(v, |m| v.max(m));
+            max.map_or(v, |m| v.min(m))
+        }
+        None => v,
+    }
 }
 
 /// Extract the height modifier value from modifiers
@@ -4442,6 +4474,8 @@ fn get_constraint_target_var(
         LayoutConstraint::GreaterOrEqual { variable, .. } => {
             Some((variable.element_id.clone(), variable.property))
         }
+        // A size's own bounds move nothing: they only limit it.
+        LayoutConstraint::Within { .. } => None,
         LayoutConstraint::LessOrEqual { variable, .. } => {
             Some((variable.element_id.clone(), variable.property))
         }
@@ -4476,7 +4510,7 @@ fn get_constraint_referenced_elements(constraint: &super::solver::LayoutConstrai
                 b.element_id.clone(),
             ]
         }
-        LayoutConstraint::GreaterOrEqual { variable, .. } => {
+        LayoutConstraint::GreaterOrEqual { variable, .. } | LayoutConstraint::Within { variable, .. } => {
             vec![variable.element_id.clone()]
         }
         LayoutConstraint::LessOrEqual { variable, .. } => {
@@ -4604,6 +4638,9 @@ fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&Ha
         // Lines routed through siblings are drawn over the layout, not part of it.
         let mut parts = elem.children.iter().filter(|c| !c.is_through_path());
         if let Some(first) = parts.next() {
+            // The boxes the solver laid out (a turned child's unturned box):
+            // a constraint on this element must mean what it meant to the
+            // solver. Lint measures turned shapes by what they cover.
             let mut bounds = first.bounds;
             for child in parts {
                 bounds = bounds.union(&child.bounds);
@@ -5058,6 +5095,22 @@ fn add_element_by_name_with_per_property_strength(
             && (target_vars.contains(&(element_name.to_string(), LayoutProperty::Y))
                 || target_vars.contains(&(element_name.to_string(), LayoutProperty::CenterY)));
 
+        // A ranged size whose far edge alone is asked for grows or shrinks to
+        // it: its near edge prefers to stay where it is (`body.right =
+        // cols.right` on a `width: 200..` body widens it rather than sliding
+        // it along), and gives way only when the range runs out.
+        let has = |p: LayoutProperty| target_vars.contains(&(element_name.to_string(), p));
+        let x_held = elem.styles.width_range.is_some()
+            && has(LayoutProperty::Right)
+            && !has(LayoutProperty::X)
+            && !has(LayoutProperty::CenterX);
+        let y_held = elem.styles.height_range.is_some()
+            && has(LayoutProperty::Bottom)
+            && !has(LayoutProperty::Y)
+            && !has(LayoutProperty::CenterY);
+        let x_is_targeted = x_is_targeted && !x_held;
+        let y_is_targeted = y_is_targeted && !y_held;
+
         // Add X position - SUGGESTED if targeted, FIXED if reference only
         // For contains: suggest at large value so LE constraint pulls it tight
         if x_is_targeted {
@@ -5067,6 +5120,17 @@ fn add_element_by_name_with_per_property_strength(
                     variable: LayoutVariable::x(element_name),
                     value: suggested_x,
                     source: ConstraintSource::layout(0..0, "target element x"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        } else if x_held {
+            // Kept over the size's own suggestion, so the part grows; but a
+            // far edge its range cannot reach still moves it, as it would a
+            // plain-size part.
+            solver
+                .add_constraint(LayoutConstraint::Shrink {
+                    variable: LayoutVariable::x(element_name),
+                    value: elem.bounds.x,
+                    source: ConstraintSource::layout(0..0, "held near edge x"),
                 })
                 .map_err(LayoutError::solver_error)?;
         } else {
@@ -5090,6 +5154,17 @@ fn add_element_by_name_with_per_property_strength(
                     source: ConstraintSource::layout(0..0, "target element y"),
                 })
                 .map_err(LayoutError::solver_error)?;
+        } else if y_held {
+            // Kept over the size's own suggestion, so the part grows; but a
+            // far edge its range cannot reach still moves it, as it would a
+            // plain-size part.
+            solver
+                .add_constraint(LayoutConstraint::Shrink {
+                    variable: LayoutVariable::y(element_name),
+                    value: elem.bounds.y,
+                    source: ConstraintSource::layout(0..0, "held near edge y"),
+                })
+                .map_err(LayoutError::solver_error)?;
         } else {
             solver
                 .add_constraint(LayoutConstraint::Fixed {
@@ -5111,7 +5186,32 @@ fn add_element_by_name_with_per_property_strength(
         let height_is_targeted =
             target_vars.contains(&(element_name.to_string(), LayoutProperty::Height)) || contains_y;
 
-        if width_is_targeted {
+        // A ranged size (`width: 120..400`) is never pinned: it keeps its
+        // size unless a constraint asks for another, within its bounds.
+        let w_ranged = elem.styles.width_range.is_some();
+        let h_ranged = elem.styles.height_range.is_some();
+        if let Some((min, max)) = elem.styles.width_range {
+            solver
+                .add_constraint(LayoutConstraint::Within {
+                    variable: LayoutVariable::width(element_name),
+                    min,
+                    max,
+                    source: ConstraintSource::intrinsic("width range"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        }
+        if let Some((min, max)) = elem.styles.height_range {
+            solver
+                .add_constraint(LayoutConstraint::Within {
+                    variable: LayoutVariable::height(element_name),
+                    min,
+                    max,
+                    source: ConstraintSource::intrinsic("height range"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        }
+
+        if width_is_targeted || w_ranged {
             let suggested_w = if contains_x { 1.0 } else { elem.bounds.width };
             // A container is as small as its members allow; anything else
             // keeps its size. The wrap must win over a plain suggestion
@@ -5135,7 +5235,7 @@ fn add_element_by_name_with_per_property_strength(
                 })
                 .map_err(LayoutError::solver_error)?;
         }
-        if height_is_targeted {
+        if height_is_targeted || h_ranged {
             let suggested_h = if contains_y { 1.0 } else { elem.bounds.height };
             // A container is as small as its members allow; anything else
             // keeps its size. The wrap must win over a plain suggestion
@@ -5813,6 +5913,59 @@ mod tests {
             group.bounds.height
         );
     }
+}
+
+/// `width: 120..400` and friends: a range is a size that constraints may
+/// change, so it only goes where a size can change without distorting a
+/// drawing.
+fn validate_size_ranges(stmts: &[Spanned<Statement>]) -> Result<(), LayoutError> {
+    for stmt in stmts {
+        let (modifiers, children, name, kind) = match &stmt.node {
+            Statement::Shape(s) => (&s.modifiers, None, s.name.as_ref().map(|n| n.node.to_string()), Some(&s.shape_type.node)),
+            Statement::Layout(l) => (&l.modifiers, Some(&l.children), l.name.as_ref().map(|n| n.node.to_string()), None),
+            Statement::Group(g) => (&g.modifiers, Some(&g.children), g.name.as_ref().map(|n| n.node.to_string()), None),
+            _ => continue,
+        };
+        let owner = name.unwrap_or_else(|| "an unnamed element".to_string());
+        for m in modifiers {
+            let StyleValue::Range { min, max } = &m.node.value.node else { continue };
+            let key = m.node.key.node.source_name();
+            let written = format!(
+                "`{}: {}..{}`",
+                key,
+                min.map(|v| v.to_string()).unwrap_or_default(),
+                max.map(|v| v.to_string()).unwrap_or_default()
+            );
+            let fail = |why: String| Err(LayoutError::validation_error(format!("{} on {}: {}", written, owner, why)));
+            match m.node.key.node {
+                StyleKey::Width | StyleKey::Height => {}
+                StyleKey::Size => {
+                    return fail("a range on `size:` would have to keep the shape's proportions, which is not built yet; give `width:` and `height:` their own ranges, or a fixed size".into())
+                }
+                _ => return fail("a range (a..b) is a size that may change; only `width` and `height` take one".into()),
+            }
+            match kind {
+                Some(ShapeType::Rectangle | ShapeType::Ellipse | ShapeType::Callout { .. }) => {}
+                Some(ShapeType::Circle | ShapeType::Icon { .. } | ShapeType::SvgEmbed { .. } | ShapeType::RasterImage { .. }) => {
+                    return fail("this shape keeps its proportions, so its size cannot change on one axis; give it a fixed size".into())
+                }
+                Some(_) => return fail("only a rect, ellipse or callout takes a size range".into()),
+                None => return fail("a row, column or group is sized by what it holds; give the range to a shape inside it".into()),
+            }
+            if min.is_some_and(|v| v < 0.0) {
+                return fail("a size is never negative".into());
+            }
+            if let (Some(a), Some(b)) = (min, max) {
+                if a > b {
+                    return fail(format!("the lower bound {} is above the upper bound {}; write {}..{}", a, b, b, a));
+                }
+            }
+        }
+        if let Some(children) = children {
+            validate_size_ranges(children)?;
+        }
+    }
+    Ok(())
 }
 
 /// Reject malformed label markup before anything is laid out.

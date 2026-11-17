@@ -783,6 +783,54 @@ each r in [
 ```
 Full scene: examples/line-ends.ail.
 
+## Cross-functional flowchart: lanes from records, nodes that place themselves
+
+Lanes are one `lane` per record (`{id: am, name: "Account manager"}`), named by
+the id with `each r by id` (`lanes_am`, reached as `lanes[am]`). A lane's body has `width: 200..`, a
+size range, so it stretches to the last step; a fixed part would move its whole
+lane instead (`--doc sizes`). Steps are invisible points `step[k]`. Every node
+template takes `name:`, `lane:` and `at:` and constrains itself onto the lane's
+centre line and the step, and every node kind declares the same anchors `l r t b`.
+
+```
+template "lane" (name: "", across: "", h: 130) {
+    rect hd [width: 36, height: h, corner_radius: 0, fill: role-surface-2, stroke: role-muted]
+    text "{name}" title [rotation: -90, font_size: 13, font_weight: bold, overlaps: hd]
+    rect body [width: 200.., height: h, corner_radius: 0, fill: none, stroke: role-muted, overlaps: all]
+    constrain title.center = hd.center
+    constrain body.left = hd.right
+    constrain body.top = hd.top
+    constrain body.right = across.right + 50
+}
+template "task" (name: "", lane: "", at: "") {
+    rect box [label: name, width: 130, height: 56, corner_radius: 8, fill: role-series-1-soft, font_size: 12]
+    constrain box.center_y = lane.center_y
+    constrain box.center_x = at.center_x
+    anchor l [position: box.left, direction: left]
+    anchor r [position: box.right, direction: right]
+    anchor t [position: box.top, direction: up]
+    anchor b [position: box.bottom, direction: down]
+}
+
+col pool [gap: 0, padding: 0, align: hd] {
+    each r by id in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}] {
+        lane lanes [name: r.name, across: steps]
+    }
+}
+row steps [gap: 150] {
+    each k in [1, 2, 3] { point step }
+}
+constrain steps.left = lanes[cust].body.left + 60
+constrain steps.center_y = pool.top
+
+task ask  [name: "Ask for a quote", lane: lanes[cust], at: step[1]]
+task make [name: "Prepare quote",   lane: lanes[am],   at: step[2]]
+task sign [name: "Sign",            lane: lanes[cust], at: step[3]]
+ask.b  -> make.l
+make.r -> sign.b
+```
+Full scene, with gateways, events and a message flow: examples/cross-functional.ail.
+
 ## Class diagram: lists and `each` make the compartments
 
 A class box is a template that takes lists (`attrs`, `ops`); `each` writes one

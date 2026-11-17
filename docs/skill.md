@@ -36,6 +36,9 @@ Check here before writing coordinates or a run of `constrain` lines.
 | One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
 | The same connection or constraint for several elements (a server to each client) | `each c in [c1, c2, c3] { srv -> c }` (`--doc each`) | one hand-copied line per element |
 | Connections from a table (transitions, dependencies, associations) | `each t in [{from: a, to: b, on: "go"}, ...] { t.from -> t.to [label: t.on] }` (`--doc each`) | parallel lists, or one hand-written line per row |
+| Copies named by meaning, not number (lanes, rows you refer to later) | `by` a record field: `each r by id in [{id: am, ...}] { lane lanes }` makes `lanes_am`, reached as `lanes[am]` (`--doc each`) | counting which copy is which |
+| A template part that stretches to something outside it (a lane body to the last column, a bar to a date) | `rect body [width: 200..]` in the template, then `constrain body.right = across.right` (`--doc sizes`) | a `width:` parameter computed by hand |
+| A box that may grow or shrink, within limits | `width: 120..400` (`200..` at least, `..300` at most); the label wraps at the upper bound (`--doc sizes`) | a fixed width that is too wide for one label and too narrow for the next |
 | One copy an `each` made, by number (a chain of stages, row k of a lifeline) | `stage[2]`, `api.p[k]`; in an `each`: `stage[k+1]`, `api.p[m.row]` (`--doc each`) | spelling out `stage_2`, or computing names by hand |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
 | A title above, left-aligned | `[label: "x", label_position: above, align: start]` | an absolute `center_y` |
@@ -494,7 +497,7 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
 ```
 
 - **Names.** An element, anchor, constraint or connection name declared in the
-  body gets the item's 1-based number appended: `entry` becomes `entry_1`,
+  body gets the item's 1-based number appended (or its `id`, below): `entry` becomes `entry_1`,
   `entry_2`, ... In a template instance `file` that is `file.entry_1`. In a
   nested `each` the numbers chain (`cell_2_3`: outer item 2, inner item 3), so
   names never collide across items, instances or nested blocks. Two sibling
@@ -502,6 +505,19 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   same body (`constrain bg contains entry`, `clip: x`) follow the renaming.
   `constrain`, anchors, keyframes and connections can target `entry_2` like any
   element. Unnamed elements need no names.
+- **Keyed copies: `by` a field.** `each r by id in [...]` names the copies
+  by each record's `id` field instead of by number:
+  `each r by id in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}]
+  { lane lanes [name: r.name] }` makes `lanes_cust` and `lanes_am`, reached from
+  anywhere as `lanes[am]`. Inserting an item renumbers nothing. Any field
+  works (`by key`). Every item needs it, as a plain word (letters, digits,
+  `_`), each different; otherwise it is an error that names the item. Without
+  `by`, an `id` field is ordinary data and copies are numbered. The index `i`
+  still counts positions.
+- **A name indexed by the item keeps that name.** `rect lane[l]` (or
+  `rect p[m.id]`) is already one per item, so no number is added:
+  `each l in [cust, am] { rect lane[l] }` makes `lane_cust` and `lane_am`.
+  Two items that make the same name are an error.
 - **Items that name elements.** An item written as a name (no quotes) stands
   for that element wherever a name goes: connection ends, `constrain`,
   `contains`, `midpoint`, anchor positions and `via:`/`through:` lists.
@@ -567,6 +583,82 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   exist), a non-list after `in`, a missing `in`.
 - `each` is a reserved word (`--doc reserved`); `in` is a word only right after `each NAME`.
 - Same idea at parse time, for ready-made arguments: `k* [items: [...]]`.
+
+### Sizes that stretch: ranges
+
+A number is a fixed size: `width: 120`. A range is a size that constraints may
+change, within bounds: `width: 200..` (at least 200), `width: ..300` (at most
+300), `width: 120..400`; `height:` the same. With nothing pushing on it, the
+shape keeps the size it would have had without a `width:` (its label's width,
+or the default), kept within the range; a label wraps at the upper bound.
+
+```
+template "lane" (name: "", across: "") {
+    rect hd [width: 36, height: 130]
+    text "{name}" ttl [rotation: -90, font_weight: bold, overlaps: hd]
+    rect body [height: 130, width: 200.., fill: none, overlaps: all]
+    constrain ttl.center = hd.center
+    constrain body.left = hd.right
+    constrain body.top = hd.top
+    constrain body.right = across.right + 50    // stretches the body, not the lane
+}
+lane ops [name: "Operations", across: cols]
+```
+
+- **Why ranges.** A template keeps its shape: a constraint on one of its parts
+  moves the whole instance, so an icon or a card is never distorted by
+  something outside it. A range is how a template's author says "this part may
+  stretch". Only the part with the range changes size; the rest of the
+  instance stays as laid out.
+- **One edge asked for:** a ranged part whose far edge alone is constrained
+  (`body.right = ...`) grows or shrinks to it, its near edge stays put. When
+  the range runs out first, it moves the rest of the way, as a fixed-size
+  shape would. Both edges asked for (`left` and `right`) sets the width
+  between them, as for any shape.
+- **Bounds hold.** No constraint pushes a size past its range. When both its
+  edges are held and the range cannot span them, `--lint` reports the
+  constraint and names the range ("`b` stopped at the top of its width range
+  (100..200)").
+- **In a row or column**, only stretch the last member: the others do not make
+  way, and `--lint` reports one stretched over its neighbour.
+- `--lint` also says when a template part's fixed shape is what makes a
+  constraint impossible ("`x.b` is part of a template, which keeps its
+  shape ... give it a size range").
+- A range goes on `width:` or `height:` of a rect, ellipse or callout.
+  Anywhere else it is an error that says why: a circle, icon or image keeps its
+  proportions, a row or column is sized by what it holds, `size:` would need
+  the proportions kept (not built yet), and `300..100` is reversed.
+
+### Cross-functional flowcharts (swimlanes)
+
+There is no lane or flowchart element: lanes, nodes and flows are small
+templates over general pieces. `examples/cross-functional.ail` is a complete
+one to copy from.
+
+- **Lanes:** one record per lane, `{id: am, name: "Account manager"}`, and an
+  `each r by id` that makes one `lane` per record inside a `col [gap: 0, padding: 0]`.
+  The ids name the lanes (`lanes_am`, reached as `lanes[am]`). The lane body has a
+  size range and stretches to the last column (`--doc sizes`). An upright
+  title is `text ... [rotation: -90]`: lint measures it turned, layout by its
+  unturned box, so line the lanes up on their headers with `align: hd` on the
+  `col`.
+- **Steps (columns):** a row of invisible points, `row steps { each k in
+  [1, 2, ...] { point step } }`, placed against a lane body with two
+  constraints. Step k is `step[k]`.
+- **Nodes:** each node template takes `name:`, `lane:` and `at:` and places itself:
+  `constrain box.center_y = lane.center_y`, `constrain box.center_x =
+  at.center_x`. A node is then one line:
+  `task move [name: "Offboard", lane: lanes[am], at: step[5]]`. Align the
+  node lines in columns (kind, name, lane, step) so the process reads as a table.
+- **Same anchors on every node kind** (`l`, `r`, `t`, `b`, declared with
+  `anchor`), so flows read alike: `known.b -> intro.l [label: "No"]`.
+- Node kinds in the example: task, subprocess (a [+] marker), gateway
+  (a rotated square with `×` or `+`; its anchors sit on an invisible
+  square around it, at the diamond's tips), start, end, timer and message
+  events (a ring with a caption under it). A message flow:
+  `a.t -> b.b [stroke_dasharray: dashed, from_end: circle, to_end: open]`.
+- Put a gateway's question above it, so the flows leaving its sides and
+  bottom stay clear of it.
 
 ### Class and entity diagrams
 

@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90.4875 -55 1961.4875 640" font-size="14">
+  <!-- agent-illustrator dev -->
+  <style><![CDATA[
+    :root {
+    --accent-1: #ba2415;
+    --accent-2: #D4734F;
+    --accent-3: #dd977a;
+    --accent-dark: #901C1D;
+    --accent-light: #e2d7cd;
+    --background-1: #ffffff;
+    --background-2: #ececec;
+    --background-3: #e2d7cd;
+    --background-dark: #484847;
+    --background-light: #ffffff;
+    --code-add: var(--role-ok);
+    --code-add-bg: var(--role-ok-soft);
+    --code-add-strong: var(--role-ok);
+    --code-bg: var(--role-surface);
+    --code-comment: var(--role-muted);
+    --code-del: var(--role-error);
+    --code-del-bg: var(--role-error-soft);
+    --code-del-strong: var(--role-error);
+    --code-frame: var(--role-ink);
+    --code-function: var(--role-ink);
+    --code-key: var(--role-primary);
+    --code-keyword: var(--role-primary);
+    --code-ln: var(--role-muted);
+    --code-mark-bg: var(--role-warn-soft);
+    --code-number: var(--role-ink);
+    --code-plain: var(--role-ink);
+    --code-string: var(--role-ok);
+    --code-title: var(--role-ink);
+    --code-title-bg: var(--role-surface-2);
+    --foreground-1: #484847;
+    --foreground-2: #818281;
+    --foreground-3: #bfc0c0;
+    --foreground-dark: #000000;
+    --foreground-light: #ececec;
+    --kpv-amber: #FFB31B;
+    --kpv-burgundy: #5a322b;
+    --role-backdrop: var(--background-2);
+    --role-error: var(--status-error);
+    --role-error-soft: #f6dedb;
+    --role-ink: var(--text-1);
+    --role-muted: var(--text-2);
+    --role-ok: var(--status-success);
+    --role-ok-soft: #e3f3e8;
+    --role-primary: var(--secondary-1);
+    --role-rule: var(--foreground-3);
+    --role-secondary: var(--accent-1);
+    --role-series-1: var(--secondary-2);
+    --role-series-1-soft: #d2e9ee;
+    --role-series-2: var(--status-warning);
+    --role-series-2-soft: #f8e2cf;
+    --role-series-3: var(--secondary-3);
+    --role-series-3-soft: #d5eee7;
+    --role-series-4: var(--accent-2);
+    --role-series-4-soft: #f4ddd3;
+    --role-surface: var(--background-1);
+    --role-surface-2: var(--background-2);
+    --role-warn: var(--status-warning);
+    --role-warn-soft: #fbead9;
+    --secondary-1: #1D6E88;
+    --secondary-2: #1F92A6;
+    --secondary-3: #36b191;
+    --secondary-dark: #1D6E88;
+    --secondary-light: #ececec;
+    --status-error: #ba2415;
+    --status-success: #1E9F49;
+    --status-warning: #DD8028;
+    --text-1: #484847;
+    --text-2: #818281;
+    --text-3: #bfc0c0;
+    --text-dark: #484847;
+    --text-light: #ffffff;
+  }
+  .ai-on-dark { fill: var(--text-light); }
+    
+/* stylesheets/kapernikov.css */
+/* Kapernikov Brand Stylesheet for Agent Illustrator
+   Colors from kapernikov-theme.css (huisstijlgids v4)
+*/
+
+:root {
+  /* Foreground colors (lines, primary visual elements) */
+  --foreground-1: #484847;       /* Dark grey */
+  --foreground-2: #818281;       /* Medium grey */
+  --foreground-3: #bfc0c0;       /* Light grey */
+  --foreground-light: #ececec;   /* Very light grey */
+  --foreground-dark: #000000;    /* Black */
+
+  /* Background colors */
+  --background-1: #ffffff;       /* White */
+  --background-2: #ececec;       /* Very light grey */
+  --background-3: #e2d7cd;       /* Beige */
+  --background-light: #ffffff;
+  --background-dark: #484847;    /* Dark grey */
+
+  /* Text colors */
+  --text-1: #484847;
+  --text-2: #818281;
+  --text-3: #bfc0c0;
+  --text-light: #ffffff;
+  --text-dark: #484847;
+
+  /* Accent colors (brand red family) */
+  --accent-1: #ba2415;           /* Primary brand red */
+  --accent-2: #D4734F;           /* Red light */
+  --accent-3: #dd977a;           /* Red lighter */
+  --accent-light: #e2d7cd;       /* Beige (warm light fill) */
+  --accent-dark: #901C1D;        /* Crimson */
+
+  /* Secondary colors (cool teal/petrol) */
+  --secondary-1: #1D6E88;        /* Petrol */
+  --secondary-2: #1F92A6;        /* Cyan */
+  --secondary-3: #36b191;        /* Jade */
+  --secondary-light: #ececec;    /* Very light grey */
+  --secondary-dark: #1D6E88;     /* Petrol */
+
+  /* Extra brand colors (not in standard token set) */
+  --kpv-burgundy: #5a322b;
+  --kpv-amber: #FFB31B;
+
+  /* Status colors */
+  --status-success: #1E9F49;     /* Emerald */
+  --status-warning: #DD8028;     /* Tangerine */
+  --status-error: #ba2415;       /* Brand red */
+
+  /* Roles: what a colour is for (reusable scenes and ail:motion libraries
+     use only these). The line colours are petrol and brand red. */
+  --role-primary: var(--secondary-1);
+  --role-secondary: var(--accent-1);
+  --role-ink: var(--text-1);
+  --role-muted: var(--text-2);
+  --role-rule: var(--foreground-3);
+  --role-surface: var(--background-1);
+  --role-surface-2: var(--background-2);
+  --role-backdrop: var(--background-2);
+  --role-ok: var(--status-success);
+  --role-error: var(--status-error);
+  --role-warn: var(--status-warning);
+  --role-ok-soft: #e3f3e8;
+  --role-error-soft: #f6dedb;
+  --role-warn-soft: #fbead9;
+  --role-series-1: var(--secondary-2);
+  --role-series-2: var(--status-warning);
+  --role-series-3: var(--secondary-3);
+  --role-series-4: var(--accent-2);
+  --role-series-1-soft: #d2e9ee;
+  --role-series-2-soft: #f8e2cf;
+  --role-series-3-soft: #d5eee7;
+  --role-series-4-soft: #f4ddd3;
+}
+
+/* Typography */
+.ai-label, .ai-text {
+  font-family: 'Avenir LT Std', 'Avenir', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Shape defaults: rounded corners, softer stroke */
+.ai-rect {
+  rx: 4;
+  ry: 4;
+}
+
+/* Opt-out for schematics / electronic symbols */
+.schematic .ai-rect {
+  rx: 0;
+  ry: 0;
+}
+
+/* White labels on dark fills (adjacent sibling only) */
+[fill="var(--accent-1)"] + .ai-label,
+[fill="var(--accent-dark)"] + .ai-label,
+[fill="var(--secondary-1)"] + .ai-label,
+[fill="var(--secondary-2)"] + .ai-label,
+[fill="var(--secondary-3)"] + .ai-label,
+[fill="var(--secondary-dark)"] + .ai-label,
+[fill="var(--foreground-1)"] + .ai-label,
+[fill="var(--foreground-dark)"] + .ai-label {
+  fill: var(--text-light);
+}
+  ]]></style>
+  <defs>
+    <marker id="ai-arrow" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="4" markerHeight="4" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="context-stroke"/>
+    </marker>
+    <marker id="ai-end-open" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <path d="M0,1.12 L7.76,5 L0,8.88" fill="none" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+    <marker id="ai-end-circle" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6.5" markerHeight="6.5" markerUnits="strokeWidth" orient="auto-start-reverse" overflow="visible">
+      <circle cx="4.5" cy="5" r="3.5" class="ai-end-hollow" fill="#ffffff" style="fill:var(--role-surface,#ffffff)" stroke="context-stroke" stroke-width="1.54" stroke-linejoin="miter"/>
+    </marker>
+  </defs>
+  <g id="pool" class="ai-container">
+    <g id="lanes_cust" class="ai-container">
+      <rect id="lanes_cust_hd" class="ai-shape ai-rect" x="5" y="5" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <g transform="rotate(-90 22.999950000000002 70)">
+        <text id="lanes_cust_title" class="ai-shape ai-text" x="-6.5796" y="70" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Customer</text>
+      </g>
+      <rect id="lanes_cust_body" class="ai-shape ai-rect" x="41" y="5" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <g id="lanes_am" class="ai-container">
+      <rect id="lanes_am_hd" class="ai-shape ai-rect" x="5" y="135" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <g transform="rotate(-90 23.000049999999998 200)">
+        <text id="lanes_am_title" class="ai-shape ai-text" x="-30.4875" y="200" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Account manager</text>
+      </g>
+      <rect id="lanes_am_body" class="ai-shape ai-rect" x="41" y="135" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <g id="lanes_con" class="ai-container">
+      <rect id="lanes_con_hd" class="ai-shape ai-rect" x="5" y="265" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <g transform="rotate(-90 23 330)">
+        <text id="lanes_con_title" class="ai-shape ai-text" x="-9.6235" y="330" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Consultant</text>
+      </g>
+      <rect id="lanes_con_body" class="ai-shape ai-rect" x="41" y="265" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <g id="lanes_lead" class="ai-container">
+      <rect id="lanes_lead_hd" class="ai-shape ai-rect" x="5" y="395" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <g transform="rotate(-90 23 460)">
+        <text id="lanes_lead_title" class="ai-shape ai-text" x="-9.2413" y="460" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Team lead</text>
+      </g>
+      <rect id="lanes_lead_body" class="ai-shape ai-rect" x="41" y="395" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+  </g>
+  <g id="steps" class="ai-container">
+    <rect id="step_1" class="ai-shape ai-rect ai-point" x="106" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_2" class="ai-shape ai-rect ai-point" x="256" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_3" class="ai-shape ai-rect ai-point" x="406" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_4" class="ai-shape ai-rect ai-point" x="556" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_5" class="ai-shape ai-rect ai-point" x="706" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_6" class="ai-shape ai-rect ai-point" x="856" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_7" class="ai-shape ai-rect ai-point" x="1006" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_8" class="ai-shape ai-rect ai-point" x="1156" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_9" class="ai-shape ai-rect ai-point" x="1306" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_10" class="ai-shape ai-rect ai-point" x="1456" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_11" class="ai-shape ai-rect ai-point" x="1606" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_12" class="ai-shape ai-rect ai-point" x="1756" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+  </g>
+  <g id="request" class="ai-container">
+    <circle id="request_ring" class="ai-shape ai-circle" cx="106" cy="70" r="17" fill="var(--role-ok-soft)" stroke="var(--role-ok)" stroke-width="2"/>
+    <rect id="request_envelope" class="ai-shape ai-rect" x="97" y="64" width="18" height="12" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text id="request_caption" class="ai-shape ai-text" x="69.0125" y="96.5" text-anchor="start" dominant-baseline="middle" font-size="11">Project request</text>
+  </g>
+  <g id="qualify" class="ai-container">
+    <rect id="qualify_box" class="ai-shape ai-rect" x="191" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="256" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="256" dy="-0"><tspan>Qualify request</tspan></tspan></text>
+  </g>
+  <g id="known" class="ai-container">
+    <g transform="rotate(45 406 200)">
+      <rect id="known_diamond" class="ai-shape ai-rect" x="389" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <rect id="known_hit" class="ai-shape ai-rect" x="382" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="406" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="406" dy="-0"><tspan>×</tspan></tspan></text>
+    <text id="known_question" class="ai-shape ai-text" x="326.8275" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11">Consultant already at customer?</text>
+  </g>
+  <g id="intro" class="ai-container">
+    <rect id="intro_box" class="ai-shape ai-rect" x="491" y="294" width="130" height="72" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="556" y="330" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="556" dy="-7.5"><tspan>Run project</tspan></tspan><tspan x="556" dy="15"><tspan>introduction</tspan></tspan></text>
+    <rect id="intro_plus" class="ai-shape ai-rect" x="549" y="349" width="14" height="14" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text class="ai-label" x="556" y="356" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="556" dy="-0"><tspan>+</tspan></tspan></text>
+  </g>
+  <g id="join" class="ai-container">
+    <rect id="join_box" class="ai-shape ai-rect" x="491" y="42" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="556" y="70" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="556" dy="-7.5"><tspan>Join project</tspan></tspan><tspan x="556" dy="15"><tspan>introduction</tspan></tspan></text>
+  </g>
+  <g id="move" class="ai-container">
+    <rect id="move_box" class="ai-shape ai-rect" x="641" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="706" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="706" dy="-15"><tspan>Offboard and</tspan></tspan><tspan x="706" dy="15"><tspan>onboard on new</tspan></tspan><tspan x="706" dy="15"><tspan>project</tspan></tspan></text>
+  </g>
+  <g id="onboard" class="ai-container">
+    <rect id="onboard_box" class="ai-shape ai-rect" x="791" y="302" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="856" y="330" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="856" dy="-7.5"><tspan>Follow up</tspan></tspan><tspan x="856" dy="15"><tspan>onboarding</tspan></tspan></text>
+  </g>
+  <g id="merge" class="ai-container">
+    <g transform="rotate(45 1006 200)">
+      <rect id="merge_diamond" class="ai-shape ai-rect" x="989" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <rect id="merge_hit" class="ai-shape ai-rect" x="982" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1006" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1006" dy="-0"><tspan>×</tspan></tspan></text>
+    <text id="merge_question" class="ai-shape ai-text" x="996" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
+  </g>
+  <g id="split" class="ai-container">
+    <g transform="rotate(45 1156 200)">
+      <rect id="split_diamond" class="ai-shape ai-rect" x="1139" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <rect id="split_hit" class="ai-shape ai-rect" x="1132" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1156" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1156" dy="-0"><tspan>+</tspan></tspan></text>
+    <text id="split_question" class="ai-shape ai-text" x="1146" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
+  </g>
+  <g id="due" class="ai-container">
+    <circle id="due_ring" class="ai-shape ai-circle" cx="1306" cy="460" r="17" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="2"/>
+    <circle id="due_face" class="ai-shape ai-circle" cx="1306" cy="460" r="13" fill="var(--role-surface)" stroke="var(--role-warn)" stroke-width="1.5"/>
+    <rect id="due_minute" class="ai-shape ai-rect" x="1305" y="452" width="2" height="9" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <rect id="due_hour" class="ai-shape ai-rect" x="1305" y="459" width="7" height="2" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text id="due_caption" class="ai-shape ai-text" x="1263.21" y="486.5" text-anchor="start" dominant-baseline="middle" font-size="11">Review cycle due</text>
+  </g>
+  <g id="context" class="ai-container">
+    <rect id="context_box" class="ai-shape ai-rect" x="1391" y="42" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="1456" y="70" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1456" dy="-7.5"><tspan>Follow up customer</tspan></tspan><tspan x="1456" dy="15"><tspan>context</tspan></tspan></text>
+  </g>
+  <g id="project" class="ai-container">
+    <rect id="project_box" class="ai-shape ai-rect" x="1391" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="1456" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1456" dy="-0"><tspan>Follow up project</tspan></tspan></text>
+  </g>
+  <g id="review" class="ai-container">
+    <rect id="review_box" class="ai-shape ai-rect" x="1391" y="424" width="130" height="72" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="1456" y="460" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1456" dy="-0"><tspan>Performance review</tspan></tspan></text>
+    <rect id="review_plus" class="ai-shape ai-rect" x="1449" y="479" width="14" height="14" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text class="ai-label" x="1456" y="486" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="1456" dy="-0"><tspan>+</tspan></tspan></text>
+  </g>
+  <g id="joined" class="ai-container">
+    <g transform="rotate(45 1606 200)">
+      <rect id="joined_diamond" class="ai-shape ai-rect" x="1589" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    </g>
+    <rect id="joined_hit" class="ai-shape ai-rect" x="1582" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1606" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1606" dy="-0"><tspan>+</tspan></tspan></text>
+    <text id="joined_question" class="ai-shape ai-text" x="1596" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
+  </g>
+  <g id="done" class="ai-container">
+    <circle id="done_ring" class="ai-shape ai-circle" cx="1756" cy="200" r="17" fill="var(--role-error-soft)" stroke="var(--role-error)" stroke-width="4"/>
+    <text id="done_caption" class="ai-shape ai-text" x="1711.67" y="226.5" text-anchor="start" dominant-baseline="middle" font-size="11">Consultant staffed</text>
+  </g>
+  <text class="ai-label" x="535.5" y="190" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="535.5" dy="-0"><tspan>Yes</tspan></tspan></text>
+  <text class="ai-label" x="416" y="319.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="416" dy="-0"><tspan>No</tspan></tspan></text>
+  <path class="ai-connection" d="M123 70 L256 70 L256 164.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M321 200 L374.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M430 200 L633.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M406 224 L406 330 L483.8 330" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M621 330 L783.8 330" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M921 330 L1006 330 L1006 231.2" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M771 200 L974.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1030 200 L1124.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1156 176 L1156 70 L1383.8 70" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1180 200 L1383.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1156 224 L1156 460 L1281.8 460" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1323 460 L1383.8 460" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1521 70 L1606 70 L1606 168.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1521 200 L1574.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1521 460 L1606 460 L1606 231.2" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1630 200 L1731.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M556 282.3 L556 98" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-start="url(#ai-end-circle)" marker-end="url(#ai-end-open)"/>
+</svg>

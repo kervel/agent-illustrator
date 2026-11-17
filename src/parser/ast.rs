@@ -185,6 +185,9 @@ pub enum Statement {
 pub struct EachBlock {
     pub var: Spanned<Identifier>,
     pub index: Option<Spanned<Identifier>>,
+    /// `each r by id in ...`: the record field whose value names each item's
+    /// copies (`lane lanes` -> `lanes_am`). Without it copies are numbered.
+    pub key: Option<Spanned<Identifier>>,
     /// A literal `StyleValue::List`, or an `Identifier` naming a list parameter.
     pub source: Spanned<StyleValue>,
     pub body: Vec<Spanned<Statement>>,
@@ -797,6 +800,13 @@ pub enum StyleValue {
     Call {
         name: String,
         args: Vec<Spanned<StyleValue>>,
+    },
+    /// A size that may change between bounds: `width: 200..` (at least 200),
+    /// `width: ..300` (at most 300), `width: 120..400`. At least one bound is
+    /// given. Only `width` and `height` take one.
+    Range {
+        min: Option<f64>,
+        max: Option<f64>,
     },
 }
 

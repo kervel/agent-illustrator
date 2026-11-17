@@ -294,6 +294,8 @@ fn check_collisions(
     scope: &FrameScope<'_>,
     warnings: &mut Vec<LintWarning>,
 ) {
+    let paged = on_page(result);
+    let result = paged.as_ref().unwrap_or(result);
     check_overlaps(result, contains_ids, scope, warnings);
     check_labels(result, scope, warnings);
     check_label_element_overlaps(result, scope, warnings);
@@ -305,6 +307,57 @@ fn check_collisions(
     check_bundles(result, scope, warnings);
     check_masked_arrows(result, scope, warnings);
     check_text_in_view(result, scope, warnings);
+}
+
+/// The layout as it is seen on the page: a plain shape with `rotation:` is
+/// drawn turned about its pivot, while layout keeps its unrotated box. The
+/// collision checks ask what covers what on the page, so they get a copy in
+/// which every such shape has the box it covers once turned, and its label
+/// the box the turned words cover. `None` when nothing is rotated.
+///
+/// Only leaf shapes: a rotated template instance already has its parts
+/// turned in place by the two-phase solver.
+fn on_page(result: &LayoutResult) -> Option<LayoutResult> {
+    fn any_turned(es: &[ElementLayout]) -> bool {
+        es.iter().any(|e| e.turned_by().is_some() || any_turned(&e.children))
+    }
+    fn turn(e: &mut ElementLayout) {
+        if let Some(angle) = e.turned_by() {
+            let rot = super::transform::RotationTransform::new(angle, e.pivot_point());
+            if let Some(label) = e.label.as_mut() {
+                // Carry the words' centre with the turn; their extent turns
+                // about that centre (see `label_on_page`).
+                let c = estimate_label_bbox(label).center();
+                let moved = rot.transform_point(c);
+                label.position.x += moved.x - c.x;
+                label.position.y += moved.y - c.y;
+            }
+            e.bounds = e.footprint();
+        }
+        for c in &mut e.children {
+            turn(c);
+        }
+    }
+    if !any_turned(&result.root_elements) {
+        return None;
+    }
+    let mut paged = result.clone();
+    for e in paged.root_elements.iter_mut() {
+        turn(e);
+    }
+    for e in paged.elements.values_mut() {
+        turn(e);
+    }
+    Some(paged)
+}
+
+/// A label's box on the page: turned with its owner when the owner is a
+/// rotated leaf shape (`on_page` has already moved its centre).
+fn label_on_page(elem: &ElementLayout, bbox: BoundingBox) -> BoundingBox {
+    match elem.turned_by() {
+        Some(angle) => super::transform::RotationTransform::new(angle, bbox.center()).transform_bounds(&bbox),
+        None => bbox,
+    }
 }
 
 /// A caption closer than this to a box it faces reads as that box's label.
@@ -1351,6 +1404,18 @@ fn reportable_overlap(
     b: &ElementLayout,
     contains_ids: &ContainsRelations,
 ) -> Option<(f64, f64)> {
+    reportable_overlap_of(a, b, contains_ids, false)
+}
+
+/// `side_by_side`: `a` and `b` are members of one row, column or grid, which
+/// is there to keep them apart, so one covering the other is never a
+/// backdrop or a ring around it (a member stretched over its neighbour).
+fn reportable_overlap_of(
+    a: &ElementLayout,
+    b: &ElementLayout,
+    contains_ids: &ContainsRelations,
+    side_by_side: bool,
+) -> Option<(f64, f64)> {
     // Reference-only grid cells are never drawn; ignore them.
     if is_reference_only(a) || is_reference_only(b) {
         return None;
@@ -1381,7 +1446,7 @@ fn reportable_overlap(
             && big.bounds.contains_bbox(&small.bounds)
             && area(big) > 4.0 * area(small).max(1.0)
     };
-    if !is_text_shape(a) && !is_text_shape(b) && (backdrop(a, b) || backdrop(b, a)) {
+    if !side_by_side && !is_text_shape(a) && !is_text_shape(b) && (backdrop(a, b) || backdrop(b, a)) {
         return None;
     }
 
@@ -1395,7 +1460,7 @@ fn reportable_overlap(
             && outer.label.is_none()
             && outer.bounds.contains_bbox(&inner.bounds)
     };
-    if encloses(a, b) || encloses(b, a) {
+    if !side_by_side && (encloses(a, b) || encloses(b, a)) {
         return None;
     }
 
@@ -1770,7 +1835,11 @@ fn check_overlaps_recursive(
                     continue;
                 }
 
-                if let Some((w, h)) = reportable_overlap(a, b, contains_ids) {
+                let side_by_side = matches!(
+                    parent.element_type,
+                    ElementType::Layout(LayoutType::Row | LayoutType::Column | LayoutType::Grid)
+                );
+                if let Some((w, h)) = reportable_overlap_of(a, b, contains_ids, side_by_side) {
                     let mut name_a = name(a, index_a);
                     let mut name_b = name(b, index_b);
                     // Two anonymous children of the same cell would otherwise
@@ -2080,7 +2149,7 @@ fn collect_labels_in(
     };
     // An empty label ("") draws nothing, so it overlaps nothing.
     if let Some(label) = elem.label.as_ref().filter(|l| !l.text.trim().is_empty()) {
-        let bbox = estimate_label_bbox_styled(label, &elem.styles);
+        let bbox = label_on_page(elem, estimate_label_bbox_styled(label, &elem.styles));
         let on_own_fill = is_visual_shape(elem)
             && is_opaque(elem)
             && !has_see_through_fill(elem)
@@ -3629,12 +3698,155 @@ fn format_constraint_expr(expr: &ConstraintExpr) -> String {
 }
 
 fn check_over_constrained(result: &LayoutResult, doc: &Document, warnings: &mut Vec<LintWarning>) {
-    check_over_constrained_in_stmts(&doc.statements, result, warnings);
+    let mut groups = Vec::new();
+    constraint_groups(&doc.statements, &mut groups);
+    check_over_constrained_in_stmts(&doc.statements, result, &groups, warnings);
+}
+
+/// The elements each `constrain` names (leaf ids), document-wide.
+fn constraint_groups(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<Vec<(String, ConstraintProperty)>>) {
+    for stmt in stmts {
+        match &stmt.node {
+            Statement::Constrain(c) => out.push(expr_refs(&c.expr)),
+            Statement::Layout(l) => constraint_groups(&l.children, out),
+            Statement::Group(g) => constraint_groups(&g.children, out),
+            _ => {}
+        }
+    }
+}
+
+/// The (element, property) pairs a constraint compares.
+fn expr_refs(expr: &ConstraintExpr) -> Vec<(String, ConstraintProperty)> {
+    let pr = |r: &crate::parser::ast::PropertyRef| (r.element.node.leaf().0.clone(), r.property.node.clone());
+    match expr {
+        ConstraintExpr::Equal { left, right } | ConstraintExpr::EqualWithOffset { left, right, .. } => vec![pr(left), pr(right)],
+        ConstraintExpr::Constant { left, .. }
+        | ConstraintExpr::GreaterOrEqual { left, .. }
+        | ConstraintExpr::LessOrEqual { left, .. } => vec![pr(left)],
+        _ => vec![],
+    }
+}
+
+/// Which way a property runs: Some(true) horizontal, Some(false) vertical.
+fn horizontal(p: &ConstraintProperty) -> Option<bool> {
+    use ConstraintProperty::*;
+    match p {
+        X | Width | Left | Right | CenterX => Some(true),
+        Y | Height | Top | Bottom | CenterY => Some(false),
+        _ => None,
+    }
+}
+
+/// A property through which a constraint stretches a size: its far edge or
+/// the size itself.
+fn stretches(p: &ConstraintProperty, horiz: bool) -> bool {
+    use ConstraintProperty::*;
+    if horiz { matches!(p, Right | Width) } else { matches!(p, Bottom | Height) }
+}
+
+/// The element paths a constraint compares (not `contains` or midpoints).
+fn expr_paths(expr: &ConstraintExpr) -> Vec<&crate::parser::ast::ElementPath> {
+    match expr {
+        ConstraintExpr::Equal { left, right } | ConstraintExpr::EqualWithOffset { left, right, .. } => {
+            vec![&left.element.node, &right.element.node]
+        }
+        ConstraintExpr::Constant { left, .. }
+        | ConstraintExpr::GreaterOrEqual { left, .. }
+        | ConstraintExpr::LessOrEqual { left, .. } => vec![&left.element.node],
+        _ => vec![],
+    }
+}
+
+/// Why a constraint could not be met, when sizes are the reason: a ranged
+/// size stopped at one of its bounds, or a template part that keeps its
+/// shape (it moves its whole instance instead of stretching).
+///
+/// Which constraint the solver gives up is its choice, so a range that stopped
+/// is looked for among this constraint's elements and then among those that
+/// share another constraint with them.
+fn size_hint(result: &LayoutResult, expr: &ConstraintExpr, groups: &[Vec<(String, ConstraintProperty)>]) -> String {
+    let paths = expr_paths(expr);
+    let written = |p: &crate::parser::ast::ElementPath| {
+        p.segments.iter().map(|s| s.node.0.as_str()).collect::<Vec<_>>().join(".")
+    };
+    let here = expr_refs(expr);
+    // The axis the conflict is on; a size range on the other axis is no reason.
+    let Some(horiz) = here.iter().find_map(|(_, p)| horizontal(p)) else { return String::new() };
+    // What this constraint and those sharing an element with it ask of each
+    // element on this axis.
+    let mut asked: Vec<(String, ConstraintProperty, bool)> =
+        here.iter().map(|(id, p)| (id.clone(), p.clone(), true)).collect();
+    for g in groups {
+        if g.iter().any(|(x, _)| here.iter().any(|(h, _)| h == x)) {
+            for (x, p) in g {
+                asked.push((x.clone(), p.clone(), false));
+            }
+        }
+    }
+    let mut seen: Vec<&str> = Vec::new();
+    for (id, _, _) in &asked {
+        if seen.contains(&id.as_str()) {
+            continue;
+        }
+        seen.push(id);
+        let Some(e) = result.get_element_by_name(id) else { continue };
+        let (axis, range, size) = if horiz {
+            ("width", e.styles.width_range, e.bounds.width)
+        } else {
+            ("height", e.styles.height_range, e.bounds.height)
+        };
+        let Some((min, max)) = range else { continue };
+        // Only a range something tried to stretch: a constraint on its far
+        // edge or its size. One that merely sits at a bound is at rest.
+        let pulled_here = asked.iter().any(|(x, p, direct)| *direct && x == id && stretches(p, horiz));
+        let pulled = asked.iter().any(|(x, p, _)| x == id && stretches(p, horiz));
+        if !pulled || min.is_some() && min == max {
+            continue;
+        }
+        let name = paths.iter().find(|p| p.leaf().0 == *id).map(|p| written(p)).unwrap_or_else(|| id.clone());
+        let range_text = format!(
+            "{}..{}",
+            min.map(|v| format!("{v}")).unwrap_or_default(),
+            max.map(|v| format!("{v}")).unwrap_or_default()
+        );
+        if max.is_some_and(|m| (size - m).abs() < 0.5) {
+            return format!("; `{}` stopped at the top of its {} range ({}): raise or drop the upper bound", name, axis, range_text);
+        }
+        if pulled_here && min.is_some_and(|m| (size - m).abs() < 0.5) {
+            return format!("; `{}` stopped at the bottom of its {} range ({}): lower or drop the lower bound", name, axis, range_text);
+        }
+    }
+    // A rigid template part asked to stretch (its far edge or size, while
+    // something else holds it): a range is what would let it.
+    for (path, (id, p)) in paths.iter().zip(&here) {
+        if !stretches(p, horiz) {
+            continue;
+        }
+        let Some(e) = result.get_element_by_name(id) else { continue };
+        let ranged = if horiz { e.styles.width_range.is_some() } else { e.styles.height_range.is_some() };
+        if !ranged && in_template_instance(&result.root_elements, id) {
+            return format!(
+                "; `{}` is part of a template, which keeps its shape and moves as one piece: to let constraints stretch it, give it a size range in the template ({}: 200..)",
+                written(path),
+                if horiz { "width" } else { "height" }
+            );
+        }
+    }
+    String::new()
+}
+
+/// `id` is a part of a template instance (its parent is one).
+fn in_template_instance(elems: &[ElementLayout], id: &str) -> bool {
+    elems.iter().any(|e| {
+        (is_template_instance_group(e) && e.children.iter().any(|c| c.id.as_ref().is_some_and(|i| i.0 == id)))
+            || in_template_instance(&e.children, id)
+    })
 }
 
 fn check_over_constrained_in_stmts(
     stmts: &[crate::parser::ast::Spanned<Statement>],
     result: &LayoutResult,
+    groups: &[Vec<(String, ConstraintProperty)>],
     warnings: &mut Vec<LintWarning>,
 ) {
     const EPSILON: f64 = 1.0;
@@ -3657,8 +3869,8 @@ fn check_over_constrained_in_stmts(
                                     warnings.push(LintWarning {
                                         category: LintCategory::OverConstrained,
                                         message: format!(
-                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
-                                            desc, residual
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained{}",
+                                            desc, residual, size_hint(result, &c.expr, groups)
                                         ),
                                         frames: Vec::new(),
                                         pair: None,
@@ -3685,8 +3897,8 @@ fn check_over_constrained_in_stmts(
                                     warnings.push(LintWarning {
                                         category: LintCategory::OverConstrained,
                                         message: format!(
-                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
-                                            desc, residual
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained{}",
+                                            desc, residual, size_hint(result, &c.expr, groups)
                                         ),
                                         frames: Vec::new(),
                                         pair: None,
@@ -3707,8 +3919,8 @@ fn check_over_constrained_in_stmts(
                                     warnings.push(LintWarning {
                                         category: LintCategory::OverConstrained,
                                         message: format!(
-                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
-                                            desc, residual
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained{}",
+                                            desc, residual, size_hint(result, &c.expr, groups)
                                         ),
                                         frames: Vec::new(),
                                         pair: None,
@@ -3729,8 +3941,8 @@ fn check_over_constrained_in_stmts(
                                     warnings.push(LintWarning {
                                         category: LintCategory::OverConstrained,
                                         message: format!(
-                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
-                                            desc, violation
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained{}",
+                                            desc, violation, size_hint(result, &c.expr, groups)
                                         ),
                                         frames: Vec::new(),
                                         pair: None,
@@ -3751,8 +3963,8 @@ fn check_over_constrained_in_stmts(
                                     warnings.push(LintWarning {
                                         category: LintCategory::OverConstrained,
                                         message: format!(
-                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained",
-                                            desc, violation
+                                            "constraint \"{}\" is violated by {:.0}px; the system may be over-constrained{}",
+                                            desc, violation, size_hint(result, &c.expr, groups)
                                         ),
                                         frames: Vec::new(),
                                         pair: None,
@@ -3765,10 +3977,10 @@ fn check_over_constrained_in_stmts(
                 }
             }
             Statement::Layout(l) => {
-                check_over_constrained_in_stmts(&l.children, result, warnings);
+                check_over_constrained_in_stmts(&l.children, result, groups, warnings);
             }
             Statement::Group(g) => {
-                check_over_constrained_in_stmts(&g.children, result, warnings);
+                check_over_constrained_in_stmts(&g.children, result, groups, warnings);
             }
             _ => {}
         }
@@ -4849,6 +5061,8 @@ fn check_hand_placed_labels(
     warnings: &mut Vec<LintWarning>,
     scope: &FrameScope<'_>,
 ) {
+    let paged = on_page(result);
+    let result = paged.as_ref().unwrap_or(result);
     let contains = collect_contains_ids(doc);
 
     struct Seen {

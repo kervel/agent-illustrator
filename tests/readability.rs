@@ -175,6 +175,13 @@ fn a_point_is_an_invisible_place_with_no_size() {
 }
 
 #[test]
+fn a_point_inside_each_makes_one_point_per_item() {
+    let svg = render("row steps [gap: 100] { each k in [1, 2, 3] { point step } }");
+    assert_eq!(attr(&svg, "step_3", "width"), 0.0);
+    assert!(attr(&svg, "step_3", "x") > attr(&svg, "step_1", "x") + 150.0);
+}
+
+#[test]
 fn the_heading_follows_keyframe_titles() {
     let src = r#"
 text "Snapshots" heading [font_size: 30]

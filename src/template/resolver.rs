@@ -788,11 +788,30 @@ fn substitute_parameters(
                     }
                 }
             }
+            // `overlaps:` is scoped before substitution: a name that is a
+            // parameter is whatever was passed in (outside the template), any
+            // other name is this instance's own part.
+            let overlaps = shape
+                .modifiers
+                .iter()
+                .find(|m| matches!(&m.node.key.node, StyleKey::Custom(k) if k == "overlaps"))
+                .map(|m| scope_overlaps(&m.node.value, params, prefix));
             // Substitute parameters in modifiers
             shape.modifiers = substitute_modifiers(&shape.modifiers, params);
+            if let Some(v) = overlaps {
+                for m in shape.modifiers.iter_mut() {
+                    if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "overlaps") {
+                        m.node.value = v.clone();
+                    }
+                }
+            }
             // A line routed through siblings names them: scope those names too.
             let scope_list = |mods: &mut Vec<Spanned<StyleModifier>>| {
                 for m in mods.iter_mut() {
+                    // `overlaps:` was scoped above.
+                    if matches!(&m.node.key.node, StyleKey::Custom(k) if k == "overlaps") {
+                        continue;
+                    }
                     // `caption_of: dot` names a sibling inside the template.
                     if matches!(&m.node.key.node, StyleKey::CaptionOf) {
                         if let StyleValue::Identifier(id) = &m.node.value.node {
@@ -915,6 +934,46 @@ fn substitute_parameters(
 
 /// Element-reference parameters of an instance: parameter name -> element it names.
 type Refs = HashMap<String, String>;
+
+/// `overlaps: hd` / `[hd, on]` inside a template: `all` stays, a parameter
+/// becomes what was passed in (a name or a list of names, from outside), and
+/// any other name is the instance's own part (`a_hd`).
+fn scope_overlaps(v: &Spanned<StyleValue>, params: &HashMap<String, StyleValue>, prefix: &str) -> Spanned<StyleValue> {
+    let one = |id: &Identifier, span: &crate::parser::ast::Span| -> Vec<Spanned<StyleValue>> {
+        if id.0 == "all" {
+            return vec![Spanned::new(StyleValue::Identifier(id.clone()), span.clone())];
+        }
+        match params.get(&id.0) {
+            Some(StyleValue::List(items)) => items.clone(),
+            Some(other) => vec![Spanned::new(other.clone(), span.clone())],
+            None => vec![Spanned::new(
+                StyleValue::Identifier(Identifier::new(format!("{}_{}", prefix, id.0.replace('.', "_")))),
+                span.clone(),
+            )],
+        }
+    };
+    let node = match &v.node {
+        StyleValue::Identifier(id) => {
+            let mut out = one(id, &v.span);
+            if out.len() == 1 {
+                out.pop().unwrap().node
+            } else {
+                StyleValue::List(out)
+            }
+        }
+        StyleValue::List(items) => StyleValue::List(
+            items
+                .iter()
+                .flat_map(|it| match &it.node {
+                    StyleValue::Identifier(id) => one(id, &it.span),
+                    _ => vec![it.clone()],
+                })
+                .collect(),
+        ),
+        other => other.clone(),
+    };
+    Spanned::new(node, v.span.clone())
+}
 
 fn element_refs(params: &HashMap<String, StyleValue>) -> Refs {
     params
