@@ -123,6 +123,42 @@ S6 as built (differences from §2 P6 noted):
   t.to` as a curved loop through two points; a `seek` keyframe rides it as `arc_7`). Docs:
   skill.md, grammar.md, examples.md, `--doc where`.
 
+`if` as built (after S6; revisits the rejection in §5):
+- Evidence that changed the call: optional parts *of one instance or item* (an "AI" badge on
+  some task steps, a review gate after some steps) need a template parameter or a field to
+  switch a part on, which `where` cannot do (it picks whole items) and a second template or an
+  invisible box does badly (the box still takes room in a row). The condition language did not
+  grow: `if` takes exactly `where`'s tests (`==`, `!=`, `and`) plus a bare value.
+- Syntax: `if COND { ... } [else { ... }]`, `else if` chains (an `else` whose body is one
+  `if`). `if`/`else` are lexer keywords (`Token::If`/`Else`, in `error::RESERVED`,
+  `keyword_spelling`, `--doc reserved`); `Statement::If(IfBlock)`.
+- Evaluated in `each.rs` `expand_in`, so it runs wherever `each` expands: the top level
+  (lists = lets), inline/file template bodies per instance (lists = lets + parameters,
+  defaults included), every `each` copy, and inside rows/cols/groups. The chosen body is
+  spliced in flat (no wrapper group), so a dropped body takes no space and a row closes up.
+- Inside `each`, `subst_stmt` fills the sides that are loop variables and marks them `filled`,
+  so a field value `api` is never looked up again as a parameter. Other words are looked up in
+  the parameters/lets; a comparison needs at least one side that reads something (else: "reads
+  no parameter or loop variable", with a did-you-mean over parameters, lets and loop
+  variables); a bare `if x` with no such name is "nothing called `x` here; did you mean ...".
+- Truth of a bare value: `true`/`false` (bare words, which parse as identifiers, or quoted), a
+  non-empty string is true and `""` false. Deviation: the string `"false"` is false too (it
+  would otherwise be a true non-empty string, a trap). Numbers, other words, lists and records
+  are errors naming the value.
+- A name declared only in the dropped body is recorded (`TemplateRegistry::conditional`,
+  prefixed with the instance for template parts); `render_pipeline` turns an undefined name,
+  path or anchor (`s1.badge -> x` reads `badge` as an anchor of `s1`) that matches one into
+  "`s1.badge` only exists when `ai` is true ...", keeping the caret.
+- Parse pre-pass `if_mistakes` gives carets for `if !ai` (the lexer drops `!`, which would
+  silently invert the test), `=`, `or`, `&&`/`||`/`<`/`>`, `>=`/`<=`, an `if` without a
+  condition or body, and an `else` that does not follow an `if` body. `let` inside an `if` is
+  an error (top level only).
+- Limitation: lets are lists, so a top-level `if` has no scalar to read except loop variables
+  of a top-level `each` (or a literal `true`/`false`).
+- Example: `examples/support-flow.ail`. Docs: skill.md ("Optional parts: `if`" + Reach For
+  row), grammar.md, examples.md, `--doc if` (aliases `else`, `conditional`, `flag`,
+  `optional`, ...). Tests: `tests/if_block.rs`.
+
 Sequence rewrite as built (§4; differences noted):
 - One `let msgs` of records `{id, from, to, kind, label}`; every `life` gets `ticks: msgs`
   and makes its rows with `each t by id in ticks` (`api.p[query]`). Labels are numbered
@@ -502,7 +538,8 @@ built" (a parameter default that names the template's own part, `until: rows`).
   *inside* an `each` body, not instead of one.
 - **General conditionals (`if`) or expressions in the body.** They are heavier and invite
   logic-in-diagrams. `where` with equality covers the observed needs. Revisit only with
-  evidence.
+  evidence. *(Revisited: optional parts of one instance needed it; `if` landed with `where`'s
+  tests only, no expressions. See "`if` as built".)*
 - **A self-loop route instead of P6.** That would be `a -> a [routing: loop]`, and today
   `a -> a` draws a stub. It is a good general feature (state machines need it), but it fixes only
   this one case of per-item variation. `where` covers that case and more. Both may be worth

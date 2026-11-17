@@ -504,6 +504,19 @@ Declarations that serve motion:
                   an each source anywhere in the file, a template argument
                   [ticks: tr], a parameter default (ticks: tr), k* [items: tr].
                   Not a value: fill: tr / tr -> x is an error ("tr is data").
+    optional part: if COND { statements } [else { statements }]   (--doc if)
+                  chosen before layout; the other body is dropped and takes no
+                  space (a row closes up). COND is the condition of where (X == Y,
+                  X != Y, joined with and) or a bare value: if ai is true for true
+                  (or "true", or a non-empty string), false for false (or "",
+                  "false"); any other value is an error. X/Y: a template parameter
+                  (defaults included: (ai: false)), an each variable or field
+                  (m.kind, i), or a value. else if x { ... } chains. Works in
+                  templates, each bodies, rows/cols/groups and at the top level.
+                  A reference to a name only one body declares, when the other
+                  was chosen, is an error naming the condition ("badge only
+                  exists when ai is true"). No !, or, <, >: write == false, else,
+                  or a second if.
                   anchors may be declared inside: anchor r_a [position: row.right]
     keyframe flags: keyframe "k" [auto, after: 0.3] plays on by itself after
                   the previous one; [no_resolve] keeps the previous frame's
@@ -567,7 +580,7 @@ RESERVED IDENTIFIERS
 --------------------
 Cannot use as element names: left, right, top, bottom, x, y, width, height,
 and the keywords: rect, circle, ellipse, polygon, line, path, text, icon,
-callout, row, col, grid, stack, group, label, template, anchor, each, let, ... (a name
+callout, row, col, grid, stack, group, label, template, anchor, each, let, if, else, ... (a name
 that is a keyword is a parse error that says so).
 
 EXAMPLES

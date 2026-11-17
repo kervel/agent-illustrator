@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
     AnchorPosition, AnchorReference, CompareOp, ConstrainDecl, ConstraintExpr, EachBlock, ElementPath, Identifier,
-    PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
+    IfBlock, PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
 };
 
 use super::names::head_of;
@@ -37,27 +37,56 @@ struct Bound {
 }
 type Vars = HashMap<String, Bound>;
 
-/// Expand every `each` in `stmts`. `lists` are the values `each x in NAME`
-/// can name (a template's parameters); other kinds of value are ignored.
-pub fn expand_each(stmts: Stmts, lists: &HashMap<String, StyleValue>) -> Result<Stmts, TemplateError> {
+/// A name that an `if` left out: it is declared only in the body that was
+/// not chosen. `when` is the value of `condition` under which it exists.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Conditional {
+    pub name: String,
+    pub condition: String,
+    pub when: bool,
+}
+
+/// Expand every `each` and choose every `if` in `stmts`. `lists` are the
+/// values `each x in NAME` and `if NAME` can name (a template's parameters,
+/// the file's lets). The names an `if` leaves out are added to `dropped`.
+pub fn expand_each(
+    stmts: Stmts,
+    lists: &HashMap<String, StyleValue>,
+    dropped: &mut Vec<Conditional>,
+) -> Result<Stmts, TemplateError> {
     // Names declared anywhere in this scope (the document, or a template
     // body): a loop variable used as a name must not hide one of them.
     let scope = declared_names(&stmts);
-    expand_in(stmts, lists, &scope)
+    expand_in(stmts, lists, &scope, dropped)
 }
 
-fn expand_in(stmts: Stmts, lists: &HashMap<String, StyleValue>, scope: &HashSet<String>) -> Result<Stmts, TemplateError> {
+fn expand_in(
+    stmts: Stmts,
+    lists: &HashMap<String, StyleValue>,
+    scope: &HashSet<String>,
+    dropped: &mut Vec<Conditional>,
+) -> Result<Stmts, TemplateError> {
     let mut out = Vec::with_capacity(stmts.len());
     for st in stmts {
         let span = st.span.clone();
         match st.node {
-            Statement::Each(e) => out.extend(expand_block(e, lists, scope)?),
+            Statement::Each(e) => out.extend(expand_block(e, lists, scope, dropped)?),
+            // The chosen body takes the place of the `if`, flat: in a row it
+            // is the row's children, and the other body takes no space.
+            Statement::If(b) => {
+                let holds = eval_if(&b, lists)?;
+                let (chosen, other) = if holds { (b.then_body, b.else_body) } else { (b.else_body, b.then_body) };
+                let mut names: Vec<String> = declared_names(&other).into_iter().collect();
+                names.sort();
+                dropped.extend(names.into_iter().map(|name| Conditional { name, condition: b.text.clone(), when: !holds }));
+                out.extend(expand_in(chosen, lists, scope, dropped)?);
+            }
             Statement::Layout(mut l) => {
-                l.children = expand_in(l.children, lists, scope)?;
+                l.children = expand_in(l.children, lists, scope, dropped)?;
                 out.push(Spanned::new(Statement::Layout(l), span));
             }
             Statement::Group(mut g) => {
-                g.children = expand_in(g.children, lists, scope)?;
+                g.children = expand_in(g.children, lists, scope, dropped)?;
                 out.push(Spanned::new(Statement::Group(g), span));
             }
             other => out.push(Spanned::new(other, span)),
@@ -82,7 +111,12 @@ fn describe(v: &StyleValue) -> String {
     }
 }
 
-fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashSet<String>) -> Result<Stmts, TemplateError> {
+fn expand_block(
+    e: EachBlock,
+    lists: &HashMap<String, StyleValue>,
+    scope: &HashSet<String>,
+    dropped: &mut Vec<Conditional>,
+) -> Result<Stmts, TemplateError> {
     let var = e.var.node.0.clone();
     let by = e.key.as_ref().map(|k| format!(" by {}", k.node.0)).unwrap_or_default();
     let header = match &e.index {
@@ -216,7 +250,7 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
         if !problems.is_empty() {
             continue;
         }
-        let mut body = expand_in(body, lists, scope)?;
+        let mut body = expand_in(body, lists, scope, dropped)?;
         crate::parser::join_constraint_parts(&mut body);
         out.extend(body);
     }
@@ -384,7 +418,7 @@ fn report(problems: Vec<Problem>, items: &[Spanned<StyleValue>]) -> String {
 
 /// One side of a condition: the value it has for this item, and whether it
 /// came from a loop variable. `None` on a problem (pushed).
-fn operand(v: &Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) -> Option<(StyleValue, bool)> {
+fn operand(v: &Spanned<StyleValue>, vars: &Vars, kw: &str, problems: &mut Vec<Problem>) -> Option<(StyleValue, bool)> {
     let StyleValue::Identifier(id) = &v.node else { return Some((v.node.clone(), false)) };
     if !vars.contains_key(head_of(&id.0).0) {
         return Some((v.node.clone(), false));
@@ -392,10 +426,12 @@ fn operand(v: &Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) ->
     let (value, rest, _, what) = lookup(&id.0, vars, problems)?;
     if let Some(r) = rest {
         problems.push(Problem::Msg(format!(
-            "`where {}`: {} is {}, and `where` compares values, not parts (`.{}`); compare the field itself",
+            "`{} {}`: {} is {}, and `{}` compares values, not parts (`.{}`); compare the field itself",
+            kw,
             id.0,
             what,
             describe(&value),
+            kw,
             r
         )));
         return None;
@@ -429,7 +465,7 @@ fn show_cond(c: &WhereCond) -> String {
 fn matches_filter(filter: &[WhereCond], vars: &Vars, header: &str, problems: &mut Vec<Problem>) -> bool {
     let mut all = true;
     for c in filter {
-        let (Some((l, lb)), Some((r, rb))) = (operand(&c.left, vars, problems), operand(&c.right, vars, problems)) else {
+        let (Some((l, lb)), Some((r, rb))) = (operand(&c.left, vars, "where", problems), operand(&c.right, vars, "where", problems)) else {
             all = false;
             continue;
         };
@@ -470,6 +506,176 @@ fn matches_filter(filter: &[WhereCond], vars: &Vars, header: &str, problems: &mu
         }
     }
     all
+}
+
+// ---- `if`: which body is drawn -----------------------------------------
+
+/// One side of an `if` test, looked up.
+enum Side {
+    /// A value from a parameter, a let or a loop variable.
+    Bound(StyleValue),
+    /// A value written as is (`"x"`, `3`, a colour).
+    Literal(StyleValue),
+    /// A plain word that names nothing here: a literal word on one side of
+    /// a comparison, a misspelt name otherwise.
+    Word(String),
+}
+
+fn if_err(b: &IfBlock, why: String) -> TemplateError {
+    err(format!("`if {}`: {}", b.text, why))
+}
+
+/// The names an `if` here could read, for messages.
+fn known_names(b: &IfBlock, lists: &HashMap<String, StyleValue>) -> Vec<String> {
+    let mut names: Vec<String> = lists.keys().cloned().chain(b.loop_vars.iter().cloned()).collect();
+    names.sort();
+    names.dedup();
+    names
+}
+
+/// "; did you mean `ai`?" for a misspelt name, or the names there are.
+fn suggest(word: &str, known: &[String]) -> String {
+    let head = head_of(word).0;
+    let close = known
+        .iter()
+        .filter(|k| crate::layout::levenshtein_distance(k, head) <= 2)
+        .min_by_key(|k| crate::layout::levenshtein_distance(k, head));
+    match close {
+        Some(c) => format!("; did you mean `{}`?", c),
+        None if known.is_empty() => "; an `if` reads template parameters (`(ai: false)`) and `each` variables (`m.kind`), and there are none here".to_string(),
+        None => format!(
+            "; names here: {}",
+            known.iter().map(|k| format!("`{}`", k)).collect::<Vec<_>>().join(", ")
+        ),
+    }
+}
+
+fn side_of(b: &IfBlock, v: &StyleValue, filled: bool, lists: &HashMap<String, StyleValue>) -> Result<Side, TemplateError> {
+    if filled {
+        return Ok(Side::Bound(v.clone()));
+    }
+    let StyleValue::Identifier(id) = v else { return Ok(Side::Literal(v.clone())) };
+    let (head, rest) = head_of(&id.0);
+    let Some(value) = lists.get(head) else { return Ok(Side::Word(id.0.clone())) };
+    match rest {
+        None => Ok(Side::Bound(value.clone())),
+        Some(r) => Err(if_err(
+            b,
+            format!("`{}` is {}, which has no field `{}`; fields belong to the items of an `each` (m.{})", head, describe(value), r, r),
+        )),
+    }
+}
+
+/// `if flag`: `true` and `false` (written bare or quoted), and a string is
+/// true unless empty. Anything else is a mistake, not a hidden rule.
+fn truth(b: &IfBlock, written: &str, v: &StyleValue) -> Result<bool, TemplateError> {
+    let word = match v {
+        StyleValue::Identifier(id) => Some(id.0.as_str()),
+        StyleValue::Keyword(k) => Some(k.as_str()),
+        _ => None,
+    };
+    match (word, v) {
+        (Some("true"), _) => Ok(true),
+        (Some("false"), _) => Ok(false),
+        (_, StyleValue::String(s)) => Ok(!(s.is_empty() || s == "false")),
+        _ => {
+            let what = match v {
+                StyleValue::Identifier(_) | StyleValue::Keyword(_) => format!("the word `{}`", word.unwrap_or_default()),
+                StyleValue::List(_) | StyleValue::IdentifierList(_) => "a list".to_string(),
+                other => describe(other),
+            };
+            let why = match comparable(v) {
+                Some(shown) => format!(
+                    "`{}` is {}, which is neither true nor false; give it `true` or `false` ({}: true), or compare it: if {} == {}",
+                    written, what, head_of(written).0, written, shown
+                ),
+                None => format!(
+                    "`{}` is {}, which is neither true nor false; `if` tests one value (`true`/`false`, or a comparison such as m.kind == call)",
+                    written, what
+                ),
+            };
+            Err(if_err(b, why))
+        }
+    }
+}
+
+/// Does every test of `b` hold? Names not filled in by an `each` are
+/// looked up in `lists` (template parameters, lets).
+fn eval_if(b: &IfBlock, lists: &HashMap<String, StyleValue>) -> Result<bool, TemplateError> {
+    let mut all = true;
+    for t in &b.tests {
+        let left = side_of(b, &t.left.node, t.filled[0], lists)?;
+        let written = match &t.left.node {
+            StyleValue::Identifier(id) if !t.filled[0] => id.0.clone(),
+            _ => t.show(),
+        };
+        let holds = match &t.cmp {
+            None => match left {
+                Side::Bound(v) => truth(b, &written, &v)?,
+                Side::Word(w) if w == "true" => true,
+                Side::Word(w) if w == "false" => false,
+                Side::Word(w) => {
+                    return Err(if_err(
+                        b,
+                        format!(
+                            "nothing called `{}` here{}",
+                            w,
+                            suggest(&w, &known_names(b, lists))
+                        ),
+                    ))
+                }
+                Side::Literal(v) => truth(b, &written, &v)?,
+            },
+            Some((op, r)) => {
+                let right = side_of(b, &r.node, t.filled[1], lists)?;
+                let bound = |s: &Side| matches!(s, Side::Bound(_));
+                if !bound(&left) && !bound(&right) {
+                    // Two fixed values: a misspelt name, most likely.
+                    let words: Vec<&String> = [&left, &right]
+                        .into_iter()
+                        .filter_map(|s| match s {
+                            Side::Word(w) => Some(w),
+                            _ => None,
+                        })
+                        .collect();
+                    let known = known_names(b, lists);
+                    let hint = words
+                        .iter()
+                        .map(|w| suggest(w, &known))
+                        .find(|h| h.contains("did you mean"))
+                        .unwrap_or_else(|| suggest("", &known));
+                    return Err(if_err(
+                        b,
+                        format!(
+                            "`{}` reads no parameter or loop variable, so it never changes{}",
+                            t.show(),
+                            hint
+                        ),
+                    ));
+                }
+                let value = |s: Side| match s {
+                    Side::Bound(v) | Side::Literal(v) => v,
+                    Side::Word(w) => StyleValue::Identifier(Identifier::new(w)),
+                };
+                let (l, r) = (value(left), value(right));
+                let (Some(a), Some(c)) = (comparable(&l), comparable(&r)) else {
+                    let bad = if comparable(&l).is_none() { &l } else { &r };
+                    let what = match bad {
+                        StyleValue::List(_) | StyleValue::IdentifierList(_) => "a list",
+                        StyleValue::Record(_) => "a record",
+                        _ => "a value without text",
+                    };
+                    return Err(if_err(
+                        b,
+                        format!("one side of `{}` is {}; `if` compares single values (a word, a string or a number)", t.show(), what),
+                    ));
+                };
+                (a == c) == (*op == CompareOp::Eq)
+            }
+        };
+        all &= holds;
+    }
+    Ok(all)
 }
 
 // ---- names declared inside a body ------------------------------------
@@ -519,6 +725,10 @@ pub(crate) fn declared_names(stmts: &[Spanned<Statement>]) -> HashSet<String> {
                     out.insert(a.name.node.0.clone());
                 }
                 Statement::Each(e) => go(&e.body, out),
+                Statement::If(b) => {
+                    go(&b.then_body, out);
+                    go(&b.else_body, out);
+                }
                 _ => {}
             }
         }
@@ -660,6 +870,11 @@ fn rename_stmt(st: Spanned<Statement>, m: &HashMap<String, String>) -> Spanned<S
         Statement::Each(mut e) => {
             e.body = e.body.into_iter().map(|c| rename_stmt(c, m)).collect();
             Statement::Each(e)
+        }
+        Statement::If(mut b) => {
+            b.then_body = b.then_body.into_iter().map(|c| rename_stmt(c, m)).collect();
+            b.else_body = b.else_body.into_iter().map(|c| rename_stmt(c, m)).collect();
+            Statement::If(b)
         }
         other => other,
     };
@@ -1156,6 +1371,39 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
             e.body = e.body.into_iter().map(|c| subst_stmt(c, &inner, problems)).collect();
             Statement::Each(e)
         }
+        Statement::If(mut b) => {
+            // A side that is a loop variable (`m.ai`, `i`) becomes its value
+            // for this item; other names are parameters, looked up when the
+            // `if` is chosen.
+            for t in &mut b.tests {
+                let sides = std::iter::once((&mut t.left, 0)).chain(t.cmp.as_mut().map(|(_, r)| (r, 1)));
+                let mut filled = t.filled;
+                for (side, k) in sides {
+                    if filled[k] {
+                        continue;
+                    }
+                    let StyleValue::Identifier(id) = &side.node else { continue };
+                    if !vars.contains_key(head_of(&id.0).0) {
+                        continue;
+                    }
+                    if let Some((value, true)) = operand(side, vars, "if", problems) {
+                        side.node = value;
+                        filled[k] = true;
+                    }
+                }
+                t.filled = filled;
+            }
+            let mut names: Vec<String> = vars.keys().cloned().collect();
+            names.sort();
+            for n in names {
+                if !b.loop_vars.contains(&n) {
+                    b.loop_vars.push(n);
+                }
+            }
+            b.then_body = b.then_body.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
+            b.else_body = b.else_body.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
+            Statement::If(b)
+        }
         other => other,
     };
     Spanned::new(node, span)
@@ -1205,6 +1453,7 @@ fn used_as_name(stmts: &[Spanned<Statement>], name: &str) -> Option<String> {
             Statement::Each(e) if e.var.node.0 != name && e.index.as_ref().is_none_or(|i| i.node.0 != name) => {
                 used_as_name(&e.body, name)
             }
+            Statement::If(b) => used_as_name(&b.then_body, name).or_else(|| used_as_name(&b.else_body, name)),
             _ => None,
         };
         if hit.is_some() {

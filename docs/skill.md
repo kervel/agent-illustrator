@@ -41,6 +41,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | Copies named by meaning, not number (lanes, rows you refer to later) | `by` a record field: `each r by id in [{id: am, ...}] { lane lanes }` makes `lanes_am`, reached as `lanes[am]` (`--doc each`) | counting which copy is which |
 | A template part that stretches to something outside it (a lane body to the last column, a bar to a date) | `rect body [width: 200..]` in the template, then `constrain body.right = across.right` (`--doc sizes`) | a `width:` parameter computed by hand |
 | A box that may grow or shrink, within limits | `width: 120..400` (`200..` at least, `..300` at most); the label wraps at the upper bound (`--doc sizes`) | a fixed width that is too wide for one label and too narrow for the next |
+| A part only some instances or items have (an "AI" badge on some steps, a note on a failed one) | `if ai { rect badge [...] }` in the template, `(ai: false)` as the default, `step s [ai: true]`; `if m.kind == call { ... } else { ... }` in an `each` (`--doc if`) | a second template, or a hidden box that still takes room |
 | One copy an `each` made, by number (a chain of stages, row k of a lifeline) | `stage[2]`, `api.p[k]`; in an `each`: `stage[k+1]`, `api.p[m.row]` (`--doc each`) | spelling out `stage_2`, or computing names by hand |
 | A template parameter that usually means one of the template's own parts (a lifeline that ends at its last row, unless told where) | a default that names the part: `template "life" (until: rows) { ... hd -- until }`, then `life auth [until: auth.p[ok]]` for the exception (`--doc templates`) | a parameter every caller must pass, or a second template |
 | A caption under a box | `[label: "x", label_position: below]` | `constrain cap.top = b.bottom + 20` |
@@ -630,6 +631,51 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
 - `each` and `let` are reserved words (`--doc reserved`); `in`, `by`, `where`
   and `and` are words only in an `each` header.
 - Same idea at parse time, for ready-made arguments: `k* [items: [...]]`.
+- A part that only some items have: `if` (below), inside the body.
+
+### Optional parts: `if`
+
+`if COND { ... } else { ... }` keeps one of two bodies and drops the other
+before layout. A dropped body takes no space: in a row or column the
+neighbours close up, as if it had never been written. `else` is optional;
+`else if x { ... }` chains.
+
+```
+template "step" (name: "", ai: false) {
+    rect box [label: name, width: 150, height: 64]
+    if ai {
+        rect badge [label: "AI", width: 30, height: 18, corner_radius: 9, font_size: 10, overlaps: box]
+        constrain badge.right = box.right - 6
+        constrain badge.top = box.top + 6
+    }
+}
+step triage [name: "Triage", ai: true]
+step review [name: "Review"]                 // ai: false, the default: no badge
+```
+
+- **The condition** is the one `where` takes: `==`, `!=`, joined with `and`
+  (`if m.kind == call and m.from != m.to`), or a bare value: `if ai` holds for
+  `true` and fails for `false` (bare or quoted), a non-empty string holds and
+  `""` fails. Any other value (a number, another word, a list) is an error that
+  names it; compare it instead (`if mode == fast`). There is no `!`, `or`,
+  `<`/`>`: write `== false`, use `else`, or a second `if`.
+- **What it reads:** template parameters, their defaults included (`(ai:
+  false)`), `each` variables and fields (`if m.ai`, `if i == 0`), compared with
+  plain values (words, strings, numbers compare by what they say, as in
+  `where`). A name that is none of these is an error with a did-you-mean. At
+  the top level there are no parameters, so a top-level `if` reads `each`
+  variables (`each m in msgs { if m.kind == call { ... } }`).
+- **Where:** in a template body, an `each` body, a row/col/group, nested
+  inside another `if`, and at the top level.
+- **Everything about the optional part goes inside the `if`:** its
+  constraints, its connections. A reference from outside to a name that only
+  the dropped body declares is an error that says why: "`s2.badge` only exists
+  when `ai` is true".
+- In an `each`, `where` picks items for the whole body; `if` picks a part
+  of the body per item. `examples/support-flow.ail` does both: a review gate
+  after the steps whose record says `check: true` (the row closes up where
+  there is none), and arrows through the gate or straight on.
+- `if` and `else` are reserved words.
 
 ### Sizes that stretch: ranges
 
@@ -872,7 +918,7 @@ A shape's `label:` takes `<br>`, `<b>`, `<i>`, `<small>` and `<span fill=…>`.
 These are keywords: they cannot name an element, a part, a connection or a
 parameter. Pick a more specific name (`app_icon`, `log_row`, `wire`).
 
-`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `each`, `let`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
+`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `each`, `let`, `if`, `else`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
 
 ---
 

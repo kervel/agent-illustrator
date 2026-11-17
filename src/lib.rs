@@ -382,6 +382,10 @@ fn extract_template_rotations(doc: &Document) -> std::collections::HashMap<Strin
                 Statement::Group(g) => {
                     visit_statements(&g.children, rotations);
                 }
+                Statement::If(b) => {
+                    visit_statements(&b.then_body, rotations);
+                    visit_statements(&b.else_body, rotations);
+                }
                 Statement::Label(inner) => {
                     // Labels contain a single inner statement
                     let inner_spanned = parser::ast::Spanned {
@@ -585,7 +589,61 @@ pub fn render_frames_strip(source: &str, config: RenderConfig, frame: &str) -> R
 
 pub(crate) fn render_pipeline(
     source: &str,
+    config: RenderConfig,
+) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {
+    let mut conditional = Vec::new();
+    render_pipeline_inner(source, config, &mut conditional).map_err(|e| explain_conditional(e, &conditional))
+}
+
+/// A reference to a name that an `if` left out: say which condition it
+/// needs, instead of "undefined identifier".
+fn explain_conditional(e: RenderError, conditional: &[template::Conditional]) -> RenderError {
+    if conditional.is_empty() {
+        return e;
+    }
+    let (candidates, span): (Vec<String>, parser::ast::Span) = match &e {
+        RenderError::Layout(LayoutError::UndefinedIdentifier { name, span, .. })
+        | RenderError::Layout(LayoutError::PathNotFound { path: name, span, .. }) => {
+            (vec![name.replace('.', "_")], span.clone())
+        }
+        // `s1.badge -> x`: the part reads as an anchor of `s1`.
+        RenderError::Layout(LayoutError::InvalidAnchor { element, anchor, span, .. }) => {
+            let mut out = Vec::new();
+            let mut name = element.clone();
+            for seg in anchor.split('.') {
+                name = format!("{}_{}", name, seg);
+                out.push(name.clone());
+            }
+            (out, span.clone())
+        }
+        _ => return e,
+    };
+    let Some(c) = candidates.iter().find_map(|n| conditional.iter().find(|c| c.name == *n)) else { return e };
+    let shown = match &e {
+        RenderError::Layout(LayoutError::InvalidAnchor { element, .. }) => {
+            format!("{}.{}", element, &c.name[element.len() + 1..])
+        }
+        RenderError::Layout(LayoutError::UndefinedIdentifier { name, .. }) | RenderError::Layout(LayoutError::PathNotFound { path: name, .. }) => {
+            name.clone()
+        }
+        _ => c.name.clone(),
+    };
+    RenderError::Layout(LayoutError::Located {
+        message: format!(
+            "`{}` only exists when `{}` is {}, and here it is not, so `{}` is not drawn; refer to it inside the same `if` (or its `else`), or make the condition hold",
+            shown,
+            c.condition,
+            c.when,
+            shown
+        ),
+        span,
+    })
+}
+
+fn render_pipeline_inner(
+    source: &str,
     mut config: RenderConfig,
+    conditional: &mut Vec<template::Conditional>,
 ) -> Result<(String, Vec<layout::lint::LintWarning>), RenderError> {
     if config.svg.scope.is_empty() {
         config.svg.scope = document_scope(source);
@@ -640,6 +698,7 @@ pub(crate) fn render_pipeline(
         registry.set_image_href_mode(config.image_href_mode);
         let doc = resolve_templates(doc, &mut registry)?;
         collapsed_parts = std::mem::take(&mut registry.collapsed_parts);
+        *conditional = std::mem::take(&mut registry.conditional);
         doc
     } else {
         doc
@@ -1116,6 +1175,10 @@ fn template_instance_spans(stmts: &[parser::ast::Spanned<parser::ast::Statement>
             Statement::TemplateInstance(t) => out.push((t.instance_name.node.0.clone(), t.instance_name.span.clone())),
             Statement::Layout(l) => out.extend(template_instance_spans(&l.children)),
             Statement::Group(g) => out.extend(template_instance_spans(&g.children)),
+            Statement::If(b) => {
+                out.extend(template_instance_spans(&b.then_body));
+                out.extend(template_instance_spans(&b.else_body));
+            }
             _ => {}
         }
     }

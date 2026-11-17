@@ -182,6 +182,63 @@ pub enum Statement {
     /// arguments (`[ticks: tr]`). Top level only; taken out when templates
     /// are resolved, never reaches layout.
     Let(LetDecl),
+    /// `if ai { ... } else { ... }`: one of two bodies, chosen when templates
+    /// are resolved (from template parameters and loop variables). The other
+    /// body is dropped and takes no space; never reaches layout.
+    If(IfBlock),
+}
+
+/// `if COND { ... } [else { ... }]`
+#[derive(Debug, Clone, PartialEq)]
+pub struct IfBlock {
+    /// Joined with `and`; all must hold.
+    pub tests: Vec<IfTest>,
+    pub then_body: Vec<Spanned<Statement>>,
+    /// Empty without `else`. `else if` is an `else` whose body is one `if`.
+    pub else_body: Vec<Spanned<Statement>>,
+    /// The condition as written (`ai`, `m.kind == call`), for messages.
+    pub text: String,
+    /// The loop variables of the enclosing `each` blocks (filled in when
+    /// they expand), so a misspelt name can suggest them.
+    pub loop_vars: Vec<String>,
+}
+
+/// One test of an `if`: a bare value (`if ai`: true or false) or a
+/// comparison (`if m.kind == call`), with the same sides as `where`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct IfTest {
+    pub left: Spanned<StyleValue>,
+    pub cmp: Option<(CompareOp, Spanned<StyleValue>)>,
+    /// Sides an enclosing `each` already filled in (left, right): their
+    /// values are data, not names to look up.
+    pub filled: [bool; 2],
+}
+
+impl IfTest {
+    /// The test as written.
+    pub fn show(&self) -> String {
+        fn side(v: &StyleValue) -> String {
+            match v {
+                StyleValue::Identifier(id) => id.0.clone(),
+                StyleValue::Keyword(k) => k.clone(),
+                StyleValue::String(s) => format!("\"{}\"", s),
+                StyleValue::Number { value, .. } => format!("{}", value),
+                StyleValue::Color(c) => c.token_string().unwrap_or_else(|| "a colour".to_string()),
+                StyleValue::List(_) | StyleValue::IdentifierList(_) => "[...]".to_string(),
+                StyleValue::Record(_) => "{...}".to_string(),
+                _ => "...".to_string(),
+            }
+        }
+        match &self.cmp {
+            None => side(&self.left.node),
+            Some((op, r)) => format!(
+                "{} {} {}",
+                side(&self.left.node),
+                if *op == CompareOp::Eq { "==" } else { "!=" },
+                side(&r.node)
+            ),
+        }
+    }
 }
 
 /// `let NAME = [...]`

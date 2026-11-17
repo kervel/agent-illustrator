@@ -1,0 +1,45 @@
+// A support-ticket flow: some steps are done by an AI agent, and a person checks
+// what those agents produce before the ticket moves on.
+//
+// `if` keeps or drops part of a template or an `each` body before layout:
+//   - the `step` template draws an "AI" badge only when `ai` is true (default false);
+//   - a step whose record says `check: true` is followed by a review gate. Where there
+//     is no gate, the row closes up: a dropped part takes no space.
+// `where` picks the items that get an arrow (all but the last); `if` picks, per item,
+// whether that arrow goes through a gate.
+
+template "step" (name: "", who: "", ai: false) {
+    rect box [label: "<b>{name}</b><br>{who}", width: 150, height: 64, fill: role-surface-2, font_size: 12]
+    if ai {
+        rect badge [label: "AI", width: 30, height: 18, corner_radius: 9, fill: role-primary, label_fill: role-surface,
+                    stroke: none, font_size: 10, font_weight: bold, overlaps: box]
+        constrain badge.right = box.right - 6
+        constrain badge.top = box.top + 6
+    }
+}
+
+let steps = [
+    {id: receive,  name: "Receive",     who: "mail gateway",  ai: false, check: false, next: classify},
+    {id: classify, name: "Classify",    who: "triage agent",  ai: true,  check: true,  next: draft},
+    {id: draft,    name: "Draft reply", who: "support agent", ai: true,  check: true,  next: send},
+    {id: send,     name: "Send",        who: "helpdesk",      ai: false, check: false, next: none},
+]
+
+row flow [gap: 36, align: center] {
+    each s by id in steps {
+        step st [name: s.name, who: s.who, ai: s.ai]
+        if s.check {
+            rect gate [label: "review", width: 64, height: 28, corner_radius: 14, fill: role-warn-soft,
+                       stroke: role-warn, font_size: 11]
+        }
+    }
+}
+
+each s by id in steps where s.next != none {
+    if s.check {
+        st[s.id].right -> gate[s.id].left [routing: direct]
+        gate[s.id].right -> st[s.next].left [routing: direct]
+    } else {
+        st[s.id].right -> st[s.next].left [routing: direct]
+    }
+}

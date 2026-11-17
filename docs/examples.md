@@ -1006,3 +1006,46 @@ row stages [gap: 70, align: center] {
 each k in [1, 2] { stage[k].right -> stage[k+1].left [routing: direct] }   // copies count from 1
 stage[2].top -> stage[1].top [routing: curved, label: "fails"]               // one copy by number
 ```
+
+## Optional parts with `if`
+
+`if COND { ... } else { ... }` keeps one body and drops the other before layout; a dropped
+body takes no space, so a row closes up. The condition reads template parameters (defaults
+included) and `each` variables, like `where`. A support-ticket flow whose AI steps carry a
+badge and whose checked steps are followed by a review gate (`examples/support-flow.ail`):
+
+```
+template "step" (name: "", who: "", ai: false) {
+    rect box [label: "<b>{name}</b><br>{who}", width: 150, height: 64, fill: role-surface-2, font_size: 12]
+    if ai {                                       // only on steps with ai: true
+        rect badge [label: "AI", width: 30, height: 18, corner_radius: 9, fill: role-primary,
+                    label_fill: role-surface, stroke: none, font_size: 10, overlaps: box]
+        constrain badge.right = box.right - 6     // its constraints go inside the `if` too
+        constrain badge.top = box.top + 6
+    }
+}
+let steps = [
+    {id: receive,  name: "Receive",     who: "mail gateway",  ai: false, check: false, next: classify},
+    {id: classify, name: "Classify",    who: "triage agent",  ai: true,  check: true,  next: draft},
+    {id: draft,    name: "Draft reply", who: "support agent", ai: true,  check: true,  next: send},
+    {id: send,     name: "Send",        who: "helpdesk",      ai: false, check: false, next: none},
+]
+row flow [gap: 36, align: center] {
+    each s by id in steps {
+        step st [name: s.name, who: s.who, ai: s.ai]
+        if s.check { rect gate [label: "review", width: 64, height: 28, corner_radius: 14] }
+    }
+}
+each s by id in steps where s.next != none {      // `where`: which items; `if`: which part
+    if s.check {
+        st[s.id].right -> gate[s.id].left [routing: direct]
+        gate[s.id].right -> st[s.next].left [routing: direct]
+    } else {
+        st[s.id].right -> st[s.next].left [routing: direct]
+    }
+}
+```
+
+`if ai` holds for `true` and fails for `false`; `if m.kind == call and m.from != m.to` compares.
+Referring to `st[receive].badge` from outside is an error: "`st_receive.badge` only exists when
+`ai` is true".

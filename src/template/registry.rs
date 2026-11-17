@@ -163,6 +163,9 @@ pub struct TemplateRegistry {
     /// The file's `let` lists by name: `each` sources and template
     /// arguments (`[ticks: tr]`) everywhere in the file.
     pub lets: HashMap<String, StyleValue>,
+    /// Names an `if` left out (its other body was chosen), with the
+    /// condition, so a reference to one can say why it is missing.
+    pub conditional: Vec<super::each::Conditional>,
 }
 
 impl TemplateRegistry {
@@ -179,6 +182,7 @@ impl TemplateRegistry {
             image_href_mode: ImageHrefMode::default(),
             collapsed_parts: Vec::new(),
             lets: HashMap::new(),
+            conditional: Vec::new(),
         }
     }
 

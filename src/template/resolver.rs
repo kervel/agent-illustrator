@@ -119,7 +119,9 @@ pub fn resolve_templates(
     }
 
     // `each` at the top level repeats over literal lists and lets
-    let doc_statements = super::each::expand_each(statements, &registry.lets)?;
+    let mut dropped = Vec::new();
+    let doc_statements = super::each::expand_each(statements, &registry.lets, &mut dropped)?;
+    registry.conditional.extend(dropped);
     if !registry.lets.is_empty() {
         // A let and an element of the same name: `[a: tr]` could mean either.
         let declared = super::each::declared_names(&doc_statements);
@@ -466,7 +468,10 @@ fn resolve_ail_template(
 
     let mut expanded = Vec::new();
 
-    for stmt in super::each::expand_each(parsed_doc.statements, param_values)? {
+    let mut dropped = Vec::new();
+    let statements = super::each::expand_each(parsed_doc.statements, param_values, &mut dropped)?;
+    registry.conditional.extend(scope_conditional(dropped, instance_name));
+    for stmt in statements {
         match &stmt.node {
             Statement::TemplateDecl(_) => {
                 // Template declarations are consumed by the registry, not expanded
@@ -509,6 +514,18 @@ fn resolve_ail_template(
     Ok(expanded)
 }
 
+/// Names an `if` left out of a template body are the instance's parts
+/// (`badge` of `s1` is `s1_badge`).
+fn scope_conditional(dropped: Vec<super::each::Conditional>, instance_name: &str) -> Vec<super::each::Conditional> {
+    dropped
+        .into_iter()
+        .map(|mut c| {
+            c.name = format!("{}_{}", instance_name, c.name);
+            c
+        })
+        .collect()
+}
+
 /// Resolve an inline template by expanding its body
 fn resolve_inline_template(
     def: &super::registry::TemplateDefinition,
@@ -533,10 +550,12 @@ fn resolve_inline_template(
     // The file's lets are lists here too; a parameter of the same name wins.
     let mut lists = registry.lets.clone();
     lists.extend(param_values.iter().map(|(k, v)| (k.clone(), v.clone())));
+    let mut dropped = Vec::new();
     let mut body = match &def.body {
-        Some(b) => super::each::expand_each(b.clone(), &lists)?,
+        Some(b) => super::each::expand_each(b.clone(), &lists, &mut dropped)?,
         None => return Ok(vec![]),
     };
+    registry.conditional.extend(scope_conditional(dropped, instance_name));
     let own = own_part_defaults(param_values, defaulted, &body, instance_name);
     let param_values = &own;
     // `machine anna [hist.appears: later]`: a modifier for one part of this
@@ -733,6 +752,10 @@ fn misused_lets(
                     inner.insert(ix.node.0.clone());
                 }
                 misused_lets(&e.body, lets, registry, &inner)?;
+            }
+            Statement::If(b) => {
+                misused_lets(&b.then_body, lets, registry, shadow)?;
+                misused_lets(&b.else_body, lets, registry, shadow)?;
             }
             Statement::TemplateDecl(t) => {
                 if let Some(body) = &t.body {

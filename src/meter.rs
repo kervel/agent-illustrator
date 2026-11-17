@@ -136,6 +136,10 @@ fn walk(
             }
             Statement::Layout(l) => l.children = walk(std::mem::take(&mut l.children), generated, counter)?,
             Statement::Group(g) => g.children = walk(std::mem::take(&mut g.children), generated, counter)?,
+            Statement::If(b) => {
+                b.then_body = walk(std::mem::take(&mut b.then_body), generated, counter)?;
+                b.else_body = walk(std::mem::take(&mut b.else_body), generated, counter)?;
+            }
             Statement::TemplateDecl(d) => {
                 if let Some(body) = d.body.take() {
                     d.body = Some(walk(body, generated, counter)?);

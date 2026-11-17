@@ -139,6 +139,11 @@ pub enum Token {
     // Named data: `let tr = [...]` (top level only)
     #[token("let")]
     Let,
+    // Conditional statements: `if ai { ... } else { ... }`
+    #[token("if")]
+    If,
+    #[token("else")]
+    Else,
 
     // Constraint keywords
     #[token("constrain")]

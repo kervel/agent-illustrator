@@ -18,3 +18,4 @@ examples/cross-functional.ail
 examples/sequence-diagram.ail
 examples/state-machine.ail
 examples/pipeline.ail
+examples/support-flow.ail

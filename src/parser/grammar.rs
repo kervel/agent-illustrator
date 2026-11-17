@@ -347,6 +347,10 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
         return Err(vec![e.locate(input)]);
     }
 
+    if let Some(e) = if_mistakes(input) {
+        return Err(vec![e.locate(input)]);
+    }
+
     // Create a logos lexer and convert to token stream
     let tokens = indexed_names(indexed_parts(crate::parser::lexer::lex(input).collect()), input)
         .map_err(|e| vec![e.locate(input)])?;
@@ -397,6 +401,10 @@ fn check_lets(doc: &Document) -> Result<(), (Span, String)> {
                 Statement::Layout(l) => nested(&l.children, "a row/col/grid/stack")?,
                 Statement::Group(g) => nested(&g.children, "a group")?,
                 Statement::Each(e) => nested(&e.body, "an `each`")?,
+                Statement::If(b) => {
+                    nested(&b.then_body, "an `if`")?;
+                    nested(&b.else_body, "an `else`")?
+                }
                 Statement::TemplateDecl(t) => {
                     if let Some(body) = &t.body {
                         nested(body, "a template")?
@@ -422,7 +430,7 @@ fn check_lets(doc: &Document) -> Result<(), (Span, String)> {
                     ));
                 }
             }
-            Statement::Layout(_) | Statement::Group(_) | Statement::Each(_) | Statement::TemplateDecl(_) | Statement::Label(_) => {
+            Statement::Layout(_) | Statement::Group(_) | Statement::Each(_) | Statement::If(_) | Statement::TemplateDecl(_) | Statement::Label(_) => {
                 nested(std::slice::from_ref(st), "")?;
             }
             _ => {}
@@ -495,6 +503,117 @@ fn where_mistakes(input: &str) -> Option<crate::ParseError> {
     None
 }
 
+/// Mistakes around `if` that would otherwise parse into something else, or
+/// fail far from the cause: `if !ai` (the lexer drops `!`, so it would read
+/// as `if ai`), `=`, `or`, `&&`, `<`, an `if` without a condition, an `else`
+/// that does not follow an `if` body.
+fn if_mistakes(input: &str) -> Option<crate::ParseError> {
+    let toks: Vec<(Token, std::ops::Range<usize>)> = crate::parser::lexer::lex(input).collect();
+    let fail = |span: std::ops::Range<usize>, message: &str| {
+        Some(crate::ParseError::Syntax { span, message: message.to_string(), expected: vec![] })
+    };
+    // One entry per open `{`: is it the body of an `if` or `else`?
+    let mut braces: Vec<bool> = Vec::new();
+    // The next `{` outside brackets opens an `if`/`else` body.
+    let mut body_next = false;
+    // Index of the `}` that last closed an `if`/`else` body.
+    let mut closed_if: Option<usize> = None;
+    let mut depth = 0usize;
+    let mut i = 0;
+    while i < toks.len() {
+        let (tok, span) = &toks[i];
+        match tok {
+            Token::BracketOpen | Token::ParenOpen => depth += 1,
+            Token::BracketClose | Token::ParenClose => depth = depth.saturating_sub(1),
+            Token::BraceOpen if depth == 0 => {
+                braces.push(std::mem::take(&mut body_next));
+            }
+            Token::BraceOpen => braces.push(false),
+            Token::BraceClose => {
+                if braces.pop() == Some(true) {
+                    closed_if = Some(i);
+                }
+            }
+            Token::Else => {
+                if closed_if != i.checked_sub(1) {
+                    return fail(
+                        span.clone(),
+                        "`else` goes right after the `}` of an `if` body: if ai { ... } else { ... }",
+                    );
+                }
+                match toks.get(i + 1).map(|t| &t.0) {
+                    Some(Token::BraceOpen) => body_next = true,
+                    Some(Token::If) => {}
+                    _ => {
+                        return fail(span.clone(), "`else` takes a body in braces (`else { ... }`) or another `if` (`else if x { ... }`)")
+                    }
+                }
+            }
+            Token::If => {
+                if matches!(toks.get(i + 1).map(|t| &t.0), Some(Token::BraceOpen) | None) {
+                    return fail(
+                        span.clone(),
+                        "`if` needs a condition before its `{`: if ai { ... }, if m.kind == call { ... }",
+                    );
+                }
+                // The condition, up to the body's `{` (outside brackets).
+                let mut d = 0usize;
+                let mut j = i + 1;
+                while j < toks.len() {
+                    match &toks[j].0 {
+                        Token::BracketOpen | Token::ParenOpen => d += 1,
+                        Token::BracketClose | Token::ParenClose => d = d.saturating_sub(1),
+                        Token::BraceOpen if d == 0 => break,
+                        _ => {}
+                    }
+                    j += 1;
+                }
+                if j >= toks.len() {
+                    return fail(span.clone(), "`if` needs a body in braces: if ai { ... }");
+                }
+                for k in i + 1..j {
+                    let (t, sp) = &toks[k];
+                    match t {
+                        Token::Equals => {
+                            return fail(sp.clone(), "`if` compares with `==` (or `!=`), not `=`: if m.kind == call")
+                        }
+                        Token::GreaterOrEqual | Token::LessOrEqual => {
+                            return fail(sp.clone(), "`if` compares with `==` and `!=` only (equal or not), not `<`/`>`")
+                        }
+                        Token::Ident(o) if o == "or" => {
+                            return fail(
+                                sp.clone(),
+                                "`if` joins tests with `and` only; for \"this or that\", write a second `if` (or use `else`)",
+                            )
+                        }
+                        _ => {}
+                    }
+                    // Characters the lexer drops show up between tokens.
+                    let gap_start = toks[k - 1].1.end;
+                    let gap = &input[gap_start..sp.start];
+                    let gap = gap.split("//").next().unwrap_or("").split("/*").next().unwrap_or("");
+                    if let Some(at) = gap.find(['&', '|', '!', '<', '>']) {
+                        let at = gap_start + at;
+                        let message = if gap[at - gap_start..].starts_with('!') {
+                            "`if` has no `!` (not): write `if ai == false`, or put the other case under `else`"
+                        } else {
+                            "`if` takes `==`, `!=` and `and` only (no `&&`, `||`, `!`, `<`, `>`): if m.kind == call and m.from != m.to"
+                        };
+                        return fail(at..at + 1, message);
+                    }
+                }
+                body_next = true;
+                // Go on from the `{`, so it is pushed as an `if` body.
+                i = j;
+                continue;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
+}
+
 /// `contains` and `midpoint` operands name a component's part as one name:
 /// `c.dot` -> `c_dot`. The parser keeps the dots; this joins them everywhere
 /// except inside `each` bodies, which are joined once their loop variables
@@ -536,6 +655,10 @@ pub fn join_constraint_parts(stmts: &mut [Spanned<Statement>]) {
             }
             // Joined after expansion (template/each.rs).
             Statement::Each(_) => {}
+            Statement::If(b) => {
+                join_constraint_parts(&mut b.then_body);
+                join_constraint_parts(&mut b.else_body);
+            }
             _ => {}
         }
     }
@@ -742,6 +865,11 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                     e.body = walk(e.body, counts)?;
                     out.push(Spanned::new(Statement::Each(e), span));
                 }
+                Statement::If(mut b) => {
+                    b.then_body = walk(b.then_body, counts)?;
+                    b.else_body = walk(b.else_body, counts)?;
+                    out.push(Spanned::new(Statement::If(b), span));
+                }
                 Statement::TemplateDecl(mut t) => {
                     if let Some(body) = t.body.take() {
                         t.body = Some(walk(body, counts)?);
@@ -783,6 +911,10 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
                 Statement::Layout(l) => let_items(&mut l.children, lets),
                 Statement::Group(g) => let_items(&mut g.children, lets),
                 Statement::Each(e) => let_items(&mut e.body, lets),
+                Statement::If(b) => {
+                    let_items(&mut b.then_body, lets);
+                    let_items(&mut b.else_body, lets);
+                }
                 Statement::TemplateDecl(t) => {
                     if let Some(body) = &mut t.body {
                         let_items(body, lets);
@@ -2267,6 +2399,56 @@ where
                 Ok(Statement::Each(EachBlock { var, index, key, source, filter: filter.unwrap_or_default(), body }))
             });
 
+        // `if ai { ... } else { ... }`, `if m.kind == call and m.from != m.to
+        // { ... }`: the tests of `where`, plus a bare `if flag`. `else if`
+        // is an `else` whose body is one `if`.
+        let if_test = style_value
+            .clone()
+            .then(
+                choice((just(Token::EqEq).to(CompareOp::Eq), just(Token::NotEq).to(CompareOp::Ne)))
+                    .then(style_value.clone())
+                    .or_not(),
+            )
+            .map(|(left, cmp)| IfTest { left, cmp, filled: [false, false] });
+        let if_body = stmt
+            .clone()
+            .repeated()
+            .collect::<Vec<_>>()
+            .delimited_by(just(Token::BraceOpen), just(Token::BraceClose))
+            .boxed();
+        let if_block = recursive(|if_block| {
+            just(Token::If)
+                .ignore_then(
+                    if_test
+                        .separated_by(select! { Token::Ident(s) if s == "and" => () })
+                        .at_least(1)
+                        .collect::<Vec<_>>(),
+                )
+                .then(if_body.clone())
+                .then(
+                    just(Token::Else)
+                        .ignore_then(choice((
+                            if_body.clone(),
+                            if_block.map(|s: Spanned<Statement>| vec![s]),
+                        )))
+                        .or_not(),
+                )
+                .map_with(|((tests, then_body), else_body), e| {
+                    let text = tests.iter().map(|t: &IfTest| t.show()).collect::<Vec<_>>().join(" and ");
+                    Spanned::new(
+                        Statement::If(IfBlock {
+                            tests,
+                            then_body,
+                            else_body: else_body.unwrap_or_default(),
+                            text,
+                            loop_vars: Vec::new(),
+                        }),
+                        span_range(&e.span()),
+                    )
+                })
+                .boxed()
+        });
+
         // `let tr = [{from: a, to: b}, ...]`: a list with a name.
         let let_decl = just(Token::Let)
             .ignore_then(identifier)
@@ -3169,6 +3351,7 @@ where
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
             each_block,
+            if_block.map(|s| s.node),
             let_decl,
             label_decl,
             connection_decl.clone().map(Statement::Connection),
