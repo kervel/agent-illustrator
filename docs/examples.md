@@ -407,7 +407,7 @@ EXAMPLE 9: Grid as an alignment scaffold (not a heatmap)
 // columns" — a worked sum, a table, a calendar. Cells carry the layout;
 // cell refs position the rule and frame a block. No hand-computed pitch,
 // no per-digit constraints.
-grid digits [cols: 4, rows: 3, gap: 8, cell_width: 38, cell_height: 44,
+grid digits [cols: 4, rows: 3, gap_x: 6, gap_y: 12, cell_width: 38, cell_height: 44,
              col_labels: ["1000", "100", "10", "1"]] {
     text "2" [at: [0, 0], align: center]
     text "4" [at: [0, 1], align: center]
@@ -433,9 +433,10 @@ constrain carry contains digits.cell(0, 3), digits.cell(2, 3) [padding: 2]
 whatever the glyph widths. The highlight is never sized by hand:
 `contains` over two cell refs spans the block between them.
 
-Three details that make this lint clean. The grid has a `gap`, so the
-rule has somewhere to live: with `gap: 0` the cells touch and a rule on a
-row boundary necessarily overlaps a neighbouring row. The rule is
+Three details that make this lint clean. The grid has a gap between rows
+(`gap_y: 12`), so the rule has somewhere to live: with no gap the cells touch
+and a rule on a row boundary necessarily overlaps a neighbouring row. The
+columns stay tight (`gap_x: 6`); `gap` alone would set both. The rule is
 positioned by its edges (`.left` / `.right` / `.top`), not by `contains`,
 which would free its height and turn 3px into a whole cell. And the
 highlight is drawn see-through, so the digits resting on it are not

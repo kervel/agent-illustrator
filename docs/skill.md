@@ -345,7 +345,10 @@ its colour from plain `fill`.
 `grid g [cols: 6, rows: 6, gap: 5, cell_width: 56, cell_height: 56]` lays a
 regular lattice. Place children by coordinate with `[at: [row, col]]` (0-indexed);
 unplaced children fill row-major; empty cells stay empty, so sparse or triangular
-grids are trivial. Children without a size inherit the cell size.
+grids are trivial. Children without a size inherit the cell size. `gap` spaces
+rows and columns alike; `gap_x` (between columns) and `gap_y` (between rows) set
+one axis: `grid g [cols: 4, gap_x: 40, gap_y: 8]` for wide columns of tight rows.
+`at:` works on a template instance too (`card c [at: [1, 2]]`).
 
 Address any cell as `g.cell(row, col)` in `constrain`/connections — that is what
 makes a grid an alignment scaffold rather than just a picture: draw a frame

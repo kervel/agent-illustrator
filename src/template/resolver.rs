@@ -547,6 +547,12 @@ fn resolve_inline_template(
         })
         .cloned()
         .collect();
+    // `card c [at: [1, 2]]` in a grid: where the whole instance goes. It
+    // belongs to the instance (its group, or its one shape), like `overlaps`.
+    let placement: Option<Spanned<StyleModifier>> = instance_modifiers
+        .iter()
+        .find(|m| matches!(&m.node.key.node, StyleKey::Custom(k) if k == "at"))
+        .cloned();
     // The file's lets are lists here too; a parameter of the same name wins.
     let mut lists = registry.lets.clone();
     lists.extend(param_values.iter().map(|(k, v)| (k.clone(), v.clone())));
@@ -637,12 +643,18 @@ fn resolve_inline_template(
                 registry.collapsed_parts.push((part.node.0.clone(), instance_name.to_string()));
             }
             shape.name = Some(Spanned::new(Identifier::new(instance_name), span.clone()));
+            if let Some(at) = &placement {
+                shape.modifiers.retain(|m| !matches!(&m.node.key.node, StyleKey::Custom(k) if k == "at"));
+                shape.modifiers.push(at.clone());
+            }
             let mut out = vec![Spanned::new(Statement::Shape(shape), span.clone())];
             out.extend(states);
             return Ok(out);
         }
     }
     expanded.extend(states);
+    let mut group_modifiers = group_modifiers;
+    group_modifiers.extend(placement);
 
     // Multiple elements or custom anchors: wrap them in a group with the instance name
     // This allows the instance name to be used in connections and constraints

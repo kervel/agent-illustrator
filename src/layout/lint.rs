@@ -4121,6 +4121,8 @@ const KNOWN_CUSTOM_KEYS: &[&str] = &[
     "rows",         // grid
     "col_labels",   // grid
     "row_labels",   // grid
+    "gap_x",        // grid: gap between columns
+    "gap_y",        // grid: gap between rows
     "trim",         // svg templates
     "via",          // connection routing
     "padding",      // contains

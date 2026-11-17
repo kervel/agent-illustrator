@@ -2569,6 +2569,9 @@ fn layout_grid(
     let mods = &layout.modifiers;
     let grid_name = layout.name.as_ref().map(|n| n.node.0.clone());
     let gap = gap_override.unwrap_or(config.element_spacing);
+    // `gap_x` between columns, `gap_y` between rows; `gap` sets both.
+    let gap_x = extract_f64_param(mods, "gap_x").unwrap_or(gap);
+    let gap_y = extract_f64_param(mods, "gap_y").unwrap_or(gap);
     let pad = config.container_padding;
 
     let filtered = grid_filtered_children(layout);
@@ -2621,8 +2624,8 @@ fn layout_grid(
 
     let origin_x = position.x + pad + row_gutter;
     let origin_y = position.y + pad + col_gutter;
-    let cell_x = |c: usize| origin_x + c as f64 * (cell_w + gap);
-    let cell_y = |r: usize| origin_y + r as f64 * (cell_h + gap);
+    let cell_x = |c: usize| origin_x + c as f64 * (cell_w + gap_x);
+    let cell_y = |r: usize| origin_y + r as f64 * (cell_h + gap_y);
 
     let mut out: Vec<ElementLayout> = Vec::new();
 
@@ -2688,8 +2691,8 @@ fn layout_grid(
         }
     }
 
-    let content_w = cols as f64 * cell_w + cols.saturating_sub(1) as f64 * gap;
-    let content_h = rows as f64 * cell_h + rows.saturating_sub(1) as f64 * gap;
+    let content_w = cols as f64 * cell_w + cols.saturating_sub(1) as f64 * gap_x;
+    let content_h = rows as f64 * cell_h + rows.saturating_sub(1) as f64 * gap_y;
     let total_width = row_gutter + content_w + 2.0 * pad;
     let total_height = col_gutter + content_h + 2.0 * pad;
 

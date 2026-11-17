@@ -51,6 +51,7 @@ const TOPICS: &[(&str, &str, &str)] = &[
     ("if", "skill", "Optional parts: `if`"),
     ("sizes", "skill", "Sizes that stretch: ranges"),
     ("swimlanes", "skill", "Cross-functional flowcharts"),
+    ("grid", "skill", "Grid (any row/column alignment"),
 ];
 
 /// Other words for the same topics (what an agent would type).
@@ -167,6 +168,17 @@ const ALIASES: &[(&str, &str)] = &[
     ("resize", "sizes"),
     ("min-width", "sizes"),
     ("max-size", "sizes"),
+    ("gap_x", "grid"),
+    ("gap_y", "grid"),
+    ("row_gap", "grid"),
+    ("col_gap", "grid"),
+    ("column_gap", "grid"),
+    ("row-gap", "grid"),
+    ("column-gap", "grid"),
+    ("lattice", "grid"),
+    ("cell", "grid"),
+    ("cells", "grid"),
+    ("matrix", "grid"),
     ("swimlane", "swimlanes"),
     ("lanes", "swimlanes"),
     ("lane", "swimlanes"),

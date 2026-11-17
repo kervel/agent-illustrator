@@ -42,13 +42,16 @@ grid [name] [mod] { ... }    Regular lattice of cells
 
 Grid modifiers:
     cols: <n>, rows: <n>          Lattice size (rows optional; inferred otherwise)
-    gap: <n>                      Space between cells
+    gap: <n>                      Space between cells (both axes)
+    gap_x: <n>, gap_y: <n>        Space between columns / between rows (each
+                                  overrides `gap` on its axis)
     cell_width: <n>, cell_height: <n>   Cell size (children without an explicit
                                   size inherit it; explicit size centers in cell)
     col_labels: ["a","b",...]     Text labels above each column
     row_labels: ["a","b",...]     Text labels in a left gutter for each row
 Grid children:
-    rect [at: [row, col], ...]    Place a child in a cell (0-indexed). Children
+    rect [at: [row, col], ...]    Place a child (a template instance too: card c
+                                  [at: [1, 2]]) in a cell (0-indexed). Children
                                   without `at:` fill row-major. Unoccupied cells
                                   stay empty (transparent) — sparse/triangular ok.
 Grid cell addressing (in constrain / connections / contains):
