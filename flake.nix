@@ -10,7 +10,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        version = "0.2.53";
+        version = "0.2.54";
 
         # Map Nix system to GitHub release artifact name
         artifactName = {
@@ -20,12 +20,12 @@
           "aarch64-darwin" = "agent-illustrator-macos-aarch64";
         }.${system} or (throw "Unsupported system: ${system}");
 
-        # Hashes for v0.2.53 release binaries
+        # Hashes for v0.2.54 release binaries
         artifactHash = {
-          "x86_64-linux" = "sha256-S3tekMqqWtD/OVDlcvF7I09SZNO8opLq5mwZuM1WBd4=";
-          "aarch64-linux" = "sha256-I7PBKd3vGGE6IK8R+zWZepIZ6rKyCIg8wLwDrsGXN2c=";
-          "x86_64-darwin" = "sha256-KXYSbN/DLRPl6lYmbyj9gX5TaOZxTm1mPy7zAo02hYc=";
-          "aarch64-darwin" = "sha256-rBs/+5bGWlN8YFlhtCoPa8u/ykyQ80/Fbi4nFjHKRgY=";
+          "x86_64-linux" = "sha256-Bjb+b3zoOyj+uTaxLzTPsyVtCZkPlL/AwJwCeLbYGoE=";
+          "aarch64-linux" = "sha256-SggxWmKVPlRjJtarFf4AZEQ+Y98te1sevhH7IlhfNnE=";
+          "x86_64-darwin" = "sha256-2ePt+kFFyo7+udMrX16I4VYsEyMUI3cEcpdm/rOzkbI=";
+          "aarch64-darwin" = "sha256-9LVEwiPqG6Wy5CDTiNQ3WZMDzI4uukhp2DTxsMI5OZQ=";
         }.${system} or (throw "Unsupported system: ${system}");
 
       in
