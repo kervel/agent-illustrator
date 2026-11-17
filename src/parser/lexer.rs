@@ -136,6 +136,9 @@ pub enum Token {
     // Repetition: `each a in items { ... }`
     #[token("each")]
     Each,
+    // Named data: `let tr = [...]` (top level only)
+    #[token("let")]
+    Let,
 
     // Constraint keywords
     #[token("constrain")]
@@ -204,6 +207,11 @@ pub enum Token {
     GreaterOrEqual,
     #[token("<=")]
     LessOrEqual,
+    // `each t in tr where t.from == t.to`
+    #[token("==")]
+    EqEq,
+    #[token("!=")]
+    NotEq,
     #[token("=")]
     Equals,
 

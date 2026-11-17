@@ -13,8 +13,8 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
-    AnchorPosition, AnchorReference, ConstrainDecl, ConstraintExpr, EachBlock, ElementPath, Identifier,
-    PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue,
+    AnchorPosition, AnchorReference, CompareOp, ConstrainDecl, ConstraintExpr, EachBlock, ElementPath, Identifier,
+    PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
 };
 
 use super::names::head_of;
@@ -122,9 +122,9 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
                     .collect();
                 known.sort();
                 let hint = if known.is_empty() {
-                    "there is no list parameter here; declare one on the template (e.g. `attrs: []`) or write the list out: [\"a\", \"b\"]".to_string()
+                    "there is no list by that name here; write the list out ([\"a\", \"b\"]), name one at the top level of the file (`let items = [...]`), or declare a list parameter on the template (`attrs: []`)".to_string()
                 } else {
-                    format!("list parameters here: {}", known.join(", "))
+                    format!("lists here (lets and list parameters): {}", known.join(", "))
                 };
                 return Err(err(format!("each {} in {}: no list called `{}`; {}", var, id.0, id.0, hint)));
             }
@@ -150,6 +150,8 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
     let mut made: HashMap<String, usize> = HashMap::new();
     let mut out = Vec::new();
     let mut problems: Vec<Problem> = Vec::new();
+    // Items that `where` leaves out still count: `i` and the copy names are
+    // positions (or keys) in the whole list.
     for (k, item) in items.iter().enumerate() {
         let value = match &item.node {
             v @ (StyleValue::String(_)
@@ -182,6 +184,9 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
                     header: header.clone(),
                 },
             );
+        }
+        if !e.filter.is_empty() && !matches_filter(&e.filter, &vars, &header, &mut problems) {
+            continue;
         }
         let renames: HashMap<String, String> =
             declared.iter().map(|n| (n.clone(), format!("{}_{}", n, keys[k]))).collect();
@@ -338,9 +343,9 @@ fn report(problems: Vec<Problem>, items: &[Spanned<StyleValue>]) -> String {
             }
         }
     }
-    let records = items.iter().filter(|i| matches!(i.node, StyleValue::Record(_))).count();
     for (header, written, field, its) in missing {
-        if its.len() == records {
+        // With `where`, only some items run the body: ask the list, not the count.
+        if !items.iter().any(|i| field_names(&i.node).contains(&field)) {
             // No item has it: a misspelt field.
             let first = its[0];
             let fields = field_names(&items[first - 1].node);
@@ -375,9 +380,101 @@ fn report(problems: Vec<Problem>, items: &[Spanned<StyleValue>]) -> String {
     lines.join("\n")
 }
 
+// ---- `where`: which items run the body --------------------------------
+
+/// One side of a condition: the value it has for this item, and whether it
+/// came from a loop variable. `None` on a problem (pushed).
+fn operand(v: &Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) -> Option<(StyleValue, bool)> {
+    let StyleValue::Identifier(id) = &v.node else { return Some((v.node.clone(), false)) };
+    if !vars.contains_key(head_of(&id.0).0) {
+        return Some((v.node.clone(), false));
+    }
+    let (value, rest, _, what) = lookup(&id.0, vars, problems)?;
+    if let Some(r) = rest {
+        problems.push(Problem::Msg(format!(
+            "`where {}`: {} is {}, and `where` compares values, not parts (`.{}`); compare the field itself",
+            id.0,
+            what,
+            describe(&value),
+            r
+        )));
+        return None;
+    }
+    Some((value, true))
+}
+
+/// How a single value compares: numbers by value, everything else by the
+/// word or text it shows (`call`, `"call"` and a keyword `open` alike).
+fn comparable(v: &StyleValue) -> Option<String> {
+    match v {
+        StyleValue::Number { value, .. } => Some(format!("{}", value)),
+        StyleValue::List(_) | StyleValue::IdentifierList(_) | StyleValue::Record(_) => None,
+        other => as_text(other),
+    }
+}
+
+fn show_cond(c: &WhereCond) -> String {
+    let side = |v: &StyleValue| match v {
+        StyleValue::Identifier(id) => id.0.clone(),
+        StyleValue::Keyword(k) => k.clone(),
+        StyleValue::String(s) => format!("\"{}\"", s),
+        other => comparable(other).unwrap_or_else(|| describe(other)),
+    };
+    let op = if c.op == CompareOp::Eq { "==" } else { "!=" };
+    format!("{} {} {}", side(&c.left.node), op, side(&c.right.node))
+}
+
+/// Does this item pass every condition? `false` on a problem (pushed), so
+/// the body is skipped and all problems are reported together.
+fn matches_filter(filter: &[WhereCond], vars: &Vars, header: &str, problems: &mut Vec<Problem>) -> bool {
+    let mut all = true;
+    for c in filter {
+        let (Some((l, lb)), Some((r, rb))) = (operand(&c.left, vars, problems), operand(&c.right, vars, problems)) else {
+            all = false;
+            continue;
+        };
+        if !lb && !rb {
+            let mut names: Vec<(&String, &Bound)> = vars.iter().collect();
+            names.sort_by_key(|(n, b)| (b.is_index, n.as_str()));
+            let item = names.first().map(|(n, _)| n.as_str()).unwrap_or("m");
+            let names: Vec<String> = names.iter().map(|(n, _)| format!("`{}`", n)).collect();
+            problems.push(Problem::Msg(format!(
+                "{}: `where {}` does not use the loop variable ({}), so it is the same for every item; compare the item or a field of it: where {}.kind == call",
+                header,
+                show_cond(c),
+                names.join(" or "),
+                item
+            )));
+            all = false;
+            continue;
+        }
+        let (Some(a), Some(b)) = (comparable(&l), comparable(&r)) else {
+            let bad = if comparable(&l).is_none() { &l } else { &r };
+            let what = match bad {
+                StyleValue::List(_) | StyleValue::IdentifierList(_) => "a list",
+                StyleValue::Record(_) => "a record",
+                _ => "a value without text",
+            };
+            problems.push(Problem::Msg(format!(
+                "{}: `where {}`: one side is {}; `where` compares single values (a word, a string or a number)",
+                header,
+                show_cond(c),
+                what
+            )));
+            all = false;
+            continue;
+        };
+        let equal = a == b;
+        if equal != (c.op == CompareOp::Eq) {
+            all = false;
+        }
+    }
+    all
+}
+
 // ---- names declared inside a body ------------------------------------
 
-fn declared_names(stmts: &[Spanned<Statement>]) -> HashSet<String> {
+pub(crate) fn declared_names(stmts: &[Spanned<Statement>]) -> HashSet<String> {
     fn go(stmts: &[Spanned<Statement>], out: &mut HashSet<String>) {
         for st in stmts {
             match &st.node {
@@ -1050,6 +1147,11 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
             inner.remove(&e.var.node.0);
             if let Some(ix) = &e.index {
                 inner.remove(&ix.node.0);
+            }
+            // `where b.x == a.y` may compare with an outer item.
+            for c in &mut e.filter {
+                subst_value(&mut c.left, &inner, problems);
+                subst_value(&mut c.right, &inner, problems);
             }
             e.body = e.body.into_iter().map(|c| subst_stmt(c, &inner, problems)).collect();
             Statement::Each(e)

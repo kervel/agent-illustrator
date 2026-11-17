@@ -343,6 +343,10 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
         return Err(vec![e.locate(input)]);
     }
 
+    if let Some(e) = where_mistakes(input) {
+        return Err(vec![e.locate(input)]);
+    }
+
     // Create a logos lexer and convert to token stream
     let tokens = indexed_names(indexed_parts(crate::parser::lexer::lex(input).collect()), input)
         .map_err(|e| vec![e.locate(input)])?;
@@ -363,6 +367,9 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
                 .collect::<Vec<_>>()
         })
         .and_then(|doc| {
+            check_lets(&doc).map_err(|(span, message)| {
+                vec![crate::ParseError::Syntax { span, message, expected: vec![] }.locate(input)]
+            })?;
             expand_starred(doc).map_err(|(span, message)| {
                 vec![crate::ParseError::Syntax { span, message, expected: vec![] }.locate(input)]
             })
@@ -371,6 +378,121 @@ pub fn parse(input: &str) -> Result<Document, Vec<crate::ParseError>> {
             join_constraint_parts(&mut doc.statements);
             doc
         })
+}
+
+/// `let` names a list for the whole file: only at the top level, once per name.
+fn check_lets(doc: &Document) -> Result<(), (Span, String)> {
+    fn nested(stmts: &[Spanned<Statement>], inside: &str) -> Result<(), (Span, String)> {
+        for st in stmts {
+            match &st.node {
+                Statement::Let(l) => {
+                    return Err((
+                        st.span.clone(),
+                        format!(
+                            "`let {}` is inside {}; a let names a list for the whole file, so it goes at the top level (move it out, above or below, order does not matter)",
+                            l.name.node.0, inside
+                        ),
+                    ))
+                }
+                Statement::Layout(l) => nested(&l.children, "a row/col/grid/stack")?,
+                Statement::Group(g) => nested(&g.children, "a group")?,
+                Statement::Each(e) => nested(&e.body, "an `each`")?,
+                Statement::TemplateDecl(t) => {
+                    if let Some(body) = &t.body {
+                        nested(body, "a template")?
+                    }
+                }
+                Statement::Label(inner) => nested(&[Spanned::new((**inner).clone(), st.span.clone())], "a label")?,
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+    let mut seen: std::collections::HashMap<&str, &Span> = std::collections::HashMap::new();
+    for st in &doc.statements {
+        match &st.node {
+            Statement::Let(l) => {
+                if seen.insert(l.name.node.0.as_str(), &l.name.span).is_some() {
+                    return Err((
+                        l.name.span.clone(),
+                        format!(
+                            "`let {}` is defined twice; a let is defined once (give this list another name, or merge the two)",
+                            l.name.node.0
+                        ),
+                    ));
+                }
+            }
+            Statement::Layout(_) | Statement::Group(_) | Statement::Each(_) | Statement::TemplateDecl(_) | Statement::Label(_) => {
+                nested(std::slice::from_ref(st), "")?;
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+/// Mistakes in a `where` clause that would otherwise parse into something
+/// else or vanish (the lexer drops `&`, `|`, `!`, `<`, `>`): `t.kind = call`,
+/// `or`, `&&`, `<`.
+fn where_mistakes(input: &str) -> Option<crate::ParseError> {
+    let toks: Vec<(Token, std::ops::Range<usize>)> = crate::parser::lexer::lex(input).collect();
+    let fail = |span: std::ops::Range<usize>, message: &str| {
+        Some(crate::ParseError::Syntax { span, message: message.to_string(), expected: vec![] })
+    };
+    let mut i = 0;
+    while i < toks.len() {
+        if toks[i].0 != Token::Each {
+            i += 1;
+            continue;
+        }
+        // The header up to the body's `{` (outside brackets: records are in lists).
+        let mut depth = 0usize;
+        let mut j = i + 1;
+        let mut at_where: Option<usize> = None;
+        while j < toks.len() {
+            match &toks[j].0 {
+                Token::BracketOpen | Token::ParenOpen => depth += 1,
+                Token::BracketClose | Token::ParenClose => depth = depth.saturating_sub(1),
+                Token::BraceOpen if depth == 0 => break,
+                Token::Ident(w) if depth == 0 && w == "where" && at_where.is_none() => at_where = Some(j),
+                _ => {}
+            }
+            j += 1;
+        }
+        if let Some(w) = at_where {
+            for k in w + 1..j {
+                let (tok, span) = &toks[k];
+                match tok {
+                    Token::Equals => {
+                        return fail(span.clone(), "`where` compares with `==` (or `!=`), not `=`: where t.kind == call")
+                    }
+                    Token::GreaterOrEqual | Token::LessOrEqual => {
+                        return fail(span.clone(), "`where` compares with `==` and `!=` only (equal or not), not `<`/`>`")
+                    }
+                    Token::Ident(o) if o == "or" => {
+                        return fail(
+                            span.clone(),
+                            "`where` joins conditions with `and` only; for \"this or that\", write a second `each` with the other condition",
+                        )
+                    }
+                    _ => {}
+                }
+                // Characters the lexer drops show up between tokens.
+                let gap_start = toks[k - 1].1.end;
+                let gap = &input[gap_start..span.start];
+                let gap = gap.split("//").next().unwrap_or("").split("/*").next().unwrap_or("");
+                if let Some(at) = gap.find(['&', '|', '!', '<', '>']) {
+                    let at = gap_start + at;
+                    return fail(
+                        at..at + 1,
+                        "`where` takes `==`, `!=` and `and` only (no `&&`, `||`, `!`, `<`, `>`): where t.from != t.to and t.on == \"x\"",
+                    );
+                }
+            }
+        }
+        i = j.max(i + 1);
+    }
+    None
 }
 
 /// `contains` and `midpoint` operands name a component's part as one name:
@@ -630,6 +752,56 @@ fn expand_starred(mut doc: Document) -> Result<Document, (Span, String)> {
             }
         }
         Ok(out)
+    }
+    /// `k* [items: tr]` with `let tr = [...]`: one instance per item of the
+    /// let, as if the list were written there. Only `items:` takes a let
+    /// here; any other list argument is passed whole to every instance.
+    fn let_items(stmts: &mut [Spanned<Statement>], lets: &std::collections::HashMap<String, StyleValue>) {
+        let fill = |v: &mut Spanned<StyleValue>| {
+            if let StyleValue::Identifier(id) = &v.node {
+                if let Some(list) = lets.get(&id.0) {
+                    v.node = list.clone();
+                }
+            }
+        };
+        for st in stmts {
+            match &mut st.node {
+                Statement::Shape(shape) if shape.name.as_ref().is_some_and(|n| n.node.0.ends_with('*')) => {
+                    for m in &mut shape.modifiers {
+                        if m.node.key.node.source_name() == "items" {
+                            fill(&mut m.node.value);
+                        }
+                    }
+                }
+                Statement::TemplateInstance(inst) if inst.instance_name.node.0.ends_with('*') => {
+                    for (k, v) in &mut inst.arguments {
+                        if k.node.0 == "items" {
+                            fill(v);
+                        }
+                    }
+                }
+                Statement::Layout(l) => let_items(&mut l.children, lets),
+                Statement::Group(g) => let_items(&mut g.children, lets),
+                Statement::Each(e) => let_items(&mut e.body, lets),
+                Statement::TemplateDecl(t) => {
+                    if let Some(body) = &mut t.body {
+                        let_items(body, lets);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    let lets: std::collections::HashMap<String, StyleValue> = doc
+        .statements
+        .iter()
+        .filter_map(|s| match &s.node {
+            Statement::Let(l) => Some((l.name.node.0.clone(), l.value.node.clone())),
+            _ => None,
+        })
+        .collect();
+    if !lets.is_empty() {
+        let_items(&mut doc.statements, &lets);
     }
     let mut counts = std::collections::HashMap::new();
     doc.statements = walk(doc.statements, &mut counts)?;
@@ -2046,12 +2218,31 @@ where
                     .or_not(),
             )
             .then(
+                // `where t.from == t.to and t.on != "tick"`: like `in`, `where`
+                // and `and` are words only here.
+                select! { Token::Ident(s) if s == "where" => () }
+                    .ignore_then(
+                        style_value
+                            .clone()
+                            .then(choice((
+                                just(Token::EqEq).to(CompareOp::Eq),
+                                just(Token::NotEq).to(CompareOp::Ne),
+                            )))
+                            .then(style_value.clone())
+                            .map(|((left, op), right)| WhereCond { left, op, right })
+                            .separated_by(select! { Token::Ident(s) if s == "and" => () })
+                            .at_least(1)
+                            .collect::<Vec<_>>(),
+                    )
+                    .or_not(),
+            )
+            .then(
                 stmt.clone()
                     .repeated()
                     .collect::<Vec<_>>()
                     .delimited_by(just(Token::BraceOpen), just(Token::BraceClose)),
             )
-            .try_map(|((((var, index), key), source), body), span| {
+            .try_map(|(((((var, index), key), source), filter), body), span| {
                 let Some(source) = source else {
                     return Err(Rich::custom(
                         span,
@@ -2073,7 +2264,32 @@ where
                         ));
                     }
                 }
-                Ok(Statement::Each(EachBlock { var, index, key, source, body }))
+                Ok(Statement::Each(EachBlock { var, index, key, source, filter: filter.unwrap_or_default(), body }))
+            });
+
+        // `let tr = [{from: a, to: b}, ...]`: a list with a name.
+        let let_decl = just(Token::Let)
+            .ignore_then(identifier)
+            .then_ignore(just(Token::Equals).labelled("`=` (let NAME = [...])"))
+            .then(style_value.clone())
+            .try_map(|(name, value), _span| match &value.node {
+                StyleValue::List(_) => Ok(Statement::Let(LetDecl { name, value })),
+                other => {
+                    let given = match other {
+                        StyleValue::String(s) => format!("the string \"{}\"", s),
+                        StyleValue::Number { value, .. } => format!("the number {}", value),
+                        StyleValue::Record(_) => "a record".to_string(),
+                        StyleValue::Identifier(id) => format!("`{}`", id.0),
+                        _ => "a value that is not a list".to_string(),
+                    };
+                    Err(Rich::custom(
+                        value.span.clone().into(),
+                        format!(
+                            "`let {}` holds a list, but was given {}; write a list: let {} = [\"a\", \"b\"] or [{{from: a, to: b}}, ...]",
+                            name.node.0, given, name.node.0
+                        ),
+                    ))
+                }
             });
 
         // Label declaration: `label { ... }` or `label: <element>`
@@ -2953,6 +3169,7 @@ where
             layout_decl.map(Statement::Layout),
             group_decl.map(Statement::Group),
             each_block,
+            let_decl,
             label_decl,
             connection_decl.clone().map(Statement::Connection),
             // path_decl before shape_decl since 'path' is a keyword (Feature 007)

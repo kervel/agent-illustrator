@@ -785,3 +785,254 @@ fn two_items_making_one_indexed_name_is_an_error() {
     let e = render_err("col c {\n each l in [a, a] {\n rect r[l]\n }\n}\n");
     assert!(e.contains("items 1 and 2 both make an element called `r_a`"), "{e}");
 }
+
+// ---- S4: `let NAME = [...]`, a list with a name ----------------------
+
+fn labels(svg: &str) -> Vec<String> {
+    svg.split('>')
+        .filter_map(|s| s.split('<').next())
+        .filter(|t| !t.trim().is_empty())
+        .map(str::to_string)
+        .collect()
+}
+
+#[test]
+fn a_let_is_an_each_source_for_several_blocks() {
+    let out = svg(r#"
+let tr = [{from: a, to: b, on: "go"}, {from: b, to: a, on: "back"}]
+row r [gap: 80] { rect a  rect b }
+each t in tr { t.from -> t.to [label: t.on] }
+col legend { each t, i in tr { text "{i+1}. {t.on}" ev } }
+"#);
+    assert_eq!(connections(&out), 2);
+    assert!(has_id(&out, "ev_1") && has_id(&out, "ev_2"), "{:?}", ids(&out));
+    for t in ["go", "back", "1. go", "2. back"] {
+        assert!(labels(&out).iter().any(|l| l == t), "missing {t}");
+    }
+}
+
+#[test]
+fn order_does_not_matter() {
+    let out = svg(r#"
+each n in names { rect box [label: n] }
+let names = ["x", "y"]
+"#);
+    assert!(has_id(&out, "box_1") && has_id(&out, "box_2"), "{:?}", ids(&out));
+}
+
+#[test]
+fn a_let_is_a_template_argument_a_default_and_reaches_nested_instances() {
+    let out = svg(r#"
+let msgs = [{id: login, label: "login"}, {id: ok, label: "ok"}]
+template "life" (ticks: msgs) {
+    col c [gap: 4] { each t by id in ticks { rect p [label: t.label, width: 60, height: 20] } }
+}
+template "pair" (rows: []) { row r { life x [ticks: rows] } }
+row actors [gap: 40] {
+    life cl [ticks: msgs]
+    life api
+}
+pair pp [rows: msgs]
+cl.p[login] -> api.p[ok]
+"#);
+    for id in ["cl_p_login", "cl_p_ok", "api_p_login", "api_p_ok", "pp_x_p_login", "pp_x_p_ok"] {
+        assert!(has_id(&out, id), "missing {id}: {:?}", ids(&out));
+    }
+    assert_eq!(connections(&out), 1);
+}
+
+#[test]
+fn a_template_body_sees_the_lets_and_a_parameter_of_the_same_name_wins() {
+    let out = svg(r#"
+let xs = ["file"]
+template "t" (ys: []) { col c { each a in xs { rect f [label: a] } each b in ys { rect g [label: b] } } }
+template "u" (xs: ["param"]) { col c { each a in xs { rect f [label: a] } } }
+t one [ys: xs]
+u two
+"#);
+    assert!(has_id(&out, "one_f_1") && has_id(&out, "one_g_1"), "{:?}", ids(&out));
+    assert!(labels(&out).iter().any(|l| l == "param"), "parameter should shadow the let");
+    assert_eq!(labels(&out).iter().filter(|l| *l == "file").count(), 2);
+}
+
+#[test]
+fn a_let_gives_star_instances_their_items() {
+    let out = svg(r#"
+let chips = [{name: "A"}, {name: "B"}, {name: "C"}]
+template "chip" (name: "x") { rect c [label: name, width: 40, height: 20] }
+row { chip k* [items: chips] }
+"#);
+    for id in ["k0", "k1", "k2"] {
+        assert!(has_id(&out, id), "missing {id}: {:?}", ids(&out));
+    }
+}
+
+#[test]
+fn a_let_is_defined_once() {
+    let e = render_err("let tr = [a]\nlet tr = [b]\n");
+    assert!(e.contains("`let tr` is defined twice"), "{e}");
+}
+
+#[test]
+fn a_let_goes_at_the_top_level() {
+    let e = render_err("row r {\n let xs = [a]\n rect b\n}\n");
+    assert!(e.contains("top level") && e.contains("row"), "{e}");
+    let e = render_err("template \"t\" {\n let xs = [a]\n rect b\n}\n");
+    assert!(e.contains("top level") && e.contains("template"), "{e}");
+    let e = render_err("each n in [a] {\n let xs = [a]\n}\n");
+    assert!(e.contains("top level"), "{e}");
+}
+
+#[test]
+fn a_let_holds_a_list() {
+    let e = render_err("let n = 5\n");
+    assert!(e.contains("holds a list") && e.contains("the number 5"), "{e}");
+    let e = render_err("let r = {a: 1}\n");
+    assert!(e.contains("holds a list") || e.contains("Unexpected"), "{e}");
+}
+
+#[test]
+fn a_let_where_one_value_goes_is_an_error() {
+    let e = render_err("let tr = [{a: 1}, {a: 2}]\nrect x [fill: tr]\n");
+    assert!(e.contains("`fill: tr`") && e.contains("is data") && e.contains("2 records") && e.contains("each"), "{e}");
+    let e = render_err("let tr = [a]\nrect x\ntr -> x\n");
+    assert!(e.contains("`tr -> x`") && e.contains("is data"), "{e}");
+    let e = render_err("let tr = [a]\neach n in [a] { rect r [label: tr] }\n");
+    assert!(e.contains("`label: tr`"), "{e}");
+}
+
+#[test]
+fn a_let_and_an_element_may_not_share_a_name() {
+    let e = render_err("let tr = [a]\nrect tr\n");
+    assert!(e.contains("`let tr`") && e.contains("element called `tr`"), "{e}");
+}
+
+#[test]
+fn let_is_reserved() {
+    let e = render_err("rect let\n");
+    assert!(e.contains("reserved"), "{e}");
+}
+
+#[test]
+fn an_unknown_list_lists_the_lets() {
+    let e = render_err("let tr = [a]\neach t in rt { rect r }\n");
+    assert!(e.contains("no list called `rt`") && e.contains("tr"), "{e}");
+    let e = render_err("each t in rt { rect r }\n");
+    assert!(e.contains("let"), "{e}");
+}
+
+// ---- S6: `where`, only some items -----------------------------------
+
+const TR: &str = r#"
+let tr = [
+    {from: a, to: b, on: "go"},
+    {from: b, to: b, on: "stay"},
+    {from: b, to: a, on: "back"},
+]
+row r [gap: 80] { rect a  rect b }
+"#;
+
+#[test]
+fn where_splits_one_list_and_keeps_source_positions() {
+    let out = svg(&format!(r#"{TR}
+each t, i in tr where t.from != t.to {{ t.from -> t.to [label: "{{i+1}} {{t.on}}"] }}
+each t, i in tr where t.from == t.to {{ text "{{i+1}} {{t.on}}" self }}
+"#));
+    assert_eq!(connections(&out), 2);
+    let l = labels(&out);
+    for t in ["1 go", "3 back", "2 stay"] {
+        assert!(l.iter().any(|x| x == t), "missing {t}: {l:?}");
+    }
+    // The copy is named by its place in the whole list: self_2, not self_1.
+    assert!(has_id(&out, "self_2") && !has_id(&out, "self_1"), "{:?}", ids(&out));
+}
+
+#[test]
+fn where_joins_conditions_with_and_and_compares_words_strings_and_numbers() {
+    let out = svg(r#"
+col c {
+    each m in [{k: call, n: 1, s: "x"}, {k: reply, n: 2, s: "y"}, {k: call, n: 3, s: "y"}]
+        where m.k == call and m.s == "y" { rect hit [label: "{m.n}"] }
+    each m in [{k: call, n: 1}, {k: reply, n: 2}] where m.k == "call" { rect q }
+    each m in [{k: call, n: 1}, {k: reply, n: 2}] where m.n != 1 { rect num }
+    each n, i in [a, b, c] where i != 0 { rect skip_first }
+}
+"#);
+    assert!(has_id(&out, "hit_3") && !has_id(&out, "hit_1") && !has_id(&out, "hit_2"), "{:?}", ids(&out));
+    // a quoted string and a bare word with the same text are equal
+    assert!(has_id(&out, "q_1") && !has_id(&out, "q_2"), "{:?}", ids(&out));
+    assert!(has_id(&out, "num_2") && !has_id(&out, "num_1"), "{:?}", ids(&out));
+    assert!(has_id(&out, "skip_first_2") && has_id(&out, "skip_first_3") && !has_id(&out, "skip_first_1"));
+}
+
+#[test]
+fn where_with_by_keeps_the_keys() {
+    let out = svg(r#"
+col c {
+    each m by id in [{id: login, self: no}, {id: check, self: yes}, {id: done, self: no}] where m.self == no {
+        rect p
+    }
+}
+"#);
+    assert!(has_id(&out, "p_login") && has_id(&out, "p_done") && !has_id(&out, "p_check"), "{:?}", ids(&out));
+}
+
+#[test]
+fn where_may_compare_with_an_outer_item() {
+    let out = svg(r#"
+col c { each a in [x, y] { each b in [{k: x}, {k: y}, {k: x}] where b.k == a { rect r } } }
+"#);
+    assert!(has_id(&out, "r_1_1") && has_id(&out, "r_1_3") && has_id(&out, "r_2_2"), "{:?}", ids(&out));
+    assert!(!has_id(&out, "r_1_2") && !has_id(&out, "r_2_1"));
+}
+
+#[test]
+fn a_field_only_the_matching_items_use_need_only_be_there() {
+    let out = svg(r#"
+col c {
+    each m in [{k: a}, {k: b, extra: "only me"}] where m.k == b { rect r [label: m.extra] }
+}
+"#);
+    assert!(out.contains(">only me<"));
+}
+
+#[test]
+fn an_unknown_field_in_where_suggests_one() {
+    let e = render_err(&format!("{TR}\neach t in tr where t.form != t.to {{ t.from -> t.to }}\n"));
+    assert!(e.contains("no item has a field `form`") && e.contains("did you mean `from`"), "{e}");
+}
+
+#[test]
+fn a_field_missing_from_some_items_in_where_names_them() {
+    let e = render_err("col c {\n each m in [{k: a}, {k: b, z: 1}, {k: c}] where m.z == 1 { rect r }\n}\n");
+    assert!(e.contains("items 1 and 3 have no field `z`"), "{e}");
+}
+
+#[test]
+fn a_misspelt_body_field_under_where_says_no_item_has_it() {
+    let e = render_err(&format!("{TR}\neach t in tr where t.from == t.to {{ text t.no }}\n"));
+    assert!(e.contains("no item has a field `no`"), "{e}");
+}
+
+#[test]
+fn where_mistakes_say_what_to_write() {
+    let e = render_err(&format!("{TR}\neach t in tr where t.from = t.to {{ rect r }}\n"));
+    assert!(e.contains("`==`"), "{e}");
+    let e = render_err(&format!("{TR}\neach t in tr where t.from == a or t.to == a {{ rect r }}\n"));
+    assert!(e.contains("`and` only"), "{e}");
+    let e = render_err(&format!("{TR}\neach t in tr where t.from == a && t.to == a {{ rect r }}\n"));
+    assert!(e.contains("&&"), "{e}");
+    let e = render_err(&format!("{TR}\neach t in tr where kind == a {{ rect r }}\n"));
+    assert!(e.contains("does not use the loop variable") && e.contains("t.kind"), "{e}");
+}
+
+#[test]
+fn where_compares_single_values() {
+    let e = render_err("col c {\n each m in [{k: a}] where m.k == [a, b] { rect r }\n}\n");
+    assert!(e.contains("compares single values") && e.contains("a list"), "{e}");
+}
+
+#[test]
+fn where_and_and_stay_ordinary_words_elsewhere() {
+    assert!(render("rect where\nrect and\nwhere -> and").is_ok());
+}

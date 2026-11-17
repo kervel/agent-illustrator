@@ -1,6 +1,8 @@
 # Design: connections (and other statements) from data
 
-Status: approved. **S1 (P1) released in v0.2.49; S2 (P2), S3 (P3) and S5 (P5) implemented**; S4 and S6 not started.
+Status: approved. **S1 (P1) released in v0.2.49; S2 (P2), S3 (P3), S4 (P4), S5 (P5) and S6 (P6)
+implemented**. What remains is the sequence-example rewrite of §4 (see "Before the sequence
+rewrite" below).
 Maintainer decisions: keywords may name fields (open question 1: yes); a missing field is an
 error, there are no defaults (open question 4). Motivating example: `examples/sequence-diagram.ail`.
 
@@ -78,6 +80,57 @@ S5 as built (differences from §2 P5 noted):
   undefined-name message lists the similar names.
 - Example: `examples/cross-functional.ail` (lanes `lanes_cust`, `lanes_am`, reached as `lanes[am]`).
   Docs: skill.md (`each`), grammar.md, examples.md, `--doc keyed`.
+
+S4 as built (differences from §2 P4 noted):
+- `let` is a lexer keyword (`Token::Let`, in `error::RESERVED` and `--doc reserved`).
+  `Statement::Let(LetDecl)` is taken out in `resolve_templates`; the lists live in
+  `TemplateRegistry::lets`.
+- Checked at parse time, with a caret: the value must be a list (open question 7: no records or
+  scalars), a let only at the top level (not in a template, row, group or `each`), defined once.
+- Where it works: an `each` source at the top level and in inline template bodies (a parameter
+  of the same name wins), a template argument and a parameter default (`resolve_instance`
+  replaces an `Identifier` naming a let, after parameter substitution, so it covers top level,
+  rows/groups and nested instances), and `items:` of `k* [...]` (filled in by the parser's star
+  expansion; other list arguments of a starred instance are passed whole, not zipped).
+- Errors at resolve time: a let used where one value or element goes (any modifier value, an
+  instance argument that is not a parameter, a connection end): "`fill: tr`: `tr` is data (a
+  let: a list of 7 records); use it in `each t in tr { ... }` or as a template argument". Also
+  new: a let that has the name of an element (checked after `each` expansion, so `as tr` →
+  `tr_1` does not clash) is an error, because `[x: tr]` could mean either.
+- A `let` in a template *file* (`template "x" from "x.ail"`) is an error; pass the list in as an
+  argument. The main file's lets are not visible inside template files.
+- The unknown-list error lists lets and list parameters together.
+- Example: `examples/state-machine.ail` (`let tr = [...]` read by two transition blocks and the
+  legend). Docs: skill.md (`each` + two Reach For rows), grammar.md, examples.md, `--doc let`.
+
+S6 as built (differences from §2 P6 noted):
+- Lexer: `==` and `!=` tokens (before, `!` was silently dropped, so `!=` read as `=`). `where`
+  and `and` stay plain words, recognised only in an `each` header.
+- A side of a condition is the item, a field, `i`, or a plain value (word, string, number); so
+  `where i != 0` and `where n == a` over plain items work too. A condition that uses no loop
+  variable (`where kind == call`) is an error that suggests `m.kind`.
+- Values compare by what they say: numbers by value, everything else by its text, so `kind ==
+  call` matches `kind: "call"` and a keyword or a hyphenated word works. A list or record on
+  either side is an error.
+- A parse pre-pass (`where_mistakes`) gives carets for `=` ("use `==`"), `or` ("`and` only;
+  write a second `each`"), `>=`/`<=`, and characters the lexer drops (`&&`, `||`, `!`, `<`, `>`).
+- `i` and copy names keep source positions or `by` keys; `by` keys are computed and checked over
+  the whole list. Fields in `where` are needed on every item (missing ones reported per item, as
+  in P2); a field used only by the body is needed only on the matching items. The "no item has
+  a field" message now asks the list, not a count, so it stays right under `where`.
+- In a nested `each`, `where` may compare with an outer item (`where b.k == a`).
+- Example: `examples/state-machine.ail` (self-transition `seek` drawn by `where t.from ==
+  t.to` as a curved loop through two points; a `seek` keyframe rides it as `arc_7`). Docs:
+  skill.md, grammar.md, examples.md, `--doc where`.
+
+Before the sequence rewrite (§4), still open:
+- Named modifier sets (a) have not landed, so `[style: m.kind]` does not exist; per-kind looks
+  need either separate `where m.kind == reply` blocks or per-field modifiers (`to_end: m.end`).
+- Keyed copies are explicit (S5): the `life` template must say `each t by id in ticks`, and then
+  it rejects plain numeric `ticks` (no `id` field).
+- auth's short lifeline still needs slices (open question 5).
+- Self-loops: `a.top -> a.top [via: [p, q], routing: curved]` draws a loop; without
+  `routing: curved` (or `direct`) the via points of a same-element connection are ignored.
 
 ## 1. The problem, measured against today's code
 
@@ -471,9 +524,9 @@ example under `examples/`. Run `bash examples/render-all.sh`, and check that all
 | **S1** P1: names in every position, `contains`/`midpoint` keep dots until after each, shadowing error, item-span on undefined names | fan-out, any `each` that wires things | `each n in [a,b] { n -> hub }` makes 2 connections; `constrain n.width`; `contains n`; `via: [n]`; dotted value `c: board.led` → `board.led.top`; inside a template (prefixing still right); shadowing error text; typo'd item caret on the list item | `examples/fan-out.ail` (the CLAUDE.md success prompt) |
 | **S2** P2: records, `m.f` in values/names/strings, keyword field names | transition tables, class attrs in order (with (a)) | field in label/string/endpoint/constraint; unknown field lists fields + did-you-mean; missing-in-some-items lists item numbers; whole record misuse; `{i+1}: {m.f}` | `examples/state-machine.ail` from a transition list; once (a) lands, the class template moves to one `attrs` record list |
 | **S3** P3: `x.p[k]` generalised in `indexed_parts`, `{...}` in identifiers, unbound-index error, `p_0` hint | data-driven messages with numeric rows | `api.p[6]` == `api.p_6` in endpoint, constraint, contains, via list; `p[i+1]` in each; `p[i]` gives the `p_0` hint; `p[i+1]` outside each is an error; `rect a [x]`/`a -> b [auto]` unaffected (adjacency) | a pipeline whose boxes come from one `each` and whose arrows `box[i+1].right -> box[i+2].left` come from another. Optionally the sequence messages via an explicit `row:` field (`p[m.row]`), which still carries hand-written row numbers because the self-message (2 rows) stays outside the list |
-| **S4** P4: `let` | shared lists across instances and blocks | let as each source, as instance arg, as nested default; redefinition error; used as style value error; `let` in `--doc reserved` | state machine: `let tr = [...]` shared by the transitions `each` and a legend |
+| **S4** P4: `let` (done) | shared lists across instances and blocks | let as each source, as instance arg, as nested default; redefinition error; used as style value error; `let` in `--doc reserved` | state machine: `let tr = [...]` shared by the transitions `each` and a legend |
 | **S5** P5: keyed copies | insertion-stable references | keyed names `p_login`; `p[login]`; duplicate/mixed/non-word id errors; numeric index on keyed family hint; `i` still positional | class rows by id (`entry.r_a[billed_at]`) |
-| **S6** P6: `where` | per-kind bodies | `==`/`!=`/field-vs-field/`and`; `i` and names keep source positions; unknown field in `where` | state-machine self-transitions; the sequence example rewritten as in §4 (it needs S3–S6 together) |
+| **S6** P6: `where` (done; sequence rewrite pending) | per-kind bodies | `==`/`!=`/field-vs-field/`and`; `i` and names keep source positions; unknown field in `where` | state-machine self-transitions; the sequence example rewritten as in §4 (it needs S3–S6 together) |
 
 S1 alone already fixes a real gap that affects every diagram type. S2 opens up tables of
 records. The sequence example can only be fully data-driven once S3–S6 are all in: one list,

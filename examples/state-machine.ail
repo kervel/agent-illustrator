@@ -1,16 +1,22 @@
 /* A state machine drawn from its transition table, and one instance of it running.
 
-   The states are plain boxes; the transitions are one list of records, and one `each`
-   draws an arrow per record: `t.from -> t.to`, labelled with `t.on`. A record's field names
-   are free (`from`, `label`, `text` work too); every record needs every field the body uses.
-   A dotted value names a side or a part: `failed.left`.
-   To add a transition, add a record: no line of drawing code changes.
+   The transitions are one named list, `let tr = [...]`, and several blocks read it:
+   - `each t in tr where t.from != t.to` draws an arrow per transition between two states:
+     `t.from -> t.to`, labelled with `t.on`;
+   - `each t in tr where t.from == t.to` draws the self-transitions (seek keeps Playing) as a
+     curved loop over the state, through two points above it;
+   - `each t in tr` writes the legend of events.
+   A record's field names are free (`from`, `label`, `text` work too); every record needs every
+   field the body uses. A dotted value names a side or a part: `failed.left`.
+   To add a transition, add a record: no line of drawing code changes. `where` keeps positions:
+   the arrows are arc_1 .. arc_7 in list order, whichever block drew them.
 
    STORYBOARD (one click per event; the CSS version loops by itself)
      start    a token appears on the start dot and rides into Idle
      play     the token rides the "play" arrow; Playing lights up
      pause    on to Paused, where the token waits (it breathes)
      resume   back to Playing
+     seek     round the loop over Playing and back into it (a self-transition)
      error    down to Failed: it shakes and turns red
      reset    back to Idle; the next instance starts from the dot
    The heading names the event being handled (each keyframe's title);
@@ -32,18 +38,41 @@ constrain failed.top = states.bottom + 90
 
 start -> idle as enter
 
-// Inside `each`, `as tr` names the arrows by their row: tr_1 = play, tr_2 = pause,
-// tr_3 = resume, tr_4 = stop, tr_5 = error, tr_6 = reset.
-each t in [
+// The transition table. The arrows are named by their row: arc_1 = play, arc_2 = pause,
+// arc_3 = resume, arc_4 = stop, arc_5 = error, arc_6 = reset, arc_7 = seek.
+let tr = [
     {from: idle,    to: playing, on: "play"},
     {from: playing, to: paused,  on: "pause"},
     {from: paused,  to: playing, on: "resume"},
     {from: playing, to: idle,    on: "stop"},
     {from: playing, to: failed,  on: "error"},
     {from: failed.left, to: idle.bottom, on: "reset"},   // a field may name a side
-] {
-    t.from -> t.to as tr [label: t.on]
+    {from: playing, to: playing, on: "seek"},            // a self-transition
+]
+
+// Between two states: one arrow.
+each t in tr where t.from != t.to {
+    t.from -> t.to as arc [label: t.on]
 }
+
+// To the same state: a curved loop over its top, through two points above it.
+each t in tr where t.from == t.to {
+    point up_l
+    point up_r
+    constrain up_l.center_x = t.from.center_x - 22
+    constrain up_r.center_x = t.from.center_x + 22
+    constrain up_l.center_y = t.from.top - 34
+    constrain up_r.center_y = up_l.center_y
+    t.from.top -> t.to.top as arc [via: [up_l, up_r], routing: curved, label: t.on]
+}
+
+// The legend reads the same list: one row per event.
+col legend [gap: 4, align: start] {
+    text "Events" legend_title [font_size: 14, font_weight: 700, align: start]
+    each t, i in tr { text "{i+1}. {t.on}" ev [font_size: 13, align: start] }
+}
+constrain legend.left = paused.left
+constrain legend.top = states.bottom + 60
 
 text "state: Idle" status [font_size: 18, align: start]
 constrain heading.left = start.left
@@ -72,7 +101,7 @@ keyframe "start" [title: "on start: Idle"] {
 }
 
 keyframe "play" [title: "on play: Idle → Playing"] {
-    take(tr_1)
+    take(arc_1)
     when token arrives {
         unmark idle
         mark playing [tone: ok]
@@ -82,7 +111,7 @@ keyframe "play" [title: "on play: Idle → Playing"] {
 }
 
 keyframe "pause" [title: "on pause: Playing → Paused"] {
-    take(tr_2)
+    take(arc_2)
     when token arrives {
         unmark playing
         mark paused
@@ -92,7 +121,7 @@ keyframe "pause" [title: "on pause: Playing → Paused"] {
 }
 
 keyframe "resume" [title: "on resume: Paused → Playing"] {
-    take(tr_3)
+    take(arc_3)
     when token arrives {
         unmark paused
         mark playing [tone: ok]
@@ -101,8 +130,13 @@ keyframe "resume" [title: "on resume: Paused → Playing"] {
     }
 }
 
+keyframe "seek" [title: "on seek: Playing → Playing"] {
+    take(arc_7)
+    when token arrives { pulse playing }
+}
+
 keyframe "error" [title: "on error: Playing → Failed"] {
-    take(tr_5)
+    take(arc_5)
     when token arrives {
         unmark playing
         shake failed
@@ -113,7 +147,7 @@ keyframe "error" [title: "on error: Playing → Failed"] {
 }
 
 keyframe "reset" [title: "on reset: Failed → Idle"] {
-    take(tr_6)
+    take(arc_6)
     when token arrives {
         unmark failed
         mark idle

@@ -258,6 +258,7 @@ pub const RESERVED: &[&str] = &[
     "disable",
     "enable",
     "each",
+    "let",
     "constrain",
     "midpoint",
     "contains",
@@ -322,6 +323,7 @@ pub fn keyword_spelling(tok: &crate::parser::lexer::Token) -> Option<&'static st
         Token::Disable => "disable",
         Token::Enable => "enable",
         Token::Each => "each",
+        Token::Let => "let",
         Token::Constrain => "constrain",
         Token::Midpoint => "midpoint",
         Token::Contains => "contains",
@@ -375,6 +377,8 @@ fn format_token(tok: &crate::parser::lexer::Token) -> String {
         Token::ParenOpen => "'('".to_string(),
         Token::ParenClose => "')'".to_string(),
         Token::Equals => "'='".to_string(),
+        Token::EqEq => "'=='".to_string(),
+        Token::NotEq => "'!='".to_string(),
         Token::Plus => "'+'".to_string(),
         // Other
         other => match keyword_spelling(other) {

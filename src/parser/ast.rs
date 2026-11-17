@@ -178,6 +178,34 @@ pub enum Statement {
     /// `each a, i in items { ... }`: the body once per list item. Expanded
     /// when templates are resolved; never reaches layout.
     Each(EachBlock),
+    /// `let tr = [...]`: a list with a name, for `each t in tr` and template
+    /// arguments (`[ticks: tr]`). Top level only; taken out when templates
+    /// are resolved, never reaches layout.
+    Let(LetDecl),
+}
+
+/// `let NAME = [...]`
+#[derive(Debug, Clone, PartialEq)]
+pub struct LetDecl {
+    pub name: Spanned<Identifier>,
+    /// Always a `StyleValue::List` (the parser rejects anything else).
+    pub value: Spanned<StyleValue>,
+}
+
+/// `==` or `!=` in a `where` condition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CompareOp {
+    Eq,
+    Ne,
+}
+
+/// One condition of `each t in tr where t.from == t.to and ...`. Each side is
+/// a loop variable (`t`, `t.from`, `i`) or a plain value (`call`, `"x"`, `3`).
+#[derive(Debug, Clone, PartialEq)]
+pub struct WhereCond {
+    pub left: Spanned<StyleValue>,
+    pub op: CompareOp,
+    pub right: Spanned<StyleValue>,
 }
 
 /// `each NAME[, INDEX] in LIST { body }`
@@ -190,6 +218,10 @@ pub struct EachBlock {
     pub key: Option<Spanned<Identifier>>,
     /// A literal `StyleValue::List`, or an `Identifier` naming a list parameter.
     pub source: Spanned<StyleValue>,
+    /// `where t.from == t.to and ...`: the body runs only for the items that
+    /// match every condition (empty: all items). Positions and names stay
+    /// those of the whole list.
+    pub filter: Vec<WhereCond>,
     pub body: Vec<Spanned<Statement>>,
 }
 

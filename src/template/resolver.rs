@@ -104,8 +104,36 @@ pub fn resolve_templates(
     // First pass: collect template declarations
     registry.collect_from_statements(&doc.statements)?;
 
-    // `each` at the top level repeats over literal lists
-    let doc_statements = super::each::expand_each(doc.statements, &HashMap::new())?;
+    // `let tr = [...]`: the file's named lists. They leave the document here.
+    let mut statements = Vec::with_capacity(doc.statements.len());
+    for st in doc.statements {
+        match st.node {
+            Statement::Let(l) => {
+                registry.lets.insert(l.name.node.0, l.value.node);
+            }
+            other => statements.push(Spanned::new(other, st.span)),
+        }
+    }
+    if !registry.lets.is_empty() {
+        misused_lets(&statements, &registry.lets, registry, &HashSet::new())?;
+    }
+
+    // `each` at the top level repeats over literal lists and lets
+    let doc_statements = super::each::expand_each(statements, &registry.lets)?;
+    if !registry.lets.is_empty() {
+        // A let and an element of the same name: `[a: tr]` could mean either.
+        let declared = super::each::declared_names(&doc_statements);
+        let mut clash: Vec<&String> = registry.lets.keys().filter(|n| declared.contains(*n)).collect();
+        clash.sort();
+        if let Some(n) = clash.first() {
+            return Err(TemplateError::Each {
+                message: format!(
+                    "`let {}`: there is also an element called `{}`; a template argument `[x: {}]` could mean either, so give the list another name (e.g. `{}_list`)",
+                    n, n, n, n
+                ),
+            });
+        }
+    }
 
     // Second pass: resolve template instances
     let mut resolved_statements = Vec::new();
@@ -174,16 +202,25 @@ fn resolve_instance(
     // Build parameter values from arguments and defaults
     let mut param_values: HashMap<String, StyleValue> = HashMap::new();
 
+    // `[ticks: tr]` or a default `(ticks: tr)` with `let tr = [...]`: the list.
+    let lets = &registry.lets;
+    let with_lets = |v: &StyleValue| -> StyleValue {
+        match v {
+            StyleValue::Identifier(id) => lets.get(&id.0).cloned().unwrap_or_else(|| v.clone()),
+            _ => v.clone(),
+        }
+    };
+
     // Start with defaults
     for param in &def.parameters {
-        param_values.insert(param.name.node.0.clone(), param.default_value.node.clone());
+        param_values.insert(param.name.node.0.clone(), with_lets(&param.default_value.node));
     }
 
     // Override with provided arguments
     for (name, value) in &inst.arguments {
         let param_name = name.node.0.clone();
         if def.has_parameter(&param_name) {
-            param_values.insert(param_name, value.node.clone());
+            param_values.insert(param_name, with_lets(&value.node));
         }
         // Note: Extra arguments are silently ignored (could warn in future)
     }
@@ -409,6 +446,16 @@ fn resolve_ail_template(
             message: format!("Parse errors: {:?}", errors),
         })?;
 
+    if parsed_doc.statements.iter().any(|s| matches!(s.node, Statement::Let(_))) {
+        return Err(TemplateError::Each {
+            message: format!(
+                "{}: `let` works in the file being drawn, not in a template file; pass the list in as a template argument instead (template \"{}\" (items: []) ... [items: tr])",
+                full_path.display(),
+                def.name
+            ),
+        });
+    }
+
     // Collect any nested template declarations from the AIL file
     registry.collect_from_statements(&parsed_doc.statements)?;
 
@@ -480,8 +527,11 @@ fn resolve_inline_template(
         })
         .cloned()
         .collect();
+    // The file's lets are lists here too; a parameter of the same name wins.
+    let mut lists = registry.lets.clone();
+    lists.extend(param_values.iter().map(|(k, v)| (k.clone(), v.clone())));
     let mut body = match &def.body {
-        Some(b) => super::each::expand_each(b.clone(), param_values)?,
+        Some(b) => super::each::expand_each(b.clone(), &lists)?,
         None => return Ok(vec![]),
     };
     // `machine anna [hist.appears: later]`: a modifier for one part of this
@@ -581,6 +631,118 @@ fn resolve_inline_template(
         is_template_instance: true,
     };
     Ok(vec![Spanned::new(Statement::Group(group), span.clone())])
+}
+
+/// `fill: tr`, `label: tr`, `tr -> x`, `[note: tr]` (not a parameter) with
+/// `let tr = [...]`: a list where one value or one element goes. `shadow`
+/// are names that mean something else here (a template's parameters, loop
+/// variables).
+fn misused_lets(
+    stmts: &[Spanned<Statement>],
+    lets: &HashMap<String, StyleValue>,
+    registry: &TemplateRegistry,
+    shadow: &HashSet<String>,
+) -> Result<(), TemplateError> {
+    let is_let = |name: &str| -> Option<String> {
+        let head = name.split('.').next().unwrap_or(name);
+        (!shadow.contains(head) && lets.contains_key(head)).then(|| head.to_string())
+    };
+    let fail = |written: String, name: &str| -> TemplateError {
+        let what = match lets.get(name) {
+            Some(StyleValue::List(items)) => {
+                let records = items.iter().filter(|i| matches!(i.node, StyleValue::Record(_))).count();
+                if records == items.len() && records > 0 {
+                    format!("a list of {} record{}", records, if records == 1 { "" } else { "s" })
+                } else {
+                    format!("a list of {} item{}", items.len(), if items.len() == 1 { "" } else { "s" })
+                }
+            }
+            _ => "a list".to_string(),
+        };
+        let var = name.chars().next().unwrap_or('x');
+        TemplateError::Each {
+            message: format!(
+                "`{}`: `{}` is data (a let: {}); use it in `each {} in {} {{ ... }}` or as a template argument (`[items: {}]`)",
+                written, name, what, var, name, name
+            ),
+        }
+    };
+    let check_value = |key: &str, v: &StyleValue| -> Result<(), TemplateError> {
+        let one = |n: &str| match is_let(n) {
+            Some(l) => Err(fail(format!("{}: {}", key, n), &l)),
+            None => Ok(()),
+        };
+        match v {
+            StyleValue::Identifier(id) => one(&id.0),
+            StyleValue::IdentifierList(ids) => ids.iter().try_for_each(|i| one(&i.0)),
+            StyleValue::List(items) => items.iter().try_for_each(|i| match &i.node {
+                StyleValue::Identifier(id) => one(&id.0),
+                _ => Ok(()),
+            }),
+            _ => Ok(()),
+        }
+    };
+    let check_mods = |mods: &[Spanned<StyleModifier>]| -> Result<(), TemplateError> {
+        mods.iter().try_for_each(|m| check_value(&m.node.key.node.source_name(), &m.node.value.node))
+    };
+    for st in stmts {
+        match &st.node {
+            Statement::Shape(sh) => {
+                check_mods(&sh.modifiers)?;
+                if let ShapeType::Path(p) = &sh.shape_type.node {
+                    check_mods(&p.modifiers)?;
+                }
+            }
+            Statement::Layout(l) => {
+                check_mods(&l.modifiers)?;
+                misused_lets(&l.children, lets, registry, shadow)?;
+            }
+            Statement::Group(g) => {
+                check_mods(&g.modifiers)?;
+                misused_lets(&g.children, lets, registry, shadow)?;
+            }
+            Statement::Connection(cs) => {
+                for c in cs {
+                    for end in [&c.from, &c.to] {
+                        if let Some(l) = is_let(&end.element.node.0) {
+                            return Err(fail(format!("{} -> {}", c.from.element.node.0, c.to.element.node.0), &l));
+                        }
+                    }
+                    check_mods(&c.modifiers)?;
+                }
+            }
+            Statement::TemplateInstance(inst) => {
+                let def = registry.get(inst.template_name.node.as_str());
+                for (k, v) in &inst.arguments {
+                    let is_param = def.is_some_and(|d| d.has_parameter(&k.node.0));
+                    // `k* [items: tr]` was filled in by the parser.
+                    if !is_param && k.node.0 != "items" {
+                        check_value(&k.node.0, &v.node)?;
+                    }
+                }
+            }
+            Statement::Each(e) => {
+                let mut inner = shadow.clone();
+                inner.insert(e.var.node.0.clone());
+                if let Some(ix) = &e.index {
+                    inner.insert(ix.node.0.clone());
+                }
+                misused_lets(&e.body, lets, registry, &inner)?;
+            }
+            Statement::TemplateDecl(t) => {
+                if let Some(body) = &t.body {
+                    let mut inner = shadow.clone();
+                    inner.extend(t.parameters.iter().map(|p| p.name.node.0.clone()));
+                    misused_lets(body, lets, registry, &inner)?;
+                }
+            }
+            Statement::Label(inner) => {
+                misused_lets(&[Spanned::new((**inner).clone(), st.span.clone())], lets, registry, shadow)?;
+            }
+            _ => {}
+        }
+    }
+    Ok(())
 }
 
 /// Pull every `anchor` declaration out of a template body (top level and

@@ -944,20 +944,40 @@ srv.right -> c2.left [routing: direct, label: "no reply", stroke: role-error, st
 ```
 
 Items may be records: `t.from`, `t.on` are fields, usable as names, values and in strings.
-A state machine from its transition table, with one running instance animated (`examples/state-machine.ail`):
+`let` names a list for the whole file, so several blocks read one table; `where` picks the
+items a block is for. A state machine from its transition table, with one running instance
+animated (`examples/state-machine.ail`):
 
 ```
-each t in [
+let tr = [
     {from: idle,    to: playing, on: "play"},
     {from: playing, to: paused,  on: "pause"},
     {from: paused,  to: playing, on: "resume"},
     {from: playing, to: idle,    on: "stop"},
     {from: playing, to: failed,  on: "error"},
     {from: failed.left, to: idle.bottom, on: "reset"},   // a field may name a side
-] {
-    t.from -> t.to as tr [label: t.on]       // `as tr` names the arrows tr_1, tr_2, ... for motion
+    {from: playing, to: playing, on: "seek"},            // a self-transition
+]
+each t in tr where t.from != t.to {          // between two states: one arrow
+    t.from -> t.to as arc [label: t.on]       // `as arc` names them arc_1, arc_2, ... for motion
+}
+each t in tr where t.from == t.to {          // to the same state: a loop over its top
+    point up_l
+    point up_r
+    constrain up_l.center_x = t.from.center_x - 22
+    constrain up_r.center_x = t.from.center_x + 22
+    constrain up_l.center_y = t.from.top - 34
+    constrain up_r.center_y = up_l.center_y
+    t.from.top -> t.to.top as arc [via: [up_l, up_r], routing: curved, label: t.on]   // arc_7
+}
+col legend [gap: 4, align: start] {          // the same list again: one row per event
+    text "Events" legend_title [font_size: 14, font_weight: 700, align: start]
+    each t, i in tr { text "{i+1}. {t.on}" ev [font_size: 13, align: start] }
 }
 ```
+
+`where` keeps positions: the self-loop is `arc_7` because it is item 7 of `tr`, so names
+and `{i+1}` agree across every block over the same list.
 
 `stage[k]` names copy k of what an `each` made (`stage[2]` is `stage_2`); inside an `each`
 the index may be computed (`stage[k+1]`, `p[i+1]`, `p[m.row]`). A pipeline whose boxes come

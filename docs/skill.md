@@ -36,6 +36,8 @@ Check here before writing coordinates or a run of `constrain` lines.
 | One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
 | The same connection or constraint for several elements (a server to each client) | `each c in [c1, c2, c3] { srv -> c }` (`--doc each`) | one hand-copied line per element |
 | Connections from a table (transitions, dependencies, associations) | `each t in [{from: a, to: b, on: "go"}, ...] { t.from -> t.to [label: t.on] }` (`--doc each`) | parallel lists, or one hand-written line per row |
+| One list read by several blocks or instances (arrows and their legend; lifelines that share rows) | `let tr = [{from: a, to: b, on: "go"}, ...]` at the top level, then `each t in tr { ... }` and `life cl [ticks: tr]` (`--doc each`) | copying the list, or wrapping the whole diagram in a template to share it |
+| Different statements for some items of a list (self-transitions, milestones among tasks) | `each t in tr where t.from == t.to { ... }` beside `each t in tr where t.from != t.to { ... }` (`--doc each`) | splitting the list in two, which breaks numbering and order |
 | Copies named by meaning, not number (lanes, rows you refer to later) | `by` a record field: `each r by id in [{id: am, ...}] { lane lanes }` makes `lanes_am`, reached as `lanes[am]` (`--doc each`) | counting which copy is which |
 | A template part that stretches to something outside it (a lane body to the last column, a bar to a date) | `rect body [width: 200..]` in the template, then `constrain body.right = across.right` (`--doc sizes`) | a `width:` parameter computed by hand |
 | A box that may grow or shrink, within limits | `width: 120..400` (`200..` at least, `..300` at most); the label wraps at the upper bound (`--doc sizes`) | a fixed width that is too wide for one label and too narrow for the next |
@@ -526,8 +528,8 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   each c in [c1, c2, c3] { srv.right -> c.left [label: "data"] }
   each c in [c1, c3] { constrain c.width = 120 }
   ```
-  Different looks for some items: loop over those items only and write the
-  others out. Inside a template, the names are the
+  Different looks or statements for some items: `where` (below), or loop
+  over those items only. Inside a template, the names are the
   instance's parts. A quoted item (`["c1"]`) or the index where a name goes is
   an error that says what to write; a misspelt name is reported at the item in
   the list. A loop variable may not have the name of an element that the body
@@ -575,13 +577,53 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   (`api.p has copies 1 to 10`). `line[4]`, `row[2]` and `cell[r][c]` keep
   their own meaning (`line4`, `row2`). `examples/pipeline.ail` wires a
   pipeline this way.
+- **Shared lists: `let`.** `let NAME = [...]` at the top level of the file
+  names a list. Several blocks and instances read the same one, so one list
+  stays one order:
+  ```
+  let tr = [{from: idle, to: run, on: "start"}, {from: run, to: idle, on: "stop"}]
+  each t in tr { t.from -> t.to [label: t.on] }                 // the arrows
+  col legend { each t, i in tr { text "{i+1}. {t.on}" ev } }    // and their legend
+  life cl [ticks: tr]                                           // a template argument
+  ```
+  A let is a list (strings, numbers, names or records). It works as an `each`
+  source anywhere in the file (a template body too, unless a parameter has the
+  same name), as a template argument, as a parameter default
+  (`template "life" (ticks: tr)`) and as `items:` of `k* [...]`. Order does
+  not matter. It is an error to define one twice, inside a template, row or
+  `each` (top level only), in a template *file*, to give it a name an element
+  has, or to use it where one value or one element goes (`fill: tr`,
+  `tr -> x`: "`tr` is data"). `let` is a reserved word.
+- **Only some items: `where`.** `each t in tr where t.from == t.to { ... }`
+  runs the body for the items that match. A condition compares the item, a
+  field of it, or `i` with a value or another field: `==`, `!=`, joined with
+  `and` (no `or`: write a second block). Words, quoted strings and numbers
+  compare by what they say (`kind == call` matches `kind: "call"`).
+  ```
+  each t in tr where t.from != t.to { t.from -> t.to as arc [label: t.on] }
+  each t in tr where t.from == t.to {          // a self-transition: a loop over the top
+      point up_l
+      point up_r
+      constrain up_l.center_x = t.from.center_x - 22
+      constrain up_r.center_x = t.from.center_x + 22
+      constrain up_l.center_y = t.from.top - 34
+      constrain up_r.center_y = up_l.center_y
+      t.from.top -> t.to.top as arc [via: [up_l, up_r], routing: curved, label: t.on]
+  }
+  ```
+  Items that do not match still count: `i` and the copy names keep the
+  item's place in the whole list (`arc_1`, `arc_3` from one block, `arc_2`
+  from the other), and `by id` keys are checked over the whole list. A field
+  in `where` must be on every item; a field only the body uses need only be
+  on the items that match. `where` and `and` are words only there.
 - **Nesting.** An `each` may contain `each` (a grid of rows of cells).
 - **Lists as arguments.** A template argument may be a list (`attrs: ["a",
   "b"]`) and then reaches the body; passing a list straight to `label:` is an
   error, `each` is the way.
 - **Errors say what is wrong**: an unknown list name (and which list parameters
   exist), a non-list after `in`, a missing `in`.
-- `each` is a reserved word (`--doc reserved`); `in` is a word only right after `each NAME`.
+- `each` and `let` are reserved words (`--doc reserved`); `in`, `by`, `where`
+  and `and` are words only in an `each` header.
 - Same idea at parse time, for ready-made arguments: `k* [items: [...]]`.
 
 ### Sizes that stretch: ranges
@@ -825,7 +867,7 @@ A shape's `label:` takes `<br>`, `<b>`, `<i>`, `<small>` and `<span fill=…>`.
 These are keywords: they cannot name an element, a part, a connection or a
 parameter. Pick a more specific name (`app_icon`, `log_row`, `wire`).
 
-`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `each`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
+`rect`, `circle`, `ellipse`, `polygon`, `line`, `icon`, `text`, `callout`, `path`, `vertex`, `line_to`, `arc_to`, `curve_to`, `close`, `clockwise`, `cw`, `counterclockwise`, `ccw`, `row`, `col`, `grid`, `stack`, `group`, `label`, `template`, `from`, `export`, `anchor`, `direction`, `position`, `up`, `down`, `place`, `right-of`, `left-of`, `above`, `below`, `inside`, `left`, `right`, `top`, `bottom`, `horizontal_center`, `vertical_center`, `role`, `as`, `keyframe`, `show`, `hide`, `transform`, `disable`, `enable`, `each`, `let`, `constrain`, `midpoint`, `contains`, `center_x`, `center_y`, `center`.
 
 ---
 

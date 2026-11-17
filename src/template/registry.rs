@@ -160,6 +160,9 @@ pub struct TemplateRegistry {
     /// The dotted path still names them, so they take part in the
     /// name-uniqueness check.
     pub collapsed_parts: Vec<(String, String)>,
+    /// The file's `let` lists by name: `each` sources and template
+    /// arguments (`[ticks: tr]`) everywhere in the file.
+    pub lets: HashMap<String, StyleValue>,
 }
 
 impl TemplateRegistry {
@@ -175,6 +178,7 @@ impl TemplateRegistry {
             base_path: Some(base_path),
             image_href_mode: ImageHrefMode::default(),
             collapsed_parts: Vec::new(),
+            lets: HashMap::new(),
         }
     }
 
