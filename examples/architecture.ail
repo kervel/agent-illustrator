@@ -22,7 +22,7 @@ template "ext" (name: "External") {
     rect body [width: 140, height: 44, fill: foreground-3, stroke: foreground-1, stroke_width: 1, label: name]
 }
 template "zone" (name: "", tint: accent-light, edge: accent-dark) {
-    rect body [fill: tint, stroke: edge, stroke_width: 1, opacity: 0.15,
+    rect body [fill: tint, stroke: edge, stroke_width: 1, fill_opacity: 0.15, stroke_opacity: 0.15,
                label: name, label_position: above, align: start, label_fill: edge, font_size: 12]
 }
 

@@ -41,11 +41,11 @@ template "life" (ttl: "", ticks: [], until: rows, step: 48, w: 110) {
   }
   hd.bottom -- until.bottom as lifeline [routing: direct, stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
 }
-// A square frame around the rows from `first` to `last` (loop, alt), and a line that splits a
-// frame below the row `after` (the `else` of an alt).
-template "frame" (first: "", last: "", ttl: "") {
+// A square frame around the rows from `first` to `last` (loop, alt), reaching `pad` past them
+// on each side, and a line that splits a frame below the row `after` (the `else` of an alt).
+template "frame" (first: "", last: "", ttl: "", pad: 110) {
   rect box [corner_radius: 0, fill: none, stroke: role-muted, overlaps: all]
-  constrain box contains first, last [padding_x: 110, padding_y: 0]
+  constrain box contains first, last [padding_x: pad, padding_y: 0]
   text ttl title [font_size: 11, fill: role-muted, overlaps: all]
   constrain title.left = box.left + 6
   constrain title.top = box.top + 4

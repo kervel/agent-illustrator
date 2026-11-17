@@ -1189,6 +1189,35 @@ pub struct ConstrainDecl {
     pub expr: ConstraintExpr,
     /// Optional name (`constrain <expr> as <name>`) — handle for keyframe disable/enable.
     pub name: Option<Spanned<Identifier>>,
+    /// Numbers written as names (`+ gap`, `[padding_x: pad]`, `= m.w`), still
+    /// to be filled in from a template parameter or an `each` item. Empty
+    /// once templates are resolved (a name left over is an error).
+    pub numbers: Vec<NumberName>,
+}
+
+/// A number in a `constrain` written as a name: `b.right + gap`,
+/// `>= min_w`, `[padding_x: pad]`, `= m.w`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct NumberName {
+    pub slot: NumberSlot,
+    /// The name as written (`gap`, `m.w`).
+    pub name: Spanned<String>,
+    /// Written after a minus (`- gap`).
+    pub negate: bool,
+}
+
+/// Which number of a constraint a `NumberName` adds to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NumberSlot {
+    /// The offset of `a.x = b.y + N` or of a midpoint.
+    Offset,
+    /// The value of `a.x = N`, `>= N`, `<= N`. In `a.x = NAME`, a name that
+    /// stands for a side (`box.top`) turns it into `a.x = box.top`.
+    Value,
+    /// `contains ... [padding: N]` / `padding_x:` / `padding_y:`
+    Padding,
+    PaddingX,
+    PaddingY,
 }
 
 /// Build a copy of a property reference with a different property.
@@ -1358,7 +1387,7 @@ fn expand_point_constraints_in(
                 let exprs = expand_point_expr(&decl.expr, callouts);
                 for expr in exprs {
                     out.push(Spanned::new(
-                        Statement::Constrain(ConstrainDecl { expr, name: decl.name.clone() }),
+                        Statement::Constrain(ConstrainDecl { expr, name: decl.name.clone(), numbers: decl.numbers.clone() }),
                         span.clone(),
                     ));
                 }

@@ -33,7 +33,23 @@ const GATED: &[&str] = &[
 /// An entry here is a claim that the example is right and the rule is being
 /// asked a question it cannot answer. Adding one is a deliberate act — which
 /// is the point, because a bare count would let the corpus rot quietly.
-const REVIEWED: &[(&str, &str, &str)] = &[];
+const REVIEWED: &[(&str, &str, &str)] = &[
+    (
+        "architecture.ail",
+        "label on \"app_bg\" overlaps connection nginx→angular",
+        "a zone is a faint background (fill_opacity 0.15); its title sits in the zone and a connection that crosses the zone passes behind the text on purpose",
+    ),
+    (
+        "railway-topology.ail",
+        "label on \"op1\" overlaps connection mjA1→mjB1",
+        "the station ellipse is a faint background (fill_opacity 0.3); the track runs through it, its label stays readable",
+    ),
+    (
+        "railway-topology.ail",
+        "label on \"op2\" overlaps connection mjB2→mjA2",
+        "same as op1: a faint station background with the track passing through it",
+    ),
+];
 
 /// Run `--lint` the way an agent does.
 ///

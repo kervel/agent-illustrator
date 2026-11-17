@@ -160,6 +160,11 @@ pub fn resolve_templates(
         }
     }
 
+    // `constrain a.left = b.right + gap` where nothing gave `gap` a value.
+    if let Some(message) = super::numbers::first_unfilled(&resolved_statements) {
+        return Err(TemplateError::Each { message });
+    }
+
     let mut aliases = doc.aliases;
     aliases.extend(registry.collapsed_parts.iter().cloned());
     Ok(Document {
@@ -467,6 +472,7 @@ fn resolve_ail_template(
     let mut nested_ctx = ctx.nested(instance_name, param_values.clone());
 
     let mut expanded = Vec::new();
+    let mut problems: Vec<String> = Vec::new();
 
     let mut dropped = Vec::new();
     let statements = super::each::expand_each(parsed_doc.statements, param_values, &mut dropped)?;
@@ -485,7 +491,7 @@ fn resolve_ail_template(
                 // A component inside a component: its name is scoped by the
                 // outer instance (`hub_hist`, addressed as `hub.hist`), and its
                 // arguments may use the outer template's parameters.
-                let scoped = substitute_parameters(stmt.clone(), param_values, instance_name);
+                let scoped = substitute_parameters(stmt.clone(), param_values, instance_name, &mut problems);
                 let Statement::TemplateInstance(nested_inst) = &scoped.node else { unreachable!() };
                 let nested_expanded =
                     resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
@@ -493,11 +499,15 @@ fn resolve_ail_template(
             }
             _ => {
                 // Substitute parameters and prefix identifiers
-                let resolved = substitute_parameters(stmt.clone(), param_values, instance_name);
+                let resolved = substitute_parameters(stmt.clone(), param_values, instance_name, &mut problems);
                 let resolved = resolve_statement(resolved, registry, &mut nested_ctx)?;
                 expanded.push(resolved);
             }
         }
+    }
+
+    if !problems.is_empty() {
+        return Err(template_problems(instance_name, problems));
     }
 
     // If there's only one shape, rename it to the instance name
@@ -512,6 +522,14 @@ fn resolve_ail_template(
     }
 
     Ok(expanded)
+}
+
+/// What went wrong filling in one instance's parameters, as one error.
+fn template_problems(instance_name: &str, mut problems: Vec<String>) -> TemplateError {
+    problems.dedup();
+    TemplateError::Each {
+        message: problems.iter().map(|p| format!("{}: {}", instance_name, p)).collect::<Vec<_>>().join("\n"),
+    }
 }
 
 /// Names an `if` left out of a template body are the instance's parts
@@ -547,6 +565,12 @@ fn resolve_inline_template(
         })
         .cloned()
         .collect();
+    // `card c [at: [1, 2]]` in a grid: where the whole instance goes. It
+    // belongs to the instance (its group, or its one shape), like `overlaps`.
+    let placement: Option<Spanned<StyleModifier>> = instance_modifiers
+        .iter()
+        .find(|m| matches!(&m.node.key.node, StyleKey::Custom(k) if k == "at"))
+        .cloned();
     // The file's lets are lists here too; a parameter of the same name wins.
     let mut lists = registry.lets.clone();
     lists.extend(param_values.iter().map(|(k, v)| (k.clone(), v.clone())));
@@ -582,6 +606,7 @@ fn resolve_inline_template(
     let mut nested_ctx = ctx.nested(instance_name, param_values.clone());
 
     let mut expanded = Vec::new();
+    let mut problems: Vec<String> = Vec::new();
     let mut states = Vec::new();
 
     for stmt in body {
@@ -607,7 +632,7 @@ fn resolve_inline_template(
                 // A component inside a component: its name is scoped by the
                 // outer instance (`hub_hist`, addressed as `hub.hist`), and its
                 // arguments may use the outer template's parameters.
-                let scoped = substitute_parameters(stmt.clone(), param_values, instance_name);
+                let scoped = substitute_parameters(stmt.clone(), param_values, instance_name, &mut problems);
                 let Statement::TemplateInstance(nested_inst) = &scoped.node else { unreachable!() };
                 let nested_expanded =
                     resolve_instance(nested_inst, &stmt.span, registry, &mut nested_ctx)?;
@@ -615,11 +640,15 @@ fn resolve_inline_template(
             }
             _ => {
                 // Substitute parameters and prefix identifiers
-                let resolved = substitute_parameters(stmt.clone(), param_values, instance_name);
+                let resolved = substitute_parameters(stmt.clone(), param_values, instance_name, &mut problems);
                 let resolved = resolve_statement(resolved, registry, &mut nested_ctx)?;
                 expanded.push(resolved);
             }
         }
+    }
+
+    if !problems.is_empty() {
+        return Err(template_problems(instance_name, problems));
     }
 
     // Prefix anchor declarations with instance name (Feature 009)
@@ -637,12 +666,18 @@ fn resolve_inline_template(
                 registry.collapsed_parts.push((part.node.0.clone(), instance_name.to_string()));
             }
             shape.name = Some(Spanned::new(Identifier::new(instance_name), span.clone()));
+            if let Some(at) = &placement {
+                shape.modifiers.retain(|m| !matches!(&m.node.key.node, StyleKey::Custom(k) if k == "at"));
+                shape.modifiers.push(at.clone());
+            }
             let mut out = vec![Spanned::new(Statement::Shape(shape), span.clone())];
             out.extend(states);
             return Ok(out);
         }
     }
     expanded.extend(states);
+    let mut group_modifiers = group_modifiers;
+    group_modifiers.extend(placement);
 
     // Multiple elements or custom anchors: wrap them in a group with the instance name
     // This allows the instance name to be used in connections and constraints
@@ -946,10 +981,13 @@ fn substitute_motion_params(nodes: &[Spanned<MotionNode>], params: &HashMap<Stri
         .collect()
 }
 
+/// `problems` collects what cannot be filled in (a side where an element
+/// goes, ...), reported once the body is done.
 fn substitute_parameters(
     stmt: Spanned<Statement>,
     params: &HashMap<String, StyleValue>,
     prefix: &str,
+    problems: &mut Vec<String>,
 ) -> Spanned<Statement> {
     match stmt.node {
         Statement::Shape(mut shape) => {
@@ -1056,7 +1094,7 @@ fn substitute_parameters(
             layout.children = layout
                 .children
                 .into_iter()
-                .map(|c| substitute_parameters(c, params, prefix))
+                .map(|c| substitute_parameters(c, params, prefix, problems))
                 .collect();
             layout.modifiers = substitute_modifiers(&layout.modifiers, params);
             Spanned::new(Statement::Layout(layout), stmt.span)
@@ -1070,7 +1108,7 @@ fn substitute_parameters(
             group.children = group
                 .children
                 .into_iter()
-                .map(|c| substitute_parameters(c, params, prefix))
+                .map(|c| substitute_parameters(c, params, prefix, problems))
                 .collect();
             group.modifiers = substitute_modifiers(&group.modifiers, params);
             Spanned::new(Statement::Group(group), stmt.span)
@@ -1080,8 +1118,8 @@ fn substitute_parameters(
             // Feature 009: AnchorReference.element contains the identifier
             for conn in &mut conns {
                 let refs = element_refs(params);
-                conn.from.element = prefix_identifier(&conn.from.element, prefix, &refs);
-                conn.to.element = prefix_identifier(&conn.to.element, prefix, &refs);
+                prefix_endpoint(&mut conn.from, prefix, &refs);
+                prefix_endpoint(&mut conn.to, prefix, &refs);
                 // `a.right -> b.left as w` names a part of this instance
                 // (`acme.w`), like any other part.
                 if let Some(n) = &mut conn.name {
@@ -1092,12 +1130,19 @@ fn substitute_parameters(
             Spanned::new(Statement::Connection(conns), stmt.span)
         }
         Statement::Constrain(decl) => {
+            let written = decl.clone();
             // Prefix all element references in the constraint expression
-            let new_expr = prefix_constraint_expr(&decl.expr, prefix, &element_refs(params));
-            Spanned::new(
-                Statement::Constrain(ConstrainDecl { expr: new_expr, name: decl.name.clone() }),
-                stmt.span,
-            )
+            let new_expr = prefix_constraint_expr(&decl.expr, prefix, &element_refs(params), problems);
+            let mut decl = ConstrainDecl { expr: new_expr, name: decl.name.clone(), numbers: decl.numbers };
+            // `+ gap`, `[padding_x: pad]`: the template's number parameters.
+            super::numbers::fill(&mut decl, &mut |n| params.get(n).cloned(), problems);
+            if let Some(n) = decl.numbers.first() {
+                let mut known: Vec<String> = params.keys().cloned().collect();
+                known.sort();
+                // Shown as written in the template (`b.left`, not `x_b.left`).
+                problems.push(super::numbers::unfilled(&written, n, &known));
+            }
+            Spanned::new(Statement::Constrain(decl), stmt.span)
         }
         Statement::TemplateInstance(mut inst) => {
             inst.instance_name.node = Identifier::new(format!("{}_{}", prefix, inst.instance_name.node.0));
@@ -1203,31 +1248,31 @@ fn element_refs(params: &HashMap<String, StyleValue>) -> Refs {
 }
 
 /// Prefix all element references in a constraint expression
-fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str, refs: &Refs) -> ConstraintExpr {
+fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str, refs: &Refs, problems: &mut Vec<String>) -> ConstraintExpr {
     match expr {
         ConstraintExpr::Equal { left, right } => ConstraintExpr::Equal {
-            left: prefix_property_ref(left, prefix, refs),
-            right: prefix_property_ref(right, prefix, refs),
+            left: prefix_property_ref(left, prefix, refs, problems),
+            right: prefix_property_ref(right, prefix, refs, problems),
         },
         ConstraintExpr::EqualWithOffset {
             left,
             right,
             offset,
         } => ConstraintExpr::EqualWithOffset {
-            left: prefix_property_ref(left, prefix, refs),
-            right: prefix_property_ref(right, prefix, refs),
+            left: prefix_property_ref(left, prefix, refs, problems),
+            right: prefix_property_ref(right, prefix, refs, problems),
             offset: *offset,
         },
         ConstraintExpr::Constant { left, value } => ConstraintExpr::Constant {
-            left: prefix_property_ref(left, prefix, refs),
+            left: prefix_property_ref(left, prefix, refs, problems),
             value: *value,
         },
         ConstraintExpr::GreaterOrEqual { left, value } => ConstraintExpr::GreaterOrEqual {
-            left: prefix_property_ref(left, prefix, refs),
+            left: prefix_property_ref(left, prefix, refs, problems),
             value: *value,
         },
         ConstraintExpr::LessOrEqual { left, value } => ConstraintExpr::LessOrEqual {
-            left: prefix_property_ref(left, prefix, refs),
+            left: prefix_property_ref(left, prefix, refs, problems),
             value: *value,
         },
         ConstraintExpr::Midpoint {
@@ -1237,14 +1282,12 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str, refs: &Refs) -> C
             offset,
             a_edge,
             b_edge,
-        } => ConstraintExpr::Midpoint {
-            target: prefix_property_ref(target, prefix, refs),
-            a: prefix_identifier(a, prefix, refs),
-            b: prefix_identifier(b, prefix, refs),
-            offset: *offset,
-            a_edge: a_edge.clone(),
-            b_edge: b_edge.clone(),
-        },
+        } => {
+            // `midpoint(from, to)` with `from: a.right`: the side is the edge.
+            let (a, a_edge) = prefix_operand_edge(a, a_edge, prefix, refs);
+            let (b, b_edge) = prefix_operand_edge(b, b_edge, prefix, refs);
+            ConstraintExpr::Midpoint { target: prefix_property_ref(target, prefix, refs, problems), a, b, offset: *offset, a_edge, b_edge }
+        }
         ConstraintExpr::Contains {
             container,
             elements,
@@ -1255,7 +1298,10 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str, refs: &Refs) -> C
             container: prefix_identifier(container, prefix, refs),
             elements: elements
                 .iter()
-                .map(|e| prefix_identifier(e, prefix, refs))
+                .map(|e| {
+                    side_in_contains(e, refs, problems);
+                    prefix_identifier(e, prefix, refs)
+                })
                 .collect(),
             padding: *padding,
             padding_x: *padding_x,
@@ -1265,10 +1311,71 @@ fn prefix_constraint_expr(expr: &ConstraintExpr, prefix: &str, refs: &Refs) -> C
 }
 
 /// Prefix a property reference
-fn prefix_property_ref(prop_ref: &PropertyRef, prefix: &str, refs: &Refs) -> PropertyRef {
-    PropertyRef {
-        element: prefix_element_path(&prop_ref.element, prefix, refs),
-        property: prop_ref.property.clone(),
+fn prefix_property_ref(prop_ref: &PropertyRef, prefix: &str, refs: &Refs, problems: &mut Vec<String>) -> PropertyRef {
+    let mut element = prefix_element_path(&prop_ref.element, prefix, refs);
+    let mut property = prop_ref.property.clone();
+    // `src.center_x` with `src: box.top`: the x of box's top.
+    if let Err(why) = super::names::fold_side(&mut element.node, &mut property) {
+        problems.push(why);
+    }
+    PropertyRef { element, property }
+}
+
+/// A connection end: a parameter that names an element, a part or a side
+/// (`src: box.right`) puts all of it there, split as the parser splits
+/// `box.right` (the element, then the rest as its anchor); any other name
+/// is the instance's own part.
+fn prefix_endpoint(r: &mut crate::parser::ast::AnchorReference, prefix: &str, refs: &Refs) {
+    let Some(target) = refs.get(&r.element.node.0) else {
+        r.element = prefix_identifier(&r.element, prefix, refs);
+        return;
+    };
+    let full = match &r.anchor {
+        Some(a) => format!("{}.{}", target, a.node),
+        None => target.clone(),
+    };
+    let (head, rest) = super::names::head_of(&full);
+    let span = r.element.span.clone();
+    r.anchor = rest.map(|rest| Spanned::new(rest.to_string(), r.anchor.as_ref().map(|a| a.span.clone()).unwrap_or_else(|| span.clone())));
+    r.element = Spanned::new(Identifier::new(head), span);
+}
+
+/// A `midpoint` operand that a parameter fills with a side (`a.right`):
+/// the element, with the side as the operand's edge.
+fn prefix_operand_edge(
+    id: &Spanned<Identifier>,
+    edge: &Option<crate::parser::ast::ConstraintProperty>,
+    prefix: &str,
+    refs: &Refs,
+) -> (Spanned<Identifier>, Option<crate::parser::ast::ConstraintProperty>) {
+    if edge.is_none() && !id.node.0.contains('.') {
+        if let Some(target) = refs.get(&id.node.0) {
+            if let Some((element, side)) = target.rsplit_once('.') {
+                if super::names::SIDES.contains(&side) {
+                    // A name from outside: not this instance's part.
+                    let el = Spanned::new(Identifier::new(element.replace('.', "_")), id.span.clone());
+                    return (el, crate::parser::ast::ConstraintProperty::from_str(side));
+                }
+            }
+        }
+    }
+    (prefix_identifier(id, prefix, refs), edge.clone())
+}
+
+/// `contains first` with `first: x.top`: a side has no box to contain.
+fn side_in_contains(id: &Spanned<Identifier>, refs: &Refs, problems: &mut Vec<String>) {
+    if let Some(target) = refs.get(&id.node.0) {
+        if let Some((_, side)) = target.rsplit_once('.') {
+            if super::names::SIDES.contains(&side) {
+                problems.push(format!(
+                    "`contains {}`: `{}` is `{}`, one side of an element, which has no box to contain; pass the element (`{}`)",
+                    id.node.0,
+                    id.node.0,
+                    target,
+                    target.rsplit_once('.').map(|(e, _)| e).unwrap_or(target)
+                ));
+            }
+        }
     }
 }
 
@@ -1414,11 +1521,11 @@ fn arguments_to_modifiers(
 fn prefix_anchor_decl(anchor: &AnchorDecl, prefix: &str) -> AnchorDecl {
     let prefixed_position = match &anchor.position {
         AnchorPosition::PropertyRef(prop_ref) => {
-            AnchorPosition::PropertyRef(prefix_property_ref(prop_ref, prefix, &Refs::new()))
+            AnchorPosition::PropertyRef(prefix_property_ref(prop_ref, prefix, &Refs::new(), &mut Vec::new()))
         }
         AnchorPosition::PropertyRefWithOffset { prop_ref, offset } => {
             AnchorPosition::PropertyRefWithOffset {
-                prop_ref: prefix_property_ref(prop_ref, prefix, &Refs::new()),
+                prop_ref: prefix_property_ref(prop_ref, prefix, &Refs::new(), &mut Vec::new()),
                 offset: *offset,
             }
         }

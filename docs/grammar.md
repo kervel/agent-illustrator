@@ -42,13 +42,16 @@ grid [name] [mod] { ... }    Regular lattice of cells
 
 Grid modifiers:
     cols: <n>, rows: <n>          Lattice size (rows optional; inferred otherwise)
-    gap: <n>                      Space between cells
+    gap: <n>                      Space between cells (both axes)
+    gap_x: <n>, gap_y: <n>        Space between columns / between rows (each
+                                  overrides `gap` on its axis)
     cell_width: <n>, cell_height: <n>   Cell size (children without an explicit
                                   size inherit it; explicit size centers in cell)
     col_labels: ["a","b",...]     Text labels above each column
     row_labels: ["a","b",...]     Text labels in a left gutter for each row
 Grid children:
-    rect [at: [row, col], ...]    Place a child in a cell (0-indexed). Children
+    rect [at: [row, col], ...]    Place a child (a template instance too: card c
+                                  [at: [1, 2]]) in a cell (0-indexed). Children
                                   without `at:` fill row-major. Unoccupied cells
                                   stay empty (transparent) — sparse/triangular ok.
 Grid cell addressing (in constrain / connections / contains):
@@ -232,7 +235,16 @@ constrain a.width = 100                Fixed dimension
 constrain a.center_x = midpoint(b, c)  Center between two elements
 constrain a.center_y = midpoint(b.bottom, c.top)   Center in the gap between edges
 constrain a.center_x = midpoint(g.cell(0,0), g.cell(0,2))   Grid cells work too
+constrain d.center_x = box.top.center_x   A side is a point: its x and y (the top's x is
+                                       box's centre x; `box.right.center_y` is box's centre y)
                                        (there is no other arithmetic: no ( ) or /)
+constrain b.left = a.right + gap       A number may be a name: a template parameter
+constrain a.width = w                  (`template "t" (gap: 20, w: 80)`), an `each`
+constrain a.width >= m.min             variable or field (`i`, `m.dy`, `= m.w`), in an
+constrain bg contains a [padding_x: pad]   offset, a value, `>=`/`<=`, or a padding.
+                                       Terms add up: `+ gap + 4`, `- m.dy`. A name nothing
+                                       fills is an error. `= after + 4` with `after: x.bottom`
+                                       (a side) means `= x.bottom + 4`.
 constrain bg contains a, b [padding: 10]   Auto-size container (either side may be a path: `card.row.x`).
                                           `padding_x:` / `padding_y:` set one axis (override `padding`).
                                             In an animation it wraps what is on screen in each frame: a row with
@@ -270,11 +282,17 @@ Inline templates:
     "{param}" is filled in in any string modifier of a template body (label: "v{n}").
     A parameter given an element (`src: api.p_2`) works as that element in the body's
     `constrain`, `contains` and connection endpoints: how a template reaches outside itself.
+    Given a side (`src: box.top`, `box.right`, `box.center`) it is that point: `src -> x`
+    starts at box's top, `src.center_x` is the top's x (box's centre x) and `src.center_y`
+    its y (box's top), `midpoint(src, ...)` uses that edge. A side has no width or height,
+    and `contains` needs the element.
     A default that names one of the body's own parts means that part of each instance:
     `template "life" (until: rows) { ... col rows {...} ... hd.bottom -- until.bottom }`
     ends `cl`'s line at `cl.rows`; `life auth [until: auth.p[ok]]` ends it elsewhere. Only a
     parameter left at its default is read this way; a passed value names an outside element.
     Named connections in a template body are parts of each instance (acme.wire).
+    Number parameters work in the body's constraints: `(gap: 20)` then
+    `constrain b.left = a.right + gap`, `[padding_x: pad]`, `= w`, `>= lo`.
 
 File-based templates:
     template "icon" from "path/to/file.svg"     Import SVG file (embedded)
@@ -350,6 +368,12 @@ Keyframe names become CSS classes (`.frame-<name>`), so they must be letters,
 digits, '-' or '_' and must not start with a digit. A name with a space is
 rejected rather than renamed, because a renamed frame is one you could not then
 pass to --frame.
+
+One keyframe per list item: put it in an `each`; the name, title and targets
+fill in from the item.
+    each s, i in steps { keyframe "step{i+1}" [title: "{s.t}"] { show box[s.id] } }
+    each m in moves { keyframe "{m.id}" { constrain dot.left = base.right + m.dx } }
+Two items making one name is an error.
 
 Keyframes are cumulative: each frame builds on the previous frame's state.
 Transforms (visual AND geometry) persist forward, merged per-property; to reset

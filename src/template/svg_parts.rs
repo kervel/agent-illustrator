@@ -343,6 +343,7 @@ fn pin(name: &str, prop: ConstraintProperty, to: &str, to_prop: ConstraintProper
         Statement::Constrain(ConstrainDecl {
             expr: ConstraintExpr::EqualWithOffset { left: r(name, prop), right: r(to, to_prop), offset },
             name: None,
+            numbers: Vec::new(),
         }),
         span.clone(),
     )

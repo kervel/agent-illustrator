@@ -1777,6 +1777,7 @@ fn desugar_layouts(doc: &mut Document, idx: &ElementIndex) -> Result<(), LayoutE
                 .map(|(i, d)| ConstrainDecl {
                     expr: d.node.expr.clone(),
                     name: Some(Spanned::new(Identifier::new(format!("layout_{}_{}", name.node, i)), d.span.clone())),
+                    numbers: d.node.numbers.clone(),
                 })
                 .collect();
             layouts.push((name.node.clone(), decls));

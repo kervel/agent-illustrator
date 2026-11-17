@@ -407,7 +407,7 @@ EXAMPLE 9: Grid as an alignment scaffold (not a heatmap)
 // columns" — a worked sum, a table, a calendar. Cells carry the layout;
 // cell refs position the rule and frame a block. No hand-computed pitch,
 // no per-digit constraints.
-grid digits [cols: 4, rows: 3, gap: 8, cell_width: 38, cell_height: 44,
+grid digits [cols: 4, rows: 3, gap_x: 6, gap_y: 12, cell_width: 38, cell_height: 44,
              col_labels: ["1000", "100", "10", "1"]] {
     text "2" [at: [0, 0], align: center]
     text "4" [at: [0, 1], align: center]
@@ -433,9 +433,10 @@ constrain carry contains digits.cell(0, 3), digits.cell(2, 3) [padding: 2]
 whatever the glyph widths. The highlight is never sized by hand:
 `contains` over two cell refs spans the block between them.
 
-Three details that make this lint clean. The grid has a `gap`, so the
-rule has somewhere to live: with `gap: 0` the cells touch and a rule on a
-row boundary necessarily overlaps a neighbouring row. The rule is
+Three details that make this lint clean. The grid has a gap between rows
+(`gap_y: 12`), so the rule has somewhere to live: with no gap the cells touch
+and a rule on a row boundary necessarily overlaps a neighbouring row. The
+columns stay tight (`gap_x: 6`); `gap` alone would set both. The rule is
 positioned by its edges (`.left` / `.right` / `.top`), not by `contains`,
 which would free its height and turn 3px into a whole cell. And the
 highlight is drawn see-through, so the digits resting on it are not
@@ -637,11 +638,11 @@ template "life" (ttl: "", ticks: [], until: rows, step: 48, w: 110) {
   }
   hd.bottom -- until.bottom as lifeline [routing: direct, stroke_dasharray: "4,3", stroke: role-muted, stroke_width: 1]
 }
-// A square frame around the rows from `first` to `last` (loop, alt), and a line that splits a
-// frame below the row `after` (the `else` of an alt).
-template "frame" (first: "", last: "", ttl: "") {
+// A square frame around the rows from `first` to `last` (loop, alt), reaching `pad` past them
+// on each side, and a line that splits a frame below the row `after` (the `else` of an alt).
+template "frame" (first: "", last: "", ttl: "", pad: 110) {
   rect box [corner_radius: 0, fill: none, stroke: role-muted, overlaps: all]
-  constrain box contains first, last [padding_x: 110, padding_y: 0]
+  constrain box contains first, last [padding_x: pad, padding_y: 0]
   text ttl title [font_size: 11, fill: role-muted, overlaps: all]
   constrain title.left = box.left + 6
   constrain title.top = box.top + 4
@@ -1067,3 +1068,73 @@ each s by id in steps where s.next != none {      // `where`: which items; `if`:
 `if ai` holds for `true` and fails for `false`; `if m.kind == call and m.from != m.to` compares.
 Referring to `st[receive].badge` from outside is an error: "`st_receive.badge` only exists when
 `ai` is true".
+
+## Templates that take a side, and numbers in constraints
+
+A template argument may be a side of an element (`at: tight.r.top`): in the body it is that
+point (`at.center_x`, `at.center_y`, `at -> x`). A number parameter works in the body's
+constraints (`+ gap`, `[padding_x: pad]`, `= w`, `>= lo`), and so do an `each` item's
+numbers (`+ t.start`, `= m.w`, `+ i`):
+
+```
+// A pin that sits on one side of something, and a pair whose spacing the caller picks.
+template "pin" (at: "", txt: "") {
+    circle dot [size: 8, fill: role-primary, stroke: none, overlaps: all]
+    constrain dot.center_x = at.center_x    // the x of the side passed in
+    constrain dot.center_y = at.center_y    // and its y
+    text txt note [font_size: 11]
+    constrain note.center_x = dot.center_x
+    constrain note.bottom = dot.top - 16
+}
+template "pair" (a: "", b: "", gap: 20, pad: 8) {
+    rect l [label: a, width: 90, height: 36]
+    rect r [label: b, width: 90, height: 36]
+    constrain r.left = l.right + gap        // a number parameter in a constraint
+    constrain r.top = l.top
+    rect bg [fill: none, stroke: role-muted]
+    constrain bg contains l, r [padding_x: pad, padding_y: pad]
+    l.right -> r.left
+}
+pair tight [a: "API", b: "DB"]
+pair wide [a: "UI", b: "API", gap: 120, pad: 16]
+constrain wide.top = tight.bottom + 40
+constrain wide.left = tight.left
+pin p1 [at: tight.r.top, txt: "primary"]   // a side, not an element
+pin p2 [at: wide.l.top, txt: "entry"]
+
+// Numbers from data: each task starts `start` past the axis.
+let tasks = [{id: design, start: 0, len: 120}, {id: build, start: 100, len: 160}, {id: ship, start: 240, len: 40}]
+rect axis [width: 300, height: 2, fill: role-muted, stroke: none]
+constrain axis.top = wide.bottom + 50
+constrain axis.left = wide.left
+col lanes [gap: 6] {
+    each t by id in tasks { rect bar [label: "{t.id}", height: 22, width: t.len] }
+}
+constrain lanes.top = axis.bottom + 8
+each t by id in tasks { constrain bar[t.id].left = axis.left + t.start }
+```
+
+The x of a top side is the element's centre x and its y is the top, so `pin` lands on the
+middle of `tight.r`'s top edge. A side has no width or height and cannot be contained; pass the
+element (`at: tight.r`) when the template needs a box. A name nothing fills (`+ gpa`) is an
+error that names the template's parameters.
+
+## Keyframes from a list
+
+A walkthrough that steps through data writes its keyframe once, inside an `each`: one frame
+per item, named from it. `examples/token-prediction.ail` makes its six frames this way.
+
+```
+let steps = [{id: plan, t: "Plan"}, {id: build, t: "Build"}, {id: ship, t: "Ship"}]
+row r [gap: 20] {
+    each s by id in steps { rect box [label: "{s.t}", width: 80, height: 40] }
+}
+keyframe "start" { hide box[plan], box[build], box[ship] }
+each s, i in steps {                                      // step1, step2, step3
+    keyframe "step{i+1}" [title: "{s.t}"] { show box[s.id] [enter: fade]; then { pulse box[s.id] } }
+}
+```
+
+The name, `title:` and `note:` fill in like a label; the targets, the numbers in a keyframe's
+`constrain` (`+ m.dx`) and a part the same body declares (`hide tag`: this item's tag) follow
+the item. Two items that make one name (`keyframe "same"`) are an error naming both.

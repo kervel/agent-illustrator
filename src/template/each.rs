@@ -13,12 +13,14 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
-    AnchorPosition, AnchorReference, CompareOp, ConstrainDecl, ConstraintExpr, EachBlock, ElementPath, Identifier,
-    IfBlock, PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
+    AnchorPosition, AnchorReference, CompareOp, ConstrainDecl, ConstraintExpr, ConstraintProperty, EachBlock, ElementPath, Identifier,
+    IfBlock, NumberName, NumberSlot, PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
 };
 
 use super::names::head_of;
 use super::registry::TemplateError;
+
+mod keyframes;
 
 type Stmts = Vec<Spanned<Statement>>;
 
@@ -182,6 +184,8 @@ fn expand_block(
     let keys = item_keys(&items, e.key.as_ref().map(|k| k.node.0.as_str()), &header)?;
     // declared name -> the item that made it, to catch two items making one name
     let mut made: HashMap<String, usize> = HashMap::new();
+    // keyframe name -> the item that made it
+    let mut made_frames: HashMap<String, usize> = HashMap::new();
     let mut out = Vec::new();
     let mut problems: Vec<Problem> = Vec::new();
     // Items that `where` leaves out still count: `i` and the copy names are
@@ -252,6 +256,18 @@ fn expand_block(
         }
         let mut body = expand_in(body, lists, scope, dropped)?;
         crate::parser::join_constraint_parts(&mut body);
+        let mut frames = Vec::new();
+        keyframes::declared(&body, &mut frames);
+        for f in frames {
+            if let Some(&first) = made_frames.get(&f) {
+                problems.push(Problem::Msg(format!(
+                    "{}: items {} and {} both make a keyframe called \"{}\"; name it from the item: keyframe \"step{{i+1}}\" or \"{{{}.id}}\"",
+                    header, first, k + 1, f, var
+                )));
+            } else {
+                made_frames.insert(f, k + 1);
+            }
+        }
         out.extend(body);
     }
     if !problems.is_empty() {
@@ -850,7 +866,7 @@ fn rename_stmt(st: Spanned<Statement>, m: &HashMap<String, String>) -> Spanned<S
             if let Some(n) = &mut d.name {
                 rn_id(n, m);
             }
-            Statement::Constrain(ConstrainDecl { expr: d.expr, name: d.name })
+            Statement::Constrain(ConstrainDecl { expr: d.expr, name: d.name, numbers: d.numbers })
         }
         Statement::AnchorDecl(mut a) => {
             rn_id(&mut a.name, m);
@@ -875,6 +891,10 @@ fn rename_stmt(st: Spanned<Statement>, m: &HashMap<String, String>) -> Spanned<S
             b.then_body = b.then_body.into_iter().map(|c| rename_stmt(c, m)).collect();
             b.else_body = b.else_body.into_iter().map(|c| rename_stmt(c, m)).collect();
             Statement::If(b)
+        }
+        Statement::Keyframe(mut k) => {
+            keyframes::rename(&mut k, m);
+            Statement::Keyframe(k)
         }
         other => other,
     };
@@ -1192,6 +1212,24 @@ fn subst_path(p: &mut Spanned<ElementPath>, vars: &Vars, problems: &mut Vec<Prob
 
 fn subst_prop(p: &mut PropertyRef, vars: &Vars, problems: &mut Vec<Problem>) {
     subst_path(&mut p.element, vars, problems);
+    // `m.at.center_x` with `at: box.top`: the x of box's top.
+    if let Err(why) = super::names::fold_side(&mut p.element.node, &mut p.property) {
+        problems.push(Problem::Msg(why));
+    }
+}
+
+/// A `midpoint` operand that became a side (`m.from` = `a.right`): the
+/// element, with the side as its edge.
+fn side_as_edge(id: &mut Spanned<Identifier>, edge: &mut Option<crate::parser::ast::ConstraintProperty>) {
+    if edge.is_some() {
+        return;
+    }
+    if let Some((element, side)) = id.node.0.rsplit_once('.') {
+        if super::names::SIDES.contains(&side) {
+            *edge = crate::parser::ast::ConstraintProperty::from_str(side);
+            id.node = Identifier::new(element);
+        }
+    }
 }
 
 /// `n.top -> hub`, `m.from -> m.to`: the head is the element, the rest its anchor.
@@ -1230,10 +1268,12 @@ fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, problems: &mut Vec<Problem>) 
         ConstraintExpr::Constant { left, .. }
         | ConstraintExpr::GreaterOrEqual { left, .. }
         | ConstraintExpr::LessOrEqual { left, .. } => subst_prop(left, vars, problems),
-        ConstraintExpr::Midpoint { target, a, b, .. } => {
+        ConstraintExpr::Midpoint { target, a, b, a_edge, b_edge, .. } => {
             subst_prop(target, vars, problems);
             subst_dotted(a, vars, problems);
             subst_dotted(b, vars, problems);
+            side_as_edge(a, a_edge);
+            side_as_edge(b, b_edge);
         }
         ConstraintExpr::Contains { container, elements, .. } => {
             for id in std::iter::once(container).chain(elements.iter_mut()) {
@@ -1241,6 +1281,63 @@ fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, problems: &mut Vec<Problem>) 
             }
         }
     }
+}
+
+/// A whole `constrain`: names in its references, and numbers written as a
+/// loop variable or field (`+ m.gap`, `= m.w`, `[padding: i]`).
+fn subst_constrain(d: &mut ConstrainDecl, vars: &Vars, problems: &mut Vec<Problem>) {
+    field_as_number(d, vars);
+    subst_expr(&mut d.expr, vars, problems);
+    let mut msgs = Vec::new();
+    super::numbers::fill(
+        d,
+        &mut |name| {
+            if !vars.contains_key(head_of(name).0) {
+                return None;
+            }
+            match lookup(name, vars, problems)? {
+                (v, None, _, _) => Some(v),
+                (v, Some(rest), _, what) => {
+                    problems.push(Problem::Msg(format!("`{}`: {} is {}, which has no part `{}`", name, what, describe(&v), rest)));
+                    None
+                }
+            }
+        },
+        &mut msgs,
+    );
+    problems.extend(msgs.into_iter().map(Problem::Msg));
+}
+
+/// `constrain bar.width = m.w` parses as the property `w` of an element `m`.
+/// When `m` is a record with a field `w`, it is that field's value (a number,
+/// or a side such as `box.top`), plus any offset.
+fn field_as_number(d: &mut ConstrainDecl, vars: &Vars) {
+    let (left, right, offset) = match &d.expr {
+        ConstraintExpr::Equal { left, right } => (left, right, 0.0),
+        ConstraintExpr::EqualWithOffset { left, right, offset } => (left, right, *offset),
+        _ => return,
+    };
+    let [head] = right.element.node.segments.as_slice() else { return };
+    let Some(Bound { value: StyleValue::Record(fields), .. }) = vars.get(&head.node.0) else { return };
+    let field = super::numbers::spelling(&right.property.node);
+    // `m.wd` (no such field, and not a property like `width`): a misspelt
+    // field, reported as one when it is looked up.
+    let named = matches!(
+        right.property.node,
+        ConstraintProperty::Anchor(_) | ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+    );
+    if !named && !fields.iter().any(|(k, _)| k.node.0 == field) {
+        return;
+    }
+    let name = Spanned::new(format!("{}.{}", head.node.0, field), right.element.span.clone());
+    let left = left.clone();
+    for n in &mut d.numbers {
+        if n.slot == NumberSlot::Offset {
+            n.slot = NumberSlot::Value;
+        }
+    }
+    d.numbers.insert(0, NumberName { slot: NumberSlot::Value, name, negate: false });
+    d.expr = ConstraintExpr::Constant { left, value: offset };
 }
 
 fn subst_value(v: &mut Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) {
@@ -1332,7 +1429,7 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
             Statement::Connection(cs)
         }
         Statement::Constrain(mut d) => {
-            subst_expr(&mut d.expr, vars, problems);
+            subst_constrain(&mut d, vars, problems);
             Statement::Constrain(d)
         }
         Statement::Constraint(mut c) => {
@@ -1403,6 +1500,10 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
             b.then_body = b.then_body.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
             b.else_body = b.else_body.into_iter().map(|c| subst_stmt(c, vars, problems)).collect();
             Statement::If(b)
+        }
+        Statement::Keyframe(mut k) => {
+            keyframes::subst(&mut k, vars, problems);
+            Statement::Keyframe(k)
         }
         other => other,
     };
