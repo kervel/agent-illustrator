@@ -126,9 +126,34 @@ impl SvgBuilder {
 
     /// Add a `<mask>` that reveals a drawable up to its drawn fraction.
     pub fn add_draw_mask(&mut self, id: &str, d: &str, stroke_width: f64, offset: f64) {
+        self.add_draw_mask_with_start(id, d, stroke_width, offset, None);
+    }
+
+    /// [`Self::add_draw_mask`], plus an optional `(d, width)` patch over the
+    /// line's first stretch: a shape at the START end (`<->`, `*--`) sits
+    /// behind the line's first point, outside the line-wide mask, and would be
+    /// clipped away for good. The patch shares the mask's draw channel (class
+    /// `aimask-`, same dash), so it uncovers as soon as drawing begins; it has
+    /// no `aid-` class, so a route morph never stretches it along the line.
+    pub fn add_draw_mask_with_start(
+        &mut self,
+        id: &str,
+        d: &str,
+        stroke_width: f64,
+        offset: f64,
+        start: Option<(String, f64)>,
+    ) {
         let s = self.scope.clone();
+        let cover = start
+            .map(|(sd, sw)| {
+                format!(
+                    r##"<path class="aimask-{s}{id}" d="{sd}" fill="none" stroke="#fff" stroke-width="{w}" stroke-linecap="square" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:{offset}"/>"##,
+                    w = r2(sw),
+                )
+            })
+            .unwrap_or_default();
         self.defs.push(format!(
-            r##"<mask id="aim-{s}{id}" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-{s}{id} aid-{s}{id}" d="{d}" fill="none" stroke="#fff" stroke-width="{w}" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:{o}"/></mask>"##,
+            r##"<mask id="aim-{s}{id}" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000"><path class="aimask-{s}{id} aid-{s}{id}" d="{d}" fill="none" stroke="#fff" stroke-width="{w}" stroke-linecap="square" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" style="stroke-dashoffset:{o}"/>{cover}</mask>"##,
             w = r2(stroke_width * 1.6 + 2.0),
             o = offset,
         ));
@@ -2392,7 +2417,13 @@ fn render_connection(conn: &ConnectionLayout, builder: &mut SvgBuilder, id: Opti
             // widen the mask to uncover it (it then shows slightly early).
             let wide = !m.heads.contains(c) && (ends.to != LineEnd::None || ends.from != LineEnd::None);
             let mask_w = if wide { stroke_width * 8.0 } else { stroke_width };
-            builder.add_draw_mask(c, &d, mask_w, m.initial_offset(c));
+            let start = (ends.from != LineEnd::None)
+                .then(|| start_cover_d(&conn.path, ends, stroke_width))
+                .flatten()
+                // End shapes reach 6.5 stroke widths behind the line's
+                // first point; the square cap covers half the width.
+                .map(|sd| (sd, stroke_width * 14.0));
+            builder.add_draw_mask_with_start(c, &d, mask_w, m.initial_offset(c), start);
             extra = format!(r#" mask="url(#aim-{}{})""#, scope, c);
             if m.heads.contains(c) {
                 draw_marker = false;
@@ -2924,6 +2955,23 @@ pub(crate) fn connection_path_d(path: &[Point], routing_mode: RoutingMode, ends:
         }
         _ => path_to_d(path),
     }
+}
+
+/// A one-unit stub at the start of a connection's drawn path (after the
+/// start shape's pullback), pointing along it: where a draw mask must open up
+/// to let the start end's marker show.
+fn start_cover_d(path: &[Point], ends: LineEnds, stroke_width: f64) -> Option<String> {
+    let (a, b) = (*path.first()?, *path.get(1)?);
+    let (dx, dy) = (b.x - a.x, b.y - a.y);
+    let len = (dx * dx + dy * dy).sqrt();
+    if len < 0.001 {
+        return None;
+    }
+    let (ux, uy) = (dx / len, dy / len);
+    let pull = (ends.from.pullback() * stroke_width).min(len);
+    let p = Point::new(a.x + ux * pull, a.y + uy * pull);
+    let step = (len - pull).clamp(0.001, 1.0);
+    Some(format!("M{} {} L{} {}", r2(p.x), r2(p.y), r2(p.x + ux * step), r2(p.y + uy * step)))
 }
 
 fn path_to_d(path: &[Point]) -> String {
