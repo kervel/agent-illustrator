@@ -967,6 +967,39 @@ pub fn route_connection_with_anchors_and_types(
     route_orthogonal(start, end)
 }
 
+/// How far apart (across the line) two ends may be and still count as aligned:
+/// an offset below this is invisible, so drawing it as a jog (two extra
+/// corners for a fraction of a pixel) only adds noise. Half a pixel for thin
+/// lines, a whole pixel from stroke width 2 on.
+pub(crate) fn alignment_epsilon(stroke_width: f64) -> f64 {
+    if stroke_width >= 2.0 { 1.0 } else { 0.5 }
+}
+
+/// A route whose every point lies within the alignment epsilon of one
+/// vertical (or horizontal) line is drawn as that line: one straight segment
+/// from the start to the end. The end keeps its exact position (that is where
+/// the arrowhead points); the start slides along its edge by the offset.
+fn straighten_subpixel_offset(path: Vec<Point>, stroke_width: f64) -> Vec<Point> {
+    if path.len() < 2 {
+        return path;
+    }
+    let eps = alignment_epsilon(stroke_width);
+    let (start, end) = (path[0], path[path.len() - 1]);
+    let spread = |f: fn(&Point) -> f64| {
+        let (lo, hi) = path.iter().map(f).fold((f64::MAX, f64::MIN), |(lo, hi), v| (lo.min(v), hi.max(v)));
+        hi - lo
+    };
+    let (sx, sy) = (spread(|p| p.x), spread(|p| p.y));
+    let along = |a: f64, b: f64| (a - b).abs() >= 1.0;
+    if sx > 0.0 && sx < eps && along(start.y, end.y) {
+        return vec![Point::new(end.x, start.y), end];
+    }
+    if sy > 0.0 && sy < eps && along(start.x, end.x) {
+        return vec![Point::new(start.x, end.y), end];
+    }
+    path
+}
+
 /// The overlap of the two boxes along the axis the connection runs across has
 /// to be at least this long (room for the line and an arrowhead) before the
 /// route is drawn straight through it.
@@ -1160,6 +1193,11 @@ pub fn route_connections_hiding(
                             Some(&to_element.element_type),
                         );
                         let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
+                        let path = if routing_mode == RoutingMode::Curved {
+                            path
+                        } else {
+                            straighten_subpixel_offset(path, styles.stroke_width.unwrap_or(2.0))
+                        };
                         let (label, label_ref_id) =
                             extract_connection_label_with_ref(&conn.modifiers, &path, result);
 

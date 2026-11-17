@@ -2837,6 +2837,22 @@ fn check_label_connection_overlaps(
     }
 }
 
+/// A distance in px for a message: whole numbers as before ("10"), anything
+/// else with the decimals it has ("0.75", "3.25"), so a sub-pixel offset is
+/// never reported as "0".
+fn fmt_px(v: f64) -> String {
+    if (v - v.round()).abs() < 0.005 && v.round() != 0.0 {
+        return format!("{:.0}", v);
+    }
+    let mut decimals = 2;
+    while decimals < 6 && format!("{:.*}", decimals, v).trim_end_matches(['0', '.']).is_empty() {
+        decimals += 1;
+    }
+    let s = format!("{:.*}", decimals, v);
+    let s = s.trim_end_matches('0').trim_end_matches('.');
+    if s.is_empty() || s == "-" { "0".to_string() } else { s.to_string() }
+}
+
 // ── FR6: Near-alignment detection ─────────────────────────────────
 
 /// Maximum offset (in px) between connected element centers to consider
@@ -2878,8 +2894,8 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             warnings.push(LintWarning {
                 category: LintCategory::Alignment,
                 message: format!(
-                    "connection {}→{} is nearly horizontal (off by {:.0}px); aligning Y positions would straighten it",
-                    conn.from_id.0, conn.to_id.0, dy
+                    "connection {}→{} is nearly horizontal (off by {}px); aligning Y positions would straighten it",
+                    conn.from_id.0, conn.to_id.0, fmt_px(dy)
                 ),
                 frames: Vec::new(),
                 pair: None,
@@ -2889,8 +2905,8 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             warnings.push(LintWarning {
                 category: LintCategory::Alignment,
                 message: format!(
-                    "connection {}→{} is nearly vertical (off by {:.0}px); aligning X positions would straighten it",
-                    conn.from_id.0, conn.to_id.0, dx
+                    "connection {}→{} is nearly vertical (off by {}px); aligning X positions would straighten it",
+                    conn.from_id.0, conn.to_id.0, fmt_px(dx)
                 ),
                 frames: Vec::new(),
                 pair: None,
@@ -3183,13 +3199,13 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
             warnings.push(LintWarning {
                 category: LintCategory::ReducibleBend,
                 message: format!(
-                    "connection {}→{}: path jogs {:.0}px {} between bends; \
-                     moving elements at least {:.0}px further apart {} would eliminate 2 corners",
+                    "connection {}→{}: path jogs {}px {} between bends; \
+                     moving elements at least {}px further apart {} would eliminate 2 corners",
                     conn.from_id.0,
                     conn.to_id.0,
-                    shortest_len,
+                    fmt_px(shortest_len),
                     shortest_orientation,
-                    shortest_len,
+                    fmt_px(shortest_len),
                     shortest_orientation
                 ),
                 frames: Vec::new(),
