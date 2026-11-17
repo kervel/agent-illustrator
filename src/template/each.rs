@@ -13,8 +13,8 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::ast::{
-    AnchorPosition, AnchorReference, CompareOp, ConstrainDecl, ConstraintExpr, EachBlock, ElementPath, Identifier,
-    IfBlock, PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
+    AnchorPosition, AnchorReference, CompareOp, ConstrainDecl, ConstraintExpr, ConstraintProperty, EachBlock, ElementPath, Identifier,
+    IfBlock, NumberName, NumberSlot, PropertyRef, ShapeType, Span, Spanned, Statement, StyleKey, StyleModifier, StyleValue, WhereCond,
 };
 
 use super::names::head_of;
@@ -850,7 +850,7 @@ fn rename_stmt(st: Spanned<Statement>, m: &HashMap<String, String>) -> Spanned<S
             if let Some(n) = &mut d.name {
                 rn_id(n, m);
             }
-            Statement::Constrain(ConstrainDecl { expr: d.expr, name: d.name })
+            Statement::Constrain(ConstrainDecl { expr: d.expr, name: d.name, numbers: d.numbers })
         }
         Statement::AnchorDecl(mut a) => {
             rn_id(&mut a.name, m);
@@ -1263,6 +1263,63 @@ fn subst_expr(e: &mut ConstraintExpr, vars: &Vars, problems: &mut Vec<Problem>) 
     }
 }
 
+/// A whole `constrain`: names in its references, and numbers written as a
+/// loop variable or field (`+ m.gap`, `= m.w`, `[padding: i]`).
+fn subst_constrain(d: &mut ConstrainDecl, vars: &Vars, problems: &mut Vec<Problem>) {
+    field_as_number(d, vars);
+    subst_expr(&mut d.expr, vars, problems);
+    let mut msgs = Vec::new();
+    super::numbers::fill(
+        d,
+        &mut |name| {
+            if !vars.contains_key(head_of(name).0) {
+                return None;
+            }
+            match lookup(name, vars, problems)? {
+                (v, None, _, _) => Some(v),
+                (v, Some(rest), _, what) => {
+                    problems.push(Problem::Msg(format!("`{}`: {} is {}, which has no part `{}`", name, what, describe(&v), rest)));
+                    None
+                }
+            }
+        },
+        &mut msgs,
+    );
+    problems.extend(msgs.into_iter().map(Problem::Msg));
+}
+
+/// `constrain bar.width = m.w` parses as the property `w` of an element `m`.
+/// When `m` is a record with a field `w`, it is that field's value (a number,
+/// or a side such as `box.top`), plus any offset.
+fn field_as_number(d: &mut ConstrainDecl, vars: &Vars) {
+    let (left, right, offset) = match &d.expr {
+        ConstraintExpr::Equal { left, right } => (left, right, 0.0),
+        ConstraintExpr::EqualWithOffset { left, right, offset } => (left, right, *offset),
+        _ => return,
+    };
+    let [head] = right.element.node.segments.as_slice() else { return };
+    let Some(Bound { value: StyleValue::Record(fields), .. }) = vars.get(&head.node.0) else { return };
+    let field = super::numbers::spelling(&right.property.node);
+    // `m.wd` (no such field, and not a property like `width`): a misspelt
+    // field, reported as one when it is looked up.
+    let named = matches!(
+        right.property.node,
+        ConstraintProperty::Anchor(_) | ConstraintProperty::AnchorX(_) | ConstraintProperty::AnchorY(_)
+    );
+    if !named && !fields.iter().any(|(k, _)| k.node.0 == field) {
+        return;
+    }
+    let name = Spanned::new(format!("{}.{}", head.node.0, field), right.element.span.clone());
+    let left = left.clone();
+    for n in &mut d.numbers {
+        if n.slot == NumberSlot::Offset {
+            n.slot = NumberSlot::Value;
+        }
+    }
+    d.numbers.insert(0, NumberName { slot: NumberSlot::Value, name, negate: false });
+    d.expr = ConstraintExpr::Constant { left, value: offset };
+}
+
 fn subst_value(v: &mut Spanned<StyleValue>, vars: &Vars, problems: &mut Vec<Problem>) {
     match &mut v.node {
         StyleValue::Identifier(id) => {
@@ -1352,7 +1409,7 @@ fn subst_stmt(st: Spanned<Statement>, vars: &Vars, problems: &mut Vec<Problem>) 
             Statement::Connection(cs)
         }
         Statement::Constrain(mut d) => {
-            subst_expr(&mut d.expr, vars, problems);
+            subst_constrain(&mut d, vars, problems);
             Statement::Constrain(d)
         }
         Statement::Constraint(mut c) => {

@@ -563,6 +563,7 @@ fn resolve_frame_layout(
                                     value: v,
                                 },
                                 name: None,
+                                numbers: Vec::new(),
                             }),
                             0..0,
                         ));
@@ -783,6 +784,7 @@ fn build_active_document(doc: &Document, state: &FrameState, base: &LayoutResult
                                 right: pref(target, prop),
                             },
                             name: None,
+                            numbers: Vec::new(),
                         }),
                         0..0,
                     ));

@@ -160,6 +160,11 @@ pub fn resolve_templates(
         }
     }
 
+    // `constrain a.left = b.right + gap` where nothing gave `gap` a value.
+    if let Some(message) = super::numbers::first_unfilled(&resolved_statements) {
+        return Err(TemplateError::Each { message });
+    }
+
     let mut aliases = doc.aliases;
     aliases.extend(registry.collapsed_parts.iter().cloned());
     Ok(Document {
@@ -1125,12 +1130,19 @@ fn substitute_parameters(
             Spanned::new(Statement::Connection(conns), stmt.span)
         }
         Statement::Constrain(decl) => {
+            let written = decl.clone();
             // Prefix all element references in the constraint expression
             let new_expr = prefix_constraint_expr(&decl.expr, prefix, &element_refs(params), problems);
-            Spanned::new(
-                Statement::Constrain(ConstrainDecl { expr: new_expr, name: decl.name.clone() }),
-                stmt.span,
-            )
+            let mut decl = ConstrainDecl { expr: new_expr, name: decl.name.clone(), numbers: decl.numbers };
+            // `+ gap`, `[padding_x: pad]`: the template's number parameters.
+            super::numbers::fill(&mut decl, &mut |n| params.get(n).cloned(), problems);
+            if let Some(n) = decl.numbers.first() {
+                let mut known: Vec<String> = params.keys().cloned().collect();
+                known.sort();
+                // Shown as written in the template (`b.left`, not `x_b.left`).
+                problems.push(super::numbers::unfilled(&written, n, &known));
+            }
+            Spanned::new(Statement::Constrain(decl), stmt.span)
         }
         Statement::TemplateInstance(mut inst) => {
             inst.instance_name.node = Identifier::new(format!("{}_{}", prefix, inst.instance_name.node.0));

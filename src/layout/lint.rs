@@ -4714,6 +4714,7 @@ mod tests {
                     value,
                 },
                 name: None,
+                numbers: Vec::new(),
             }),
             span,
         )

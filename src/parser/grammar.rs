@@ -17,8 +17,20 @@ use crate::parser::lexer::Token;
 #[derive(Debug, Clone)]
 enum ConstraintExprKind {
     Property(PropertyRef),
-    PropertyWithOffset(PropertyRef, f64),
-    Constant(f64),
+    PropertyWithOffset(PropertyRef, NumberTerms),
+    Constant(f64, Vec<NumberName>),
+}
+
+/// `+ 20 - gap`: the numbers summed, and the names (with `true` after a minus).
+#[derive(Debug, Clone, Default)]
+struct NumberTerms {
+    sum: f64,
+    names: Vec<(Spanned<String>, bool)>,
+}
+
+/// The names of an offset as numbers of one slot.
+fn names_in(slot: NumberSlot, names: Vec<(Spanned<String>, bool)>) -> Vec<NumberName> {
+    names.into_iter().map(|(name, negate)| NumberName { slot, name, negate }).collect()
 }
 
 /// Check if an identifier is a symbolic color category
@@ -1840,11 +1852,41 @@ where
     // Cell references must be tried first (the plain ref would choke on `cell(`).
     let property_ref = choice((cell_property_ref, plain_property_ref)).boxed();
 
-    // Parse offset: + number or - number
-    let offset = choice((
-        just(Token::Plus).ignore_then(number).map(|n| n.node),
-        just(Token::Minus).ignore_then(number).map(|n| -n.node),
-    ));
+    // A number written as a name: `gap` (a template parameter), `m.gap`
+    // (a field of an `each` item), `i`. Filled in before layout.
+    let number_name = identifier
+        .then(just(Token::Dot).ignore_then(identifier).repeated().collect::<Vec<_>>())
+        .map_with(|(head, rest), e| {
+            let mut n = head.node.0;
+            for r in rest {
+                n.push('.');
+                n.push_str(&r.node.0);
+            }
+            Spanned::new(n, span_range(&e.span()))
+        })
+        .boxed();
+    // `+ 20`, `- gap`, `+ m.gap + 4`: the terms after a reference, summed.
+    // Numbers add up here; names are kept for later (`NumberTerms`).
+    let offset = choice((just(Token::Plus).to(false), just(Token::Minus).to(true)))
+        .then(choice((
+            number.map(|n| Err::<Spanned<String>, f64>(n.node)),
+            number_name.clone().map(Ok),
+        )))
+        .repeated()
+        .at_least(1)
+        .collect::<Vec<_>>()
+        .map(|terms| {
+            let mut sum = 0.0;
+            let mut names = Vec::new();
+            for (neg, t) in terms {
+                match t {
+                    Err(v) => sum += if neg { -v } else { v },
+                    Ok(n) => names.push((n, neg)),
+                }
+            }
+            NumberTerms { sum, names }
+        })
+        .boxed();
 
     // Constraint expression parsers
 
@@ -1890,13 +1932,12 @@ where
         .then(midpoint_arg.clone())
         .then_ignore(just(Token::ParenClose))
         .then(offset.clone().or_not())
-        .map(|(((target, (a, a_edge)), (b, b_edge)), off)| ConstraintExpr::Midpoint {
-            target,
-            a,
-            b,
-            offset: off.unwrap_or(0.0),
-            a_edge,
-            b_edge,
+        .map(|(((target, (a, a_edge)), (b, b_edge)), off)| {
+            let off = off.unwrap_or_default();
+            (
+                ConstraintExpr::Midpoint { target, a, b, offset: off.sum, a_edge, b_edge },
+                names_in(NumberSlot::Offset, off.names),
+            )
         });
 
     // Either side may be a path into components: `card.inner.x`.
@@ -1913,14 +1954,22 @@ where
         )
         .then(modifier_block.clone().or_not())
         .map(|((container, elements), modifiers)| {
-            // Extract padding from modifiers if present
-            let pad_of = |key: &str| {
+            // Extract padding from modifiers if present; `padding_x: pad`
+            // (a name) is filled in later.
+            let mut names = Vec::new();
+            let mut pad_of = |key: &str, slot: NumberSlot| {
                 modifiers.as_ref().and_then(|mods| {
                     mods.iter().find_map(|m| {
                         if let StyleKey::Custom(k) = &m.node.key.node {
                             if k == key {
-                                if let StyleValue::Number { value, .. } = &m.node.value.node {
-                                    return Some(*value);
+                                match &m.node.value.node {
+                                    StyleValue::Number { value, .. } => return Some(*value),
+                                    StyleValue::Identifier(id) => names.push(NumberName {
+                                        slot,
+                                        name: Spanned::new(id.0.clone(), m.node.value.span.clone()),
+                                        negate: false,
+                                    }),
+                                    _ => {}
                                 }
                             }
                         }
@@ -1928,33 +1977,45 @@ where
                     })
                 })
             };
-            ConstraintExpr::Contains {
-                container,
-                elements,
-                padding: pad_of("padding"),
-                padding_x: pad_of("padding_x"),
-                padding_y: pad_of("padding_y"),
-            }
+            let padding = pad_of("padding", NumberSlot::Padding);
+            let padding_x = pad_of("padding_x", NumberSlot::PaddingX);
+            let padding_y = pad_of("padding_y", NumberSlot::PaddingY);
+            (ConstraintExpr::Contains { container, elements, padding, padding_x, padding_y }, names)
         });
+
+    // A number on its own: `20`, `-4`, `gap`, `-m.gap`, `gap + 4`. Its
+    // names are `Value` names (they add to the value).
+    let bound_value = just(Token::Minus)
+        .or_not()
+        .then(choice((
+            number.map(|n| Err::<Spanned<String>, f64>(n.node)),
+            number_name.clone().map(Ok),
+        )))
+        .then(offset.clone().or_not())
+        .map(|((neg, first), more)| {
+            let more = more.unwrap_or_default();
+            let mut names = names_in(NumberSlot::Value, more.names);
+            let mut value = more.sum;
+            match first {
+                Err(v) => value += if neg.is_some() { -v } else { v },
+                Ok(n) => names.insert(0, NumberName { slot: NumberSlot::Value, name: n, negate: neg.is_some() }),
+            }
+            (value, names)
+        })
+        .boxed();
 
     // Inequality: a.prop >= value or a.prop <= value
     let ge_expr = property_ref
         .clone()
         .then_ignore(just(Token::GreaterOrEqual))
-        .then(just(Token::Minus).or_not().then(number))
-        .map(|(left, (neg, n))| {
-            let value = if neg.is_some() { -n.node } else { n.node };
-            ConstraintExpr::GreaterOrEqual { left, value }
-        });
+        .then(bound_value.clone())
+        .map(|(left, (value, names))| (ConstraintExpr::GreaterOrEqual { left, value }, names));
 
     let le_expr = property_ref
         .clone()
         .then_ignore(just(Token::LessOrEqual))
-        .then(just(Token::Minus).or_not().then(number))
-        .map(|(left, (neg, n))| {
-            let value = if neg.is_some() { -n.node } else { n.node };
-            ConstraintExpr::LessOrEqual { left, value }
-        });
+        .then(bound_value.clone())
+        .map(|(left, (value, names))| (ConstraintExpr::LessOrEqual { left, value }, names));
 
     // Equality with property: a.prop = b.prop [+ offset]
     // Or constant: a.prop = value
@@ -1970,22 +2031,19 @@ where
                     ConstraintExprKind::Property(right)
                 }
             })
-            // Or just a constant number
-            .or(just(Token::Minus).or_not().then(number).map(|(neg, n)| {
-                let value = if neg.is_some() { -n.node } else { n.node };
-                ConstraintExprKind::Constant(value)
-            })),
+            // Or a number: `= 100`, `= w`, `= gap + 4` (a name may also
+            // stand for a side: `= after` with `after: x.bottom`)
+            .or(bound_value.clone().map(|(value, names)| ConstraintExprKind::Constant(value, names))),
     );
 
     // Build the final constraint expression from equality
     let equality_constraint = equality_expr.map(|(left, kind)| match kind {
-        ConstraintExprKind::Property(right) => ConstraintExpr::Equal { left, right },
-        ConstraintExprKind::PropertyWithOffset(right, offset) => ConstraintExpr::EqualWithOffset {
-            left,
-            right,
-            offset,
-        },
-        ConstraintExprKind::Constant(value) => ConstraintExpr::Constant { left, value },
+        ConstraintExprKind::Property(right) => (ConstraintExpr::Equal { left, right }, Vec::new()),
+        ConstraintExprKind::PropertyWithOffset(right, offset) => (
+            ConstraintExpr::EqualWithOffset { left, right, offset: offset.sum },
+            names_in(NumberSlot::Offset, offset.names),
+        ),
+        ConstraintExprKind::Constant(value, names) => (ConstraintExpr::Constant { left, value }, names),
     });
 
     // All constraint expressions (order matters - try more specific first)
@@ -2002,7 +2060,7 @@ where
     let constrain_decl = just(Token::Constrain)
         .ignore_then(constraint_expr)
         .then(just(Token::As).ignore_then(identifier).or_not())
-        .map(|(expr, name)| ConstrainDecl { expr, name });
+        .map(|((expr, numbers), name)| ConstrainDecl { expr, name, numbers });
 
     // ==================== Template Parsing (Feature 005) ====================
 

@@ -19,6 +19,7 @@
 
 mod each;
 pub(crate) mod names;
+mod numbers;
 mod registry;
 mod resolver;
 pub mod svg_parts;
