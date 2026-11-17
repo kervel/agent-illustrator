@@ -4638,11 +4638,12 @@ fn recompute_element_bounds_recursive(elem: &mut ElementLayout, skip: Option<&Ha
         // Lines routed through siblings are drawn over the layout, not part of it.
         let mut parts = elem.children.iter().filter(|c| !c.is_through_path());
         if let Some(first) = parts.next() {
-            // What a turned child covers, not its unturned box: an upright
-            // title in a narrow strip must not widen the strip's group.
-            let mut bounds = first.footprint();
+            // The boxes the solver laid out (a turned child's unturned box):
+            // a constraint on this element must mean what it meant to the
+            // solver. Lint measures turned shapes by what they cover.
+            let mut bounds = first.bounds;
             for child in parts {
-                bounds = bounds.union(&child.footprint());
+                bounds = bounds.union(&child.bounds);
             }
             // A row or column keeps the padding it was laid out with, so a
             // constraint on it means the same thing before and after its
@@ -5095,8 +5096,9 @@ fn add_element_by_name_with_per_property_strength(
                 || target_vars.contains(&(element_name.to_string(), LayoutProperty::CenterY)));
 
         // A ranged size whose far edge alone is asked for grows or shrinks to
-        // it: its near edge stays where it is (`body.right = cols.right` on a
-        // `width: 200..` body widens it rather than sliding it along).
+        // it: its near edge prefers to stay where it is (`body.right =
+        // cols.right` on a `width: 200..` body widens it rather than sliding
+        // it along), and gives way only when the range runs out.
         let has = |p: LayoutProperty| target_vars.contains(&(element_name.to_string(), p));
         let x_held = elem.styles.width_range.is_some()
             && has(LayoutProperty::Right)
@@ -5120,6 +5122,17 @@ fn add_element_by_name_with_per_property_strength(
                     source: ConstraintSource::layout(0..0, "target element x"),
                 })
                 .map_err(LayoutError::solver_error)?;
+        } else if x_held {
+            // Kept over the size's own suggestion, so the part grows; but a
+            // far edge its range cannot reach still moves it, as it would a
+            // plain-size part.
+            solver
+                .add_constraint(LayoutConstraint::Shrink {
+                    variable: LayoutVariable::x(element_name),
+                    value: elem.bounds.x,
+                    source: ConstraintSource::layout(0..0, "held near edge x"),
+                })
+                .map_err(LayoutError::solver_error)?;
         } else {
             solver
                 .add_constraint(LayoutConstraint::Fixed {
@@ -5139,6 +5152,17 @@ fn add_element_by_name_with_per_property_strength(
                     variable: LayoutVariable::y(element_name),
                     value: suggested_y,
                     source: ConstraintSource::layout(0..0, "target element y"),
+                })
+                .map_err(LayoutError::solver_error)?;
+        } else if y_held {
+            // Kept over the size's own suggestion, so the part grows; but a
+            // far edge its range cannot reach still moves it, as it would a
+            // plain-size part.
+            solver
+                .add_constraint(LayoutConstraint::Shrink {
+                    variable: LayoutVariable::y(element_name),
+                    value: elem.bounds.y,
+                    source: ConstraintSource::layout(0..0, "held near edge y"),
                 })
                 .map_err(LayoutError::solver_error)?;
         } else {
@@ -5891,12 +5915,6 @@ mod tests {
     }
 }
 
-/// Reject malformed label markup before anything is laid out.
-///
-/// A half-parsed label would render a plausible-looking wrong picture, which
-/// is exactly the failure this feature exists to remove — so it is an error,
-/// not a silent fallback. A `<` that begins no recognised tag is literal
-/// text and never reaches here.
 /// `width: 120..400` and friends: a range is a size that constraints may
 /// change, so it only goes where a size can change without distorting a
 /// drawing.
@@ -5950,6 +5968,12 @@ fn validate_size_ranges(stmts: &[Spanned<Statement>]) -> Result<(), LayoutError>
     Ok(())
 }
 
+/// Reject malformed label markup before anything is laid out.
+///
+/// A half-parsed label would render a plausible-looking wrong picture, which
+/// is exactly the failure this feature exists to remove — so it is an error,
+/// not a silent fallback. A `<` that begins no recognised tag is literal
+/// text and never reaches here.
 fn validate_label_markup(stmts: &[Spanned<Statement>]) -> Result<(), LayoutError> {
     for stmt in stmts {
         let (modifiers, children, name) = match &stmt.node {

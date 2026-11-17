@@ -84,9 +84,10 @@ fn describe(v: &StyleValue) -> String {
 
 fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashSet<String>) -> Result<Stmts, TemplateError> {
     let var = e.var.node.0.clone();
+    let by = e.key.as_ref().map(|k| format!(" by {}", k.node.0)).unwrap_or_default();
     let header = match &e.index {
-        Some(ix) => format!("each {}, {} in ...", var, ix.node.0),
-        None => format!("each {} in ...", var),
+        Some(ix) => format!("each {}, {}{} in ...", var, ix.node.0, by),
+        None => format!("each {}{} in ...", var, by),
     };
     // `each a in items { a -> hub }` while an element `a` exists: the
     // reader cannot tell which one the arrow means.
@@ -139,12 +140,12 @@ fn expand_block(e: EachBlock, lists: &HashMap<String, StyleValue>, scope: &HashS
 
     // A name whose index this block binds (`rect lane[l]`, `rect p[m.id]`)
     // is already one per item: it keeps that name. Every other declared name
-    // gets the item's key: its `id` when the items are keyed records, else
-    // its position (x -> x_1, x_2, ...).
+    // gets the item's key: the `by` field of each record (`each r by id`),
+    // else its position (x -> x_1, x_2, ...).
     let index_vars: Vec<&str> = std::iter::once(var.as_str()).chain(e.index.as_ref().map(|ix| ix.node.0.as_str())).collect();
     let declared: HashSet<String> =
         declared_names(&e.body).into_iter().filter(|n| !indexed_by(n, &index_vars)).collect();
-    let keys = item_keys(&items, &header)?;
+    let keys = item_keys(&items, e.key.as_ref().map(|k| k.node.0.as_str()), &header)?;
     // declared name -> the item that made it, to catch two items making one name
     let mut made: HashMap<String, usize> = HashMap::new();
     let mut out = Vec::new();
@@ -237,53 +238,59 @@ fn indexed_by(name: &str, vars: &[&str]) -> bool {
     false
 }
 
-/// What each item's copies are called: the items' `id` fields when they are
-/// records that all have one (`{id: login, ...}` -> `p_login`), otherwise
+/// What each item's copies are called: with `by FIELD`, that field of every
+/// record (`each r by id in [{id: login, ...}]` -> `p_login`); otherwise
 /// their positions counted from 1.
-fn item_keys(items: &[Spanned<StyleValue>], header: &str) -> Result<Vec<String>, TemplateError> {
-    let id_of = |v: &StyleValue| -> Option<StyleValue> {
-        match v {
-            StyleValue::Record(fields) => fields.iter().find(|(k, _)| k.node.0 == "id").map(|(_, v)| v.node.clone()),
-            _ => None,
-        }
-    };
-    let with_id: Vec<usize> = items.iter().enumerate().filter(|(_, it)| id_of(&it.node).is_some()).map(|(k, _)| k + 1).collect();
-    if with_id.is_empty() {
+fn item_keys(items: &[Spanned<StyleValue>], by: Option<&str>, header: &str) -> Result<Vec<String>, TemplateError> {
+    let Some(field) = by else {
         return Ok((1..=items.len()).map(|k| k.to_string()).collect());
-    }
-    if with_id.len() != items.len() {
-        let without: Vec<String> =
-            (1..=items.len()).filter(|k| !with_id.contains(k)).map(|k| k.to_string()).collect();
-        return Err(err(format!(
-            "{}: item{} {} {} no `id`, which the other items have; give every item an `id` (its copies are named by it), or none (they are numbered)",
-            header,
-            if without.len() == 1 { "" } else { "s" },
-            without.join(", "),
-            if without.len() == 1 { "has" } else { "have" }
-        )));
-    }
+    };
     let mut keys: Vec<String> = Vec::with_capacity(items.len());
     for (k, it) in items.iter().enumerate() {
-        let key = match id_of(&it.node) {
-            Some(StyleValue::Identifier(id)) => Some(id.0),
-            Some(StyleValue::Keyword(w)) => Some(w),
-            Some(StyleValue::Number { value, .. }) if value >= 0.0 && value.fract() == 0.0 => Some(format!("{}", value as u64)),
+        let value = match &it.node {
+            StyleValue::Record(fields) => fields.iter().find(|(f, _)| f.node.0 == field).map(|(_, v)| v.node.clone()),
+            _ => {
+                return Err(err(format!(
+                    "{}: item {} is not a record; `by {}` names each copy by a field, so every item needs one: {{{}: a, ...}}",
+                    header,
+                    k + 1,
+                    field,
+                    field
+                )))
+            }
+        };
+        let Some(value) = value else {
+            return Err(err(format!(
+                "{}: item {} has no `{}`; `by {}` names each copy by it, so every item needs one",
+                header,
+                k + 1,
+                field,
+                field
+            )));
+        };
+        let key = match value {
+            StyleValue::Identifier(id) => Some(id.0),
+            StyleValue::Keyword(w) => Some(w),
+            StyleValue::Number { value, .. } if value >= 0.0 && value.fract() == 0.0 => Some(format!("{}", value as u64)),
             _ => None,
         }
         .filter(|w| !w.is_empty() && w.chars().all(|c| c.is_alphanumeric() || c == '_'));
         let Some(key) = key else {
             return Err(err(format!(
-                "{}: item {}: `id` must be a name (letters, digits, _), written without quotes; it names the item's copies (p_login)",
+                "{}: item {}: `{}` must be a plain word (letters, digits, _) without quotes, because it becomes part of a name ({{{}: am}} makes x_am)",
                 header,
-                k + 1
+                k + 1,
+                field,
+                field
             )));
         };
         if let Some(first) = keys.iter().position(|x| *x == key) {
             return Err(err(format!(
-                "{}: items {} and {} both have id `{}`; ids name the copies, so each must be different",
+                "{}: items {} and {} both have {} `{}`; it names their copies, so each must be different",
                 header,
                 first + 1,
                 k + 1,
+                field,
                 key
             )));
         }

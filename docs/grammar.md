@@ -178,8 +178,8 @@ Common modifiers:
                             instance instead). rect/ellipse/callout only (--doc sizes)
     corner_radius: <number> Rounded corners (rect)
     text "{param}" name     In a template: the text says a parameter's value
-    rotation: <degrees>     Rotate element (clockwise); an enclosing group's box
-                            and --lint use the box it covers once turned
+    rotation: <degrees>     Rotate element (clockwise). Layout uses the unturned
+                            box; --lint checks the box it covers once turned
     class: <name>           Custom CSS class (for external styling)
     clip: <element>         Draw only inside that element's shape (within its stroke,
                             following its corner_radius): a window's header bar is a
@@ -472,10 +472,11 @@ Declarations that serve motion:
                   item (label: NAME, text NAME, "{NAME}"); i is the 0-based
                   position (a number; in strings "{i}", "{i+1}" counts from 1). Names declared inside
                   get _1, _2, ... (x -> x_1; nested: x_2_3). Empty list: nothing.
-                  Records that all have an id name the copies by it:
-                  each l in [{id: am}, {id: ops}] { rect lane } -> lane_am, lane_ops
-                  (lane[am]). A name indexed by the item keeps it: rect lane[l]
-                  -> lane_am. Ids are words, different, on every item or none.
+                  `by FIELD` names the copies by that field of each record:
+                  each l by id in [{id: am}, {id: ops}] { rect lane } -> lane_am,
+                  lane_ops (lane[am]). Keys are plain words, all different, on
+                  every item. A name indexed by the item keeps it: rect lane[l]
+                  -> lane_am.
                   Items that are names stand for elements wherever a name goes:
                   each c in [c1, c2, b.led] { srv -> c   constrain c.width = 80
                   constrain bg contains c   x -> y [via: [c]] }   (c.top = b.led.top)

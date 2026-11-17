@@ -1222,9 +1222,6 @@ pub struct ElementLayout {
 }
 
 impl ElementLayout {
-    /// The point rotation and scaling turn about: `pivot: left | right | top
-    /// | bottom | top_left | top_right | bottom_left | bottom_right`, else
-    /// the centre.
     /// The angle this element is drawn turned by, when it is a leaf shape
     /// with a `rotation:` that turns it at all. A rotated template instance
     /// has its parts turned in place by the solver, so it answers `None`.
@@ -1246,6 +1243,9 @@ impl ElementLayout {
         }
     }
 
+    /// The point rotation and scaling turn about: `pivot: left | right | top
+    /// | bottom | top_left | top_right | bottom_left | bottom_right`, else
+    /// the centre.
     pub fn pivot_point(&self) -> Point {
         let b = &self.bounds;
         let (fx, fy) = match self.styles.pivot.as_deref() {

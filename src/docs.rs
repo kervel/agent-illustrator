@@ -128,6 +128,7 @@ const ALIASES: &[(&str, &str)] = &[
     ("id", "each"),
     ("ids", "each"),
     ("keyed-copies", "each"),
+    ("by", "each"),
     ("range", "sizes"),
     ("ranges", "sizes"),
     ("size-range", "sizes"),

@@ -36,7 +36,7 @@ Check here before writing coordinates or a run of `constrain` lines.
 | One element per list item (UML attributes, a legend, a menu); an empty list makes nothing | `each a in items { text a }` (`--doc each`) | `<br>`-joined strings, or a second template for the empty case |
 | The same connection or constraint for several elements (a server to each client) | `each c in [c1, c2, c3] { srv -> c }` (`--doc each`) | one hand-copied line per element |
 | Connections from a table (transitions, dependencies, associations) | `each t in [{from: a, to: b, on: "go"}, ...] { t.from -> t.to [label: t.on] }` (`--doc each`) | parallel lists, or one hand-written line per row |
-| Copies named by meaning, not number (lanes, rows you refer to later) | records with an `id`: `each r in [{id: am, ...}] { lane lanes }` makes `lanes_am`, reached as `lanes[am]` (`--doc each`) | counting which copy is which |
+| Copies named by meaning, not number (lanes, rows you refer to later) | `by` a record field: `each r by id in [{id: am, ...}] { lane lanes }` makes `lanes_am`, reached as `lanes[am]` (`--doc each`) | counting which copy is which |
 | A template part that stretches to something outside it (a lane body to the last column, a bar to a date) | `rect body [width: 200..]` in the template, then `constrain body.right = across.right` (`--doc sizes`) | a `width:` parameter computed by hand |
 | A box that may grow or shrink, within limits | `width: 120..400` (`200..` at least, `..300` at most); the label wraps at the upper bound (`--doc sizes`) | a fixed width that is too wide for one label and too narrow for the next |
 | One copy an `each` made, by number (a chain of stages, row k of a lifeline) | `stage[2]`, `api.p[k]`; in an `each`: `stage[k+1]`, `api.p[m.row]` (`--doc each`) | spelling out `stage_2`, or computing names by hand |
@@ -505,14 +505,15 @@ each n in ["a", "b", "c"] { circle dot [size: 12] }   // top level: dot_1, dot_2
   same body (`constrain bg contains entry`, `clip: x`) follow the renaming.
   `constrain`, anchors, keyframes and connections can target `entry_2` like any
   element. Unnamed elements need no names.
-- **Keyed copies: named by an `id`.** When the items are records that all
-  have an `id` field, copies are named by it instead of by number:
-  `each l in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}]
-  { lane ln [name: l.name] }` makes `ln_cust` and `ln_am`, reached from
-  anywhere as `ln[am]`. Inserting an item renumbers nothing. The id is a word
-  (letters, digits, `_`), each id is different, and either every item has one
-  or none does; each of these is an error that names the items. The index
-  `i` still counts positions.
+- **Keyed copies: `by` a field.** `each r by id in [...]` names the copies
+  by each record's `id` field instead of by number:
+  `each r by id in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}]
+  { lane lanes [name: r.name] }` makes `lanes_cust` and `lanes_am`, reached from
+  anywhere as `lanes[am]`. Inserting an item renumbers nothing. Any field
+  works (`by key`). Every item needs it, as a plain word (letters, digits,
+  `_`), each different; otherwise it is an error that names the item. Without
+  `by`, an `id` field is ordinary data and copies are numbered. The index `i`
+  still counts positions.
 - **A name indexed by the item keeps that name.** `rect lane[l]` (or
   `rect p[m.id]`) is already one per item, so no number is added:
   `each l in [cust, am] { rect lane[l] }` makes `lane_cust` and `lane_am`.
@@ -610,12 +611,16 @@ lane ops [name: "Operations", across: cols]
   stretch". Only the part with the range changes size; the rest of the
   instance stays as laid out.
 - **One edge asked for:** a ranged part whose far edge alone is constrained
-  (`body.right = ...`) grows or shrinks to it, its near edge stays put. Both
-  edges asked for (`left` and `right`) sets the width between them, as for any
-  shape.
-- **Bounds hold.** No constraint pushes a size past its range; the constraint
-  that wanted more is reported by `--lint`, which names the range
-  ("`b` stopped at the top of its width range (100..200)").
+  (`body.right = ...`) grows or shrinks to it, its near edge stays put. When
+  the range runs out first, it moves the rest of the way, as a fixed-size
+  shape would. Both edges asked for (`left` and `right`) sets the width
+  between them, as for any shape.
+- **Bounds hold.** No constraint pushes a size past its range. When both its
+  edges are held and the range cannot span them, `--lint` reports the
+  constraint and names the range ("`b` stopped at the top of its width range
+  (100..200)").
+- **In a row or column**, only stretch the last member: the others do not make
+  way, and `--lint` reports one stretched over its neighbour.
 - `--lint` also says when a template part's fixed shape is what makes a
   constraint impossible ("`x.b` is part of a template, which keeps its
   shape ... give it a size range").
@@ -631,12 +636,14 @@ templates over general pieces. `examples/cross-functional.ail` is a complete
 one to copy from.
 
 - **Lanes:** one record per lane, `{id: am, name: "Account manager"}`, and an
-  `each` that makes one `lane` per record inside a `col [gap: 0, padding: 0]`.
+  `each r by id` that makes one `lane` per record inside a `col [gap: 0, padding: 0]`.
   The ids name the lanes (`lanes_am`, reached as `lanes[am]`). The lane body has a
   size range and stretches to the last column (`--doc sizes`). An upright
-  title is `text ... [rotation: -90]`: layout and lint measure it turned.
+  title is `text ... [rotation: -90]`: lint measures it turned, layout by its
+  unturned box, so line the lanes up on their headers with `align: hd` on the
+  `col`.
 - **Steps (columns):** a row of invisible points, `row steps { each k in
-  [1, 2, ...] { point step } }`, placed against the lanes with two
+  [1, 2, ...] { point step } }`, placed against a lane body with two
   constraints. Step k is `step[k]`.
 - **Nodes:** each node template takes `name:`, `lane:` and `at:` and places itself:
   `constrain box.center_y = lane.center_y`, `constrain box.center_x =
@@ -646,7 +653,7 @@ one to copy from.
 - **Same anchors on every node kind** (`l`, `r`, `t`, `b`, declared with
   `anchor`), so flows read alike: `known.b -> intro.l [label: "No"]`.
 - Node kinds in the example: task, subprocess (a [+] marker), gateway
-  (a rotated square with `×`, `+` or `○`; its anchors sit on an invisible
+  (a rotated square with `×` or `+`; its anchors sit on an invisible
   square around it, at the diamond's tips), start, end, timer and message
   events (a ring with a caption under it). A message flow:
   `a.t -> b.b [stroke_dasharray: dashed, from_end: circle, to_end: open]`.

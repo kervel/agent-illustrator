@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90.4875 -55 1965.4875 640" font-size="14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90.4875 -55 1961.4875 640" font-size="14">
   <!-- agent-illustrator dev -->
   <style><![CDATA[
     :root {
@@ -199,145 +199,145 @@
       <g transform="rotate(-90 22.999950000000002 70)">
         <text id="lanes_cust_title" class="ai-shape ai-text" x="-6.5796" y="70" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Customer</text>
       </g>
-      <rect id="lanes_cust_body" class="ai-shape ai-rect" x="41" y="5" width="1774" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <rect id="lanes_cust_body" class="ai-shape ai-rect" x="41" y="5" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
     <g id="lanes_am" class="ai-container">
       <rect id="lanes_am_hd" class="ai-shape ai-rect" x="5" y="135" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
       <g transform="rotate(-90 23.000049999999998 200)">
         <text id="lanes_am_title" class="ai-shape ai-text" x="-30.4875" y="200" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Account manager</text>
       </g>
-      <rect id="lanes_am_body" class="ai-shape ai-rect" x="41" y="135" width="1774" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <rect id="lanes_am_body" class="ai-shape ai-rect" x="41" y="135" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
     <g id="lanes_con" class="ai-container">
       <rect id="lanes_con_hd" class="ai-shape ai-rect" x="5" y="265" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
       <g transform="rotate(-90 23 330)">
         <text id="lanes_con_title" class="ai-shape ai-text" x="-9.6235" y="330" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Consultant</text>
       </g>
-      <rect id="lanes_con_body" class="ai-shape ai-rect" x="41" y="265" width="1774" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <rect id="lanes_con_body" class="ai-shape ai-rect" x="41" y="265" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
     <g id="lanes_lead" class="ai-container">
       <rect id="lanes_lead_hd" class="ai-shape ai-rect" x="5" y="395" width="36" height="130" fill="var(--role-surface-2)" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
       <g transform="rotate(-90 23 460)">
         <text id="lanes_lead_title" class="ai-shape ai-text" x="-9.2413" y="460" text-anchor="start" dominant-baseline="middle" font-size="13" style="font-weight:bold">Team lead</text>
       </g>
-      <rect id="lanes_lead_body" class="ai-shape ai-rect" x="41" y="395" width="1774" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+      <rect id="lanes_lead_body" class="ai-shape ai-rect" x="41" y="395" width="1770" height="130" fill="none" stroke="var(--role-muted)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
   </g>
   <g id="steps" class="ai-container">
-    <rect id="step_1" class="ai-shape ai-rect ai-point" x="110" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_2" class="ai-shape ai-rect ai-point" x="260" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_3" class="ai-shape ai-rect ai-point" x="410" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_4" class="ai-shape ai-rect ai-point" x="560" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_5" class="ai-shape ai-rect ai-point" x="710" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_6" class="ai-shape ai-rect ai-point" x="860" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_7" class="ai-shape ai-rect ai-point" x="1010" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_8" class="ai-shape ai-rect ai-point" x="1160" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_9" class="ai-shape ai-rect ai-point" x="1310" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_10" class="ai-shape ai-rect ai-point" x="1460" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_11" class="ai-shape ai-rect ai-point" x="1610" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
-    <rect id="step_12" class="ai-shape ai-rect ai-point" x="1760" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_1" class="ai-shape ai-rect ai-point" x="106" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_2" class="ai-shape ai-rect ai-point" x="256" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_3" class="ai-shape ai-rect ai-point" x="406" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_4" class="ai-shape ai-rect ai-point" x="556" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_5" class="ai-shape ai-rect ai-point" x="706" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_6" class="ai-shape ai-rect ai-point" x="856" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_7" class="ai-shape ai-rect ai-point" x="1006" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_8" class="ai-shape ai-rect ai-point" x="1156" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_9" class="ai-shape ai-rect ai-point" x="1306" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_10" class="ai-shape ai-rect ai-point" x="1456" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_11" class="ai-shape ai-rect ai-point" x="1606" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
+    <rect id="step_12" class="ai-shape ai-rect ai-point" x="1756" y="5" width="0" height="0" fill="none" stroke="none" stroke-width="1.5"/>
   </g>
   <g id="request" class="ai-container">
-    <circle id="request_ring" class="ai-shape ai-circle" cx="110" cy="70" r="17" fill="var(--role-ok-soft)" stroke="var(--role-ok)" stroke-width="2"/>
-    <rect id="request_envelope" class="ai-shape ai-rect" x="101" y="64" width="18" height="12" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
-    <text id="request_caption" class="ai-shape ai-text" x="73.0125" y="96.5" text-anchor="start" dominant-baseline="middle" font-size="11">Project request</text>
+    <circle id="request_ring" class="ai-shape ai-circle" cx="106" cy="70" r="17" fill="var(--role-ok-soft)" stroke="var(--role-ok)" stroke-width="2"/>
+    <rect id="request_envelope" class="ai-shape ai-rect" x="97" y="64" width="18" height="12" fill="var(--role-surface)" stroke="var(--role-ink)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text id="request_caption" class="ai-shape ai-text" x="69.0125" y="96.5" text-anchor="start" dominant-baseline="middle" font-size="11">Project request</text>
   </g>
   <g id="qualify" class="ai-container">
-    <rect id="qualify_box" class="ai-shape ai-rect" x="195" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="260" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="260" dy="-0"><tspan>Qualify request</tspan></tspan></text>
+    <rect id="qualify_box" class="ai-shape ai-rect" x="191" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="256" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="256" dy="-0"><tspan>Qualify request</tspan></tspan></text>
   </g>
   <g id="known" class="ai-container">
-    <g transform="rotate(45 410 200)">
-      <rect id="known_diamond" class="ai-shape ai-rect" x="393" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <g transform="rotate(45 406 200)">
+      <rect id="known_diamond" class="ai-shape ai-rect" x="389" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
-    <rect id="known_hit" class="ai-shape ai-rect" x="386" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-    <text class="ai-label" x="410" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="410" dy="-0"><tspan>×</tspan></tspan></text>
-    <text id="known_question" class="ai-shape ai-text" x="330.8275" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11">Consultant already at customer?</text>
+    <rect id="known_hit" class="ai-shape ai-rect" x="382" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="406" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="406" dy="-0"><tspan>×</tspan></tspan></text>
+    <text id="known_question" class="ai-shape ai-text" x="326.8275" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11">Consultant already at customer?</text>
   </g>
   <g id="intro" class="ai-container">
-    <rect id="intro_box" class="ai-shape ai-rect" x="495" y="294" width="130" height="72" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="560" y="330" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="560" dy="-7.5"><tspan>Run project</tspan></tspan><tspan x="560" dy="15"><tspan>introduction</tspan></tspan></text>
-    <rect id="intro_plus" class="ai-shape ai-rect" x="553" y="349" width="14" height="14" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
-    <text class="ai-label" x="560" y="356" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="560" dy="-0"><tspan>+</tspan></tspan></text>
+    <rect id="intro_box" class="ai-shape ai-rect" x="491" y="294" width="130" height="72" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="556" y="330" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="556" dy="-7.5"><tspan>Run project</tspan></tspan><tspan x="556" dy="15"><tspan>introduction</tspan></tspan></text>
+    <rect id="intro_plus" class="ai-shape ai-rect" x="549" y="349" width="14" height="14" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text class="ai-label" x="556" y="356" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="556" dy="-0"><tspan>+</tspan></tspan></text>
   </g>
   <g id="join" class="ai-container">
-    <rect id="join_box" class="ai-shape ai-rect" x="495" y="42" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="560" y="70" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="560" dy="-7.5"><tspan>Join project</tspan></tspan><tspan x="560" dy="15"><tspan>introduction</tspan></tspan></text>
+    <rect id="join_box" class="ai-shape ai-rect" x="491" y="42" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="556" y="70" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="556" dy="-7.5"><tspan>Join project</tspan></tspan><tspan x="556" dy="15"><tspan>introduction</tspan></tspan></text>
   </g>
   <g id="move" class="ai-container">
-    <rect id="move_box" class="ai-shape ai-rect" x="645" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="710" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="710" dy="-15"><tspan>Offboard and</tspan></tspan><tspan x="710" dy="15"><tspan>onboard on new</tspan></tspan><tspan x="710" dy="15"><tspan>project</tspan></tspan></text>
+    <rect id="move_box" class="ai-shape ai-rect" x="641" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="706" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="706" dy="-15"><tspan>Offboard and</tspan></tspan><tspan x="706" dy="15"><tspan>onboard on new</tspan></tspan><tspan x="706" dy="15"><tspan>project</tspan></tspan></text>
   </g>
   <g id="onboard" class="ai-container">
-    <rect id="onboard_box" class="ai-shape ai-rect" x="795" y="302" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="860" y="330" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="860" dy="-7.5"><tspan>Follow up</tspan></tspan><tspan x="860" dy="15"><tspan>onboarding</tspan></tspan></text>
+    <rect id="onboard_box" class="ai-shape ai-rect" x="791" y="302" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="856" y="330" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="856" dy="-7.5"><tspan>Follow up</tspan></tspan><tspan x="856" dy="15"><tspan>onboarding</tspan></tspan></text>
   </g>
   <g id="merge" class="ai-container">
-    <g transform="rotate(45 1010 200)">
-      <rect id="merge_diamond" class="ai-shape ai-rect" x="993" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <g transform="rotate(45 1006 200)">
+      <rect id="merge_diamond" class="ai-shape ai-rect" x="989" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
-    <rect id="merge_hit" class="ai-shape ai-rect" x="986" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-    <text class="ai-label" x="1010" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1010" dy="-0"><tspan>×</tspan></tspan></text>
-    <text id="merge_question" class="ai-shape ai-text" x="1000" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
+    <rect id="merge_hit" class="ai-shape ai-rect" x="982" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1006" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1006" dy="-0"><tspan>×</tspan></tspan></text>
+    <text id="merge_question" class="ai-shape ai-text" x="996" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
   </g>
   <g id="split" class="ai-container">
-    <g transform="rotate(45 1160 200)">
-      <rect id="split_diamond" class="ai-shape ai-rect" x="1143" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <g transform="rotate(45 1156 200)">
+      <rect id="split_diamond" class="ai-shape ai-rect" x="1139" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
-    <rect id="split_hit" class="ai-shape ai-rect" x="1136" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-    <text class="ai-label" x="1160" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1160" dy="-0"><tspan>+</tspan></tspan></text>
-    <text id="split_question" class="ai-shape ai-text" x="1150" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
+    <rect id="split_hit" class="ai-shape ai-rect" x="1132" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1156" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1156" dy="-0"><tspan>+</tspan></tspan></text>
+    <text id="split_question" class="ai-shape ai-text" x="1146" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
   </g>
   <g id="due" class="ai-container">
-    <circle id="due_ring" class="ai-shape ai-circle" cx="1310" cy="460" r="17" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="2"/>
-    <circle id="due_face" class="ai-shape ai-circle" cx="1310" cy="460" r="13" fill="var(--role-surface)" stroke="var(--role-warn)" stroke-width="1.5"/>
-    <rect id="due_minute" class="ai-shape ai-rect" x="1309" y="452" width="2" height="9" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
-    <rect id="due_hour" class="ai-shape ai-rect" x="1309" y="459" width="7" height="2" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
-    <text id="due_caption" class="ai-shape ai-text" x="1267.21" y="486.5" text-anchor="start" dominant-baseline="middle" font-size="11">Review cycle due</text>
+    <circle id="due_ring" class="ai-shape ai-circle" cx="1306" cy="460" r="17" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="2"/>
+    <circle id="due_face" class="ai-shape ai-circle" cx="1306" cy="460" r="13" fill="var(--role-surface)" stroke="var(--role-warn)" stroke-width="1.5"/>
+    <rect id="due_minute" class="ai-shape ai-rect" x="1305" y="452" width="2" height="9" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <rect id="due_hour" class="ai-shape ai-rect" x="1305" y="459" width="7" height="2" fill="var(--role-ink)" stroke="none" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text id="due_caption" class="ai-shape ai-text" x="1263.21" y="486.5" text-anchor="start" dominant-baseline="middle" font-size="11">Review cycle due</text>
   </g>
   <g id="context" class="ai-container">
-    <rect id="context_box" class="ai-shape ai-rect" x="1395" y="42" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="1460" y="70" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1460" dy="-7.5"><tspan>Follow up customer</tspan></tspan><tspan x="1460" dy="15"><tspan>context</tspan></tspan></text>
+    <rect id="context_box" class="ai-shape ai-rect" x="1391" y="42" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="1456" y="70" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1456" dy="-7.5"><tspan>Follow up customer</tspan></tspan><tspan x="1456" dy="15"><tspan>context</tspan></tspan></text>
   </g>
   <g id="project" class="ai-container">
-    <rect id="project_box" class="ai-shape ai-rect" x="1395" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="1460" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1460" dy="-0"><tspan>Follow up project</tspan></tspan></text>
+    <rect id="project_box" class="ai-shape ai-rect" x="1391" y="172" width="130" height="56" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="1456" y="200" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1456" dy="-0"><tspan>Follow up project</tspan></tspan></text>
   </g>
   <g id="review" class="ai-container">
-    <rect id="review_box" class="ai-shape ai-rect" x="1395" y="424" width="130" height="72" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
-    <text class="ai-label" x="1460" y="460" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1460" dy="-0"><tspan>Performance review</tspan></tspan></text>
-    <rect id="review_plus" class="ai-shape ai-rect" x="1453" y="479" width="14" height="14" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
-    <text class="ai-label" x="1460" y="486" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="1460" dy="-0"><tspan>+</tspan></tspan></text>
+    <rect id="review_box" class="ai-shape ai-rect" x="1391" y="424" width="130" height="72" fill="var(--role-series-1-soft)" stroke="#333333" stroke-width="1.5" rx="8" style="rx:8px;ry:8px"/>
+    <text class="ai-label" x="1456" y="460" text-anchor="middle" dominant-baseline="middle" font-size="12"><tspan x="1456" dy="-0"><tspan>Performance review</tspan></tspan></text>
+    <rect id="review_plus" class="ai-shape ai-rect" x="1449" y="479" width="14" height="14" fill="var(--role-surface)" stroke="#333333" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <text class="ai-label" x="1456" y="486" text-anchor="middle" dominant-baseline="middle" font-size="11"><tspan x="1456" dy="-0"><tspan>+</tspan></tspan></text>
   </g>
   <g id="joined" class="ai-container">
-    <g transform="rotate(45 1610 200)">
-      <rect id="joined_diamond" class="ai-shape ai-rect" x="1593" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
+    <g transform="rotate(45 1606 200)">
+      <rect id="joined_diamond" class="ai-shape ai-rect" x="1589" y="183" width="34" height="34" fill="var(--role-warn-soft)" stroke="var(--role-warn)" stroke-width="1.5" rx="0" style="rx:0px;ry:0px"/>
     </g>
-    <rect id="joined_hit" class="ai-shape ai-rect" x="1586" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
-    <text class="ai-label" x="1610" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1610" dy="-0"><tspan>+</tspan></tspan></text>
-    <text id="joined_question" class="ai-shape ai-text" x="1600" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
+    <rect id="joined_hit" class="ai-shape ai-rect" x="1582" y="176" width="48" height="48" fill="none" stroke="none" stroke-width="1.5"/>
+    <text class="ai-label" x="1606" y="200" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="var(--role-warn)" style="font-weight:bold"><tspan x="1606" dy="-0"><tspan>+</tspan></tspan></text>
+    <text id="joined_question" class="ai-shape ai-text" x="1596" y="166.5" text-anchor="start" dominant-baseline="middle" font-size="11"></text>
   </g>
   <g id="done" class="ai-container">
-    <circle id="done_ring" class="ai-shape ai-circle" cx="1760" cy="200" r="17" fill="var(--role-error-soft)" stroke="var(--role-error)" stroke-width="4"/>
-    <text id="done_caption" class="ai-shape ai-text" x="1715.67" y="226.5" text-anchor="start" dominant-baseline="middle" font-size="11">Consultant staffed</text>
+    <circle id="done_ring" class="ai-shape ai-circle" cx="1756" cy="200" r="17" fill="var(--role-error-soft)" stroke="var(--role-error)" stroke-width="4"/>
+    <text id="done_caption" class="ai-shape ai-text" x="1711.67" y="226.5" text-anchor="start" dominant-baseline="middle" font-size="11">Consultant staffed</text>
   </g>
-  <text class="ai-label" x="539.5" y="190" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="539.5" dy="-0"><tspan>Yes</tspan></tspan></text>
-  <text class="ai-label" x="420" y="319.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="420" dy="-0"><tspan>No</tspan></tspan></text>
-  <path class="ai-connection" d="M127 70 L260 70 L260 164.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M325 200 L378.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M434 200 L637.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M410 224 L410 330 L487.8 330" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M625 330 L787.8 330" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M925 330 L1010 330 L1010 231.2" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M775 200 L978.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1034 200 L1128.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1160 176 L1160 70 L1387.8 70" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1184 200 L1387.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1160 224 L1160 460 L1285.8 460" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1327 460 L1387.8 460" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1525 70 L1610 70 L1610 168.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1525 200 L1578.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1525 460 L1610 460 L1610 231.2" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M1634 200 L1735.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
-  <path class="ai-connection" d="M560 282.3 L560 98" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-start="url(#ai-end-circle)" marker-end="url(#ai-end-open)"/>
+  <text class="ai-label" x="535.5" y="190" text-anchor="middle" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="535.5" dy="-0"><tspan>Yes</tspan></tspan></text>
+  <text class="ai-label" x="416" y="319.5" text-anchor="start" dominant-baseline="middle" fill="var(--text-2)" font-size="12"><tspan x="416" dy="-0"><tspan>No</tspan></tspan></text>
+  <path class="ai-connection" d="M123 70 L256 70 L256 164.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M321 200 L374.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M430 200 L633.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M406 224 L406 330 L483.8 330" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M621 330 L783.8 330" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M921 330 L1006 330 L1006 231.2" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M771 200 L974.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1030 200 L1124.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1156 176 L1156 70 L1383.8 70" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1180 200 L1383.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1156 224 L1156 460 L1281.8 460" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1323 460 L1383.8 460" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1521 70 L1606 70 L1606 168.8" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1521 200 L1574.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1521 460 L1606 460 L1606 231.2" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M1630 200 L1731.8 200" fill="none" stroke="#333" stroke-width="2" marker-end="url(#ai-arrow)"/>
+  <path class="ai-connection" d="M556 282.3 L556 98" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="8,4" marker-start="url(#ai-end-circle)" marker-end="url(#ai-end-open)"/>
 </svg>

@@ -1404,6 +1404,18 @@ fn reportable_overlap(
     b: &ElementLayout,
     contains_ids: &ContainsRelations,
 ) -> Option<(f64, f64)> {
+    reportable_overlap_of(a, b, contains_ids, false)
+}
+
+/// `side_by_side`: `a` and `b` are members of one row, column or grid, which
+/// is there to keep them apart, so one covering the other is never a
+/// backdrop or a ring around it (a member stretched over its neighbour).
+fn reportable_overlap_of(
+    a: &ElementLayout,
+    b: &ElementLayout,
+    contains_ids: &ContainsRelations,
+    side_by_side: bool,
+) -> Option<(f64, f64)> {
     // Reference-only grid cells are never drawn; ignore them.
     if is_reference_only(a) || is_reference_only(b) {
         return None;
@@ -1434,7 +1446,7 @@ fn reportable_overlap(
             && big.bounds.contains_bbox(&small.bounds)
             && area(big) > 4.0 * area(small).max(1.0)
     };
-    if !is_text_shape(a) && !is_text_shape(b) && (backdrop(a, b) || backdrop(b, a)) {
+    if !side_by_side && !is_text_shape(a) && !is_text_shape(b) && (backdrop(a, b) || backdrop(b, a)) {
         return None;
     }
 
@@ -1448,7 +1460,7 @@ fn reportable_overlap(
             && outer.label.is_none()
             && outer.bounds.contains_bbox(&inner.bounds)
     };
-    if encloses(a, b) || encloses(b, a) {
+    if !side_by_side && (encloses(a, b) || encloses(b, a)) {
         return None;
     }
 
@@ -1823,7 +1835,11 @@ fn check_overlaps_recursive(
                     continue;
                 }
 
-                if let Some((w, h)) = reportable_overlap(a, b, contains_ids) {
+                let side_by_side = matches!(
+                    parent.element_type,
+                    ElementType::Layout(LayoutType::Row | LayoutType::Column | LayoutType::Grid)
+                );
+                if let Some((w, h)) = reportable_overlap_of(a, b, contains_ids, side_by_side) {
                     let mut name_a = name(a, index_a);
                     let mut name_b = name(b, index_b);
                     // Two anonymous children of the same cell would otherwise
@@ -3688,15 +3704,44 @@ fn check_over_constrained(result: &LayoutResult, doc: &Document, warnings: &mut 
 }
 
 /// The elements each `constrain` names (leaf ids), document-wide.
-fn constraint_groups(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<Vec<String>>) {
+fn constraint_groups(stmts: &[crate::parser::ast::Spanned<Statement>], out: &mut Vec<Vec<(String, ConstraintProperty)>>) {
     for stmt in stmts {
         match &stmt.node {
-            Statement::Constrain(c) => out.push(expr_paths(&c.expr).iter().map(|p| p.leaf().0.clone()).collect()),
+            Statement::Constrain(c) => out.push(expr_refs(&c.expr)),
             Statement::Layout(l) => constraint_groups(&l.children, out),
             Statement::Group(g) => constraint_groups(&g.children, out),
             _ => {}
         }
     }
+}
+
+/// The (element, property) pairs a constraint compares.
+fn expr_refs(expr: &ConstraintExpr) -> Vec<(String, ConstraintProperty)> {
+    let pr = |r: &crate::parser::ast::PropertyRef| (r.element.node.leaf().0.clone(), r.property.node.clone());
+    match expr {
+        ConstraintExpr::Equal { left, right } | ConstraintExpr::EqualWithOffset { left, right, .. } => vec![pr(left), pr(right)],
+        ConstraintExpr::Constant { left, .. }
+        | ConstraintExpr::GreaterOrEqual { left, .. }
+        | ConstraintExpr::LessOrEqual { left, .. } => vec![pr(left)],
+        _ => vec![],
+    }
+}
+
+/// Which way a property runs: Some(true) horizontal, Some(false) vertical.
+fn horizontal(p: &ConstraintProperty) -> Option<bool> {
+    use ConstraintProperty::*;
+    match p {
+        X | Width | Left | Right | CenterX => Some(true),
+        Y | Height | Top | Bottom | CenterY => Some(false),
+        _ => None,
+    }
+}
+
+/// A property through which a constraint stretches a size: its far edge or
+/// the size itself.
+fn stretches(p: &ConstraintProperty, horiz: bool) -> bool {
+    use ConstraintProperty::*;
+    if horiz { matches!(p, Right | Width) } else { matches!(p, Bottom | Height) }
 }
 
 /// The element paths a constraint compares (not `contains` or midpoints).
@@ -3719,54 +3764,71 @@ fn expr_paths(expr: &ConstraintExpr) -> Vec<&crate::parser::ast::ElementPath> {
 /// Which constraint the solver gives up is its choice, so a range that stopped
 /// is looked for among this constraint's elements and then among those that
 /// share another constraint with them.
-fn size_hint(result: &LayoutResult, expr: &ConstraintExpr, groups: &[Vec<String>]) -> String {
+fn size_hint(result: &LayoutResult, expr: &ConstraintExpr, groups: &[Vec<(String, ConstraintProperty)>]) -> String {
     let paths = expr_paths(expr);
     let written = |p: &crate::parser::ast::ElementPath| {
         p.segments.iter().map(|s| s.node.0.as_str()).collect::<Vec<_>>().join(".")
     };
-    let mut ids: Vec<String> = paths.iter().map(|p| p.leaf().0.clone()).collect();
-    let mut shown: Vec<String> = paths.iter().map(|p| written(p)).collect();
-    let direct = ids.clone();
+    let here = expr_refs(expr);
+    // The axis the conflict is on; a size range on the other axis is no reason.
+    let Some(horiz) = here.iter().find_map(|(_, p)| horizontal(p)) else { return String::new() };
+    // What this constraint and those sharing an element with it ask of each
+    // element on this axis.
+    let mut asked: Vec<(String, ConstraintProperty, bool)> =
+        here.iter().map(|(id, p)| (id.clone(), p.clone(), true)).collect();
     for g in groups {
-        if g.iter().any(|x| direct.contains(x)) {
-            for x in g {
-                if !ids.contains(x) {
-                    ids.push(x.clone());
-                    shown.push(x.clone());
-                }
+        if g.iter().any(|(x, _)| here.iter().any(|(h, _)| h == x)) {
+            for (x, p) in g {
+                asked.push((x.clone(), p.clone(), false));
             }
         }
     }
-    for (k, (id, name)) in ids.iter().zip(&shown).enumerate() {
+    let mut seen: Vec<&str> = Vec::new();
+    for (id, _, _) in &asked {
+        if seen.contains(&id.as_str()) {
+            continue;
+        }
+        seen.push(id);
         let Some(e) = result.get_element_by_name(id) else { continue };
-        // At its lower bound is often just a size at rest: only said of an
-        // element this constraint names.
-        let named_here = k < direct.len();
-        for (axis, range, size) in [
-            ("width", e.styles.width_range, e.bounds.width),
-            ("height", e.styles.height_range, e.bounds.height),
-        ] {
-            let Some((min, max)) = range else { continue };
-            let range_text = format!(
-                "{}..{}",
-                min.map(|v| format!("{v}")).unwrap_or_default(),
-                max.map(|v| format!("{v}")).unwrap_or_default()
-            );
-            if max.is_some_and(|m| (size - m).abs() < 0.5) {
-                return format!("; `{}` stopped at the top of its {} range ({}): raise or drop the upper bound", name, axis, range_text);
-            }
-            if named_here && min.is_some_and(|m| (size - m).abs() < 0.5) {
-                return format!("; `{}` stopped at the bottom of its {} range ({}): lower or drop the lower bound", name, axis, range_text);
-            }
+        let (axis, range, size) = if horiz {
+            ("width", e.styles.width_range, e.bounds.width)
+        } else {
+            ("height", e.styles.height_range, e.bounds.height)
+        };
+        let Some((min, max)) = range else { continue };
+        // Only a range something tried to stretch: a constraint on its far
+        // edge or its size. One that merely sits at a bound is at rest.
+        let pulled_here = asked.iter().any(|(x, p, direct)| *direct && x == id && stretches(p, horiz));
+        let pulled = asked.iter().any(|(x, p, _)| x == id && stretches(p, horiz));
+        if !pulled || min.is_some() && min == max {
+            continue;
+        }
+        let name = paths.iter().find(|p| p.leaf().0 == *id).map(|p| written(p)).unwrap_or_else(|| id.clone());
+        let range_text = format!(
+            "{}..{}",
+            min.map(|v| format!("{v}")).unwrap_or_default(),
+            max.map(|v| format!("{v}")).unwrap_or_default()
+        );
+        if max.is_some_and(|m| (size - m).abs() < 0.5) {
+            return format!("; `{}` stopped at the top of its {} range ({}): raise or drop the upper bound", name, axis, range_text);
+        }
+        if pulled_here && min.is_some_and(|m| (size - m).abs() < 0.5) {
+            return format!("; `{}` stopped at the bottom of its {} range ({}): lower or drop the lower bound", name, axis, range_text);
         }
     }
-    for path in &paths {
-        let id = path.leaf().0.clone();
-        let Some(e) = result.get_element_by_name(&id) else { continue };
-        if e.styles.width_range.is_none() && e.styles.height_range.is_none() && in_template_instance(&result.root_elements, &id) {
+    // A rigid template part asked to stretch (its far edge or size, while
+    // something else holds it): a range is what would let it.
+    for (path, (id, p)) in paths.iter().zip(&here) {
+        if !stretches(p, horiz) {
+            continue;
+        }
+        let Some(e) = result.get_element_by_name(id) else { continue };
+        let ranged = if horiz { e.styles.width_range.is_some() } else { e.styles.height_range.is_some() };
+        if !ranged && in_template_instance(&result.root_elements, id) {
             return format!(
-                "; `{}` is part of a template, which keeps its shape and moves as one piece: to let constraints stretch it, give it a size range in the template (width: 200..)",
-                written(path)
+                "; `{}` is part of a template, which keeps its shape and moves as one piece: to let constraints stretch it, give it a size range in the template ({}: 200..)",
+                written(path),
+                if horiz { "width" } else { "height" }
             );
         }
     }
@@ -3784,7 +3846,7 @@ fn in_template_instance(elems: &[ElementLayout], id: &str) -> bool {
 fn check_over_constrained_in_stmts(
     stmts: &[crate::parser::ast::Spanned<Statement>],
     result: &LayoutResult,
-    groups: &[Vec<String>],
+    groups: &[Vec<(String, ConstraintProperty)>],
     warnings: &mut Vec<LintWarning>,
 ) {
     const EPSILON: f64 = 1.0;

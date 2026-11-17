@@ -686,10 +686,10 @@ fn render_err(src: &str) -> String {
 }
 
 #[test]
-fn records_with_an_id_name_their_copies_by_it() {
+fn by_a_field_names_the_copies_by_it() {
     let out = svg(r#"
 col lanes {
-    each l in [{id: cust, name: "Customer"}, {id: ops, name: "Operations"}] {
+    each l by id in [{id: cust, name: "Customer"}, {id: ops, name: "Operations"}] {
         rect lane [label: l.name]
     }
 }
@@ -705,7 +705,7 @@ lane_ops -> hub
 fn a_keyed_copy_is_reached_with_an_index() {
     let base = r#"
 col lanes {
-    each l in [{id: cust}, {id: ops}] {
+    each l by id in [{id: cust}, {id: ops}] {
         rect lane
     }
 }
@@ -718,7 +718,7 @@ rect hub
 fn the_position_still_counts_from_zero_with_keyed_copies() {
     let out = svg(r#"
 col c {
-    each l, i in [{id: a}, {id: b}] {
+    each l, i by id in [{id: a}, {id: b}] {
         rect r [label: "row {i+1}"]
     }
 }
@@ -728,21 +728,41 @@ col c {
 }
 
 #[test]
-fn an_id_on_only_some_items_is_an_error() {
-    let e = render_err("col c {\n each l in [{id: a, n: 1}, {n: 2}] {\n rect r\n }\n}\n");
+fn a_key_missing_from_an_item_is_an_error() {
+    let e = render_err("col c {\n each l by id in [{id: a, n: 1}, {n: 2}] {\n rect r\n }\n}\n");
     assert!(e.contains("item 2 has no `id`"), "{e}");
 }
 
 #[test]
 fn a_duplicate_id_is_an_error() {
-    let e = render_err("col c {\n each l in [{id: a}, {id: a}] {\n rect r\n }\n}\n");
+    let e = render_err("col c {\n each l by id in [{id: a}, {id: a}] {\n rect r\n }\n}\n");
     assert!(e.contains("items 1 and 2 both have id `a`"), "{e}");
 }
 
 #[test]
 fn a_quoted_id_is_an_error() {
-    let e = render_err("col c {\n each l in [{id: \"a b\"}] {\n rect r\n }\n}\n");
-    assert!(e.contains("`id` must be a name"), "{e}");
+    let e = render_err("col c {\n each l by id in [{id: \"a b\"}] {\n rect r\n }\n}\n");
+    assert!(e.contains("`id` must be a plain word"), "{e}");
+}
+
+#[test]
+fn an_id_field_without_by_is_plain_data() {
+    // Records often carry an id as data: no `by`, no keying, numbered copies.
+    let out = svg(r#"
+col c {
+    each t in [{id: "T-101", title: "Login"}, {id: "T-101", title: "Logout"}] {
+        rect card [label: "{t.id}: {t.title}"]
+    }
+}
+"#);
+    assert!(has_id(&out, "card_1") && has_id(&out, "card_2"), "{:?}", ids(&out));
+    assert!(out.contains("T-101: Logout"));
+}
+
+#[test]
+fn by_needs_records() {
+    let e = render_err("col c {\n each l by id in [a, b] {\n rect r\n }\n}\n");
+    assert!(e.contains("item 1 is not a record"), "{e}");
 }
 
 #[test]

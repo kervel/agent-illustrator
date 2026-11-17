@@ -132,9 +132,10 @@ template "message" (name: "", lane: "", at: "") {
 
 // ─── 2. The grid ─────────────────────────────────────────────────────────────
 
-// One lane per role, top to bottom. The `id` names each copy: lanes[am] is lanes_am.
-col pool [gap: 0, padding: 0] {
-    each r in [
+// One lane per role, top to bottom. `by id` names each copy: lanes[am] is lanes_am.
+// `align: hd` lines the lanes up on their header strips.
+col pool [gap: 0, padding: 0, align: hd] {
+    each r by id in [
         {id: cust, name: "Customer"},
         {id: am,   name: "Account manager"},
         {id: con,  name: "Consultant"},
@@ -150,7 +151,7 @@ row steps [gap: 150] {
         point step
     }
 }
-constrain steps.left = pool.left + 100
+constrain steps.left = lanes[cust].body.left + 60
 constrain steps.center_y = pool.top
 
 

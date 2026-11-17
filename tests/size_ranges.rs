@@ -156,3 +156,53 @@ constrain x.b.right = c.right
 "#);
     assert!(w.iter().any(|m| m.contains("part of a template") && m.contains("width: 200..")), "{w:?}");
 }
+
+#[test]
+fn a_far_edge_out_of_reach_moves_a_ranged_shape_as_it_would_a_fixed_one() {
+    // Grows to its upper bound, then moves: no unsatisfiable error.
+    let out = svg("rect a [width: 100..200, height: 20]\nconstrain a.right = 300\n");
+    assert_eq!(rect_x_w(&out, "a"), (100.0, 200.0));
+    let out = svg("rect a [width: 100.., height: 20]\nconstrain a.right = 50\n");
+    assert_eq!(rect_x_w(&out, "a"), (-50.0, 100.0));
+    // Within reach it grows and stays put.
+    let out = svg("rect a [width: 100..200, height: 20]\nconstrain a.right = 150\n");
+    assert_eq!(rect_x_w(&out, "a"), (0.0, 150.0));
+}
+
+#[test]
+fn a_range_on_the_other_axis_is_not_blamed() {
+    let w = lint(
+        "rect b [size: 10]\nrect r [width: 100.., height: 30]\nconstrain b.top = 100\nconstrain r.top = 10\nconstrain r.top = b.bottom + 50\n",
+    );
+    assert!(w.iter().any(|m| m.contains("violated")), "{w:?}");
+    assert!(!w.iter().any(|m| m.contains("range")), "{w:?}");
+}
+
+#[test]
+fn a_position_conflict_on_a_template_part_does_not_suggest_a_range() {
+    let w = lint(
+        "template \"Q\" () { rect q [size: 20] }\nQ x\nrect z [size: 10]\nconstrain z.top = 200\nconstrain x.q.top = 10\nconstrain x.q.top = z.bottom + 100\n",
+    );
+    assert!(w.iter().any(|m| m.contains("violated")), "{w:?}");
+    assert!(!w.iter().any(|m| m.contains("size range")), "{w:?}");
+}
+
+#[test]
+fn a_row_member_stretched_over_its_neighbour_is_reported() {
+    let w = lint(r#"
+row r {
+    rect a [width: 100.., height: 30]
+    rect b [width: 50, height: 30]
+}
+rect c [width: 400, height: 20]
+constrain c.top = r.bottom + 20
+constrain a.right = c.right
+"#);
+    assert!(w.iter().any(|m| m.contains("\"a\" and \"b\" overlap")), "{w:?}");
+}
+
+#[test]
+fn a_negative_bound_is_an_error_that_says_so() {
+    let e = render("rect a [width: -10..20]\n").unwrap_err().to_string();
+    assert!(e.contains("never negative"), "{e}");
+}

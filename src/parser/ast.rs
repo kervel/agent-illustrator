@@ -185,6 +185,9 @@ pub enum Statement {
 pub struct EachBlock {
     pub var: Spanned<Identifier>,
     pub index: Option<Spanned<Identifier>>,
+    /// `each r by id in ...`: the record field whose value names each item's
+    /// copies (`lane lanes` -> `lanes_am`). Without it copies are numbered.
+    pub key: Option<Spanned<Identifier>>,
     /// A literal `StyleValue::List`, or an `Identifier` naming a list parameter.
     pub source: Spanned<StyleValue>,
     pub body: Vec<Spanned<Statement>>,

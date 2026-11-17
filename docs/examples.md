@@ -786,7 +786,7 @@ Full scene: examples/line-ends.ail.
 ## Cross-functional flowchart: lanes from records, nodes that place themselves
 
 Lanes are one `lane` per record (`{id: am, name: "Account manager"}`), named by
-the id (`lanes_am`, reached as `lanes[am]`). A lane's body has `width: 200..`, a
+the id with `each r by id` (`lanes_am`, reached as `lanes[am]`). A lane's body has `width: 200..`, a
 size range, so it stretches to the last step; a fixed part would move its whole
 lane instead (`--doc sizes`). Steps are invisible points `step[k]`. Every node
 template takes `name:`, `lane:` and `at:` and constrains itself onto the lane's
@@ -812,15 +812,15 @@ template "task" (name: "", lane: "", at: "") {
     anchor b [position: box.bottom, direction: down]
 }
 
-col pool [gap: 0, padding: 0] {
-    each r in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}] {
+col pool [gap: 0, padding: 0, align: hd] {
+    each r by id in [{id: cust, name: "Customer"}, {id: am, name: "Account manager"}] {
         lane lanes [name: r.name, across: steps]
     }
 }
 row steps [gap: 150] {
     each k in [1, 2, 3] { point step }
 }
-constrain steps.left = pool.left + 100
+constrain steps.left = lanes[cust].body.left + 60
 constrain steps.center_y = pool.top
 
 task ask  [name: "Ask for a quote", lane: lanes[cust], at: step[1]]
