@@ -677,10 +677,8 @@ each k in looks {
     constrain out.center_y = m.from.p[m.id].top
     constrain back.center_x = out.center_x
     constrain back.center_y = m.from.p[m.id].bottom
-    m.from.p[m.id].top -> m.to.p[m.id].bottom [routing: direct, via: [out, back], to_end: k.head, stroke_dasharray: k.dash]
-    text "{i+1}: {m.label}" self_t [font_size: 11, fill: role-muted]
-    constrain self_t.left = out.right + 6
-    constrain self_t.center_y = m.from.p[m.id].center_y
+    m.from.p[m.id].top -> m.to.p[m.id].bottom [routing: direct, via: [out, back], to_end: k.head, stroke_dasharray: k.dash,
+                                               label: "{i+1}: {m.label}", label_offset: 6]
   }
 }
 

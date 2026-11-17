@@ -178,3 +178,57 @@ a.top -> a.top as c
     let msgs = lint(src);
     assert!(msgs.iter().any(|m| m.contains("a→a") && m.contains("via")), "{msgs:?}");
 }
+
+// ── labels sit on the drawn polyline ──────────────────────────────────
+
+/// (x, text-anchor) of the label text whose content is `text`.
+fn label_x(svg: &str, text: &str) -> (f64, String) {
+    let line = svg
+        .lines()
+        .find(|l| l.contains("ai-label") && l.contains(&format!(">{text}<")))
+        .unwrap_or_else(|| panic!("label {text} in {svg}"));
+    let attr = |name: &str| {
+        let s = line.find(&format!(" {name}=\"")).unwrap() + name.len() + 3;
+        line[s..s + line[s..].find('"').unwrap()].to_string()
+    };
+    (attr("x").parse().unwrap(), attr("text-anchor"))
+}
+
+const SELF_MSG: &str = r#"
+rect a [width: 20, height: 100]
+point out
+point back
+constrain a.left = 0
+constrain a.top = 0
+constrain out.center_x = a.right + 40
+constrain out.center_y = a.top
+constrain back.center_x = out.center_x
+constrain back.center_y = a.bottom
+a.top -> a.bottom [routing: direct, via: [out, back], label: "validate"OFFSET]
+"#;
+
+#[test]
+fn label_on_direct_via_polyline_is_offset_from_the_drawn_line() {
+    // The polyline's middle is on its vertical run at x = 60.
+    let (x, anchor) = label_x(&render(&SELF_MSG.replace("OFFSET", "")).unwrap(), "validate");
+    assert_eq!((x, anchor.as_str()), (70.0, "start"), "default offset 10 from the line at x=60");
+    let (x, _) = label_x(&render(&SELF_MSG.replace("OFFSET", ", label_offset: 6")).unwrap(), "validate");
+    assert_eq!(x, 66.0, "label_offset counts from the drawn line");
+}
+
+#[test]
+fn label_on_orthogonal_z_route_is_offset_from_its_middle_run() {
+    let src = r#"
+rect a [width: 40, height: 40]
+rect b [width: 40, height: 40]
+constrain a.left = 0
+constrain a.top = 0
+constrain b.left = 200
+constrain b.top = 100
+a.right -> b.left [label: "go"]
+"#;
+    // Z route: (40,20) (120,20) (120,120) (200,120): the middle is on x = 120.
+    let (x, anchor) = label_x(&render(src).unwrap(), "go");
+    assert_eq!(anchor, "start");
+    assert_eq!(x, 130.0);
+}

@@ -1299,7 +1299,7 @@ pub fn route_connections_hiding(
                             straighten_subpixel_offset(path, styles.stroke_width.unwrap_or(2.0))
                         };
                         let (label, label_ref_id) =
-                            extract_connection_label_with_ref(&conn.modifiers, &path, result);
+                            extract_connection_label_with_ref(&conn.modifiers, &path, routing_mode, result);
 
                         if let Some(id) = label_ref_id {
                             label_element_ids.insert(id);
@@ -1663,7 +1663,9 @@ fn extract_connection_label(
     path: &[Point],
     result: &LayoutResult,
 ) -> Option<LabelLayout> {
-    extract_connection_label_with_ref(modifiers, path, result).0
+    // Unit tests pass a bare path: four points there mean a Bezier curve.
+    let mode = if path.len() == 4 { RoutingMode::Curved } else { RoutingMode::Orthogonal };
+    extract_connection_label_with_ref(modifiers, path, mode, result).0
 }
 
 /// `label_mask: N` on a connection: the padding around its label's box inside
@@ -1755,6 +1757,7 @@ fn place_end_labels(conn: &mut ConnectionLayout) {
 fn extract_connection_label_with_ref(
     modifiers: &[Spanned<StyleModifier>],
     path: &[Point],
+    routing_mode: RoutingMode,
     result: &LayoutResult,
 ) -> (Option<LabelLayout>, Option<String>) {
     let mut label_ref_id: Option<String> = None;
@@ -1847,8 +1850,11 @@ fn extract_connection_label_with_ref(
         })
         .unwrap_or(0.5);
 
-    // Calculate label position - for curves, use the actual curve point at label_at
-    let (mid_x, mid_y, anchor) = if path.len() == 4 {
+    // Calculate label position - for curves, use the actual curve point at label_at.
+    // Only a curved route's four points are a Bezier; any other four-point
+    // route (an orthogonal Z, a direct line through two via points) is the
+    // polyline that is drawn.
+    let (mid_x, mid_y, anchor) = if routing_mode == RoutingMode::Curved && path.len() == 4 {
         // Cubic Bezier: calculate point at t=label_at
         let t = label_at;
         let mt = 1.0 - t;

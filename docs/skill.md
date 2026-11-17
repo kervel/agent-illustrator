@@ -390,8 +390,8 @@ message: `api.p[login]`); every lifeline gets `ticks: msgs`. One `each m, i in m
 m.from != m.to` draws the arrows (`m.from.p[m.id] -> m.to.p[m.id]`, label `"{i+1}: {m.label}"`);
 the look per kind is a second list (`let looks = [{kind: reply, head: open, dash: dashed}, ...]`,
 read by an outer `each k in looks` with `where m.kind == k.kind`). A self-message (`where m.from
-== m.to`) is `x.p[id].top -> x.p[id].bottom [routing: direct, via: [out, back]]` through two
-points beside the row. Activation bars come from `let bars = [{on: api, first: login, last:
+== m.to`) is `x.p[id].top -> x.p[id].bottom [routing: direct, via: [out, back], label: ...,
+label_offset: 6]` through two points beside the row; its label sits beside the loop's outer run. Activation bars come from `let bars = [{on: api, first: login, last:
 conflict}]`; frames (loop, alt) are a `frame` template that `contains` the rows from `first:`
 to `last:`. A shorter lifeline: `life auth [ticks: msgs, until: auth.p[ok]]`, where the
 template says `(until: rows)`, a default that names its own part (see Template Best
