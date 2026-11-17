@@ -212,10 +212,14 @@
     </g>
     <g id="meso" class="ai-container">
       <g id="meso_content" class="ai-container">
-        <ellipse id="op1" class="ai-shape ai-ellipse" cx="62" cy="171" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="62" y="171" text-anchor="middle" dominant-baseline="middle"><tspan x="62" dy="-0"><tspan>OP 1 (Station)</tspan></tspan></text>
-        <ellipse id="op2" class="ai-shape ai-ellipse" cx="242" cy="171" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
-        <text class="ai-label" x="242" y="171" text-anchor="middle" dominant-baseline="middle"><tspan x="242" dy="-0"><tspan>OP 2 (Station)</tspan></tspan></text>
+        <g opacity="0.3">
+          <ellipse id="op1" class="ai-shape ai-ellipse" cx="62" cy="171" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <text class="ai-label" x="62" y="171" text-anchor="middle" dominant-baseline="middle"><tspan x="62" dy="-0"><tspan>OP 1 (Station)</tspan></tspan></text>
+        </g>
+        <g opacity="0.3">
+          <ellipse id="op2" class="ai-shape ai-ellipse" cx="242" cy="171" rx="70" ry="40" fill="var(--accent-light)" stroke="var(--accent-1)" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <text class="ai-label" x="242" y="171" text-anchor="middle" dominant-baseline="middle"><tspan x="242" dy="-0"><tspan>OP 2 (Station)</tspan></tspan></text>
+        </g>
         <g id="meso_tracks" class="ai-container">
           <g id="mtrackA" class="ai-container">
             <circle id="ma1" class="ai-shape ai-circle" cx="23" cy="144" r="3" fill="var(--foreground-3)" stroke="#333333" stroke-width="1.5"/>
