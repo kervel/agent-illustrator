@@ -854,6 +854,12 @@ pub fn route_connection_with_anchors_and_types(
         return vec![start, end];
     }
 
+    // Orthogonal routing through `via:` points: right angles from the start
+    // through each via point to the end.
+    if mode == RoutingMode::Orthogonal && !via_points.is_empty() {
+        return orthogonal_through(from_bounds, to_bounds, via_points, from_anchor, to_anchor);
+    }
+
     // Orthogonal routing: use anchor positions if provided, otherwise edge-based attachment
     // Feature 009: When anchors are specified, use their positions
     let (default_from_edge, default_to_edge) = best_edges(from_bounds, to_bounds);
@@ -964,7 +970,149 @@ pub fn route_connection_with_anchors_and_types(
         }
     }
 
+    // The same going left (Left to Right): bend half way between the sides,
+    // rather than running along both edges.
+    if from_edge == Edge::Left && to_edge == Edge::Right {
+        let dy = (end.y - start.y).abs();
+        if dy > 15.0 {
+            let mid_x = ((start.x + end.x) / 2.0).max(end.x + MIN_FINAL_SEGMENT_LENGTH);
+            return vec![
+                start,
+                Point::new(mid_x, start.y),
+                Point::new(mid_x, end.y),
+                end,
+            ];
+        }
+    }
+
     route_orthogonal(start, end)
+}
+
+fn edge_direction(edge: Edge) -> Point {
+    match edge {
+        Edge::Top => Point::new(0.0, -1.0),
+        Edge::Bottom => Point::new(0.0, 1.0),
+        Edge::Left => Point::new(-1.0, 0.0),
+        Edge::Right => Point::new(1.0, 0.0),
+    }
+}
+
+/// An orthogonal route that passes through every `via:` point in order. It
+/// leaves the start along its anchor's direction (or by the edge facing the
+/// first via point), runs on in the direction it is going before turning
+/// toward each next via point, and arrives at the end against the end
+/// anchor's direction (or at the edge facing the last via point). Works the
+/// same when both ends are on one element, so a self connection loops out
+/// through its via points and back.
+fn orthogonal_through(
+    from_bounds: &BoundingBox,
+    to_bounds: &BoundingBox,
+    via_points: &[Point],
+    from_anchor: Option<&ResolvedAnchor>,
+    to_anchor: Option<&ResolvedAnchor>,
+) -> Vec<Point> {
+    let first = via_points[0];
+    let last = via_points[via_points.len() - 1];
+    let dot = |p: Point| BoundingBox::new(p.x, p.y, 0.0, 0.0);
+    let (start, mut heading) = match from_anchor {
+        Some(a) => (a.position, cardinal_direction_for_anchor(a.direction)),
+        None => {
+            let edge = best_edges(from_bounds, &dot(first)).0;
+            (attachment_point(from_bounds, edge), edge_direction(edge))
+        }
+    };
+    let (end, arrive) = match to_anchor {
+        Some(a) => {
+            let facing = cardinal_direction_for_anchor(a.direction);
+            (a.position, Point::new(-facing.x, -facing.y))
+        }
+        None => {
+            let edge = best_edges(&dot(last), to_bounds).1;
+            let facing = edge_direction(edge);
+            (attachment_point(to_bounds, edge), Point::new(-facing.x, -facing.y))
+        }
+    };
+    let vertical = |d: Point| d.y.abs() > d.x.abs();
+    let mut path = vec![start];
+    let mut cur = start;
+    for &v in via_points {
+        // Keep going the way the line runs, then turn toward v.
+        let corner = if vertical(heading) { Point::new(cur.x, v.y) } else { Point::new(v.x, cur.y) };
+        path.push(corner);
+        path.push(v);
+        let d = segment_direction(corner, v);
+        heading = if d.x != 0.0 || d.y != 0.0 {
+            d
+        } else {
+            let d = segment_direction(cur, corner);
+            if d.x != 0.0 || d.y != 0.0 { d } else { heading }
+        };
+        cur = v;
+    }
+    // The last leg ends running along `arrive`.
+    let corner = if vertical(arrive) { Point::new(end.x, cur.y) } else { Point::new(cur.x, end.y) };
+    path.push(corner);
+    path.push(end);
+    drop_repeated_and_straight_points(path)
+}
+
+/// Remove repeated points and points in the middle of a straight run (the
+/// line goes on the same way through them). Unlike `simplify_path` it keeps a
+/// point where the line turns back, so a via point at the far end of an
+/// out-and-back run stays on the route.
+fn drop_repeated_and_straight_points(points: Vec<Point>) -> Vec<Point> {
+    let mut out: Vec<Point> = Vec::with_capacity(points.len());
+    for p in points {
+        if out.last().is_some_and(|l| (l.x - p.x).abs() < 0.001 && (l.y - p.y).abs() < 0.001) {
+            continue;
+        }
+        if out.len() >= 2 {
+            let (a, b) = (out[out.len() - 2], out[out.len() - 1]);
+            let d1 = segment_direction(a, b);
+            let d2 = segment_direction(b, p);
+            let straight_on = (d1.x == d2.x && d1.y == d2.y)
+                && ((a.x - b.x).abs() < 0.001 && (b.x - p.x).abs() < 0.001
+                    || (a.y - b.y).abs() < 0.001 && (b.y - p.y).abs() < 0.001);
+            if straight_on {
+                out.pop();
+            }
+        }
+        out.push(p);
+    }
+    out
+}
+
+/// How far apart (across the line) two ends may be and still count as aligned:
+/// an offset below this is invisible, so drawing it as a jog (two extra
+/// corners for a fraction of a pixel) only adds noise. Half a pixel for thin
+/// lines, a whole pixel from stroke width 2 on.
+pub(crate) fn alignment_epsilon(stroke_width: f64) -> f64 {
+    if stroke_width >= 2.0 { 1.0 } else { 0.5 }
+}
+
+/// A route whose every point lies within the alignment epsilon of one
+/// vertical (or horizontal) line is drawn as that line: one straight segment
+/// from the start to the end. The end keeps its exact position (that is where
+/// the arrowhead points); the start slides along its edge by the offset.
+fn straighten_subpixel_offset(path: Vec<Point>, stroke_width: f64) -> Vec<Point> {
+    if path.len() < 2 {
+        return path;
+    }
+    let eps = alignment_epsilon(stroke_width);
+    let (start, end) = (path[0], path[path.len() - 1]);
+    let spread = |f: fn(&Point) -> f64| {
+        let (lo, hi) = path.iter().map(f).fold((f64::MAX, f64::MIN), |(lo, hi), v| (lo.min(v), hi.max(v)));
+        hi - lo
+    };
+    let (sx, sy) = (spread(|p| p.x), spread(|p| p.y));
+    let along = |a: f64, b: f64| (a - b).abs() >= 1.0;
+    if sx > 0.0 && sx < eps && along(start.y, end.y) {
+        return vec![Point::new(end.x, start.y), end];
+    }
+    if sy > 0.0 && sy < eps && along(start.x, end.x) {
+        return vec![Point::new(start.x, end.y), end];
+    }
+    path
 }
 
 /// The overlap of the two boxes along the axis the connection runs across has
@@ -1128,10 +1276,19 @@ pub fn route_connections_hiding(
                         let to_bounds = to_element.bounds;
 
                         // Feature 009: Resolve anchors for connection endpoints
+                        // With `via:` an end without an explicit anchor faces its
+                        // nearest via point (the first for the start, the last for
+                        // the end), not the other element: for a self connection
+                        // the other element is itself.
+                        let via_refs = extract_via_references(&conn.modifiers);
+                        let via_points = resolve_via_points(&via_refs, result)?;
+                        let dot = |p: &Point| BoundingBox::new(p.x, p.y, 0.0, 0.0);
+                        let toward_from = via_points.first().map(dot).unwrap_or(to_bounds);
+                        let toward_to = via_points.last().map(dot).unwrap_or(from_bounds);
                         let from_anchor =
-                            resolve_anchor(&conn.from, &result.elements, Some(&to_bounds))?;
+                            resolve_anchor(&conn.from, &result.elements, Some(&toward_from))?;
                         let to_anchor =
-                            resolve_anchor(&conn.to, &result.elements, Some(&from_bounds))?;
+                            resolve_anchor(&conn.to, &result.elements, Some(&toward_to))?;
 
                         // Always pass resolved anchors (auto-picked or explicit) so
                         // the router can use their direction for routing.
@@ -1146,9 +1303,12 @@ pub fn route_connections_hiding(
                             && conn.to.anchor.is_none();
                         let from_anchor_opt = if auto_ortho { None } else { Some(&from_anchor) };
                         let to_anchor_opt = if auto_ortho { None } else { Some(&to_anchor) };
-
-                        let via_refs = extract_via_references(&conn.modifiers);
-                        let via_points = resolve_via_points(&via_refs, result)?;
+                        // Orthogonal through via points: an end without an
+                        // explicit anchor takes the middle of the side facing its
+                        // via point (decided per end by the router).
+                        let ortho_via = routing_mode == RoutingMode::Orthogonal && !via_points.is_empty();
+                        let from_anchor_opt = if ortho_via && conn.from.anchor.is_none() { None } else { from_anchor_opt };
+                        let to_anchor_opt = if ortho_via && conn.to.anchor.is_none() { None } else { to_anchor_opt };
                         let path = route_connection_with_anchors_and_types(
                             &from_bounds,
                             &to_bounds,
@@ -1160,8 +1320,13 @@ pub fn route_connections_hiding(
                             Some(&to_element.element_type),
                         );
                         let styles = ResolvedStyles::from_modifiers(&conn.modifiers);
+                        let path = if routing_mode == RoutingMode::Curved {
+                            path
+                        } else {
+                            straighten_subpixel_offset(path, styles.stroke_width.unwrap_or(2.0))
+                        };
                         let (label, label_ref_id) =
-                            extract_connection_label_with_ref(&conn.modifiers, &path, result);
+                            extract_connection_label_with_ref(&conn.modifiers, &path, routing_mode, result);
 
                         if let Some(id) = label_ref_id {
                             label_element_ids.insert(id);
@@ -1289,14 +1454,45 @@ fn spread_coinciding_connections(result: &mut LayoutResult) {
             result.get_element_by_name(&from_box).map(|e| e.bounds),
             result.get_element_by_name(&to_box).map(|e| e.bounds),
         );
+        // A bare point has no edge to spread along: its end stays on the
+        // point and the lanes fan out from the box end only. Between two
+        // points there is nowhere to spread to.
+        let is_point = |b: Option<BoundingBox>| b.is_some_and(|b| b.width < 1.0 && b.height < 1.0);
+        let (from_pt, to_pt) = (is_point(boxes.0), is_point(boxes.1));
+        // A fan is diagonal: under right-angle routing the lines stay on
+        // one straight run into the point, like a single connection.
+        let orthogonal = order.iter().any(|(j, _)| result.connections[*j].routing_mode == RoutingMode::Orthogonal);
+        if (from_pt && to_pt) || ((from_pt || to_pt) && orthogonal) {
+            for (j, _) in &order {
+                done[*j] = true;
+            }
+            continue;
+        }
         let k = order.len() as f64;
         for (slot, (j, reversed)) in order.iter().enumerate() {
             done[*j] = true;
             let off = ((k - 1.0) / 2.0 - slot as f64) * gap;
             let (ox, oy) = (nx * off, ny * off);
             let (mut a, mut b) = (Point::new(p.x + ox, p.y + oy), Point::new(q.x + ox, q.y + oy));
-            // Slide the ends along the shifted line back onto the boxes' edges.
-            if let (Some(fb), Some(tb)) = boxes {
+            if from_pt || to_pt {
+                let (fb, tb) = (boxes.0.unwrap(), boxes.1.unwrap());
+                if from_pt {
+                    a = p;
+                    // The box end: where the line from the point enters the box.
+                    let d = (b.x - a.x, b.y - a.y);
+                    if let Some((t_enter, _)) = clip_line(a, d, &tb) {
+                        b = Point::new(a.x + d.0 * t_enter, a.y + d.1 * t_enter);
+                    }
+                } else {
+                    b = q;
+                    // The box end: where the line toward the point leaves the box.
+                    let d = (b.x - a.x, b.y - a.y);
+                    if let Some((_, t_exit)) = clip_line(a, d, &fb) {
+                        a = Point::new(a.x + d.0 * t_exit, a.y + d.1 * t_exit);
+                    }
+                }
+            } else if let (Some(fb), Some(tb)) = boxes {
+                // Slide the ends along the shifted line back onto the boxes' edges.
                 let d = (b.x - a.x, b.y - a.y);
                 let origin = a;
                 if let (Some((_, t_exit)), Some((t_enter, _))) = (clip_line(origin, d, &fb), clip_line(origin, d, &tb)) {
@@ -1309,7 +1505,9 @@ fn spread_coinciding_connections(result: &mut LayoutResult) {
             let c = &mut result.connections[*j];
             c.path = if *reversed { vec![b, a] } else { vec![a, b] };
             if let Some(l) = c.label.as_mut() {
-                l.position = Point::new(l.position.x + ox, l.position.y + oy);
+                // A fan (one end fixed on a point) moves its middle half as far.
+                let f = if from_pt || to_pt { 0.5 } else { 1.0 };
+                l.position = Point::new(l.position.x + ox * f, l.position.y + oy * f);
             }
         }
     }
@@ -1525,7 +1723,9 @@ fn extract_connection_label(
     path: &[Point],
     result: &LayoutResult,
 ) -> Option<LabelLayout> {
-    extract_connection_label_with_ref(modifiers, path, result).0
+    // Unit tests pass a bare path: four points there mean a Bezier curve.
+    let mode = if path.len() == 4 { RoutingMode::Curved } else { RoutingMode::Orthogonal };
+    extract_connection_label_with_ref(modifiers, path, mode, result).0
 }
 
 /// `label_mask: N` on a connection: the padding around its label's box inside
@@ -1617,6 +1817,7 @@ fn place_end_labels(conn: &mut ConnectionLayout) {
 fn extract_connection_label_with_ref(
     modifiers: &[Spanned<StyleModifier>],
     path: &[Point],
+    routing_mode: RoutingMode,
     result: &LayoutResult,
 ) -> (Option<LabelLayout>, Option<String>) {
     let mut label_ref_id: Option<String> = None;
@@ -1709,8 +1910,11 @@ fn extract_connection_label_with_ref(
         })
         .unwrap_or(0.5);
 
-    // Calculate label position - for curves, use the actual curve point at label_at
-    let (mid_x, mid_y, anchor) = if path.len() == 4 {
+    // Calculate label position - for curves, use the actual curve point at label_at.
+    // Only a curved route's four points are a Bezier; any other four-point
+    // route (an orthogonal Z, a direct line through two via points) is the
+    // polyline that is drawn.
+    let (mid_x, mid_y, anchor) = if routing_mode == RoutingMode::Curved && path.len() == 4 {
         // Cubic Bezier: calculate point at t=label_at
         let t = label_at;
         let mt = 1.0 - t;

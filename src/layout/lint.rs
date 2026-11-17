@@ -221,6 +221,7 @@ pub fn check(
     check_alignment(result, &mut warnings);
     check_redundant_constants(doc, &mut warnings);
     check_reducible_bends(result, &mut warnings);
+    check_zero_length_connections(result, &mut warnings);
     check_missing_anchors(doc, result, &mut warnings);
     check_contrast(result, &mut warnings);
     check_steep_direct(result, &mut warnings);
@@ -2837,6 +2838,62 @@ fn check_label_connection_overlaps(
     }
 }
 
+/// A connection whose route has no length (both ends on one spot: `a.top ->
+/// a.top`, or `a -> a`) draws nothing, at most a stray arrowhead.
+fn check_zero_length_connections(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
+    for conn in &result.connections {
+        let len: f64 = conn.path.windows(2).map(|w| (w[1].x - w[0].x).hypot(w[1].y - w[0].y)).sum();
+        if conn.path.len() >= 2 && len < 1.0 {
+            warnings.push(LintWarning {
+                category: LintCategory::Connection,
+                message: format!(
+                    "connection {}→{} has no length: both ends are on the same spot, so nothing is drawn; \
+                     loop it out with `via: [p, q]` (points beside the element) or connect two different anchors",
+                    conn.from_id.0, conn.to_id.0
+                ),
+                frames: Vec::new(),
+                pair: None,
+            });
+            continue;
+        }
+        // A connection from an element to itself drawn straight across its own
+        // box (`a -> a`): the line is hidden under, or scribbled over, the box.
+        if conn.from_id == conn.to_id && conn.path.len() >= 2 {
+            let Some(el) = result.get_element_by_name(&conn.from_id.0) else { continue };
+            let b = el.bounds;
+            let inside = |p: Point| p.x > b.x + 0.5 && p.x < b.right() - 0.5 && p.y > b.y + 0.5 && p.y < b.bottom() - 0.5;
+            if conn.path.windows(2).any(|w| inside(Point::new((w[0].x + w[1].x) / 2.0, (w[0].y + w[1].y) / 2.0))) {
+                warnings.push(LintWarning {
+                    category: LintCategory::Connection,
+                    message: format!(
+                        "connection {}→{} runs through its own element; \
+                         loop it out with `via: [p, q]` (points beside the element), e.g. `{}.top -> {}.right [via: [p, q]]`",
+                        conn.from_id.0, conn.to_id.0, conn.from_id.0, conn.to_id.0
+                    ),
+                    frames: Vec::new(),
+                    pair: None,
+                });
+            }
+        }
+    }
+}
+
+/// A distance in px for a message: whole numbers as before ("10"), anything
+/// else with the decimals it has ("0.75", "3.25"), so a sub-pixel offset is
+/// never reported as "0".
+fn fmt_px(v: f64) -> String {
+    if (v - v.round()).abs() < 0.005 && v.round() != 0.0 {
+        return format!("{:.0}", v);
+    }
+    let mut decimals = 2;
+    while decimals < 6 && format!("{:.*}", decimals, v).trim_end_matches(['0', '.']).is_empty() {
+        decimals += 1;
+    }
+    let s = format!("{:.*}", decimals, v);
+    let s = s.trim_end_matches('0').trim_end_matches('.');
+    if s.is_empty() || s == "-" { "0".to_string() } else { s.to_string() }
+}
+
 // ── FR6: Near-alignment detection ─────────────────────────────────
 
 /// Maximum offset (in px) between connected element centers to consider
@@ -2878,8 +2935,8 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             warnings.push(LintWarning {
                 category: LintCategory::Alignment,
                 message: format!(
-                    "connection {}→{} is nearly horizontal (off by {:.0}px); aligning Y positions would straighten it",
-                    conn.from_id.0, conn.to_id.0, dy
+                    "connection {}→{} is nearly horizontal (off by {}px); aligning Y positions would straighten it",
+                    conn.from_id.0, conn.to_id.0, fmt_px(dy)
                 ),
                 frames: Vec::new(),
                 pair: None,
@@ -2889,8 +2946,8 @@ fn check_alignment(result: &LayoutResult, warnings: &mut Vec<LintWarning>) {
             warnings.push(LintWarning {
                 category: LintCategory::Alignment,
                 message: format!(
-                    "connection {}→{} is nearly vertical (off by {:.0}px); aligning X positions would straighten it",
-                    conn.from_id.0, conn.to_id.0, dx
+                    "connection {}→{} is nearly vertical (off by {}px); aligning X positions would straighten it",
+                    conn.from_id.0, conn.to_id.0, fmt_px(dx)
                 ),
                 frames: Vec::new(),
                 pair: None,
@@ -3183,13 +3240,13 @@ fn check_reducible_bends(result: &LayoutResult, warnings: &mut Vec<LintWarning>)
             warnings.push(LintWarning {
                 category: LintCategory::ReducibleBend,
                 message: format!(
-                    "connection {}→{}: path jogs {:.0}px {} between bends; \
-                     moving elements at least {:.0}px further apart {} would eliminate 2 corners",
+                    "connection {}→{}: path jogs {}px {} between bends; \
+                     moving elements at least {}px further apart {} would eliminate 2 corners",
                     conn.from_id.0,
                     conn.to_id.0,
-                    shortest_len,
+                    fmt_px(shortest_len),
                     shortest_orientation,
-                    shortest_len,
+                    fmt_px(shortest_len),
                     shortest_orientation
                 ),
                 frames: Vec::new(),
