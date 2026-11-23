@@ -898,7 +898,20 @@ pub fn route_connection_with_anchors_and_types(
                 Point::new((to.x - from.x).signum(), 0.0)
             }
         };
-        if is_point(to_bounds) && !is_point(from_bounds) {
+        // Already in line with the anchor: one straight segment. (`signum` of
+        // 0.0 is 1.0, so `across` would otherwise invent a sideways bend.)
+        let in_line = |along: Point| {
+            if along.x.abs() > 0.5 {
+                (end.y - start.y).abs() < 0.5
+            } else {
+                (end.x - start.x).abs() < 0.5
+            }
+        };
+        if is_point(to_bounds) && !is_point(from_bounds) && in_line(from_dir) {
+            to_dir = from_dir;
+        } else if is_point(from_bounds) && !is_point(to_bounds) && in_line(to_dir) {
+            from_dir = to_dir;
+        } else if is_point(to_bounds) && !is_point(from_bounds) {
             to_dir = across(from_dir, start, end);
         } else if is_point(from_bounds) && !is_point(to_bounds) {
             from_dir = across(to_dir, end, start);

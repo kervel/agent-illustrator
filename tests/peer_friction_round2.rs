@@ -141,3 +141,22 @@ keyframe "show" { show p }
     let svg = render_with_config(src, RenderConfig { frame: Some("start".into()), ..Default::default() }).unwrap();
     assert!(!svg.contains("artwork caption"), "hidden with its subject:\n{svg}");
 }
+
+#[test]
+fn a_point_in_line_with_its_anchor_is_one_straight_segment() {
+    let src = r#"
+rect stage [width: 600, height: 300, fill: none, stroke: none, canvas: true]
+constrain stage.left = 0
+constrain stage.top = 0
+rect llm [width: 100, height: 100]
+point merge
+constrain llm.left = stage.left + 400
+constrain llm.center_y = stage.top + 150
+constrain merge.center_x = stage.left + 200
+constrain merge.center_y = llm.center_y
+merge -> llm.left
+"#;
+    let svg = render_with_config(src, RenderConfig::default()).unwrap();
+    let d = svg.split(r#"class="ai-connection""#).nth(1).and_then(|s| s.split(" d=\"").nth(1)).and_then(|s| s.split('"').next()).unwrap();
+    assert_eq!(d.matches('L').count(), 1, "in line: no bend, got {d}");
+}
